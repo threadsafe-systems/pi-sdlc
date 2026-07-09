@@ -151,7 +151,7 @@ be made to fail is a broken spec.
 ## Panels: resolve, dispatch, consolidate, adjudicate, stop
 
 Each design panel and the PR panel run the same shape. The four phase reviewer
-prompts are the single sources of truth in `assets/`; never hand-copy a prompt
+prompts are the single sources of truth in `prompts/`; never hand-copy a prompt
 per model.
 
 1. **Resolve the panel** for the phase (live, deduped, author-excluded):
@@ -200,7 +200,7 @@ treating a "detached" status label as lost output.
 4. **Adjudicate**: for every high or medium finding, either incorporate it or
    record a one-line reason for dismissal. Disclose the orchestrating model in
    the consolidated file. Disputed high or medium findings are decided by the
-   human (Neil), who is the final adjudicator. Reviewer output is roughly eighty
+   project's human owner, who is the final adjudicator. Reviewer output is roughly eighty
    per cent right and overreaches, so nothing is actioned blindly and nothing is
    dismissed silently.
 5. **Stop** when no high or medium finding survives adjudication. Low findings
@@ -214,7 +214,7 @@ and the orchestrating model.
 ## Per-task validator (implementation)
 
 Each task ends with one validator subagent, a checklist executor, not a judge.
-Its remit is only checks it runs (see `assets/validator-task.prompt.md`): the
+Its remit is only checks it runs (see `prompts/validator-task.prompt.md`): the
 test command exits zero, `npx tsc --noEmit` exits zero, the task's named
 scenario ids pass, greppable CONTRIBUTORS rules hold, no banned patterns. It
 gives a pass or fail per check, never a quality opinion. A task is not done
@@ -225,7 +225,7 @@ preference: `deepseek/deepseek-v4-flash`, then `anthropic/claude-haiku-4-5`.
 
 Open the PR with `.github/pull_request_template.md` filled in (track declared,
 plan and spec linked, checklist complete). Run the PR panel
-(`assets/adversary-review.prompt.md`), consolidate and adjudicate, and post
+(`prompts/adversary-review.prompt.md`), consolidate and adjudicate, and post
 inline via the `gh-pr-review-comments` skill's atomic review scripts (one pending
 review, verified by content, single submit event). When addressing comments,
 reply on each thread with the short SHA of the commit that addressed it. Repeat
@@ -273,7 +273,7 @@ governing docs are historical record and are not migrated.
 - Dismissing a finding without a recorded reason, or incorporating one blindly.
 - A spec outcome that no scenario can falsify.
 - Committing generated per-model adversary files (they are git-ignored; the
-  templates in `assets/` are the source of truth).
+  templates in `prompts/` are the source of truth).
 - Editing a phase reviewer prompt in more than one place.
 - Resolving more than one map ticket in a single session.
 - A HITL ticket resolved by the agent answering its own questions.

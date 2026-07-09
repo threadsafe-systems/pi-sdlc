@@ -1,6 +1,6 @@
 ---
 name: loom-spec-review
-description: loom-sdlc spec_review reviewer. Stamped by the sdlc skill; edit the template, not this file. Dispatch one task per model via the subagent tool's per-task model override.
+description: loom-sdlc spec_review reviewer. Stamped from assets/adversary-spec.prompt.md — edit the template, not this file. Dispatch one task per model via the subagent tool's per-task model override.
 tools: read,grep,find,ls,bash
 ---
 

@@ -84,7 +84,10 @@ test("S3b: ensure-panel-agent rejects malformed config (exit 2)", () => {
 		'{"schemaVersion":1,"prefix":"Loom","labelPrefix":"loom-sdlc","announce":"a"}',
 		'{"schemaVersion":1,"prefix":"loom","labelPrefix":"loom-sdlc"}',
 		'{"schemaVersion":1,"prefix":"loom","labelPrefix":"loom-sdlc","announce":"a","extra":1}',
-		'{"schemaVersion":1,"prefix":"loom","labelPrefix":"loom-sdlc","announce":"a","tracker":{"repo":"bad","board":{"number":1,"url":"u"}}}',
+		'{"schemaVersion":1,"prefix":"loom","labelPrefix":"loom-sdlc","announce":"a","tracker":{"repo":"bad","board":{"number":1,"url":"https://x/1"}}}',
+		'{"schemaVersion":1,"prefix":"loom","labelPrefix":"loom-sdlc","announce":"a","tracker":{"repo":"o/n","board":{"number":1,"url":"not-a-url"}}}',
+		'{"schemaVersion":1,"prefix":"loom","labelPrefix":"loom-sdlc","announce":"a","paths":{"agents":"../escape"}}',
+		'{"schemaVersion":1,"prefix":"loom","labelPrefix":"loom-sdlc","announce":"a","paths":{"agents":"/abs"}}',
 	];
 	for (const bad of mutations) {
 		const dir = mkdtempSync(join(tmpdir(), "sdlc-badc-"));

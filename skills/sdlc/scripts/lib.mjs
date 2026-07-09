@@ -116,6 +116,8 @@ export function validateConfig(raw, p) {
 		for (const [k, v] of Object.entries(raw.paths)) {
 			if (!pathKeys.has(k)) fail(`${where}: unknown paths key '${k}'`);
 			if (typeof v !== "string" || v.length === 0) fail(`${where}: paths.${k} must be a non-empty string`);
+			// repo-relative, must not escape the consumer repo
+			if (v.startsWith("/") || v.split("/").includes("..")) fail(`${where}: paths.${k} must be a repo-relative path with no '..' segment`);
 		}
 	}
 	if (raw.tracker !== undefined) {
@@ -130,7 +132,7 @@ export function validateConfig(raw, p) {
 			if (k !== "number" && k !== "url") fail(`${where}: unknown tracker.board key '${k}'`);
 		}
 		if (!Number.isInteger(t.board.number) || t.board.number < 1) fail(`${where}: tracker.board.number must be an integer >= 1`);
-		if (typeof t.board.url !== "string" || t.board.url.length === 0) fail(`${where}: tracker.board.url must be a non-empty string`);
+		if (typeof t.board.url !== "string" || !/^https?:\/\/.+/.test(t.board.url)) fail(`${where}: tracker.board.url must be an http(s) URL`);
 	}
 }
 

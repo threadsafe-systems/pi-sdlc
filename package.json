@@ -1,6 +1,6 @@
 {
   "name": "pi-sdlc",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "A portable, project-agnostic software-development lifecycle skill for pi: enforced brainstorm/plan/spec/build/implement/PR with per-phase adversarial panels, driven by a small per-project manifest.",
   "type": "module",
   "license": "MIT",
@@ -17,7 +17,9 @@
     "skill"
   ],
   "pi": {
-    "skills": ["./skills"]
+    "skills": [
+      "./skills"
+    ]
   },
   "scripts": {
     "test": "node --test"
