@@ -1,0 +1,19 @@
+{
+  "tasks": [
+    {
+      "agent": "loom-plan-review",
+      "task": "FILL_IN_TASK_BLOCK",
+      "model": "openai-codex/gpt-5.5"
+    },
+    {
+      "agent": "loom-plan-review",
+      "task": "FILL_IN_TASK_BLOCK",
+      "model": "deepseek/deepseek-v4-pro"
+    },
+    {
+      "agent": "loom-plan-review",
+      "task": "FILL_IN_TASK_BLOCK",
+      "model": "zai-coding-cn/glm-5.2"
+    }
+  ]
+}

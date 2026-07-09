@@ -1,0 +1,14 @@
+{
+  "tasks": [
+    {
+      "agent": "loom-task-validate",
+      "task": "FILL_IN_TASK_BLOCK",
+      "model": "deepseek/deepseek-v4-flash"
+    },
+    {
+      "agent": "loom-task-validate",
+      "task": "FILL_IN_TASK_BLOCK",
+      "model": "anthropic/claude-haiku-4-5"
+    }
+  ]
+}
