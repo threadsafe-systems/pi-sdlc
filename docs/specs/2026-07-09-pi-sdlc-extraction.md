@@ -4,231 +4,265 @@
 - Track: **irreversible**. Implements the approved plan
   `docs/plans/2026-07-09-pi-sdlc-extraction.md` (v3, `75347a0`).
 - Author vendor: anthropic (excluded from panels).
+- Revision: v2, incorporating the spec panel (openai-codex, deepseek, zai;
+  adjudication in `docs/reviews/spec-pi-sdlc-extraction-2026-07-09/`).
 - Zero-regression claim: the migrated loom drives a change identically to
-  loom-sdlc @ loom `main` `b5a3529`.
+  loom-sdlc @ loom `main` `b5a3529` (behavioural surface = agent name + tools +
+  prompt body + resolved panel + artefacts + gates; see §4 on metadata).
 
-## 0. Overview and the one mechanism the plan delegated to the spec
-
-The plan fixes the shape; this spec pins the contracts. Two kinds of
-"substitution" exist and must not be conflated:
+## 0. Overview: two kinds of substitution, and what byte-identity covers
 
 - **Genericisation (static, one-time):** `SKILL.md`, `assets/tracker-ops.md`,
-  `assets/agent-brief.md` become project-agnostic documents. Project-specific
-  values appear as `<TOKEN>` placeholders described in prose as "resolved from
-  `.pi/sdlc/sdlc.config.json`". No script rewrites these; the orchestrating agent
-  reads the manifest and applies the values when it acts. They are never
-  per-project stamped.
-- **Machine substitution (runtime, per stamp/resolve):** `ensure-panel-agent.sh`
-  writes stamped agent files with literal substitution; `resolve-panel` reads
-  `sdlc.models.json`. These are the only mechanical substitution points, and the
-  only outputs under byte-identity gates.
+  `assets/agent-brief.md`, and **the script comments** become project-agnostic.
+  Project values appear as `<TOKEN>` placeholders described in prose as "resolved
+  from `.pi/sdlc/sdlc.config.json`". No script rewrites these; the orchestrating
+  agent applies manifest values when it acts.
+- **Machine substitution (runtime):** `ensure-panel-agent.sh` writes stamped agent
+  files; `resolve-panel` reads `sdlc.models.json`. The only mechanical points.
 
-**Prompt overrides (confirmed, not changed):** the plan-phase and spec-phase
-reviewer prompts each carry a *different* per-phase governing-doc sentence
-(`adversary-plan.prompt.md:12` vs `adversary-spec.prompt.md:14` — the spec line
-adds "prior specs the spec claims zero regression against"), so no single config
-token reproduces both. Loom therefore ships exactly two whole-file prompt
-overrides for these two prompts; `adversary-review` and `validator-task` use the
-generic prompts unchanged (already byte-identical to loom's today).
+**What byte-identity gates (S4):** the stamped agent's `name`, `tools`, and
+**prompt body** (the behavioural surface the reviewer model acts on). The
+`description` frontmatter is regenerated (see §4) and is explicitly NOT under
+byte-identity — it is non-behavioural metadata, and loom's current `description`
+names a template path (`assets/...`) that legitimately moves in extraction.
+
+**Prompt overrides (confirmed):** the plan-phase and spec-phase reviewer prompts
+carry *different* per-phase governing-doc sentences (`adversary-plan.prompt.md:12`
+vs `adversary-spec.prompt.md:14`), so no single config token reproduces both. Loom
+ships two whole-file prompt overrides for these; `adversary-review` and
+`validator-task` use the generic prompts unchanged.
 
 ## 1. Contract: `sdlc.config.json` (frozen surface FS1)
 
-JSON object. Additive-within-major. Required and optional fields:
+JSON object, `additionalProperties:false`, additive-within-major.
 
 | field | type | required | default (no-manifest) | drives |
 |---|---|---|---|---|
-| `schemaVersion` | integer ≥ 1 | yes | — | compat gate; scripts reject an unknown major |
-| `prefix` | string, `^[a-z][a-z0-9-]*$` | yes | `sdlc` | stamped agent name `<prefix>-<phase-slug>` |
-| `labelPrefix` | string, `^[a-z][a-z0-9-]*$` | yes | `sdlc` | label vocabulary + stamped-agent `description` label |
-| `announce` | string (non-empty) | yes | `Using the sdlc skill to drive this change through its lifecycle.` | the start-of-work announce string |
-| `paths` | object | no | see below | skill-internal doc/agent path resolution |
-| `paths.plans` | string (repo-relative dir) | no | `docs/plans` | where plan docs live |
-| `paths.specs` | string | no | `docs/specs` | where spec docs live |
-| `paths.reviews` | string | no | `docs/reviews` | where review artefacts live |
-| `paths.agents` | string | no | `.pi/agents` | where stamped agents are written |
-| `tracker` | object | no | absent → tracker modes disabled | GitHub tracker identity |
-| `tracker.repo` | string `owner/name` | required iff `tracker` present | — | issue/label operations |
-| `tracker.board.number` | integer ≥ 1 | required iff `tracker` present | — | the project board |
-| `tracker.board.url` | string (URL) | required iff `tracker` present | — | the project board URL |
+| `schemaVersion` | integer, `1` only in v1 | yes | treated as `1` | compat gate (see below) |
+| `prefix` | string `^[a-z][a-z0-9-]*$` | yes | `sdlc` | stamped agent name |
+| `labelPrefix` | string `^[a-z][a-z0-9-]*$` | yes | `sdlc` | label vocabulary + description identity |
+| `announce` | non-empty string | yes | `Using the sdlc skill to drive this change through its lifecycle.` | announce string |
+| `paths` | object | no | see rows | doc/agent path resolution |
+| `paths.plans` | repo-relative dir | no | `docs/plans` | plan docs |
+| `paths.specs` | repo-relative dir | no | `docs/specs` | spec docs |
+| `paths.reviews` | repo-relative dir | no | `docs/reviews` | review artefacts |
+| `paths.agents` | repo-relative dir | no | `.pi/agents` | stamped agents |
+| `tracker` | object | no | absent → tracker modes error | GitHub tracker |
+| `tracker.repo` | `owner/name` | iff `tracker` | — | issue/label ops |
+| `tracker.board.number` | integer ≥ 1 | iff `tracker` | — | project board |
+| `tracker.board.url` | URL string | iff `tracker` | — | board URL |
 
-- **Unknown top-level keys:** rejected (strict; `additionalProperties: false`) so
-  a typo is loud, not silent.
-- **Tracker absent:** map-mode and tracker-backed build MUST error with a clear
-  message ("this project has no `tracker` configured; brainstorm map mode and the
-  epic/sub-issue/board build step require it"). Phases + panels still work.
-- A committed JSON Schema (`schema/sdlc.config.schema.json`) is the source of
-  truth; the table above is its human description. A documented example
-  (`schema/sdlc.config.example.json`) accompanies it.
+- `schemaVersion`: v1 scripts accept `1` only and exit non-zero with a diagnostic
+  for any other value; a no-manifest project is treated as version 1. (Spec-author
+  addition beyond the plan's field list — a compat gate consistent with the plan's
+  additive-within-major policy; flagged for Neil at the approval gate.)
+- Tracker absent: map-mode and tracker-backed build error clearly; phases + panels
+  still work.
+- Source of truth: committed `schema/sdlc.config.schema.json` + documented example.
 
 ## 2. Contract: `sdlc.models.json` (frozen surface FS2)
 
-The panel model roster the resolver reads. Fields consumed by `resolve-panel`
-(verified against `resolve-panel.mjs:84,179-193`):
+Fields `resolve-panel` reads (verified `resolve-panel.mjs:84,179-193`):
 
 | field | type | required | meaning |
 |---|---|---|---|
-| `author_default` | string `provider/model` | no | fallback author when `--author` omitted |
-| `rules.exclude_author_vendor` | boolean | no (default true) | drop the author's vendor from a panel of ≥2 |
-| `phases` | object keyed by phase id | yes | per-phase config |
+| `author_default` | `provider/model` | no | fallback author |
+| `rules.exclude_author_vendor` | boolean | no (default true) | drop author vendor when min_panel ≥ 2 |
+| `phases` | object | yes | must contain **exactly** the four v1 phase keys |
 | `phases.<phase>.min_panel` | integer ≥ 1 | yes | distinct-vendor floor |
-| `phases.<phase>.prefer` | string[] of `provider/model` | yes | ordered preference, deduped to one per vendor |
+| `phases.<phase>.prefer` | string[] `provider/model` | yes, non-empty | ordered preference |
 
-- Phase keys MUST be a subset of `{plan_review, spec_review, pr_review,
-  task_validate}`.
-- Committed JSON Schema `schema/sdlc.models.schema.json` + example. Malformed →
-  non-zero with a clear error (FR-D3).
+- **All four phase keys are required in v1** (`plan_review, spec_review,
+  pr_review, task_validate`); a subset is invalid (tightening later would break).
+- **No built-in roster.** Model ids drift per machine, so the skill ships none;
+  `resolve-panel` REQUIRES `<consumer-root>/.pi/sdlc/sdlc.models.json` and exits
+  non-zero with a clear error if it is absent (even in no-manifest mode).
+  Stamping and path resolution do not need it.
+- Committed `schema/sdlc.models.schema.json` + example.
 
 ## 3. Contract: consumer-root resolution (frozen surface FS3)
 
-Both scripts resolve the **consumer root** independently of the skill's own
-location. Deterministic precedence:
+Both scripts resolve the **consumer root** independently of `SKILL_DIR`:
 
-1. `--config <path>` or `--repo-root <path>` explicit flag → that root.
+1. `--config <dir>` or `--repo-root <dir>` (a DIRECTORY, not a file) → that root.
 2. else `$SDLC_ROOT` env var if set → that root.
 3. else walk up from `$PWD`; first ancestor containing
-   `.pi/sdlc/sdlc.config.json` → that root (a configured project).
-4. else the `git rev-parse --show-toplevel` of `$PWD`, using built-in defaults
-   (a no-manifest project).
-5. else (not in a git repo, no flag/env) → exit non-zero with:
-   `sdlc: cannot locate a consumer repo; pass --config <dir> or set $SDLC_ROOT`.
+   `.pi/sdlc/sdlc.config.json` → that root.
+4. else `git rev-parse --show-toplevel` of `$PWD`, with built-in defaults.
+5. else exit non-zero: `sdlc: cannot locate a consumer repo; pass --config <dir>
+   or set $SDLC_ROOT`.
 
-Derived: `paths.agents` and `.pi/sdlc/` resolve relative to the consumer root.
-`ensure-panel-agent.sh --dir` default = `<root>/<paths.agents>`;
-`resolve-panel --models-file` default = `<root>/.pi/sdlc/sdlc.models.json`;
-config default = `<root>/.pi/sdlc/sdlc.config.json`. `SKILL_DIR` is NEVER used for
-consumer path resolution.
+Derived: config = `<root>/.pi/sdlc/sdlc.config.json`; models =
+`<root>/.pi/sdlc/sdlc.models.json`; `ensure-panel-agent --dir` default =
+`<root>/<paths.agents>`. `SKILL_DIR` is never used for consumer paths.
 
 ## 4. Contract: derivation rules (frozen surface FS4)
 
 - Phase ids (fixed): `plan_review, spec_review, pr_review, task_validate`.
-- Phase → prompt template: `plan_review→adversary-plan`, `spec_review→adversary-spec`,
+- Phase → template: `plan_review→adversary-plan`, `spec_review→adversary-spec`,
   `pr_review→adversary-review`, `task_validate→validator-task`.
-- **Agent name** = `<prefix>-<phase-slug>`, phase-slug = phase id with `_`→`-`.
-  So with `prefix=loom`: `loom-plan-review, loom-spec-review, loom-pr-review,
-  loom-task-validate` (byte-identical to `ensure-panel-agent.sh:40-43` today).
-- **Stamped `description` label** = `<labelPrefix>`. The description line is
-  `description: <labelPrefix> <phase> reviewer. Stamped from <template>.prompt.md
-  — edit the template, not this file. Dispatch one task per model via the subagent
-  tool's per-task model override.` With `labelPrefix=loom-sdlc` this reproduces
-  `ensure-panel-agent.sh:93` byte-for-byte.
+- **Agent name** = `<prefix>-<phase-slug>`, phase-slug = phase id with `_`→`-`
+  (`prefix=loom` → `loom-plan-review` … byte-identical to today's `:40-43`).
+- **`tools`** frontmatter: default `read,grep,find,ls,bash` (unchanged).
+- **Prompt body**: the (override-or-generic) template body verbatim (no
+  `tail -n +2`), with `REVIEWER_TAG` replaced by the exact literal
+  `one of several independent reviewers in a multi-model panel`
+  (`ensure-panel-agent.sh:88`). This is the byte-identity surface.
+- **`description`** (regenerated, non-behavioural, NOT byte-compared):
+  `description: <labelPrefix> <phase> reviewer. Stamped by the sdlc skill from the
+  <phase> prompt template; edit the template, not this file. Dispatch one task per
+  model via the subagent tool's per-task model override.` The `assets/<template>`
+  path in loom's current description is intentionally dropped (the template moved).
 - **Label vocabulary** = `<labelPrefix>:{map, ticket-research, ticket-prototype,
-  ticket-grilling, ticket-task, epic, build-task, hitl, afk}` (the nine labels of
-  `tracker-ops.md:24-32`).
+  ticket-grilling, ticket-task, epic, build-task, hitl, afk}`.
 
 ## 5. Contract: script CLIs (frozen surface FS5)
 
-`resolve-panel.sh <phase> [--author <provider/model|vendor>] [--pong]
-[--models-file <path>] [--emit-tasks <agent>] [--config <path>|--repo-root <path>]`
+`resolve-panel.sh <phase> [--author X] [--pong] [--models-file P] [--emit-tasks A]
+[--config D | --repo-root D]`
+- stdout: model list (one `provider/model`/line), or `{ "tasks":[{agent,
+  task:"FILL_IN_TASK_BLOCK", model}...] }` pretty JSON with `--emit-tasks`.
+- stderr: panel summary + drop reasons.
+- exit: `0` iff `panel.length ≥ min_panel`; `1` on under-panel; `2` on bad args,
+  unknown phase, or unreadable/unparseable/invalid models or config file
+  (verified `resolve-panel.mjs:79-89`).
 
-- stdout without `--emit-tasks`: the resolved panel, one `provider/model` per line.
-- stdout with `--emit-tasks <agent>`: `{ "tasks": [ {agent, task:"FILL_IN_TASK_BLOCK",
-  model}, ... ] }` pretty JSON, one task per resolved model.
-- stderr: the panel summary + drop reasons.
-- exit: 0 iff `panel.length ≥ min_panel`; 2 on bad args; 1 on under-panel.
-- Behaviour identical to loom's current script except default `--models-file`
-  derives from the consumer root (FS3), not the script dir.
-
-`ensure-panel-agent.sh <phase> [--dir <dir>] [--tools <csv>] [--force]
-[--config <path>|--repo-root <path>]`
-
-- writes `<dir>/<agent-name>.md` (default `<root>/<paths.agents>/<agent-name>.md`).
-- copies the (override or generic) prompt body verbatim (NO `tail -n +2`),
-  substitutes `REVIEWER_TAG` generically, stamps frontmatter per FS4.
+`ensure-panel-agent.sh <phase> [--dir D] [--tools CSV] [--force] [--config D |
+--repo-root D]`
+- writes `<dir>/<agent-name>.md`; body verbatim; frontmatter per FS4.
+- **Prompt resolution order:** first `<root>/.pi/sdlc/prompts/<template>.prompt.md`
+  (consumer override); else `<skill-dir>/prompts/<template>.prompt.md` (generic).
 - idempotent; refuses to overwrite differing content without `--force`; rejects
   flag-like values for `--dir`/`--tools`; `--help` prints only the header.
-- exit: 0 on write/up-to-date; 2 on bad args/unknown phase; 1 on missing template
-  or existing-differing-without-force.
+- exit: `0` on write/up-to-date; `2` on bad args/unknown phase/invalid manifest;
+  `1` on missing template or existing-differing-without-force.
 
-## 6. Contract: token convention + substitution-site inventory (frozen surface FS6)
+**Manifest validation (no new deps, NFR2):** both scripts do minimal built-in
+structural validation — required keys present, primitive types correct,
+`schemaVersion` known, `phases` has the four keys — and exit `2` with a clear
+message on violation. No JSON-Schema library at runtime; the committed schemas
+are for the S3 test-time validation of the examples.
 
-Generic tokens (angle-bracket, uppercase): `<PREFIX>`, `<LABEL_PREFIX>`,
-`<ANNOUNCE>`, `<PLANS_DIR>`, `<SPECS_DIR>`, `<REVIEWS_DIR>`, `<AGENTS_DIR>`,
-`<TRACKER_REPO>`, `<TRACKER_BOARD>`, `<TRACKER_BOARD_URL>`. Every genericisation
-site (static prose, resolved by the reading agent) — the complete list the build
-must clear, derived from the audit:
+## 6. Contract: tokens + genericisation clearance (frozen surface FS6)
 
-- `SKILL.md`: `:2` name→`sdlc`; `:3,:6` skill name; `:8` "enters Loom"→generic;
-  `:10` loom plan cross-ref→removed/generic; `:14` announce→`<ANNOUNCE>`;
-  `:65,74,79,120,122` `loom-sdlc:*`→`<LABEL_PREFIX>:*`; `:129` "Loom Build
-  Board"→`<TRACKER_BOARD>`; `:143` `sdlc-artifacts` CI name→generic "your CI
-  presence-check"; `:161,174,175` command paths→skill-relative `scripts/…` with a
-  note they run from the consumer root; `:180` "loom prompts"→"the prompts";
-  `:249` self-ref→generic; `:268` loom governing-doc paths→generic example.
-- `assets/tracker-ops.md`: `:3` skill name; `:8,:56,:111,:129,:131,:144,:146,
-  :153,:154,:167,:186,:191` `threadsafe-systems/loom`/owner→`<TRACKER_REPO>` and
-  its owner; `:10,:145,:153` "Loom Build Board"/project #4/URL→`<TRACKER_BOARD>`/
-  `<TRACKER_BOARD_URL>`; `:24-35` `loom-sdlc:*`→`<LABEL_PREFIX>:*`.
-- `assets/agent-brief.md`: `:23,:32,:34` loom adapter-boundary example→a
-  domain-neutral example; `:93,:97` `loom-sdlc:*`→`<LABEL_PREFIX>:*`.
+Tokens (angle-bracket, uppercase): `<PREFIX>`, `<LABEL_PREFIX>`, `<ANNOUNCE>`,
+`<PLANS_DIR>`, `<SPECS_DIR>`, `<REVIEWS_DIR>`, `<AGENTS_DIR>`, `<TRACKER_REPO>`,
+`<TRACKER_BOARD>`, `<TRACKER_BOARD_URL>`.
 
-Machine-substitution sites (stamp time): agent name, description label
-(`ensure-panel-agent.sh:93`), `REVIEWER_TAG` (already generic).
+**Authoritative clearance is the D2 grep over the ENTIRE `skills/sdlc/` tree
+(SKILL.md, prompts, assets, AND scripts) returning empty** (outside `schema/`
+examples and `docs/`). The site list below is high-value guidance the build starts
+from, not a closed set — the build is not done until the grep is clean:
+
+- `SKILL.md`: `:2,3,6,8` skill name/"enters Loom"; `:10` loom plan cross-ref;
+  `:14` announce→`<ANNOUNCE>`; `:65,74,79,120,122` `loom-sdlc:*`→`<LABEL_PREFIX>:*`;
+  `:129` "Loom Build Board"→`<TRACKER_BOARD>`; `:143` `sdlc-artifacts`→generic
+  "your CI presence-check"; `:161,174,175` command paths (skill-relative, run from
+  consumer root); `:180` "loom prompts"; `:249,268` self/governing-doc refs.
+- `assets/tracker-ops.md`: `:3` skill name; `:8,56,111,129,131,144,146,153,154,
+  167,186,191` repo/owner→`<TRACKER_REPO>`; `:10,145,153` board→`<TRACKER_BOARD>`/
+  `<TRACKER_BOARD_URL>`; `:24-35` labels→`<LABEL_PREFIX>:*`; **`:135` RunDriver
+  example→domain-neutral; `:232` `sdlc-artifacts`→generic**.
+- `assets/agent-brief.md`: `:23,32,34` adapter-boundary example→domain-neutral;
+  `:93,97` labels→`<LABEL_PREFIX>:*`.
+- **scripts** (comments only; logic is already generic): `resolve-panel.sh:2`,
+  `resolve-panel.mjs:3`, `ensure-panel-agent.sh:2,6,8,12,29,83` "loom-sdlc"/"loom"
+  prose → "sdlc"/"the consumer" wording. (`ensure-panel-agent.sh:40-43,93` are
+  logic, handled by FS4.)
 
 ## 7. Contract: prompt skeletons (frozen surface FS7)
 
-The four generic prompts under `skills/sdlc/prompts/` keep their current required
-sections (Method/target/output-format/verification-mode as applicable). The
-plan-phase and spec-phase generic prompts replace their governing-doc parenthetical
-with a domain-neutral form: "(the project's `AGENTS.md` and any governing or
-locked-decision documents it names)". A consumer needing its exact doc set ships a
-whole-file override under `.pi/sdlc/prompts/<name>.prompt.md`. Overriding is
-whole-file; the consumer owns keeping the non-doc sections in step (documented
-trade-off; these two prompts are small and stable).
+The four generic prompts under `skills/sdlc/prompts/` MUST retain these exact `##`
+section headings (a consumer whole-file override must preserve them):
+
+- `adversary-plan`: `## The review target`, `## Required context (read before
+  judging)`, `## Attack surfaces (verify each; also hunt for defects not listed)`,
+  `## Output format (STRICT: markdown only, findings only, no preamble, no
+  conclusion)`.
+- `adversary-spec`: the above plus `## Grounding against the framework (MANDATORY
+  for any claim about framework behaviour)`.
+- `adversary-review`: `## Method`, `## Baseline smells (Standards, judgement
+  calls)`, `## The review target`, `## Output format (STRICT)`, `## Verification
+  mode (only when the caller asks for it)`.
+- `validator-task`: `## Inputs the caller gives you`, `## Checks (run every one;
+  do not skip)`, `## Output format (STRICT: markdown only)`.
+
+The generic plan/spec prompts replace their governing-doc parenthetical with a
+domain-neutral form ("the project's `AGENTS.md` and any governing or
+locked-decision documents it names"). Loom ships whole-file overrides for
+`adversary-plan`/`adversary-spec` restoring its exact `:12`/`:14` lines; the
+consumer owns keeping the other headings in step (documented trade-off; these two
+prompts are small and stable).
 
 ## 8. Loom instance manifest (the migration must produce exactly this)
 
 `.pi/sdlc/sdlc.config.json`: `{schemaVersion:1, prefix:"loom",
-labelPrefix:"loom-sdlc", announce:"Using loom-sdlc to drive this change through
-its lifecycle.", paths:{plans:"docs/plans",specs:"docs/specs",
-reviews:"docs/reviews",agents:".pi/agents"}, tracker:{repo:"threadsafe-systems/loom",
-board:{number:4, url:"https://github.com/orgs/threadsafe-systems/projects/4"}}}`.
+labelPrefix:"loom-sdlc", announce:"Using loom-sdlc to drive this change through its
+lifecycle.", paths:{plans:"docs/plans",specs:"docs/specs",reviews:"docs/reviews",
+agents:".pi/agents"}, tracker:{repo:"threadsafe-systems/loom", board:{number:4,
+url:"https://github.com/orgs/threadsafe-systems/projects/4"}}}`.
 `.pi/sdlc/sdlc.models.json`: loom's current file verbatim.
-`.pi/sdlc/prompts/adversary-plan.prompt.md` and `adversary-spec.prompt.md`:
-whole-file copies of loom's current two prompts (preserving `:12`/`:14`).
+`.pi/sdlc/prompts/{adversary-plan,adversary-spec}.prompt.md`: whole-file copies of
+loom's current two prompts.
 
 ## 9. Non-functional requirements
 
-- NFR1: no test in the offline gate makes a live/paid model call. D4b uses a
-  stubbed credential env (fixture `auth.json` + env vars) since `hasCreds()` is
-  file/env-only.
-- NFR2: scripts are POSIX-bash, `set -euo pipefail`, no new runtime deps.
-- NFR3: the generic surface has zero loom-domain content (FR-D2 grep).
+- NFR1: no offline-gate test makes a live/paid model call. D4b/S6 use an
+  **isolated** environment: `HOME` set to a temp dir containing
+  `.pi/agent/auth.json` (fixture with keys for exactly `{anthropic, deepseek,
+  openai-codex, zai-coding-cn, moonshotai}` and AWS creds for amazon-bedrock),
+  all ambient credential env vars cleared, no `--pong`. The expected panel per
+  phase is a committed golden (`test/fixtures/resolve-panel-golden.json`) captured
+  once from the pre-extraction script under that same isolated env (a one-time
+  setup, not a gate run).
+- NFR2: scripts are POSIX-bash `set -euo pipefail` / node, no new runtime deps
+  (validation is hand-rolled per §5).
+- NFR3: the whole generic surface (incl. scripts) has zero loom-domain content
+  (S2 grep).
 - NFR4: MIT `LICENSE` committed (DEP1).
 
 ## 10. Verification scenarios (stable ids)
 
-- S1 (FS-all/D1): `pi` lists `/skill:sdlc`; repo has `package.json`
+- S1 (D1): `pi` lists `/skill:sdlc`; repo has `package.json`
   `{"pi":{"skills":["./skills"]}}`, `README.md`, MIT `LICENSE`. Falsify: skill
-  absent from `pi` skill list.
-- S2 (FS6/D2): `grep -rniE 'loom|rundriver|northstar|handover|conveyanc|clc|build board|threadsafe-systems|adapter boundary|sdlc-artifacts' skills/sdlc/`
-  is empty outside `schema/`+`docs/`. Falsify: any match.
-- S3 (FS1/FS2/D3): each schema validates its example; a mutated (bad-type,
-  missing-required, extra-key) example is rejected non-zero. Falsify: bad example
-  accepted.
-- S4 (FS4/FS7/D4a): for all four phases, stamping under loom's manifest yields a
-  full agent file (frontmatter+description+body+filename) byte-identical to the
-  committed loom golden fixture; plan/spec via overrides, review/validate generic.
-  Falsify: any diff.
-- S5 (FS3/D4a): invoked with `$PWD` inside a simulated consumer while the skill is
-  at a global path, the stamped agent lands under `<consumer-root>/.pi/agents`, not
-  the skill dir. Falsify: file written under the skill repo.
-- S6 (FS5/D4b): under the stubbed cred env, `resolve-panel --emit-tasks` for all
-  four phases emits the same model set + JSON as the pre-extraction script.
-  Falsify: any divergence.
-- S7 (FS3): resolution terminal cases — outside any repo with no flag/env exits
-  non-zero with the diagnostic; no-manifest git repo uses defaults. Falsify:
-  silent wrong root.
-- S8 (O3/D5): after migration, loom's `.pi/skills/loom-sdlc/` is gone; `.pi/sdlc/`
-  holds config+models+two overrides; `AGENTS.md`/`CONTRIBUTORS.md`/PR-template/
-  `.gitignore` carry no stale `.pi/skills/loom-sdlc` path; loom config reproduces
-  `prefix`/`labelPrefix`/`announce`; loom offline gate green. Falsify: any stale
-  ref, changed value, or red gate.
-- S9 (DEP2/D5): loom's deletion commit is a descendant of the commit/verification
-  that confirmed `/skill:sdlc` discovery. Falsify: deletion precedes discovery.
-- S10 (D6): a loom `pr_review` dry run produces `docs/reviews/<...>/` with per-model
-  files + `prompt.md` + `consolidated.md` carrying the four named sections.
-  Falsify: missing file or section.
-- S11 (D7): one ADR per frozen surface FS1–FS7 + name + distribution model exists.
+  absent.
+- S2 (FS6/NFR3): `grep -rniE 'loom|rundriver|northstar|handover|conveyanc|clc|
+  build board|threadsafe-systems|adapter boundary|sdlc-artifacts' skills/sdlc/`
+  empty outside `schema/`+`docs/`, **scripts included**. Falsify: any match.
+- S3 (FS1/FS2): each JSON Schema validates its example. Falsify: valid example
+  rejected.
+- S3b (FS1/FS2/§5): each script, given a mutated manifest (bad type / missing
+  required / extra key / bad schemaVersion / missing phase), exits `2` with a
+  clear message. Falsify: mutated manifest accepted or wrong exit code.
+- S4 (FS4/FS7/D4a): for all four phases, stamping under loom's manifest yields
+  `name` + `tools` + **body** byte-identical to the committed loom golden fixture
+  (plan/spec via overrides, review/validate generic). `description` excluded by
+  §4. Falsify: any name/tools/body diff.
+- S5 (FS3/D4a): with `$PWD` in a simulated consumer and the skill at a global
+  path, the stamped agent lands under `<consumer-root>/<paths.agents>`. Falsify:
+  written under the skill repo.
+- S6 (FS5/D4b/NFR1): under the isolated cred env (§9), `resolve-panel
+  --emit-tasks` for all four phases deep-equals the committed golden. Falsify: any
+  divergence.
+- S7 (FS3): terminal cases — outside any repo with no flag/env exits non-zero with
+  the diagnostic; no-manifest git repo resolves root + defaults but
+  `resolve-panel` errors clearly without a models file. Falsify: silent wrong root
+  or crash.
+- S8 (O3/D5): after migration, `.pi/skills/loom-sdlc/` gone; `.pi/sdlc/` holds
+  config+models+two overrides; no stale `.pi/skills/loom-sdlc` path in
+  `AGENTS.md`/`CONTRIBUTORS.md`/PR-template/`.gitignore`; loom config reproduces
+  prefix/labelPrefix/announce; loom offline gate green. Falsify: any stale ref,
+  changed value, red gate.
+- S9 (DEP2/D5): a committed loom artefact
+  `docs/reviews/<...>/discovery-verified.md` recording the discovered `pi-sdlc`
+  commit + surfaced path exists, and its commit is an ancestor (same-repo) of
+  loom's engine-deletion commit. Falsify: artefact absent or not an ancestor of
+  the deletion.
+- S10 (D6): a loom `pr_review` dry run produces `docs/reviews/<...>/` with
+  per-model files + `prompt.md` + `consolidated.md` carrying the four named
+  sections (panel table, per-finding adjudication, stop condition, orchestrating
+  model). Falsify: missing file/section.
+- S11 (D7): one ADR per frozen surface FS1–FS7 + name + distribution exists.
   Falsify: missing ADR.
 
 ## 11. Out of scope (restates plan)
