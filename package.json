@@ -1,0 +1,28 @@
+{
+  "name": "pi-sdlc",
+  "version": "0.1.0",
+  "description": "A portable, project-agnostic software-development lifecycle skill for pi: enforced brainstorm/plan/spec/build/implement/PR with per-phase adversarial panels, driven by a small per-project manifest.",
+  "type": "module",
+  "license": "MIT",
+  "author": "Neil Chambers (ThreadSafe Systems)",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/threadsafe-systems/pi-sdlc.git"
+  },
+  "keywords": [
+    "pi",
+    "pi-coding-agent",
+    "sdlc",
+    "adversarial-review",
+    "skill"
+  ],
+  "pi": {
+    "skills": ["./skills"]
+  },
+  "scripts": {
+    "test": "node --test"
+  },
+  "devDependencies": {
+    "ajv": "^8.17.1"
+  }
+}

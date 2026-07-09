@@ -1,0 +1,19 @@
+{
+  "schemaVersion": 1,
+  "prefix": "acme",
+  "labelPrefix": "acme-sdlc",
+  "announce": "Using the sdlc skill to drive this change through its lifecycle.",
+  "paths": {
+    "plans": "docs/plans",
+    "specs": "docs/specs",
+    "reviews": "docs/reviews",
+    "agents": ".pi/agents"
+  },
+  "tracker": {
+    "repo": "acme-inc/widget",
+    "board": {
+      "number": 7,
+      "url": "https://github.com/orgs/acme-inc/projects/7"
+    }
+  }
+}

@@ -1,0 +1,62 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://github.com/threadsafe-systems/pi-sdlc/skills/sdlc/schema/sdlc.config.schema.json",
+  "title": "sdlc.config.json",
+  "description": "Per-project configuration for the sdlc skill. Frozen surface FS1: additive within a major.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "prefix", "labelPrefix", "announce"],
+  "properties": {
+    "schemaVersion": {
+      "type": "integer",
+      "const": 1,
+      "description": "Config major version. v1 scripts accept 1 only."
+    },
+    "prefix": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9-]*$",
+      "description": "Drives the stamped panel agent name <prefix>-<phase-slug>."
+    },
+    "labelPrefix": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9-]*$",
+      "description": "Drives the tracker label vocabulary and the stamped agent description identity."
+    },
+    "announce": {
+      "type": "string",
+      "minLength": 1,
+      "description": "The start-of-work announce string."
+    },
+    "paths": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "plans": { "type": "string", "minLength": 1 },
+        "specs": { "type": "string", "minLength": 1 },
+        "reviews": { "type": "string", "minLength": 1 },
+        "agents": { "type": "string", "minLength": 1 }
+      }
+    },
+    "tracker": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["repo", "board"],
+      "properties": {
+        "repo": {
+          "type": "string",
+          "pattern": "^[^/]+/[^/]+$",
+          "description": "GitHub owner/name."
+        },
+        "board": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["number", "url"],
+          "properties": {
+            "number": { "type": "integer", "minimum": 1 },
+            "url": { "type": "string", "format": "uri" }
+          }
+        }
+      }
+    }
+  }
+}

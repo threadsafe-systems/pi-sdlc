@@ -1,0 +1,50 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://github.com/threadsafe-systems/pi-sdlc/skills/sdlc/schema/sdlc.models.schema.json",
+  "title": "sdlc.models.json",
+  "description": "Per-project panel model roster for the sdlc skill. Frozen surface FS2.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["phases"],
+  "properties": {
+    "author_default": {
+      "type": "string",
+      "pattern": "^[^/]+/.+$",
+      "description": "Fallback author (provider/model) when --author is omitted."
+    },
+    "rules": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "exclude_author_vendor": { "type": "boolean" }
+      }
+    },
+    "phases": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["plan_review", "spec_review", "pr_review", "task_validate"],
+      "description": "Exactly the four v1 phases; each required.",
+      "properties": {
+        "plan_review": { "$ref": "#/definitions/phase" },
+        "spec_review": { "$ref": "#/definitions/phase" },
+        "pr_review": { "$ref": "#/definitions/phase" },
+        "task_validate": { "$ref": "#/definitions/phase" }
+      }
+    }
+  },
+  "definitions": {
+    "phase": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["min_panel", "prefer"],
+      "properties": {
+        "min_panel": { "type": "integer", "minimum": 1 },
+        "prefer": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "type": "string", "pattern": "^[^/]+/.+$" }
+        }
+      }
+    }
+  }
+}
