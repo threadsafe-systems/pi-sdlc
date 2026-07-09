@@ -58,3 +58,40 @@ are added and the exact REVIEWER_TAG literal is frozen.
 
 Wave 1 surfaced 2 high + 8 medium + 1 low, all valid, all incorporated into v2.
 A confirming wave 2 follows; Neil is the final adjudicator on the spec.
+
+---
+
+# Spec panel — wave 2 (on spec v2, commit 5908997)
+
+Same panel, 3/3. All valid; all incorporated into v3. Framework grounding
+confirmed by openai-codex: pi-subagents dispatches by name + prompt body,
+`description` is metadata only — so v2's "description non-behavioural" scoping is
+correct.
+
+- **HIGH — S2 grep is necessary-but-not-sufficient; loom concept names without the
+  literals leak (`2026-07-08-sdlc-v2-upgrades` plan paths, `journal`) —
+  INCORPORATED.** v3 §6 makes the exhaustive site list the primary mechanism (grep
+  is a backstop), adds SKILL.md:12, tracker-ops.md:10-12, SKILL.md:25, and
+  `sdlc-v2` context.
+- **MEDIUM — validation split: resolve-panel reads only models.json,
+  ensure-panel-agent only config.json; "both validate phases/schemaVersion" was
+  unbuildable — INCORPORATED.** v3 §5 splits validation per file; drops "config
+  file" from resolve-panel's exit list; S3b→S3b (config, ensure-panel-agent) +
+  S3c (models, resolve-panel).
+- **MEDIUM — "exactly four phase keys" not enforced by the script (reads one phase)
+  — INCORPORATED.** v3 §5: resolve-panel checks the full phase key set at startup.
+- **MEDIUM — hand validation omitted value constraints (min_panel≥1, non-empty
+  prefer, regex/paths/URL) — INCORPORATED.** v3 §5 enumerates every consumed
+  constraint; S3b/S3c add value-boundary mutations.
+- **MEDIUM — §7 adversary-spec headings wrong ("read ALL", order) —
+  INCORPORATED.** v3 §7 enumerates all five exact headings in order.
+- **MEDIUM — regenerated `description` frozen but ungated — INCORPORATED.** v3 S4
+  asserts the stamped description equals the FS4 string.
+- **LOW — §4 description `<phase>` rendered the phase id not the template name —
+  INCORPORATED.** v3 §4 drops the template-name reference entirely.
+
+## Stop condition (spec)
+
+Two waves. Wave 2 found enforcement-precision gaps, not structural defects (the
+spec shape held). All incorporated into v3. Spec gate is human approval; Neil is
+the final adjudicator.

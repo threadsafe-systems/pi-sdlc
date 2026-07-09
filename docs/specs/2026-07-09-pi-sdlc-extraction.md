@@ -4,8 +4,8 @@
 - Track: **irreversible**. Implements the approved plan
   `docs/plans/2026-07-09-pi-sdlc-extraction.md` (v3, `75347a0`).
 - Author vendor: anthropic (excluded from panels).
-- Revision: v2, incorporating the spec panel (openai-codex, deepseek, zai;
-  adjudication in `docs/reviews/spec-pi-sdlc-extraction-2026-07-09/`).
+- Revision: v3, incorporating spec panel waves 1 and 2 (openai-codex, deepseek,
+  zai; adjudication in `docs/reviews/spec-pi-sdlc-extraction-2026-07-09/`).
 - Zero-regression claim: the migrated loom drives a change identically to
   loom-sdlc @ loom `main` `b5a3529` (behavioural surface = agent name + tools +
   prompt body + resolved panel + artefacts + gates; see §4 on metadata).
@@ -108,11 +108,15 @@ Derived: config = `<root>/.pi/sdlc/sdlc.config.json`; models =
   `tail -n +2`), with `REVIEWER_TAG` replaced by the exact literal
   `one of several independent reviewers in a multi-model panel`
   (`ensure-panel-agent.sh:88`). This is the byte-identity surface.
-- **`description`** (regenerated, non-behavioural, NOT byte-compared):
-  `description: <labelPrefix> <phase> reviewer. Stamped by the sdlc skill from the
-  <phase> prompt template; edit the template, not this file. Dispatch one task per
-  model via the subagent tool's per-task model override.` The `assets/<template>`
-  path in loom's current description is intentionally dropped (the template moved).
+- **`description`** (regenerated, non-behavioural per framework grounding: pi
+  dispatches by `name` + prompt body; `description` is list/metadata only). Exact
+  frozen string:
+  `description: <labelPrefix> <phase> reviewer. Stamped by the sdlc skill; edit the
+  template, not this file. Dispatch one task per model via the subagent tool's
+  per-task model override.` (`<phase>` = the phase id). No template-name/path is
+  referenced (loom's `assets/<template>` path is intentionally dropped; the
+  template moved). It is NOT under old-vs-new byte-identity, but S4 asserts the
+  stamped `description` equals this generated string exactly.
 - **Label vocabulary** = `<labelPrefix>:{map, ticket-research, ticket-prototype,
   ticket-grilling, ticket-task, epic, build-task, hitl, afk}`.
 
@@ -124,8 +128,8 @@ Derived: config = `<root>/.pi/sdlc/sdlc.config.json`; models =
   task:"FILL_IN_TASK_BLOCK", model}...] }` pretty JSON with `--emit-tasks`.
 - stderr: panel summary + drop reasons.
 - exit: `0` iff `panel.length ≥ min_panel`; `1` on under-panel; `2` on bad args,
-  unknown phase, or unreadable/unparseable/invalid models or config file
-  (verified `resolve-panel.mjs:79-89`).
+  unknown phase, or unreadable/unparseable/invalid **models** file (verified
+  `resolve-panel.mjs:79-89`). resolve-panel does NOT read `sdlc.config.json`.
 
 `ensure-panel-agent.sh <phase> [--dir D] [--tools CSV] [--force] [--config D |
 --repo-root D]`
@@ -137,11 +141,21 @@ Derived: config = `<root>/.pi/sdlc/sdlc.config.json`; models =
 - exit: `0` on write/up-to-date; `2` on bad args/unknown phase/invalid manifest;
   `1` on missing template or existing-differing-without-force.
 
-**Manifest validation (no new deps, NFR2):** both scripts do minimal built-in
-structural validation — required keys present, primitive types correct,
-`schemaVersion` known, `phases` has the four keys — and exit `2` with a clear
-message on violation. No JSON-Schema library at runtime; the committed schemas
-are for the S3 test-time validation of the examples.
+**Manifest validation (no new deps, NFR2) — split by which file each script
+reads:**
+- `ensure-panel-agent.sh` reads and validates **only `sdlc.config.json`**:
+  `schemaVersion` is `1`; `prefix`/`labelPrefix` match `^[a-z][a-z0-9-]*$`;
+  `announce` non-empty; `paths.*` repo-relative strings if present; `tracker`
+  (if present) has `repo` matching `owner/name`, `board.number` integer ≥ 1,
+  `board.url` a URL; no unknown top-level keys.
+- `resolve-panel` reads and validates **only `sdlc.models.json`**: `phases` has
+  **exactly** the four v1 keys (checked via the full key set at startup, not just
+  the requested phase); each `min_panel` an integer ≥ 1; each `prefer` a non-empty
+  array of `provider/model` strings; `rules.exclude_author_vendor` (if present)
+  boolean; `author_default` (if present) a `provider/model` string.
+Each exits `2` with a clear message on violation. Hand-rolled (no JSON-Schema
+library at runtime); the committed schemas validate the examples at S3 test time.
+Neither script requires the OTHER's file.
 
 ## 6. Contract: tokens + genericisation clearance (frozen surface FS6)
 
@@ -149,20 +163,26 @@ Tokens (angle-bracket, uppercase): `<PREFIX>`, `<LABEL_PREFIX>`, `<ANNOUNCE>`,
 `<PLANS_DIR>`, `<SPECS_DIR>`, `<REVIEWS_DIR>`, `<AGENTS_DIR>`, `<TRACKER_REPO>`,
 `<TRACKER_BOARD>`, `<TRACKER_BOARD_URL>`.
 
-**Authoritative clearance is the D2 grep over the ENTIRE `skills/sdlc/` tree
-(SKILL.md, prompts, assets, AND scripts) returning empty** (outside `schema/`
-examples and `docs/`). The site list below is high-value guidance the build starts
-from, not a closed set — the build is not done until the grep is clean:
+**Clearance is BOTH: (a) the exhaustive site list below is fully applied, AND (b)
+the S2 grep over the ENTIRE `skills/sdlc/` tree (SKILL.md, prompts, assets, AND
+scripts) returns empty** (outside `schema/` examples and `docs/`). The grep is
+necessary but NOT sufficient: a loom concept name containing none of the grep
+literals (date-stamped plan-doc paths, `journal`) leaks past it, so the site list
+— not the grep — is the primary mechanism and must be exhaustive:
 
-- `SKILL.md`: `:2,3,6,8` skill name/"enters Loom"; `:10` loom plan cross-ref;
-  `:14` announce→`<ANNOUNCE>`; `:65,74,79,120,122` `loom-sdlc:*`→`<LABEL_PREFIX>:*`;
+- `SKILL.md`: `:2,3,6,8` skill name/"enters Loom"; `:10,:12` loom plan-doc
+  cross-refs (incl. the date-stamped `2026-07-08-sdlc-v2-upgrades` path the grep
+  does NOT catch); `:25` "journal shapes" (loom persistence concept; remove, do
+  not grep `journal`); `:14` announce→`<ANNOUNCE>`; `:65,74,79,120,122` `loom-sdlc:*`→`<LABEL_PREFIX>:*`;
   `:129` "Loom Build Board"→`<TRACKER_BOARD>`; `:143` `sdlc-artifacts`→generic
   "your CI presence-check"; `:161,174,175` command paths (skill-relative, run from
   consumer root); `:180` "loom prompts"; `:249,268` self/governing-doc refs.
 - `assets/tracker-ops.md`: `:3` skill name; `:8,56,111,129,131,144,146,153,154,
-  167,186,191` repo/owner→`<TRACKER_REPO>`; `:10,145,153` board→`<TRACKER_BOARD>`/
-  `<TRACKER_BOARD_URL>`; `:24-35` labels→`<LABEL_PREFIX>:*`; **`:135` RunDriver
-  example→domain-neutral; `:232` `sdlc-artifacts`→generic**.
+  167,186,191` repo/owner→`<TRACKER_REPO>`; `:10-12` board provenance + the
+  date-stamped `2026-07-08-sdlc-v2-upgrades-build` plan path (grep does NOT catch
+  the latter); `:10,145,153` board→`<TRACKER_BOARD>`/`<TRACKER_BOARD_URL>`;
+  `:24-35` labels→`<LABEL_PREFIX>:*`; **`:135` RunDriver example→domain-neutral;
+  `:232` `sdlc-artifacts`→generic**.
 - `assets/agent-brief.md`: `:23,32,34` adapter-boundary example→domain-neutral;
   `:93,97` labels→`<LABEL_PREFIX>:*`.
 - **scripts** (comments only; logic is already generic): `resolve-panel.sh:2`,
@@ -179,8 +199,12 @@ section headings (a consumer whole-file override must preserve them):
   judging)`, `## Attack surfaces (verify each; also hunt for defects not listed)`,
   `## Output format (STRICT: markdown only, findings only, no preamble, no
   conclusion)`.
-- `adversary-spec`: the above plus `## Grounding against the framework (MANDATORY
-  for any claim about framework behaviour)`.
+- `adversary-spec` (five headings, exact text and order): `## The review target`,
+  `## Required context (read ALL before judging)` (note "ALL", unlike plan),
+  `## Grounding against the framework (MANDATORY for any claim about framework
+  behaviour)` (between Required context and Attack surfaces), `## Attack surfaces
+  (verify each; also hunt for defects not listed)`, `## Output format (STRICT:
+  markdown only, findings only, no preamble, no conclusion)`.
 - `adversary-review`: `## Method`, `## Baseline smells (Standards, judgement
   calls)`, `## The review target`, `## Output format (STRICT)`, `## Verification
   mode (only when the caller asks for it)`.
@@ -231,13 +255,19 @@ loom's current two prompts.
   empty outside `schema/`+`docs/`, **scripts included**. Falsify: any match.
 - S3 (FS1/FS2): each JSON Schema validates its example. Falsify: valid example
   rejected.
-- S3b (FS1/FS2/§5): each script, given a mutated manifest (bad type / missing
-  required / extra key / bad schemaVersion / missing phase), exits `2` with a
-  clear message. Falsify: mutated manifest accepted or wrong exit code.
+- S3b (FS1/§5, config): `ensure-panel-agent`, given a mutated `sdlc.config.json`
+  (bad `schemaVersion`, missing required key, bad-regex `prefix`/`labelPrefix`,
+  empty `announce`, malformed `tracker`, extra top-level key), exits `2` with a
+  clear message. Falsify: mutated config accepted or wrong exit code.
+- S3c (FS2/§5, models): `resolve-panel`, given a mutated `sdlc.models.json`
+  (missing/extra phase, `min_panel:0`, empty `prefer`, bad `provider/model`,
+  non-boolean `rules.exclude_author_vendor`), exits `2`. Falsify: mutated models
+  file accepted or wrong exit code.
 - S4 (FS4/FS7/D4a): for all four phases, stamping under loom's manifest yields
   `name` + `tools` + **body** byte-identical to the committed loom golden fixture
-  (plan/spec via overrides, review/validate generic). `description` excluded by
-  §4. Falsify: any name/tools/body diff.
+  (plan/spec via overrides, review/validate generic), AND the stamped
+  `description` equals the FS4 generated string exactly. Falsify: any name/tools/
+  body diff, or a description not matching FS4.
 - S5 (FS3/D4a): with `$PWD` in a simulated consumer and the skill at a global
   path, the stamped agent lands under `<consumer-root>/<paths.agents>`. Falsify:
   written under the skill repo.
