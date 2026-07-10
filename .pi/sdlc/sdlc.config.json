@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "prefix": "pi-sdlc",
+  "labelPrefix": "sdlc",
+  "announce": "Using the sdlc skill to drive this change through its lifecycle (pi-sdlc, dogfooding itself).",
+  "paths": {
+    "plans": "docs/plans",
+    "specs": "docs/specs",
+    "reviews": "docs/reviews",
+    "agents": ".pi/agents"
+  }
+}
