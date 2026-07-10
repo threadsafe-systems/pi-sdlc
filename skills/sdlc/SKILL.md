@@ -10,7 +10,34 @@ feature.
 
 Announce at start with the project's `announce` string from
 `.pi/sdlc/sdlc.config.json` (default: "Using the sdlc skill to drive this change
-through its lifecycle.").
+through its lifecycle.") — but first run the opt-in gate below: announce only
+after `sdlc-status` confirms this repo has adopted the sdlc.
+
+## Opt-in and advisory mode
+
+The sdlc is a framework a repo *adopts*, not a global default. A repo has opted
+in when it commits `.pi/sdlc/sdlc.config.json`. At the start of every session,
+run the mechanical gate and branch on its exit code:
+
+1. Run `skills/sdlc/scripts/sdlc-status.sh` (with the session's cwd inside the
+   consumer repo, or pass `--repo-root`).
+2. **Exit 0 (opted in)**: announce with the config's `announce` string, then
+   enumerate each configured hook (phase, timing, kind) and each top-level rule
+   of `.pi/sdlc/workflow.md` if present. Proceed under full law.
+3. **Exit 1 (not opted in)**: do NOT proceed under law. State that this repo has
+   not adopted the sdlc and offer either `/setup-sdlc` to opt in, or advisory
+   mode for this session only, with the user's explicit in-session consent.
+4. **Exit 2 (invalid config)**: surface the diagnostic and stop. An invalid
+   manifest is never silently downgraded to advisory mode.
+
+### Advisory mode
+
+Advisory mode is the escape hatch when a repo has not opted in but the user still
+wants sdlc guidance for one session. In advisory mode: never use any `announce`
+string and never claim the session runs "under law"; prefix every phase marker
+with `advisory:`; follow the phase sequence as guidance only; and MUST NOT create
+or mutate tracker objects, MUST NOT claim any gate as passed, and MUST NOT stamp
+panel agents.
 
 ## The iron law (two tracks)
 
@@ -41,7 +68,7 @@ the declared track's artifacts are committed.
 | Plan | objectives, rationale, scope in/out, definition of done, context for the next agent | `docs/plans/<date>-<feat>.md` | plan panel (irreversible); human approval |
 | Spec | contracts, interfaces, surface area, functional and non-functional requirements, falsifiable verification scenarios with stable ids | `docs/specs/<date>-<feat>.md` | spec panel grounded in the code; human approval |
 | Build¹ | task breakdown; each task names its check commands and the scenario ids it satisfies | `docs/plans/<date>-<feat>-build.md` | none (derived from the vetted spec) |
-| Implement | code and tests | the feature branch, in a worktree | per-task mechanistic validator |
+| Implement | code and tests | the feature branch (worktree or checkout per the project's hooks/workflow) | per-task mechanistic validator |
 | PR | the diff | GitHub | PR panel to the stop condition |
 
 ¹ Both have a second mode for scale, backed by GitHub's native sub-issue and
@@ -241,6 +268,68 @@ IDs in headings and edge triples in front matter, then `lint.mjs` /
 a dependency: renders are ephemeral, never committed as a requirement, and
 never CI-checked.
 
+## Hooks (local workflow)
+
+A repo may declare local workflow actions in the `hooks` object of
+`sdlc.config.json`, so the global process stays identical everywhere while each
+repo layers on its own ways of working. Hook phase keys are the six lifecycle
+names — `brainstorm`, `plan`, `spec`, `build`, `implement`, `pr` — plus `*`
+(every phase). This vocabulary is distinct from the four review-panel phases and
+must not be conflated. Each phase key carries optional `before`/`after` arrays
+of hook items; each item is exactly one of:
+
+- `{ "run": "<command>" }` — a shell command the agent executes verbatim.
+- `{ "use": "skill:<name>" | "tool:<name>", "do": "<intent>" }` — an
+  instruction the agent interprets: `tool:<name>` invokes that tool with `do`
+  as the intent (missing tool = hook failure); `skill:<name>` loads that skill
+  and performs `do` per its instructions (missing skill = hook failure). The
+  `do` text is the acceptance criterion.
+
+**Ordering.** `before` hooks fire `*` items first, then phase-specific; `after`
+hooks fire phase-specific first, then `*`. Within a list, array order.
+
+**Failure.** A failed or skipped `before` hook **blocks** the phase (report,
+then retry, ask, or move backward — do not enter the phase). A failed `after`
+hook **warns**: recorded, never blocking.
+
+**Working directory.** A `run` hook executes from the session's current working
+root at fire time — the consumer root unless a hook or workflow has legitimately
+moved it (e.g. a `before` hook entered a worktree; a worktree is a checkout of
+the same repo, so repo-relative commands still resolve).
+
+**Announce-on-fire (the audit trail).** Before executing any hook and after it
+completes, emit exactly:
+
+```
+[sdlc hook] <phase>:<before|after> run$ <command>
+[sdlc hook] <phase>:<before|after> use=<use> do=<first 80 chars of do>
+[sdlc hook] <phase>:<before|after> result: ok
+[sdlc hook] <phase>:<before|after> result: failed (<one-line reason>)
+```
+
+A transcript that enters a phase whose `before` hooks lack these lines is a
+violation. Hooks are prose law executed by the agent — the same enforcement
+model as the iron law; there is no mechanical runner.
+
+**Trust boundary.** `run` hooks execute arbitrary shell commands with the
+agent's privileges, from a committed file. They sit inside pi's existing
+project-trust boundary: enabling hooks for a repo means trusting that repo's
+config, exactly as you already must for `.pi/prompts` and project settings. The
+agent always echoes the exact command before running it, and the scaffolder
+warns whenever it writes a `run` hook.
+
+**`workflow.md` (prose layer).** An optional `.pi/sdlc/workflow.md` carries
+local ways-of-working that don't decompose into hooks (e.g. "no risky merges on
+Fridays"). At announce, enumerate each top-level bullet (first line, truncated
+to 80 chars). Conflict rule: *gates* — the Gate column of the phase table plus
+the iron law's forward-skip prohibitions — always resolve to the global rule
+(local rules may ADD gates, never remove or weaken those); *process* —
+everything else — resolves to the local rule.
+
+**Worktrees.** If your workflow uses worktrees: creating one is not enough — the
+session's working root must move into it (create-then-enter). Writing to the
+main checkout after creating a worktree is a red flag.
+
 ## Delegation (do not reimplement)
 
 - `adversarial-review` (global): the generic reviewer template mechanics and the
@@ -269,6 +358,8 @@ governing docs are historical record and are not migrated.
 ## Red flags
 
 - Skipping a gate forward (backward is always fine).
+- Skipping or silently reordering a configured phase hook.
+- Writing to the main checkout after creating a worktree.
 - Merging with a high or medium finding that survived adjudication.
 - Dismissing a finding without a recorded reason, or incorporating one blindly.
 - A spec outcome that no scenario can falsify.

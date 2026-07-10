@@ -30,9 +30,25 @@ Create `.pi/sdlc/` in your repo:
 - `prompts/<name>.prompt.md` (optional) — override a phase reviewer prompt when
   your project needs a specific grounding the generic prompt does not carry.
 
-With no manifest, the skill still runs phases + panels using built-in defaults
-(`prefix`/`labelPrefix` = `sdlc`, standard doc paths); a models file is still
-required to resolve a panel.
+With no manifest the skill does not run as project law: invoking it in a repo
+that has not committed `.pi/sdlc/sdlc.config.json` prompts you to adopt it with
+`/setup-sdlc`, or to continue in a clearly-labelled session-only advisory mode.
+The fastest way to opt in is the `/setup-sdlc` scaffolder, which interviews you
+(identity, optional tracker, optional worktree and notification hooks) and writes
+the manifest. A models file is still required to resolve a panel.
+
+## Local workflow hooks
+
+An optional `hooks` object in `sdlc.config.json` lets a repo run adjacent actions
+before/after any lifecycle phase (`brainstorm`, `plan`, `spec`, `build`,
+`implement`, `pr`, or `*`). Each hook is either a `{ "run": "<command>" }` shell
+command or a `{ "use": "skill:… | tool:…", "do": "…" }` agent instruction;
+`before` hooks block the phase on failure, `after` hooks warn. This is how a repo
+expresses preferences the global skill must not hard-code — for example, using
+your own worktree tool to enter a fresh workspace at `implement`, or pinging a
+channel after each phase. `run` hooks execute with the agent's privileges from
+the committed config, so only commit hooks you trust. Free-prose local rules that
+don't fit a hook go in `.pi/sdlc/workflow.md`.
 
 ## The panel machine
 
