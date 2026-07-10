@@ -8,10 +8,13 @@
 // invalid result, existing-without-force, no TTY for an interview).
 
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
-import { join } from "node:path";
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
 import { createInterface } from "node:readline/promises";
 import { stdin, stdout } from "node:process";
-import { CONFIG_DEFAULTS, fail, HOOK_PHASES, resolveRoot, validateConfig } from "./lib.mjs";
+import { CONFIG_DEFAULTS, fail, HOOK_PHASES, resolveRoot, USE_RE, validateConfig } from "./lib.mjs";
+
+const SCRIPT_DIR = dirname(fileURLToPath(import.meta.url));
 
 const RUN_HOOK_WARNING =
 	"sdlc: WARNING — 'run' hooks execute arbitrary shell commands with the agent's\n" +
@@ -24,7 +27,10 @@ let sawConfigFlag = false;
 
 function needVal(name, i) {
 	const v = argv[i];
-	if (v === undefined || v.startsWith("--")) fail(`setup-sdlc: ${name} requires a value`);
+	// Only a genuinely absent value is an error; a value may legitimately begin
+	// with '-' (e.g. --announce "--foo"). The switch already consumed the flag
+	// token, so argv[i] is this flag's value.
+	if (v === undefined) fail(`setup-sdlc: ${name} requires a value`);
 	return v;
 }
 
@@ -65,6 +71,7 @@ function parseHookUse(raw) {
 	if (parts.length < 5) fail(`setup-sdlc: --hook-use must be "<phase>:<before|after>:<kind>:<name>:<do>" (got ${JSON.stringify(raw)})`);
 	const [phase, timing, kind, name] = parts;
 	const use = `${kind}:${name}`;
+	if (!USE_RE.test(use)) fail(`setup-sdlc: --hook-use 'use' must match ${USE_RE} (got ${JSON.stringify(use)}; names may not contain ':')`);
 	const doText = parts.slice(4).join(":");
 	return { phase, timing, item: { use, do: doText } };
 }
@@ -119,20 +126,22 @@ function writeConfig(root, cfg, hasRun) {
 	if (existsSync(target) && !opts.force) {
 		fail(`setup-sdlc: ${target} already exists; pass --force to overwrite`);
 	}
-	validateConfig(cfg, target); // self-validation BEFORE writing; exits 2 on any bug
+	validateConfig(cfg, `${target} (to be written)`); // self-validation BEFORE writing; exits 2 on any bug
+
+	// Resolve every source read BEFORE the first write so a --with-models failure
+	// cannot leave the repo half-configured (config written, models missing).
+	const modelsTarget = join(sdlcDir, "sdlc.models.json");
+	const wantModels = opts.withModels && !existsSync(modelsTarget);
+	const modelsContent = wantModels
+		? `${readFileSync(join(SCRIPT_DIR, "..", "schema", "sdlc.models.example.json"), "utf8").trimEnd()}\n`
+		: null;
+
 	mkdirSync(sdlcDir, { recursive: true });
 	writeFileSync(target, `${JSON.stringify(cfg, null, 2)}\n`);
 	if (hasRun) console.error(RUN_HOOK_WARNING);
+	if (opts.withModels && !wantModels) console.error(`setup-sdlc: ${modelsTarget} exists; leaving it untouched`);
+	if (wantModels) writeFileSync(modelsTarget, modelsContent);
 
-	if (opts.withModels) {
-		const modelsTarget = join(sdlcDir, "sdlc.models.json");
-		if (existsSync(modelsTarget)) {
-			console.error(`setup-sdlc: ${modelsTarget} exists; leaving it untouched`);
-		} else {
-			const example = join(import.meta.dirname, "..", "schema", "sdlc.models.example.json");
-			writeFileSync(modelsTarget, `${readFileSync(example, "utf8").trimEnd()}\n`);
-		}
-	}
 	console.log(`sdlc: wrote ${target}`);
 	console.log("sdlc: commit .pi/sdlc/ to adopt the sdlc for this repo.");
 }
@@ -170,6 +179,11 @@ async function interview(root) {
 			hasRun = true;
 		}
 		const cfg = assembleConfig({ prefix, labelPrefix, announce, tracker, hooks });
+		const confirm = (await ask("write this config now? (Y/n)", "y")).toLowerCase();
+		if (confirm.startsWith("n")) {
+			console.error("setup-sdlc: aborted at your request; nothing written.");
+			process.exit(1);
+		}
 		writeConfig(root, cfg, hasRun);
 		process.exit(0);
 	} finally {

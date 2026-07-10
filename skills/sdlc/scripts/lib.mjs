@@ -22,7 +22,7 @@ export const LABELS = [
 const PREFIX_RE = /^[a-z][a-z0-9-]*$/;
 const PM_RE = /^[^/]+\/.+$/; // provider/model
 const REPO_RE = /^[^/]+\/[^/]+$/;
-const USE_RE = /^(skill|tool):[a-z][a-z0-9_-]*$/;
+export const USE_RE = /^(skill|tool):[a-z][a-z0-9_-]*$/;
 const SINGLE_LINE_RE = /^[^\r\n]+$/; // non-empty, single-line (run/do)
 
 // Hook phase vocabulary: the six lifecycle phases + '*' (every phase). This is

@@ -94,6 +94,8 @@ test("OH5: malformed hook flags exit 2", () => {
 		["--hook-run", "onlyone"],
 		["--hook-run", "deploy:before:x"],       // bad phase
 		["--hook-run", "plan:sideways:x"],        // bad timing
+		["--hook-run", "plan:before:"],           // empty command after 2nd colon
+		["--hook-run", "plan:before:line1\rline2"], // carriage return in command
 		["--hook-use", "plan:before:tool:t"],     // too few fields (no do)
 		["--hook-use", "plan:before:bogus:name:do"], // use kind not skill|tool
 	];
@@ -104,6 +106,17 @@ test("OH5: malformed hook flags exit 2", () => {
 		} finally {
 			rmSync(dir, { recursive: true, force: true });
 		}
+	}
+});
+
+test("PR-fix: value-taking flags accept values that begin with '-' (e.g. --announce '--foo')", () => {
+	const dir = mkTemp();
+	try {
+		const r = setup(dir, ["--prefix", "x", "--label-prefix", "y", "--announce", "--foo bar"]);
+		assert.equal(r.code, 0, r.stderr);
+		assert.equal(readCfg(dir).announce, "--foo bar");
+	} finally {
+		rmSync(dir, { recursive: true, force: true });
 	}
 });
 

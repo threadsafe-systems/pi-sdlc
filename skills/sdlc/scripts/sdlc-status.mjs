@@ -19,7 +19,7 @@ for (let i = 0; i < argv.length; i++) {
 	const a = argv[i];
 	const needVal = (name) => {
 		const v = argv[++i];
-		if (v === undefined || v.startsWith("-")) fail(`sdlc-status: ${name} requires a value`);
+		if (v === undefined) fail(`sdlc-status: ${name} requires a value`);
 		return v;
 	};
 	if (a === "--config") config = needVal("--config");
