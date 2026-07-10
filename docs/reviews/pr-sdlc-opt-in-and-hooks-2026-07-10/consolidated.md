@@ -78,5 +78,15 @@ fixed, PM4 dismissed with a recorded reason (pre-existing, out of scope) +
 follow-up. All low findings incorporated except the deferred PL4 refactor.
 `npm test` green at 33/33 after the fixes. Panel ran 3/4 (kimi lost to the
 credential clobber); the min_panel=3 floor for `pr_review` is met by the three
-that returned. Re-run of a full 4-vendor panel is advisable once credentials
-are restored, but is not blocking.
+that returned.
+
+## Post-fix verification
+
+After credentials and model discovery recovered, a focused two-vendor
+verification reviewed only `d47ed9c..1f67660`:
+
+- `openai-codex/gpt-5.6-sol`: **VERIFIED — no high or medium findings.**
+- `zai/glm-5.2`: **VERIFIED — no high or medium findings; 33/33 tests pass.**
+
+Artifacts: `verification-codex-gpt-5.6-sol.md`, `verification-glm-5.2.md`.
+The stop condition is therefore verified after the fix wave.
