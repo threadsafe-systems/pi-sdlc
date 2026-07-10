@@ -22,6 +22,12 @@ export const LABELS = [
 const PREFIX_RE = /^[a-z][a-z0-9-]*$/;
 const PM_RE = /^[^/]+\/.+$/; // provider/model
 const REPO_RE = /^[^/]+\/[^/]+$/;
+export const USE_RE = /^(skill|tool):[a-z][a-z0-9_-]*$/;
+const SINGLE_LINE_RE = /^[^\r\n]+$/; // non-empty, single-line (run/do)
+
+// Hook phase vocabulary: the six lifecycle phases + '*' (every phase). This is
+// DISTINCT from PHASES (the four review-panel ids) and must not be conflated.
+export const HOOK_PHASES = ["brainstorm", "plan", "spec", "build", "implement", "pr", "*"];
 
 export const CONFIG_DEFAULTS = Object.freeze({
 	schemaVersion: 1,
@@ -76,10 +82,15 @@ function isPlainObject(v) {
 	return typeof v === "object" && v !== null && !Array.isArray(v);
 }
 
-// FS1: read + validate sdlc.config.json (or defaults when absent). ensure-panel-agent only.
-export function readConfig(root) {
+// FS1: read + validate sdlc.config.json. Default (no-manifest) returns built-in
+// defaults; with { requireManifest: true } a missing manifest exits 2 naming
+// /setup-sdlc (the opt-in gate; ensure-panel-agent keeps the default behaviour).
+export function readConfig(root, { requireManifest = false } = {}) {
 	const p = join(root, ".pi", "sdlc", "sdlc.config.json");
 	if (!existsSync(p)) {
+		if (requireManifest) {
+			fail(`sdlc: no manifest at ${p}; this repo has not opted in. Run /setup-sdlc to adopt the sdlc.`);
+		}
 		return { ...CONFIG_DEFAULTS, paths: { ...CONFIG_DEFAULTS.paths }, tracker: undefined };
 	}
 	let raw;
@@ -96,13 +107,14 @@ export function readConfig(root) {
 		announce: raw.announce,
 		paths: { ...CONFIG_DEFAULTS.paths, ...(raw.paths ?? {}) },
 		tracker: raw.tracker,
+		hooks: raw.hooks,
 	};
 }
 
 export function validateConfig(raw, p) {
 	const where = `sdlc config ${p}`;
 	if (!isPlainObject(raw)) fail(`${where}: must be a JSON object`);
-	const allowed = new Set(["schemaVersion", "prefix", "labelPrefix", "announce", "paths", "tracker"]);
+	const allowed = new Set(["schemaVersion", "prefix", "labelPrefix", "announce", "paths", "tracker", "hooks"]);
 	for (const k of Object.keys(raw)) {
 		if (!allowed.has(k)) fail(`${where}: unknown key '${k}'`);
 	}
@@ -133,6 +145,43 @@ export function validateConfig(raw, p) {
 		}
 		if (!Number.isInteger(t.board.number) || t.board.number < 1) fail(`${where}: tracker.board.number must be an integer >= 1`);
 		if (typeof t.board.url !== "string" || !/^https?:\/\/.+/.test(t.board.url)) fail(`${where}: tracker.board.url must be an http(s) URL`);
+	}
+	if (raw.hooks !== undefined) validateHooks(raw.hooks, where);
+}
+
+// FS1 (additive): hooks. Hand-rolled twin of the JSON Schema fragment (spec §1.1).
+export function validateHooks(hooks, where) {
+	if (!isPlainObject(hooks)) fail(`${where}: hooks must be an object`);
+	const phaseKeys = Object.keys(hooks);
+	if (phaseKeys.length === 0) fail(`${where}: hooks must not be empty`);
+	for (const phase of phaseKeys) {
+		if (!HOOK_PHASES.includes(phase)) fail(`${where}: unknown hooks phase '${phase}' (allowed: ${HOOK_PHASES.join(", ")})`);
+		const ph = hooks[phase];
+		if (!isPlainObject(ph)) fail(`${where}: hooks.${phase} must be an object`);
+		const timings = Object.keys(ph);
+		if (timings.length === 0) fail(`${where}: hooks.${phase} must have a 'before' or 'after' list`);
+		for (const timing of timings) {
+			if (timing !== "before" && timing !== "after") fail(`${where}: unknown key hooks.${phase}.${timing} (allowed: before, after)`);
+			const list = ph[timing];
+			if (!Array.isArray(list) || list.length === 0) fail(`${where}: hooks.${phase}.${timing} must be a non-empty array`);
+			list.forEach((item, i) => validateHookItem(item, `${where}: hooks.${phase}.${timing}[${i}]`));
+		}
+	}
+}
+
+function validateHookItem(item, at) {
+	if (!isPlainObject(item)) fail(`${at} must be an object`);
+	const keys = Object.keys(item).sort();
+	const isRun = keys.length === 1 && keys[0] === "run";
+	const isUse = keys.length === 2 && keys[0] === "do" && keys[1] === "use";
+	if (!isRun && !isUse) {
+		fail(`${at} must be exactly {run} or {use, do}`);
+	}
+	if (isRun) {
+		if (typeof item.run !== "string" || !SINGLE_LINE_RE.test(item.run)) fail(`${at}.run must be a non-empty single-line string`);
+	} else {
+		if (typeof item.use !== "string" || !USE_RE.test(item.use)) fail(`${at}.use must match ${USE_RE}`);
+		if (typeof item.do !== "string" || !SINGLE_LINE_RE.test(item.do)) fail(`${at}.do must be a non-empty single-line string`);
 	}
 }
 

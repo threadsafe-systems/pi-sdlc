@@ -57,6 +57,58 @@
           }
         }
       }
+    },
+    "hooks": {
+      "type": "object",
+      "additionalProperties": false,
+      "minProperties": 1,
+      "description": "Per-phase local workflow hooks (lifecycle phase names + '*'), agent-executed under announce-on-fire discipline. before=block, after=warn.",
+      "properties": {
+        "brainstorm": { "$ref": "#/definitions/phaseHooks" },
+        "plan": { "$ref": "#/definitions/phaseHooks" },
+        "spec": { "$ref": "#/definitions/phaseHooks" },
+        "build": { "$ref": "#/definitions/phaseHooks" },
+        "implement": { "$ref": "#/definitions/phaseHooks" },
+        "pr": { "$ref": "#/definitions/phaseHooks" },
+        "*": { "$ref": "#/definitions/phaseHooks" }
+      }
+    }
+  },
+  "definitions": {
+    "phaseHooks": {
+      "type": "object",
+      "additionalProperties": false,
+      "minProperties": 1,
+      "properties": {
+        "before": { "$ref": "#/definitions/hookList" },
+        "after": { "$ref": "#/definitions/hookList" }
+      }
+    },
+    "hookList": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/definitions/hookItem" }
+    },
+    "hookItem": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["run"],
+          "properties": {
+            "run": { "type": "string", "pattern": "^[^\\r\\n]+$" }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["use", "do"],
+          "properties": {
+            "use": { "type": "string", "pattern": "^(skill|tool):[a-z][a-z0-9_-]*$" },
+            "do": { "type": "string", "pattern": "^[^\\r\\n]+$" }
+          }
+        }
+      ]
     }
   }
 }

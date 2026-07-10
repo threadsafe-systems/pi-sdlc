@@ -19,6 +19,9 @@
   "pi": {
     "skills": [
       "./skills"
+    ],
+    "prompts": [
+      "./templates"
     ]
   },
   "scripts": {
