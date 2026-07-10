@@ -15,5 +15,18 @@
       "number": 7,
       "url": "https://github.com/orgs/acme-inc/projects/7"
     }
+  },
+  "hooks": {
+    "implement": {
+      "before": [
+        {
+          "use": "tool:my_worktree_tool",
+          "do": "Create AND enter a worktree for the feature branch so the session's working root moves into it; target all subsequent writes there."
+        }
+      ]
+    },
+    "*": {
+      "after": [{ "run": "scripts/notify.sh sdlc-phase-done" }]
+    }
   }
 }
