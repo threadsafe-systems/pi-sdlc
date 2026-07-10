@@ -8,5 +8,15 @@
     "specs": "docs/specs",
     "reviews": "docs/reviews",
     "agents": ".pi/agents"
+  },
+  "hooks": {
+    "implement": {
+      "before": [
+        {
+          "use": "tool:worktree_session",
+          "do": "Create AND enter a worktree for the feature branch so the session's working root moves into it (create-then-enter); target all subsequent writes there."
+        }
+      ]
+    }
   }
 }
