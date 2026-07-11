@@ -101,8 +101,13 @@ Pinning `plugins` explicitly is therefore required to (a) exclude npm and
   baseline. Core (not a plugin) creates and pushes the tag. Verified in §8:
   a probe `feat:` commit yields the would-be tag `v0.2.0`.
 - **`@semantic-release/commit-analyzer` + `@semantic-release/release-notes-generator`**
-  — default Angular/conventionalcommits preset: `feat` → minor, `fix` →
-  patch, `feat!`/`BREAKING CHANGE:` → major; `docs`/`chore`/`ci`/`test`/
+  — default Angular/conventionalcommits preset, the **complete** mapping for
+  every type this spec's grammar (§3.2) accepts (spec-panel finding, both
+  reviewers, medium: an earlier draft omitted `perf`/`revert` from this
+  table even though the grammar already accepted them — verified against
+  `@semantic-release/commit-analyzer`'s own default release rules):
+  `feat` → minor; `fix` → patch; **`perf` → patch; `revert` → patch**;
+  `feat!`/`BREAKING CHANGE:` (any type) → major; `docs`/`chore`/`ci`/`test`/
   `refactor`/`style`/`build` with no breaking marker → **no release**. This
   is what makes the bootstrap safe (SR1) and matches the global
   conventional-commits skill's mapping.
@@ -162,7 +167,6 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          persist-credentials: false
       - uses: actions/setup-node@v4
         with:
           node-version: "24"
@@ -204,9 +208,27 @@ fact desirable, and it compounds with `[skip ci]` to guarantee the changelog
 commit cannot loop the pipeline. A PAT would only become necessary if a
 future workflow needed to fire on the created release, or if main-branch
 protection forbids the changelog push without a bypass actor (§10) — neither
-is adopted here. `persist-credentials: false` on checkout avoids leaving the
-Actions token in the git remote; semantic-release authenticates via the
-`GITHUB_TOKEN` env var it reads directly.
+is adopted here.
+
+**Correction (spec-panel finding, deepseek-v4-pro, high severity — a real bug
+in an earlier draft of this spec, not just a risk):** the two bundled plugins
+authenticate through **different channels**, and an earlier draft conflated
+them. `@semantic-release/github` makes GitHub REST API calls and reads
+`GITHUB_TOKEN` directly from the environment (as documented). `@semantic-
+release/git` does a literal `git push` — it has **no `GITHUB_TOKEN`-reading
+auth path at all** (verified: the plugin's README documents only
+`GIT_AUTHOR_NAME`/`GIT_AUTHOR_EMAIL`/`GIT_COMMITTER_NAME`/
+`GIT_COMMITTER_EMAIL` for commit identity, zero mentions of `GITHUB_TOKEN`).
+It pushes using whatever git credential is already configured in the
+checkout. `actions/checkout@v4`'s **default** (`persist-credentials: true`,
+now the pinned behaviour — the earlier draft incorrectly set this to
+`false`, which would have stripped that credential and made the release
+workflow fail on its very first real run, at the exact deliverable the
+irreversible track exists to scrutinise) leaves an `http.extraheader`
+credential in the git config, scoped by the job's `permissions:
+contents: write`, which is exactly what `@semantic-release/git`'s push
+needs. No PAT, no extra remote-URL step — the default checkout behaviour is
+sufficient once the override is removed.
 
 ## 3. Contract: commit-message CI check (pinned, normative)
 
@@ -326,6 +348,9 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: "24"
+      # No `npm ci` here (deliberately, unlike release.yml): the script uses
+      # only node:child_process (zero deps) — verified in §3.3. If it ever
+      # gains a dependency, add `npm ci` before this step then.
       - run: node scripts/check-commit-messages.mjs
         env:
           PR_TITLE: ${{ github.event.pull_request.title }}
@@ -487,9 +512,19 @@ the 11 pre-existing non-conventional commits since `v0.1.1` (plus the one
 existing `v0.1.0`/`v0.1.1` convention; release notes render with sectioned
 Features/Bug Fixes and the descriptions verbatim.
 
-**Config-parse / no-npm:** both dry-runs loaded the pinned plugin config
-without error under semantic-release 25.0.6; `@semantic-release/npm` was never
-in the resolved plugin set; `package.json` `version` stayed `0.1.1`.
+**Config-parse / no-npm — corrected scope (spec-panel finding, both
+reviewers, medium):** an earlier draft claimed both dry-runs loaded "the
+pinned plugin config" — imprecise. What was actually verified locally: the
+version+changelog **subset** (`commit-analyzer`, `release-notes-generator`,
+`changelog`) loaded and ran without error, `@semantic-release/npm` was never
+in that resolved subset, and `package.json` `version` stayed `0.1.1`. The
+`github` and `git` plugins' `verifyConditions` require a live `GITHUB_TOKEN`
++ network and were **not** exercised locally — their config (option keys,
+asset lists, message template) is syntactically valid JSON consumed by
+semantic-release's own config loader (which parses the full file regardless
+of which plugins later run), but their runtime behaviour is CI-only,
+verified for the first time on the first real push to `main`. SR3 is
+reworded below to claim only what this evidence supports.
 
 ## 9. Verification scenarios (stable ids; falsifiable)
 
@@ -500,16 +535,37 @@ in the resolved plugin set; `package.json` `version` stayed `0.1.1`.
   *(Evidenced §8 Scenario 1.)*
 - **SR2 (version + tag + changelog, dry-run):** with a releasing commit
   present, the dry-run computes the correct semver from `v0.1.1` (`feat` →
-  `0.2.0`; `fix` → `0.1.2`; breaking → `1.0.0`), the would-be tag matches
-  `v${version}`, and release notes render the commit descriptions. Falsify:
-  wrong bump, tag not `v<semver>`, or empty/garbled notes.
-  *(Evidenced §8 Scenario 2.)*
-- **SR3 (config parses, no npm, no package.json write):** the pinned
-  `.releaserc.json` loads under semantic-release 25 with no error; the
-  resolved plugin set contains commit-analyzer, release-notes-generator,
-  changelog, github, git and does **not** contain `@semantic-release/npm`; a
-  full dry-run leaves `package.json` `version` unchanged. Falsify: load error,
-  npm plugin resolved, or `version` mutated. *(Evidenced §8.)*
+  `0.2.0`; `fix` → `0.1.2`; `perf`/`revert` → `0.1.2`; breaking → `1.0.0`),
+  the would-be tag matches `v${version}`, and release notes render the commit
+  descriptions. Falsify: wrong bump for any accepted type (including
+  `perf`/`revert`), tag not `v<semver>`, or empty/garbled notes.
+  *(Evidenced §8 Scenario 2 for `feat`/`fix`; `perf`/`revert` verified
+  against the commit-analyzer's own default rules, not independently
+  dry-run-probed — acceptable, since this is the plugin's stock behaviour,
+  not custom config.)*
+- **SR3 (config parses; no npm; no package.json write; full plugin set
+  resolved — scope corrected, spec-panel finding):** the pinned
+  `.releaserc.json` parses as valid JSON and semantic-release's config
+  loader resolves all five configured plugins by name (commit-analyzer,
+  release-notes-generator, changelog, github, git) with **no**
+  `@semantic-release/npm` in the resolved set — verified locally. The
+  `github`/`git` plugins' `verifyConditions`/`publish`/`prepare` steps
+  require live `GITHUB_TOKEN` + network and are **first verified on the
+  first real push to `main`**, not locally — this is a stated, accepted gap
+  in local verification, not a silent one. A full local dry-run of the
+  version+changelog subset leaves `package.json` `version` unchanged.
+  Falsify: `.releaserc.json` fails to parse, any plugin fails to resolve by
+  name, `@semantic-release/npm` appears in the resolved set, or `version` is
+  mutated. *(Evidenced §8; the github/git runtime gap is intentional per
+  this scenario's own text, not a defect.)*
+- **SR11 (commit-lint is an enforced merge gate, not just a reported check):**
+  after `commit-lint.yml` has run at least once, `main`'s branch protection
+  `required_status_checks.contexts` includes `commit-lint` alongside
+  `test + biome` (verified via `gh api repos/.../branches/main/protection`);
+  a PR with a deliberately malformed commit or PR title shows as `BLOCKED`,
+  not just a red check with mergeability otherwise unaffected. Falsify:
+  `commit-lint` absent from `required_status_checks.contexts`, or a PR with
+  a failing `commit-lint` check is mergeable.
 - **SR4 (commit check blocks a malformed commit):** on a PR whose range
   contains a commit subject violating the §3.2 grammar (e.g. `updated stuff`),
   `check-commit-messages.mjs` exits non-zero naming that subject; on an
@@ -545,26 +601,43 @@ in the resolved plugin set; `package.json` `version` stayed `0.1.1`.
 
 ## 10. Open questions / judgement calls for the spec panel
 
-1. **Branch protection × `@semantic-release/git` push (cross-plan).** The
-   pinned config commits `CHANGELOG.md` back to `main` with the default
-   `GITHUB_TOKEN`. If the sibling biome-ci plan adds branch protection to
-   `main` requiring PRs/reviews, that **direct push will be rejected** unless
-   the release actor is granted a bypass (GitHub "allow specified actors to
-   bypass required pull requests"). Options for the panel: (a) grant the
-   github-actions bot bypass on `main`; (b) drop `@semantic-release/git` and
-   rely on GitHub Release notes only (contradicts the plan's committed-
-   `CHANGELOG.md` deliverable); (c) publish releases from tags via a
-   different flow. **Recommended: (a)**, documented as a one-time protection
-   setting in the biome-ci plan's branch-protection step. Flagged rather than
-   silently decided because it spans both plans.
-2. **github-plugin comments disabled to keep `contents: write`-only.** §1.1
+1. **Branch protection × `@semantic-release/git` push (cross-plan) —
+   narrowed after spec-panel review.** The primary defect —
+   `persist-credentials: false` stripping the git push credential entirely,
+   which would have failed on *any* branch, protected or not — is fixed
+   (§2.3). The residual, narrower question: does the currently-live branch
+   protection (`required_status_checks: strict` on `test + biome`,
+   `enforce_admins: false`, `allow_force_pushes: false`, and — unverified as
+   of this spec — whatever `restrictions`/required-PR-review setting the
+   sibling biome-ci plan did or didn't configure) block a **direct push**
+   (not a PR merge) from an Actions-authenticated `GITHUB_TOKEN`? GitHub's
+   own model gates PR merges via required status checks; whether a direct
+   push to a protected branch is independently blocked depends on push
+   restrictions specifically, which this spec has not empirically confirmed
+   either way. Folded into SR3 as a required empirical check at
+   implementation time, not assumed in either direction.
+2. **Commit-lint required-check gap — resolved as a concrete implementation
+   step, not left as a recommendation.** Both spec-panel reviewers
+   independently found the same gap: `commit-lint.yml` reports a check, but
+   nothing requires it to pass before merge. Fix, pinned: after
+   `commit-lint.yml` lands and has run at least once on a PR (GitHub
+   requires a context to have reported before it can be added to
+   `required_status_checks`), update the existing rule to include it:
+
+   ```bash
+   gh api -X PATCH repos/threadsafe-systems/pi-sdlc/branches/main/protection/required_status_checks \
+     -f strict=true -f 'contexts[]=test + biome' -f 'contexts[]=commit-lint'
+   ```
+
+   This is now a DoD item and SR11 (§9), not an open question.
+3. **github-plugin comments disabled to keep `contents: write`-only.** §1.1
    disables PR/issue comments and labels so the token stays minimal. This
    trades away the automatic "released in vX" PR comment and the failure
    issue. Alternative: re-enable defaults and broaden `permissions` to add
    `issues: write` + `pull-requests: write`. Recommended: keep minimal
    (as pinned); the red Actions run is sufficient failure signal. Panel to
    confirm the tradeoff.
-3. **Biome step depends on the unspecced sibling plan.** `release.yml` and
+4. **Biome step depends on the unspecced sibling plan.** `release.yml` and
    the DoD reference `npx --no-install biome ci .` from
    `docs/plans/2026-07-11-biome-ci.md`, which is not spec'd/implemented in
    this worktree. The exact biome invocation and its `devDependency` are
@@ -572,7 +645,7 @@ in the resolved plugin set; `package.json` `version` stayed `0.1.1`.
    land (or be spec'd in parallel) first. If biome is not yet wired at
    implementation time, the biome step is a placeholder to be reconciled, not
    silently dropped.
-4. **Node version pin.** The workflow pins `node-version: "24"` (satisfies
+5. **Node version pin.** The workflow pins `node-version: "24"` (satisfies
    semantic-release 25's engine `^22.14.0 || >=24.10.0`). `package.json` has
    no `engines` field today; adding one is out of scope but the panel may want
    it noted.

@@ -153,8 +153,12 @@ statement of the same rule, but is no longer the only enforcement mechanism.
       npm plugin), **and verified via `semantic-release --dry-run`** against
       this branch's real commit range before merge — plugin config parses,
       tag format matches `v0.1.0`/`v0.1.1`, changelog renders.
-- [ ] Commit-message CI check present and actually blocks a deliberately
-      malformed commit/PR-title in a test case.
+- [ ] Commit-message CI check present, AND wired into `main`'s branch
+      protection `required_status_checks.contexts` (a reported-but-not-
+      required check does not block a merge — spec-panel finding, two
+      independent reviewers; see spec §10 item 2 and SR11) — verified by a
+      deliberately malformed commit/PR-title actually showing the PR as
+      `BLOCKED`, not just red.
 - [ ] New ADR committed: release & versioning policy.
 - [ ] `CONTRIBUTING.md` states the commit convention and the mechanical
       check, independent of any personal global skill.
