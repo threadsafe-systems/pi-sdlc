@@ -278,7 +278,10 @@ test command exits zero, `npx tsc --noEmit` exits zero, the task's named
 scenario ids pass, greppable CONTRIBUTORS rules hold, no banned patterns. It
 gives a pass or fail per check, never a quality opinion. A task is not done
 until every check passes. Judgement review happens later at the PR panel. Model
-preference: `deepseek/deepseek-v4-flash`, then `anthropic/claude-haiku-4-5`.
+preference: `deepseek/deepseek-v4-flash`, then `anthropic/claude-haiku-4-5` —
+a `:low` (or `:off`) thinking suffix on either fits this role well, since a
+checklist executor doesn't need deep reasoning (see `sdlc.models.schema.json`
+for the full `provider/model[:thinking]` syntax).
 
 ## PR and review cycle
 

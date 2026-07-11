@@ -43,6 +43,7 @@
         "prefer": {
           "type": "array",
           "minItems": 1,
+          "description": "Ordered provider/model preference strings. Each entry may optionally carry pi's ':<thinking>' suffix (e.g. 'openai-codex/gpt-5.6-sol:high') to set a reasoning level for that specific model when resolved into a panel; valid levels are off, minimal, low, medium, high, xhigh, max. This is intentionally NOT validated against that enum: some providers (e.g. amazon-bedrock) use a trailing ':<version>' in the model id itself (such as 'amazon-bedrock/anthropic.claude-opus-4-8-v1:0') which is not a thinking suffix at all — rejecting unrecognized colon-suffixes would wrongly break those. Validate model strings by shape only, as elsewhere in this schema. Note: 'resolve-panel --pong' also passes an explicit '--thinking off' for its smoke test regardless of any suffix here — confirmed live to be harmless (no error, credential check still succeeds), so a suffixed entry works fine with --pong; the suffix governs the actual panel dispatch, not the smoke test.",
           "items": { "type": "string", "pattern": "^[^/]+/.+$" }
         }
       }
