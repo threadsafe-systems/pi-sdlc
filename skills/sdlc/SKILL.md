@@ -79,7 +79,50 @@ tasks. Each mode has its own canonical source (map mode: the map issue itself;
 tracker-backed build: the committed build-plan doc) — see each section for
 which.
 
-## Brainstorm — map mode (wayfinder-lite)
+## Brainstorm
+
+Brainstorm is a live dialogue, not a drafting exercise the agent completes
+alone. The agent's job is to be the author's thinking companion: actively
+rubber-duck the idea, not agree with it. Going along with whatever the human
+says first is a failure mode, not politeness. This applies to both plain
+dialogue and map mode below — it's how the conversation runs, not a mode of
+its own.
+
+Concrete behaviour, not just tone:
+
+- **Raise a contradiction, or say there isn't one.** Before the gate, name at
+  least one contradiction, unstated assumption, or gap in the design if one
+  exists. If the design is genuinely clean, state that explicitly ("no
+  contradiction found") rather than saying nothing — silence is not evidence
+  of soundness.
+- **Use the tools available**, not just the conversation, when they'd
+  actually sharpen the thinking: web research for prior art or external
+  grounding, and codebase exploration when the idea touches an existing
+  pattern the human might be unaware of or might be wrongly assuming is
+  novel. This is proportional, not mandatory ceremony — a brief brainstorm
+  (see below) doesn't need a research pass just to be brief.
+- **Present multiple open questions in a structured form** when the
+  environment provides a tool for that (e.g. a questions-helper plugin)
+  rather than a wall of unstructured prose. See "Skills and tools are
+  enhancements, not dependencies" below for what to do when it isn't there.
+- **Expand and pressure-test, don't commandeer.** Contradictions and
+  questions exist to widen the human's option space, not to steer the design
+  toward the agent's own preferred answer. The human remains the owner of
+  the direction; the gate is *their* approval, not the agent's conviction.
+
+### Skills and tools are enhancements, not dependencies
+
+Any skill or tool named anywhere in this document (a questions-helper
+plugin, web research, codebase exploration, a worktree tool a hook names,
+anything else) is an enhancement the agent reaches for when available, never
+a hard dependency the phase blocks on. When it's missing, degrade to the
+plain fallback — inline structured prose for a missing questions tool, a
+direct read/grep for missing research tooling — and say so, rather than
+stopping or refusing to proceed. This mirrors the worktree-neutrality
+principle already in this file: name no external tool as a shipped
+dependency of the skill itself.
+
+### Map mode (wayfinder-lite)
 
 Default brainstorm is a single dialogue gated by human approval, sized for one
 session. Switch to **map mode** when the idea is too large or too foggy for
