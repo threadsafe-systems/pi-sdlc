@@ -1,5 +1,5 @@
 {
-  "$comment": "Panel roster for pi-sdlc itself. Preference reconciled against live credentials by resolve-panel; model ids drift, re-check with `pi --list-models`.",
+  "$comment": "Panel roster for pi-sdlc itself. Preference reconciled against live credentials by resolve-panel; model ids drift, re-check with `pi --list-models`. Entries may carry pi's ':<thinking>' suffix (off/minimal/low/medium/high/xhigh/max) to set that model's reasoning level; see docs/plans/2026-07-11-model-thinking-levels.md for the reasoning behind the levels below.",
   "author_default": "anthropic/claude-opus-4-8",
   "rules": {
     "exclude_author_vendor": true
@@ -7,38 +7,19 @@
   "phases": {
     "plan_review": {
       "min_panel": 2,
-      "prefer": [
-        "openai-codex/gpt-5.6-sol",
-        "zai/glm-5.2",
-        "anthropic/claude-opus-4-8",
-        "moonshotai/kimi-k2.6"
-      ]
+      "prefer": ["openai-codex/gpt-5.6-sol:high", "zai/glm-5.2:high", "anthropic/claude-opus-4-8:high", "moonshotai/kimi-k2.6:high"]
     },
     "spec_review": {
       "min_panel": 2,
-      "prefer": [
-        "anthropic/claude-opus-4-8",
-        "openai-codex/gpt-5.6-terra",
-        "zai/glm-5.2",
-        "moonshotai/kimi-k2.6"
-      ]
+      "prefer": ["anthropic/claude-opus-4-8:high", "openai-codex/gpt-5.6-terra:high", "zai/glm-5.2:high", "moonshotai/kimi-k2.6:high"]
     },
     "pr_review": {
       "min_panel": 3,
-      "prefer": [
-        "anthropic/claude-opus-4-8",
-        "openai-codex/gpt-5.6-sol",
-        "zai/glm-5.2",
-        "moonshotai/kimi-k2.6"
-      ]
+      "prefer": ["anthropic/claude-opus-4-8:medium", "openai-codex/gpt-5.6-sol:medium", "zai/glm-5.2:medium", "moonshotai/kimi-k2.6:medium"]
     },
     "task_validate": {
       "min_panel": 1,
-      "prefer": [
-        "openai-codex/gpt-5.6-luna",
-        "zai/glm-5.2",
-        "anthropic/claude-haiku-4-5"
-      ]
+      "prefer": ["openai-codex/gpt-5.6-luna:low", "zai/glm-5.2:low", "anthropic/claude-haiku-4-5:low"]
     }
   }
 }

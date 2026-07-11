@@ -79,7 +79,39 @@ tasks. Each mode has its own canonical source (map mode: the map issue itself;
 tracker-backed build: the committed build-plan doc) — see each section for
 which.
 
-## Brainstorm — map mode (wayfinder-lite)
+## Brainstorm
+
+Brainstorm is a live dialogue, not a drafting exercise the agent completes
+alone. The agent's job is to be the author's thinking companion: actively
+rubber-duck the idea, not agree with it. Going along with whatever the human
+says first is a failure mode, not politeness. This applies to both plain
+dialogue and map mode below — it's how the conversation runs, not a mode of
+its own.
+
+Concrete behaviour, not just tone:
+
+- **Raise a contradiction, or say there isn't one.** Before the gate, name at
+  least one contradiction, unstated assumption, or gap in the design if one
+  exists. If the design is genuinely clean, state that explicitly ("no
+  contradiction found") rather than saying nothing — silence is not evidence
+  of soundness.
+- **Use the tools available**, not just the conversation, when they'd
+  actually sharpen the thinking: web research for prior art or external
+  grounding, and codebase exploration when the idea touches an existing
+  pattern the human might be unaware of or might be wrongly assuming is
+  novel. This is proportional, not mandatory ceremony — a brief brainstorm
+  (see below) doesn't need a research pass just to be brief.
+- **Present multiple open questions in a structured form** when the
+  environment provides a tool for that (e.g. a questions-helper plugin)
+  rather than a wall of unstructured prose. See "Skills and tools are
+  enhancements, not dependencies" (below, after Hooks) for what to do when
+  it isn't there — note that rule explicitly does not cover hooks.
+- **Expand and pressure-test, don't commandeer.** Contradictions and
+  questions exist to widen the human's option space, not to steer the design
+  toward the agent's own preferred answer. The human remains the owner of
+  the direction; the gate is *their* approval, not the agent's conviction.
+
+### Map mode (wayfinder-lite)
 
 Default brainstorm is a single dialogue gated by human approval, sized for one
 session. Switch to **map mode** when the idea is too large or too foggy for
@@ -246,7 +278,10 @@ test command exits zero, `npx tsc --noEmit` exits zero, the task's named
 scenario ids pass, greppable CONTRIBUTORS rules hold, no banned patterns. It
 gives a pass or fail per check, never a quality opinion. A task is not done
 until every check passes. Judgement review happens later at the PR panel. Model
-preference: `deepseek/deepseek-v4-flash`, then `anthropic/claude-haiku-4-5`.
+preference: `deepseek/deepseek-v4-flash`, then `anthropic/claude-haiku-4-5` —
+a `:low` (or `:off`) thinking suffix on either fits this role well, since a
+checklist executor doesn't need deep reasoning (see `sdlc.models.schema.json`
+for the full `provider/model[:thinking]` syntax).
 
 ## PR and review cycle
 
@@ -329,6 +364,24 @@ everything else — resolves to the local rule.
 **Worktrees.** If your workflow uses worktrees: creating one is not enough — the
 session's working root must move into it (create-then-enter). Writing to the
 main checkout after creating a worktree is a red flag.
+
+## Skills and tools are enhancements, not dependencies
+
+Any skill or tool the agent reaches for opportunistically — a questions-helper
+plugin, web research, codebase exploration, anything else named anywhere in
+this document as a way to do a phase better — is an enhancement, never a
+hard dependency a phase blocks on. When it's missing, degrade to the plain
+fallback (inline structured prose for a missing questions tool, a direct
+read/grep for missing research tooling) and say so, rather than stopping or
+refusing to proceed. This mirrors the worktree-neutrality principle already
+in this file: name no external tool as a shipped dependency of the skill
+itself.
+
+**This rule does not cover hooks.** A `hooks` entry a repo has explicitly
+configured in `sdlc.config.json` is a deliberate, load-bearing contract, not
+an opportunistic enhancement — its failure semantics are defined above
+(before=block, after=warn) and stand as written. A missing `use:` tool/skill
+on a configured hook is a hook failure, per Hooks, full stop.
 
 ## Delegation (do not reimplement)
 

@@ -7,39 +7,19 @@
   "phases": {
     "plan_review": {
       "min_panel": 2,
-      "prefer": [
-        "openai-codex/gpt-5.5",
-        "deepseek/deepseek-v4-pro",
-        "amazon-bedrock/global.anthropic.claude-opus-4-8",
-        "zai-coding-cn/glm-5.2"
-      ]
+      "prefer": ["openai-codex/gpt-5.5", "deepseek/deepseek-v4-pro", "amazon-bedrock/global.anthropic.claude-opus-4-8", "zai-coding-cn/glm-5.2"]
     },
     "spec_review": {
       "min_panel": 2,
-      "prefer": [
-        "amazon-bedrock/global.anthropic.claude-opus-4-8",
-        "openai-codex/gpt-5.5",
-        "deepseek/deepseek-v4-pro",
-        "zai-coding-cn/glm-5.2",
-        "moonshotai/kimi-k2.7-code"
-      ]
+      "prefer": ["amazon-bedrock/global.anthropic.claude-opus-4-8", "openai-codex/gpt-5.5", "deepseek/deepseek-v4-pro", "zai-coding-cn/glm-5.2", "moonshotai/kimi-k2.7-code"]
     },
     "pr_review": {
       "min_panel": 3,
-      "prefer": [
-        "amazon-bedrock/global.anthropic.claude-opus-4-8",
-        "openai-codex/gpt-5.5",
-        "deepseek/deepseek-v4-pro",
-        "zai-coding-cn/glm-5.2",
-        "moonshotai/kimi-k2.7-code"
-      ]
+      "prefer": ["amazon-bedrock/global.anthropic.claude-opus-4-8", "openai-codex/gpt-5.5", "deepseek/deepseek-v4-pro", "zai-coding-cn/glm-5.2", "moonshotai/kimi-k2.7-code"]
     },
     "task_validate": {
       "min_panel": 1,
-      "prefer": [
-        "deepseek/deepseek-v4-flash",
-        "anthropic/claude-haiku-4-5"
-      ]
+      "prefer": ["deepseek/deepseek-v4-flash", "anthropic/claude-haiku-4-5"]
     }
   }
 }
