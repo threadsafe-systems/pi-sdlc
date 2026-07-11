@@ -10,7 +10,7 @@ import { fileURLToPath } from "node:url";
 import { test } from "node:test";
 
 import Ajv from "ajv";
-import { readConfig, validateConfig } from "../skills/sdlc/scripts/lib.mjs";
+import { readConfig } from "../skills/sdlc/scripts/lib.mjs";
 
 const here = dirname(fileURLToPath(import.meta.url));
 const repo = dirname(here);
@@ -33,9 +33,7 @@ function validateConfigExit(configObj) {
 	mkdirSync(pj, { recursive: true });
 	writeFileSync(join(pj, "sdlc.config.json"), JSON.stringify(configObj));
 	try {
-		execFileSync("node", ["--input-type=module", "-e",
-			`import { readConfig } from ${JSON.stringify(join(skill, "scripts", "lib.mjs"))}; readConfig(${JSON.stringify(dir)});`],
-			{ stdio: ["ignore", "pipe", "pipe"], encoding: "utf8" });
+		execFileSync("node", ["--input-type=module", "-e", `import { readConfig } from ${JSON.stringify(join(skill, "scripts", "lib.mjs"))}; readConfig(${JSON.stringify(dir)});`], { stdio: ["ignore", "pipe", "pipe"], encoding: "utf8" });
 		return { code: 0 };
 	} catch (e) {
 		return { code: e.status ?? 1, stderr: e.stderr ?? "" };
@@ -80,9 +78,7 @@ test("OH1: mutations are rejected by BOTH the schema and validateConfig (exit 2)
 test("OH2: readConfig strict mode rejects a missing manifest naming /setup-sdlc", () => {
 	const empty = mkdtempSync(join(tmpdir(), "sdlc-nomani-"));
 	try {
-		const r = execFileSync("node", ["--input-type=module", "-e",
-			`import { readConfig } from ${JSON.stringify(join(skill, "scripts", "lib.mjs"))}; readConfig(${JSON.stringify(empty)}, { requireManifest: true });`],
-			{ stdio: ["ignore", "pipe", "pipe"], encoding: "utf8" });
+		execFileSync("node", ["--input-type=module", "-e", `import { readConfig } from ${JSON.stringify(join(skill, "scripts", "lib.mjs"))}; readConfig(${JSON.stringify(empty)}, { requireManifest: true });`], { stdio: ["ignore", "pipe", "pipe"], encoding: "utf8" });
 		assert.fail("strict mode should have exited non-zero");
 	} catch (e) {
 		assert.equal(e.status, 2, "missing manifest under strict mode must exit 2");

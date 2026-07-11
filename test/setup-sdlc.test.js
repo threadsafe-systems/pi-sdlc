@@ -3,7 +3,7 @@
 
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
-import { mkdtempSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { mkdtempSync, readFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -76,14 +76,13 @@ test("OH5: --hook-run command = remainder after 2nd colon (colons preserved); tr
 test("OH5: mixed repeated hook flags preserve argv order in the written list", () => {
 	const dir = mkTemp();
 	try {
-		const r = setup(dir, [
-			"--hook-run", "plan:before:first",
-			"--hook-use", "plan:before:tool:t:second",
-			"--hook-run", "plan:before:third",
-		]);
+		const r = setup(dir, ["--hook-run", "plan:before:first", "--hook-use", "plan:before:tool:t:second", "--hook-run", "plan:before:third"]);
 		assert.equal(r.code, 0, r.stderr);
 		const list = readCfg(dir).hooks.plan.before;
-		assert.deepEqual(list.map((i) => i.run ?? i.do), ["first", "second", "third"]);
+		assert.deepEqual(
+			list.map((i) => i.run ?? i.do),
+			["first", "second", "third"],
+		);
 	} finally {
 		rmSync(dir, { recursive: true, force: true });
 	}
@@ -92,11 +91,11 @@ test("OH5: mixed repeated hook flags preserve argv order in the written list", (
 test("OH5: malformed hook flags exit 2", () => {
 	const cases = [
 		["--hook-run", "onlyone"],
-		["--hook-run", "deploy:before:x"],       // bad phase
-		["--hook-run", "plan:sideways:x"],        // bad timing
-		["--hook-run", "plan:before:"],           // empty command after 2nd colon
+		["--hook-run", "deploy:before:x"], // bad phase
+		["--hook-run", "plan:sideways:x"], // bad timing
+		["--hook-run", "plan:before:"], // empty command after 2nd colon
 		["--hook-run", "plan:before:line1\rline2"], // carriage return in command
-		["--hook-use", "plan:before:tool:t"],     // too few fields (no do)
+		["--hook-use", "plan:before:tool:t"], // too few fields (no do)
 		["--hook-use", "plan:before:bogus:name:do"], // use kind not skill|tool
 	];
 	for (const args of cases) {

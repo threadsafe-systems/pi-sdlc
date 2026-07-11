@@ -35,13 +35,18 @@ function mkRepo(config) {
 }
 
 test("OH3: opted-in repo with hooks reports §3 keys in order with counts", () => {
-	const dir = mkRepo(JSON.stringify({
-		schemaVersion: 1, prefix: "acme", labelPrefix: "acme-sdlc", announce: "a",
-		hooks: {
-			implement: { before: [{ use: "tool:t", do: "x" }], after: [{ run: "y" }] },
-			"*": { after: [{ run: "z" }] },
-		},
-	}));
+	const dir = mkRepo(
+		JSON.stringify({
+			schemaVersion: 1,
+			prefix: "acme",
+			labelPrefix: "acme-sdlc",
+			announce: "a",
+			hooks: {
+				implement: { before: [{ use: "tool:t", do: "x" }], after: [{ run: "y" }] },
+				"*": { after: [{ run: "z" }] },
+			},
+		}),
+	);
 	mkdirSync(join(dir, ".pi", "sdlc"), { recursive: true });
 	writeFileSync(join(dir, ".pi", "sdlc", "sdlc.models.json"), "{}");
 	try {
