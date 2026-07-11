@@ -47,10 +47,13 @@
   released version by design — consumers and tooling must read git tags /
   GitHub Releases, not the field; (2) the release depends on commit types
   being correct, which the CI check enforces but which still requires authors
-  (and merge/squash titles) to follow the convention; (3) committing
-  `CHANGELOG.md` back to `main` with the default `GITHUB_TOKEN` interacts with
-  any future branch protection on `main` — the release actor must be permitted
-  to bypass a required-PR rule, or the changelog-commit approach must be
-  revisited (tracked in the spec's open questions). Reversal (adding npm
-  publish later) remains additive — re-introduce `@semantic-release/npm` and a
-  registry token — but is a new, deliberate decision, not a default.
+  (and merge/squash titles) to follow the convention; (3) `main`'s branch protection (a GitHub ruleset requiring one approving
+  review, bypassable only by `OrganizationAdmin`) does not cover the default
+  `GITHUB_TOKEN`'s `github-actions[bot]` identity, so committing
+  `CHANGELOG.md` back to `main` needed a resolution beyond the default token:
+  a fine-grained PAT (`RELEASE_PAT`, `Contents: Read and write` on this repo
+  only, owned by the bypassed account) authenticates both the changelog push
+  and the Release creation — see the spec's §2.3 for the full mechanism.
+  Reversal (adding npm publish later) remains additive — re-introduce
+  `@semantic-release/npm` and a registry token — but is a new, deliberate
+  decision, not a default.
