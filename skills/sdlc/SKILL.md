@@ -104,23 +104,12 @@ Concrete behaviour, not just tone:
 - **Present multiple open questions in a structured form** when the
   environment provides a tool for that (e.g. a questions-helper plugin)
   rather than a wall of unstructured prose. See "Skills and tools are
-  enhancements, not dependencies" below for what to do when it isn't there.
+  enhancements, not dependencies" (below, after Hooks) for what to do when
+  it isn't there — note that rule explicitly does not cover hooks.
 - **Expand and pressure-test, don't commandeer.** Contradictions and
   questions exist to widen the human's option space, not to steer the design
   toward the agent's own preferred answer. The human remains the owner of
   the direction; the gate is *their* approval, not the agent's conviction.
-
-### Skills and tools are enhancements, not dependencies
-
-Any skill or tool named anywhere in this document (a questions-helper
-plugin, web research, codebase exploration, a worktree tool a hook names,
-anything else) is an enhancement the agent reaches for when available, never
-a hard dependency the phase blocks on. When it's missing, degrade to the
-plain fallback — inline structured prose for a missing questions tool, a
-direct read/grep for missing research tooling — and say so, rather than
-stopping or refusing to proceed. This mirrors the worktree-neutrality
-principle already in this file: name no external tool as a shipped
-dependency of the skill itself.
 
 ### Map mode (wayfinder-lite)
 
@@ -372,6 +361,24 @@ everything else — resolves to the local rule.
 **Worktrees.** If your workflow uses worktrees: creating one is not enough — the
 session's working root must move into it (create-then-enter). Writing to the
 main checkout after creating a worktree is a red flag.
+
+## Skills and tools are enhancements, not dependencies
+
+Any skill or tool the agent reaches for opportunistically — a questions-helper
+plugin, web research, codebase exploration, anything else named anywhere in
+this document as a way to do a phase better — is an enhancement, never a
+hard dependency a phase blocks on. When it's missing, degrade to the plain
+fallback (inline structured prose for a missing questions tool, a direct
+read/grep for missing research tooling) and say so, rather than stopping or
+refusing to proceed. This mirrors the worktree-neutrality principle already
+in this file: name no external tool as a shipped dependency of the skill
+itself.
+
+**This rule does not cover hooks.** A `hooks` entry a repo has explicitly
+configured in `sdlc.config.json` is a deliberate, load-bearing contract, not
+an opportunistic enhancement — its failure semantics are defined above
+(before=block, after=warn) and stand as written. A missing `use:` tool/skill
+on a configured hook is a hook failure, per Hooks, full stop.
 
 ## Delegation (do not reimplement)
 
