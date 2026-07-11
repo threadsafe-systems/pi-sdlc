@@ -16,10 +16,7 @@ import { CONFIG_DEFAULTS, fail, HOOK_PHASES, resolveRoot, USE_RE, validateConfig
 
 const SCRIPT_DIR = dirname(fileURLToPath(import.meta.url));
 
-const RUN_HOOK_WARNING =
-	"sdlc: WARNING — 'run' hooks execute arbitrary shell commands with the agent's\n" +
-	"privileges from the committed config. Only commit hooks you trust, exactly as\n" +
-	"you would for .pi/prompts or project settings.";
+const RUN_HOOK_WARNING = "sdlc: WARNING — 'run' hooks execute arbitrary shell commands with the agent's\n" + "privileges from the committed config. Only commit hooks you trust, exactly as\n" + "you would for .pi/prompts or project settings.";
 
 const argv = process.argv.slice(2);
 const opts = { hookSpecs: [] };
@@ -37,23 +34,60 @@ function needVal(name, i) {
 for (let i = 0; i < argv.length; i++) {
 	const a = argv[i];
 	switch (a) {
-		case "--prefix": opts.prefix = needVal("--prefix", ++i); sawConfigFlag = true; break;
-		case "--label-prefix": opts.labelPrefix = needVal("--label-prefix", ++i); sawConfigFlag = true; break;
-		case "--announce": opts.announce = needVal("--announce", ++i); sawConfigFlag = true; break;
-		case "--tracker-repo": opts.trackerRepo = needVal("--tracker-repo", ++i); sawConfigFlag = true; break;
-		case "--tracker-board-number": opts.trackerBoardNumber = needVal("--tracker-board-number", ++i); sawConfigFlag = true; break;
-		case "--tracker-board-url": opts.trackerBoardUrl = needVal("--tracker-board-url", ++i); sawConfigFlag = true; break;
-		case "--hook-run": opts.hookSpecs.push({ kind: "run", raw: needVal("--hook-run", ++i) }); sawConfigFlag = true; break;
-		case "--hook-use": opts.hookSpecs.push({ kind: "use", raw: needVal("--hook-use", ++i) }); sawConfigFlag = true; break;
-		case "--with-models": opts.withModels = true; break;
-		case "--force": opts.force = true; break;
-		case "--yes": opts.yes = true; break;
-		case "--config": opts.config = needVal("--config", ++i); break;
-		case "--repo-root": opts.repoRoot = needVal("--repo-root", ++i); break;
-		case "--help": case "-h":
+		case "--prefix":
+			opts.prefix = needVal("--prefix", ++i);
+			sawConfigFlag = true;
+			break;
+		case "--label-prefix":
+			opts.labelPrefix = needVal("--label-prefix", ++i);
+			sawConfigFlag = true;
+			break;
+		case "--announce":
+			opts.announce = needVal("--announce", ++i);
+			sawConfigFlag = true;
+			break;
+		case "--tracker-repo":
+			opts.trackerRepo = needVal("--tracker-repo", ++i);
+			sawConfigFlag = true;
+			break;
+		case "--tracker-board-number":
+			opts.trackerBoardNumber = needVal("--tracker-board-number", ++i);
+			sawConfigFlag = true;
+			break;
+		case "--tracker-board-url":
+			opts.trackerBoardUrl = needVal("--tracker-board-url", ++i);
+			sawConfigFlag = true;
+			break;
+		case "--hook-run":
+			opts.hookSpecs.push({ kind: "run", raw: needVal("--hook-run", ++i) });
+			sawConfigFlag = true;
+			break;
+		case "--hook-use":
+			opts.hookSpecs.push({ kind: "use", raw: needVal("--hook-use", ++i) });
+			sawConfigFlag = true;
+			break;
+		case "--with-models":
+			opts.withModels = true;
+			break;
+		case "--force":
+			opts.force = true;
+			break;
+		case "--yes":
+			opts.yes = true;
+			break;
+		case "--config":
+			opts.config = needVal("--config", ++i);
+			break;
+		case "--repo-root":
+			opts.repoRoot = needVal("--repo-root", ++i);
+			break;
+		case "--help":
+		case "-h":
 			console.log("usage: setup-sdlc.sh [--prefix V] [--label-prefix V] [--announce V] [--tracker-repo o/n --tracker-board-number N --tracker-board-url U] [--hook-run S] [--hook-use S] [--with-models] [--force] [--yes] [--config DIR|--repo-root DIR]");
 			process.exit(0);
-		default: fail(`setup-sdlc: unexpected argument: ${a}`);
+			break;
+		default:
+			fail(`setup-sdlc: unexpected argument: ${a}`);
 	}
 }
 
@@ -132,9 +166,7 @@ function writeConfig(root, cfg, hasRun) {
 	// cannot leave the repo half-configured (config written, models missing).
 	const modelsTarget = join(sdlcDir, "sdlc.models.json");
 	const wantModels = opts.withModels && !existsSync(modelsTarget);
-	const modelsContent = wantModels
-		? `${readFileSync(join(SCRIPT_DIR, "..", "schema", "sdlc.models.example.json"), "utf8").trimEnd()}\n`
-		: null;
+	const modelsContent = wantModels ? `${readFileSync(join(SCRIPT_DIR, "..", "schema", "sdlc.models.example.json"), "utf8").trimEnd()}\n` : null;
 
 	mkdirSync(sdlcDir, { recursive: true });
 	writeFileSync(target, `${JSON.stringify(cfg, null, 2)}\n`);

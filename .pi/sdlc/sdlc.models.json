@@ -7,38 +7,19 @@
   "phases": {
     "plan_review": {
       "min_panel": 2,
-      "prefer": [
-        "openai-codex/gpt-5.6-sol",
-        "zai/glm-5.2",
-        "anthropic/claude-opus-4-8",
-        "moonshotai/kimi-k2.6"
-      ]
+      "prefer": ["openai-codex/gpt-5.6-sol", "zai/glm-5.2", "anthropic/claude-opus-4-8", "moonshotai/kimi-k2.6"]
     },
     "spec_review": {
       "min_panel": 2,
-      "prefer": [
-        "anthropic/claude-opus-4-8",
-        "openai-codex/gpt-5.6-terra",
-        "zai/glm-5.2",
-        "moonshotai/kimi-k2.6"
-      ]
+      "prefer": ["anthropic/claude-opus-4-8", "openai-codex/gpt-5.6-terra", "zai/glm-5.2", "moonshotai/kimi-k2.6"]
     },
     "pr_review": {
       "min_panel": 3,
-      "prefer": [
-        "anthropic/claude-opus-4-8",
-        "openai-codex/gpt-5.6-sol",
-        "zai/glm-5.2",
-        "moonshotai/kimi-k2.6"
-      ]
+      "prefer": ["anthropic/claude-opus-4-8", "openai-codex/gpt-5.6-sol", "zai/glm-5.2", "moonshotai/kimi-k2.6"]
     },
     "task_validate": {
       "min_panel": 1,
-      "prefer": [
-        "openai-codex/gpt-5.6-luna",
-        "zai/glm-5.2",
-        "anthropic/claude-haiku-4-5"
-      ]
+      "prefer": ["openai-codex/gpt-5.6-luna", "zai/glm-5.2", "anthropic/claude-haiku-4-5"]
     }
   }
 }

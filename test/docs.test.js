@@ -51,6 +51,5 @@ test("OH9: exactly two new ADRs (opt-in, hooks) with context/decision/consequenc
 test("OH12: README has the opt-in story and drops the old no-manifest-defaults claim", () => {
 	assert.match(readme, /\/setup-sdlc/);
 	assert.match(readme, /has not committed .*sdlc\.config\.json|has not adopted|opt/i);
-	assert.ok(!readme.includes("the skill still runs phases + panels using built-in defaults"),
-		"README must not keep the old 'runs with defaults' claim");
+	assert.ok(!readme.includes("the skill still runs phases + panels using built-in defaults"), "README must not keep the old 'runs with defaults' claim");
 });
