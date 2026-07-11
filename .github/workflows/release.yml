@@ -1,0 +1,31 @@
+name: release
+
+on:
+  push:
+    branches: [main]
+
+# Job-level permissions are deliberately minimal: the actual write authority
+# (push + Release creation) comes from RELEASE_PAT (spec §2.3), passed
+# explicitly to checkout and to semantic-release — not from the ambient
+# GITHUB_TOKEN.
+permissions:
+  contents: read
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.RELEASE_PAT }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+      - run: npm ci
+      - run: npm test
+      # Biome safety re-check — reuses the sibling biome-ci plan's config.
+      - run: npx --no-install biome ci .
+      - run: npx --no-install semantic-release
+        env:
+          GITHUB_TOKEN: ${{ secrets.RELEASE_PAT }}

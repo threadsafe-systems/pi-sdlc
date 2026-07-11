@@ -1,0 +1,26 @@
+name: commit-lint
+
+on:
+  pull_request:
+    types: [opened, edited, synchronize, reopened]
+
+permissions:
+  contents: read
+
+jobs:
+  commit-lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+      # No `npm ci` here (deliberately, unlike release.yml): the script uses
+      # only node:child_process (zero deps) — verified in spec §3.3. If it
+      # ever gains a dependency, add `npm ci` before this step then.
+      - run: node scripts/check-commit-messages.mjs
+        env:
+          PR_TITLE: ${{ github.event.pull_request.title }}
+          COMMIT_RANGE: origin/${{ github.event.pull_request.base.ref }}..HEAD

@@ -62,6 +62,19 @@ credentials and prints a ready-to-paste `subagent` `tasks: [...]` array (one tas
 per resolved model, per-task `model` override). The full process law is in
 `skills/sdlc/SKILL.md`.
 
+## Releases & versioning
+
+Releases are automated with
+[semantic-release](https://semantic-release.gitbook.io/). Merging to `main`
+computes the next [semantic version](https://semver.org/) from the
+[Conventional Commits](https://www.conventionalcommits.org/) since the last
+tag, updates `CHANGELOG.md`, tags `v<version>`, and publishes a **GitHub
+Release**. There is **no npm publish** — pi-sdlc is installed as a git package
+(see `## Install`). Git tags are the version source of truth; `package.json`'s
+`version` field is not automatically bumped and is not authoritative. Commit
+messages must follow Conventional Commits and are checked in CI — see
+`CONTRIBUTING.md`.
+
 ## Licence
 
 MIT. See `LICENSE`.
