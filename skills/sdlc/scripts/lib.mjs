@@ -14,10 +14,7 @@ export const PHASE_TEMPLATE = {
 	task_validate: "validator-task",
 };
 // FS4 label vocabulary (documentation of the derivation; consumed by the SKILL).
-export const LABELS = [
-	"map", "ticket-research", "ticket-prototype", "ticket-grilling",
-	"ticket-task", "epic", "build-task", "hitl", "afk",
-];
+export const LABELS = ["map", "ticket-research", "ticket-prototype", "ticket-grilling", "ticket-task", "epic", "build-task", "hitl", "afk"];
 
 const PREFIX_RE = /^[a-z][a-z0-9-]*$/;
 const PM_RE = /^[^/]+\/.+$/; // provider/model
@@ -97,7 +94,7 @@ export function readConfig(root, { requireManifest = false } = {}) {
 	try {
 		raw = JSON.parse(readFileSync(p, "utf8"));
 	} catch (e) {
-		fail(`sdlc: cannot parse ${p}: ${(e && e.message) || e}`);
+		fail(`sdlc: cannot parse ${p}: ${e?.message || e}`);
 	}
 	validateConfig(raw, p);
 	return {
@@ -164,7 +161,9 @@ export function validateHooks(hooks, where) {
 			if (timing !== "before" && timing !== "after") fail(`${where}: unknown key hooks.${phase}.${timing} (allowed: before, after)`);
 			const list = ph[timing];
 			if (!Array.isArray(list) || list.length === 0) fail(`${where}: hooks.${phase}.${timing} must be a non-empty array`);
-			list.forEach((item, i) => validateHookItem(item, `${where}: hooks.${phase}.${timing}[${i}]`));
+			list.forEach((item, i) => {
+				validateHookItem(item, `${where}: hooks.${phase}.${timing}[${i}]`);
+			});
 		}
 	}
 }
@@ -195,7 +194,7 @@ export function readModels(root, explicitPath) {
 	try {
 		raw = JSON.parse(readFileSync(p, "utf8"));
 	} catch (e) {
-		fail(`sdlc: cannot parse ${p}: ${(e && e.message) || e}`);
+		fail(`sdlc: cannot parse ${p}: ${e?.message || e}`);
 	}
 	validateModels(raw, p);
 	return raw;

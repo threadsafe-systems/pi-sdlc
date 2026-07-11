@@ -1,1 +1,8 @@
-{"schemaVersion":1,"prefix":"loom","labelPrefix":"loom-sdlc","announce":"Using loom-sdlc to drive this change through its lifecycle.","paths":{"plans":"docs/plans","specs":"docs/specs","reviews":"docs/reviews","agents":".pi/agents"},"tracker":{"repo":"threadsafe-systems/loom","board":{"number":4,"url":"https://github.com/orgs/threadsafe-systems/projects/4"}}}
+{
+  "schemaVersion": 1,
+  "prefix": "loom",
+  "labelPrefix": "loom-sdlc",
+  "announce": "Using loom-sdlc to drive this change through its lifecycle.",
+  "paths": { "plans": "docs/plans", "specs": "docs/specs", "reviews": "docs/reviews", "agents": ".pi/agents" },
+  "tracker": { "repo": "threadsafe-systems/loom", "board": { "number": 4, "url": "https://github.com/orgs/threadsafe-systems/projects/4" } }
+}

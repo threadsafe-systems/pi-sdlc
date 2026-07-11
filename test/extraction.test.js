@@ -57,13 +57,16 @@ function mkConsumer() {
 
 test("S2: no loom-domain content in the generic surface", () => {
 	const alt = /loom|rundriver|northstar|handover|conveyanc|clc|build board|threadsafe-systems|adapter boundary|sdlc-artifacts/i;
-	const walk = (d) => readdirSync(d, { withFileTypes: true }).flatMap((e) => {
-		const p = join(d, e.name);
-		if (e.isDirectory()) return e.name === "schema" ? [] : walk(p);
-		return /\.(md|mjs|sh)$/.test(e.name) ? [p] : [];
-	});
+	const walk = (d) =>
+		readdirSync(d, { withFileTypes: true }).flatMap((e) => {
+			const p = join(d, e.name);
+			if (e.isDirectory()) return e.name === "schema" ? [] : walk(p);
+			return /\.(md|mjs|sh)$/.test(e.name) ? [p] : [];
+		});
 	for (const f of walk(skill)) {
-		const hit = readFileSync(f, "utf8").split("\n").findIndex((l) => alt.test(l));
+		const hit = readFileSync(f, "utf8")
+			.split("\n")
+			.findIndex((l) => alt.test(l));
 		assert.equal(hit, -1, `${f}:${hit + 1} leaks a loom-domain literal`);
 	}
 });
@@ -159,12 +162,14 @@ test("S6: resolve-panel --emit-tasks deep-equals golden under isolated env", () 
 test("S7: resolution terminal cases", () => {
 	// outside any repo, no flag/env -> exit 2 with diagnostic
 	const empty = mkdtempSync(join(tmpdir(), "sdlc-noroot-"));
-	const r = run("ensure-panel-agent.mjs", ["pr_review"], { env: { PATH: process.env.PATH, HOME: empty, GIT_CEILING_DIRECTORIES: dirname(empty) } });
+	run("ensure-panel-agent.mjs", ["pr_review"], { env: { PATH: process.env.PATH, HOME: empty, GIT_CEILING_DIRECTORIES: dirname(empty) } });
 	// spawn with cwd outside a git repo
 	let outside;
 	try {
 		outside = execFileSync("node", [join(scripts, "ensure-panel-agent.mjs"), "pr_review"], {
-			cwd: empty, encoding: "utf8", stdio: ["ignore", "pipe", "pipe"],
+			cwd: empty,
+			encoding: "utf8",
+			stdio: ["ignore", "pipe", "pipe"],
 			env: { PATH: process.env.PATH, HOME: empty, GIT_CEILING_DIRECTORIES: empty },
 		});
 		outside = { code: 0 };
