@@ -157,8 +157,11 @@ on:
   push:
     branches: [main]
 
+# Job-level permissions are deliberately minimal: the actual write authority
+# (push + Release creation) comes from RELEASE_PAT (§2.3), passed explicitly
+# to checkout and to semantic-release — not from the ambient GITHUB_TOKEN.
 permissions:
-  contents: write
+  contents: read
 
 jobs:
   release:
@@ -167,6 +170,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          token: ${{ secrets.RELEASE_PAT }}
       - uses: actions/setup-node@v4
         with:
           node-version: "24"
@@ -177,58 +181,63 @@ jobs:
       - run: npx --no-install biome ci .
       - run: npx --no-install semantic-release
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.RELEASE_PAT }}
 ```
 
-### 2.2 Permissions — verified precisely (answers plan item 2)
+### 2.2 Permissions — revised for the PAT (§2.3), answers plan item 2
 
 `@semantic-release/github`'s published README (verified live 2026-07-11)
-states the **minimum required permissions** for the default `GITHUB_TOKEN`:
+states the **minimum required permissions** for the token actually used:
+`contents: write` (publish the Release, push the tag and the changelog
+commit); `issues`/`pull-requests: write` only to comment on released
+issues/PRs — not exercised, since §1.1 disables all issue/PR commenting and
+labelling.
 
-- `contents: write` — to publish a GitHub Release (and, for us, to push the
-  tag and the `@semantic-release/git` changelog commit).
-- `issues: write` — **only** to comment on released issues.
-- `pull-requests: write` — **only** to comment on released pull requests.
+With `RELEASE_PAT` (§2.3) doing the actual write via an explicit
+`token:`/`GITHUB_TOKEN` override on the two steps that need it, the **job-level
+`permissions:` block governs only the ambient `GITHUB_TOKEN`** used implicitly
+by the other steps (`setup-node`, `npm ci`, `npm test`, `biome`) — none of
+which need write access. Pinned to `contents: read`, tighter than the
+previous `contents: write` draft (which existed only to cover the direct
+push that's now handled by the PAT instead).
 
-Because §1.1 **disables** all issue/PR commenting and labelling
-(`successComment/failComment/failTitle/releasedLabels: false`), the
-issues/pull-requests scopes are not exercised, so the pinned workflow grants
-**`contents: write` only** — the true minimum for this plugin set. The
-top-level `permissions:` block is set explicitly (default-deny for every
-other scope).
+### 2.3 `RELEASE_PAT`, not the default `GITHUB_TOKEN` — resolved (was §10 item 1)
 
-### 2.3 Default `GITHUB_TOKEN` vs. PAT — verified precisely (answers plan item 2)
+**A PAT is required and now adopted — verified precisely, not assumed.**
+`main`'s branch protection is a GitHub **ruleset** ("no main", not classic
+branch protection — verified via `gh api repos/.../rulesets`), requiring one
+approving PR review, with `bypass_actors: [{actor_type: "OrganizationAdmin",
+bypass_mode: "always"}]`. The default `GITHUB_TOKEN` authenticates as the
+`github-actions[bot]` **Integration**, not an `OrganizationAdmin` — confirmed
+by inspecting the ruleset directly, not inferred. A direct push authenticated
+as `GITHUB_TOKEN` would therefore be **rejected** by the required-review
+rule; `@semantic-release/git` does no PR, no review, so it cannot satisfy
+that rule any other way.
 
-The default `GITHUB_TOKEN` **suffices**; no PAT is needed for this plugin set.
-Verified against the github plugin README's GitHub Actions note: the default
-token can publish releases. Its documented limitation — releases made with
-`GITHUB_TOKEN` do **not** trigger further workflow `release` events — is
-irrelevant here (no downstream release-triggered workflow exists) and is in
-fact desirable, and it compounds with `[skip ci]` to guarantee the changelog
-commit cannot loop the pipeline. A PAT would only become necessary if a
-future workflow needed to fire on the created release, or if main-branch
-protection forbids the changelog push without a bypass actor (§10) — neither
-is adopted here.
+**Resolution:** a fine-grained PAT, scoped to `threadsafe-systems/pi-sdlc`
+only with `Contents: Read and write` permission (nothing broader), owned by
+the project owner's own account — the identity the ruleset's
+`OrganizationAdmin` bypass actually covers. Stored as the repo secret
+`RELEASE_PAT` (verified present via `gh secret list`; value never inspected).
+Passed explicitly to `actions/checkout@v4`'s `token:` input (so the git
+credential left in the checkout is the PAT's, not the ambient
+`GITHUB_TOKEN`'s) and to the `semantic-release` step's `GITHUB_TOKEN` env var
+(the variable name semantic-release itself reads is unchanged — only the
+value populating it changes). `@semantic-release/github`'s API calls and
+`@semantic-release/git`'s literal `git push` therefore both authenticate as
+the bypassed identity.
 
-**Correction (spec-panel finding, deepseek-v4-pro, high severity — a real bug
-in an earlier draft of this spec, not just a risk):** the two bundled plugins
-authenticate through **different channels**, and an earlier draft conflated
-them. `@semantic-release/github` makes GitHub REST API calls and reads
-`GITHUB_TOKEN` directly from the environment (as documented). `@semantic-
-release/git` does a literal `git push` — it has **no `GITHUB_TOKEN`-reading
-auth path at all** (verified: the plugin's README documents only
-`GIT_AUTHOR_NAME`/`GIT_AUTHOR_EMAIL`/`GIT_COMMITTER_NAME`/
-`GIT_COMMITTER_EMAIL` for commit identity, zero mentions of `GITHUB_TOKEN`).
-It pushes using whatever git credential is already configured in the
-checkout. `actions/checkout@v4`'s **default** (`persist-credentials: true`,
-now the pinned behaviour — the earlier draft incorrectly set this to
-`false`, which would have stripped that credential and made the release
-workflow fail on its very first real run, at the exact deliverable the
-irreversible track exists to scrutinise) leaves an `http.extraheader`
-credential in the git config, scoped by the job's `permissions:
-contents: write`, which is exactly what `@semantic-release/git`'s push
-needs. No PAT, no extra remote-URL step — the default checkout behaviour is
-sufficient once the override is removed.
+`[skip ci]` (§1.2) still guarantees the changelog commit cannot loop the
+`release` workflow, independent of which token pushed it.
+
+**Correction retained from spec-panel review (deepseek-v4-pro, high
+severity):** the two bundled plugins authenticate through different
+channels — `@semantic-release/github` reads `GITHUB_TOKEN` from the
+environment for its API calls; `@semantic-release/git` has no
+`GITHUB_TOKEN`-reading path at all and pushes using whatever git credential
+the checkout step left configured. Both now resolve to `RELEASE_PAT`, by
+design, for the reason above — not by the earlier draft's incorrect
+assumption that the default token's ambient credential would suffice.
 
 ## 3. Contract: commit-message CI check (pinned, normative)
 
@@ -575,11 +584,15 @@ reworded below to claim only what this evidence supports.
   `PR_TITLE="Big update"` (non-conventional) the check exits non-zero even
   when every commit in the range is conventional; with a conventional
   `PR_TITLE` it exits 0. Falsify: a non-conventional title accepted.
-- **SR6 (workflow trigger + least permission):** `release.yml` triggers only
-  on `push` to `main`, declares top-level `permissions: contents: write` (and
-  no broader scope), and references no PAT secret (only `secrets.GITHUB_TOKEN`).
-  Falsify: any other trigger ref, missing/looser `contents` scope, a PAT
-  secret referenced, or a missing `permissions` block.
+- **SR6 (workflow trigger + least permission — revised for the PAT):**
+  `release.yml` triggers only on `push` to `main`; declares top-level
+  `permissions: contents: read` (governing only the ambient `GITHUB_TOKEN`
+  used by the non-writing steps); the two steps that write
+  (`actions/checkout`'s `token:`, and `semantic-release`'s `GITHUB_TOKEN` env)
+  reference exactly `secrets.RELEASE_PAT`, no other secret. Falsify: any
+  other trigger ref, a job-level `contents` scope broader than `read`, either
+  writing step missing the `RELEASE_PAT` reference, or any reference to a
+  secret other than `RELEASE_PAT` for those two steps.
 - **SR7 (no registry publish path):** grep across `.releaserc.json` and both
   workflows finds no `@semantic-release/npm`, no `npm publish`, and no
   `NPM_TOKEN`/`NODE_AUTH_TOKEN`; `package.json` gains no `publishConfig` and
@@ -602,20 +615,15 @@ reworded below to claim only what this evidence supports.
 ## 10. Open questions / judgement calls for the spec panel
 
 1. **Branch protection × `@semantic-release/git` push (cross-plan) —
-   narrowed after spec-panel review.** The primary defect —
-   `persist-credentials: false` stripping the git push credential entirely,
-   which would have failed on *any* branch, protected or not — is fixed
-   (§2.3). The residual, narrower question: does the currently-live branch
-   protection (`required_status_checks: strict` on `test + biome`,
-   `enforce_admins: false`, `allow_force_pushes: false`, and — unverified as
-   of this spec — whatever `restrictions`/required-PR-review setting the
-   sibling biome-ci plan did or didn't configure) block a **direct push**
-   (not a PR merge) from an Actions-authenticated `GITHUB_TOKEN`? GitHub's
-   own model gates PR merges via required status checks; whether a direct
-   push to a protected branch is independently blocked depends on push
-   restrictions specifically, which this spec has not empirically confirmed
-   either way. Folded into SR3 as a required empirical check at
-   implementation time, not assumed in either direction.
+   RESOLVED.** Confirmed precisely (not assumed): `main` is protected by a
+   GitHub ruleset requiring one approving PR review, bypassable only by
+   `OrganizationAdmin`. The default `GITHUB_TOKEN` authenticates as the
+   `github-actions[bot]` Integration — not covered by that bypass — so a
+   direct push authenticated as `GITHUB_TOKEN` would have been rejected.
+   Resolved with a fine-grained PAT (`RELEASE_PAT`, `Contents: Read and
+   write` on this repo only, owned by the bypassed account) passed
+   explicitly to both the checkout and the `semantic-release` step — see
+   §2.3 for the full mechanism. SR3 and SR6 updated to match.
 2. **Commit-lint required-check gap — resolved as a concrete implementation
    step, not left as a recommendation.** Both spec-panel reviewers
    independently found the same gap: `commit-lint.yml` reports a check, but
