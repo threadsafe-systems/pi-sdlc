@@ -54,21 +54,27 @@ export function boundStream(text) {
 	const hadTrailingNL = text.endsWith("\n");
 	let lines = text.split("\n");
 	if (hadTrailingNL) lines.pop();
-	let truncated = false;
-	if (lines.length > STREAM_MAX_LINES) {
-		truncated = true;
-		lines = lines.slice(lines.length - (STREAM_MAX_LINES - 1));
-	}
+	const joinedFull = lines.join("\n") + (hadTrailingNL ? "\n" : "");
+	const truncated = lines.length > STREAM_MAX_LINES || Buffer.byteLength(joinedFull, "utf8") > STREAM_MAX_BYTES;
+	if (!truncated) return joinedFull;
+	// Reserve one line for the marker, keep the tail, then trim to the byte budget
+	// in a single reverse pass (no O(n^2) shift loop).
+	if (lines.length > STREAM_MAX_LINES - 1) lines = lines.slice(lines.length - (STREAM_MAX_LINES - 1));
 	let joined = lines.join("\n") + (hadTrailingNL ? "\n" : "");
-	const rendered = () => (truncated ? TRUNCATION_MARK : "") + joined;
-	while (Buffer.byteLength(rendered(), "utf8") > STREAM_MAX_BYTES) {
-		truncated = true;
+	const budget = STREAM_MAX_BYTES - Buffer.byteLength(TRUNCATION_MARK, "utf8");
+	if (Buffer.byteLength(joined, "utf8") > budget) {
 		const chars = Array.from(joined);
-		if (chars.length === 0) break;
-		chars.shift();
-		joined = chars.join("");
+		let bytes = 0;
+		let start = chars.length;
+		for (let i = chars.length - 1; i >= 0; i--) {
+			const b = Buffer.byteLength(chars[i], "utf8");
+			if (bytes + b > budget) break;
+			bytes += b;
+			start = i;
+		}
+		joined = chars.slice(start).join("");
 	}
-	return rendered();
+	return TRUNCATION_MARK + joined;
 }
 
 function prepareStream(buf, values) {
@@ -408,13 +414,17 @@ function atomicWriteReport(target, json, canonicalRoot) {
 
 // ---- CLI ------------------------------------------------------------------
 
-export function parseArgs(argv) {
-	// full pre-scan: JSON mode is recognised anywhere in argv
-	let jsonMode = false;
+// JSON mode is recognised if a well-formed `--format json` pair appears anywhere
+// in argv, independent of position or a later parse error.
+export function detectJsonMode(argv) {
 	for (let i = 0; i < argv.length; i++) {
-		if (argv[i] === "--format" && argv[i + 1] === "json") jsonMode = true;
+		if (argv[i] === "--format" && argv[i + 1] === "json") return true;
 	}
-	const opts = { format: "text", jsonMode };
+	return false;
+}
+
+export function parseArgs(argv) {
+	const opts = { format: "text", jsonMode: detectJsonMode(argv) };
 	for (let i = 0; i < argv.length; i++) {
 		const a = argv[i];
 		const val = () => {
@@ -441,7 +451,7 @@ function main() {
 	try {
 		opts = parseArgs(argv);
 	} catch (e) {
-		return emitError(String(e.message || e), argvHasJson(argv));
+		return emitError(String(e.message || e), detectJsonMode(argv));
 	}
 	if (opts.help) {
 		console.log("usage: validate-task.sh --manifest PATH [--repo-root DIR] [--format text|json] [--report PATH]");
@@ -472,11 +482,6 @@ function main() {
 
 	process.stdout.write(opts.format === "json" ? json : renderText(report));
 	process.exit(report.exitCode);
-}
-
-function argvHasJson(argv) {
-	for (let i = 0; i < argv.length; i++) if (argv[i] === "--format" && argv[i + 1] === "json") return true;
-	return false;
 }
 
 function emitError(message, jsonMode) {

@@ -385,6 +385,13 @@ test("PV8 unit: boundStream and redaction name-matching are precise", () => {
 	assert.ok(bounded.startsWith("[...truncated; showing bounded tail...]\n"));
 	assert.ok(bounded.split("\n").filter(Boolean).length <= 100);
 	assert.equal(boundStream(""), "");
+	// a single very large line must bound in one pass (no O(n^2) hang) and fit the byte cap
+	const hugeLine = "a".repeat(20 * 1024 * 1024);
+	const t0 = Date.now();
+	const boundedHuge = boundStream(hugeLine);
+	assert.ok(Date.now() - t0 < 2000, "boundStream must not be quadratic on a huge single line");
+	assert.ok(boundedHuge.startsWith("[...truncated; showing bounded tail...]\n"));
+	assert.ok(Buffer.byteLength(boundedHuge, "utf8") <= 10240, "single-line tail within byte cap");
 	// name matching: credential tokens delimited, benign names ignored
 	const values = buildRedactionValues({ OPENAI_API_KEY: "abcd1234", MONKEY: "banana99", AUTHOR: "neil-writes", OAUTH_TOKEN: "tok-000111" });
 	assert.ok(values.includes("abcd1234"));
@@ -481,7 +488,7 @@ test("PV11: receipt hash verification detects mutation of any stored file", () =
 	const dir = mkdtempSync(join(tmpdir(), "pv-receipt-"));
 	try {
 		writeFileSync(join(dir, "manifest.json"), '{"taskId":"pv-x"}\n');
-		writeFileSync(join(dir, "runner-report.json"), '{"verdict":"PASS"}\n');
+		writeFileSync(join(dir, "runner-report.json"), '{"taskId":"pv-x","verdict":"PASS","exitCode":0}\n');
 		writeFileSync(join(dir, "generated-agent.md"), "agent body\n");
 		const hash = (f) =>
 			createHash("sha256")
@@ -505,6 +512,39 @@ test("PV11: receipt hash verification detects mutation of any stored file", () =
 
 		writeFileSync(join(dir, "generated-agent.md"), "tampered\n");
 		assert.ok(verifyReceipt(dir).some((f) => f.includes("generated-agent.md hash mismatch")));
+	} finally {
+		rmSync(dir, { recursive: true, force: true });
+	}
+});
+
+test("PV11: a FAIL runner-report cannot ride under runnerVerdict PASS", () => {
+	const dir = mkdtempSync(join(tmpdir(), "pv-receipt2-"));
+	try {
+		writeFileSync(join(dir, "manifest.json"), '{"taskId":"pv-x"}\n');
+		writeFileSync(join(dir, "runner-report.json"), '{"taskId":"pv-x","verdict":"FAIL","exitCode":1}\n');
+		writeFileSync(join(dir, "generated-agent.md"), "agent body\n");
+		const hash = (f) =>
+			createHash("sha256")
+				.update(readFileSync(join(dir, f)))
+				.digest("hex");
+		const receipt = {
+			schemaVersion: 1,
+			taskId: "pv-x",
+			manifestPath: "docs/validation/x/pv-x.json",
+			manifestSha256: hash("manifest.json"),
+			runnerReportSha256: hash("runner-report.json"),
+			generatedAgentSha256: hash("generated-agent.md"),
+			model: "provider/model:low",
+			runnerVerdict: "PASS",
+			validatorVerdict: "PASS",
+			createdAt: new Date().toISOString(),
+		};
+		writeFileSync(join(dir, "receipt.json"), JSON.stringify(receipt, null, 2));
+		const failures = verifyReceipt(dir);
+		assert.ok(
+			failures.some((f) => f.includes("runner-report verdict/exit")),
+			"a FAIL report must break verification even with matching hashes",
+		);
 	} finally {
 		rmSync(dir, { recursive: true, force: true });
 	}

@@ -45,6 +45,23 @@ export function verifyReceipt(dir) {
 	}
 	if (receipt.runnerVerdict !== "PASS") failures.push(`runnerVerdict is ${receipt.runnerVerdict}, expected PASS`);
 	if (receipt.validatorVerdict !== "PASS") failures.push(`validatorVerdict is ${receipt.validatorVerdict}, expected PASS`);
+
+	// The stored runner report must itself corroborate the recorded verdict, not
+	// just hash-match: a genuine FAIL report cannot ride under runnerVerdict:PASS.
+	const reportPath = join(dir, "runner-report.json");
+	if (existsSync(reportPath)) {
+		let report;
+		try {
+			report = JSON.parse(readFileSync(reportPath, "utf8"));
+		} catch (e) {
+			failures.push(`cannot parse runner-report.json: ${e?.message || e}`);
+			report = null;
+		}
+		if (report) {
+			if (report.verdict !== "PASS" || report.exitCode !== 0) failures.push(`runner-report verdict/exit is ${report.verdict}/${report.exitCode}, expected PASS/0`);
+			if (typeof receipt.taskId === "string" && report.taskId !== receipt.taskId) failures.push(`runner-report taskId '${report.taskId}' does not match receipt taskId '${receipt.taskId}'`);
+		}
+	}
 	return failures.sort();
 }
 
