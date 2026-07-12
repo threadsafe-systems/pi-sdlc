@@ -1,0 +1,226 @@
+{
+  "schemaVersion": 1,
+  "taskId": "pv-t1",
+  "manifest": "/home/neil/code/threadsafe/pi-sdlc.worktrees/feat-portable-validator/docs/validation/portable-validator/pv-t1.json",
+  "repoRoot": "/home/neil/code/threadsafe/pi-sdlc.worktrees/feat-portable-validator",
+  "verdict": "PASS",
+  "exitCode": 0,
+  "errors": [],
+  "manifestErrors": [],
+  "commands": [
+    {
+      "id": "tests.contract",
+      "argv": [
+        "node",
+        "--test",
+        "test/validator-contract.test.js",
+        "test/extraction.test.js",
+        "test/docs.test.js"
+      ],
+      "evidence": [
+        "PV1-PV11 portable-validator contract",
+        "PV13 compatibility"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 2351,
+      "stdoutTail": "✔ OH7: SKILL.md carries the opt-in, advisory, hooks headings + red flags (0.661889ms)\n✔ OH7: the Implement table row no longer prescribes 'in a worktree' (3.484522ms)\n✔ OH8: SKILL.md contains the announce-on-fire block and the workflow.md rule (0.109261ms)\n✔ OH9: exactly two new ADRs (opt-in, hooks) with context/decision/consequences (0.27185ms)\n✔ OH12: README has the opt-in story and drops the old no-manifest-defaults claim (0.113473ms)\nunknown format \"uri\" ignored in schema at path \"#/properties/tracker/properties/board/properties/url\"\nunknown format \"uri\" ignored in schema at path \"#/properties/tracker/properties/board/properties/url\"\n✔ S2: no loom-domain content in the generic surface (1.573779ms)\n✔ S3: JSON schemas validate their examples (25.633829ms)\n✔ S3b: ensure-panel-agent rejects malformed config (exit 2) (225.878548ms)\n✔ S3c: resolve-panel rejects malformed models (exit 2) (116.668753ms)\n✔ S4: stamped name+tools+body byte-identical to golden; description == FS4 (128.822579ms)\n✔ S5: agent lands in the CONSUMER's .pi/agents (not the skill dir) (32.929505ms)\n✔ S6: resolve-panel --emit-tasks deep-equals golden under isolated env (121.471258ms)\n✔ S7: resolution terminal cases (74.902704ms)\n✔ PV1: a valid JavaScript manifest runs only declared checks and passes (82.46053ms)\n✔ PV2: only declared argv run; an undeclared tool command never executes (131.360013ms)\n✔ PV3: schema and inspectManifest reject the mutation matrix before any command runs (45.375521ms)\n✔ PV4: command outcomes are complete and deterministic; runner continues after failures (37.445205ms)\n✔ PV4: a timeout is reported as FAIL with timedOut (1047.458701ms)\n✔ PV5: category applicability is exact; injected n/a shapes are rejected (73.057302ms)\n✔ PV6: scenario mapping gates the verdict (53.373397ms)\n✔ PV7: standards and banned patterns are commands, not judgement (83.550502ms)\n✔ PV8: evidence is bounded and secrets are redacted (65.253239ms)\n✔ PV8 unit: boundStream and redaction name-matching are precise (0.32375ms)\n✔ PV9: JSON/text/exit agree and JSON mode is order-independent (423.555697ms)\n✔ PV9: --report writes the exact JSON bytes atomically (104.121109ms)\n✔ PV10: generic validator law and generated agent are portable (0.616849ms)\n✔ PV11: receipt hash verification detects mutation of any stored file (1.819171ms)\n✔ parseArgs: recognises JSON anywhere and rejects bad flags (0.449661ms)\n✔ PV13: renderText is a faithful projection of the report (78.682711ms)\nℹ tests 29\nℹ suites 0\nℹ pass 29\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 2323.342813\n",
+      "stderrTail": ""
+    },
+    {
+      "id": "static.runner",
+      "argv": [
+        "node",
+        "--check",
+        "skills/sdlc/scripts/validate-task.mjs"
+      ],
+      "evidence": [
+        "PV2 runner syntax"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 26,
+      "stdoutTail": "",
+      "stderrTail": ""
+    },
+    {
+      "id": "static.receipt",
+      "argv": [
+        "node",
+        "--check",
+        "skills/sdlc/scripts/verify-task-receipt.mjs"
+      ],
+      "evidence": [
+        "PV11 receipt verifier syntax"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 30,
+      "stdoutTail": "",
+      "stderrTail": ""
+    },
+    {
+      "id": "static.lint",
+      "argv": [
+        "npm",
+        "run",
+        "lint"
+      ],
+      "evidence": [
+        "Repository lint and formatting rules"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 132,
+      "stdoutTail": "\n> pi-sdlc@0.1.1 lint\n> biome check .\n\nChecked 34 files in 33ms. No fixes applied.\nFound 6 infos.\n",
+      "stderrTail": "[...truncated; showing bounded tail...]\n    387 │ \t}\n    388 │ \tfor (const s of report.scenarios) lines.push(`scenario: ${s.scenarioId} ${s.status} checks=${s.checkIds.join(\",\")}`);\n  > 389 │ \treturn lines.join(\"\\n\") + \"\\n\";\n        │ \t       ^^^^^^^^^^^^^^^^^^^^^^^\n    390 │ }\n    391 │ \n  \n  i Unsafe fix: Use a template literal.\n  \n    387 387 │     }\n    388 388 │     for (const s of report.scenarios) lines.push(`scenario: ${s.scenarioId} ${s.status} checks=${s.checkIds.join(\",\")}`);\n    389     │ - → return·lines.join(\"\\n\")·+·\"\\n\";\n        389 │ + → return·`${lines.join(\"\\n\")}\\n`;\n    390 390 │   }\n    391 391 │   \n  \n\nskills/sdlc/scripts/validate-task.mjs:461:15 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━\n\n  i Template literals are preferred over string concatenation.\n  \n    460 │ \tconst report = runManifest({ manifestPath: opts.manifest, repoRoot: canonicalRoot });\n  > 461 │ \tconst json = JSON.stringify(report, null, 2) + \"\\n\";\n        │ \t             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n    462 │ \n    463 │ \tif (opts.report) {\n  \n  i Unsafe fix: Use a template literal.\n  \n    459 459 │   \n    460 460 │     const report = runManifest({ manifestPath: opts.manifest, repoRoot: canonicalRoot });\n    461     │ - → const·json·=·JSON.stringify(report,·null,·2)·+·\"\\n\";\n        461 │ + → const·json·=·`${JSON.stringify(report,·null,·2)}\\n`;\n    462 462 │   \n    463 463 │     if (opts.report) {\n  \n\nskills/sdlc/scripts/validate-task.mjs:468:50 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━\n\n  i Template literals are preferred over string concatenation.\n  \n    466 │ \t\t} catch (e) {\n    467 │ \t\t\tconst errReport = { ...report, verdict: \"ERROR\", exitCode: 2, errors: [...report.errors, `report-write error: ${e?.message || e}`], commands: [], categories: [], scenarios: [], manifestErrors: report.manifestErrors };\n  > 468 │ \t\t\tprocess.stdout.write(opts.format === \"json\" ? JSON.stringify(errReport, null, 2) + \"\\n\" : renderText(errReport));\n        │ \t\t\t                                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n    469 │ \t\t\tprocess.exit(2);\n    470 │ \t\t}\n  \n  i Unsafe fix: Use a template literal.\n  \n    466 466 │       } catch (e) {\n    467 467 │         const errReport = { ...report, verdict: \"ERROR\", exitCode: 2, errors: [...report.errors, `report-write error: ${e?.message || e}`], commands: [], categories: [], scenarios: [], manifestErrors: report.manifestErrors };\n    468     │ - → → → process.stdout.write(opts.format·===·\"json\"·?·JSON.stringify(errReport,·null,·2)·+·\"\\n\"·:·renderText(errReport));\n        468 │ + → → → process.stdout.write(opts.format·===·\"json\"·?·`${JSON.stringify(errReport,·null,·2)}\\n`·:·renderText(errReport));\n    469 469 │         process.exit(2);\n    470 470 │       }\n  \n\nskills/sdlc/scripts/validate-task.mjs:496:37 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━\n\n  i Template literals are preferred over string concatenation.\n  \n    494 │ \t\tscenarios: [],\n    495 │ \t};\n  > 496 │ \tif (jsonMode) process.stdout.write(JSON.stringify(report, null, 2) + \"\\n\");\n        │ \t                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n    497 │ \telse process.stderr.write(`validate-task: ${message}\\n`);\n    498 │ \tprocess.exit(2);\n  \n  i Unsafe fix: Use a template literal.\n  \n    494 494 │       scenarios: [],\n    495 495 │     };\n    496     │ - → if·(jsonMode)·process.stdout.write(JSON.stringify(report,·null,·2)·+·\"\\n\");\n        496 │ + → if·(jsonMode)·process.stdout.write(`${JSON.stringify(report,·null,·2)}\\n`);\n    497 497 │     else process.stderr.write(`validate-task: ${message}\\n`);\n    498 498 │     process.exit(2);\n  \n\ntest/validator-contract.test.js:383:14 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n  i Template literals are preferred over string concatenation.\n  \n    382 │ test(\"PV8 unit: boundStream and redaction name-matching are precise\", () => {\n  > 383 │ \tconst big = Array.from({ length: 500 }, (_, i) => `l${i}`).join(\"\\n\") + \"\\n\";\n        │ \t            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n    384 │ \tconst bounded = boundStream(big);\n    385 │ \tassert.ok(bounded.startsWith(\"[...truncated; showing bounded tail...]\\n\"));\n  \n  i Unsafe fix: Use a template literal.\n  \n    381 381 │   \n    382 382 │   test(\"PV8 unit: boundStream and redaction name-matching are precise\", () => {\n    383     │ - → const·big·=·Array.from({·length:·500·},·(_,·i)·=>·`l${i}`).join(\"\\n\")·+·\"\\n\";\n        383 │ + → const·big·=·`${Array.from({·length:·500·},·(_,·i)·=>·`l${i}`).join(\"\\n\")}\\n`;\n    384 384 │     const bounded = boundStream(big);\n    385 385 │     assert.ok(bounded.startsWith(\"[...truncated; showing bounded tail...]\\n\"));\n  \n\n"
+    },
+    {
+      "id": "patterns.diff",
+      "argv": [
+        "git",
+        "diff",
+        "--check",
+        "HEAD"
+      ],
+      "evidence": [
+        "No whitespace-error banned patterns in task diff"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 3,
+      "stdoutTail": "",
+      "stderrTail": ""
+    }
+  ],
+  "categories": [
+    {
+      "category": "tests",
+      "status": "PASS",
+      "checkIds": [
+        "tests.contract"
+      ]
+    },
+    {
+      "category": "static",
+      "status": "PASS",
+      "checkIds": [
+        "static.runner",
+        "static.receipt",
+        "static.lint"
+      ]
+    },
+    {
+      "category": "scenarios",
+      "status": "PASS"
+    },
+    {
+      "category": "standards",
+      "status": "N/A",
+      "reason": "No additional governing standard applies beyond declared lint and contract checks."
+    },
+    {
+      "category": "bannedPatterns",
+      "status": "PASS",
+      "checkIds": [
+        "patterns.diff"
+      ]
+    }
+  ],
+  "scenarios": [
+    {
+      "scenarioId": "PV1",
+      "status": "PASS",
+      "checkIds": [
+        "tests.contract"
+      ]
+    },
+    {
+      "scenarioId": "PV10",
+      "status": "PASS",
+      "checkIds": [
+        "tests.contract"
+      ]
+    },
+    {
+      "scenarioId": "PV11",
+      "status": "PASS",
+      "checkIds": [
+        "tests.contract"
+      ]
+    },
+    {
+      "scenarioId": "PV13",
+      "status": "PASS",
+      "checkIds": [
+        "tests.contract"
+      ]
+    },
+    {
+      "scenarioId": "PV2",
+      "status": "PASS",
+      "checkIds": [
+        "tests.contract"
+      ]
+    },
+    {
+      "scenarioId": "PV3",
+      "status": "PASS",
+      "checkIds": [
+        "tests.contract"
+      ]
+    },
+    {
+      "scenarioId": "PV4",
+      "status": "PASS",
+      "checkIds": [
+        "tests.contract"
+      ]
+    },
+    {
+      "scenarioId": "PV5",
+      "status": "PASS",
+      "checkIds": [
+        "tests.contract"
+      ]
+    },
+    {
+      "scenarioId": "PV6",
+      "status": "PASS",
+      "checkIds": [
+        "tests.contract"
+      ]
+    },
+    {
+      "scenarioId": "PV7",
+      "status": "PASS",
+      "checkIds": [
+        "tests.contract"
+      ]
+    },
+    {
+      "scenarioId": "PV8",
+      "status": "PASS",
+      "checkIds": [
+        "tests.contract"
+      ]
+    },
+    {
+      "scenarioId": "PV9",
+      "status": "PASS",
+      "checkIds": [
+        "tests.contract"
+      ]
+    }
+  ]
+}
