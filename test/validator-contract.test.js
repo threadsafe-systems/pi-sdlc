@@ -380,7 +380,7 @@ test("PV8: evidence is bounded and secrets are redacted", () => {
 });
 
 test("PV8 unit: boundStream and redaction name-matching are precise", () => {
-	const big = Array.from({ length: 500 }, (_, i) => `l${i}`).join("\n") + "\n";
+	const big = `${Array.from({ length: 500 }, (_, i) => `l${i}`).join("\n")}\n`;
 	const bounded = boundStream(big);
 	assert.ok(bounded.startsWith("[...truncated; showing bounded tail...]\n"));
 	assert.ok(bounded.split("\n").filter(Boolean).length <= 100);

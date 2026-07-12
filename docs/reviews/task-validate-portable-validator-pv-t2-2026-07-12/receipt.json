@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "taskId": "pv-t2",
+  "manifestPath": "docs/validation/portable-validator/pv-t2.json",
+  "manifestSha256": "fafbb84bbe7d1220b2ab48b5d1c846db287948c96f47872a4184f1a439f77f46",
+  "runnerReportSha256": "b73e62e4b586f08259566856432b59526590ea900af5126ab5442241801120b4",
+  "generatedAgentSha256": "d1afca203509cba3f2db0469e3de0ebcf3f496755c44799678bb1138805afa1a",
+  "model": "zai/glm-5.2:low",
+  "runnerVerdict": "PASS",
+  "validatorVerdict": "PASS",
+  "createdAt": "2026-07-12T12:05:11Z"
+}

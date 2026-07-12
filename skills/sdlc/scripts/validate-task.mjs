@@ -327,7 +327,7 @@ export function runManifest({ manifestPath, repoRoot, env = process.env }) {
 		return base;
 	}
 	base.manifest = absManifest;
-	if (absManifest !== canonicalRoot && !absManifest.startsWith(canonicalRoot + "/")) {
+	if (absManifest !== canonicalRoot && !absManifest.startsWith(`${canonicalRoot}/`)) {
 		base.errors.push("manifest path escapes the repository root");
 		return base;
 	}
@@ -386,7 +386,7 @@ export function renderText(report) {
 		else lines.push(`category: ${c.category} ${c.status}${c.checkIds ? ` checks=${c.checkIds.join(",")}` : ""}`);
 	}
 	for (const s of report.scenarios) lines.push(`scenario: ${s.scenarioId} ${s.status} checks=${s.checkIds.join(",")}`);
-	return lines.join("\n") + "\n";
+	return `${lines.join("\n")}\n`;
 }
 
 function atomicWriteReport(target, json, canonicalRoot) {
@@ -458,14 +458,14 @@ function main() {
 	}
 
 	const report = runManifest({ manifestPath: opts.manifest, repoRoot: canonicalRoot });
-	const json = JSON.stringify(report, null, 2) + "\n";
+	const json = `${JSON.stringify(report, null, 2)}\n`;
 
 	if (opts.report) {
 		try {
 			atomicWriteReport(opts.report, json, canonicalRoot);
 		} catch (e) {
 			const errReport = { ...report, verdict: "ERROR", exitCode: 2, errors: [...report.errors, `report-write error: ${e?.message || e}`], commands: [], categories: [], scenarios: [], manifestErrors: report.manifestErrors };
-			process.stdout.write(opts.format === "json" ? JSON.stringify(errReport, null, 2) + "\n" : renderText(errReport));
+			process.stdout.write(opts.format === "json" ? `${JSON.stringify(errReport, null, 2)}\n` : renderText(errReport));
 			process.exit(2);
 		}
 	}
@@ -493,7 +493,7 @@ function emitError(message, jsonMode) {
 		categories: [],
 		scenarios: [],
 	};
-	if (jsonMode) process.stdout.write(JSON.stringify(report, null, 2) + "\n");
+	if (jsonMode) process.stdout.write(`${JSON.stringify(report, null, 2)}\n`);
 	else process.stderr.write(`validate-task: ${message}\n`);
 	process.exit(2);
 }
