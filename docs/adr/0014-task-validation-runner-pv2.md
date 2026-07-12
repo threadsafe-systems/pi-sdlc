@@ -25,4 +25,8 @@
   field or exit meaning is a major bump. The runner is POSIX-portable and makes
   no network, model, or credential-file access; Windows manifests must declare
   executable argv (no implicit shell), since `shell:false` does not resolve
-  `.cmd` shims.
+  `.cmd` shims. Both the manifest and the `--report` target are confined to the
+  repo root (a stray report path cannot clobber an arbitrary file). Redaction is
+  scoped to credential-named environment values only (defence in depth); a
+  command that prints a secret from a config file or a non-credential-named
+  variable is the command's responsibility, not the runner's.

@@ -7,7 +7,7 @@
 
 import { spawnSync } from "node:child_process";
 import { closeSync, existsSync, fsyncSync, mkdtempSync, openSync, readFileSync, realpathSync, renameSync, rmSync, statSync, writeSync } from "node:fs";
-import { dirname, isAbsolute, join, resolve } from "node:path";
+import { basename, dirname, isAbsolute, join, resolve } from "node:path";
 
 export const CATEGORY_ORDER = ["tests", "static", "scenarios", "standards", "bannedPatterns"];
 const COMMAND_CATEGORIES = ["tests", "static", "standards", "bannedPatterns"];
@@ -399,7 +399,12 @@ function atomicWriteReport(target, json, canonicalRoot) {
 	const absTarget = isAbsolute(target) ? target : resolve(canonicalRoot, target);
 	const parent = dirname(absTarget);
 	if (!existsSync(parent) || !statSync(parent).isDirectory()) throw new Error(`report parent directory does not exist: ${parent}`);
-	const tmp = mkdtempSync(join(parent, ".validate-task-"));
+	// Confine the report target to the repo root, symmetric with the manifest
+	// containment check, so a stray --report path cannot clobber an arbitrary file.
+	const realParent = realpathSync(parent);
+	if (realParent !== canonicalRoot && !realParent.startsWith(`${canonicalRoot}/`)) throw new Error("report path escapes the repository root");
+	const finalTarget = join(realParent, basename(absTarget));
+	const tmp = mkdtempSync(join(realParent, ".validate-task-"));
 	const tmpFile = join(tmp, "report.json");
 	const fd = openSync(tmpFile, "w");
 	try {
@@ -408,7 +413,7 @@ function atomicWriteReport(target, json, canonicalRoot) {
 	} finally {
 		closeSync(fd);
 	}
-	renameSync(tmpFile, absTarget);
+	renameSync(tmpFile, finalTarget);
 	rmSync(tmp, { recursive: true, force: true });
 }
 

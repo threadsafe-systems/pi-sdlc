@@ -59,7 +59,8 @@ export function verifyReceipt(dir) {
 		}
 		if (report) {
 			if (report.verdict !== "PASS" || report.exitCode !== 0) failures.push(`runner-report verdict/exit is ${report.verdict}/${report.exitCode}, expected PASS/0`);
-			if (typeof receipt.taskId === "string" && report.taskId !== receipt.taskId) failures.push(`runner-report taskId '${report.taskId}' does not match receipt taskId '${receipt.taskId}'`);
+			if (typeof receipt.taskId !== "string") failures.push("receipt taskId is not a string");
+			else if (report.taskId !== receipt.taskId) failures.push(`runner-report taskId '${report.taskId}' does not match receipt taskId '${receipt.taskId}'`);
 		}
 	}
 	return failures.sort();

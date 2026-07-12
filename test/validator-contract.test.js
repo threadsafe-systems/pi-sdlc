@@ -454,6 +454,25 @@ test("PV9: --report writes the exact JSON bytes atomically", () => {
 	}
 });
 
+test("PV9: --report outside the repo root is refused and clobbers nothing", () => {
+	const dir = mkRepo();
+	const outsideDir = mkdtempSync(join(tmpdir(), "pv-outside-"));
+	const victim = join(outsideDir, "victim.json");
+	writeFileSync(victim, '{"important":"data"}\n');
+	try {
+		const p = writeManifest(dir, baseManifest());
+		const r = runCli(dir, ["--manifest", p, "--repo-root", dir, "--format", "json", "--report", victim]);
+		assert.equal(r.code, 2, "escaping report path must be an ERROR");
+		const rep = JSON.parse(r.stdout);
+		assert.equal(rep.verdict, "ERROR");
+		assert.ok(rep.errors.some((e) => e.includes("escapes the repository root")));
+		assert.equal(readFileSync(victim, "utf8"), '{"important":"data"}\n', "victim file must be untouched");
+	} finally {
+		rmSync(dir, { recursive: true, force: true });
+		rmSync(outsideDir, { recursive: true, force: true });
+	}
+});
+
 // ---- PV10 ----------------------------------------------------------------
 
 test("PV10: generic validator law and generated agent are portable", () => {
