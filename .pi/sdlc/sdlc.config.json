@@ -9,6 +9,13 @@
     "reviews": "docs/reviews",
     "agents": ".pi/agents"
   },
+  "tracker": {
+    "repo": "threadsafe-systems/pi-sdlc",
+    "board": {
+      "number": 5,
+      "url": "https://github.com/orgs/threadsafe-systems/projects/5"
+    }
+  },
   "hooks": {
     "implement": {
       "before": [
