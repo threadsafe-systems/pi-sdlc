@@ -1,0 +1,249 @@
+{
+  "schemaVersion": 1,
+  "taskId": "pv-t3",
+  "manifest": "/home/neil/code/threadsafe/pi-sdlc.worktrees/feat-portable-validator/docs/validation/portable-validator/pv-t3.json",
+  "repoRoot": "/home/neil/code/threadsafe/pi-sdlc.worktrees/feat-portable-validator",
+  "verdict": "PASS",
+  "exitCode": 0,
+  "errors": [],
+  "manifestErrors": [],
+  "commands": [
+    {
+      "id": "tests.full",
+      "argv": [
+        "npm",
+        "test"
+      ],
+      "evidence": [
+        "PV1-PV13 integrated scenario suite"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 2524,
+      "stdoutTail": "\n> pi-sdlc@0.1.1 test\n> node --test\n\n✔ OH7: SKILL.md carries the opt-in, advisory, hooks headings + red flags (1.025455ms)\n✔ OH7: the Implement table row no longer prescribes 'in a worktree' (0.345408ms)\n✔ OH8: SKILL.md contains the announce-on-fire block and the workflow.md rule (0.183671ms)\n✔ OH9: exactly two new ADRs (opt-in, hooks) with context/decision/consequences (0.445808ms)\n✔ OH12: README has the opt-in story and drops the old no-manifest-defaults claim (0.204713ms)\nunknown format \"uri\" ignored in schema at path \"#/properties/tracker/properties/board/properties/url\"\nunknown format \"uri\" ignored in schema at path \"#/properties/tracker/properties/board/properties/url\"\n✔ S2: no loom-domain content in the generic surface (3.105925ms)\n✔ S3: JSON schemas validate their examples (32.637567ms)\n✔ S3b: ensure-panel-agent rejects malformed config (exit 2) (244.469892ms)\n✔ S3c: resolve-panel rejects malformed models (exit 2) (133.987172ms)\n✔ S4: stamped name+tools+body byte-identical to golden; description == FS4 (106.475961ms)\n✔ S5: agent lands in the CONSUMER's .pi/agents (not the skill dir) (33.073291ms)\n✔ S6: resolve-panel --emit-tasks deep-equals golden under isolated env (102.100193ms)\n✔ S7: resolution terminal cases (95.344652ms)\nunknown format \"uri\" ignored in schema at path \"#/properties/tracker/properties/board/properties/url\"\nunknown format \"uri\" ignored in schema at path \"#/properties/tracker/properties/board/properties/url\"\n✔ OH1: valid hooks pass both the JSON Schema and validateConfig (34.558324ms)\n✔ OH1: the committed example (with hooks) validates against the schema (0.242812ms)\n✔ OH1: mutations are rejected by BOTH the schema and validateConfig (exit 2) (311.353114ms)\n✔ OH2: readConfig strict mode rejects a missing manifest naming /setup-sdlc (21.94355ms)\n✔ OH2: default readConfig returns defaults for a missing manifest (0.278283ms)\n✔ OH2: strict mode returns the config (incl. hooks) when the manifest is present (1.031003ms)\n✔ OH3: opted-in repo with hooks reports §3 keys in order with counts (24.128523ms)\n✔ OH3: opted-in repo without hooks reports 'hooks: none' (33.704475ms)\n✔ OH3: manifest-less repo exits 1 with opted-in: no (20.802314ms)\n✔ OH3: corrupt config exits 2 (23.490547ms)\n✔ OH10: this repo's committed config is valid and sdlc-status exits 0 (24.325802ms)\n✔ OH4: --yes writes a schema-valid config; re-run without --force exits 2 unchanged; --force overwrites (84.171125ms)\n✔ OH5: --hook-use fields 3-4 = use, do = remainder after 4th colon (colons in do preserved) (36.912716ms)\n✔ OH5: --hook-run command = remainder after 2nd colon (colons preserved); trust warning on stderr (24.458464ms)\n✔ OH5: mixed repeated hook flags preserve argv order in the written list (42.61967ms)\n✔ OH5: malformed hook flags exit 2 (189.67508ms)\n✔ PR-fix: value-taking flags accept values that begin with '-' (e.g. --announce '--foo') (22.185011ms)\n✔ OH5: partial tracker flags exit 2 (all-or-none) (21.312048ms)\n✔ OH5: no config flags and no TTY exits 2 (interview needs a TTY) (20.16733ms)\n✔ OH6: package.json pi.prompts includes ./templates and the template has a description (0.359821ms)\n✔ PV1: a valid JavaScript manifest runs only declared checks and passes (62.071092ms)\n✔ PV2: only declared argv run; an undeclared tool command never executes (150.622774ms)\n✔ PV3: schema and inspectManifest reject the mutation matrix before any command runs (95.613222ms)\n✔ PV4: command outcomes are complete and deterministic; runner continues after failures (48.414409ms)\n✔ PV4: a timeout is reported as FAIL with timedOut (1061.670542ms)\n✔ PV5: category applicability is exact; injected n/a shapes are rejected (74.925477ms)\n✔ PV6: scenario mapping gates the verdict (59.15887ms)\n✔ PV7: standards and banned patterns are commands, not judgement (123.350413ms)\n✔ PV8: evidence is bounded and secrets are redacted (78.168397ms)\n✔ PV8 unit: boundStream and redaction name-matching are precise (0.49278ms)\n✔ PV9: JSON/text/exit agree and JSON mode is order-independent (410.529719ms)\n✔ PV9: --report writes the exact JSON bytes atomically (89.890086ms)\n✔ PV10: generic validator law and generated agent are portable (0.673208ms)\n✔ PV11: receipt hash verification detects mutation of any stored file (2.054984ms)\n✔ parseArgs: recognises JSON anywhere and rejects bad flags (0.417248ms)\n✔ PV13: renderText is a faithful projection of the report (71.554897ms)\nℹ tests 49\nℹ suites 0\nℹ pass 49\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 2412.73245\n",
+      "stderrTail": ""
+    },
+    {
+      "id": "static.lint",
+      "argv": [
+        "npm",
+        "run",
+        "lint"
+      ],
+      "evidence": [
+        "Repository lint and formatting rules"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 119,
+      "stdoutTail": "\n> pi-sdlc@0.1.1 lint\n> biome check .\n\nChecked 34 files in 22ms. No fixes applied.\n",
+      "stderrTail": ""
+    },
+    {
+      "id": "static.runner",
+      "argv": [
+        "node",
+        "--check",
+        "skills/sdlc/scripts/validate-task.mjs"
+      ],
+      "evidence": [
+        "PV2 runner syntax"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 18,
+      "stdoutTail": "",
+      "stderrTail": ""
+    },
+    {
+      "id": "static.receipt",
+      "argv": [
+        "node",
+        "--check",
+        "skills/sdlc/scripts/verify-task-receipt.mjs"
+      ],
+      "evidence": [
+        "PV11 receipt verifier syntax"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 17,
+      "stdoutTail": "",
+      "stderrTail": ""
+    },
+    {
+      "id": "standards.commits",
+      "argv": [
+        "node",
+        "scripts/check-commit-messages.mjs",
+        "origin/main..HEAD"
+      ],
+      "evidence": [
+        "Conventional Commits repository standard"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 22,
+      "stdoutTail": "All commit headers and the PR title follow Conventional Commits.\n",
+      "stderrTail": ""
+    },
+    {
+      "id": "patterns.diff",
+      "argv": [
+        "git",
+        "diff",
+        "--check",
+        "HEAD"
+      ],
+      "evidence": [
+        "No whitespace-error banned patterns in feature diff"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 2,
+      "stdoutTail": "",
+      "stderrTail": ""
+    }
+  ],
+  "categories": [
+    {
+      "category": "tests",
+      "status": "PASS",
+      "checkIds": [
+        "tests.full"
+      ]
+    },
+    {
+      "category": "static",
+      "status": "PASS",
+      "checkIds": [
+        "static.lint",
+        "static.runner",
+        "static.receipt"
+      ]
+    },
+    {
+      "category": "scenarios",
+      "status": "PASS"
+    },
+    {
+      "category": "standards",
+      "status": "PASS",
+      "checkIds": [
+        "standards.commits"
+      ]
+    },
+    {
+      "category": "bannedPatterns",
+      "status": "PASS",
+      "checkIds": [
+        "patterns.diff"
+      ]
+    }
+  ],
+  "scenarios": [
+    {
+      "scenarioId": "PV1",
+      "status": "PASS",
+      "checkIds": [
+        "tests.full"
+      ]
+    },
+    {
+      "scenarioId": "PV10",
+      "status": "PASS",
+      "checkIds": [
+        "tests.full"
+      ]
+    },
+    {
+      "scenarioId": "PV11",
+      "status": "PASS",
+      "checkIds": [
+        "tests.full"
+      ]
+    },
+    {
+      "scenarioId": "PV12",
+      "status": "PASS",
+      "checkIds": [
+        "tests.full"
+      ]
+    },
+    {
+      "scenarioId": "PV13",
+      "status": "PASS",
+      "checkIds": [
+        "tests.full"
+      ]
+    },
+    {
+      "scenarioId": "PV2",
+      "status": "PASS",
+      "checkIds": [
+        "tests.full"
+      ]
+    },
+    {
+      "scenarioId": "PV3",
+      "status": "PASS",
+      "checkIds": [
+        "tests.full"
+      ]
+    },
+    {
+      "scenarioId": "PV4",
+      "status": "PASS",
+      "checkIds": [
+        "tests.full"
+      ]
+    },
+    {
+      "scenarioId": "PV5",
+      "status": "PASS",
+      "checkIds": [
+        "tests.full"
+      ]
+    },
+    {
+      "scenarioId": "PV6",
+      "status": "PASS",
+      "checkIds": [
+        "tests.full"
+      ]
+    },
+    {
+      "scenarioId": "PV7",
+      "status": "PASS",
+      "checkIds": [
+        "tests.full"
+      ]
+    },
+    {
+      "scenarioId": "PV8",
+      "status": "PASS",
+      "checkIds": [
+        "tests.full"
+      ]
+    },
+    {
+      "scenarioId": "PV9",
+      "status": "PASS",
+      "checkIds": [
+        "tests.full"
+      ]
+    }
+  ]
+}
