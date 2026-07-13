@@ -1,10 +1,11 @@
 #!/usr/bin/env bash
-# sdlc-status.sh — thin entry point for the sdlc opt-in status probe.
-# All logic lives in sdlc-status.mjs (JSON config handling in node).
+# sdlc-status.sh — thin entry point for the FS8 four-state readiness gate.
+# All logic lives in sdlc-status.mjs; this wrapper's contract is identical.
 #
-# Usage: sdlc-status.sh [--config DIR|--repo-root DIR]
-# Reports whether the consumer repo (FS3-resolved) has opted in, plus its
-# prefix/labelPrefix, configured hooks, and workflow/models presence.
-# Exit 0 = opted in (valid config); 1 = no manifest; 2 = invalid config/bad args.
+# Usage: sdlc-status.sh [--config DIR | --repo-root DIR] [--format text|json]
+# Read-only inspection of the consumer repo (FS3-resolved): adoption binds to
+# the manifest blob in current HEAD; readiness needs clean+valid config,
+# committed+clean+valid models, and a readable optional workflow.md.
+# Exit: 0 ready; 1 not-adopted; 2 error (CLI/root/git/config); 3 not-ready.
 set -euo pipefail
 exec node "$(dirname "$0")/sdlc-status.mjs" "$@"

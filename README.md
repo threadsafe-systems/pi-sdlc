@@ -30,12 +30,34 @@ Create `.pi/sdlc/` in your repo:
 - `prompts/<name>.prompt.md` (optional) — override a phase reviewer prompt when
   your project needs a specific grounding the generic prompt does not carry.
 
-With no manifest the skill does not run as project law: invoking it in a repo
-that has not committed `.pi/sdlc/sdlc.config.json` prompts you to adopt it with
-`/setup-sdlc`, or to continue in a clearly-labelled session-only advisory mode.
-The fastest way to opt in is the `/setup-sdlc` scaffolder, which interviews you
-(identity, optional tracker, optional worktree and notification hooks) and writes
-the manifest. A models file is still required to resolve a panel.
+Without adoption the skill does not run as project law. `sdlc-status` is the
+mechanical four-state gate: exit 0 `ready`, 1 `not-adopted`, 2 `error`, 3
+`not-ready`. Adoption means the **current git `HEAD`** contains
+`.pi/sdlc/sdlc.config.json` — a file merely on disk is not adoption — and
+readiness (exit 0) additionally requires that manifest clean and valid plus a
+committed, clean, valid `sdlc.models.json`. Invoking the skill in a repo whose
+`HEAD` has no manifest prompts you to adopt it with `/setup-sdlc`, or to
+continue in a clearly-labelled session-only advisory mode. The fastest way to
+opt in is the `/setup-sdlc` scaffolder, which interviews you (identity,
+optional tracker, optional worktree and notification hooks) and writes the
+manifest — then commit `.pi/sdlc/` to actually adopt.
+
+### Migrating callers of the old two-state status
+
+FS8 (ADR 0015/0016) intentionally breaks the old `sdlc-status` output and
+exits:
+
+- Exit 0 used to mean "manifest present and valid"; it now means fully ready.
+  A repo that formerly exited 0 on a filesystem-only or dirty manifest may now
+  exit 3 until config and models are committed and clean.
+- Exit 3 is new (adopted but incomplete or dirty); shell callers must branch
+  on 0/1/2/3 explicitly.
+- Non-git roots move to exit 2: they historically exited 1 without a manifest
+  and 0 with a valid one. Non-git consumers must adopt inside a git
+  repository.
+- The legacy text summary keys (`opted-in:`, `prefix:`, `labelPrefix:`,
+  `hooks:`, `workflow:`, `models:`) are removed; parse the FS8 `check:` lines
+  or preferably `--format json`.
 
 ## Local workflow hooks
 

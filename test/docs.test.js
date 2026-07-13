@@ -1,6 +1,8 @@
-// Offline doc-presence tests (spec OH7, OH8, OH9, OH12). Greps over committed
-// docs; no model calls. An outline shows shape; these assert the normative text
-// the spec requires is actually present.
+// Offline doc-presence tests (spec OH7, OH8, OH9, OH12; AR build T4: AR10
+// startup-contract mutation tests, AR11 migration completeness). Greps over
+// committed docs; no model calls. An outline shows shape; these assert the
+// normative text the spec requires is actually present, and that removing any
+// required startup branch or prohibition is detected.
 
 import assert from "node:assert/strict";
 import { readFileSync, readdirSync } from "node:fs";
@@ -13,6 +15,9 @@ const repo = dirname(here);
 const skillMd = readFileSync(join(repo, "skills", "sdlc", "SKILL.md"), "utf8");
 const readme = readFileSync(join(repo, "README.md"), "utf8");
 const adrDir = join(repo, "docs", "adr");
+const setupTemplate = readFileSync(join(repo, "templates", "setup-sdlc.md"), "utf8");
+const statusSh = readFileSync(join(repo, "skills", "sdlc", "scripts", "sdlc-status.sh"), "utf8");
+const statusMjs = readFileSync(join(repo, "skills", "sdlc", "scripts", "sdlc-status.mjs"), "utf8");
 
 test("OH7: SKILL.md carries the opt-in, advisory, hooks headings + red flags", () => {
 	assert.match(skillMd, /^## Opt-in and advisory mode$/m);
@@ -52,4 +57,105 @@ test("OH12: README has the opt-in story and drops the old no-manifest-defaults c
 	assert.match(readme, /\/setup-sdlc/);
 	assert.match(readme, /has not committed .*sdlc\.config\.json|has not adopted|opt/i);
 	assert.ok(!readme.includes("the skill still runs phases + panels using built-in defaults"), "README must not keep the old 'runs with defaults' claim");
+});
+
+// ---------------------------------------------------------------------------
+// AR10 — the startup contract has four branches and the pre-exit-0 prohibitions,
+// each mutation-tested: removing the fragment must be detectable.
+// ---------------------------------------------------------------------------
+
+const STARTUP_FRAGMENTS = {
+	"exit 0 (ready) branch": /\*\*Exit 0 \(`ready`\)\*\*: announce/,
+	"exit 1 (not-adopted) branch": /\*\*Exit 1 \(`not-adopted`\)\*\*: do NOT announce/,
+	"exit 2 (error) branch": /\*\*Exit 2 \(`error`\)\*\*: do NOT announce/,
+	"exit 3 (not-ready) branch": /\*\*Exit 3 \(`not-ready`\)\*\*: do NOT announce/,
+	"error is never advisory": /never .*downgraded to advisory/,
+	"not-ready is not bypassed": /Do not offer advisory mode as a bypass/,
+	"prohibition: enter a phase": /MUST\s+NOT\s+enter\s+any\s+lifecycle\s+phase/,
+	"prohibition: fire hooks": /MUST\s+NOT\s+fire\s+configured\s+hooks/,
+	"prohibition: stamp agents": /MUST\s+NOT\s+stamp\s+panel\s+agents/,
+	"prohibition: tracker mutation": /MUST\s+NOT\s+create\s+or\s+mutate\s+tracker\s+objects/,
+	"prohibition: claim gates": /MUST\s+NOT\s+claim\s+any\s+gate\s+as\s+passed/,
+};
+
+test("AR10: all four startup branches and every prohibition are present and mutation-detectable", () => {
+	// scope to the startup block: the advisory section repeats some prohibitions
+	const start = skillMd.indexOf("## Opt-in and advisory mode");
+	const end = skillMd.indexOf("### Advisory mode");
+	assert.ok(start >= 0 && end > start, "startup section must exist before the advisory section");
+	const startupSection = skillMd.slice(start, end);
+	for (const [label, re] of Object.entries(STARTUP_FRAGMENTS)) {
+		assert.match(startupSection, re, `SKILL.md startup section missing: ${label}`);
+		const mutated = startupSection.replace(re, "");
+		assert.doesNotMatch(mutated, re, `mutation of '${label}' must be detected (fragment appears once)`);
+	}
+});
+
+test("AR10: docs never equate manifest presence with readiness or claim mechanical agent enforcement", () => {
+	assert.match(skillMd, /current `HEAD` commit|committed in .*HEAD|current `?HEAD`? /, "adoption must be defined against HEAD");
+	assert.match(skillMd, /merely present on disk .*is not adoption|not adoption/, "filesystem presence must be disclaimed");
+	assert.ok(!skillMd.includes("mechanically enforces agent behaviour"), "no claim of mechanical agent enforcement");
+});
+
+// ---------------------------------------------------------------------------
+// AR11 — migration is complete: README/SKILL/setup + ADRs
+// ---------------------------------------------------------------------------
+
+const MIGRATION_FRAGMENTS = {
+	"former exit 0 may become exit 3": /may now\s+exit 3/,
+	"non-git roots move to exit 2": /non-git .*exit 2/i,
+	"non-git historic exit 1 and 0": /exited\s+1\s+without\s+a\s+manifest\s+and\s+0\s+with/,
+	"exit 3 is new": /exit 3 is new/i,
+	"explicit 0\\/1\\/2\\/3 branching": /branch\s+on\s+0\/1\/2\/3\s+explicitly/,
+	"legacy keys removed": /`opted-in:`.*removed|legacy text .*keys .*removed|legacy .*summary keys/,
+	"prefer json": /--format json/,
+};
+
+test("AR11: README carries the complete migration story", () => {
+	for (const [label, re] of Object.entries(MIGRATION_FRAGMENTS)) {
+		assert.match(readme, re, `README missing migration item: ${label}`);
+	}
+});
+
+test("AR11: ADR 0010 is superseded and the policy ADR 0015 restates the migration", () => {
+	const adr10 = readFileSync(join(adrDir, "0010-opt-in-semantics.md"), "utf8");
+	assert.match(adr10, /[Ss]uperseded by ADR 0015/);
+	const adr15 = readFileSync(join(adrDir, "0015-adoption-readiness-policy.md"), "utf8");
+	for (const marker of [/- Context:/, /- Decision:/, /- Consequences/]) {
+		assert.match(adr15, marker, `ADR 0015 missing ${marker}`);
+	}
+	assert.match(adr15, /mechanically enforce/i, "ADR 0015 must state 0010's intent is now mechanically enforced");
+	assert.match(adr15, /may now exit 3/);
+	assert.match(adr15, /non-git roots move to exit 2/i);
+	assert.match(adr15, /Supersedes: ADR 0010/);
+});
+
+test("AR11: ADR 0016 freezes the FS8 machine surface", () => {
+	const adr16 = readFileSync(join(adrDir, "0016-status-surface-fs8.md"), "utf8");
+	for (const marker of [/- Context:/, /- Decision:/, /- Consequences/]) {
+		assert.match(adr16, marker, `ADR 0016 missing ${marker}`);
+	}
+	assert.match(adr16, /schema version 1|schemaVersion.*1/i);
+	for (const id of ["cli.arguments", "root.resolve", "git.repository", "adoption.manifest-head", "adoption.manifest-clean", "config.valid", "models.head", "models.clean", "models.valid", "workflow.readable"]) {
+		assert.ok(adr16.includes(id), `ADR 0016 must freeze check id ${id}`);
+	}
+	assert.match(adr16, /0 `ready`, 1 `not-adopted`, 2 `error`, 3 `not-ready`/);
+});
+
+test("AR11: no stale opted-in output claim remains in shipped guidance", () => {
+	for (const [name, body] of Object.entries({ "SKILL.md": skillMd, "README.md": readme, "templates/setup-sdlc.md": setupTemplate, "sdlc-status.sh": statusSh })) {
+		assert.doesNotMatch(body, /opted-in: (yes|no)/, `${name} still claims the legacy opted-in output`);
+	}
+});
+
+test("AR11: wrapper help/comments and .mjs usage match the FS8 invocation", () => {
+	assert.match(statusSh, /--format text\|json/, "wrapper comment must show --format");
+	assert.match(statusSh, /0 ready.*1 not-adopted.*2 error.*3 not-ready|0 = ready/s, "wrapper must document the four exits");
+	assert.match(statusMjs, /usage: sdlc-status\.sh \[--config DIR \| --repo-root DIR\] \[--format text\|json\]/);
+});
+
+test("AR11: the setup template requires committing .pi\u2044sdlc and points at the status gate", () => {
+	assert.match(setupTemplate, /commit `\.pi\/sdlc\/`/);
+	assert.match(setupTemplate, /sdlc-status/);
+	assert.match(setupTemplate, /exit 0|ready/);
 });

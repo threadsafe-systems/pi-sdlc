@@ -1,5 +1,10 @@
 # ADR 0010: repo opt-in is the presence of a committed manifest
 
+> Superseded by ADR 0015: the committed-manifest intent below is now
+> mechanically enforced against current `HEAD`, with four-state readiness
+> (0 ready / 1 not-adopted / 2 error / 3 not-ready). The exit codes described
+> here are historical.
+
 - Context: the skill previously ran as project law in any repo, falling back to
   built-in defaults (`prefix`/`labelPrefix` = `sdlc`, standard doc paths) when
   `.pi/sdlc/sdlc.config.json` was absent (FS3 root resolution ends at the git
