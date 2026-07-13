@@ -13,9 +13,17 @@ function run(args, cwd = ROOT) {
 	return spawnSync(process.execPath, [SCRIPT, ...args], { cwd, encoding: "utf8" });
 }
 
+function parseJson(text) {
+	try {
+		return JSON.parse(text);
+	} catch (error) {
+		throw new Error(`invalid JSON report: ${error.message}\n${text}`);
+	}
+}
+
 function jsonRun(args, cwd = ROOT) {
 	const result = run(["--format", "json", ...args], cwd);
-	return { ...result, report: JSON.parse(result.stdout) };
+	return { ...result, report: parseJson(result.stdout) };
 }
 
 function fixture() {

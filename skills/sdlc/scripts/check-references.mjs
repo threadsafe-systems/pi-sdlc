@@ -178,15 +178,16 @@ try {
 	args ??= { packageRoot: defaultRoot, inventory: defaultInventory };
 	result = { report: makeReport(args, "error", 2, [], error?.message || error), exitCode: 2 };
 }
+const print = (line) => process.stdout.write(`${line}\n`);
 if (result.help) {
-	console.log(result.help);
+	print(result.help);
 	process.exit(0);
 }
 const forceJson = process.argv.slice(2).some((arg, index, argv) => arg === "--format=json" || (arg === "--format" && argv[index + 1] === "json"));
-if (args?.format === "json" || args?.jsonRequested || forceJson) console.log(JSON.stringify(result.report));
+if (args?.format === "json" || args?.jsonRequested || forceJson) print(JSON.stringify(result.report));
 else if (result.report) {
-	console.log(`reference-check: ${result.report.state}`);
-	for (const check of result.report.checks) console.log(`check: ${check.id} ${check.status} — ${check.message}`);
-	if (result.report.error) console.log(`error: ${result.report.error}`);
+	print(`reference-check: ${result.report.state}`);
+	for (const check of result.report.checks) print(`check: ${check.id} ${check.status} — ${check.message}`);
+	if (result.report.error) print(`error: ${result.report.error}`);
 }
 process.exit(result.exitCode);

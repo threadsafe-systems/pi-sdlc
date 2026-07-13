@@ -5,6 +5,13 @@ import test from "node:test";
 
 const ROOT = new URL("..", import.meta.url).pathname.replace(/\/$/, "");
 const read = (path) => readFileSync(join(ROOT, path), "utf8");
+const parseJson = (path) => {
+	try {
+		return JSON.parse(read(path));
+	} catch (error) {
+		throw new Error(`invalid JSON fixture ${path}: ${error.message}`);
+	}
+};
 
 const genericPrompts = ["skills/sdlc/prompts/adversary-plan.prompt.md", "skills/sdlc/prompts/adversary-spec.prompt.md", "skills/sdlc/prompts/adversary-review.prompt.md", "skills/sdlc/prompts/validator-task.prompt.md"];
 
@@ -26,8 +33,8 @@ test("NR7: skill dispatch instructions are concrete and CI claims are bounded", 
 });
 
 test("NR7: inventory checker and ADR are shipped and versioned", () => {
-	const inventory = JSON.parse(read("skills/sdlc/assets/normative-references.json"));
-	const schema = JSON.parse(read("skills/sdlc/assets/normative-references.schema.json"));
+	const inventory = parseJson("skills/sdlc/assets/normative-references.json");
+	const schema = parseJson("skills/sdlc/assets/normative-references.schema.json");
 	assert.equal(inventory.schemaVersion, 1);
 	assert.equal(schema.title, "pi-sdlc normative reference inventory");
 	assert.match(read("docs/adr/0019-normative-reference-honesty-fs11.md"), /FS11/);
