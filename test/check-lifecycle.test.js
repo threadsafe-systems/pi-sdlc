@@ -15,7 +15,11 @@ function run(args, cwd = ROOT) {
 
 function jsonRun(args, cwd = ROOT) {
 	const result = run(["--format", "json", ...args], cwd);
-	return { ...result, report: JSON.parse(result.stdout) };
+	try {
+		return { ...result, report: JSON.parse(result.stdout) };
+	} catch (error) {
+		throw new Error(`invalid JSON report: ${error.message}\nstdout: ${result.stdout}\nstderr: ${result.stderr}`);
+	}
 }
 
 function fixture() {
@@ -85,6 +89,10 @@ test("bot exemption applies only without a valid declaration", () => {
 		const declared = jsonRun(["--event", join(dir, "event.json")]);
 		assert.equal(declared.report.exempt, false);
 		assert.equal(declared.report.track, "reversible");
+		const invalid = jsonRun(["--track", "banana", "--slug", "bad", "--author", "dependabot[bot]"]);
+		assert.equal(invalid.status, 0);
+		assert.equal(invalid.report.exempt, true);
+		assert.equal(invalid.report.track, "none");
 	} finally {
 		rmSync(dir, { recursive: true, force: true });
 	}

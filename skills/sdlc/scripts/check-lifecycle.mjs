@@ -247,8 +247,20 @@ function main(argv = process.argv.slice(2), cwd = process.cwd()) {
 		const author = source.author;
 		const bot = typeof author === "string" && author.endsWith("[bot]");
 		if (parsedDeclaration.kind === "block") {
-			values = parsedDeclaration.values;
-			setResult(results, "declaration.parse", "pass", "one declaration structure parsed");
+			const candidateResults = new Map();
+			checkValues(parsedDeclaration.values, candidateResults);
+			const declarationValid = !["declaration.track", "declaration.slug", "declaration.reason"].some((id) => statusOf(candidateResults, id) === "fail");
+			if (declarationValid) {
+				values = parsedDeclaration.values;
+				setResult(results, "declaration.parse", "pass", "one declaration structure parsed");
+			} else if (bot) {
+				values = { track: "none", reason: `auto-generated PR (author: ${author})` };
+				report.exempt = true;
+				setResult(results, "declaration.parse", "pass", `declaration invalid; auto-generated exemption applies (author: ${sanitize(author)})`);
+			} else {
+				values = parsedDeclaration.values;
+				setResult(results, "declaration.parse", "pass", "one declaration structure parsed");
+			}
 		} else if (bot) {
 			values = { track: "none", reason: `auto-generated PR (author: ${author})` };
 			report.exempt = true;
@@ -323,7 +335,7 @@ function main(argv = process.argv.slice(2), cwd = process.cwd()) {
 }
 
 function renderText(report) {
-	const lines = [`root: ${report.root}`, `mode: ${report.mode}`, `state: ${report.state}`, `exit-code: ${report.exitCode}`, `track: ${report.track ?? "-"}`, `slug: ${report.slug ?? "-"}`, `reason: ${report.reason ?? "-"}`, `exempt: ${report.exempt}`];
+	const lines = [`root: ${report.root}`, `mode: ${report.mode}`, `state: ${report.state}`, `exit-code: ${report.exitCode}`, `track: ${report.track ?? "-"}`, `slug: ${report.slug ?? "-"}`, `reason: ${report.reason == null ? "-" : sanitize(report.reason, 200)}`, `exempt: ${report.exempt}`];
 	for (const check of report.checks) {
 		lines.push(`check: ${check.id} ${check.status} — ${check.message}`);
 		if (check.remediation) lines.push(`remediation: ${check.id} — ${check.remediation}`);

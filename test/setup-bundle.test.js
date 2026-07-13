@@ -172,6 +172,19 @@ test("workflow from another repository is refused", () => {
 	}
 });
 
+test("malformed CI marker fails before any bundle write", () => {
+	const root = temp();
+	try {
+		writeFileSync(join(root, ".buildkite"), "not-a-directory\n");
+		const result = jsonRun(root, ["--yes", "--with-ci-workflow"]);
+		assert.equal(result.status, 2);
+		assert.equal(result.report.assets.length, 0);
+		assert.equal(existsSync(join(root, ".pi/sdlc/sdlc.config.json")), false);
+	} finally {
+		rmSync(root, { recursive: true, force: true });
+	}
+});
+
 test("existing target directories fail before any bundle write", () => {
 	const root = temp();
 	try {

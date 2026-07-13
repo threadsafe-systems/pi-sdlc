@@ -191,10 +191,18 @@ function source(path) {
 		throw new SetupError(`setup-sdlc: package asset unavailable: ${path} (${error.message})`);
 	}
 }
+function directoryEntries(path) {
+	if (!existsSync(path)) return [];
+	try {
+		return readdirSync(path);
+	} catch (error) {
+		throw new SetupError(`setup-sdlc: cannot inspect CI path: ${path} (${error.message})`);
+	}
+}
 function existsCi(root, target) {
 	const workflows = join(root, ".github", "workflows");
-	if (existsSync(workflows) && readdirSync(workflows).some((file) => /\.ya?ml$/.test(file) && file !== target)) return true;
-	return [".gitlab-ci.yml", ".circleci/config.yml", "azure-pipelines.yml", "Jenkinsfile", ".travis.yml", "bitbucket-pipelines.yml"].some((file) => existsSync(join(root, file))) || (existsSync(join(root, ".buildkite")) && readdirSync(join(root, ".buildkite")).length > 0);
+	if (directoryEntries(workflows).some((file) => /\.ya?ml$/.test(file) && file !== target)) return true;
+	return [".gitlab-ci.yml", ".circleci/config.yml", "azure-pipelines.yml", "Jenkinsfile", ".travis.yml", "bitbucket-pipelines.yml"].some((file) => existsSync(join(root, file))) || directoryEntries(join(root, ".buildkite")).length > 0;
 }
 function rootPrefix(root) {
 	try {
@@ -220,7 +228,7 @@ function structural(target, kind) {
 	}
 	if (kind === "ci-workflow") {
 		const repository = packageRepository();
-		const repositoryLine = repository && new RegExp(`repository:\\s*${repository.replace(/[.*+?^${}()|[\\]\\]/g, "\\\\$&")}`).test(text);
+		const repositoryLine = repository && new RegExp(`repository:\\s*${repository.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}(?=\\s|$)`).test(text);
 		return Boolean(repositoryLine && /ref:\s*\S+/.test(text) && /node\s+\S*check-lifecycle\.mjs/.test(text));
 	}
 	return true;
@@ -359,6 +367,7 @@ function writeBundle(root, opts, cfg, hooks, tracker) {
 			return report;
 		}
 	}
+	const ciDetected = opts.withCiWorkflow ? existsCi(root, "sdlc-lifecycle.yml") : false;
 	const configExists = existsSync(configTarget);
 	const configIssue = existingAssetIssue(configTarget, inspectConfig, "config");
 	const modelIssue = opts.withModels ? existingAssetIssue(modelTarget, inspectModels, "models") : null;
@@ -385,7 +394,7 @@ function writeBundle(root, opts, cfg, hooks, tracker) {
 	if (opts.withCiWorkflow) {
 		const target = join(root, ".github", "workflows", "sdlc-lifecycle.yml");
 		if (rootPrefix(root)) report.assets.push({ id: "ci-workflow", action: "refused", message: "consumer root is a subdirectory of the git repository", remediation: "install the workflow at the repository root" });
-		else if (existsCi(root, "sdlc-lifecycle.yml")) report.assets.push({ id: "ci-workflow", action: "refused", message: "existing CI configuration detected", remediation: "add the lifecycle-check snippet to existing CI" });
+		else if (ciDetected) report.assets.push({ id: "ci-workflow", action: "refused", message: "existing CI configuration detected", remediation: "add the lifecycle-check snippet to existing CI" });
 		else asset("ci-workflow", target, "ci-workflow", workflowContent, report);
 	}
 	if (opts.copyPrompts)
