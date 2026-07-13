@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "taskId": "ab-t3",
+  "manifestPath": "docs/validation/sdlc-adoption-bundle/ab-t3.json",
+  "manifestSha256": "99d382add98d1291642713ee546f32eb13d6a2c0f11d572e6846708059391633",
+  "runnerReportSha256": "5e9e7ee7ae2cf2b96df717794d8fb9a82239498a146c5131593b478260c1b90c",
+  "generatedAgentSha256": "d1afca203509cba3f2db0469e3de0ebcf3f496755c44799678bb1138805afa1a",
+  "model": "openai-codex/gpt-5.6-terra",
+  "runnerVerdict": "PASS",
+  "validatorVerdict": "PASS",
+  "createdAt": "2026-07-13T16:45:00Z"
+}
