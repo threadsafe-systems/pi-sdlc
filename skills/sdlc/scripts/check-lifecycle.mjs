@@ -256,7 +256,7 @@ function main(argv = process.argv.slice(2), cwd = process.cwd()) {
 			} else if (bot) {
 				values = { track: "none", reason: `auto-generated PR (author: ${author})` };
 				report.exempt = true;
-				setResult(results, "declaration.parse", "pass", `declaration invalid; auto-generated exemption applies (author: ${sanitize(author)})`);
+				setResult(results, "declaration.parse", "pass", `no valid declaration; auto-generated exemption applies (author: ${sanitize(author)})`);
 			} else {
 				values = parsedDeclaration.values;
 				setResult(results, "declaration.parse", "pass", "one declaration structure parsed");

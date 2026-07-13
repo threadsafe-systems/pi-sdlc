@@ -68,6 +68,20 @@ test("existing CI suppresses workflow creation and reports refusal", () => {
 	}
 });
 
+test("template info strings must be exactly sdlc", () => {
+	const root = temp();
+	try {
+		const target = join(root, ".github/pull_request_template.md");
+		spawnSync("mkdir", ["-p", join(root, ".github")]);
+		writeFileSync(target, "```sdlcBAD\ntrack: reversible\nslug: bogus\n```\n");
+		const result = jsonRun(root, ["--yes"]);
+		assert.equal(result.status, 1);
+		assert.equal(result.report.assets.find((asset) => asset.id === "pr-template").action, "refused");
+	} finally {
+		rmSync(root, { recursive: true, force: true });
+	}
+});
+
 test("consumer template with the wrong companion is refused byte-identically", () => {
 	const root = temp();
 	try {

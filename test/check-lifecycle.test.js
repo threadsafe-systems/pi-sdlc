@@ -93,6 +93,7 @@ test("bot exemption applies only without a valid declaration", () => {
 		assert.equal(invalid.status, 0);
 		assert.equal(invalid.report.exempt, true);
 		assert.equal(invalid.report.track, "none");
+		assert.match(invalid.report.checks.find((c) => c.id === "declaration.parse").message, /^no valid declaration; auto-generated exemption applies/);
 	} finally {
 		rmSync(dir, { recursive: true, force: true });
 	}

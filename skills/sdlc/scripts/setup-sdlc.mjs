@@ -224,7 +224,7 @@ function structural(target, kind) {
 	if (!existsSync(target)) return false;
 	const text = readFileSync(target, "utf8");
 	if (kind === "pr-template") {
-		const blocks = [...text.matchAll(/```sdlc\s*([\s\S]*?)```/gm)];
+		const blocks = [...text.matchAll(/```sdlc[ \t]*\r?\n([\s\S]*?)```/g)];
 		if (blocks.length !== 1) return false;
 		const block = blocks[0][1];
 		const track = /^track: (irreversible|reversible|none)$/m.exec(block)?.[1];
