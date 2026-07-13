@@ -280,14 +280,15 @@ function main(argv = process.argv.slice(2), cwd = process.cwd()) {
 			setResult(results, id, "skip", "prerequisite config.valid did not pass");
 			continue;
 		}
-		const absoluteDir = resolve(root, configured);
+		const normalizedConfigured = configured.replaceAll("\\", "/");
+		const absoluteDir = resolve(root, normalizedConfigured);
 		const rootRelative = relative(resolve(root), absoluteDir);
 		if (rootRelative.startsWith("..") || isAbsolute(rootRelative)) {
 			setResult(results, "config.valid", "error", `configured ${pathKey} path escapes the consumer root`);
 			setResult(results, id, "skip", "prerequisite config.valid did not pass");
 			continue;
 		}
-		const treePath = `${prefix ? `${prefix}/` : ""}${configured.replaceAll("\\", "/").replace(/^\/+|\/+$/g, "")}`;
+		const treePath = `${prefix ? `${prefix}/` : ""}${normalizedConfigured.replace(/^\/+|\/+$/g, "")}`;
 		const listing = git(root, ["ls-tree", "-r", "--name-only", "HEAD", "--", `${treePath}/`]);
 		if (listing.code !== 0) {
 			setResult(results, id, "fail", "no matching committed artifact");
