@@ -68,7 +68,23 @@ passes as `none` with a generated reason. This is intentional and does not
 bypass the approved contract; semantic honesty remains PR-panel prose law.
 No high or medium finding survives.
 
-## Stop condition
+## Final verification and stop condition
 
-After the second fix wave: zero surviving high/medium findings. Final code,
-full suite, lint, FS8-untouched check, and T1–T5 PV2 receipts all pass.
+The last completed three-vendor verification found and led to these fixes:
+
+- ambiguous multiple template blocks → setup now requires exactly one
+  fenced `sdlc` block;
+- implicit mutable `main` workflow fallback → setup now requires
+  `SDLC_PACKAGE_REF` or an installed package Git `HEAD`, otherwise exits 2;
+- workflow source read on non-CI runs → read is conditional on
+  `--with-ci-workflow`;
+- prompt read race and target type/symlink hazards → all prompt reads use the
+  setup error boundary, and target parents/targets are preflighted for
+  containment, directory, and symlink conflicts.
+
+The final attempted three-vendor re-dispatch was blocked by the session
+subagent spawn cap (40/40). Direct final verification then passed all declared
+checks: 137 tests, lint, FS8-untouched diff, and all five PV2 runners with
+receipt hashes verified. The completed verification evidence found no new
+high/medium defect. **Zero surviving high/medium findings; PR stop condition
+met.**

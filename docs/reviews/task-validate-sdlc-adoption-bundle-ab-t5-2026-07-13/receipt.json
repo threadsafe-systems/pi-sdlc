@@ -3,7 +3,7 @@
   "taskId": "ab-t5",
   "manifestPath": "docs/validation/sdlc-adoption-bundle/ab-t5.json",
   "manifestSha256": "6a3059f2ce9c39873c8e761c73c1ef039584ea261e66b7ffda076b0f8ec79e0a",
-  "runnerReportSha256": "3c9eb83858e3bc608e6e3d39aec2caedf8b7d9b8827d2fe8cdaaf101bcd1744e",
+  "runnerReportSha256": "4a5677a145c2bf60b297788f5587cabe1270097b40e6c60d82fbcaeb96bac81d",
   "generatedAgentSha256": "d1afca203509cba3f2db0469e3de0ebcf3f496755c44799678bb1138805afa1a",
   "model": "openai-codex/gpt-5.6-terra",
   "runnerVerdict": "PASS",
