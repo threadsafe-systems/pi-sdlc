@@ -44,3 +44,22 @@ Per-model outputs: `gpt-5.6-sol.round2.md`, `deepseek-v4-pro.round2.md`.
 
 After the round-2 fix wave, no high or medium finding survives adjudication.
 Round 3 verifies the index-flag fix.
+
+## Round 3 (verification pass against 68a0f4d)
+
+Panel: openai-codex/gpt-5.6-sol:medium (finder of #10).
+Per-model output: `gpt-5.6-sol.round3.md`.
+
+- Finding #10 (index flags): **RESOLVED** — both flags × both files exit 3 at
+  the right check; sparse contract unchanged; monorepo prefix probe passes.
+
+| # | Severity | Source | Finding | Adjudication |
+|---|---|---|---|---|
+| 11 | high | sol | A git *clean filter* (`.gitattributes` + `filter.<x>.clean` config) can emit the committed blob while the working file differs, defeating both `git diff` and the filtered `hash-object` comparison | **Dismissal recommended — pending human ratification.** Reason: filter definitions require *local git config*, which is the same privilege domain as editing the skill's scripts, PATH, or the git binary — a principal there defeats any local check by construction, so this sits outside sdlc-status's trust boundary (spec §4.1 targets injection/secret hygiene, not adversarial local config). The index-flag fix (#10) was warranted because those flags are casual single-command state that tooling (e.g. sparse-checkout) sets legitimately. The mooted `--no-filters` fix would false-dirty every EOL-normalised (autocrlf/CRLF) checkout, breaking the cross-platform NFR for a threat the local-config principal can re-open elsewhere anyway. Recorded as accepted residual risk; final adjudication by the project's human owner at merge |
+
+## Stop condition (round 3)
+
+Fixes #1–#3, #5, #10 verified closed. No finding survives adjudication except
+#11, whose dismissal is recorded above and awaits the human owner's
+ratification (the merge itself requires the owner's --admin authorisation, so
+ratification happens at the merge gate).
