@@ -23,8 +23,8 @@
       "exitCode": 0,
       "signal": null,
       "timedOut": false,
-      "durationMs": 145,
-      "stdoutTail": "✔ OH7: SKILL.md carries the opt-in, advisory, hooks headings + red flags (1.867336ms)\n✔ OH7: the Implement table row no longer prescribes 'in a worktree' (0.390116ms)\n✔ OH8: SKILL.md contains the announce-on-fire block and the workflow.md rule (0.261427ms)\n✔ OH9: exactly two new ADRs (opt-in, hooks) with context/decision/consequences (0.6633ms)\n✔ OH12: README has the opt-in story and drops the old no-manifest-defaults claim (0.306072ms)\n✔ FS9/FS10 dogfood assets are present (0.332849ms)\n✔ FS9 documentation carries declaration rules and reversible grounding (0.416316ms)\n✔ FS9 and FS10 ADRs freeze the new surfaces (0.341211ms)\n✔ AR10: all four startup branches and every prohibition are present and mutation-detectable (1.992346ms)\n✔ AR10: docs never equate manifest presence with readiness or claim mechanical agent enforcement (0.474925ms)\n✔ AR11: README carries the complete migration story (0.470476ms)\n✔ AR11: ADR 0010 is superseded and the policy ADR 0015 restates the migration (0.428961ms)\n✔ AR11: ADR 0016 freezes the FS8 machine surface (0.329117ms)\n✔ AR11: no stale opted-in output claim remains in shipped guidance (0.295201ms)\n✔ AR11: wrapper help/comments and .mjs usage match the FS8 invocation (0.237894ms)\n✔ AR11: the setup template requires committing .pi⁄sdlc and points at the status gate (0.183721ms)\nℹ tests 16\nℹ suites 0\nℹ pass 16\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 99.483236\n",
+      "durationMs": 194,
+      "stdoutTail": "✔ OH7: SKILL.md carries the opt-in, advisory, hooks headings + red flags (1.599354ms)\n✔ OH7: the Implement table row no longer prescribes 'in a worktree' (0.342454ms)\n✔ OH8: SKILL.md contains the announce-on-fire block and the workflow.md rule (0.213078ms)\n✔ OH9: exactly two new ADRs (opt-in, hooks) with context/decision/consequences (0.572204ms)\n✔ OH12: README has the opt-in story and drops the old no-manifest-defaults claim (0.239962ms)\n✔ FS9/FS10 dogfood assets are present (0.27196ms)\n✔ FS9 documentation carries declaration rules and reversible grounding (0.326501ms)\n✔ FS9 and FS10 ADRs freeze the new surfaces (0.295112ms)\n✔ AR10: all four startup branches and every prohibition are present and mutation-detectable (0.677644ms)\n✔ AR10: docs never equate manifest presence with readiness or claim mechanical agent enforcement (0.557633ms)\n✔ AR11: README carries the complete migration story (0.362461ms)\n✔ AR11: ADR 0010 is superseded and the policy ADR 0015 restates the migration (0.377618ms)\n✔ AR11: ADR 0016 freezes the FS8 machine surface (0.26801ms)\n✔ AR11: no stale opted-in output claim remains in shipped guidance (0.25128ms)\n✔ AR11: wrapper help/comments and .mjs usage match the FS8 invocation (0.187213ms)\n✔ AR11: the setup template requires committing .pi⁄sdlc and points at the status gate (0.198228ms)\nℹ tests 16\nℹ suites 0\nℹ pass 16\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 131.399454\n",
       "stderrTail": ""
     },
     {
@@ -41,7 +41,7 @@
       "exitCode": 0,
       "signal": null,
       "timedOut": false,
-      "durationMs": 49,
+      "durationMs": 43,
       "stdoutTail": "",
       "stderrTail": ""
     },
@@ -59,7 +59,7 @@
       "exitCode": 0,
       "signal": null,
       "timedOut": false,
-      "durationMs": 54,
+      "durationMs": 48,
       "stdoutTail": "",
       "stderrTail": ""
     },
@@ -77,8 +77,8 @@
       "exitCode": 0,
       "signal": null,
       "timedOut": false,
-      "durationMs": 266,
-      "stdoutTail": "\n> pi-sdlc@0.1.1 lint\n> biome check .\n\nChecked 52 files in 66ms. No fixes applied.\n",
+      "durationMs": 219,
+      "stdoutTail": "\n> pi-sdlc@0.1.1 lint\n> biome check .\n\nChecked 52 files in 51ms. No fixes applied.\n",
       "stderrTail": ""
     },
     {
@@ -96,7 +96,7 @@
       "exitCode": 0,
       "signal": null,
       "timedOut": false,
-      "durationMs": 7,
+      "durationMs": 6,
       "stdoutTail": "",
       "stderrTail": ""
     }
