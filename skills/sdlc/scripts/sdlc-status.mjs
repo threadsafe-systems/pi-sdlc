@@ -174,10 +174,12 @@ function buildReport(argv, cwd) {
 		else set("adoption.manifest-head", "fail", `current HEAD has no manifest blob at ${manifestGitPath}`, `run /setup-sdlc and commit ${manifestGitPath}`);
 	}
 
-	// two independent comparisons (spec §2.4): index vs HEAD, working tree vs index
+	// two independent comparisons (spec §2.4): index vs HEAD, working tree vs index.
+	// `:(top)` pins the pathspec to the repository top level: plain pathspecs are
+	// cwd-relative, which would silently miss prefixed monorepo-subdirectory paths.
 	const cleanAgainstHead = (path) => {
-		const idx = git(root, ["diff", "--quiet", "--cached", "HEAD", "--", path]);
-		const wt = git(root, ["diff", "--quiet", "--", path]);
+		const idx = git(root, ["diff", "--quiet", "--cached", "HEAD", "--", `:(top)${path}`]);
+		const wt = git(root, ["diff", "--quiet", "--", `:(top)${path}`]);
 		if (idx.code === 0 && wt.code === 0) return "clean";
 		if (idx.code === 1 || wt.code === 1) return "dirty";
 		return "error";
