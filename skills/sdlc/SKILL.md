@@ -10,25 +10,44 @@ feature.
 
 Announce at start with the project's `announce` string from
 `.pi/sdlc/sdlc.config.json` (default: "Using the sdlc skill to drive this change
-through its lifecycle.") — but first run the opt-in gate below: announce only
-after `sdlc-status` confirms this repo has adopted the sdlc.
+through its lifecycle.") — but first run the readiness gate below: announce only
+after `sdlc-status` reports this repo is ready (exit 0).
 
 ## Opt-in and advisory mode
 
-The sdlc is a framework a repo *adopts*, not a global default. A repo has opted
-in when it commits `.pi/sdlc/sdlc.config.json`. At the start of every session,
-run the mechanical gate and branch on its exit code:
+The sdlc is a framework a repo *adopts*, not a global default. A repo has
+adopted the sdlc when its **current `HEAD` commit** contains
+`.pi/sdlc/sdlc.config.json` — a manifest merely present on disk (untracked,
+staged, or ignored) is not adoption. Being **ready** to run under law needs
+more: the active manifest must also be clean and valid, the models roster
+(`.pi/sdlc/sdlc.models.json`) committed, clean, and valid, and any
+`.pi/sdlc/workflow.md` readable. `sdlc-status` (FS8, ADR 0016) proves all of
+this mechanically with four states.
 
-1. Run `skills/sdlc/scripts/sdlc-status.sh` (with the session's cwd inside the
-   consumer repo, or pass `--repo-root`).
-2. **Exit 0 (opted in)**: announce with the config's `announce` string, then
+At the start of every session, run the mechanical gate and branch on its exit
+code (prefer `--format json` when parsing):
+
+1. Run `skills/sdlc/scripts/sdlc-status.sh [--repo-root DIR] [--format text|json]`
+   (with the session's cwd inside the consumer repo, or pass `--repo-root`).
+2. **Exit 0 (`ready`)**: announce with the config's `announce` string, then
    enumerate each configured hook (phase, timing, kind) and each top-level rule
    of `.pi/sdlc/workflow.md` if present. Proceed under full law.
-3. **Exit 1 (not opted in)**: do NOT proceed under law. State that this repo has
-   not adopted the sdlc and offer either `/setup-sdlc` to opt in, or advisory
+3. **Exit 1 (`not-adopted`)**: do NOT announce. State that this repo has not
+   adopted the sdlc and offer either `/setup-sdlc` to opt in, or advisory
    mode for this session only, with the user's explicit in-session consent.
-4. **Exit 2 (invalid config)**: surface the diagnostic and stop. An invalid
-   manifest is never silently downgraded to advisory mode.
+4. **Exit 2 (`error`)**: do NOT announce. Surface the report's diagnostics and
+   stop the SDLC. An error is never silently downgraded to advisory mode —
+   advisory is not a bypass.
+5. **Exit 3 (`not-ready`)**: do NOT announce. State that the repo is adopted
+   but incomplete (for example uncommitted manifest changes or a missing
+   committed models file), list the report's remediations, and stop the SDLC.
+   Do not offer advisory mode as a bypass.
+
+Before `sdlc-status` exits 0 the agent MUST NOT enter any lifecycle phase, MUST
+NOT fire configured hooks, MUST NOT stamp panel agents, MUST NOT create or
+mutate tracker objects, and MUST NOT claim any gate as passed. This startup
+table is agent-executed prose law (ADR 0011): the script proves repository
+state; it does not claim to enforce agent behaviour.
 
 ### Advisory mode
 

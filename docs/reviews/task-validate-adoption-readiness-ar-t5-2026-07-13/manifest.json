@@ -1,0 +1,76 @@
+{
+  "schemaVersion": 1,
+  "taskId": "ar-t5",
+  "buildPlan": "docs/plans/2026-07-12-sdlc-adoption-readiness-build.md",
+  "repoRoot": ".",
+  "ownedScenarios": ["AR1", "AR10", "AR11", "AR12", "AR2", "AR3", "AR4", "AR5", "AR6", "AR7", "AR8", "AR9"],
+  "checks": [
+    {
+      "id": "tests.full",
+      "argv": ["npm", "test"],
+      "timeoutMs": 300000,
+      "evidence": ["AR1-AR12 integrated scenario suite and compatibility goldens"]
+    },
+    {
+      "id": "static.lint",
+      "argv": ["npm", "run", "lint"],
+      "timeoutMs": 120000,
+      "evidence": ["Repository lint and formatting rules"]
+    },
+    {
+      "id": "static.lib",
+      "argv": ["node", "--check", "skills/sdlc/scripts/lib.mjs"],
+      "evidence": ["Shared library syntax"]
+    },
+    {
+      "id": "static.status",
+      "argv": ["node", "--check", "skills/sdlc/scripts/sdlc-status.mjs"],
+      "evidence": ["FS8 status command syntax"]
+    },
+    {
+      "id": "standards.commits",
+      "argv": ["node", "scripts/check-commit-messages.mjs", "origin/main..HEAD"],
+      "evidence": ["Conventional Commits repository standard on the feature range"]
+    },
+    {
+      "id": "patterns.diff",
+      "argv": ["git", "diff", "--check", "HEAD"],
+      "evidence": ["No whitespace-error banned patterns in feature diff"]
+    }
+  ],
+  "categories": {
+    "tests": {
+      "applicability": "required",
+      "checkIds": ["tests.full"]
+    },
+    "static": {
+      "applicability": "required",
+      "checkIds": ["static.lint", "static.lib", "static.status"]
+    },
+    "scenarios": {
+      "applicability": "required",
+      "evidence": {
+        "AR1": ["tests.full"],
+        "AR10": ["tests.full"],
+        "AR11": ["tests.full"],
+        "AR12": ["tests.full", "static.lint"],
+        "AR2": ["tests.full"],
+        "AR3": ["tests.full"],
+        "AR4": ["tests.full"],
+        "AR5": ["tests.full"],
+        "AR6": ["tests.full"],
+        "AR7": ["tests.full"],
+        "AR8": ["tests.full"],
+        "AR9": ["tests.full"]
+      }
+    },
+    "standards": {
+      "applicability": "required",
+      "checkIds": ["standards.commits"]
+    },
+    "bannedPatterns": {
+      "applicability": "required",
+      "checkIds": ["patterns.diff"]
+    }
+  }
+}

@@ -1,0 +1,146 @@
+{
+  "schemaVersion": 1,
+  "taskId": "ar-t4",
+  "manifest": "/home/neil/code/threadsafe/pi-sdlc.worktrees/feat-adoption-readiness/docs/validation/adoption-readiness/ar-t4.json",
+  "repoRoot": "/home/neil/code/threadsafe/pi-sdlc.worktrees/feat-adoption-readiness",
+  "verdict": "PASS",
+  "exitCode": 0,
+  "errors": [],
+  "manifestErrors": [],
+  "commands": [
+    {
+      "id": "tests.docs",
+      "argv": [
+        "node",
+        "--test",
+        "test/docs.test.js",
+        "test/sdlc-status.test.js"
+      ],
+      "evidence": [
+        "AR10 startup-contract mutation tests",
+        "AR11 migration docs/fixture assertions",
+        "AR12 documentation portion"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 1518,
+      "stdoutTail": "✔ OH7: SKILL.md carries the opt-in, advisory, hooks headings + red flags (0.630853ms)\n✔ OH7: the Implement table row no longer prescribes 'in a worktree' (0.129626ms)\n✔ OH8: SKILL.md contains the announce-on-fire block and the workflow.md rule (0.095446ms)\n✔ OH9: exactly two new ADRs (opt-in, hooks) with context/decision/consequences (0.218831ms)\n✔ OH12: README has the opt-in story and drops the old no-manifest-defaults claim (0.114127ms)\n✔ AR10: all four startup branches and every prohibition are present and mutation-detectable (0.211989ms)\n✔ AR10: docs never equate manifest presence with readiness or claim mechanical agent enforcement (0.103578ms)\n✔ AR11: README carries the complete migration story (0.151425ms)\n✔ AR11: ADR 0010 is superseded and the policy ADR 0015 restates the migration (0.730518ms)\n✔ AR11: ADR 0016 freezes the FS8 machine surface (0.212396ms)\n✔ AR11: no stale opted-in output claim remains in shipped guidance (0.148475ms)\n✔ AR11: wrapper help/comments and .mjs usage match the FS8 invocation (0.096358ms)\n✔ AR11: the setup template requires committing .pi⁄sdlc and points at the status gate (0.065293ms)\n✔ AR1: committed valid config+models, clean tree — exit 0, state ready, all checks pass (132.915468ms)\n✔ AR2: absent, untracked, staged, and ignored manifests all exit 1 not-adopted (186.198806ms)\n✔ AR4: argument errors exit 2 at cli.arguments with later checks skipped (170.920807ms)\n✔ AR4: unresolvable implicit root exits 2 at root.resolve (35.696051ms)\n✔ AR4: non-git explicit root exits 2 at git.repository, with or without a manifest (65.58501ms)\n✔ AR4: a git repository without HEAD exits 1 not-adopted, not 2 (34.78617ms)\n✔ AR4: --help prints usage, exits 0, and emits no status envelope (28.979863ms)\n✔ AR5: committed clean but invalid manifests exit 2 at config.valid (158.127288ms)\n✔ AR6: models absent from HEAD (filesystem-only variants) exits 3 at models.head (138.752304ms)\n✔ AR6: dirty committed models exits 3 at models.clean; models.valid skips (65.134325ms)\n✔ AR6: committed malformed / FS2-invalid / unreadable models exit 3 at models.valid (171.316565ms)\n✔ AR6: workflow.md present+readable passes; injected read failure exits 3 (96.800795ms)\n✔ AR3 (baseline): unrelated dirty files do not affect readiness (46.384029ms)\n✔ AR12: status completes with a PATH exposing only git (no other executable can run) (66.169744ms)\n✔ dogfood: this repo's committed config+models make sdlc-status exit 0 (47.022068ms)\nℹ tests 28\nℹ suites 0\nℹ pass 28\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 1487.238263\n",
+      "stderrTail": ""
+    },
+    {
+      "id": "standards.commits",
+      "argv": [
+        "node",
+        "scripts/check-commit-messages.mjs",
+        "origin/main..HEAD"
+      ],
+      "evidence": [
+        "Conventional Commits repository standard once feature-branch commits exist; re-evidenced at ar-t5"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 27,
+      "stdoutTail": "All commit headers and the PR title follow Conventional Commits.\n",
+      "stderrTail": ""
+    },
+    {
+      "id": "static.lint",
+      "argv": [
+        "npm",
+        "run",
+        "lint"
+      ],
+      "evidence": [
+        "Repository lint and formatting rules"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 121,
+      "stdoutTail": "\n> pi-sdlc@0.1.1 lint\n> biome check .\n\nChecked 43 files in 21ms. No fixes applied.\n",
+      "stderrTail": ""
+    },
+    {
+      "id": "patterns.diff",
+      "argv": [
+        "git",
+        "diff",
+        "--check",
+        "HEAD"
+      ],
+      "evidence": [
+        "No whitespace-error banned patterns in task diff"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 6,
+      "stdoutTail": "",
+      "stderrTail": ""
+    }
+  ],
+  "categories": [
+    {
+      "category": "tests",
+      "status": "PASS",
+      "checkIds": [
+        "tests.docs"
+      ]
+    },
+    {
+      "category": "static",
+      "status": "PASS",
+      "checkIds": [
+        "static.lint"
+      ]
+    },
+    {
+      "category": "scenarios",
+      "status": "PASS"
+    },
+    {
+      "category": "standards",
+      "status": "PASS",
+      "checkIds": [
+        "standards.commits"
+      ]
+    },
+    {
+      "category": "bannedPatterns",
+      "status": "PASS",
+      "checkIds": [
+        "patterns.diff"
+      ]
+    }
+  ],
+  "scenarios": [
+    {
+      "scenarioId": "AR10",
+      "status": "PASS",
+      "checkIds": [
+        "tests.docs"
+      ]
+    },
+    {
+      "scenarioId": "AR11",
+      "status": "PASS",
+      "checkIds": [
+        "tests.docs"
+      ]
+    },
+    {
+      "scenarioId": "AR12",
+      "status": "PASS",
+      "checkIds": [
+        "tests.docs",
+        "static.lint"
+      ]
+    }
+  ]
+}

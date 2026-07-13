@@ -1,0 +1,243 @@
+{
+  "schemaVersion": 1,
+  "taskId": "ar-t5",
+  "manifest": "/home/neil/code/threadsafe/pi-sdlc.worktrees/feat-adoption-readiness/docs/validation/adoption-readiness/ar-t5.json",
+  "repoRoot": "/home/neil/code/threadsafe/pi-sdlc.worktrees/feat-adoption-readiness",
+  "verdict": "PASS",
+  "exitCode": 0,
+  "errors": [],
+  "manifestErrors": [],
+  "commands": [
+    {
+      "id": "tests.full",
+      "argv": [
+        "npm",
+        "test"
+      ],
+      "evidence": [
+        "AR1-AR12 integrated scenario suite and compatibility goldens"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 3127,
+      "stdoutTail": "[...truncated; showing bounded tail...]\n✔ S4: stamped name+tools+body byte-identical to golden; description == FS4 (127.903804ms)\n✔ S5: agent lands in the CONSUMER's .pi/agents (not the skill dir) (24.391046ms)\n✔ S6: resolve-panel --emit-tasks deep-equals golden under isolated env (103.906653ms)\n✔ S7: resolution terminal cases (81.493721ms)\n✔ test/fs8-helpers.js (28.854333ms)\nunknown format \"uri\" ignored in schema at path \"#/properties/tracker/properties/board/properties/url\"\nunknown format \"uri\" ignored in schema at path \"#/properties/tracker/properties/board/properties/url\"\n✔ OH1: valid hooks pass both the JSON Schema and validateConfig (37.570773ms)\n✔ OH1: the committed example (with hooks) validates against the schema (0.496346ms)\n✔ OH1: mutations are rejected by BOTH the schema and validateConfig (exit 2) (305.66295ms)\n✔ OH2: readConfig strict mode rejects a missing manifest naming /setup-sdlc (24.606344ms)\n✔ OH2: default readConfig returns defaults for a missing manifest (0.548384ms)\n✔ OH2: strict mode returns the config (incl. hooks) when the manifest is present (2.05407ms)\n✔ AR3: every manifest dirty variant exits 3 at adoption.manifest-clean (322.141403ms)\n✔ AR3: every models dirty variant exits 3 at models.clean (301.497778ms)\n✔ AR9: a linked worktree is ready on its own HEAD/index/working tree (63.587269ms)\n✔ AR9: a dirty manifest in the main checkout does not contaminate a linked worktree (97.473132ms)\n✔ AR9: detached HEAD with the required blobs is ready (43.389635ms)\n✔ AR9: a symlinked consumer root compares equal after realpath and is ready (54.389971ms)\n✔ AR9: a configured monorepo subdirectory uses prefixed HEAD blob paths and can be ready (131.818939ms)\n✔ AR9: a consumer root that is a git submodule is inspected as its own worktree (100.253335ms)\n✔ AR9: sparse checkout omitting required committed files deterministically fails, never ready (98.401405ms)\n✔ AR4: a corrupt .git pointer is git.repository:error, exit 2 (30.172999ms)\n✔ RL1: inspectRoot explicit precedence — config over repoRoot over sdlcRoot; relative resolves against cwd (1.174004ms)\n✔ RL2: inspectRoot walks ancestors from cwd to a configured project root (0.401516ms)\n✔ RL3: inspectRoot falls back to the git top-level for a manifest-less repo (7.204855ms)\n✔ RL4: inspectRoot returns the error member (never exits) outside any project (2.260137ms)\n✔ RL5: inspectRoot honours $SDLC_ROOT when no explicit option is given (0.242917ms)\n✔ RL6: inspectConfig — valid input yields [], non-objects yield the deterministic issue (0.502561ms)\n✔ RL7: inspectConfig — aggregates every issue in validation-rule order, never throws (0.268333ms)\n✔ RL7b: inspectConfig — malformed nested structures aggregate without throwing (0.160864ms)\n✔ RL8: inspectModels — valid roster yields [], non-objects and aggregates are deterministic (0.441655ms)\n✔ RL8b: inspectModels — non-object phases and phase entries never throw (0.196439ms)\n✔ RL9: validateConfig first diagnostic is byte-identical to the first collector issue (exit 2) (135.574056ms)\n✔ RL10: validateModels first diagnostic is byte-identical to the first collector issue (exit 2) (106.715304ms)\n✔ RL11: validators still accept valid input (exit 0) after delegation (61.68425ms)\n✔ AR8: ready fixture — exact text golden (76.903334ms)\n✔ AR8: ready fixture — exact JSON golden (deterministic serialization) (84.427023ms)\n✔ AR8: not-adopted — text carries fail + remediation and pinned skips (exit 1) (40.982115ms)\n✔ AR8: JSON on every state 0-3 is a single valid envelope with only FS8 fields (207.169131ms)\n✔ AR8: secret sentinels in the environment never appear in output (155.975685ms)\n✔ AR8: --format json anywhere in argv forces the envelope for argument errors (122.105793ms)\n✔ AR8: JSON envelope root falls back to absolute cwd on root-resolution failure (25.128229ms)\n✔ AR8: cli.arguments error envelope uses the single unambiguous explicit root when available (30.030425ms)\n✔ AR7: missing committed models + workflow read failure both surface, exit 3 (50.161144ms)\n✔ AR7: malformed config + missing committed models both report; error precedence wins (exit 2) (43.411734ms)\n✔ AR7: skip pins — not-adopted repo (37.553355ms)\n✔ AR7: skip pins — dirty manifest still evaluates independent models/workflow checks (45.695653ms)\n✔ wrapper: sdlc-status.sh output and exit are identical to direct .mjs invocation (143.780514ms)\n✔ AR1: committed valid config+models, clean tree — exit 0, state ready, all checks pass (103.458442ms)\n✔ AR2: absent, untracked, staged, and ignored manifests all exit 1 not-adopted (176.471911ms)\n✔ AR4: argument errors exit 2 at cli.arguments with later checks skipped (195.18529ms)\n✔ AR4: unresolvable implicit root exits 2 at root.resolve (35.091421ms)\n✔ AR4: non-git explicit root exits 2 at git.repository, with or without a manifest (60.564256ms)\n✔ AR4: a git repository without HEAD exits 1 not-adopted, not 2 (35.734713ms)\n✔ AR4: --help prints usage, exits 0, and emits no status envelope (32.237763ms)\n✔ AR5: committed clean but invalid manifests exit 2 at config.valid (138.191177ms)\n✔ AR6: models absent from HEAD (filesystem-only variants) exits 3 at models.head (122.014422ms)\n✔ AR6: dirty committed models exits 3 at models.clean; models.valid skips (42.744807ms)\n✔ AR6: committed malformed / FS2-invalid / unreadable models exit 3 at models.valid (147.298481ms)\n✔ AR6: workflow.md present+readable passes; injected read failure exits 3 (88.730514ms)\n✔ AR3 (baseline): unrelated dirty files do not affect readiness (37.009923ms)\n✔ AR12: status completes with a PATH exposing only git (no other executable can run) (50.649968ms)\n✔ dogfood: this repo's committed config+models make sdlc-status exit 0 (45.050147ms)\n✔ OH4: --yes writes a schema-valid config; re-run without --force exits 2 unchanged; --force overwrites (94.777733ms)\n✔ OH5: --hook-use fields 3-4 = use, do = remainder after 4th colon (colons in do preserved) (30.246974ms)\n✔ OH5: --hook-run command = remainder after 2nd colon (colons preserved); trust warning on stderr (26.655459ms)\n✔ OH5: mixed repeated hook flags preserve argv order in the written list (24.636629ms)\n✔ OH5: malformed hook flags exit 2 (193.760431ms)\n✔ PR-fix: value-taking flags accept values that begin with '-' (e.g. --announce '--foo') (30.522929ms)\n✔ OH5: partial tracker flags exit 2 (all-or-none) (33.588526ms)\n✔ OH5: no config flags and no TTY exits 2 (interview needs a TTY) (21.696786ms)\n✔ OH6: package.json pi.prompts includes ./templates and the template has a description (0.369675ms)\n✔ PV1: a valid JavaScript manifest runs only declared checks and passes (69.922822ms)\n✔ PV2: only declared argv run; an undeclared tool command never executes (120.826413ms)\n✔ PV3: schema and inspectManifest reject the mutation matrix before any command runs (64.83728ms)\n✔ PV4: command outcomes are complete and deterministic; runner continues after failures (52.124765ms)\n✔ PV4: a timeout is reported as FAIL with timedOut (1058.745602ms)\n✔ PV5: category applicability is exact; injected n/a shapes are rejected (62.357691ms)\n✔ PV6: scenario mapping gates the verdict (75.964865ms)\n✔ PV7: standards and banned patterns are commands, not judgement (83.620635ms)\n✔ PV8: evidence is bounded and secrets are redacted (64.758991ms)\n✔ PV8 unit: boundStream and redaction name-matching are precise (210.505022ms)\n✔ PV9: JSON/text/exit agree and JSON mode is order-independent (418.4879ms)\n✔ PV9: --report writes the exact JSON bytes atomically (103.194984ms)\n✔ PV9: --report outside the repo root is refused and clobbers nothing (103.460202ms)\n✔ PV10: generic validator law and generated agent are portable (0.34451ms)\n✔ PV11: receipt hash verification detects mutation of any stored file (3.469031ms)\n✔ PV11: a FAIL runner-report cannot ride under runnerVerdict PASS (0.330919ms)\n✔ parseArgs: recognises JSON anywhere and rejects bad flags (0.264011ms)\n✔ PV13: renderText is a faithful projection of the report (66.56567ms)\nℹ tests 106\nℹ suites 0\nℹ pass 106\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 3043.689303\n",
+      "stderrTail": ""
+    },
+    {
+      "id": "static.lint",
+      "argv": [
+        "npm",
+        "run",
+        "lint"
+      ],
+      "evidence": [
+        "Repository lint and formatting rules"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 133,
+      "stdoutTail": "\n> pi-sdlc@0.1.1 lint\n> biome check .\n\nChecked 43 files in 27ms. No fixes applied.\n",
+      "stderrTail": ""
+    },
+    {
+      "id": "static.lib",
+      "argv": [
+        "node",
+        "--check",
+        "skills/sdlc/scripts/lib.mjs"
+      ],
+      "evidence": [
+        "Shared library syntax"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 26,
+      "stdoutTail": "",
+      "stderrTail": ""
+    },
+    {
+      "id": "static.status",
+      "argv": [
+        "node",
+        "--check",
+        "skills/sdlc/scripts/sdlc-status.mjs"
+      ],
+      "evidence": [
+        "FS8 status command syntax"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 23,
+      "stdoutTail": "",
+      "stderrTail": ""
+    },
+    {
+      "id": "standards.commits",
+      "argv": [
+        "node",
+        "scripts/check-commit-messages.mjs",
+        "origin/main..HEAD"
+      ],
+      "evidence": [
+        "Conventional Commits repository standard on the feature range"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 32,
+      "stdoutTail": "All commit headers and the PR title follow Conventional Commits.\n",
+      "stderrTail": ""
+    },
+    {
+      "id": "patterns.diff",
+      "argv": [
+        "git",
+        "diff",
+        "--check",
+        "HEAD"
+      ],
+      "evidence": [
+        "No whitespace-error banned patterns in feature diff"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 3,
+      "stdoutTail": "",
+      "stderrTail": ""
+    }
+  ],
+  "categories": [
+    {
+      "category": "tests",
+      "status": "PASS",
+      "checkIds": [
+        "tests.full"
+      ]
+    },
+    {
+      "category": "static",
+      "status": "PASS",
+      "checkIds": [
+        "static.lint",
+        "static.lib",
+        "static.status"
+      ]
+    },
+    {
+      "category": "scenarios",
+      "status": "PASS"
+    },
+    {
+      "category": "standards",
+      "status": "PASS",
+      "checkIds": [
+        "standards.commits"
+      ]
+    },
+    {
+      "category": "bannedPatterns",
+      "status": "PASS",
+      "checkIds": [
+        "patterns.diff"
+      ]
+    }
+  ],
+  "scenarios": [
+    {
+      "scenarioId": "AR1",
+      "status": "PASS",
+      "checkIds": [
+        "tests.full"
+      ]
+    },
+    {
+      "scenarioId": "AR10",
+      "status": "PASS",
+      "checkIds": [
+        "tests.full"
+      ]
+    },
+    {
+      "scenarioId": "AR11",
+      "status": "PASS",
+      "checkIds": [
+        "tests.full"
+      ]
+    },
+    {
+      "scenarioId": "AR12",
+      "status": "PASS",
+      "checkIds": [
+        "tests.full",
+        "static.lint"
+      ]
+    },
+    {
+      "scenarioId": "AR2",
+      "status": "PASS",
+      "checkIds": [
+        "tests.full"
+      ]
+    },
+    {
+      "scenarioId": "AR3",
+      "status": "PASS",
+      "checkIds": [
+        "tests.full"
+      ]
+    },
+    {
+      "scenarioId": "AR4",
+      "status": "PASS",
+      "checkIds": [
+        "tests.full"
+      ]
+    },
+    {
+      "scenarioId": "AR5",
+      "status": "PASS",
+      "checkIds": [
+        "tests.full"
+      ]
+    },
+    {
+      "scenarioId": "AR6",
+      "status": "PASS",
+      "checkIds": [
+        "tests.full"
+      ]
+    },
+    {
+      "scenarioId": "AR7",
+      "status": "PASS",
+      "checkIds": [
+        "tests.full"
+      ]
+    },
+    {
+      "scenarioId": "AR8",
+      "status": "PASS",
+      "checkIds": [
+        "tests.full"
+      ]
+    },
+    {
+      "scenarioId": "AR9",
+      "status": "PASS",
+      "checkIds": [
+        "tests.full"
+      ]
+    }
+  ]
+}

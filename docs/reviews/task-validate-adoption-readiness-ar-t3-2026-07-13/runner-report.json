@@ -1,0 +1,188 @@
+{
+  "schemaVersion": 1,
+  "taskId": "ar-t3",
+  "manifest": "/home/neil/code/threadsafe/pi-sdlc.worktrees/feat-adoption-readiness/docs/validation/adoption-readiness/ar-t3.json",
+  "repoRoot": "/home/neil/code/threadsafe/pi-sdlc.worktrees/feat-adoption-readiness",
+  "verdict": "PASS",
+  "exitCode": 0,
+  "errors": [],
+  "manifestErrors": [],
+  "commands": [
+    {
+      "id": "tests.git",
+      "argv": [
+        "node",
+        "--test",
+        "test/sdlc-status.test.js",
+        "test/readiness-git.test.js"
+      ],
+      "evidence": [
+        "AR2 HEAD-absent completion",
+        "AR3 index/working-tree dirty variants",
+        "AR4 git error fixtures",
+        "AR6 unreadable models/workflow",
+        "AR9 topology matrix",
+        "AR12 compatibility"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 1240,
+      "stdoutTail": "✔ AR3: every manifest dirty variant exits 3 at adoption.manifest-clean (309.293557ms)\n✔ AR3: every models dirty variant exits 3 at models.clean (248.764397ms)\n✔ AR9: a linked worktree is ready on its own HEAD/index/working tree (47.742351ms)\n✔ AR9: a dirty manifest in the main checkout does not contaminate a linked worktree (94.862238ms)\n✔ AR9: detached HEAD with the required blobs is ready (46.475791ms)\n✔ AR9: a symlinked consumer root compares equal after realpath and is ready (52.57143ms)\n✔ AR9: a configured monorepo subdirectory uses prefixed HEAD blob paths and can be ready (93.946328ms)\n✔ AR9: a consumer root that is a git submodule is inspected as its own worktree (104.603048ms)\n✔ AR9: sparse checkout omitting required committed files deterministically fails, never ready (109.884648ms)\n✔ AR4: a corrupt .git pointer is git.repository:error, exit 2 (22.685059ms)\n✔ AR1: committed valid config+models, clean tree — exit 0, state ready, all checks pass (70.467349ms)\n✔ AR2: absent, untracked, staged, and ignored manifests all exit 1 not-adopted (143.082323ms)\n✔ AR4: argument errors exit 2 at cli.arguments with later checks skipped (154.851761ms)\n✔ AR4: unresolvable implicit root exits 2 at root.resolve (32.378896ms)\n✔ AR4: non-git explicit root exits 2 at git.repository, with or without a manifest (62.063765ms)\n✔ AR4: a git repository without HEAD exits 1 not-adopted, not 2 (26.21886ms)\n✔ AR4: --help prints usage, exits 0, and emits no status envelope (27.17107ms)\n✔ AR5: committed clean but invalid manifests exit 2 at config.valid (138.090615ms)\n✔ AR6: models absent from HEAD (filesystem-only variants) exits 3 at models.head (114.151532ms)\n✔ AR6: dirty committed models exits 3 at models.clean; models.valid skips (38.50927ms)\n✔ AR6: committed malformed / FS2-invalid / unreadable models exit 3 at models.valid (154.414945ms)\n✔ AR6: workflow.md present+readable passes; injected read failure exits 3 (67.463687ms)\n✔ AR3 (baseline): unrelated dirty files do not affect readiness (36.077307ms)\n✔ AR12: status completes with a PATH exposing only git (no other executable can run) (55.864925ms)\n✔ dogfood: this repo's committed config+models make sdlc-status exit 0 (44.446696ms)\nℹ tests 25\nℹ suites 0\nℹ pass 25\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 1217.355037\n",
+      "stderrTail": ""
+    },
+    {
+      "id": "static.status",
+      "argv": [
+        "node",
+        "--check",
+        "skills/sdlc/scripts/sdlc-status.mjs"
+      ],
+      "evidence": [
+        "FS8 status command syntax"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 22,
+      "stdoutTail": "",
+      "stderrTail": ""
+    },
+    {
+      "id": "static.tests-exist",
+      "argv": [
+        "node",
+        "--check",
+        "test/readiness-git.test.js"
+      ],
+      "evidence": [
+        "New readiness-git test file exists and parses; guards node --test silently skipping missing files"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 17,
+      "stdoutTail": "",
+      "stderrTail": ""
+    },
+    {
+      "id": "static.lint",
+      "argv": [
+        "npm",
+        "run",
+        "lint"
+      ],
+      "evidence": [
+        "Repository lint and formatting rules"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 106,
+      "stdoutTail": "\n> pi-sdlc@0.1.1 lint\n> biome check .\n\nChecked 43 files in 18ms. No fixes applied.\n",
+      "stderrTail": ""
+    },
+    {
+      "id": "patterns.diff",
+      "argv": [
+        "git",
+        "diff",
+        "--check",
+        "HEAD"
+      ],
+      "evidence": [
+        "No whitespace-error banned patterns in task diff"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 2,
+      "stdoutTail": "",
+      "stderrTail": ""
+    }
+  ],
+  "categories": [
+    {
+      "category": "tests",
+      "status": "PASS",
+      "checkIds": [
+        "tests.git"
+      ]
+    },
+    {
+      "category": "static",
+      "status": "PASS",
+      "checkIds": [
+        "static.status",
+        "static.tests-exist",
+        "static.lint"
+      ]
+    },
+    {
+      "category": "scenarios",
+      "status": "PASS"
+    },
+    {
+      "category": "standards",
+      "status": "N/A",
+      "reason": "Commit-range standard is verified at ar-t5; no additional standard applies to this task."
+    },
+    {
+      "category": "bannedPatterns",
+      "status": "PASS",
+      "checkIds": [
+        "patterns.diff"
+      ]
+    }
+  ],
+  "scenarios": [
+    {
+      "scenarioId": "AR12",
+      "status": "PASS",
+      "checkIds": [
+        "tests.git",
+        "static.lint"
+      ]
+    },
+    {
+      "scenarioId": "AR2",
+      "status": "PASS",
+      "checkIds": [
+        "tests.git"
+      ]
+    },
+    {
+      "scenarioId": "AR3",
+      "status": "PASS",
+      "checkIds": [
+        "tests.git"
+      ]
+    },
+    {
+      "scenarioId": "AR4",
+      "status": "PASS",
+      "checkIds": [
+        "tests.git"
+      ]
+    },
+    {
+      "scenarioId": "AR6",
+      "status": "PASS",
+      "checkIds": [
+        "tests.git"
+      ]
+    },
+    {
+      "scenarioId": "AR9",
+      "status": "PASS",
+      "checkIds": [
+        "tests.git"
+      ]
+    }
+  ]
+}

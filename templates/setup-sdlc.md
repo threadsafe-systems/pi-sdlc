@@ -26,5 +26,8 @@ name — pi-sdlc ships none), and an optional after-phase notification `run` hoo
 `run` hooks execute arbitrary shell commands with the agent's privileges from the
 committed config; only commit hooks you trust (same boundary as `.pi/prompts`).
 
-After it writes `.pi/sdlc/`, confirm the generated `sdlc.config.json` back to the
-user and remind them to commit `.pi/sdlc/` to adopt the sdlc for the repo.
+After it writes `.pi/sdlc/`, confirm the generated `sdlc.config.json` back to
+the user, then have them commit `.pi/sdlc/` — adoption is the manifest blob in
+the current git `HEAD`, and readiness also needs the committed models file.
+Verify with `skills/sdlc/scripts/sdlc-status.sh` (exit 0 = ready; exit 3 =
+adopted but incomplete, for example uncommitted `.pi/sdlc/` files).

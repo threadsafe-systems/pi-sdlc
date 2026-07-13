@@ -1,0 +1,164 @@
+{
+  "schemaVersion": 1,
+  "taskId": "ar-t1",
+  "manifest": "/home/neil/code/threadsafe/pi-sdlc.worktrees/feat-adoption-readiness/docs/validation/adoption-readiness/ar-t1.json",
+  "repoRoot": "/home/neil/code/threadsafe/pi-sdlc.worktrees/feat-adoption-readiness",
+  "verdict": "PASS",
+  "exitCode": 0,
+  "errors": [],
+  "manifestErrors": [],
+  "commands": [
+    {
+      "id": "tests.readiness-lib",
+      "argv": [
+        "node",
+        "--test",
+        "test/readiness-lib.test.js",
+        "test/extraction.test.js",
+        "test/hooks.test.js"
+      ],
+      "evidence": [
+        "AR5/AR6 non-fatal inspection seams",
+        "AR12 existing collector/validator compatibility"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 729,
+      "stdoutTail": "unknown format \"uri\" ignored in schema at path \"#/properties/tracker/properties/board/properties/url\"\nunknown format \"uri\" ignored in schema at path \"#/properties/tracker/properties/board/properties/url\"\n✔ S2: no loom-domain content in the generic surface (1.759536ms)\n✔ S3: JSON schemas validate their examples (23.071832ms)\n✔ S3b: ensure-panel-agent rejects malformed config (exit 2) (201.3728ms)\n✔ S3c: resolve-panel rejects malformed models (exit 2) (107.645995ms)\n✔ S4: stamped name+tools+body byte-identical to golden; description == FS4 (83.431651ms)\n✔ S5: agent lands in the CONSUMER's .pi/agents (not the skill dir) (32.096768ms)\n✔ S6: resolve-panel --emit-tasks deep-equals golden under isolated env (107.845309ms)\n✔ S7: resolution terminal cases (87.876163ms)\nunknown format \"uri\" ignored in schema at path \"#/properties/tracker/properties/board/properties/url\"\nunknown format \"uri\" ignored in schema at path \"#/properties/tracker/properties/board/properties/url\"\n✔ OH1: valid hooks pass both the JSON Schema and validateConfig (22.021168ms)\n✔ OH1: the committed example (with hooks) validates against the schema (0.277643ms)\n✔ OH1: mutations are rejected by BOTH the schema and validateConfig (exit 2) (295.445994ms)\n✔ OH2: readConfig strict mode rejects a missing manifest naming /setup-sdlc (27.860625ms)\n✔ OH2: default readConfig returns defaults for a missing manifest (0.392644ms)\n✔ OH2: strict mode returns the config (incl. hooks) when the manifest is present (1.457483ms)\n✔ RL1: inspectRoot explicit precedence — config over repoRoot over sdlcRoot; relative resolves against cwd (1.810726ms)\n✔ RL2: inspectRoot walks ancestors from cwd to a configured project root (0.797038ms)\n✔ RL3: inspectRoot falls back to the git top-level for a manifest-less repo (6.376534ms)\n✔ RL4: inspectRoot returns the error member (never exits) outside any project (1.693448ms)\n✔ RL5: inspectRoot honours $SDLC_ROOT when no explicit option is given (0.698432ms)\n✔ RL6: inspectConfig — valid input yields [], non-objects yield the deterministic issue (0.484692ms)\n✔ RL7: inspectConfig — aggregates every issue in validation-rule order, never throws (0.269012ms)\n✔ RL7b: inspectConfig — malformed nested structures aggregate without throwing (0.163869ms)\n✔ RL8: inspectModels — valid roster yields [], non-objects and aggregates are deterministic (0.450241ms)\n✔ RL8b: inspectModels — non-object phases and phase entries never throw (0.218148ms)\n✔ RL9: validateConfig first diagnostic is byte-identical to the first collector issue (exit 2) (137.98177ms)\n✔ RL10: validateModels first diagnostic is byte-identical to the first collector issue (exit 2) (120.109518ms)\n✔ RL11: validators still accept valid input (exit 0) after delegation (41.111805ms)\nℹ tests 27\nℹ suites 0\nℹ pass 27\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 698.339005\n",
+      "stderrTail": ""
+    },
+    {
+      "id": "static.lib",
+      "argv": [
+        "node",
+        "--check",
+        "skills/sdlc/scripts/lib.mjs"
+      ],
+      "evidence": [
+        "Shared library syntax"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 20,
+      "stdoutTail": "",
+      "stderrTail": ""
+    },
+    {
+      "id": "static.tests-exist",
+      "argv": [
+        "node",
+        "--check",
+        "test/readiness-lib.test.js"
+      ],
+      "evidence": [
+        "New readiness-lib test file exists and parses; guards node --test silently skipping missing files"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 22,
+      "stdoutTail": "",
+      "stderrTail": ""
+    },
+    {
+      "id": "static.lint",
+      "argv": [
+        "npm",
+        "run",
+        "lint"
+      ],
+      "evidence": [
+        "Repository lint and formatting rules"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 145,
+      "stdoutTail": "\n> pi-sdlc@0.1.1 lint\n> biome check .\n\nChecked 40 files in 24ms. No fixes applied.\n",
+      "stderrTail": ""
+    },
+    {
+      "id": "patterns.diff",
+      "argv": [
+        "git",
+        "diff",
+        "--check",
+        "HEAD"
+      ],
+      "evidence": [
+        "No whitespace-error banned patterns in task diff"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 4,
+      "stdoutTail": "",
+      "stderrTail": ""
+    }
+  ],
+  "categories": [
+    {
+      "category": "tests",
+      "status": "PASS",
+      "checkIds": [
+        "tests.readiness-lib"
+      ]
+    },
+    {
+      "category": "static",
+      "status": "PASS",
+      "checkIds": [
+        "static.lib",
+        "static.tests-exist",
+        "static.lint"
+      ]
+    },
+    {
+      "category": "scenarios",
+      "status": "PASS"
+    },
+    {
+      "category": "standards",
+      "status": "N/A",
+      "reason": "Commit-range standard is verified at ar-t5; no additional standard applies to this task."
+    },
+    {
+      "category": "bannedPatterns",
+      "status": "PASS",
+      "checkIds": [
+        "patterns.diff"
+      ]
+    }
+  ],
+  "scenarios": [
+    {
+      "scenarioId": "AR12",
+      "status": "PASS",
+      "checkIds": [
+        "tests.readiness-lib",
+        "static.lint"
+      ]
+    },
+    {
+      "scenarioId": "AR5",
+      "status": "PASS",
+      "checkIds": [
+        "tests.readiness-lib"
+      ]
+    },
+    {
+      "scenarioId": "AR6",
+      "status": "PASS",
+      "checkIds": [
+        "tests.readiness-lib"
+      ]
+    }
+  ]
+}
