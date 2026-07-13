@@ -1,0 +1,142 @@
+{
+  "schemaVersion": 1,
+  "taskId": "ab-t5",
+  "manifest": "/home/neil/code/threadsafe/pi-sdlc.worktrees/feat-sdlc-adoption-bundle/docs/validation/sdlc-adoption-bundle/ab-t5.json",
+  "repoRoot": "/home/neil/code/threadsafe/pi-sdlc.worktrees/feat-sdlc-adoption-bundle",
+  "verdict": "PASS",
+  "exitCode": 0,
+  "errors": [],
+  "manifestErrors": [],
+  "commands": [
+    {
+      "id": "tests.full-suite",
+      "argv": [
+        "npm",
+        "test"
+      ],
+      "evidence": [
+        "AB17 full offline suite including no-live-call sentinel",
+        "AB14 upgrade fixture and FS8 tests green"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 5226,
+      "stdoutTail": "[...truncated; showing bounded tail...]\n✔ OH1: mutations are rejected by BOTH the schema and validateConfig (exit 2) (430.07033ms)\n✔ OH2: readConfig strict mode rejects a missing manifest naming /setup-sdlc (33.222912ms)\n✔ OH2: default readConfig returns defaults for a missing manifest (0.383502ms)\n✔ OH2: strict mode returns the config (incl. hooks) when the manifest is present (1.726851ms)\n✔ AR3: every manifest dirty variant exits 3 at adoption.manifest-clean (576.913822ms)\n✔ AR3: every models dirty variant exits 3 at models.clean (581.273776ms)\n✔ AR9: a linked worktree is ready on its own HEAD/index/working tree (99.826592ms)\n✔ AR9: a dirty manifest in the main checkout does not contaminate a linked worktree (179.357851ms)\n✔ AR9: detached HEAD with the required blobs is ready (109.134871ms)\n✔ AR9: a symlinked consumer root compares equal after realpath and is ready (113.070551ms)\n✔ AR9: a configured monorepo subdirectory uses prefixed HEAD blob paths and can be ready (298.210642ms)\n✔ AR9: a consumer root that is a git submodule is inspected as its own worktree (253.76398ms)\n✔ AR9: sparse checkout omitting required committed files deterministically fails, never ready (249.176062ms)\n✔ AR9/PR-panel: a manifest committed as a symlink is never trusted as adoption content (206.829984ms)\n✔ AR3/PR-panel: assume-unchanged and skip-worktree index flags cannot smuggle uncommitted content (479.372719ms)\n✔ AR4: a corrupt .git pointer is git.repository:error, exit 2 (50.507131ms)\n✔ RL1: inspectRoot explicit precedence — config over repoRoot over sdlcRoot; relative resolves against cwd (2.202775ms)\n✔ RL2: inspectRoot walks ancestors from cwd to a configured project root (0.905433ms)\n✔ RL3: inspectRoot falls back to the git top-level for a manifest-less repo (9.755195ms)\n✔ RL4: inspectRoot returns the error member (never exits) outside any project (6.007745ms)\n✔ RL5: inspectRoot honours $SDLC_ROOT when no explicit option is given (0.532373ms)\n✔ RL6: inspectConfig — valid input yields [], non-objects yield the deterministic issue (1.070846ms)\n✔ RL7: inspectConfig — aggregates every issue in validation-rule order, never throws (3.020352ms)\n✔ RL7b: inspectConfig — malformed nested structures aggregate without throwing (0.35234ms)\n✔ RL8: inspectModels — valid roster yields [], non-objects and aggregates are deterministic (0.844999ms)\n✔ RL8b: inspectModels — non-object phases and phase entries never throw (0.394128ms)\n✔ RL9: validateConfig first diagnostic is byte-identical to the first collector issue (exit 2) (206.574032ms)\n✔ RL10: validateModels first diagnostic is byte-identical to the first collector issue (exit 2) (184.279798ms)\n✔ RL11: validators still accept valid input (exit 0) after delegation (75.947456ms)\n✔ AR8: ready fixture — exact text golden (117.912401ms)\n✔ AR8: ready fixture — exact JSON golden (deterministic serialization) (163.797379ms)\n✔ AR8: not-adopted — text carries fail + remediation and pinned skips (exit 1) (72.670682ms)\n✔ AR8: JSON on every state 0-3 is a single valid envelope with only FS8 fields (358.985987ms)\n✔ AR8: secret sentinels in the environment never appear in output (276.604646ms)\n✔ AR8: --format json anywhere in argv forces the envelope for argument errors (195.777208ms)\n✔ AR8: JSON envelope root falls back to absolute cwd on root-resolution failure (33.516079ms)\n✔ AR8: cli.arguments error envelope uses the single unambiguous explicit root when available (33.934501ms)\n✔ AR8/PR-panel: argument values after '=' are elided from diagnostics (31.00127ms)\n✔ AR4/PR-panel: a root flag never consumes a following option as its value (36.50768ms)\n✔ PR-panel: skips blocked by an errored check propagate that check's own message (34.66372ms)\n✔ AR7: missing committed models + workflow read failure both surface, exit 3 (71.088303ms)\n✔ AR7: malformed config + missing committed models both report; error precedence wins (exit 2) (89.339682ms)\n✔ AR7: skip pins — not-adopted repo (74.290769ms)\n✔ AR7: skip pins — dirty manifest still evaluates independent models/workflow checks (125.580414ms)\n✔ wrapper: sdlc-status.sh output and exit are identical to direct .mjs invocation (415.48648ms)\n✔ AR1: committed valid config+models, clean tree — exit 0, state ready, all checks pass (216.991632ms)\n✔ AR2: absent, untracked, staged, and ignored manifests all exit 1 not-adopted (225.88242ms)\n✔ AR4: argument errors exit 2 at cli.arguments with later checks skipped (268.201492ms)\n✔ AR4: unresolvable implicit root exits 2 at root.resolve (52.280111ms)\n✔ AR4: non-git explicit root exits 2 at git.repository, with or without a manifest (89.418324ms)\n✔ AR4: a git repository without HEAD exits 1 not-adopted, not 2 (47.012736ms)\n✔ AR4: --help prints usage, exits 0, and emits no status envelope (52.004956ms)\n✔ AR5: committed clean but invalid manifests exit 2 at config.valid (352.49503ms)\n✔ AR6: models absent from HEAD (filesystem-only variants) exits 3 at models.head (319.532854ms)\n✔ AR6: dirty committed models exits 3 at models.clean; models.valid skips (105.141964ms)\n✔ AR6: committed malformed / FS2-invalid / unreadable models exit 3 at models.valid (301.379495ms)\n✔ AR6: workflow.md present+readable passes; injected read failure exits 3 (192.509259ms)\n✔ AR3 (baseline): unrelated dirty files do not affect readiness (118.576677ms)\n✔ AR12: status completes with a PATH exposing only git (no other executable can run) (127.334493ms)\n✔ dogfood: this repo's committed config+models make sdlc-status exit 0 (91.913585ms)\n✔ fresh bundle provisions requested assets and idempotent rerun retains them (98.658946ms)\n✔ existing CI suppresses workflow creation and reports refusal (47.371585ms)\n✔ consumer template without the declaration is refused byte-identically (60.809819ms)\n✔ bundle reports resolved package references before writing (43.427103ms)\n✔ OH4: --yes writes a schema-valid config; bundle re-run refuses config changes; --force overwrites (145.567467ms)\n✔ OH5: --hook-use fields 3-4 = use, do = remainder after 4th colon (colons in do preserved) (46.903745ms)\n✔ OH5: --hook-run command = remainder after 2nd colon (colons preserved); trust warning on stderr (36.791866ms)\n✔ OH5: mixed repeated hook flags preserve argv order in the written list (38.200206ms)\n✔ OH5: malformed hook flags exit 2 (276.465837ms)\n✔ PR-fix: value-taking flags accept values that begin with '-' (e.g. --announce '--foo') (58.841219ms)\n✔ OH5: partial tracker flags exit 2 (all-or-none) (56.301983ms)\n✔ OH5: no config flags and no TTY exits 2 (interview needs a TTY) (53.393461ms)\n✔ OH6: package.json pi.prompts includes ./templates and the template has a description (1.106161ms)\n✔ PV1: a valid JavaScript manifest runs only declared checks and passes (102.80832ms)\n✔ PV2: only declared argv run; an undeclared tool command never executes (227.918781ms)\n✔ PV3: schema and inspectManifest reject the mutation matrix before any command runs (76.558868ms)\n✔ PV4: command outcomes are complete and deterministic; runner continues after failures (60.161092ms)\n✔ PV4: a timeout is reported as FAIL with timedOut (1089.30227ms)\n✔ PV5: category applicability is exact; injected n/a shapes are rejected (150.171763ms)\n✔ PV6: scenario mapping gates the verdict (137.075175ms)\n✔ PV7: standards and banned patterns are commands, not judgement (166.624803ms)\n✔ PV8: evidence is bounded and secrets are redacted (165.648414ms)\n✔ PV8 unit: boundStream and redaction name-matching are precise (339.804555ms)\n✔ PV9: JSON/text/exit agree and JSON mode is order-independent (940.487937ms)\n✔ PV9: --report writes the exact JSON bytes atomically (241.153015ms)\n✔ PV9: --report outside the repo root is refused and clobbers nothing (207.913088ms)\n✔ PV10: generic validator law and generated agent are portable (0.609061ms)\n✔ PV11: receipt hash verification detects mutation of any stored file (5.805942ms)\n✔ PV11: a FAIL runner-report cannot ride under runnerVerdict PASS (0.818834ms)\n✔ parseArgs: recognises JSON anywhere and rejects bad flags (0.609349ms)\n✔ PV13: renderText is a faithful projection of the report (159.511736ms)\nℹ tests 131\nℹ suites 0\nℹ pass 131\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 5042.127115\n",
+      "stderrTail": ""
+    },
+    {
+      "id": "static.lint",
+      "argv": [
+        "npm",
+        "run",
+        "lint"
+      ],
+      "evidence": [
+        "Repository lint and formatting rules"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 327,
+      "stdoutTail": "\n> pi-sdlc@0.1.1 lint\n> biome check .\n\nChecked 52 files in 60ms. No fixes applied.\n",
+      "stderrTail": ""
+    },
+    {
+      "id": "standards.fs8-untouched",
+      "argv": [
+        "git",
+        "diff",
+        "--quiet",
+        "origin/main",
+        "--",
+        "test/sdlc-status.test.js",
+        "test/readiness-output.test.js",
+        "test/readiness-git.test.js"
+      ],
+      "evidence": [
+        "AB14: FS8 test files unmodified in the diff (exit 1 on any drift)"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 10,
+      "stdoutTail": "",
+      "stderrTail": ""
+    },
+    {
+      "id": "patterns.diff",
+      "argv": [
+        "git",
+        "diff",
+        "--check",
+        "HEAD"
+      ],
+      "evidence": [
+        "No whitespace-error banned patterns in task diff"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 5,
+      "stdoutTail": "",
+      "stderrTail": ""
+    }
+  ],
+  "categories": [
+    {
+      "category": "tests",
+      "status": "PASS",
+      "checkIds": [
+        "tests.full-suite"
+      ]
+    },
+    {
+      "category": "static",
+      "status": "PASS",
+      "checkIds": [
+        "static.lint"
+      ]
+    },
+    {
+      "category": "scenarios",
+      "status": "PASS"
+    },
+    {
+      "category": "standards",
+      "status": "PASS",
+      "checkIds": [
+        "standards.fs8-untouched"
+      ]
+    },
+    {
+      "category": "bannedPatterns",
+      "status": "PASS",
+      "checkIds": [
+        "patterns.diff"
+      ]
+    }
+  ],
+  "scenarios": [
+    {
+      "scenarioId": "AB14",
+      "status": "PASS",
+      "checkIds": [
+        "tests.full-suite",
+        "standards.fs8-untouched"
+      ]
+    },
+    {
+      "scenarioId": "AB17",
+      "status": "PASS",
+      "checkIds": [
+        "tests.full-suite",
+        "static.lint"
+      ]
+    }
+  ]
+}
