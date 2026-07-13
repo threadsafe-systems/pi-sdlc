@@ -1,0 +1,214 @@
+{
+  "schemaVersion": 1,
+  "taskId": "ar-t2",
+  "manifest": "/home/neil/code/threadsafe/pi-sdlc.worktrees/feat-adoption-readiness/docs/validation/adoption-readiness/ar-t2.json",
+  "repoRoot": "/home/neil/code/threadsafe/pi-sdlc.worktrees/feat-adoption-readiness",
+  "verdict": "PASS",
+  "exitCode": 0,
+  "errors": [],
+  "manifestErrors": [],
+  "commands": [
+    {
+      "id": "tests.status",
+      "argv": [
+        "node",
+        "--test",
+        "test/sdlc-status.test.js",
+        "test/readiness-output.test.js"
+      ],
+      "evidence": [
+        "AR1/AR2/AR4 baseline envelopes",
+        "AR5 status path",
+        "AR7 dependency/precedence goldens",
+        "AR8 exact FS8 text/JSON goldens",
+        "AR12 compatibility"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 1457,
+      "stdoutTail": "✔ AR8: ready fixture — exact text golden (58.631115ms)\n✔ AR8: ready fixture — exact JSON golden (deterministic serialization) (69.287775ms)\n✔ AR8: not-adopted — text carries fail + remediation and pinned skips (exit 1) (28.277569ms)\n✔ AR8: JSON on every state 0-3 is a single valid envelope with only FS8 fields (155.26752ms)\n✔ AR8: secret sentinels in the environment never appear in output (141.52381ms)\n✔ AR8: --format json anywhere in argv forces the envelope for argument errors (81.751295ms)\n✔ AR8: JSON envelope root falls back to absolute cwd on root-resolution failure (21.458251ms)\n✔ AR8: cli.arguments error envelope uses the single unambiguous explicit root when available (21.772729ms)\n✔ AR7: missing committed models + workflow read failure both surface, exit 3 (35.468838ms)\n✔ AR7: malformed config + missing committed models both report; error precedence wins (exit 2) (35.81601ms)\n✔ AR7: skip pins — not-adopted repo (32.894703ms)\n✔ AR7: skip pins — dirty manifest still evaluates independent models/workflow checks (35.689082ms)\n✔ wrapper: sdlc-status.sh output and exit are identical to direct .mjs invocation (128.174412ms)\n✔ AR1: committed valid config+models, clean tree — exit 0, state ready, all checks pass (71.66893ms)\n✔ AR2: absent, untracked, staged, and ignored manifests all exit 1 not-adopted (153.23018ms)\n✔ AR4: argument errors exit 2 at cli.arguments with later checks skipped (185.682878ms)\n✔ AR4: unresolvable implicit root exits 2 at root.resolve (32.698921ms)\n✔ AR4: non-git explicit root exits 2 at git.repository, with or without a manifest (63.237577ms)\n✔ AR4: a git repository without HEAD exits 1 not-adopted, not 2 (39.355851ms)\n✔ AR4: --help prints usage, exits 0, and emits no status envelope (28.494334ms)\n✔ AR5: committed clean but invalid manifests exit 2 at config.valid (164.15744ms)\n✔ AR6: models absent from HEAD (filesystem-only variants) exits 3 at models.head (154.433894ms)\n✔ AR6: dirty committed models exits 3 at models.clean; models.valid skips (43.200326ms)\n✔ AR6: committed malformed / FS2-invalid / unreadable models exit 3 at models.valid (162.751705ms)\n✔ AR6: workflow.md present+readable passes; injected read failure exits 3 (95.975718ms)\n✔ AR3 (baseline): unrelated dirty files do not affect readiness (61.832473ms)\n✔ AR12: status completes with a PATH exposing only git (no other executable can run) (68.741993ms)\n✔ dogfood: this repo's committed config+models make sdlc-status exit 0 (41.593846ms)\nℹ tests 28\nℹ suites 0\nℹ pass 28\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 1422.188789\n",
+      "stderrTail": ""
+    },
+    {
+      "id": "static.status",
+      "argv": [
+        "node",
+        "--check",
+        "skills/sdlc/scripts/sdlc-status.mjs"
+      ],
+      "evidence": [
+        "FS8 status command syntax"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 32,
+      "stdoutTail": "",
+      "stderrTail": ""
+    },
+    {
+      "id": "static.tests-exist",
+      "argv": [
+        "node",
+        "--check",
+        "test/readiness-output.test.js"
+      ],
+      "evidence": [
+        "New readiness-output test file exists and parses; guards node --test silently skipping missing files"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 22,
+      "stdoutTail": "",
+      "stderrTail": ""
+    },
+    {
+      "id": "static.wrapper",
+      "argv": [
+        "skills/sdlc/scripts/sdlc-status.sh",
+        "--format",
+        "json"
+      ],
+      "evidence": [
+        "AR8 shell and direct-Node entry points agree on a ready repository"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 49,
+      "stdoutTail": "{\n  \"schemaVersion\": 1,\n  \"root\": \"/home/neil/code/threadsafe/pi-sdlc.worktrees/feat-adoption-readiness\",\n  \"state\": \"ready\",\n  \"exitCode\": 0,\n  \"checks\": [\n    {\n      \"id\": \"cli.arguments\",\n      \"status\": \"pass\",\n      \"message\": \"arguments are valid\"\n    },\n    {\n      \"id\": \"root.resolve\",\n      \"status\": \"pass\",\n      \"message\": \"consumer root resolved\"\n    },\n    {\n      \"id\": \"git.repository\",\n      \"status\": \"pass\",\n      \"message\": \"resolved root is a git worktree\"\n    },\n    {\n      \"id\": \"adoption.manifest-head\",\n      \"status\": \"pass\",\n      \"message\": \"current HEAD contains .pi/sdlc/sdlc.config.json\"\n    },\n    {\n      \"id\": \"adoption.manifest-clean\",\n      \"status\": \"pass\",\n      \"message\": \"manifest matches HEAD in index and working tree\"\n    },\n    {\n      \"id\": \"config.valid\",\n      \"status\": \"pass\",\n      \"message\": \"committed manifest is valid\"\n    },\n    {\n      \"id\": \"models.head\",\n      \"status\": \"pass\",\n      \"message\": \"current HEAD contains .pi/sdlc/sdlc.models.json\"\n    },\n    {\n      \"id\": \"models.clean\",\n      \"status\": \"pass\",\n      \"message\": \"models file matches HEAD in index and working tree\"\n    },\n    {\n      \"id\": \"models.valid\",\n      \"status\": \"pass\",\n      \"message\": \"committed models file is valid\"\n    },\n    {\n      \"id\": \"workflow.readable\",\n      \"status\": \"pass\",\n      \"message\": \"optional workflow.md is absent\"\n    }\n  ]\n}\n",
+      "stderrTail": ""
+    },
+    {
+      "id": "static.lint",
+      "argv": [
+        "npm",
+        "run",
+        "lint"
+      ],
+      "evidence": [
+        "Repository lint and formatting rules"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 107,
+      "stdoutTail": "\n> pi-sdlc@0.1.1 lint\n> biome check .\n\nChecked 42 files in 20ms. No fixes applied.\n",
+      "stderrTail": ""
+    },
+    {
+      "id": "patterns.diff",
+      "argv": [
+        "git",
+        "diff",
+        "--check",
+        "HEAD"
+      ],
+      "evidence": [
+        "No whitespace-error banned patterns in task diff"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 2,
+      "stdoutTail": "",
+      "stderrTail": ""
+    }
+  ],
+  "categories": [
+    {
+      "category": "tests",
+      "status": "PASS",
+      "checkIds": [
+        "tests.status"
+      ]
+    },
+    {
+      "category": "static",
+      "status": "PASS",
+      "checkIds": [
+        "static.status",
+        "static.tests-exist",
+        "static.wrapper",
+        "static.lint"
+      ]
+    },
+    {
+      "category": "scenarios",
+      "status": "PASS"
+    },
+    {
+      "category": "standards",
+      "status": "N/A",
+      "reason": "Commit-range standard is verified at ar-t5; no additional standard applies to this task."
+    },
+    {
+      "category": "bannedPatterns",
+      "status": "PASS",
+      "checkIds": [
+        "patterns.diff"
+      ]
+    }
+  ],
+  "scenarios": [
+    {
+      "scenarioId": "AR1",
+      "status": "PASS",
+      "checkIds": [
+        "tests.status"
+      ]
+    },
+    {
+      "scenarioId": "AR12",
+      "status": "PASS",
+      "checkIds": [
+        "tests.status",
+        "static.lint"
+      ]
+    },
+    {
+      "scenarioId": "AR2",
+      "status": "PASS",
+      "checkIds": [
+        "tests.status"
+      ]
+    },
+    {
+      "scenarioId": "AR4",
+      "status": "PASS",
+      "checkIds": [
+        "tests.status"
+      ]
+    },
+    {
+      "scenarioId": "AR5",
+      "status": "PASS",
+      "checkIds": [
+        "tests.status"
+      ]
+    },
+    {
+      "scenarioId": "AR7",
+      "status": "PASS",
+      "checkIds": [
+        "tests.status"
+      ]
+    },
+    {
+      "scenarioId": "AR8",
+      "status": "PASS",
+      "checkIds": [
+        "tests.status",
+        "static.wrapper"
+      ]
+    }
+  ]
+}
