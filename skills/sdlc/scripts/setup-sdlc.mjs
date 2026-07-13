@@ -194,15 +194,15 @@ function source(path) {
 function directoryEntries(path) {
 	if (!existsSync(path)) return [];
 	try {
-		return readdirSync(path);
+		return readdirSync(path, { withFileTypes: true });
 	} catch (error) {
 		throw new SetupError(`setup-sdlc: cannot inspect CI path: ${path} (${error.message})`);
 	}
 }
 function existsCi(root, target) {
 	const workflows = join(root, ".github", "workflows");
-	if (directoryEntries(workflows).some((file) => /\.ya?ml$/.test(file) && file !== target)) return true;
-	return [".gitlab-ci.yml", ".circleci/config.yml", "azure-pipelines.yml", "Jenkinsfile", ".travis.yml", "bitbucket-pipelines.yml"].some((file) => existsSync(join(root, file))) || directoryEntries(join(root, ".buildkite")).length > 0;
+	if (directoryEntries(workflows).some((entry) => entry.isFile() && /\.ya?ml$/.test(entry.name) && entry.name !== target)) return true;
+	return [".gitlab-ci.yml", ".circleci/config.yml", "azure-pipelines.yml", "Jenkinsfile", ".travis.yml", "bitbucket-pipelines.yml"].some((file) => existsSync(join(root, file))) || directoryEntries(join(root, ".buildkite")).some((entry) => entry.isFile());
 }
 function rootPrefix(root) {
 	try {
@@ -343,6 +343,7 @@ function writeBundle(root, opts, cfg, hooks, tracker) {
 	// do not prove that a source is readable (a directory or unreadable file can
 	// still exist), and a failed late read would otherwise leave a partial bundle.
 	const templateContent = source(templateSource);
+	source(checkerSource);
 	const promptContents = Object.fromEntries(promptSources.map((path) => [path, source(path)]));
 	const modelContent = opts.withModels ? source(modelSource) : undefined;
 	if (opts.withCiWorkflow) workflowContent = source(workflowSource).replace("__PI_SDLC_REF__", packageRef());

@@ -40,6 +40,18 @@ test("fresh bundle provisions requested assets and idempotent rerun retains them
 	}
 });
 
+test("CI marker directories are not mistaken for CI files", () => {
+	const root = temp();
+	try {
+		spawnSync("mkdir", ["-p", join(root, ".github/workflows/not-ci.yml"), join(root, ".buildkite/hooks")]);
+		const result = jsonRun(root, ["--yes", "--with-ci-workflow"]);
+		assert.equal(result.status, 0);
+		assert.equal(result.report.assets.find((asset) => asset.id === "ci-workflow").action, "created");
+	} finally {
+		rmSync(root, { recursive: true, force: true });
+	}
+});
+
 test("existing CI suppresses workflow creation and reports refusal", () => {
 	const root = temp();
 	try {
@@ -133,6 +145,24 @@ test("unreadable package sources fail before any bundle write", () => {
 		renameSync(source, backup);
 		spawnSync("mkdir", [source]);
 		const result = jsonRun(root, ["--yes", "--with-models"]);
+		assert.equal(result.status, 2);
+		assert.equal(result.report.assets.length, 0);
+		assert.equal(existsSync(join(root, ".pi/sdlc/sdlc.config.json")), false);
+	} finally {
+		rmSync(source, { recursive: true, force: true });
+		renameSync(backup, source);
+		rmSync(root, { recursive: true, force: true });
+	}
+});
+
+test("checker source must be readable before any bundle write", () => {
+	const root = temp();
+	const source = join(ROOT, "skills", "sdlc", "scripts", "check-lifecycle.mjs");
+	const backup = `${source}.panel-test-${process.pid}`;
+	try {
+		renameSync(source, backup);
+		spawnSync("mkdir", [source]);
+		const result = jsonRun(root, ["--yes"]);
 		assert.equal(result.status, 2);
 		assert.equal(result.report.assets.length, 0);
 		assert.equal(existsSync(join(root, ".pi/sdlc/sdlc.config.json")), false);
