@@ -1,0 +1,23 @@
+name: pi-sdlc lifecycle
+
+on:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  lifecycle:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          repository: threadsafe-systems/pi-sdlc
+          ref: v0.1.1
+          path: .pi-sdlc
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: node .pi-sdlc/skills/sdlc/scripts/check-lifecycle.mjs --event "$GITHUB_EVENT_PATH" --repo-root "$GITHUB_WORKSPACE"
+      # Add your project-specific test/lint steps here.

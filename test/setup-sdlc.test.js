@@ -24,7 +24,7 @@ function mkTemp() {
 	return mkdtempSync(join(tmpdir(), "sdlc-setup-"));
 }
 
-test("OH4: --yes writes a schema-valid config; re-run without --force exits 2 unchanged; --force overwrites", () => {
+test("OH4: --yes writes a schema-valid config; bundle re-run refuses config changes; --force overwrites", () => {
 	const dir = mkTemp();
 	try {
 		const r1 = setup(dir, ["--prefix", "x", "--label-prefix", "y", "--yes"]);
@@ -36,7 +36,7 @@ test("OH4: --yes writes a schema-valid config; re-run without --force exits 2 un
 		const before = readFileSync(join(dir, ".pi", "sdlc", "sdlc.config.json"), "utf8");
 
 		const r2 = setup(dir, ["--prefix", "z", "--label-prefix", "y"]);
-		assert.equal(r2.code, 2, "re-run without --force must exit 2");
+		assert.equal(r2.code, 1, "bundle re-run without --force must refuse config replacement");
 		const after = readFileSync(join(dir, ".pi", "sdlc", "sdlc.config.json"), "utf8");
 		assert.equal(after, before, "file must be byte-identical after refused overwrite");
 
