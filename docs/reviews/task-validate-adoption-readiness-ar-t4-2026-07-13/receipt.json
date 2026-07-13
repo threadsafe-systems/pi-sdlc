@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "taskId": "ar-t4",
+  "manifestPath": "docs/validation/adoption-readiness/ar-t4.json",
+  "manifestSha256": "001d2ea0c8ea60eeee6c30dba5dcad912c1a76696530850ff6273a8882c7678a",
+  "runnerReportSha256": "f24b0a034563e2ad8a56f43e699cef6fc3d6800febf6e9ea899a469e88f80541",
+  "generatedAgentSha256": "d1afca203509cba3f2db0469e3de0ebcf3f496755c44799678bb1138805afa1a",
+  "model": "openai-codex/gpt-5.6-terra",
+  "runnerVerdict": "PASS",
+  "validatorVerdict": "PASS",
+  "createdAt": "2026-07-13T05:34:16Z"
+}
