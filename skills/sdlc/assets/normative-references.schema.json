@@ -1,0 +1,37 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://github.com/threadsafe-systems/pi-sdlc/skills/sdlc/assets/normative-references.schema.json",
+  "title": "pi-sdlc normative reference inventory",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "package", "sources"],
+  "properties": {
+    "schemaVersion": { "type": "integer", "const": 1 },
+    "package": { "type": "string", "const": "pi-sdlc" },
+    "sources": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "source", "assertion", "targetKind", "ownership", "required", "resolution", "target"],
+        "properties": {
+          "id": { "type": "string", "pattern": "^[a-z][a-z0-9-]*(\\.[a-z0-9-]+)+$" },
+          "source": { "type": "string", "minLength": 1 },
+          "assertion": { "type": "string", "minLength": 1 },
+          "targetKind": { "enum": ["file", "command", "facility", "external"] },
+          "ownership": { "enum": ["package", "consumer", "external"] },
+          "required": { "type": "boolean" },
+          "resolution": { "enum": ["package", "consumer", "readiness", "external"] },
+          "target": { "type": "string", "minLength": 1 },
+          "verification": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["source", "assertion"],
+            "properties": { "source": { "type": "string", "minLength": 1 }, "assertion": { "type": "string", "minLength": 1 } }
+          }
+        }
+      }
+    }
+  }
+}

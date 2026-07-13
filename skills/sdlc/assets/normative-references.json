@@ -1,0 +1,226 @@
+{
+  "schemaVersion": 1,
+  "package": "pi-sdlc",
+  "sources": [
+    {
+      "id": "inventory.self",
+      "source": "skills/sdlc/assets/normative-references.json",
+      "assertion": "\"schemaVersion\": 1",
+      "targetKind": "file",
+      "ownership": "package",
+      "required": true,
+      "resolution": "package",
+      "target": "skills/sdlc/assets/normative-references.json"
+    },
+    {
+      "id": "inventory.schema",
+      "source": "skills/sdlc/assets/normative-references.json",
+      "assertion": "\"target\": \"skills/sdlc/assets/normative-references.schema.json\"",
+      "targetKind": "file",
+      "ownership": "package",
+      "required": true,
+      "resolution": "package",
+      "target": "skills/sdlc/assets/normative-references.schema.json"
+    },
+    {
+      "id": "checker.source",
+      "source": "skills/sdlc/scripts/check-references.mjs",
+      "assertion": "NORMATIVE-REFERENCE-CHECKER: FS11-v1",
+      "targetKind": "command",
+      "ownership": "package",
+      "required": true,
+      "resolution": "package",
+      "target": "skills/sdlc/scripts/check-references.mjs"
+    },
+    {
+      "id": "checker.wrapper",
+      "source": "skills/sdlc/scripts/check-references.sh",
+      "assertion": "NORMATIVE-REFERENCE-WRAPPER: FS11-v1",
+      "targetKind": "command",
+      "ownership": "package",
+      "required": true,
+      "resolution": "package",
+      "target": "skills/sdlc/scripts/check-references.sh"
+    },
+    {
+      "id": "skill.source",
+      "source": "skills/sdlc/SKILL.md",
+      "assertion": "# sdlc",
+      "targetKind": "file",
+      "ownership": "package",
+      "required": true,
+      "resolution": "package",
+      "target": "skills/sdlc/SKILL.md"
+    },
+    {
+      "id": "readme.source",
+      "source": "README.md",
+      "assertion": "# pi-sdlc",
+      "targetKind": "file",
+      "ownership": "package",
+      "required": true,
+      "resolution": "package",
+      "target": "README.md"
+    },
+    {
+      "id": "setup-template.source",
+      "source": "templates/setup-sdlc.md",
+      "assertion": "Run the scaffolder from the pi-sdlc package checkout",
+      "targetKind": "file",
+      "ownership": "package",
+      "required": true,
+      "resolution": "package",
+      "target": "templates/setup-sdlc.md"
+    },
+    {
+      "id": "tracker.asset",
+      "source": "skills/sdlc/assets/tracker-ops.md",
+      "assertion": "# Tracker operations (GitHub)",
+      "targetKind": "file",
+      "ownership": "package",
+      "required": true,
+      "resolution": "package",
+      "target": "skills/sdlc/assets/tracker-ops.md"
+    },
+    {
+      "id": "agent-brief.asset",
+      "source": "skills/sdlc/assets/agent-brief.md",
+      "assertion": "# Writing durable issue/ticket bodies",
+      "targetKind": "file",
+      "ownership": "package",
+      "required": true,
+      "resolution": "package",
+      "target": "skills/sdlc/assets/agent-brief.md"
+    },
+    {
+      "id": "prompt.plan",
+      "source": "skills/sdlc/prompts/adversary-plan.prompt.md",
+      "assertion": "You are REVIEWER_TAG, a ruthless adversarial reviewer of a feature PLAN",
+      "targetKind": "file",
+      "ownership": "package",
+      "required": true,
+      "resolution": "package",
+      "target": "skills/sdlc/prompts/adversary-plan.prompt.md"
+    },
+    {
+      "id": "prompt.validator",
+      "source": "skills/sdlc/prompts/validator-task.prompt.md",
+      "assertion": "You are REVIEWER_TAG, a mechanistic task validator.",
+      "targetKind": "file",
+      "ownership": "package",
+      "required": true,
+      "resolution": "package",
+      "target": "skills/sdlc/prompts/validator-task.prompt.md"
+    },
+    {
+      "id": "prompt.spec",
+      "source": "skills/sdlc/prompts/adversary-spec.prompt.md",
+      "assertion": "You are REVIEWER_TAG, a ruthless adversarial reviewer of a feature SPEC",
+      "targetKind": "file",
+      "ownership": "package",
+      "required": true,
+      "resolution": "package",
+      "target": "skills/sdlc/prompts/adversary-spec.prompt.md"
+    },
+    {
+      "id": "prompt.review",
+      "source": "skills/sdlc/prompts/adversary-review.prompt.md",
+      "assertion": "You are REVIEWER_TAG, a ruthless adversarial code reviewer.",
+      "targetKind": "file",
+      "ownership": "package",
+      "required": true,
+      "resolution": "package",
+      "target": "skills/sdlc/prompts/adversary-review.prompt.md"
+    },
+    {
+      "id": "script.status",
+      "source": "skills/sdlc/scripts/sdlc-status.sh",
+      "assertion": "sdlc-status.sh — thin entry point for the FS8 four-state readiness gate.",
+      "targetKind": "command",
+      "ownership": "package",
+      "required": true,
+      "resolution": "package",
+      "target": "skills/sdlc/scripts/sdlc-status.sh"
+    },
+    {
+      "id": "script.panel-resolver",
+      "source": "skills/sdlc/scripts/resolve-panel.sh",
+      "assertion": "resolve-panel.sh — thin entry point for the sdlc panel resolver.",
+      "targetKind": "command",
+      "ownership": "package",
+      "required": true,
+      "resolution": "package",
+      "target": "skills/sdlc/scripts/resolve-panel.sh"
+    },
+    {
+      "id": "script.panel-agent",
+      "source": "skills/sdlc/scripts/ensure-panel-agent.sh",
+      "assertion": "ensure-panel-agent.sh — thin entry point for the sdlc panel-agent stamper.",
+      "targetKind": "command",
+      "ownership": "package",
+      "required": true,
+      "resolution": "package",
+      "target": "skills/sdlc/scripts/ensure-panel-agent.sh"
+    },
+    {
+      "id": "script.validator",
+      "source": "skills/sdlc/scripts/validate-task.sh",
+      "assertion": "validate-task.sh — thin entry point for the deterministic per-task validation",
+      "targetKind": "command",
+      "ownership": "package",
+      "required": true,
+      "resolution": "package",
+      "target": "skills/sdlc/scripts/validate-task.sh"
+    },
+    {
+      "id": "script.receipt-verifier",
+      "source": "skills/sdlc/scripts/verify-task-receipt.mjs",
+      "assertion": "verify-task-receipt.mjs — verify a stored portable-validator runtime receipt.",
+      "targetKind": "command",
+      "ownership": "package",
+      "required": true,
+      "resolution": "package",
+      "target": "skills/sdlc/scripts/verify-task-receipt.mjs"
+    },
+    {
+      "id": "schema.models",
+      "source": "skills/sdlc/schema/sdlc.models.schema.json",
+      "assertion": "\"title\": \"sdlc.models.json\"",
+      "targetKind": "file",
+      "ownership": "package",
+      "required": true,
+      "resolution": "package",
+      "target": "skills/sdlc/schema/sdlc.models.schema.json"
+    },
+    {
+      "id": "schema.task-validation",
+      "source": "skills/sdlc/schema/task-validation-manifest.schema.json",
+      "assertion": "\"title\": \"task-validation-manifest\"",
+      "targetKind": "file",
+      "ownership": "package",
+      "required": true,
+      "resolution": "package",
+      "target": "skills/sdlc/schema/task-validation-manifest.schema.json"
+    },
+    {
+      "id": "consumer.workflow",
+      "source": "skills/sdlc/SKILL.md",
+      "assertion": "An optional `.pi/sdlc/workflow.md`",
+      "targetKind": "file",
+      "ownership": "consumer",
+      "required": false,
+      "resolution": "consumer",
+      "target": ".pi/sdlc/workflow.md"
+    },
+    {
+      "id": "external.gh",
+      "source": "skills/sdlc/assets/tracker-ops.md",
+      "assertion": "Shared mechanics for both tracker-backed modes of `sdlc`",
+      "targetKind": "external",
+      "ownership": "external",
+      "required": false,
+      "resolution": "external",
+      "target": "github.com/issues-projects"
+    }
+  ]
+}

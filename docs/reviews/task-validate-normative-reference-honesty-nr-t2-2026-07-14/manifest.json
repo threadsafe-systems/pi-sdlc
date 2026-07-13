@@ -1,0 +1,20 @@
+{
+  "schemaVersion": 1,
+  "taskId": "nr-t2",
+  "buildPlan": "docs/plans/2026-07-13-sdlc-normative-reference-honesty-build.md",
+  "repoRoot": ".",
+  "ownedScenarios": ["NR7", "NR8"],
+  "checks": [
+    { "id": "tests.reference-contract", "argv": ["node", "--test", "test/reference-contract.test.js", "test/extraction.test.js", "test/validator-contract.test.js", "test/docs.test.js"], "timeoutMs": 120000, "evidence": ["NR7 known references and NR8 compatibility"] },
+    { "id": "static.tests-exist", "argv": ["node", "--check", "test/reference-contract.test.js"], "evidence": ["test file exists"] },
+    { "id": "static.lint", "argv": ["npm", "run", "lint"], "timeoutMs": 120000, "evidence": ["lint"] },
+    { "id": "patterns.diff", "argv": ["git", "diff", "--check", "HEAD"], "evidence": ["diff whitespace"] }
+  ],
+  "categories": {
+    "tests": { "applicability": "required", "checkIds": ["tests.reference-contract"] },
+    "static": { "applicability": "required", "checkIds": ["static.tests-exist", "static.lint"] },
+    "scenarios": { "applicability": "required", "evidence": { "NR7": ["tests.reference-contract"], "NR8": ["tests.reference-contract"] } },
+    "standards": { "applicability": "n/a", "reason": "Integrated full suite is owned by nr-t3." },
+    "bannedPatterns": { "applicability": "required", "checkIds": ["patterns.diff"] }
+  }
+}

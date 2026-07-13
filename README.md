@@ -145,6 +145,15 @@ repositories with existing CI receive a copy-paste snippet instead. The local
 checker is canonical, and CI enforces the declaration only where that workflow
 or snippet is configured.
 
+## Reference consistency
+
+The package ships a versioned normative-reference inventory and an offline checker
+for package-owned claims. Consumer-owned files such as `.pi/sdlc/workflow.md`
+and local prompt overrides are not silently certified; external facilities such
+as GitHub Projects are reported as external. Run the checker from the installed
+skill directory when auditing the package itself. It does not replace
+`sdlc-status` readiness or the declared-track lifecycle checker.
+
 ## Releases & versioning
 
 Releases are automated with

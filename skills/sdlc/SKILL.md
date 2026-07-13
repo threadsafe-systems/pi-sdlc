@@ -257,13 +257,15 @@ per model.
      scripts/ensure-panel-agent.sh pr_review   # writes .pi/agents/<prefix>-pr-review.md
      scripts/resolve-panel.sh pr_review --author <vendor> --emit-tasks <prefix>-pr-review
      ```
-     `--emit-tasks` prints a ready-to-paste `subagent` `tasks: [...]` array; fill
-     the `FILL_IN_TASK_BLOCK` placeholder with the task block below and dispatch
-     in one call. Per-model attribution comes back on each task's `result.model`.
-     `ensure-panel-agent.sh` copies the prompt body verbatim (the prompts have
-     no H1 title to strip) and writes to the consumer repo's `.pi/agents` where the
-     session resolves project agents (NOT a `cd`-ed cwd). See the sub-agent
-     gotchas in AGENTS.md.
+     `--emit-tasks` prints a ready-to-paste `subagent` `tasks: [...]` array. Replace
+     its task value with the exact review task: name the artifact paths, commit,
+     governing documents, grounding rule, and required findings-only output; then
+     dispatch the populated array in one call. Per-model attribution comes back on
+     each task's `result.model`. `ensure-panel-agent.sh` copies the prompt body
+     verbatim (the prompts have no H1 title to strip) and writes to the consumer
+     repo's `.pi/agents` where the session resolves project agents (NOT a `cd`-ed
+     cwd). Consult the project's governing documents (for example, `AGENTS.md` or
+     an equivalent if present) for any local sub-agent gotchas.
    - detached (headless/cron/CI, no live tool): `dispatch-subagents`'s
      `dispatch.sh` stamps one prompt file across `--model` flags.
    Give each reviewer the exact inputs: the artifact under review, the upstream

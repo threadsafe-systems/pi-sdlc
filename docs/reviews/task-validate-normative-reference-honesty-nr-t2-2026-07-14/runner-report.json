@@ -1,0 +1,137 @@
+{
+  "schemaVersion": 1,
+  "taskId": "nr-t2",
+  "manifest": "/home/neil/code/threadsafe/pi-sdlc.worktrees/feat-normative-reference-honesty/docs/validation/normative-reference-honesty/nr-t2.json",
+  "repoRoot": "/home/neil/code/threadsafe/pi-sdlc.worktrees/feat-normative-reference-honesty",
+  "verdict": "PASS",
+  "exitCode": 0,
+  "errors": [],
+  "manifestErrors": [],
+  "commands": [
+    {
+      "id": "tests.reference-contract",
+      "argv": [
+        "node",
+        "--test",
+        "test/reference-contract.test.js",
+        "test/extraction.test.js",
+        "test/validator-contract.test.js",
+        "test/docs.test.js"
+      ],
+      "evidence": [
+        "NR7 known references and NR8 compatibility"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 2721,
+      "stdoutTail": "✔ OH7: SKILL.md carries the opt-in, advisory, hooks headings + red flags (1.203212ms)\n✔ OH7: the Implement table row no longer prescribes 'in a worktree' (0.25276ms)\n✔ OH8: SKILL.md contains the announce-on-fire block and the workflow.md rule (0.163143ms)\n✔ OH9: exactly two new ADRs (opt-in, hooks) with context/decision/consequences (0.391257ms)\n✔ OH12: README has the opt-in story and drops the old no-manifest-defaults claim (0.19389ms)\n✔ FS9/FS10 dogfood assets are present (0.208069ms)\n✔ FS9 documentation carries declaration rules and reversible grounding (0.345696ms)\n✔ FS9 and FS10 ADRs freeze the new surfaces (1.017517ms)\n✔ AR10: all four startup branches and every prohibition are present and mutation-detectable (0.428709ms)\n✔ AR10: docs never equate manifest presence with readiness or claim mechanical agent enforcement (0.294816ms)\n✔ AR11: README carries the complete migration story (0.273929ms)\n✔ AR11: ADR 0010 is superseded and the policy ADR 0015 restates the migration (0.328523ms)\n✔ AR11: ADR 0016 freezes the FS8 machine surface (0.268259ms)\n✔ AR11: no stale opted-in output claim remains in shipped guidance (0.194143ms)\n✔ AR11: wrapper help/comments and .mjs usage match the FS8 invocation (0.163506ms)\n✔ AR11: the setup template requires committing .pi⁄sdlc and points at the status gate (0.146372ms)\nunknown format \"uri\" ignored in schema at path \"#/properties/tracker/properties/board/properties/url\"\nunknown format \"uri\" ignored in schema at path \"#/properties/tracker/properties/board/properties/url\"\n✔ S2: no loom-domain content in the generic surface (2.498551ms)\n✔ S3: JSON schemas validate their examples (24.110761ms)\n✔ S3b: ensure-panel-agent rejects malformed config (exit 2) (205.6312ms)\n✔ S3c: resolve-panel rejects malformed models (exit 2) (109.215533ms)\n✔ S4: stamped name+tools+body byte-identical to golden; description == FS4 (85.698547ms)\n✔ S5: agent lands in the CONSUMER's .pi/agents (not the skill dir) (32.424206ms)\n✔ S6: resolve-panel --emit-tasks deep-equals golden under isolated env (107.218589ms)\n✔ S7: resolution terminal cases (96.443865ms)\n✔ NR7: generic prompts do not require absent governing files (1.100809ms)\n✔ NR7: skill dispatch instructions are concrete and CI claims are bounded (1.095613ms)\n✔ NR7: inventory checker and ADR are shipped and versioned (0.503737ms)\n✔ NR8: source prompt extraction remains the fixture authority (0.34211ms)\n✔ PV1: a valid JavaScript manifest runs only declared checks and passes (74.752033ms)\n✔ PV2: only declared argv run; an undeclared tool command never executes (122.923709ms)\n✔ PV3: schema and inspectManifest reject the mutation matrix before any command runs (69.827092ms)\n✔ PV4: command outcomes are complete and deterministic; runner continues after failures (39.256615ms)\n✔ PV4: a timeout is reported as FAIL with timedOut (1060.855105ms)\n✔ PV5: category applicability is exact; injected n/a shapes are rejected (76.70738ms)\n✔ PV6: scenario mapping gates the verdict (62.015045ms)\n✔ PV7: standards and banned patterns are commands, not judgement (92.843047ms)\n✔ PV8: evidence is bounded and secrets are redacted (62.808216ms)\n✔ PV8 unit: boundStream and redaction name-matching are precise (233.228896ms)\n✔ PV9: JSON/text/exit agree and JSON mode is order-independent (432.413198ms)\n✔ PV9: --report writes the exact JSON bytes atomically (109.167656ms)\n✔ PV9: --report outside the repo root is refused and clobbers nothing (95.887028ms)\n✔ PV10: generic validator law and generated agent are portable (0.341516ms)\n✔ PV11: receipt hash verification detects mutation of any stored file (1.742743ms)\n✔ PV11: a FAIL runner-report cannot ride under runnerVerdict PASS (0.348547ms)\n✔ parseArgs: recognises JSON anywhere and rejects bad flags (0.24487ms)\n✔ PV13: renderText is a faithful projection of the report (72.330558ms)\nℹ tests 46\nℹ suites 0\nℹ pass 46\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 2693.710782\n",
+      "stderrTail": ""
+    },
+    {
+      "id": "static.tests-exist",
+      "argv": [
+        "node",
+        "--check",
+        "test/reference-contract.test.js"
+      ],
+      "evidence": [
+        "test file exists"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 19,
+      "stdoutTail": "",
+      "stderrTail": ""
+    },
+    {
+      "id": "static.lint",
+      "argv": [
+        "npm",
+        "run",
+        "lint"
+      ],
+      "evidence": [
+        "lint"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 140,
+      "stdoutTail": "\n> pi-sdlc@0.1.1 lint\n> biome check .\n\nChecked 60 files in 42ms. No fixes applied.\n",
+      "stderrTail": ""
+    },
+    {
+      "id": "patterns.diff",
+      "argv": [
+        "git",
+        "diff",
+        "--check",
+        "HEAD"
+      ],
+      "evidence": [
+        "diff whitespace"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 4,
+      "stdoutTail": "",
+      "stderrTail": ""
+    }
+  ],
+  "categories": [
+    {
+      "category": "tests",
+      "status": "PASS",
+      "checkIds": [
+        "tests.reference-contract"
+      ]
+    },
+    {
+      "category": "static",
+      "status": "PASS",
+      "checkIds": [
+        "static.tests-exist",
+        "static.lint"
+      ]
+    },
+    {
+      "category": "scenarios",
+      "status": "PASS"
+    },
+    {
+      "category": "standards",
+      "status": "N/A",
+      "reason": "Integrated full suite is owned by nr-t3."
+    },
+    {
+      "category": "bannedPatterns",
+      "status": "PASS",
+      "checkIds": [
+        "patterns.diff"
+      ]
+    }
+  ],
+  "scenarios": [
+    {
+      "scenarioId": "NR7",
+      "status": "PASS",
+      "checkIds": [
+        "tests.reference-contract"
+      ]
+    },
+    {
+      "scenarioId": "NR8",
+      "status": "PASS",
+      "checkIds": [
+        "tests.reference-contract"
+      ]
+    }
+  ]
+}
