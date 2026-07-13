@@ -1,3 +1,10 @@
+# [0.5.0](https://github.com/threadsafe-systems/pi-sdlc/compare/v0.4.0...v0.5.0) (2026-07-13)
+
+
+### Features
+
+* **adoption:** provision bundle and lifecycle checker ([#24](https://github.com/threadsafe-systems/pi-sdlc/issues/24)) ([730e5ef](https://github.com/threadsafe-systems/pi-sdlc/commit/730e5efa01bfabe812ede33ac9ed6ea4f56aa2e3)), closes [#18](https://github.com/threadsafe-systems/pi-sdlc/issues/18) [19-#23](https://github.com/19-/issues/23) [#19](https://github.com/threadsafe-systems/pi-sdlc/issues/19) [#19](https://github.com/threadsafe-systems/pi-sdlc/issues/19) [#20](https://github.com/threadsafe-systems/pi-sdlc/issues/20) [#20](https://github.com/threadsafe-systems/pi-sdlc/issues/20) [#21](https://github.com/threadsafe-systems/pi-sdlc/issues/21) [#21](https://github.com/threadsafe-systems/pi-sdlc/issues/21) [#22](https://github.com/threadsafe-systems/pi-sdlc/issues/22) [#22](https://github.com/threadsafe-systems/pi-sdlc/issues/22) [#21](https://github.com/threadsafe-systems/pi-sdlc/issues/21) [#22](https://github.com/threadsafe-systems/pi-sdlc/issues/22) [#21](https://github.com/threadsafe-systems/pi-sdlc/issues/21) [#23](https://github.com/threadsafe-systems/pi-sdlc/issues/23)
+
 # [0.4.0](https://github.com/threadsafe-systems/pi-sdlc/compare/v0.3.0...v0.4.0) (2026-07-13)
 
 
