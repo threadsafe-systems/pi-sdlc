@@ -199,7 +199,9 @@ function structural(target, kind) {
 		if (!block) return false;
 		const track = /^track: (irreversible|reversible|none)$/m.exec(block)?.[1];
 		if (!track) return false;
-		return track === "none" ? /^reason: /m.test(block) : /^slug: /m.test(block);
+		const hasSlug = /^slug: /m.test(block);
+		const hasReason = /^reason: /m.test(block);
+		return track === "none" ? hasReason && !hasSlug : hasSlug && !hasReason;
 	}
 	if (kind === "ci-workflow") return /repository:\s*[^/\s]+\/pi-sdlc/.test(text) && /ref:\s*\S+/.test(text) && /node\s+\S*check-lifecycle\.mjs/.test(text);
 	return true;

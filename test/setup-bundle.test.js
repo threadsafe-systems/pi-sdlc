@@ -56,7 +56,7 @@ test("consumer template with the wrong companion is refused byte-identically", (
 	try {
 		const target = join(root, ".github", "pull_request_template.md");
 		spawnSync("mkdir", ["-p", join(root, ".github")]);
-		writeFileSync(target, "```sdlc\ntrack: none\nslug: wrong\n```\n");
+		writeFileSync(target, "```sdlc\ntrack: none\nslug: wrong\nreason: both\n```\n");
 		const result = jsonRun(root, ["--yes"]);
 		assert.equal(result.status, 1);
 		assert.equal(result.report.assets.find((asset) => asset.id === "pr-template").action, "refused");
