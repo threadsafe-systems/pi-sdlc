@@ -28,8 +28,8 @@
       "exitCode": 0,
       "signal": null,
       "timedOut": false,
-      "durationMs": 1194,
-      "stdoutTail": "✔ fresh bundle provisions requested assets and idempotent rerun retains them (119.563828ms)\n✔ existing CI suppresses workflow creation and reports refusal (78.146254ms)\n✔ consumer template without the declaration is refused byte-identically (67.461041ms)\n✔ bundle reports resolved package references before writing (53.170109ms)\n✔ OH4: --yes writes a schema-valid config; bundle re-run refuses config changes; --force overwrites (213.255708ms)\n✔ OH5: --hook-use fields 3-4 = use, do = remainder after 4th colon (colons in do preserved) (45.679422ms)\n✔ OH5: --hook-run command = remainder after 2nd colon (colons preserved); trust warning on stderr (62.4805ms)\n✔ OH5: mixed repeated hook flags preserve argv order in the written list (73.064669ms)\n✔ OH5: malformed hook flags exit 2 (421.033285ms)\n✔ PR-fix: value-taking flags accept values that begin with '-' (e.g. --announce '--foo') (57.80733ms)\n✔ OH5: partial tracker flags exit 2 (all-or-none) (64.147791ms)\n✔ OH5: no config flags and no TTY exits 2 (interview needs a TTY) (75.617664ms)\n✔ OH6: package.json pi.prompts includes ./templates and the template has a description (0.851938ms)\nℹ tests 13\nℹ suites 0\nℹ pass 13\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 1125.350262\n",
+      "durationMs": 1059,
+      "stdoutTail": "✔ fresh bundle provisions requested assets and idempotent rerun retains them (109.643138ms)\n✔ existing CI suppresses workflow creation and reports refusal (56.260304ms)\n✔ consumer template with the wrong companion is refused byte-identically (40.789906ms)\n✔ consumer template without the declaration is refused byte-identically (53.986777ms)\n✔ bundle reports resolved package references before writing (51.363034ms)\n✔ OH4: --yes writes a schema-valid config; bundle re-run refuses config changes; --force overwrites (192.891924ms)\n✔ OH5: --hook-use fields 3-4 = use, do = remainder after 4th colon (colons in do preserved) (69.869776ms)\n✔ OH5: --hook-run command = remainder after 2nd colon (colons preserved); trust warning on stderr (64.848454ms)\n✔ OH5: mixed repeated hook flags preserve argv order in the written list (58.271649ms)\n✔ OH5: malformed hook flags exit 2 (346.858174ms)\n✔ PR-fix: value-taking flags accept values that begin with '-' (e.g. --announce '--foo') (62.815623ms)\n✔ OH5: partial tracker flags exit 2 (all-or-none) (60.150148ms)\n✔ OH5: no config flags and no TTY exits 2 (interview needs a TTY) (64.632507ms)\n✔ OH6: package.json pi.prompts includes ./templates and the template has a description (0.939485ms)\nℹ tests 14\nℹ suites 0\nℹ pass 14\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 1006.372533\n",
       "stderrTail": ""
     },
     {
@@ -46,7 +46,7 @@
       "exitCode": 0,
       "signal": null,
       "timedOut": false,
-      "durationMs": 48,
+      "durationMs": 39,
       "stdoutTail": "",
       "stderrTail": ""
     },
@@ -64,7 +64,7 @@
       "exitCode": 0,
       "signal": null,
       "timedOut": false,
-      "durationMs": 46,
+      "durationMs": 42,
       "stdoutTail": "",
       "stderrTail": ""
     },
@@ -82,8 +82,8 @@
       "exitCode": 0,
       "signal": null,
       "timedOut": false,
-      "durationMs": 311,
-      "stdoutTail": "\n> pi-sdlc@0.1.1 lint\n> biome check .\n\nChecked 52 files in 62ms. No fixes applied.\n",
+      "durationMs": 261,
+      "stdoutTail": "\n> pi-sdlc@0.1.1 lint\n> biome check .\n\nChecked 52 files in 51ms. No fixes applied.\n",
       "stderrTail": ""
     },
     {
@@ -101,7 +101,7 @@
       "exitCode": 0,
       "signal": null,
       "timedOut": false,
-      "durationMs": 6,
+      "durationMs": 8,
       "stdoutTail": "",
       "stderrTail": ""
     }

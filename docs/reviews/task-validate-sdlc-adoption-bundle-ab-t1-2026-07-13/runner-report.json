@@ -24,8 +24,8 @@
       "exitCode": 0,
       "signal": null,
       "timedOut": false,
-      "durationMs": 803,
-      "stdoutTail": "✔ help is available without a declaration source (36.100206ms)\n✔ flags mode accepts a reversible declaration (69.15666ms)\n✔ track none requires a reason and demands no artifacts (113.595046ms)\n✔ body grammar rejects ambiguity and invalid lines (137.075712ms)\n✔ bot exemption applies only without a valid declaration (171.03339ms)\n✔ event payload null body is an empty body and missing login is not exempt (82.405698ms)\n✔ JSON mode is inert for shell metacharacters and emits one envelope (52.28183ms)\nℹ tests 7\nℹ suites 0\nℹ pass 7\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 742.260771\n",
+      "durationMs": 802,
+      "stdoutTail": "✔ help is available without a declaration source (56.44349ms)\n✔ flags mode accepts a reversible declaration (63.414295ms)\n✔ invalid track stays null in the report envelope (57.372878ms)\n✔ track none requires a reason and demands no artifacts (121.544588ms)\n✔ body grammar rejects ambiguity and invalid lines (119.582148ms)\n✔ bot exemption applies only without a valid declaration (116.870115ms)\n✔ event payload null body is an empty body and missing login is not exempt (56.889272ms)\n✔ JSON mode is inert for shell metacharacters and emits one envelope (65.698266ms)\nℹ tests 8\nℹ suites 0\nℹ pass 8\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 748.536081\n",
       "stderrTail": ""
     },
     {
@@ -42,7 +42,7 @@
       "exitCode": 0,
       "signal": null,
       "timedOut": false,
-      "durationMs": 21,
+      "durationMs": 37,
       "stdoutTail": "",
       "stderrTail": ""
     },
@@ -60,7 +60,7 @@
       "exitCode": 0,
       "signal": null,
       "timedOut": false,
-      "durationMs": 42,
+      "durationMs": 24,
       "stdoutTail": "",
       "stderrTail": ""
     },
@@ -78,8 +78,8 @@
       "exitCode": 0,
       "signal": null,
       "timedOut": false,
-      "durationMs": 284,
-      "stdoutTail": "\n> pi-sdlc@0.1.1 lint\n> biome check .\n\nChecked 50 files in 57ms. No fixes applied.\n",
+      "durationMs": 232,
+      "stdoutTail": "\n> pi-sdlc@0.1.1 lint\n> biome check .\n\nChecked 52 files in 64ms. No fixes applied.\n",
       "stderrTail": ""
     },
     {
@@ -97,7 +97,7 @@
       "exitCode": 0,
       "signal": null,
       "timedOut": false,
-      "durationMs": 6,
+      "durationMs": 3,
       "stdoutTail": "",
       "stderrTail": ""
     }
