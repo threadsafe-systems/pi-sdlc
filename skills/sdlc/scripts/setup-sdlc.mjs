@@ -376,11 +376,11 @@ function writeBundle(root, opts, cfg, hooks, tracker) {
 		mkdirSync(dirname(configTarget), { recursive: true });
 		writeFileSync(configTarget, `${JSON.stringify(cfg, null, 2)}\n`);
 		report.assets.push({ id: "config", action: "created", message: `created ${configTarget}` });
-	} else if (configMutating && opts.force) {
+	} else if (configIssue) report.assets.push({ id: "config", action: "refused", message: `refused invalid existing config ${configTarget}: ${configIssue}`, remediation: `repair or delete ${configTarget} and re-run setup` });
+	else if (configMutating && opts.force) {
 		writeFileSync(configTarget, `${JSON.stringify(cfg, null, 2)}\n`);
 		report.assets.push({ id: "config", action: "upgraded", message: `upgraded ${configTarget}` });
-	} else if (configIssue) report.assets.push({ id: "config", action: "refused", message: `refused invalid existing config ${configTarget}: ${configIssue}`, remediation: `repair or delete ${configTarget} and re-run setup` });
-	else if (configMutating && !opts.force) report.assets.push({ id: "config", action: "refused", message: `refused config replacement without --force: ${configTarget}`, remediation: `re-run with --force to replace the configuration` });
+	} else if (configMutating && !opts.force) report.assets.push({ id: "config", action: "refused", message: `refused config replacement without --force: ${configTarget}`, remediation: `re-run with --force to replace the configuration` });
 	else report.assets.push({ id: "config", action: "retained", message: `retained ${configTarget}` });
 	if (opts.withModels) {
 		if (!existsSync(modelTarget)) {

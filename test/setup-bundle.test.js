@@ -154,6 +154,10 @@ test("invalid existing config and models are refused without overwrite", () => {
 		assert.equal(result.report.assets.find((asset) => asset.id === "config").action, "refused");
 		assert.equal(result.report.assets.find((asset) => asset.id === "models").action, "refused");
 		assert.equal(readFileSync(join(root, ".pi/sdlc/sdlc.config.json"), "utf8"), "{bad\n");
+		const forced = jsonRun(root, ["--yes", "--prefix", "changed", "--force"]);
+		assert.equal(forced.status, 1);
+		assert.equal(forced.report.assets.find((asset) => asset.id === "config").action, "refused");
+		assert.equal(readFileSync(join(root, ".pi/sdlc/sdlc.config.json"), "utf8"), "{bad\n");
 	} finally {
 		rmSync(root, { recursive: true, force: true });
 	}
