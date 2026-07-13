@@ -1,0 +1,126 @@
+{
+  "schemaVersion": 1,
+  "taskId": "pv-t2",
+  "manifest": "/home/neil/code/threadsafe/pi-sdlc.worktrees/feat-portable-validator/docs/validation/portable-validator/pv-t2.json",
+  "repoRoot": "/home/neil/code/threadsafe/pi-sdlc.worktrees/feat-portable-validator",
+  "verdict": "PASS",
+  "exitCode": 0,
+  "errors": [],
+  "manifestErrors": [],
+  "commands": [
+    {
+      "id": "tests.docs",
+      "argv": [
+        "node",
+        "--test",
+        "test/docs.test.js",
+        "test/extraction.test.js",
+        "test/validator-contract.test.js"
+      ],
+      "evidence": [
+        "PV10 prompt and panel compatibility",
+        "PV12 blocked sibling handoff",
+        "PV13 regression"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 2406,
+      "stdoutTail": "✔ OH7: SKILL.md carries the opt-in, advisory, hooks headings + red flags (1.025447ms)\n✔ OH7: the Implement table row no longer prescribes 'in a worktree' (0.306826ms)\n✔ OH8: SKILL.md contains the announce-on-fire block and the workflow.md rule (0.165041ms)\n✔ OH9: exactly two new ADRs (opt-in, hooks) with context/decision/consequences (0.42646ms)\n✔ OH12: README has the opt-in story and drops the old no-manifest-defaults claim (0.196228ms)\nunknown format \"uri\" ignored in schema at path \"#/properties/tracker/properties/board/properties/url\"\nunknown format \"uri\" ignored in schema at path \"#/properties/tracker/properties/board/properties/url\"\n✔ S2: no loom-domain content in the generic surface (1.623827ms)\n✔ S3: JSON schemas validate their examples (23.074375ms)\n✔ S3b: ensure-panel-agent rejects malformed config (exit 2) (219.899013ms)\n✔ S3c: resolve-panel rejects malformed models (exit 2) (104.093274ms)\n✔ S4: stamped name+tools+body byte-identical to golden; description == FS4 (105.727933ms)\n✔ S5: agent lands in the CONSUMER's .pi/agents (not the skill dir) (32.016354ms)\n✔ S6: resolve-panel --emit-tasks deep-equals golden under isolated env (114.357196ms)\n✔ S7: resolution terminal cases (87.897102ms)\n✔ PV1: a valid JavaScript manifest runs only declared checks and passes (57.727658ms)\n✔ PV2: only declared argv run; an undeclared tool command never executes (143.039625ms)\n✔ PV3: schema and inspectManifest reject the mutation matrix before any command runs (61.679594ms)\n✔ PV4: command outcomes are complete and deterministic; runner continues after failures (45.295644ms)\n✔ PV4: a timeout is reported as FAIL with timedOut (1067.450042ms)\n✔ PV5: category applicability is exact; injected n/a shapes are rejected (74.558564ms)\n✔ PV6: scenario mapping gates the verdict (71.350693ms)\n✔ PV7: standards and banned patterns are commands, not judgement (105.666612ms)\n✔ PV8: evidence is bounded and secrets are redacted (78.574434ms)\n✔ PV8 unit: boundStream and redaction name-matching are precise (0.315876ms)\n✔ PV9: JSON/text/exit agree and JSON mode is order-independent (416.434181ms)\n✔ PV9: --report writes the exact JSON bytes atomically (104.197566ms)\n✔ PV10: generic validator law and generated agent are portable (0.485915ms)\n✔ PV11: receipt hash verification detects mutation of any stored file (1.242428ms)\n✔ parseArgs: recognises JSON anywhere and rejects bad flags (0.255291ms)\n✔ PV13: renderText is a faithful projection of the report (71.581211ms)\nℹ tests 29\nℹ suites 0\nℹ pass 29\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 2385.224302\n",
+      "stderrTail": ""
+    },
+    {
+      "id": "static.lint",
+      "argv": [
+        "npm",
+        "run",
+        "lint"
+      ],
+      "evidence": [
+        "Repository lint and formatting rules"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 109,
+      "stdoutTail": "\n> pi-sdlc@0.1.1 lint\n> biome check .\n\nChecked 34 files in 14ms. No fixes applied.\n",
+      "stderrTail": ""
+    },
+    {
+      "id": "patterns.diff",
+      "argv": [
+        "git",
+        "diff",
+        "--check",
+        "HEAD"
+      ],
+      "evidence": [
+        "No whitespace-error banned patterns in task diff"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 3,
+      "stdoutTail": "",
+      "stderrTail": ""
+    }
+  ],
+  "categories": [
+    {
+      "category": "tests",
+      "status": "PASS",
+      "checkIds": [
+        "tests.docs"
+      ]
+    },
+    {
+      "category": "static",
+      "status": "PASS",
+      "checkIds": [
+        "static.lint"
+      ]
+    },
+    {
+      "category": "scenarios",
+      "status": "PASS"
+    },
+    {
+      "category": "standards",
+      "status": "N/A",
+      "reason": "No additional governing standard applies beyond declared documentation and lint checks."
+    },
+    {
+      "category": "bannedPatterns",
+      "status": "PASS",
+      "checkIds": [
+        "patterns.diff"
+      ]
+    }
+  ],
+  "scenarios": [
+    {
+      "scenarioId": "PV10",
+      "status": "PASS",
+      "checkIds": [
+        "tests.docs"
+      ]
+    },
+    {
+      "scenarioId": "PV12",
+      "status": "PASS",
+      "checkIds": [
+        "tests.docs"
+      ]
+    },
+    {
+      "scenarioId": "PV13",
+      "status": "PASS",
+      "checkIds": [
+        "tests.docs"
+      ]
+    }
+  ]
+}

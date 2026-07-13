@@ -62,6 +62,38 @@ credentials and prints a ready-to-paste `subagent` `tasks: [...]` array (one tas
 per resolved model, per-task `model` override). The full process law is in
 `skills/sdlc/SKILL.md`.
 
+## Portable per-task validator
+
+Each implementation task is gated by a committed **validation manifest**
+(`docs/validation/<feature>/<task-id>.json`, schema
+`skills/sdlc/schema/task-validation-manifest.schema.json`) projected from its
+approved Build task. The manifest declares the task's checks as exact argv
+arrays across five categories (`tests`, `static`, `scenarios`, `standards`,
+`bannedPatterns`), each `required` or `n/a` with a Build-approved reason, plus
+the mapping from each owned spec scenario to the checks that evidence it.
+
+The deterministic runner executes it:
+
+```bash
+skills/sdlc/scripts/validate-task.sh \
+  --manifest docs/validation/<feature>/<task-id>.json --repo-root . --format json \
+  --report docs/reviews/task-validate-<feature>-<task-id>-<date>/runner-report.json
+```
+
+The runner — not the model — runs only declared commands (`shell:false`),
+evaluates categories/scenarios, bounds and redacts evidence, and exits `0` PASS /
+`1` FAIL / `2` ERROR. The validator subagent runs it, confirms exit and verdict
+agree, and reports results; `scripts/verify-task-receipt.mjs` checks the stored
+receipt hashes. Validation is portable: a TypeScript task declares `tsc`, a
+JavaScript task declares `node --check` and its linter, another repo declares its
+own tools. There is no unconditional TypeScript check and no assumed
+`CONTRIBUTORS` file (see `docs/adr/0013-*` and `0014-*`).
+
+**Migrating a whole-file validator prompt override:** overrides keep FS7 heading
+compatibility but must adopt the manifest/runner contract (run the runner, report
+its results) before use; a stale override that still greps for `tsc`/
+`CONTRIBUTORS` no longer reflects the generic law.
+
 ## Releases & versioning
 
 Releases are automated with

@@ -273,15 +273,37 @@ and the orchestrating model.
 ## Per-task validator (implementation)
 
 Each task ends with one validator subagent, a checklist executor, not a judge.
-Its remit is only checks it runs (see `prompts/validator-task.prompt.md`): the
-test command exits zero, `npx tsc --noEmit` exits zero, the task's named
-scenario ids pass, greppable CONTRIBUTORS rules hold, no banned patterns. It
-gives a pass or fail per check, never a quality opinion. A task is not done
-until every check passes. Judgement review happens later at the PR panel. Model
-preference: `deepseek/deepseek-v4-flash`, then `anthropic/claude-haiku-4-5` —
-a `:low` (or `:off`) thinking suffix on either fits this role well, since a
-checklist executor doesn't need deep reasoning (see `sdlc.models.schema.json`
-for the full `provider/model[:thinking]` syntax).
+Validation is **portable and deterministic**: the task's checks are whatever its
+approved Build task declared, never a language or tool the skill imposes. There
+is no unconditional `npx tsc --noEmit` and no assumed `CONTRIBUTORS` file; a
+TypeScript task declares `tsc`, a JavaScript task declares `node --check` and its
+linter, another repo declares its own tools.
+
+Every implementation task carries a committed **PV1 validation manifest**
+(`docs/validation/<feature>/<task-id>.json`, schema
+`schema/task-validation-manifest.schema.json`) projected from its canonical
+Build task. The manifest names, as exact argv arrays, the task's checks across
+five categories — `tests`, `static`, `scenarios`, `standards`, `bannedPatterns`
+— each `required` or `n/a` with a Build-approved reason, plus the mapping from
+each owned Specification scenario to the required checks that evidence it.
+
+The **deterministic runner** (`scripts/validate-task.sh` → `validate-task.mjs`,
+surface PV2) — not the model — validates the manifest, executes only its
+declared argv with no shell, evaluates categories and scenarios, bounds and
+redacts command evidence, and returns `PASS` (exit 0), `FAIL` (exit 1), or
+`ERROR` (exit 2). Build, not the validator, owns which commands run and which
+categories are `n/a`; the validator cannot invent a command, weaken a check, or
+decide applicability. The validator subagent (see
+`prompts/validator-task.prompt.md`) runs the runner, confirms exit and report
+verdict agree, and reports each result. A nonzero runner result blocks task
+completion; a task is not done until the runner returns PASS. Each task stores a
+runtime receipt (manifest copy, runner report, generated-agent copy, hashes,
+model, verdicts) under `docs/reviews/task-validate-<feature>-<task-id>-<date>/`,
+verifiable with `scripts/verify-task-receipt.mjs`. Judgement review happens later
+at the PR panel. Model preference: `deepseek/deepseek-v4-flash`, then
+`anthropic/claude-haiku-4-5` — a `:low` (or `:off`) thinking suffix on either
+fits this role well, since a checklist executor doesn't need deep reasoning (see
+`sdlc.models.schema.json` for the full `provider/model[:thinking]` syntax).
 
 ## PR and review cycle
 
@@ -421,6 +443,11 @@ governing docs are historical record and are not migrated.
 - Editing a phase reviewer prompt in more than one place.
 - Resolving more than one map ticket in a single session.
 - A HITL ticket resolved by the agent answering its own questions.
+- Bypassing the deterministic validation runner, running an undeclared command
+  as a gate substitute, or editing a task's validation manifest mid-
+  implementation without a Build correction and renewed approval.
+- A stale whole-file validator prompt override claiming portable validation
+  without adopting the PV1 manifest / PV2 runner contract.
 - A build plan with two or more tasks that skips the epic/sub-issue/board
   publish step.
 - Treating the tracker (map, epic, sub-issues, board) as the source of truth
