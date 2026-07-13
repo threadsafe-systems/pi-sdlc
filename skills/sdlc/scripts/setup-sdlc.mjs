@@ -195,7 +195,7 @@ function structural(target, kind) {
 	if (!existsSync(target)) return false;
 	const text = readFileSync(target, "utf8");
 	if (kind === "pr-template") return /```sdlc\s*[\s\S]*^track: (irreversible|reversible|none)\s*$[\s\S]*(?:^slug: |^reason: )/m.test(text);
-	if (kind === "ci-workflow") return /repository:\s*threadsafe-systems\/pi-sdlc/.test(text) && /ref:\s*\S+/.test(text) && /node\s+\S*check-lifecycle\.mjs/.test(text);
+	if (kind === "ci-workflow") return /repository:\s*[^/\s]+\/pi-sdlc/.test(text) && /ref:\s*\S+/.test(text) && /node\s+\S*check-lifecycle\.mjs/.test(text);
 	return true;
 }
 function asset(id, target, kind, content, report) {
