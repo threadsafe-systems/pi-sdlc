@@ -98,6 +98,17 @@ test("bot exemption applies only without a valid declaration", () => {
 	}
 });
 
+test("empty body and event filenames remain source errors", () => {
+	const body = jsonRun(["--body", ""]);
+	assert.equal(body.status, 2);
+	assert.equal(body.report.mode, "body");
+	assert.equal(body.report.checks.find((c) => c.id === "declaration.source").status, "error");
+	const event = jsonRun(["--event", ""]);
+	assert.equal(event.status, 2);
+	assert.equal(event.report.mode, "event");
+	assert.equal(event.report.checks.find((c) => c.id === "declaration.source").status, "error");
+});
+
 test("event payload null body is an empty body and missing login is not exempt", () => {
 	const dir = fixture();
 	try {

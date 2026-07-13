@@ -186,7 +186,7 @@ function main(argv = process.argv.slice(2), cwd = process.cwd()) {
 	const parsed = parseArgs(argv);
 	if (parsed.help) return { report: null, jsonMode, help: true };
 	const results = new Map();
-	const report = { schemaVersion: 1, root: resolve(cwd), mode: parsed.event ? "event" : parsed.body ? "body" : "flags", state: "error", exitCode: 2, track: null, slug: null, reason: null, exempt: false, checks: [] };
+	const report = { schemaVersion: 1, root: resolve(cwd), mode: parsed.event !== undefined ? "event" : parsed.body !== undefined ? "body" : "flags", state: "error", exitCode: 2, track: null, slug: null, reason: null, exempt: false, checks: [] };
 	if (parsed.error) setResult(results, "cli.arguments", "error", parsed.error, USAGE);
 	else setResult(results, "cli.arguments", "pass", "arguments are valid");
 	let root = report.root;
@@ -228,11 +228,11 @@ function main(argv = process.argv.slice(2), cwd = process.cwd()) {
 	let source;
 	if (prerequisitesPass(results, "declaration.source")) {
 		try {
-			if (parsed.event) {
+			if (parsed.event !== undefined) {
 				const event = parseEvent(parsed.event);
 				source = { mode: "event", ...event };
 				report.mode = "event";
-			} else if (parsed.body) {
+			} else if (parsed.body !== undefined) {
 				source = { mode: "body", body: readFileSync(parsed.body, "utf8"), author: parsed.author };
 				report.mode = "body";
 			} else source = { mode: "flags", track: parsed.track, slug: parsed.slug, reason: parsed.reason, author: parsed.author };

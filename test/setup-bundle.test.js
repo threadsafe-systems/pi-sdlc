@@ -189,6 +189,19 @@ test("malformed CI marker fails before any bundle write", () => {
 	}
 });
 
+test("operational JSON errors preserve the resolved consumer root", () => {
+	const root = temp();
+	try {
+		writeFileSync(join(root, ".buildkite"), "not-a-directory\n");
+		const result = spawnSync(process.execPath, [SETUP, "--repo-root", root, "--format", "json", "--yes", "--with-ci-workflow"], { cwd: ROOT, encoding: "utf8" });
+		const report = JSON.parse(result.stdout);
+		assert.equal(result.status, 2);
+		assert.equal(report.root, root);
+	} finally {
+		rmSync(root, { recursive: true, force: true });
+	}
+});
+
 test("existing target directories fail before any bundle write", () => {
 	const root = temp();
 	try {

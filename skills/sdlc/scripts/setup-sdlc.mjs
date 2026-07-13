@@ -440,6 +440,7 @@ async function interview(root) {
 
 const argv = process.argv.slice(2);
 const isJson = jsonMode(argv);
+let resolvedRoot;
 try {
 	const opts = parseArgs(argv);
 	if (opts.help) {
@@ -447,6 +448,7 @@ try {
 		process.exit(0);
 	}
 	const root = resolveRoot({ config: opts.config, repoRoot: opts.repoRoot });
+	resolvedRoot = root;
 	if (!opts.runFlag) process.exitCode = await interview(root);
 	else {
 		const tracker = trackerFromFlags(opts);
@@ -463,7 +465,7 @@ try {
 } catch (error) {
 	const code = error instanceof SetupError ? error.code : 2;
 	if (isJson) {
-		process.stdout.write(`${JSON.stringify({ schemaVersion: 1, root: process.cwd(), exitCode: code, error: String(error.message), references: [], assets: [] }, null, 2)}\n`);
+		process.stdout.write(`${JSON.stringify({ schemaVersion: 1, root: resolvedRoot ?? process.cwd(), exitCode: code, error: String(error.message), references: [], assets: [] }, null, 2)}\n`);
 	} else console.error(error.message);
 	process.exitCode = code;
 }
