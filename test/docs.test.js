@@ -74,6 +74,9 @@ test("FS9 documentation carries declaration rules and reversible grounding", () 
 	assert.match(reviewPrompt, /<TRACK>/);
 	assert.match(reviewPrompt, /<GOVERNING_DOCS>/);
 	assert.match(reviewPrompt, /When `<TRACK>` is `reversible`/);
+	assert.match(skillMd, /populate the prompt's `<TRACK>` from the PR declaration/);
+	assert.match(skillMd, /`<GOVERNING_DOCS>` from the linked documents/);
+	assert.match(skillMd, /never send\s+literal placeholders/);
 	assert.doesNotMatch(skillMd, /CI checks\\s+the declared track's artifacts are committed/);
 });
 

@@ -268,7 +268,11 @@ per model.
      `dispatch.sh` stamps one prompt file across `--model` flags.
    Give each reviewer the exact inputs: the artifact under review, the upstream
    artifacts it must be consistent with, the repo path and commit, and the
-   grounding rule (cite file:line for any framework claim).
+   grounding rule (cite file:line for any framework claim). For `pr_review`,
+   populate the prompt's `<TRACK>` from the PR declaration and
+   `<GOVERNING_DOCS>` from the linked documents before dispatch; never send
+   literal placeholders. On the reversible track, provide the plan and Build
+   plan only and explicitly state that a Specification must not be demanded.
 
 **Before you fan out** (either path): confirm the `subagent` tool is actually in
 your toolset. If it is missing in a live pi session, the fix is a session reload
