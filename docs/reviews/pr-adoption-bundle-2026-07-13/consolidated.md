@@ -2,9 +2,10 @@
 
 - Author/orchestrator: anthropic
 - Track: irreversible
-- Head: `47b2068`
-- Panel: openai-codex/gpt-5.6-luna:medium, zai/glm-5.2:medium,
-  deepseek/deepseek-v4-pro:medium (anthropic excluded)
+- Head: `d8bf81c`
+- Panel: openai/gpt-5.6-sol:medium, deepseek/deepseek-v4-pro:medium,
+  amazon-bedrock/global.anthropic.claude-haiku-4-5-20251001-v1:medium
+  (author vendor anthropic excluded from the direct panel)
 
 ## Round 1 adjudication
 
@@ -82,9 +83,12 @@ The last completed three-vendor verification found and led to these fixes:
   setup error boundary, and target parents/targets are preflighted for
   containment, directory, and symlink conflicts.
 
-The final attempted three-vendor re-dispatch was blocked by the session
-subagent spawn cap (40/40). Direct final verification then passed all declared
-checks: 137 tests, lint, FS8-untouched diff, and all five PV2 runners with
-receipt hashes verified. The completed verification evidence found no new
-high/medium defect. **Zero surviving high/medium findings; PR stop condition
+Subsequent verification fix waves addressed: invalid config under `--force`,
+malformed CI marker paths, bot value-invalid exemption, empty source paths,
+resolved-root JSON errors, checker-source readability, directory-vs-file CI
+markers, exact `sdlc` template info strings, and the pinned bot exemption
+message. The final head `d8bf81c` passed 145 tests, lint, and LSP diagnostics;
+the final three-vendor panel found no surviving high/medium defect. The shared
+package-source mutation regression was removed after detecting a concurrent
+cross-file test race. **Zero surviving high/medium findings; PR stop condition
 met.**
