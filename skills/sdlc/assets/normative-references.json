@@ -53,6 +53,64 @@
       "target": "skills/sdlc/SKILL.md"
     },
     {
+      "id": "skill.lifecycle-checker",
+      "source": "skills/sdlc/SKILL.md",
+      "assertion": "The `check-lifecycle` script verifies the declared",
+      "targetKind": "command",
+      "ownership": "package",
+      "required": true,
+      "resolution": "package",
+      "target": "skills/sdlc/scripts/check-lifecycle.mjs"
+    },
+    {
+      "id": "skill.pr-template",
+      "source": "skills/sdlc/SKILL.md",
+      "assertion": "template's `sdlc` declaration block",
+      "targetKind": "file",
+      "ownership": "package",
+      "required": true,
+      "resolution": "package",
+      "target": "skills/sdlc/assets/pull_request_template.md"
+    },
+    {
+      "id": "skill.ci-workflow",
+      "source": "README.md",
+      "assertion": "setup offers a pinned pi-sdlc workflow only when no CI configuration is detected",
+      "targetKind": "file",
+      "ownership": "package",
+      "required": true,
+      "resolution": "package",
+      "target": "skills/sdlc/assets/sdlc-lifecycle.yml"
+    },
+    {
+      "id": "consumer.config",
+      "source": "skills/sdlc/SKILL.md",
+      "assertion": "more: the active manifest must also be clean and valid, the models roster",
+      "targetKind": "file",
+      "ownership": "consumer",
+      "required": true,
+      "resolution": "readiness",
+      "target": ".pi/sdlc/sdlc.config.json",
+      "verification": {
+        "source": "skills/sdlc/scripts/sdlc-status.mjs",
+        "assertion": "adoption.manifest-clean\": \"manifest has uncommitted changes"
+      }
+    },
+    {
+      "id": "consumer.models",
+      "source": "skills/sdlc/SKILL.md",
+      "assertion": "the models roster",
+      "targetKind": "file",
+      "ownership": "consumer",
+      "required": true,
+      "resolution": "readiness",
+      "target": ".pi/sdlc/sdlc.models.json",
+      "verification": {
+        "source": "skills/sdlc/scripts/sdlc-status.mjs",
+        "assertion": "set(\"models.clean\", \"pass\", \"models file matches HEAD in index and working tree\");"
+      }
+    },
+    {
       "id": "readme.source",
       "source": "README.md",
       "assertion": "# pi-sdlc",
