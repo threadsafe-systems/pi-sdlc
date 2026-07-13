@@ -14,7 +14,8 @@ jobs:
       - uses: actions/checkout@v4
         with:
           repository: threadsafe-systems/pi-sdlc
-          ref: v0.1.1
+          ref: __PI_SDLC_REF__
+          # setup replaces this placeholder with the installed package commit/tag
           path: .pi-sdlc
       - uses: actions/setup-node@v4
         with:

@@ -25,6 +25,7 @@ test("fresh bundle provisions requested assets and idempotent rerun retains them
 		assert.equal(first.status, 0, first.stderr);
 		assert.equal(first.report.exitCode, 0);
 		for (const path of [".pi/sdlc/sdlc.config.json", ".pi/sdlc/sdlc.models.json", ".github/pull_request_template.md", ".github/workflows/sdlc-lifecycle.yml", ".pi/sdlc/prompts/adversary-plan.prompt.md"]) assert.equal(existsSync(join(root, path)), true, path);
+		assert.doesNotMatch(readFileSync(join(root, ".github/workflows/sdlc-lifecycle.yml"), "utf8"), /__PI_SDLC_REF__/);
 		const before = readFileSync(join(root, ".github/pull_request_template.md"), "utf8");
 		const second = jsonRun(root, ["--yes", "--with-models", "--with-ci-workflow", "--copy-prompts"]);
 		assert.equal(second.status, 0, second.stderr);

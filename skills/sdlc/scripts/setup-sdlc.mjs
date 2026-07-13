@@ -216,6 +216,14 @@ function asset(id, target, kind, content, report) {
 	if (structural(target, kind)) report.assets.push({ id, action: "retained", message: `retained recognised consumer asset ${target}` });
 	else report.assets.push({ id, action: "refused", message: `refused existing consumer asset ${target}`, remediation: `add the required ${kind} structure or delete ${target} and re-run setup` });
 }
+function packageRef() {
+	if (process.env.SDLC_PACKAGE_REF) return process.env.SDLC_PACKAGE_REF;
+	try {
+		return execFileSync("git", ["-C", PACKAGE_DIR, "rev-parse", "HEAD"], { encoding: "utf8", stdio: ["ignore", "pipe", "ignore"] }).trim();
+	} catch {
+		return "main";
+	}
+}
 function checkReference(id, path, report) {
 	if (existsSync(path)) report.references.push({ id, status: "ok", message: `resolved ${path}` });
 	else report.references.push({ id, status: "broken", message: `package asset unavailable: ${path}` });
@@ -226,7 +234,7 @@ function targetParentConflict(root, target) {
 	while (parent.startsWith(rootResolved) && parent !== rootResolved) {
 		if (existsSync(parent)) {
 			try {
-				if (!readdirSync(parent, { withFileTypes: true })) return `target parent is not a directory: ${parent}`;
+				readdirSync(parent, { withFileTypes: true });
 			} catch (error) {
 				return `target parent cannot be inspected: ${parent} (${error.message})`;
 			}
@@ -251,6 +259,7 @@ function writeBundle(root, opts, cfg, hooks, tracker) {
 	const modelTarget = join(root, ".pi", "sdlc", "sdlc.models.json");
 	const templateSource = join(PACKAGE_DIR, "assets", "pull_request_template.md");
 	const workflowSource = join(PACKAGE_DIR, "assets", "sdlc-lifecycle.yml");
+	let workflowContent;
 	const checkerSource = join(SCRIPT_DIR, "check-lifecycle.mjs");
 	const modelSource = join(PACKAGE_DIR, "schema", "sdlc.models.example.json");
 	checkReference("reference.pr-template", templateSource, report);
@@ -263,6 +272,7 @@ function writeBundle(root, opts, cfg, hooks, tracker) {
 		report.error = "one or more package references could not be resolved";
 		return report;
 	}
+	workflowContent = source(workflowSource).replace("__PI_SDLC_REF__", packageRef());
 	const configIssues = inspectConfig(cfg);
 	if (configIssues.length > 0) {
 		report.exitCode = 2;
@@ -307,7 +317,7 @@ function writeBundle(root, opts, cfg, hooks, tracker) {
 		const target = join(root, ".github", "workflows", "sdlc-lifecycle.yml");
 		if (rootPrefix(root)) report.assets.push({ id: "ci-workflow", action: "refused", message: "consumer root is a subdirectory of the git repository", remediation: "install the workflow at the repository root" });
 		else if (existsCi(root, "sdlc-lifecycle.yml")) report.assets.push({ id: "ci-workflow", action: "refused", message: "existing CI configuration detected", remediation: "add the lifecycle-check snippet to existing CI" });
-		else asset("ci-workflow", target, "ci-workflow", source(workflowSource), report);
+		else asset("ci-workflow", target, "ci-workflow", workflowContent, report);
 	}
 	if (opts.copyPrompts) for (const base of PROMPT_BASES) asset(`prompt.${base}`, join(root, ".pi", "sdlc", "prompts", `${base}.prompt.md`), "prompt", readFileSync(join(PACKAGE_DIR, "prompts", `${base}.prompt.md`), "utf8"), report);
 	if (hooks && Object.keys(hooks).length > 0) report.hookWarning = RUN_HOOK_WARNING;
