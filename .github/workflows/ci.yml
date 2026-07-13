@@ -20,6 +20,8 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
+      - name: lifecycle contract
+        run: node skills/sdlc/scripts/check-lifecycle.mjs --event "$GITHUB_EVENT_PATH" --repo-root "$GITHUB_WORKSPACE"
       - run: npm test
       # Verify-only: biome check exits non-zero on any format or lint
       # violation, failing the job. CI never auto-fixes.

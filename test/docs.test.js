@@ -18,6 +18,9 @@ const adrDir = join(repo, "docs", "adr");
 const setupTemplate = readFileSync(join(repo, "templates", "setup-sdlc.md"), "utf8");
 const statusSh = readFileSync(join(repo, "skills", "sdlc", "scripts", "sdlc-status.sh"), "utf8");
 const statusMjs = readFileSync(join(repo, "skills", "sdlc", "scripts", "sdlc-status.mjs"), "utf8");
+const reviewPrompt = readFileSync(join(repo, "skills", "sdlc", "prompts", "adversary-review.prompt.md"), "utf8");
+const prTemplate = readFileSync(join(repo, ".github", "pull_request_template.md"), "utf8");
+const ciWorkflow = readFileSync(join(repo, ".github", "workflows", "ci.yml"), "utf8");
 
 test("OH7: SKILL.md carries the opt-in, advisory, hooks headings + red flags", () => {
 	assert.match(skillMd, /^## Opt-in and advisory mode$/m);
@@ -57,6 +60,27 @@ test("OH12: README has the opt-in story and drops the old no-manifest-defaults c
 	assert.match(readme, /\/setup-sdlc/);
 	assert.match(readme, /has not committed .*sdlc\.config\.json|has not adopted|opt/i);
 	assert.ok(!readme.includes("the skill still runs phases + panels using built-in defaults"), "README must not keep the old 'runs with defaults' claim");
+});
+
+test("FS9/FS10 dogfood assets are present", () => {
+	assert.match(prTemplate, /```sdlc[\s\S]*^track: reversible$[\s\S]*^slug: /m);
+	assert.match(ciWorkflow, /check-lifecycle\.mjs --event/);
+	assert.match(skillMd, /check-lifecycle/);
+	assert.match(readme, /adoption bundle/i);
+});
+
+test("FS9 documentation carries declaration rules and reversible grounding", () => {
+	for (const marker of ["irreversible", "reversible", "none", "slug", "reason", "[bot]", "check-lifecycle"]) assert.ok(skillMd.includes(marker), `missing ${marker}`);
+	assert.match(reviewPrompt, /<TRACK>/);
+	assert.match(reviewPrompt, /<GOVERNING_DOCS>/);
+	assert.match(reviewPrompt, /When `<TRACK>` is `reversible`/);
+	assert.doesNotMatch(skillMd, /CI checks\\s+the declared track's artifacts are committed/);
+});
+
+test("FS9 and FS10 ADRs freeze the new surfaces", () => {
+	const adr17 = readFileSync(join(adrDir, "0017-lifecycle-checker-fs9.md"), "utf8");
+	const adr18 = readFileSync(join(adrDir, "0018-adoption-bundle-fs10.md"), "utf8");
+	for (const body of [adr17, adr18]) for (const marker of [/- Context:/, /- Decision:/, /- Consequences:/, /schema version 1/]) assert.match(body, marker);
 });
 
 // ---------------------------------------------------------------------------
