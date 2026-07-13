@@ -1,0 +1,179 @@
+{
+  "schemaVersion": 1,
+  "taskId": "ab-t2",
+  "manifest": "/home/neil/code/threadsafe/pi-sdlc.worktrees/feat-sdlc-adoption-bundle/docs/validation/sdlc-adoption-bundle/ab-t2.json",
+  "repoRoot": "/home/neil/code/threadsafe/pi-sdlc.worktrees/feat-sdlc-adoption-bundle",
+  "verdict": "PASS",
+  "exitCode": 0,
+  "errors": [],
+  "manifestErrors": [],
+  "commands": [
+    {
+      "id": "tests.check-lifecycle-all",
+      "argv": [
+        "node",
+        "--test",
+        "test/check-lifecycle.test.js",
+        "test/check-lifecycle-git.test.js"
+      ],
+      "evidence": [
+        "AB3 irreversible conformance",
+        "AB4 reversible never demands a spec",
+        "AB5 none demands nothing",
+        "AB6 committed content through configured paths",
+        "AB7 golden completion"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 1072,
+      "stdoutTail": "✔ irreversible artifacts pass only when all committed documents exist (161.455624ms)\n✔ missing artifact and missing artifact directory are contract failures (254.773081ms)\n✔ reversible never requires a specification (140.222656ms)\n✔ configured paths are authoritative and multiple dated matches pass (105.507043ms)\n✔ working-tree-only artifacts do not count (108.659594ms)\n✔ configured path escape is an operational config error (121.469209ms)\n✔ help is available without a declaration source (73.275962ms)\n✔ flags mode accepts a reversible declaration (96.880468ms)\n✔ track none requires a reason and demands no artifacts (148.091267ms)\n✔ body grammar rejects ambiguity and invalid lines (144.590258ms)\n✔ bot exemption applies only without a valid declaration (125.450986ms)\n✔ event payload null body is an empty body and missing login is not exempt (44.225984ms)\n✔ JSON mode is inert for shell metacharacters and emits one envelope (72.894516ms)\nℹ tests 13\nℹ suites 0\nℹ pass 13\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 1001.482218\n",
+      "stderrTail": ""
+    },
+    {
+      "id": "static.checker",
+      "argv": [
+        "node",
+        "--check",
+        "skills/sdlc/scripts/check-lifecycle.mjs"
+      ],
+      "evidence": [
+        "Checker script syntax"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 46,
+      "stdoutTail": "",
+      "stderrTail": ""
+    },
+    {
+      "id": "static.tests-exist",
+      "argv": [
+        "node",
+        "--check",
+        "test/check-lifecycle-git.test.js"
+      ],
+      "evidence": [
+        "New git-fixture test file exists and parses; guards node --test silently skipping missing files"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 55,
+      "stdoutTail": "",
+      "stderrTail": ""
+    },
+    {
+      "id": "static.lint",
+      "argv": [
+        "npm",
+        "run",
+        "lint"
+      ],
+      "evidence": [
+        "Repository lint and formatting rules"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 332,
+      "stdoutTail": "\n> pi-sdlc@0.1.1 lint\n> biome check .\n\nChecked 51 files in 59ms. No fixes applied.\n",
+      "stderrTail": ""
+    },
+    {
+      "id": "patterns.diff",
+      "argv": [
+        "git",
+        "diff",
+        "--check",
+        "HEAD"
+      ],
+      "evidence": [
+        "No whitespace-error banned patterns in task diff"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 7,
+      "stdoutTail": "",
+      "stderrTail": ""
+    }
+  ],
+  "categories": [
+    {
+      "category": "tests",
+      "status": "PASS",
+      "checkIds": [
+        "tests.check-lifecycle-all"
+      ]
+    },
+    {
+      "category": "static",
+      "status": "PASS",
+      "checkIds": [
+        "static.checker",
+        "static.tests-exist",
+        "static.lint"
+      ]
+    },
+    {
+      "category": "scenarios",
+      "status": "PASS"
+    },
+    {
+      "category": "standards",
+      "status": "N/A",
+      "reason": "Commit-range and FS8-untouched standards are verified at ab-t5; no additional standard applies to this task."
+    },
+    {
+      "category": "bannedPatterns",
+      "status": "PASS",
+      "checkIds": [
+        "patterns.diff"
+      ]
+    }
+  ],
+  "scenarios": [
+    {
+      "scenarioId": "AB3",
+      "status": "PASS",
+      "checkIds": [
+        "tests.check-lifecycle-all"
+      ]
+    },
+    {
+      "scenarioId": "AB4",
+      "status": "PASS",
+      "checkIds": [
+        "tests.check-lifecycle-all"
+      ]
+    },
+    {
+      "scenarioId": "AB5",
+      "status": "PASS",
+      "checkIds": [
+        "tests.check-lifecycle-all"
+      ]
+    },
+    {
+      "scenarioId": "AB6",
+      "status": "PASS",
+      "checkIds": [
+        "tests.check-lifecycle-all"
+      ]
+    },
+    {
+      "scenarioId": "AB7",
+      "status": "PASS",
+      "checkIds": [
+        "tests.check-lifecycle-all"
+      ]
+    }
+  ]
+}
