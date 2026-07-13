@@ -194,7 +194,13 @@ function rootPrefix(root) {
 function structural(target, kind) {
 	if (!existsSync(target)) return false;
 	const text = readFileSync(target, "utf8");
-	if (kind === "pr-template") return /```sdlc\s*[\s\S]*^track: (irreversible|reversible|none)\s*$[\s\S]*(?:^slug: |^reason: )/m.test(text);
+	if (kind === "pr-template") {
+		const block = /```sdlc\s*([\s\S]*?)```/m.exec(text)?.[1];
+		if (!block) return false;
+		const track = /^track: (irreversible|reversible|none)$/m.exec(block)?.[1];
+		if (!track) return false;
+		return track === "none" ? /^reason: /m.test(block) : /^slug: /m.test(block);
+	}
 	if (kind === "ci-workflow") return /repository:\s*[^/\s]+\/pi-sdlc/.test(text) && /ref:\s*\S+/.test(text) && /node\s+\S*check-lifecycle\.mjs/.test(text);
 	return true;
 }
@@ -232,7 +238,7 @@ function writeBundle(root, opts, cfg, hooks, tracker) {
 	const modelSource = join(PACKAGE_DIR, "schema", "sdlc.models.example.json");
 	checkReference("reference.pr-template", templateSource, report);
 	if (opts.withCiWorkflow) checkReference("reference.ci-workflow", workflowSource, report);
-	if (opts.copyPrompts) checkReference("reference.prompts", join(PACKAGE_DIR, "prompts", "adversary-plan.prompt.md"), report);
+	if (opts.copyPrompts) for (const base of PROMPT_BASES) checkReference(`reference.prompt.${base}`, join(PACKAGE_DIR, "prompts", `${base}.prompt.md`), report);
 	if (opts.withModels) checkReference("reference.models-example", modelSource, report);
 	checkReference("reference.checker", checkerSource, report);
 	if (report.references.some((ref) => ref.status === "broken")) {
@@ -265,7 +271,7 @@ function writeBundle(root, opts, cfg, hooks, tracker) {
 		else if (existsCi(root, "sdlc-lifecycle.yml")) report.assets.push({ id: "ci-workflow", action: "refused", message: "existing CI configuration detected", remediation: "add the lifecycle-check snippet to existing CI" });
 		else asset("ci-workflow", target, "ci-workflow", source(workflowSource), report);
 	}
-	if (opts.copyPrompts) for (const base of PROMPT_BASES) asset(`prompt.${base}`, join(root, ".pi", "sdlc", "prompts", `${base}.prompt.md`), "prompt", source(join(PACKAGE_DIR, "prompts", `${base}.prompt.md`)), report);
+	if (opts.copyPrompts) for (const base of PROMPT_BASES) asset(`prompt.${base}`, join(root, ".pi", "sdlc", "prompts", `${base}.prompt.md`), "prompt", readFileSync(join(PACKAGE_DIR, "prompts", `${base}.prompt.md`), "utf8"), report);
 	if (hooks && Object.keys(hooks).length > 0) report.hookWarning = RUN_HOOK_WARNING;
 	report.exitCode = report.assets.some((item) => item.action === "refused") ? 1 : 0;
 	return report;

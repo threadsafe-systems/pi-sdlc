@@ -40,6 +40,12 @@ test("flags mode accepts a reversible declaration", () => {
 	assert.equal(result.report.checks.find((c) => c.id === "artifact.spec").status, "skip");
 });
 
+test("invalid track stays null in the report envelope", () => {
+	const result = jsonRun(["--track", "banana", "--slug", "sdlc-adoption-bundle"]);
+	assert.equal(result.status, 1);
+	assert.equal(result.report.track, null);
+});
+
 test("track none requires a reason and demands no artifacts", () => {
 	const good = jsonRun(["--track", "none", "--reason", "dependency update"]);
 	assert.equal(good.status, 0);

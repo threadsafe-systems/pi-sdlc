@@ -257,7 +257,7 @@ function main(argv = process.argv.slice(2), cwd = process.cwd()) {
 	}
 	if (prerequisitesPass(results, "declaration.track")) {
 		checkValues(values, results);
-		report.track = values.track ?? null;
+		if (statusOf(results, "declaration.track") === "pass") report.track = values.track ?? null;
 		if (statusOf(results, "declaration.slug") === "pass") report.slug = values.slug ?? null;
 		if (statusOf(results, "declaration.reason") === "pass" && values.track === "none") report.reason = values.reason ?? null;
 	}
@@ -291,7 +291,7 @@ function main(argv = process.argv.slice(2), cwd = process.cwd()) {
 		const treePath = `${prefix ? `${prefix}/` : ""}${normalizedConfigured.replace(/^\/+|\/+$/g, "")}`;
 		const listing = git(root, ["ls-tree", "-r", "--name-only", "HEAD", "--", `${treePath}/`]);
 		if (listing.code !== 0) {
-			setResult(results, id, "fail", "no matching committed artifact");
+			setResult(results, id, "error", "git could not inspect the committed artifact tree", "check repository integrity and current HEAD");
 			continue;
 		}
 		const expected = new RegExp(`^\\d{4}-\\d{2}-\\d{2}-${escapeRegExp(values.slug)}${suffix}\\.md$`);
