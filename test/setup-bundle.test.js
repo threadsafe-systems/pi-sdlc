@@ -81,6 +81,31 @@ test("consumer template without the declaration is refused byte-identically", ()
 	}
 });
 
+test("invalid assembled configuration fails before any bundle write", () => {
+	const root = temp();
+	try {
+		const result = jsonRun(root, ["--yes", "--prefix", "BAD"]);
+		assert.equal(result.status, 2);
+		assert.equal(result.report.assets.length, 0);
+		assert.equal(existsSync(join(root, ".pi/sdlc/sdlc.config.json")), false);
+	} finally {
+		rmSync(root, { recursive: true, force: true });
+	}
+});
+
+test("target parent conflicts fail before any bundle write", () => {
+	const root = temp();
+	try {
+		writeFileSync(join(root, ".github"), "not-a-directory\n");
+		const result = jsonRun(root, ["--yes"]);
+		assert.equal(result.status, 2);
+		assert.equal(result.report.assets.length, 0);
+		assert.equal(existsSync(join(root, ".pi/sdlc/sdlc.config.json")), false);
+	} finally {
+		rmSync(root, { recursive: true, force: true });
+	}
+});
+
 test("bundle reports resolved package references before writing", () => {
 	const root = temp();
 	try {

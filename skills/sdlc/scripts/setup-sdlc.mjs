@@ -8,7 +8,7 @@ import { dirname, join, relative, resolve, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 import { createInterface } from "node:readline/promises";
 import { stdin, stdout } from "node:process";
-import { CONFIG_DEFAULTS, HOOK_PHASES, USE_RE, resolveRoot } from "./lib.mjs";
+import { CONFIG_DEFAULTS, HOOK_PHASES, USE_RE, inspectConfig, resolveRoot } from "./lib.mjs";
 
 const SCRIPT_DIR = dirname(fileURLToPath(import.meta.url));
 const PACKAGE_DIR = resolve(SCRIPT_DIR, "..");
@@ -218,6 +218,21 @@ function checkReference(id, path, report) {
 	if (existsSync(path)) report.references.push({ id, status: "ok", message: `resolved ${path}` });
 	else report.references.push({ id, status: "broken", message: `package asset unavailable: ${path}` });
 }
+function targetParentConflict(root, target) {
+	let parent = dirname(target);
+	const rootResolved = resolve(root);
+	while (parent.startsWith(rootResolved) && parent !== rootResolved) {
+		if (existsSync(parent)) {
+			try {
+				if (!readdirSync(parent, { withFileTypes: true })) return `target parent is not a directory: ${parent}`;
+			} catch (error) {
+				return `target parent cannot be inspected: ${parent} (${error.message})`;
+			}
+		}
+		parent = dirname(parent);
+	}
+	return null;
+}
 function renderReport(report) {
 	if (report.format === "json") return `${JSON.stringify({ schemaVersion: 1, root: report.root, exitCode: report.exitCode, ...(report.error ? { error: report.error } : {}), references: report.references, assets: report.assets }, null, 2)}\n`;
 	const lines = [`root: ${report.root}`, `exit-code: ${report.exitCode}`];
@@ -245,6 +260,27 @@ function writeBundle(root, opts, cfg, hooks, tracker) {
 		report.exitCode = 2;
 		report.error = "one or more package references could not be resolved";
 		return report;
+	}
+	const configIssues = inspectConfig(cfg);
+	if (configIssues.length > 0) {
+		report.exitCode = 2;
+		report.error = `assembled configuration is invalid: ${configIssues[0].message}`;
+		return report;
+	}
+	const targets = [
+		configTarget,
+		...(opts.withModels ? [modelTarget] : []),
+		join(root, ".github", "pull_request_template.md"),
+		...(opts.withCiWorkflow ? [join(root, ".github", "workflows", "sdlc-lifecycle.yml")] : []),
+		...(opts.copyPrompts ? PROMPT_BASES.map((base) => join(root, ".pi", "sdlc", "prompts", `${base}.prompt.md`)) : []),
+	];
+	for (const target of targets) {
+		const conflict = targetParentConflict(root, target);
+		if (conflict) {
+			report.exitCode = 2;
+			report.error = conflict;
+			return report;
+		}
 	}
 	const configExists = existsSync(configTarget);
 	const configMutating = opts.prefix !== undefined || opts.labelPrefix !== undefined || opts.announce !== undefined || tracker !== undefined || (hooks && Object.keys(hooks).length > 0);
