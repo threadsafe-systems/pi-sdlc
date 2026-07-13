@@ -27,8 +27,8 @@
       "exitCode": 0,
       "signal": null,
       "timedOut": false,
-      "durationMs": 879,
-      "stdoutTail": "✔ irreversible artifacts pass only when all committed documents exist (131.7626ms)\n✔ missing artifact and missing artifact directory are contract failures (229.407917ms)\n✔ reversible never requires a specification (116.379468ms)\n✔ configured paths are authoritative and multiple dated matches pass (112.887474ms)\n✔ working-tree-only artifacts do not count (80.369152ms)\n✔ configured path escape is an operational config error (67.884285ms)\n✔ help is available without a declaration source (61.811064ms)\n✔ flags mode accepts a reversible declaration (65.47741ms)\n✔ invalid track stays null in the report envelope (43.713387ms)\n✔ track none requires a reason and demands no artifacts (106.280376ms)\n✔ body grammar rejects ambiguity and invalid lines (124.915152ms)\n✔ bot exemption applies only without a valid declaration (113.892465ms)\n✔ event payload null body is an empty body and missing login is not exempt (63.722121ms)\n✔ JSON mode is inert for shell metacharacters and emits one envelope (58.815733ms)\nℹ tests 14\nℹ suites 0\nℹ pass 14\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 818.020599\n",
+      "durationMs": 941,
+      "stdoutTail": "✔ irreversible artifacts pass only when all committed documents exist (147.679382ms)\n✔ missing artifact and missing artifact directory are contract failures (206.785451ms)\n✔ reversible never requires a specification (76.484922ms)\n✔ configured paths are authoritative and multiple dated matches pass (142.72889ms)\n✔ working-tree-only artifacts do not count (129.371645ms)\n✔ configured path escape is an operational config error (70.652037ms)\n✔ help is available without a declaration source (61.483985ms)\n✔ flags mode accepts a reversible declaration (80.634336ms)\n✔ invalid track stays null in the report envelope (69.137061ms)\n✔ track none requires a reason and demands no artifacts (113.569872ms)\n✔ body grammar rejects ambiguity and invalid lines (130.264274ms)\n✔ bot exemption applies only without a valid declaration (173.973732ms)\n✔ event payload null body is an empty body and missing login is not exempt (72.462256ms)\n✔ JSON mode is inert for shell metacharacters and emits one envelope (61.698291ms)\nℹ tests 14\nℹ suites 0\nℹ pass 14\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 883.629316\n",
       "stderrTail": ""
     },
     {
@@ -45,7 +45,7 @@
       "exitCode": 0,
       "signal": null,
       "timedOut": false,
-      "durationMs": 40,
+      "durationMs": 45,
       "stdoutTail": "",
       "stderrTail": ""
     },
@@ -63,7 +63,7 @@
       "exitCode": 0,
       "signal": null,
       "timedOut": false,
-      "durationMs": 32,
+      "durationMs": 40,
       "stdoutTail": "",
       "stderrTail": ""
     },
@@ -81,8 +81,8 @@
       "exitCode": 0,
       "signal": null,
       "timedOut": false,
-      "durationMs": 175,
-      "stdoutTail": "\n> pi-sdlc@0.1.1 lint\n> biome check .\n\nChecked 52 files in 38ms. No fixes applied.\n",
+      "durationMs": 323,
+      "stdoutTail": "\n> pi-sdlc@0.1.1 lint\n> biome check .\n\nChecked 52 files in 63ms. No fixes applied.\n",
       "stderrTail": ""
     },
     {
@@ -100,7 +100,7 @@
       "exitCode": 0,
       "signal": null,
       "timedOut": false,
-      "durationMs": 4,
+      "durationMs": 8,
       "stdoutTail": "",
       "stderrTail": ""
     }
