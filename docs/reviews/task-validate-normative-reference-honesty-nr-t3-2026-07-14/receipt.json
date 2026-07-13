@@ -3,7 +3,7 @@
   "taskId": "nr-t3",
   "manifestPath": "docs/validation/normative-reference-honesty/nr-t3.json",
   "manifestSha256": "952190dd6ce9152c8e3e94537591dc4938219dafb8aba8112afe0e600bcc115d",
-  "runnerReportSha256": "0200dce1ccf96af06987ccbbdeec8063b56c4acbfb8cf6598a01852075326069",
+  "runnerReportSha256": "86b5863df4183c5b89dce3018132feef34e12658ef3cf059086662baca5f88da",
   "generatedAgentSha256": "2e64d2b7427fb3cac6895979d79f3d6fb8f616c7b1872ffeebe7f855fb1fd722",
   "model": "openai-codex/gpt-5.6-terra",
   "runnerVerdict": "PASS",
