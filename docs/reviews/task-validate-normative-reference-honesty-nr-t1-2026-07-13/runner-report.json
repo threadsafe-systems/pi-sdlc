@@ -22,8 +22,8 @@
       "exitCode": 0,
       "signal": null,
       "timedOut": false,
-      "durationMs": 391,
-      "stdoutTail": "✔ live inventory passes with explicit non-package classifications (36.086853ms)\n✔ missing target and assertion mutations are contract failures (61.980366ms)\n✔ consumer and external entries are classified without probing (32.695818ms)\n✔ readiness requires the verifier assertion and path containment (103.425196ms)\n✔ invalid inventory and JSON argument errors emit one envelope (47.116051ms)\n✔ shell wrapper resolves beside itself from a consumer cwd (39.525402ms)\nℹ tests 6\nℹ suites 0\nℹ pass 6\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 360.301966\n",
+      "durationMs": 374,
+      "stdoutTail": "✔ live inventory passes with explicit non-package classifications (40.638028ms)\n✔ missing target and assertion mutations are contract failures (54.714796ms)\n✔ consumer and external entries are classified without probing (21.288039ms)\n✔ readiness requires the verifier assertion and path containment (107.068557ms)\n✔ invalid inventory and JSON argument errors emit one envelope (47.070872ms)\n✔ shell wrapper resolves beside itself from a consumer cwd (29.174216ms)\nℹ tests 6\nℹ suites 0\nℹ pass 6\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 341.699959\n",
       "stderrTail": ""
     },
     {
@@ -40,7 +40,7 @@
       "exitCode": 0,
       "signal": null,
       "timedOut": false,
-      "durationMs": 24,
+      "durationMs": 28,
       "stdoutTail": "",
       "stderrTail": ""
     },
@@ -58,7 +58,7 @@
       "exitCode": 0,
       "signal": null,
       "timedOut": false,
-      "durationMs": 16,
+      "durationMs": 20,
       "stdoutTail": "",
       "stderrTail": ""
     },
@@ -76,8 +76,8 @@
       "exitCode": 0,
       "signal": null,
       "timedOut": false,
-      "durationMs": 136,
-      "stdoutTail": "\n> pi-sdlc@0.1.1 lint\n> biome check .\n\nChecked 60 files in 30ms. No fixes applied.\n",
+      "durationMs": 144,
+      "stdoutTail": "\n> pi-sdlc@0.1.1 lint\n> biome check .\n\nChecked 60 files in 42ms. No fixes applied.\n",
       "stderrTail": ""
     },
     {
@@ -95,7 +95,7 @@
       "exitCode": 0,
       "signal": null,
       "timedOut": false,
-      "durationMs": 5,
+      "durationMs": 9,
       "stdoutTail": "",
       "stderrTail": ""
     }
