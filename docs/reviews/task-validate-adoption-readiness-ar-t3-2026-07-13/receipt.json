@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "taskId": "ar-t3",
+  "manifestPath": "docs/validation/adoption-readiness/ar-t3.json",
+  "manifestSha256": "457001dff716dfcf170bdde0eacbd073c93400d0f3ce48cd8a904fa8713c4dbf",
+  "runnerReportSha256": "aee759901c8233febf936a409d814f3f77748503536659414ef6469ffe32c79b",
+  "generatedAgentSha256": "d1afca203509cba3f2db0469e3de0ebcf3f496755c44799678bb1138805afa1a",
+  "model": "openai-codex/gpt-5.6-terra",
+  "runnerVerdict": "PASS",
+  "validatorVerdict": "PASS",
+  "createdAt": "2026-07-13T05:26:36Z"
+}
