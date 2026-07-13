@@ -26,3 +26,21 @@
 After the round-1 fix wave, no high or medium finding survives adjudication.
 Low findings 6–9 are recorded, not blocking. Round 2 of the panel runs against
 the fix commit to confirm.
+
+## Round 2 (verification pass against d84d865)
+
+Panel: openai-codex/gpt-5.6-sol:medium, deepseek/deepseek-v4-pro:medium.
+Per-model outputs: `gpt-5.6-sol.round2.md`, `deepseek-v4-pro.round2.md`.
+
+- Round-1 fixes 2–4: **VERIFIED by both models.**
+- Round-1 fix 1 (symlink trust): deepseek VERIFIED; sol NOT-CLOSED via a NEW
+  finding (below).
+
+| # | Severity | Source | Finding | Adjudication |
+|---|---|---|---|---|
+| 10 | high | sol | `git update-index --assume-unchanged` / `--skip-worktree` hide worktree changes from `git diff`, smuggling uncommitted manifest/models content past cleanliness into validation (false ready) | **Incorporated**: `cleanAgainstHead` adds a direct byte-identity comparison — `git hash-object` of the present working file vs `git rev-parse HEAD:<path>` — immune to index flags. An absent working file still defers to the validity check, preserving the sparse-checkout contract (AR9). Side effect adjudicated: a committed symlink is now caught by cleanliness itself (active bytes ≠ HEAD blob bytes → exit 3), which is the more honest classification; the HEAD-mode guard from round 1 remains as defence in depth. Tests added for both index flags × both files |
+
+## Stop condition (round 2)
+
+After the round-2 fix wave, no high or medium finding survives adjudication.
+Round 3 verifies the index-flag fix.

@@ -228,23 +228,47 @@ test("AR9/PR-panel: a manifest committed as a symlink is never trusted as adopti
 	const viaConfig = gitFixture({ files: { ".pi/sdlc/sdlc.models.json": JSON.stringify(VALID_MODELS) }, commit: false });
 	const viaModels = gitFixture({ files: { ".pi/sdlc/sdlc.config.json": JSON.stringify(VALID_CONFIG) }, commit: false });
 	try {
+		// the active bytes (symlink target) are not the HEAD blob bytes (link
+		// text), so cleanliness itself refuses the byte-identity claim (exit 3);
+		// the HEAD-mode guard in the validity checks remains as defence in depth
 		symlinkSync(join(outside, "config.json"), join(viaConfig, CONFIG_REL));
 		git(viaConfig, ["add", "-A"]);
 		git(viaConfig, ["commit", "-q", "-m", "symlinked manifest"]);
 		const r1 = runStatus(["--repo-root", viaConfig]);
-		assert.equal(r1.code, 2, `symlinked manifest must be config.valid:error\n${r1.stdout}${r1.stderr}`);
-		assert.equal(checkStatus(r1.stdout, "config.valid"), "error");
+		assert.equal(r1.code, 3, `symlinked manifest must never be ready\n${r1.stdout}${r1.stderr}`);
+		assert.equal(checkStatus(r1.stdout, "adoption.manifest-clean"), "fail");
+		assert.equal(checkStatus(r1.stdout, "config.valid"), "skip");
 
 		symlinkSync(join(outside, "models.json"), join(viaModels, MODELS_REL));
 		git(viaModels, ["add", "-A"]);
 		git(viaModels, ["commit", "-q", "-m", "symlinked models"]);
 		const r2 = runStatus(["--repo-root", viaModels]);
-		assert.equal(r2.code, 3, `symlinked models must be models.valid:fail\n${r2.stdout}${r2.stderr}`);
-		assert.equal(checkStatus(r2.stdout, "models.valid"), "fail");
+		assert.equal(r2.code, 3, `symlinked models must never be ready\n${r2.stdout}${r2.stderr}`);
+		assert.equal(checkStatus(r2.stdout, "models.clean"), "fail");
 	} finally {
 		rmSync(outside, { recursive: true, force: true });
 		rmSync(viaConfig, { recursive: true, force: true });
 		rmSync(viaModels, { recursive: true, force: true });
+	}
+});
+
+test("AR3/PR-panel: assume-unchanged and skip-worktree index flags cannot smuggle uncommitted content", () => {
+	for (const flag of ["--assume-unchanged", "--skip-worktree"]) {
+		for (const [rel, failCheck, other] of [
+			[CONFIG_REL, "adoption.manifest-clean", VALID_CONFIG],
+			[MODELS_REL, "models.clean", VALID_MODELS],
+		]) {
+			const dir = readyFixture();
+			try {
+				git(dir, ["update-index", flag, rel]);
+				writeFileSync(join(dir, rel), JSON.stringify({ ...other, $comment: "smuggled" }));
+				const r = runStatus(["--repo-root", dir]);
+				assert.equal(r.code, 3, `${flag} ${rel}: expected exit 3, got ${r.code}\n${r.stdout}${r.stderr}`);
+				assert.equal(checkStatus(r.stdout, failCheck), "fail", `${flag} ${rel}`);
+			} finally {
+				rmSync(dir, { recursive: true, force: true });
+			}
+		}
 	}
 });
 

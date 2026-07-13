@@ -190,17 +190,28 @@ function buildReport(argv, cwd) {
 	// two independent comparisons (spec §2.4): index vs HEAD, working tree vs index.
 	// `:(top)` pins the pathspec to the repository top level: plain pathspecs are
 	// cwd-relative, which would silently miss prefixed monorepo-subdirectory paths.
-	const cleanAgainstHead = (path) => {
+	// A third direct comparison hashes the present working file against the HEAD
+	// blob: worktree diffs honour assume-unchanged/skip-worktree index flags, which
+	// would otherwise smuggle uncommitted content past cleanliness. An ABSENT
+	// working file stays a validity concern (sparse checkout, spec AR9).
+	const cleanAgainstHead = (path, activeFile) => {
 		const idx = git(root, ["diff", "--quiet", "--cached", "HEAD", "--", `:(top)${path}`]);
 		const wt = git(root, ["diff", "--quiet", "--", `:(top)${path}`]);
-		if (idx.code === 0 && wt.code === 0) return "clean";
 		if (idx.code === 1 || wt.code === 1) return "dirty";
-		return "error";
+		if (idx.code !== 0 || wt.code !== 0) return "error";
+		if (existsSync(activeFile)) {
+			const headSha = git(root, ["rev-parse", `HEAD:${path}`]);
+			const wtSha = git(root, ["hash-object", "--", activeFile]);
+			if (headSha.code !== 0) return "error";
+			// an unreadable present file is left to the validity check
+			if (wtSha.code === 0 && wtSha.stdout !== headSha.stdout) return "dirty";
+		}
+		return "clean";
 	};
 
 	// adoption.manifest-clean
 	if (statusOf(results, "adoption.manifest-head") === "pass") {
-		const c = cleanAgainstHead(manifestGitPath);
+		const c = cleanAgainstHead(manifestGitPath, join(root, ".pi", "sdlc", "sdlc.config.json"));
 		if (c === "clean") set("adoption.manifest-clean", "pass", "manifest matches HEAD in index and working tree");
 		else if (c === "dirty") set("adoption.manifest-clean", "fail", "manifest differs from HEAD in the index or working tree", `commit or restore ${manifestGitPath}`);
 		else set("adoption.manifest-clean", "error", "git could not compare the manifest against HEAD", "check repository integrity with git status");
@@ -235,7 +246,7 @@ function buildReport(argv, cwd) {
 
 	// models.clean
 	if (statusOf(results, "models.head") === "pass") {
-		const c = cleanAgainstHead(modelsGitPath);
+		const c = cleanAgainstHead(modelsGitPath, join(root, ".pi", "sdlc", "sdlc.models.json"));
 		if (c === "clean") set("models.clean", "pass", "models file matches HEAD in index and working tree");
 		else if (c === "dirty") set("models.clean", "fail", "models file differs from HEAD in the index or working tree", `commit or restore ${modelsGitPath}`);
 		else set("models.clean", "error", "git could not compare the models file against HEAD", "check repository integrity with git status");
