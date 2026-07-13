@@ -8,10 +8,12 @@
 - Canonical source: this committed Build-plan document; GitHub issues are its
   projection.
 - Human gate: Build decomposition, tracker projection, checks, and DoD approved
-  by Neil Chambers on 2026-07-12.
+  by Neil Chambers on 2026-07-12; renewed Build approval of the
+  portable-validator re-projection granted by Neil Chambers on 2026-07-13.
 - Validator decision: route 2 approved. The portable-validator programme child
   is promoted and must complete before this Build enters Implement.
-- Implementation status: blocked on portable-validator completion.
+- Implementation status: portable-validator blocker resolved at v0.3.0 (PR
+  #16); renewed Build approval granted 2026-07-13 — clear to enter Implement.
 
 ## Build-time tracker bootstrap — completed and verified
 
@@ -317,18 +319,36 @@ node scripts/check-commit-messages.mjs origin/main..HEAD
 
 New product behaviour or opportunistic refactoring.
 
-## Build blocker requiring human adjudication
+## Build blocker — resolved (v0.3.0)
 
-The current global validator prompt unconditionally requires
-`npx tsc --noEmit`. This repository has no local TypeScript compiler or
-`tsconfig`, and the approved Specification explicitly does not change task
-validation (programme child 3 owns portable validation). Running the mandated
-command is therefore not an honest applicable check and currently cannot pass.
+The original blocker: the then-global validator prompt unconditionally
+required `npx tsc --noEmit`, which this repository (no TypeScript, no
+`tsconfig`) could not honestly pass. The human owner selected the process-safe
+route — promote and complete the portable-validator programme child first —
+and granted no temporary exception.
 
-The human owner selected the process-safe route: promote and complete the
-portable-validator programme child before this implementation. No temporary
-exception was granted.
+**Resolution.** The portable per-task validator shipped in **v0.3.0** via
+PR [#16]: manifest-driven applicability (PV1,
+`skills/sdlc/schema/task-validation-manifest.schema.json`), deterministic
+runner (PV2, `skills/sdlc/scripts/validate-task.sh`), and receipt verifier.
+ADRs 0013/0014 freeze the surface.
 
-The Build does **not** add TypeScript/`tsconfig` merely to manufacture a green
-check. Board tasks remain `Blocked` until the portable-validator change is
-merged and this Build can use its approved applicability contract.
+[#16]: https://github.com/threadsafe-systems/pi-sdlc/pull/16
+
+This Build's tasks now validate through committed PV1 manifests derived from
+each task's named checks and owned scenarios:
+
+| Task | Manifest |
+|---|---|
+| T1 | `docs/validation/adoption-readiness/ar-t1.json` |
+| T2 | `docs/validation/adoption-readiness/ar-t2.json` |
+| T3 | `docs/validation/adoption-readiness/ar-t3.json` |
+| T4 | `docs/validation/adoption-readiness/ar-t4.json` |
+| T5 | `docs/validation/adoption-readiness/ar-t5.json` |
+
+Each manifest was schema-validated by the runner (`manifestErrors: []`).
+Because `node --test` silently skips missing test files (verified on Node
+v25.6.1), the T1–T3 manifests add a `static.tests-exist` (`node --check`)
+guard on each task's new test file so a task cannot false-pass before its
+tests exist. Renewed Build approval was granted on 2026-07-13; board tasks
+return to `Todo` and Implement may begin.
