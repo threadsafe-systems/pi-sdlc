@@ -1,3 +1,10 @@
+# [0.4.0](https://github.com/threadsafe-systems/pi-sdlc/compare/v0.3.0...v0.4.0) (2026-07-13)
+
+
+### Features
+
+* **readiness:** FS8 four-state adoption readiness for sdlc-status ([#17](https://github.com/threadsafe-systems/pi-sdlc/issues/17)) ([77fb274](https://github.com/threadsafe-systems/pi-sdlc/commit/77fb274e72d8db835b75dea6a0a2dedb42cdff76)), closes [#7](https://github.com/threadsafe-systems/pi-sdlc/issues/7) [#8](https://github.com/threadsafe-systems/pi-sdlc/issues/8) [#9](https://github.com/threadsafe-systems/pi-sdlc/issues/9) [#10](https://github.com/threadsafe-systems/pi-sdlc/issues/10)
+
 # [0.3.0](https://github.com/threadsafe-systems/pi-sdlc/compare/v0.2.0...v0.3.0) (2026-07-13)
 
 
