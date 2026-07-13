@@ -8,10 +8,24 @@ import { dirname, join, relative, resolve, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 import { createInterface } from "node:readline/promises";
 import { stdin, stdout } from "node:process";
-import { CONFIG_DEFAULTS, HOOK_PHASES, USE_RE, inspectConfig, resolveRoot } from "./lib.mjs";
+import { CONFIG_DEFAULTS, HOOK_PHASES, USE_RE, inspectConfig, inspectModels, resolveRoot } from "./lib.mjs";
 
 const SCRIPT_DIR = dirname(fileURLToPath(import.meta.url));
 const PACKAGE_DIR = resolve(SCRIPT_DIR, "..");
+function packageRepository() {
+	try {
+		const metadata = JSON.parse(readFileSync(join(PACKAGE_DIR, "..", "..", "package.json"), "utf8"));
+		const repository = typeof metadata.repository === "string" ? metadata.repository : metadata.repository?.url;
+		return typeof repository === "string"
+			? repository
+					.replace(/^git\+/, "")
+					.replace(/^https?:\/\/github\.com\//, "")
+					.replace(/\.git$/, "")
+			: null;
+	} catch {
+		return null;
+	}
+}
 const RUN_HOOK_WARNING = "sdlc: WARNING — 'run' hooks execute arbitrary shell commands with the agent's\nprivileges from the committed config. Only commit hooks you trust, exactly as\nyou would for .pi/prompts or project settings.";
 const PROMPT_BASES = ["adversary-plan", "adversary-spec", "adversary-review", "validator-task"];
 const USAGE = "usage: setup-sdlc.sh [--prefix V] [--label-prefix V] [--announce V] [--tracker-repo o/n --tracker-board-number N --tracker-board-url U] [--hook-run S] [--hook-use S] [--with-models] [--with-ci-workflow] [--copy-prompts] [--format text|json] [--force] [--yes] [--config DIR|--repo-root DIR]";
@@ -204,7 +218,11 @@ function structural(target, kind) {
 		const hasReason = /^reason: /m.test(block);
 		return track === "none" ? hasReason && !hasSlug : hasSlug && !hasReason;
 	}
-	if (kind === "ci-workflow") return /repository:\s*[^/\s]+\/pi-sdlc/.test(text) && /ref:\s*\S+/.test(text) && /node\s+\S*check-lifecycle\.mjs/.test(text);
+	if (kind === "ci-workflow") {
+		const repository = packageRepository();
+		const repositoryLine = repository && new RegExp(`repository:\\s*${repository.replace(/[.*+?^${}()|[\\]\\]/g, "\\\\$&")}`).test(text);
+		return Boolean(repositoryLine && /ref:\s*\S+/.test(text) && /node\s+\S*check-lifecycle\.mjs/.test(text));
+	}
 	return true;
 }
 function asset(id, target, kind, content, report) {
@@ -230,6 +248,21 @@ function packageRef() {
 function checkReference(id, path, report) {
 	if (existsSync(path)) report.references.push({ id, status: "ok", message: `resolved ${path}` });
 	else report.references.push({ id, status: "broken", message: `package asset unavailable: ${path}` });
+}
+function checkPromptReferences(paths, report) {
+	const missing = paths.filter((path) => !existsSync(path));
+	if (missing.length === 0) report.references.push({ id: "reference.prompts", status: "ok", message: `resolved ${paths.length} package prompt sources` });
+	else report.references.push({ id: "reference.prompts", status: "broken", message: `package prompt sources unavailable: ${missing.join(", ")}` });
+}
+function existingAssetIssue(target, inspect, label) {
+	if (!existsSync(target)) return null;
+	try {
+		const raw = JSON.parse(readFileSync(target, "utf8"));
+		const issues = inspect(raw);
+		return issues.length > 0 ? `${label} ${issues[0].path || "root"}: ${issues[0].message}` : null;
+	} catch (error) {
+		return `${label} cannot be read or parsed (${error.message})`;
+	}
 }
 function targetParentConflict(root, target) {
 	const rootResolved = resolve(root);
@@ -289,7 +322,8 @@ function writeBundle(root, opts, cfg, hooks, tracker) {
 	const modelSource = join(PACKAGE_DIR, "schema", "sdlc.models.example.json");
 	checkReference("reference.pr-template", templateSource, report);
 	if (opts.withCiWorkflow) checkReference("reference.ci-workflow", workflowSource, report);
-	if (opts.copyPrompts) for (const base of PROMPT_BASES) checkReference(`reference.prompt.${base}`, join(PACKAGE_DIR, "prompts", `${base}.prompt.md`), report);
+	const promptSources = opts.copyPrompts ? PROMPT_BASES.map((base) => join(PACKAGE_DIR, "prompts", `${base}.prompt.md`)) : [];
+	if (opts.copyPrompts) checkPromptReferences(promptSources, report);
 	if (opts.withModels) checkReference("reference.models-example", modelSource, report);
 	checkReference("reference.checker", checkerSource, report);
 	if (report.references.some((ref) => ref.status === "broken")) {
@@ -297,6 +331,12 @@ function writeBundle(root, opts, cfg, hooks, tracker) {
 		report.error = "one or more package references could not be resolved";
 		return report;
 	}
+	// Read every package source before the first write. Existence checks alone
+	// do not prove that a source is readable (a directory or unreadable file can
+	// still exist), and a failed late read would otherwise leave a partial bundle.
+	const templateContent = source(templateSource);
+	const promptContents = Object.fromEntries(promptSources.map((path) => [path, source(path)]));
+	const modelContent = opts.withModels ? source(modelSource) : undefined;
 	if (opts.withCiWorkflow) workflowContent = source(workflowSource).replace("__PI_SDLC_REF__", packageRef());
 	const configIssues = inspectConfig(cfg);
 	if (configIssues.length > 0) {
@@ -320,31 +360,39 @@ function writeBundle(root, opts, cfg, hooks, tracker) {
 		}
 	}
 	const configExists = existsSync(configTarget);
+	const configIssue = existingAssetIssue(configTarget, inspectConfig, "config");
+	const modelIssue = opts.withModels ? existingAssetIssue(modelTarget, inspectModels, "models") : null;
 	const configMutating = opts.prefix !== undefined || opts.labelPrefix !== undefined || opts.announce !== undefined || tracker !== undefined || (hooks && Object.keys(hooks).length > 0);
 	if (!configExists) {
 		mkdirSync(dirname(configTarget), { recursive: true });
 		writeFileSync(configTarget, `${JSON.stringify(cfg, null, 2)}\n`);
 		report.assets.push({ id: "config", action: "created", message: `created ${configTarget}` });
-	} else if (configMutating && !opts.force) report.assets.push({ id: "config", action: "refused", message: `refused config replacement without --force: ${configTarget}`, remediation: `re-run with --force to replace the configuration` });
-	else if (configMutating && opts.force) {
+	} else if (configMutating && opts.force) {
 		writeFileSync(configTarget, `${JSON.stringify(cfg, null, 2)}\n`);
 		report.assets.push({ id: "config", action: "upgraded", message: `upgraded ${configTarget}` });
-	} else report.assets.push({ id: "config", action: "retained", message: `retained ${configTarget}` });
+	} else if (configIssue) report.assets.push({ id: "config", action: "refused", message: `refused invalid existing config ${configTarget}: ${configIssue}`, remediation: `repair or delete ${configTarget} and re-run setup` });
+	else if (configMutating && !opts.force) report.assets.push({ id: "config", action: "refused", message: `refused config replacement without --force: ${configTarget}`, remediation: `re-run with --force to replace the configuration` });
+	else report.assets.push({ id: "config", action: "retained", message: `retained ${configTarget}` });
 	if (opts.withModels) {
 		if (!existsSync(modelTarget)) {
 			mkdirSync(dirname(modelTarget), { recursive: true });
-			writeFileSync(modelTarget, `${source(modelSource).trimEnd()}\n`);
+			writeFileSync(modelTarget, `${modelContent.trimEnd()}\n`);
 			report.assets.push({ id: "models", action: "created", message: `created ${modelTarget}` });
-		} else report.assets.push({ id: "models", action: "retained", message: `retained ${modelTarget}` });
+		} else if (modelIssue) report.assets.push({ id: "models", action: "refused", message: `refused invalid existing models ${modelTarget}: ${modelIssue}`, remediation: `repair or delete ${modelTarget} and re-run setup` });
+		else report.assets.push({ id: "models", action: "retained", message: `retained ${modelTarget}` });
 	}
-	asset("pr-template", join(root, ".github", "pull_request_template.md"), "pr-template", source(templateSource), report);
+	asset("pr-template", join(root, ".github", "pull_request_template.md"), "pr-template", templateContent, report);
 	if (opts.withCiWorkflow) {
 		const target = join(root, ".github", "workflows", "sdlc-lifecycle.yml");
 		if (rootPrefix(root)) report.assets.push({ id: "ci-workflow", action: "refused", message: "consumer root is a subdirectory of the git repository", remediation: "install the workflow at the repository root" });
 		else if (existsCi(root, "sdlc-lifecycle.yml")) report.assets.push({ id: "ci-workflow", action: "refused", message: "existing CI configuration detected", remediation: "add the lifecycle-check snippet to existing CI" });
 		else asset("ci-workflow", target, "ci-workflow", workflowContent, report);
 	}
-	if (opts.copyPrompts) for (const base of PROMPT_BASES) asset(`prompt.${base}`, join(root, ".pi", "sdlc", "prompts", `${base}.prompt.md`), "prompt", source(join(PACKAGE_DIR, "prompts", `${base}.prompt.md`)), report);
+	if (opts.copyPrompts)
+		for (const base of PROMPT_BASES) {
+			const promptPath = join(PACKAGE_DIR, "prompts", `${base}.prompt.md`);
+			asset(`prompt.${base}`, join(root, ".pi", "sdlc", "prompts", `${base}.prompt.md`), "prompt", promptContents[promptPath], report);
+		}
 	if (hooks && Object.keys(hooks).length > 0) report.hookWarning = RUN_HOOK_WARNING;
 	report.exitCode = report.assets.some((item) => item.action === "refused") ? 1 : 0;
 	return report;

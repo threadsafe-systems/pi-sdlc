@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { existsSync, mkdtempSync, readFileSync, renameSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { spawnSync } from "node:child_process";
@@ -15,7 +15,11 @@ function temp() {
 }
 function jsonRun(root, args) {
 	const result = run(root, ["--format", "json", ...args]);
-	return { ...result, report: JSON.parse(result.stdout) };
+	try {
+		return { ...result, report: JSON.parse(result.stdout) };
+	} catch (error) {
+		throw new Error(`invalid JSON report: ${error.message}\nstdout: ${result.stdout}\nstderr: ${result.stderr}`);
+	}
 }
 
 test("fresh bundle provisions requested assets and idempotent rerun retains them", () => {
@@ -121,6 +125,53 @@ test("target parent conflicts fail before any bundle write", () => {
 	}
 });
 
+test("unreadable package sources fail before any bundle write", () => {
+	const root = temp();
+	const source = join(ROOT, "skills", "sdlc", "schema", "sdlc.models.example.json");
+	const backup = `${source}.panel-test-${process.pid}`;
+	try {
+		renameSync(source, backup);
+		spawnSync("mkdir", [source]);
+		const result = jsonRun(root, ["--yes", "--with-models"]);
+		assert.equal(result.status, 2);
+		assert.equal(result.report.assets.length, 0);
+		assert.equal(existsSync(join(root, ".pi/sdlc/sdlc.config.json")), false);
+	} finally {
+		rmSync(source, { recursive: true, force: true });
+		renameSync(backup, source);
+		rmSync(root, { recursive: true, force: true });
+	}
+});
+
+test("invalid existing config and models are refused without overwrite", () => {
+	const root = temp();
+	try {
+		spawnSync("mkdir", ["-p", join(root, ".pi/sdlc")]);
+		writeFileSync(join(root, ".pi/sdlc/sdlc.config.json"), "{bad\n");
+		writeFileSync(join(root, ".pi/sdlc/sdlc.models.json"), "{bad\n");
+		const result = jsonRun(root, ["--yes", "--with-models"]);
+		assert.equal(result.status, 1);
+		assert.equal(result.report.assets.find((asset) => asset.id === "config").action, "refused");
+		assert.equal(result.report.assets.find((asset) => asset.id === "models").action, "refused");
+		assert.equal(readFileSync(join(root, ".pi/sdlc/sdlc.config.json"), "utf8"), "{bad\n");
+	} finally {
+		rmSync(root, { recursive: true, force: true });
+	}
+});
+
+test("workflow from another repository is refused", () => {
+	const root = temp();
+	try {
+		spawnSync("mkdir", ["-p", join(root, ".github/workflows")]);
+		writeFileSync(join(root, ".github/workflows/sdlc-lifecycle.yml"), "repository: attacker/pi-sdlc\nref: main\nrun: node check-lifecycle.mjs\n");
+		const result = jsonRun(root, ["--yes", "--with-ci-workflow"]);
+		assert.equal(result.status, 1);
+		assert.equal(result.report.assets.find((asset) => asset.id === "ci-workflow").action, "refused");
+	} finally {
+		rmSync(root, { recursive: true, force: true });
+	}
+});
+
 test("existing target directories fail before any bundle write", () => {
 	const root = temp();
 	try {
@@ -142,6 +193,10 @@ test("bundle reports resolved package references before writing", () => {
 		assert.equal(
 			result.report.references.every((ref) => ref.status === "ok"),
 			true,
+		);
+		assert.deepEqual(
+			result.report.references.map((ref) => ref.id),
+			["reference.pr-template", "reference.prompts", "reference.checker"],
 		);
 	} finally {
 		rmSync(root, { recursive: true, force: true });
