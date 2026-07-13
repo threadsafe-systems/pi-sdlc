@@ -3,7 +3,7 @@
 // Bundle mode is deterministic, offline, and refuses consumer-authored assets.
 
 import { execFileSync } from "node:child_process";
-import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
+import { existsSync, lstatSync, mkdirSync, readdirSync, readFileSync, realpathSync, writeFileSync } from "node:fs";
 import { dirname, join, relative, resolve, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 import { createInterface } from "node:readline/promises";
@@ -232,17 +232,39 @@ function checkReference(id, path, report) {
 	else report.references.push({ id, status: "broken", message: `package asset unavailable: ${path}` });
 }
 function targetParentConflict(root, target) {
-	let parent = dirname(target);
 	const rootResolved = resolve(root);
+	let parent = dirname(target);
 	while (parent.startsWith(rootResolved) && parent !== rootResolved) {
 		if (existsSync(parent)) {
 			try {
+				const realParent = realpathSync(parent);
+				const relativeParent = relative(rootResolved, realParent);
+				if (relativeParent.startsWith("..") || relativeParent.includes(`${sep}..`)) return `target parent escapes the consumer root: ${parent}`;
 				readdirSync(parent, { withFileTypes: true });
 			} catch (error) {
 				return `target parent cannot be inspected: ${parent} (${error.message})`;
 			}
 		}
 		parent = dirname(parent);
+	}
+	if (
+		existsSync(target) ||
+		(() => {
+			try {
+				lstatSync(target);
+				return true;
+			} catch {
+				return false;
+			}
+		})()
+	) {
+		try {
+			const stat = lstatSync(target);
+			if (stat.isDirectory()) return `target is a directory: ${target}`;
+			if (stat.isSymbolicLink()) return `target is a symbolic link: ${target}`;
+		} catch (error) {
+			return `target cannot be inspected: ${target} (${error.message})`;
+		}
 	}
 	return null;
 }
@@ -322,7 +344,7 @@ function writeBundle(root, opts, cfg, hooks, tracker) {
 		else if (existsCi(root, "sdlc-lifecycle.yml")) report.assets.push({ id: "ci-workflow", action: "refused", message: "existing CI configuration detected", remediation: "add the lifecycle-check snippet to existing CI" });
 		else asset("ci-workflow", target, "ci-workflow", workflowContent, report);
 	}
-	if (opts.copyPrompts) for (const base of PROMPT_BASES) asset(`prompt.${base}`, join(root, ".pi", "sdlc", "prompts", `${base}.prompt.md`), "prompt", readFileSync(join(PACKAGE_DIR, "prompts", `${base}.prompt.md`), "utf8"), report);
+	if (opts.copyPrompts) for (const base of PROMPT_BASES) asset(`prompt.${base}`, join(root, ".pi", "sdlc", "prompts", `${base}.prompt.md`), "prompt", source(join(PACKAGE_DIR, "prompts", `${base}.prompt.md`)), report);
 	if (hooks && Object.keys(hooks).length > 0) report.hookWarning = RUN_HOOK_WARNING;
 	report.exitCode = report.assets.some((item) => item.action === "refused") ? 1 : 0;
 	return report;

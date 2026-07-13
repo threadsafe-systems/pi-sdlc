@@ -121,6 +121,19 @@ test("target parent conflicts fail before any bundle write", () => {
 	}
 });
 
+test("existing target directories fail before any bundle write", () => {
+	const root = temp();
+	try {
+		spawnSync("mkdir", ["-p", join(root, ".github/pull_request_template.md")]);
+		const result = jsonRun(root, ["--yes"]);
+		assert.equal(result.status, 2);
+		assert.equal(result.report.assets.length, 0);
+		assert.equal(existsSync(join(root, ".pi/sdlc/sdlc.config.json")), false);
+	} finally {
+		rmSync(root, { recursive: true, force: true });
+	}
+});
+
 test("bundle reports resolved package references before writing", () => {
 	const root = temp();
 	try {
