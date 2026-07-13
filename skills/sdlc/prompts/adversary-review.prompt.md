@@ -40,6 +40,12 @@ twelve code smells (Fowler, *Refactoring*, ch.3). Two rules govern it:
 - Commit under review: <COMMIT_SHA> (full 40 chars)
 - Diff: <DIFF_PATH>
 - Global constraints that bind this change (copy verbatim from the spec): <GLOBAL_CONSTRAINTS>
+- Declared lifecycle track: <TRACK>
+- Governing documents for the declared feature slug: <GOVERNING_DOCS>
+
+When `<TRACK>` is `reversible`, ground review constraints in the plan and
+build-plan documents; a Specification does not exist on this track and must
+not be demanded.
 
 ## Output format (STRICT)
 

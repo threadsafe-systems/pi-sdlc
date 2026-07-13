@@ -1,0 +1,162 @@
+{
+  "schemaVersion": 1,
+  "taskId": "ab-t1",
+  "manifest": "/home/neil/code/threadsafe/pi-sdlc.worktrees/feat-sdlc-adoption-bundle/docs/validation/sdlc-adoption-bundle/ab-t1.json",
+  "repoRoot": "/home/neil/code/threadsafe/pi-sdlc.worktrees/feat-sdlc-adoption-bundle",
+  "verdict": "PASS",
+  "exitCode": 0,
+  "errors": [],
+  "manifestErrors": [],
+  "commands": [
+    {
+      "id": "tests.check-lifecycle",
+      "argv": [
+        "node",
+        "--test",
+        "test/check-lifecycle.test.js"
+      ],
+      "evidence": [
+        "AB1 grammar accept/reject with distinct diagnostics",
+        "AB2 exemption/precedence",
+        "AB7 mode parity and injection inertness"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 1013,
+      "stdoutTail": "✔ help is available without a declaration source (68.238554ms)\n✔ flags mode accepts a reversible declaration (91.928542ms)\n✔ invalid track stays null in the report envelope (88.245602ms)\n✔ track none requires a reason and demands no artifacts (150.104554ms)\n✔ body grammar rejects ambiguity and invalid lines (155.589133ms)\n✔ bot exemption applies only without a valid declaration (174.725847ms)\n✔ event payload null body is an empty body and missing login is not exempt (73.86514ms)\n✔ JSON mode is inert for shell metacharacters and emits one envelope (55.74867ms)\nℹ tests 8\nℹ suites 0\nℹ pass 8\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 954.479973\n",
+      "stderrTail": ""
+    },
+    {
+      "id": "static.checker",
+      "argv": [
+        "node",
+        "--check",
+        "skills/sdlc/scripts/check-lifecycle.mjs"
+      ],
+      "evidence": [
+        "Checker script syntax"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 44,
+      "stdoutTail": "",
+      "stderrTail": ""
+    },
+    {
+      "id": "static.tests-exist",
+      "argv": [
+        "node",
+        "--check",
+        "test/check-lifecycle.test.js"
+      ],
+      "evidence": [
+        "New checker test file exists and parses; guards node --test silently skipping missing files"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 45,
+      "stdoutTail": "",
+      "stderrTail": ""
+    },
+    {
+      "id": "static.lint",
+      "argv": [
+        "npm",
+        "run",
+        "lint"
+      ],
+      "evidence": [
+        "Repository lint and formatting rules"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 327,
+      "stdoutTail": "\n> pi-sdlc@0.1.1 lint\n> biome check .\n\nChecked 52 files in 59ms. No fixes applied.\n",
+      "stderrTail": ""
+    },
+    {
+      "id": "patterns.diff",
+      "argv": [
+        "git",
+        "diff",
+        "--check",
+        "HEAD"
+      ],
+      "evidence": [
+        "No whitespace-error banned patterns in task diff"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 11,
+      "stdoutTail": "",
+      "stderrTail": ""
+    }
+  ],
+  "categories": [
+    {
+      "category": "tests",
+      "status": "PASS",
+      "checkIds": [
+        "tests.check-lifecycle"
+      ]
+    },
+    {
+      "category": "static",
+      "status": "PASS",
+      "checkIds": [
+        "static.checker",
+        "static.tests-exist",
+        "static.lint"
+      ]
+    },
+    {
+      "category": "scenarios",
+      "status": "PASS"
+    },
+    {
+      "category": "standards",
+      "status": "N/A",
+      "reason": "Commit-range and FS8-untouched standards are verified at ab-t5; no additional standard applies to this task."
+    },
+    {
+      "category": "bannedPatterns",
+      "status": "PASS",
+      "checkIds": [
+        "patterns.diff"
+      ]
+    }
+  ],
+  "scenarios": [
+    {
+      "scenarioId": "AB1",
+      "status": "PASS",
+      "checkIds": [
+        "tests.check-lifecycle"
+      ]
+    },
+    {
+      "scenarioId": "AB2",
+      "status": "PASS",
+      "checkIds": [
+        "tests.check-lifecycle"
+      ]
+    },
+    {
+      "scenarioId": "AB7",
+      "status": "PASS",
+      "checkIds": [
+        "tests.check-lifecycle"
+      ]
+    }
+  ]
+}

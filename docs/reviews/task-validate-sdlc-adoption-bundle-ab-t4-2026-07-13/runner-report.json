@@ -1,0 +1,154 @@
+{
+  "schemaVersion": 1,
+  "taskId": "ab-t4",
+  "manifest": "/home/neil/code/threadsafe/pi-sdlc.worktrees/feat-sdlc-adoption-bundle/docs/validation/sdlc-adoption-bundle/ab-t4.json",
+  "repoRoot": "/home/neil/code/threadsafe/pi-sdlc.worktrees/feat-sdlc-adoption-bundle",
+  "verdict": "PASS",
+  "exitCode": 0,
+  "errors": [],
+  "manifestErrors": [],
+  "commands": [
+    {
+      "id": "tests.docs",
+      "argv": [
+        "node",
+        "--test",
+        "test/docs.test.js"
+      ],
+      "evidence": [
+        "AB15 dogfood self-check replay",
+        "AB16 doc/prompt mutation assertions"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 173,
+      "stdoutTail": "✔ OH7: SKILL.md carries the opt-in, advisory, hooks headings + red flags (1.798781ms)\n✔ OH7: the Implement table row no longer prescribes 'in a worktree' (0.396002ms)\n✔ OH8: SKILL.md contains the announce-on-fire block and the workflow.md rule (0.251752ms)\n✔ OH9: exactly two new ADRs (opt-in, hooks) with context/decision/consequences (0.64094ms)\n✔ OH12: README has the opt-in story and drops the old no-manifest-defaults claim (0.29167ms)\n✔ FS9/FS10 dogfood assets are present (0.326842ms)\n✔ FS9 documentation carries declaration rules and reversible grounding (0.381933ms)\n✔ FS9 and FS10 ADRs freeze the new surfaces (1.302578ms)\n✔ AR10: all four startup branches and every prohibition are present and mutation-detectable (0.632377ms)\n✔ AR10: docs never equate manifest presence with readiness or claim mechanical agent enforcement (0.39938ms)\n✔ AR11: README carries the complete migration story (0.37821ms)\n✔ AR11: ADR 0010 is superseded and the policy ADR 0015 restates the migration (0.340997ms)\n✔ AR11: ADR 0016 freezes the FS8 machine surface (0.293463ms)\n✔ AR11: no stale opted-in output claim remains in shipped guidance (0.251859ms)\n✔ AR11: wrapper help/comments and .mjs usage match the FS8 invocation (0.189862ms)\n✔ AR11: the setup template requires committing .pi⁄sdlc and points at the status gate (0.16196ms)\nℹ tests 16\nℹ suites 0\nℹ pass 16\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 106.194676\n",
+      "stderrTail": ""
+    },
+    {
+      "id": "static.checker",
+      "argv": [
+        "node",
+        "--check",
+        "skills/sdlc/scripts/check-lifecycle.mjs"
+      ],
+      "evidence": [
+        "Checker invoked by the dogfood ci.yml job parses"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 52,
+      "stdoutTail": "",
+      "stderrTail": ""
+    },
+    {
+      "id": "static.tests-exist",
+      "argv": [
+        "node",
+        "--check",
+        "test/docs.test.js"
+      ],
+      "evidence": [
+        "Extended docs test file exists and parses; guards node --test silently skipping missing files"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 46,
+      "stdoutTail": "",
+      "stderrTail": ""
+    },
+    {
+      "id": "static.lint",
+      "argv": [
+        "npm",
+        "run",
+        "lint"
+      ],
+      "evidence": [
+        "Repository lint and formatting rules"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 283,
+      "stdoutTail": "\n> pi-sdlc@0.1.1 lint\n> biome check .\n\nChecked 52 files in 64ms. No fixes applied.\n",
+      "stderrTail": ""
+    },
+    {
+      "id": "patterns.diff",
+      "argv": [
+        "git",
+        "diff",
+        "--check",
+        "HEAD"
+      ],
+      "evidence": [
+        "No whitespace-error banned patterns in task diff"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 13,
+      "stdoutTail": "",
+      "stderrTail": ""
+    }
+  ],
+  "categories": [
+    {
+      "category": "tests",
+      "status": "PASS",
+      "checkIds": [
+        "tests.docs"
+      ]
+    },
+    {
+      "category": "static",
+      "status": "PASS",
+      "checkIds": [
+        "static.checker",
+        "static.tests-exist",
+        "static.lint"
+      ]
+    },
+    {
+      "category": "scenarios",
+      "status": "PASS"
+    },
+    {
+      "category": "standards",
+      "status": "N/A",
+      "reason": "Commit-range and FS8-untouched standards are verified at ab-t5; no additional standard applies to this task."
+    },
+    {
+      "category": "bannedPatterns",
+      "status": "PASS",
+      "checkIds": [
+        "patterns.diff"
+      ]
+    }
+  ],
+  "scenarios": [
+    {
+      "scenarioId": "AB15",
+      "status": "PASS",
+      "checkIds": [
+        "tests.docs"
+      ]
+    },
+    {
+      "scenarioId": "AB16",
+      "status": "PASS",
+      "checkIds": [
+        "tests.docs"
+      ]
+    }
+  ]
+}

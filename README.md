@@ -116,6 +116,35 @@ compatibility but must adopt the manifest/runner contract (run the runner, repor
 its results) before use; a stale override that still greps for `tsc`/
 `CONTRIBUTORS` no longer reflects the generic law.
 
+## Adoption bundle and lifecycle checking
+
+Re-run `/setup-sdlc` to provision the adoption bundle. It creates or retains
+configuration, a PR template with a machine-readable `sdlc` declaration block,
+and (when requested) prompt overrides. It refuses conflicting consumer-authored
+files and gives instructions rather than merging or overwriting them. Existing
+configuration is retained on a bundle re-run; replacing it still requires
+`--force`. Copied prompts are consumer-owned overrides and refresh by deleting
+the copy and re-running with `--copy-prompts`.
+
+Declare one of these in every lifecycle PR:
+
+- `track: irreversible` + `slug:` — plan, Specification, and Build plan;
+- `track: reversible` + `slug:` — plan and Build plan; no Specification;
+- `track: none` + `reason:` — an exemption, not a third lifecycle track.
+
+Run the checker locally against a PR body:
+
+```bash
+node <skill-dir>/skills/sdlc/scripts/check-lifecycle.mjs \
+  --body pr-body.md --repo-root . --format text
+```
+
+The checker is read-only and offline. GitHub Actions integration is optional:
+setup offers a pinned pi-sdlc workflow only when no CI configuration is detected;
+repositories with existing CI receive a copy-paste snippet instead. The local
+checker is canonical, and CI enforces the declaration only where that workflow
+or snippet is configured.
+
 ## Releases & versioning
 
 Releases are automated with

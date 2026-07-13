@@ -76,8 +76,14 @@ When in doubt, it is irreversible.
 | Irreversible | brainstorm, plan, spec, build, implement, PR | plan panel AND spec panel |
 | Reversible (fast path) | brainstorm (may be brief), plan, build, implement, PR | none pre-PR; the PR panel still runs |
 
-Every PR declares its track (see `.github/pull_request_template.md`). CI checks
-the declared track's artifacts are committed.
+Every PR declares its track in the template's `sdlc` declaration block
+(provisioned by setup). The `check-lifecycle` script verifies the declared
+track's artifacts are committed: run it locally before opening the PR; in CI
+it runs wherever the repository has configured the shipped workflow or the
+documented snippet. The declaration values are `irreversible`, `reversible`,
+or `none`; lifecycle tracks require a slug, and `none` requires a reason.
+Auto-generated `[bot]` PRs without a valid declaration are exempt; a valid
+present declaration always dominates.
 
 ## Phases, artifacts, gates
 
@@ -262,7 +268,11 @@ per model.
      `dispatch.sh` stamps one prompt file across `--model` flags.
    Give each reviewer the exact inputs: the artifact under review, the upstream
    artifacts it must be consistent with, the repo path and commit, and the
-   grounding rule (cite file:line for any framework claim).
+   grounding rule (cite file:line for any framework claim). For `pr_review`,
+   populate the prompt's `<TRACK>` from the PR declaration and
+   `<GOVERNING_DOCS>` from the linked documents before dispatch; never send
+   literal placeholders. On the reversible track, provide the plan and Build
+   plan only and explicitly state that a Specification must not be demanded.
 
 **Before you fan out** (either path): confirm the `subagent` tool is actually in
 your toolset. If it is missing in a live pi session, the fix is a session reload
@@ -326,13 +336,28 @@ fits this role well, since a checklist executor doesn't need deep reasoning (see
 
 ## PR and review cycle
 
-Open the PR with `.github/pull_request_template.md` filled in (track declared,
-plan and spec linked, checklist complete). Run the PR panel
-(`prompts/adversary-review.prompt.md`), consolidate and adjudicate, and post
-inline via the `gh-pr-review-comments` skill's atomic review scripts (one pending
-review, verified by content, single submit event). When addressing comments,
-reply on each thread with the short SHA of the commit that addressed it. Repeat
-the panel after each fix wave until no high or medium survives adjudication.
+Open the PR with `.github/pull_request_template.md` filled in: declare the
+track and slug, then link governing documents per track — irreversible:
+plan, Specification, Build plan; reversible: plan and Build plan, never a
+Specification; none: a reason. For reversible PRs, the plan and Build plan
+are the review grounding and a Specification must not be demanded. Run the
+PR panel (`prompts/adversary-review.prompt.md`), consolidate and adjudicate,
+and post inline via the `gh-pr-review-comments` skill's atomic review scripts
+(one pending review, verified by content, single submit event). When
+addressing comments, reply on each thread with the short SHA of the commit
+that addressed it. Repeat the panel after each fix wave until no high or
+medium survives adjudication.
+
+Before opening the PR, run the local lifecycle checker from the installed
+skill path:
+
+```bash
+node <skill-dir>/skills/sdlc/scripts/check-lifecycle.mjs --body pr-body.md --repo-root .
+```
+
+`track: none` is an exemption declaration, not a third lifecycle track; it
+requires a reason and its honesty remains PR-panel prose law. CI enforcement
+is conditional on the repository configuring the shipped workflow or snippet.
 
 ## Visual gate artefacts (optional)
 

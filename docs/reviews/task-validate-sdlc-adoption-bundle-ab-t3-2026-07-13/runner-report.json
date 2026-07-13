@@ -1,0 +1,187 @@
+{
+  "schemaVersion": 1,
+  "taskId": "ab-t3",
+  "manifest": "/home/neil/code/threadsafe/pi-sdlc.worktrees/feat-sdlc-adoption-bundle/docs/validation/sdlc-adoption-bundle/ab-t3.json",
+  "repoRoot": "/home/neil/code/threadsafe/pi-sdlc.worktrees/feat-sdlc-adoption-bundle",
+  "verdict": "PASS",
+  "exitCode": 0,
+  "errors": [],
+  "manifestErrors": [],
+  "commands": [
+    {
+      "id": "tests.setup",
+      "argv": [
+        "node",
+        "--test",
+        "test/setup-sdlc.test.js",
+        "test/setup-bundle.test.js"
+      ],
+      "evidence": [
+        "AB8 provisioning/idempotence",
+        "AB9 config guard + preflight",
+        "AB10 recognise/refuse",
+        "AB11 probe branches",
+        "AB12 reference verification",
+        "AB13 prompt-copy override resolution"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 1178,
+      "stdoutTail": "✔ fresh bundle provisions requested assets and idempotent rerun retains them (190.287322ms)\n✔ existing CI suppresses workflow creation and reports refusal (90.141265ms)\n✔ consumer template with the wrong companion is refused byte-identically (83.170193ms)\n✔ consumer template with multiple declarations is refused (80.957998ms)\n✔ consumer template without the declaration is refused byte-identically (81.618663ms)\n✔ invalid assembled configuration fails before any bundle write (64.273594ms)\n✔ target parent conflicts fail before any bundle write (80.398414ms)\n✔ existing target directories fail before any bundle write (88.235133ms)\n✔ bundle reports resolved package references before writing (63.448895ms)\n✔ OH4: --yes writes a schema-valid config; bundle re-run refuses config changes; --force overwrites (202.534002ms)\n✔ OH5: --hook-use fields 3-4 = use, do = remainder after 4th colon (colons in do preserved) (70.22847ms)\n✔ OH5: --hook-run command = remainder after 2nd colon (colons preserved); trust warning on stderr (68.809782ms)\n✔ OH5: mixed repeated hook flags preserve argv order in the written list (66.345814ms)\n✔ OH5: malformed hook flags exit 2 (423.470242ms)\n✔ PR-fix: value-taking flags accept values that begin with '-' (e.g. --announce '--foo') (66.294524ms)\n✔ OH5: partial tracker flags exit 2 (all-or-none) (70.934735ms)\n✔ OH5: no config flags and no TTY exits 2 (interview needs a TTY) (52.357996ms)\n✔ OH6: package.json pi.prompts includes ./templates and the template has a description (0.94087ms)\nℹ tests 18\nℹ suites 0\nℹ pass 18\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 1126.587157\n",
+      "stderrTail": ""
+    },
+    {
+      "id": "static.setup",
+      "argv": [
+        "node",
+        "--check",
+        "skills/sdlc/scripts/setup-sdlc.mjs"
+      ],
+      "evidence": [
+        "Setup script syntax"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 51,
+      "stdoutTail": "",
+      "stderrTail": ""
+    },
+    {
+      "id": "static.tests-exist",
+      "argv": [
+        "node",
+        "--check",
+        "test/setup-bundle.test.js"
+      ],
+      "evidence": [
+        "New bundle test file exists and parses; guards node --test silently skipping missing files"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 49,
+      "stdoutTail": "",
+      "stderrTail": ""
+    },
+    {
+      "id": "static.lint",
+      "argv": [
+        "npm",
+        "run",
+        "lint"
+      ],
+      "evidence": [
+        "Repository lint and formatting rules"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 302,
+      "stdoutTail": "\n> pi-sdlc@0.1.1 lint\n> biome check .\n\nChecked 52 files in 59ms. No fixes applied.\n",
+      "stderrTail": ""
+    },
+    {
+      "id": "patterns.diff",
+      "argv": [
+        "git",
+        "diff",
+        "--check",
+        "HEAD"
+      ],
+      "evidence": [
+        "No whitespace-error banned patterns in task diff"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 10,
+      "stdoutTail": "",
+      "stderrTail": ""
+    }
+  ],
+  "categories": [
+    {
+      "category": "tests",
+      "status": "PASS",
+      "checkIds": [
+        "tests.setup"
+      ]
+    },
+    {
+      "category": "static",
+      "status": "PASS",
+      "checkIds": [
+        "static.setup",
+        "static.tests-exist",
+        "static.lint"
+      ]
+    },
+    {
+      "category": "scenarios",
+      "status": "PASS"
+    },
+    {
+      "category": "standards",
+      "status": "N/A",
+      "reason": "Commit-range and FS8-untouched standards are verified at ab-t5; no additional standard applies to this task."
+    },
+    {
+      "category": "bannedPatterns",
+      "status": "PASS",
+      "checkIds": [
+        "patterns.diff"
+      ]
+    }
+  ],
+  "scenarios": [
+    {
+      "scenarioId": "AB10",
+      "status": "PASS",
+      "checkIds": [
+        "tests.setup"
+      ]
+    },
+    {
+      "scenarioId": "AB11",
+      "status": "PASS",
+      "checkIds": [
+        "tests.setup"
+      ]
+    },
+    {
+      "scenarioId": "AB12",
+      "status": "PASS",
+      "checkIds": [
+        "tests.setup"
+      ]
+    },
+    {
+      "scenarioId": "AB13",
+      "status": "PASS",
+      "checkIds": [
+        "tests.setup"
+      ]
+    },
+    {
+      "scenarioId": "AB8",
+      "status": "PASS",
+      "checkIds": [
+        "tests.setup"
+      ]
+    },
+    {
+      "scenarioId": "AB9",
+      "status": "PASS",
+      "checkIds": [
+        "tests.setup"
+      ]
+    }
+  ]
+}
