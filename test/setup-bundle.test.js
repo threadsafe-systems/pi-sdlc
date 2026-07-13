@@ -66,6 +66,20 @@ test("consumer template with the wrong companion is refused byte-identically", (
 	}
 });
 
+test("consumer template with multiple declarations is refused", () => {
+	const root = temp();
+	try {
+		const target = join(root, ".github", "pull_request_template.md");
+		spawnSync("mkdir", ["-p", join(root, ".github")]);
+		writeFileSync(target, "```sdlc\ntrack: reversible\nslug: one\n```\n```sdlc\ntrack: reversible\nslug: two\n```\n");
+		const result = jsonRun(root, ["--yes"]);
+		assert.equal(result.status, 1);
+		assert.equal(result.report.assets.find((asset) => asset.id === "pr-template").action, "refused");
+	} finally {
+		rmSync(root, { recursive: true, force: true });
+	}
+});
+
 test("consumer template without the declaration is refused byte-identically", () => {
 	const root = temp();
 	try {

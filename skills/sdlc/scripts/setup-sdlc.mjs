@@ -195,8 +195,9 @@ function structural(target, kind) {
 	if (!existsSync(target)) return false;
 	const text = readFileSync(target, "utf8");
 	if (kind === "pr-template") {
-		const block = /```sdlc\s*([\s\S]*?)```/m.exec(text)?.[1];
-		if (!block) return false;
+		const blocks = [...text.matchAll(/```sdlc\s*([\s\S]*?)```/gm)];
+		if (blocks.length !== 1) return false;
+		const block = blocks[0][1];
 		const track = /^track: (irreversible|reversible|none)$/m.exec(block)?.[1];
 		if (!track) return false;
 		const hasSlug = /^slug: /m.test(block);
@@ -219,10 +220,12 @@ function asset(id, target, kind, content, report) {
 function packageRef() {
 	if (process.env.SDLC_PACKAGE_REF) return process.env.SDLC_PACKAGE_REF;
 	try {
-		return execFileSync("git", ["-C", PACKAGE_DIR, "rev-parse", "HEAD"], { encoding: "utf8", stdio: ["ignore", "pipe", "ignore"] }).trim();
+		const ref = execFileSync("git", ["-C", PACKAGE_DIR, "rev-parse", "HEAD"], { encoding: "utf8", stdio: ["ignore", "pipe", "ignore"] }).trim();
+		if (ref) return ref;
 	} catch {
-		return "main";
+		// A package without an immutable ref must not generate a mutable workflow.
 	}
+	throw new SetupError("setup-sdlc: cannot determine an immutable pi-sdlc ref; set SDLC_PACKAGE_REF");
 }
 function checkReference(id, path, report) {
 	if (existsSync(path)) report.references.push({ id, status: "ok", message: `resolved ${path}` });
@@ -272,7 +275,7 @@ function writeBundle(root, opts, cfg, hooks, tracker) {
 		report.error = "one or more package references could not be resolved";
 		return report;
 	}
-	workflowContent = source(workflowSource).replace("__PI_SDLC_REF__", packageRef());
+	if (opts.withCiWorkflow) workflowContent = source(workflowSource).replace("__PI_SDLC_REF__", packageRef());
 	const configIssues = inspectConfig(cfg);
 	if (configIssues.length > 0) {
 		report.exitCode = 2;
