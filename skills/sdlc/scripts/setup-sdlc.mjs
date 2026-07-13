@@ -199,10 +199,17 @@ function directoryEntries(path) {
 		throw new SetupError(`setup-sdlc: cannot inspect CI path: ${path} (${error.message})`);
 	}
 }
+function isRegularFile(path) {
+	try {
+		return lstatSync(path).isFile();
+	} catch {
+		return false;
+	}
+}
 function existsCi(root, target) {
 	const workflows = join(root, ".github", "workflows");
 	if (directoryEntries(workflows).some((entry) => entry.isFile() && /\.ya?ml$/.test(entry.name) && entry.name !== target)) return true;
-	return [".gitlab-ci.yml", ".circleci/config.yml", "azure-pipelines.yml", "Jenkinsfile", ".travis.yml", "bitbucket-pipelines.yml"].some((file) => existsSync(join(root, file))) || directoryEntries(join(root, ".buildkite")).some((entry) => entry.isFile());
+	return [".gitlab-ci.yml", ".circleci/config.yml", "azure-pipelines.yml", "Jenkinsfile", ".travis.yml", "bitbucket-pipelines.yml"].some((file) => isRegularFile(join(root, file))) || directoryEntries(join(root, ".buildkite")).some((entry) => entry.isFile());
 }
 function rootPrefix(root) {
 	try {
