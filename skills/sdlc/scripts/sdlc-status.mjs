@@ -75,11 +75,13 @@ function parseArgs(argv) {
 	for (let i = 0; i < argv.length; i++) {
 		const a = argv[i];
 		if (a === "--config" || a === "--repo-root") {
-			const v = argv[++i];
-			if (v === undefined) {
+			const v = argv[i + 1];
+			// a following option token is a missing value, not a root (spec §1.1)
+			if (v === undefined || v.startsWith("--")) {
 				err(`${a} requires a value`);
 				continue;
 			}
+			i++;
 			out.explicitRoots.push(v);
 			if (a === "--config") out.config = v;
 			else out.repoRoot = v;
@@ -99,7 +101,10 @@ function parseArgs(argv) {
 			}
 			out.format = v;
 		} else {
-			err(`unexpected argument: ${a}`);
+			// elide anything after '=' so pasted values (e.g. credentials) never
+			// enter diagnostics (spec §4.1)
+			const shown = a.includes("=") ? `${a.slice(0, a.indexOf("=") + 1)}…` : a;
+			err(`unexpected argument: ${shown}`);
 		}
 	}
 	if (out.config !== undefined && out.repoRoot !== undefined) {
@@ -167,6 +172,14 @@ function buildReport(argv, cwd) {
 	const manifestGitPath = gitPath(".pi/sdlc/sdlc.config.json");
 	const modelsGitPath = gitPath(".pi/sdlc/sdlc.models.json");
 
+	// HEAD entry mode: a committed symlink (120000) would make the active file
+	// diverge from the HEAD blob while passing cleanliness — never trust it
+	// (spec §2.4: validated content must be byte-identical to the HEAD blob).
+	const headIsRegularFile = (path) => {
+		const r = git(root, ["ls-tree", "--full-tree", "HEAD", "--", path]);
+		return r.code === 0 && /^100(644|755) blob /.test(r.stdout);
+	};
+
 	// adoption.manifest-head
 	if (statusOf(results, "git.repository") === "pass") {
 		const blob = git(root, ["cat-file", "-e", `HEAD:${manifestGitPath}`]);
@@ -198,11 +211,13 @@ function buildReport(argv, cwd) {
 		const p = join(root, ".pi", "sdlc", "sdlc.config.json");
 		let raw;
 		let failure = null;
-		try {
-			raw = JSON.parse(readFileChecked(p));
-		} catch (e) {
-			failure = e instanceof SyntaxError ? "manifest is not valid JSON" : "manifest is unreadable";
-		}
+		if (!headIsRegularFile(manifestGitPath)) failure = "manifest is not a regular file in HEAD";
+		if (!failure)
+			try {
+				raw = JSON.parse(readFileChecked(p));
+			} catch (e) {
+				failure = e instanceof SyntaxError ? "manifest is not valid JSON" : "manifest is unreadable";
+			}
 		if (!failure) {
 			const issues = inspectConfig(raw);
 			if (issues.length > 0) failure = `manifest is invalid: ${issues[0].message}`;
@@ -231,11 +246,13 @@ function buildReport(argv, cwd) {
 		const p = join(root, ".pi", "sdlc", "sdlc.models.json");
 		let raw;
 		let failure = null;
-		try {
-			raw = JSON.parse(readFileChecked(p));
-		} catch (e) {
-			failure = e instanceof SyntaxError ? "models file is not valid JSON" : "models file is unreadable";
-		}
+		if (!headIsRegularFile(modelsGitPath)) failure = "models file is not a regular file in HEAD";
+		if (!failure)
+			try {
+				raw = JSON.parse(readFileChecked(p));
+			} catch (e) {
+				failure = e instanceof SyntaxError ? "models file is not valid JSON" : "models file is unreadable";
+			}
 		if (!failure) {
 			const issues = inspectModels(raw);
 			if (issues.length > 0) failure = `models file is invalid: ${issues[0].message}`;
@@ -260,9 +277,12 @@ function buildReport(argv, cwd) {
 	}
 
 	// fill skips for anything not evaluated, propagating the root cause: the
-	// nearest evaluated non-pass ancestor's stable reason (spec §2.8 skip messages)
+	// nearest evaluated non-pass ancestor's stable reason (spec §2.8 skip
+	// messages). SKIP_REASON strings describe fail semantics; an errored
+	// ancestor propagates its own accurate message instead.
 	const reasonFor = (id) => {
 		const r = results.get(id);
+		if (r && r.status === "error") return r.message;
 		if (r && r.status !== "pass") return SKIP_REASON[id] ?? r.message;
 		if (!r && PREREQ[id]) return reasonFor(PREREQ[id]);
 		return "prerequisite did not pass";

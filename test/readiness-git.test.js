@@ -219,6 +219,35 @@ test("AR9: sparse checkout omitting required committed files deterministically f
 	}
 });
 
+test("AR9/PR-panel: a manifest committed as a symlink is never trusted as adoption content", () => {
+	// the symlink target lives OUTSIDE the repo: its content is uncommitted,
+	// so following it would validate content that is not the HEAD blob
+	const outside = tmp("sdlc-symtarget-");
+	writeFileSync(join(outside, "config.json"), JSON.stringify(VALID_CONFIG));
+	writeFileSync(join(outside, "models.json"), JSON.stringify(VALID_MODELS));
+	const viaConfig = gitFixture({ files: { ".pi/sdlc/sdlc.models.json": JSON.stringify(VALID_MODELS) }, commit: false });
+	const viaModels = gitFixture({ files: { ".pi/sdlc/sdlc.config.json": JSON.stringify(VALID_CONFIG) }, commit: false });
+	try {
+		symlinkSync(join(outside, "config.json"), join(viaConfig, CONFIG_REL));
+		git(viaConfig, ["add", "-A"]);
+		git(viaConfig, ["commit", "-q", "-m", "symlinked manifest"]);
+		const r1 = runStatus(["--repo-root", viaConfig]);
+		assert.equal(r1.code, 2, `symlinked manifest must be config.valid:error\n${r1.stdout}${r1.stderr}`);
+		assert.equal(checkStatus(r1.stdout, "config.valid"), "error");
+
+		symlinkSync(join(outside, "models.json"), join(viaModels, MODELS_REL));
+		git(viaModels, ["add", "-A"]);
+		git(viaModels, ["commit", "-q", "-m", "symlinked models"]);
+		const r2 = runStatus(["--repo-root", viaModels]);
+		assert.equal(r2.code, 3, `symlinked models must be models.valid:fail\n${r2.stdout}${r2.stderr}`);
+		assert.equal(checkStatus(r2.stdout, "models.valid"), "fail");
+	} finally {
+		rmSync(outside, { recursive: true, force: true });
+		rmSync(viaConfig, { recursive: true, force: true });
+		rmSync(viaModels, { recursive: true, force: true });
+	}
+});
+
 // ---------------------------------------------------------------------------
 // AR4 (git cases) — inaccessible/corrupt repositories are errors
 // ---------------------------------------------------------------------------

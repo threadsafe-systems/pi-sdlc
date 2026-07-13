@@ -209,6 +209,31 @@ test("AR8: cli.arguments error envelope uses the single unambiguous explicit roo
 	}
 });
 
+test("AR8/PR-panel: argument values after '=' are elided from diagnostics", () => {
+	const r = runStatus(["--api-key=sentinel-secret-value-XYZZY", "--format", "json"], { cwd: tmpdir() });
+	assert.equal(r.code, 2);
+	assert.ok(!r.stdout.includes("sentinel-secret-value-XYZZY"), "argv value leaked into diagnostics");
+	assert.match(JSON.parse(r.stdout).checks[0].message, /unexpected argument: --api-key=/);
+});
+
+test("AR4/PR-panel: a root flag never consumes a following option as its value", () => {
+	const cwd = tmpdir();
+	const r = runStatus(["--repo-root", "--format", "json"], { cwd });
+	assert.equal(r.code, 2, r.stdout + r.stderr);
+	const rep = JSON.parse(r.stdout);
+	assert.match(rep.checks[0].message, /--repo-root requires a value/);
+	assert.ok(!rep.root.includes("--format"), `root must not be fabricated from a flag: ${rep.root}`);
+});
+
+test("PR-panel: skips blocked by an errored check propagate that check's own message", () => {
+	const r = runStatus(["--bogus", "--format", "json"], { cwd: tmpdir() });
+	const rep = JSON.parse(r.stdout);
+	assert.equal(rep.checks[0].status, "error");
+	assert.equal(rep.checks[1].id, "root.resolve");
+	assert.equal(rep.checks[1].status, "skip");
+	assert.equal(rep.checks[1].message, rep.checks[0].message, "error skips must carry the accurate root cause");
+});
+
 // ---------------------------------------------------------------------------
 // AR7 — independent blockers aggregate; precedence pins
 // ---------------------------------------------------------------------------
