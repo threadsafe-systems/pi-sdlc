@@ -20,6 +20,14 @@ function fixture() {
 	return { root, consumer, installed };
 }
 
+function parseJson(text, label) {
+	try {
+		return JSON.parse(text);
+	} catch (error) {
+		throw new Error(`invalid JSON ${label}: ${error.message}`);
+	}
+}
+
 function run(nodeScript, args, cwd, env = {}) {
 	return spawnSync(process.execPath, [nodeScript, ...args], { cwd, env: { ...process.env, ...env }, encoding: "utf8" });
 }
@@ -56,7 +64,7 @@ test("SP1: shipped generic commands use skill-relative forms", () => {
 	const workflow = readFileSync(join(ROOT, "skills", "sdlc", "assets", "sdlc-lifecycle.yml"), "utf8");
 	assert.match(workflow, /node \.pi-sdlc\/skills\/sdlc\/scripts\/check-lifecycle\.mjs/);
 	assert.doesNotMatch(workflow, /node skills\/sdlc\/scripts\/check-lifecycle\.mjs/);
-	for (const name of ["normative-references.json", "normative-references.schema.json"]) assert.doesNotThrow(() => JSON.parse(readFileSync(join(ROOT, "skills", "sdlc", "assets", name), "utf8")));
+	for (const name of ["normative-references.json", "normative-references.schema.json"]) assert.doesNotThrow(() => parseJson(readFileSync(join(ROOT, "skills", "sdlc", "assets", name), "utf8"), name));
 });
 
 function requireFiles(dir, suffix = ".md") {
@@ -80,7 +88,7 @@ test("SP2: installed skill commands run from consumer cwd", () => {
 		commitAll(f.consumer);
 		const status = run(join(f.installed, "scripts", "sdlc-status.mjs"), ["--repo-root", f.consumer, "--format", "json"], f.consumer);
 		assert.equal(status.status, 0, status.stderr);
-		assert.equal(JSON.parse(status.stdout).state, "ready");
+		assert.equal(parseJson(status.stdout, "status").state, "ready");
 		const setup = run(join(f.installed, "scripts", "setup-sdlc.mjs"), ["--repo-root", f.consumer, "--yes", "--with-models"], f.consumer, { HOME: join(f.root, "home") });
 		assert.equal(setup.status, 0, "bundle setup succeeds from consumer cwd while retaining the existing config");
 		const agent = run(join(f.installed, "scripts", "ensure-panel-agent.mjs"), ["pr_review", "--repo-root", f.consumer, "--force"], f.consumer);
@@ -90,7 +98,7 @@ test("SP2: installed skill commands run from consumer cwd", () => {
 		cpSync(FIXTURE_HOME, home, { recursive: true });
 		const panel = run(join(f.installed, "scripts", "resolve-panel.mjs"), ["pr_review", "--author", "anthropic", "--repo-root", f.consumer, "--emit-tasks", "fixture-pr-review"], f.consumer, { HOME: home });
 		assert.equal(panel.status, 0, panel.stderr);
-		assert.ok(JSON.parse(panel.stdout).tasks.length >= 1);
+		assert.ok(parseJson(panel.stdout, "panel").tasks.length >= 1);
 		const body = join(f.consumer, "pr-body.md");
 		writeFileSync(body, "```sdlc\ntrack: irreversible\nslug: sdlc-fixture\n```\n");
 		const lifecycle = run(join(f.installed, "scripts", "check-lifecycle.mjs"), ["--body", body, "--repo-root", f.consumer, "--format", "json"], f.consumer);

@@ -23,6 +23,14 @@ function tmp(prefix) {
 	return realpathSync(mkdtempSync(join(tmpdir(), prefix)));
 }
 
+function readJson(path) {
+	try {
+		return JSON.parse(readFileSync(path, "utf8"));
+	} catch (error) {
+		throw new Error(`invalid JSON fixture ${path}: ${error.message}`);
+	}
+}
+
 function withoutEnv(name, fn) {
 	const had = Object.hasOwn(process.env, name);
 	const prev = process.env[name];
@@ -197,7 +205,7 @@ test("RL7b: inspectConfig — malformed nested structures aggregate without thro
 });
 
 test("RL8: inspectModels — valid roster yields [], non-objects and aggregates are deterministic", () => {
-	const example = JSON.parse(readFileSync(join(skill, "schema", "sdlc.models.example.json"), "utf8"));
+	const example = readJson(join(skill, "schema", "sdlc.models.example.json"));
 	assert.deepEqual(inspectModels(example), []);
 	for (const bad of [null, [], "x", 7]) {
 		assert.deepEqual(inspectModels(bad), [{ path: "", message: "must be a JSON object" }]);
@@ -270,7 +278,7 @@ test("RL10: validateModels first diagnostic is byte-identical to the first colle
 });
 
 test("RL11: validators still accept valid input (exit 0) after delegation", () => {
-	const example = JSON.parse(readFileSync(join(skill, "schema", "sdlc.models.example.json"), "utf8"));
+	const example = readJson(join(skill, "schema", "sdlc.models.example.json"));
 	assert.equal(validatorExit("validateModels", example, "/x/m.json").code, 0);
 	assert.equal(validatorExit("validateConfig", GOOD_CONFIG, "/x/c.json").code, 0);
 });
