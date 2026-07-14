@@ -222,7 +222,7 @@ Build already has a committed doc to project and Brainstorm's default
 artifact (bare dialogue) does not:
 
 - **Build mode:** the committed build-plan markdown
-  (`docs/plans/<date>-<feat>-build.md`) remains the authoritative record of
+  (`<configured paths.plans>/<date>-<feat>-build.md`) remains the authoritative record of
   objectives, rationale, check commands, and definition of done. The epic and
   its sub-issues are a **live, resumable projection** of that record, never
   the other way around. If the tracker and the doc disagree, the doc wins and
@@ -230,7 +230,7 @@ artifact (bare dialogue) does not:
 - **Map mode:** there is no separate committed doc for Brainstorm to project
   — the map issue itself *is* the canonical, resumable record of that phase,
   right up until it resolves into a Plan. From that point on, the Plan
-  artifact (`docs/plans/<date>-<feat>.md`) is canonical for everything
+  artifact (`<configured paths.plans>/<date>-<feat>.md`) is canonical for everything
   downstream, same as any other brainstorm.
 
 Either way, a stale tracker object (a map ticket overtaken by events, a

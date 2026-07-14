@@ -27,7 +27,7 @@ this mechanically with four states.
 At the start of every session, run the mechanical gate and branch on its exit
 code (prefer `--format json` when parsing):
 
-1. Run `skills/sdlc/scripts/sdlc-status.sh [--repo-root DIR] [--format text|json]`
+1. In pi, run `scripts/sdlc-status.sh [--repo-root DIR] [--format text|json]` relative to this loaded skill. For headless use, run `node <skill-dir>/scripts/sdlc-status.mjs`.
    (with the session's cwd inside the consumer repo, or pass `--repo-root`).
 2. **Exit 0 (`ready`)**: announce with the config's `announce` string, then
    enumerate each configured hook (phase, timing, kind) and each top-level rule
@@ -90,9 +90,9 @@ present declaration always dominates.
 | Phase | Artifact | Home | Gate |
 |---|---|---|---|
 | Brainstorm¹ | dialogue to an agreed design | none | human approves the design |
-| Plan | objectives, rationale, scope in/out, definition of done, context for the next agent | `docs/plans/<date>-<feat>.md` | plan panel (irreversible); human approval |
-| Spec | contracts, interfaces, surface area, functional and non-functional requirements, falsifiable verification scenarios with stable ids | `docs/specs/<date>-<feat>.md` | spec panel grounded in the code; human approval |
-| Build¹ | task breakdown; each task names its check commands and the scenario ids it satisfies | `docs/plans/<date>-<feat>-build.md` | none (derived from the vetted spec) |
+| Plan | objectives, rationale, scope in/out, definition of done, context for the next agent | `<configured paths.plans>/<date>-<feat>.md` | plan panel (irreversible); human approval |
+| Spec | contracts, interfaces, surface area, functional and non-functional requirements, falsifiable verification scenarios with stable ids | `<configured paths.specs>/<date>-<feat>.md` | spec panel grounded in the code; human approval |
+| Build¹ | task breakdown; each task names its check commands and the scenario ids it satisfies | `<configured paths.plans>/<date>-<feat>-build.md` | none (derived from the vetted spec) |
 | Implement | code and tests | the feature branch (worktree or checkout per the project's hooks/workflow) | per-task mechanistic validator |
 | PR | the diff | GitHub | PR panel to the stop condition |
 
@@ -194,7 +194,7 @@ brainstorm dialogue instead.
 
 ## Build — tracker-backed (epic + sub-issues + board)
 
-The committed build-plan doc (`docs/plans/<date>-<feat>-build.md`) stays the
+The committed build-plan doc (`<configured paths.plans>/<date>-<feat>-build.md`) stays the
 canonical task breakdown — objectives, rationale, check commands, and
 scenario ids per task never live only in the tracker. Whenever that breakdown
 has **two or more tasks**, publish it as tracker objects too, so the work is
@@ -297,7 +297,7 @@ treating a "detached" status label as lost output.
    are recorded, not blocking. Termination is measured against surviving
    findings, so a ruthless panel that always emits nits still converges.
 
-Save panel artifacts under `docs/reviews/<phase>-<feat>-<date>/`: one file per
+Save panel artifacts under `<configured paths.reviews>/<phase>-<feat>-<date>/`: one file per
 model, the shared `prompt.md`, and a `consolidated.md` carrying the adjudication
 and the orchestrating model.
 
@@ -311,7 +311,7 @@ TypeScript task declares `tsc`, a JavaScript task declares `node --check` and it
 linter, another repo declares its own tools.
 
 Every implementation task carries a committed **PV1 validation manifest**
-(`docs/validation/<feature>/<task-id>.json`, schema
+(`<repository validation home>/<feature>/<task-id>.json`, schema
 `schema/task-validation-manifest.schema.json`) projected from its canonical
 Build task. The manifest names, as exact argv arrays, the task's checks across
 five categories — `tests`, `static`, `scenarios`, `standards`, `bannedPatterns`
@@ -354,7 +354,7 @@ Before opening the PR, run the local lifecycle checker from the installed
 skill path:
 
 ```bash
-node <skill-dir>/skills/sdlc/scripts/check-lifecycle.mjs --body pr-body.md --repo-root .
+node <skill-dir>/scripts/check-lifecycle.mjs --body pr-body.md --repo-root .
 ```
 
 `track: none` is an exemption declaration, not a third lifecycle track; it

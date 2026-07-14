@@ -75,8 +75,8 @@ don't fit a hook go in `.pi/sdlc/workflow.md`.
 ## The panel machine
 
 ```bash
-skills/sdlc/scripts/ensure-panel-agent.sh pr_review          # stamp one project-scoped reviewer agent
-skills/sdlc/scripts/resolve-panel.sh pr_review --author <vendor> --emit-tasks <agent>
+scripts/ensure-panel-agent.sh pr_review          # skill-relative in pi
+scripts/resolve-panel.sh pr_review --author <vendor> --emit-tasks <agent>
 ```
 
 `resolve-panel` reconciles your `sdlc.models.json` preference against live
@@ -97,9 +97,9 @@ the mapping from each owned spec scenario to the checks that evidence it.
 The deterministic runner executes it:
 
 ```bash
-skills/sdlc/scripts/validate-task.sh \
-  --manifest docs/validation/<feature>/<task-id>.json --repo-root . --format json \
-  --report docs/reviews/task-validate-<feature>-<task-id>-<date>/runner-report.json
+<skill-dir>/scripts/validate-task.sh \
+  --manifest <repository validation home>/<feature>/<task-id>.json --repo-root . --format json \
+  --report <configured paths.reviews>/task-validate-<feature>-<task-id>-<date>/runner-report.json
 ```
 
 The runner — not the model — runs only declared commands (`shell:false`),
@@ -135,7 +135,7 @@ Declare one of these in every lifecycle PR:
 Run the checker locally against a PR body:
 
 ```bash
-node <skill-dir>/skills/sdlc/scripts/check-lifecycle.mjs \
+node <skill-dir>/scripts/check-lifecycle.mjs \
   --body pr-body.md --repo-root . --format text
 ```
 
