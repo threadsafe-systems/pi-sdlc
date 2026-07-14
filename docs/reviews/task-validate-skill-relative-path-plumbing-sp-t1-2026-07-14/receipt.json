@@ -1,1 +1,12 @@
-{"schemaVersion":1,"taskId":"sp-t1","manifestPath":"docs/validation/skill-relative-path-plumbing/sp-t1.json","manifestSha256":"a62651deef0d1883f57c2b3d68567f56313065279fd5df8f8b6702a889772554","runnerReportSha256":"dcd5a78d1ea326f6bf3d779f4e1218617d3d1a94697382a557a35cf99b86a7ec","generatedAgentSha256":"2e64d2b7427fb3cac6895979d79f3d6fb8f616c7b1872ffeebe7f855fb1fd722","model":"openai-codex/gpt-5.6-terra","runnerVerdict":"PASS","validatorVerdict":"PASS","createdAt":"2026-07-14T01:20:00Z"}
+{
+  "schemaVersion": 1,
+  "taskId": "sp-t1",
+  "manifestPath": "docs/validation/skill-relative-path-plumbing/sp-t1.json",
+  "manifestSha256": "a62651deef0d1883f57c2b3d68567f56313065279fd5df8f8b6702a889772554",
+  "runnerReportSha256": "4e6106f5cd62f1f0111e227fbf448bfe7f85df6c31661de5ec0345e367c0ce30",
+  "generatedAgentSha256": "2e64d2b7427fb3cac6895979d79f3d6fb8f616c7b1872ffeebe7f855fb1fd722",
+  "model": "openai-codex/gpt-5.6-terra",
+  "runnerVerdict": "PASS",
+  "validatorVerdict": "PASS",
+  "createdAt": "2026-07-14T01:20:00Z"
+}
