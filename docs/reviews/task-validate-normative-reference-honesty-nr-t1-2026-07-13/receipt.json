@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "taskId": "nr-t1",
+  "manifestPath": "docs/validation/normative-reference-honesty/nr-t1.json",
+  "manifestSha256": "5ea9c4276972449808f9a3b35200e83b96953ffb817b677f00ad5e413c2959b7",
+  "runnerReportSha256": "451f3d97e6ab944a12cbbccb1b0fa0eaf5011bf5a9b9f276860aa10357522700",
+  "generatedAgentSha256": "2e64d2b7427fb3cac6895979d79f3d6fb8f616c7b1872ffeebe7f855fb1fd722",
+  "model": "openai-codex/gpt-5.6-terra",
+  "runnerVerdict": "PASS",
+  "validatorVerdict": "PASS",
+  "createdAt": "2026-07-14T00:10:00Z"
+}

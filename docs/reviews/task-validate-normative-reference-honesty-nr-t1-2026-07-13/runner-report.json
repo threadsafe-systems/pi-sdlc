@@ -1,0 +1,181 @@
+{
+  "schemaVersion": 1,
+  "taskId": "nr-t1",
+  "manifest": "/home/neil/code/threadsafe/pi-sdlc.worktrees/feat-normative-reference-honesty/docs/validation/normative-reference-honesty/nr-t1.json",
+  "repoRoot": "/home/neil/code/threadsafe/pi-sdlc.worktrees/feat-normative-reference-honesty",
+  "verdict": "PASS",
+  "exitCode": 0,
+  "errors": [],
+  "manifestErrors": [],
+  "commands": [
+    {
+      "id": "tests.check-references",
+      "argv": [
+        "node",
+        "--test",
+        "test/check-references.test.js"
+      ],
+      "evidence": [
+        "NR1-NR6 checker contract"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 374,
+      "stdoutTail": "✔ live inventory passes with explicit non-package classifications (40.638028ms)\n✔ missing target and assertion mutations are contract failures (54.714796ms)\n✔ consumer and external entries are classified without probing (21.288039ms)\n✔ readiness requires the verifier assertion and path containment (107.068557ms)\n✔ invalid inventory and JSON argument errors emit one envelope (47.070872ms)\n✔ shell wrapper resolves beside itself from a consumer cwd (29.174216ms)\nℹ tests 6\nℹ suites 0\nℹ pass 6\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 341.699959\n",
+      "stderrTail": ""
+    },
+    {
+      "id": "static.checker",
+      "argv": [
+        "node",
+        "--check",
+        "skills/sdlc/scripts/check-references.mjs"
+      ],
+      "evidence": [
+        "checker syntax"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 28,
+      "stdoutTail": "",
+      "stderrTail": ""
+    },
+    {
+      "id": "static.tests-exist",
+      "argv": [
+        "node",
+        "--check",
+        "test/check-references.test.js"
+      ],
+      "evidence": [
+        "test file exists"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 20,
+      "stdoutTail": "",
+      "stderrTail": ""
+    },
+    {
+      "id": "static.lint",
+      "argv": [
+        "npm",
+        "run",
+        "lint"
+      ],
+      "evidence": [
+        "lint"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 144,
+      "stdoutTail": "\n> pi-sdlc@0.1.1 lint\n> biome check .\n\nChecked 60 files in 42ms. No fixes applied.\n",
+      "stderrTail": ""
+    },
+    {
+      "id": "patterns.diff",
+      "argv": [
+        "git",
+        "diff",
+        "--check",
+        "HEAD"
+      ],
+      "evidence": [
+        "diff whitespace"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 9,
+      "stdoutTail": "",
+      "stderrTail": ""
+    }
+  ],
+  "categories": [
+    {
+      "category": "tests",
+      "status": "PASS",
+      "checkIds": [
+        "tests.check-references"
+      ]
+    },
+    {
+      "category": "static",
+      "status": "PASS",
+      "checkIds": [
+        "static.checker",
+        "static.tests-exist",
+        "static.lint"
+      ]
+    },
+    {
+      "category": "scenarios",
+      "status": "PASS"
+    },
+    {
+      "category": "standards",
+      "status": "N/A",
+      "reason": "Integrated compatibility is owned by nr-t3."
+    },
+    {
+      "category": "bannedPatterns",
+      "status": "PASS",
+      "checkIds": [
+        "patterns.diff"
+      ]
+    }
+  ],
+  "scenarios": [
+    {
+      "scenarioId": "NR1",
+      "status": "PASS",
+      "checkIds": [
+        "tests.check-references"
+      ]
+    },
+    {
+      "scenarioId": "NR2",
+      "status": "PASS",
+      "checkIds": [
+        "tests.check-references"
+      ]
+    },
+    {
+      "scenarioId": "NR3",
+      "status": "PASS",
+      "checkIds": [
+        "tests.check-references"
+      ]
+    },
+    {
+      "scenarioId": "NR4",
+      "status": "PASS",
+      "checkIds": [
+        "tests.check-references"
+      ]
+    },
+    {
+      "scenarioId": "NR5",
+      "status": "PASS",
+      "checkIds": [
+        "tests.check-references"
+      ]
+    },
+    {
+      "scenarioId": "NR6",
+      "status": "PASS",
+      "checkIds": [
+        "tests.check-references"
+      ]
+    }
+  ]
+}

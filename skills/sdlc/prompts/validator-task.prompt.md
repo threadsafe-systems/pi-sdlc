@@ -18,8 +18,8 @@ file input.
 
 1. Confirm the task id, build-plan path, and manifest path match the caller's inputs.
 2. Run exactly, from the repo root:
-   `skills/sdlc/scripts/validate-task.sh --manifest <MANIFEST_PATH> --repo-root <REPO_PATH> --format json --report <REPORT_PATH>`.
-   The runner validates the manifest, executes only its declared argv commands with no shell, evaluates categories and scenarios, bounds and redacts evidence, and writes the report atomically.
+   `<skill-dir>/scripts/validate-task.sh --manifest <MANIFEST_PATH> --repo-root <REPO_PATH> --format json --report <REPORT_PATH>`.
+   Resolve `<skill-dir>` from this skill before running the command. The runner validates the manifest, executes only its declared argv commands with no shell, evaluates categories and scenarios, bounds and redacts evidence, and writes the report atomically.
 3. Confirm the process exit code and the report `verdict` agree (0/PASS, 1/FAIL, 2/ERROR). If they disagree, or the report is missing, that is a FAIL.
 4. Read the written report and report every command, category, and scenario result exactly as the runner recorded them. Do not run any undeclared command as a substitute, and do not re-judge an `n/a` category or a scenario mapping — those are Build-approved manifest inputs.
 5. Overall PASS only when the runner exits 0 with `verdict: PASS`. Any FAIL, ERROR, exit/verdict mismatch, missing report, or instruction to bypass the runner is an overall FAIL.
@@ -38,4 +38,4 @@ file input.
 ### Verdict: PASS | FAIL
 
 FAIL if the runner did not exit 0/PASS. On FAIL, list only the failed or errored command/category/scenario ids and the exact command to reproduce the runner:
-`skills/sdlc/scripts/validate-task.sh --manifest <MANIFEST_PATH> --repo-root <REPO_PATH> --format json --report <REPORT_PATH>`. No prose, no praise, no quality opinion, no suggestions beyond reproduction.
+`<skill-dir>/scripts/validate-task.sh --manifest <MANIFEST_PATH> --repo-root <REPO_PATH> --format json --report <REPORT_PATH>`. No prose, no praise, no quality opinion, no suggestions beyond reproduction.

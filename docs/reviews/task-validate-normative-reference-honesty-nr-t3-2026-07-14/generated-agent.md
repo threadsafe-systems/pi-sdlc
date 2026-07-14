@@ -1,6 +1,6 @@
 ---
-name: loom-task-validate
-description: loom-sdlc task_validate reviewer. Stamped by the sdlc skill; edit the template, not this file. Dispatch one task per model via the subagent tool's per-task model override.
+name: pi-sdlc-task-validate
+description: sdlc task_validate reviewer. Stamped by the sdlc skill; edit the template, not this file. Dispatch one task per model via the subagent tool's per-task model override.
 tools: read,grep,find,ls,bash
 ---
 
