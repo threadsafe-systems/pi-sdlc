@@ -338,25 +338,15 @@ fits this role well, since a checklist executor doesn't need deep reasoning (see
 
 ## PR and review cycle
 
-Open the PR with `.github/pull_request_template.md` filled in: declare the
-track and slug, then link governing documents per track — irreversible:
-plan, Specification, Build plan; reversible: plan and Build plan, never a
-Specification; none: a reason. For reversible PRs, the plan and Build plan
-are the review grounding and a Specification must not be demanded.
-
-For a tracker-backed Build, also list the epic, every task sub-issue, and the
-shared board in the PR. Add `Closes #<task-issue>` for each task completed by
-merging the PR; use the explicit no-tracker exemption for single-task or
-`track: none` changes. Link the consolidated final PR-review artifact. State
-that no high or medium findings remain, or list each finding with its
-issue/thread link and the commit that addressed it.
-
-Run the PR panel (`prompts/adversary-review.prompt.md`), consolidate and
-adjudicate, and post inline via the `gh-pr-review-comments` skill's atomic
-review scripts (one pending review, verified by content, single submit event).
-When addressing comments, reply on each thread with the short SHA of the
-commit that addressed it. Repeat the panel after each fix wave until no high
-or medium survives adjudication.
+Prepare the PR body from `.github/pull_request_template.md`: declare the
+track and slug, link governing documents per track — irreversible: plan,
+Specification, Build plan; reversible: plan and Build plan, never a
+Specification; none: a reason — and, for a tracker-backed Build, list the
+epic, every task sub-issue, and the shared board. Add `Closes #<task-issue>`
+for each task completed by merging the PR; use the explicit no-tracker
+exemption for single-task or `track: none` changes. The PR body describes the
+change for its audience; it does not carry the local panel's development
+findings.
 
 Before opening the PR, run the local lifecycle checker from the installed
 skill path:
@@ -364,6 +354,20 @@ skill path:
 ```bash
 node <skill-dir>/scripts/check-lifecycle.mjs --body pr-body.md --repo-root .
 ```
+
+Then run the local PR panel (`prompts/adversary-review.prompt.md`) against the
+final committed branch, consolidate and adjudicate its findings in the durable
+internal review artifact under `docs/reviews/`, and repeat after each fix wave
+until no high or medium survives. This is our pre-PR sense check that the
+branch is a finished artefact; retain the artifact for future analysis, but do
+not add development findings to the PR body or post them as GitHub review
+comments.
+
+Only after the panel is clean, open the PR with the clean body. If a GitHub
+reviewer raises a new concern after opening, focus it with an inline comment,
+address it with a commit, reply with that commit's short SHA, and rerun the
+panel before updating the PR. The post-PR review is for new reviewer concerns,
+not a transcript of the local sense check.
 
 `track: none` is an exemption declaration, not a third lifecycle track; it
 requires a reason and its honesty remains PR-panel prose law. CI enforcement
