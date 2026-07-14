@@ -53,6 +53,10 @@ test("SP1: shipped generic commands use skill-relative forms", () => {
 		assert.doesNotMatch(text, /<skill-dir>\/skills\/sdlc\//);
 		assert.doesNotMatch(text, /skills\/sdlc\/scripts\//);
 	}
+	const workflow = readFileSync(join(ROOT, "skills", "sdlc", "assets", "sdlc-lifecycle.yml"), "utf8");
+	assert.match(workflow, /node \.pi-sdlc\/skills\/sdlc\/scripts\/check-lifecycle\.mjs/);
+	assert.doesNotMatch(workflow, /node skills\/sdlc\/scripts\/check-lifecycle\.mjs/);
+	for (const name of ["normative-references.json", "normative-references.schema.json"]) assert.doesNotThrow(() => JSON.parse(readFileSync(join(ROOT, "skills", "sdlc", "assets", name), "utf8")));
 });
 
 function requireFiles(dir, suffix = ".md") {

@@ -183,7 +183,7 @@ export function inspectConfig(raw) {
 					add(`paths.${k}`, `paths.${k} must be a non-empty string`);
 					continue;
 				}
-				const pathCheck = inspectConsumerPath(process.cwd(), v, `paths.${k}`, { checkRealpath: false });
+				const pathCheck = inspectConsumerPath("/", v, `paths.${k}`, { checkRealpath: false });
 				if (!pathCheck.ok) add(`paths.${k}`, pathCheck.message);
 			}
 		}
