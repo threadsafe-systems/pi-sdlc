@@ -1,3 +1,10 @@
+# [0.7.0](https://github.com/threadsafe-systems/pi-sdlc/compare/v0.6.0...v0.7.0) (2026-07-14)
+
+
+### Features
+
+* **paths:** enforce skill-relative invocation ([8686d99](https://github.com/threadsafe-systems/pi-sdlc/commit/8686d999b08e801c47add537443f5958c8339155))
+
 # [0.6.0](https://github.com/threadsafe-systems/pi-sdlc/compare/v0.5.0...v0.6.0) (2026-07-14)
 
 
