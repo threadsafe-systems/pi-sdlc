@@ -5,6 +5,7 @@
 - Specification: `docs/specs/2026-07-14-sdlc-skill-relative-path-plumbing.md`
 - Track: irreversible
 - Canonical source: this Build plan; tracker objects are its projection.
+- Tracker projection: epic #30; T1 #31; T2 #32; shared board #5.
 - Human gate: Build decomposition and tracker projection are approved autonomously.
 - Validator policy: PV1 manifests under `docs/validation/skill-relative-path-plumbing/` with receipts under `docs/reviews/task-validate-skill-relative-path-plumbing-<task>-<date>/`.
 

@@ -10,3 +10,24 @@ slug: replace-with-feature-slug
 - Irreversible: link the plan, Specification, and Build plan.
 - Reversible: link the plan and Build plan; no Specification is required.
 - None: replace `slug:` with `reason:` and explain the exemption.
+
+## Tracker references
+
+For a tracker-backed Build (two or more tasks), link the epic and every task
+sub-issue. Use `Closes #<task-issue>` for task issues completed by merging this
+PR. For a single-task or `track: none` change, write `N/A — no tracker-backed
+Build` and explain briefly.
+
+- Epic: `#<epic-issue>`
+- Tasks: `#<task-issue>`, `#<task-issue>`
+- Board: `<TRACKER_BOARD>`
+
+## Review evidence
+
+Link the consolidated final PR-review artifact and state the findings
+position. If findings were raised, list each finding with its issue/thread
+link and the commit that addressed it; otherwise write `No high or medium
+findings remain.`
+
+- Final review: `docs/reviews/pr-<feature>-<date>/consolidated.md`
+- Findings: `No high or medium findings remain.`

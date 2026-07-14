@@ -342,13 +342,21 @@ Open the PR with `.github/pull_request_template.md` filled in: declare the
 track and slug, then link governing documents per track — irreversible:
 plan, Specification, Build plan; reversible: plan and Build plan, never a
 Specification; none: a reason. For reversible PRs, the plan and Build plan
-are the review grounding and a Specification must not be demanded. Run the
-PR panel (`prompts/adversary-review.prompt.md`), consolidate and adjudicate,
-and post inline via the `gh-pr-review-comments` skill's atomic review scripts
-(one pending review, verified by content, single submit event). When
-addressing comments, reply on each thread with the short SHA of the commit
-that addressed it. Repeat the panel after each fix wave until no high or
-medium survives adjudication.
+are the review grounding and a Specification must not be demanded.
+
+For a tracker-backed Build, also list the epic, every task sub-issue, and the
+shared board in the PR. Add `Closes #<task-issue>` for each task completed by
+merging the PR; use the explicit no-tracker exemption for single-task or
+`track: none` changes. Link the consolidated final PR-review artifact. State
+that no high or medium findings remain, or list each finding with its
+issue/thread link and the commit that addressed it.
+
+Run the PR panel (`prompts/adversary-review.prompt.md`), consolidate and
+adjudicate, and post inline via the `gh-pr-review-comments` skill's atomic
+review scripts (one pending review, verified by content, single submit event).
+When addressing comments, reply on each thread with the short SHA of the
+commit that addressed it. Repeat the panel after each fix wave until no high
+or medium survives adjudication.
 
 Before opening the PR, run the local lifecycle checker from the installed
 skill path:

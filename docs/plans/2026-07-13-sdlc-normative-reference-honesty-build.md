@@ -5,6 +5,7 @@
 - Specification: `docs/specs/2026-07-13-sdlc-normative-reference-honesty.md` (approved)
 - Track: irreversible
 - Canonical source: this committed Build plan; tracker objects are its projection.
+- Tracker projection: epic #25; T1 #26; T2 #27; T3 #28; shared board #5.
 - Human gate: Build decomposition and tracker projection are approved autonomously under the user instruction to proceed without interactive approval.
 - Validator policy: PV1 manifests under `docs/validation/normative-reference-honesty/`, executed by `skills/sdlc/scripts/validate-task.sh` with receipts under `docs/reviews/task-validate-normative-reference-honesty-<task>-<date>/`.
 
