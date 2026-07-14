@@ -123,7 +123,7 @@
     {
       "id": "setup-template.source",
       "source": "templates/setup-sdlc.md",
-      "assertion": "Run the scaffolder from the pi-sdlc package checkout",
+      "assertion": "In pi, run the skill-relative command below",
       "targetKind": "file",
       "ownership": "package",
       "required": true,

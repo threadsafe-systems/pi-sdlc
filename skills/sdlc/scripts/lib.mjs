@@ -3,8 +3,8 @@
 // FS3 (resolution), FS4 (derivation). No runtime deps (NFR2).
 
 import { execFileSync } from "node:child_process";
-import { existsSync, readFileSync } from "node:fs";
-import { dirname, isAbsolute, join, resolve } from "node:path";
+import { existsSync, readFileSync, realpathSync } from "node:fs";
+import { dirname, isAbsolute, join, relative, resolve, sep } from "node:path";
 
 export const PHASES = ["plan_review", "spec_review", "pr_review", "task_validate"];
 export const PHASE_TEMPLATE = {
@@ -91,6 +91,33 @@ export function resolveRoot({ config, repoRoot } = {}) {
 	fail(`sdlc: ${r.message}`);
 }
 
+// FS1 path seam: pure consumer-root resolution shared by artifact and generated-agent consumers.
+// It never exits or throws; callers choose their existing fatal/reporting surface.
+export function inspectConsumerPath(root, configured, label = "path", { checkRealpath = true } = {}) {
+	if (typeof configured !== "string" || configured.length === 0) return { ok: false, message: `${label} must be a non-empty repo-relative path` };
+	const normalized = configured.replaceAll("\\", "/");
+	if (normalized.startsWith("/") || /^[A-Za-z]:\//.test(normalized) || normalized.split("/").includes("..")) {
+		return { ok: false, message: `${label} must be a contained repo-relative path` };
+	}
+	const rootAbs = resolve(root);
+	const resolved = resolve(rootAbs, normalized);
+	const rel = relative(rootAbs, resolved);
+	if (rel === ".." || rel.startsWith(`..${sep}`) || isAbsolute(rel)) return { ok: false, message: `${label} escapes the consumer root` };
+	if (checkRealpath && existsSync(resolved)) {
+		const realRoot = realpathSync(rootAbs);
+		const realTarget = realpathSync(resolved);
+		const realRel = relative(realRoot, realTarget);
+		if (realRel === ".." || realRel.startsWith(`..${sep}`) || isAbsolute(realRel)) return { ok: false, message: `${label} resolves outside the consumer root` };
+	}
+	return { ok: true, resolved, configured, normalized };
+}
+
+export function resolveConsumerPath(root, configured, label = "path") {
+	const result = inspectConsumerPath(root, configured, label);
+	if (!result.ok) fail(`sdlc: ${result.message}`);
+	return result;
+}
+
 function isPlainObject(v) {
 	return typeof v === "object" && v !== null && !Array.isArray(v);
 }
@@ -156,8 +183,8 @@ export function inspectConfig(raw) {
 					add(`paths.${k}`, `paths.${k} must be a non-empty string`);
 					continue;
 				}
-				// repo-relative, must not escape the consumer repo
-				if (v.startsWith("/") || v.split("/").includes("..")) add(`paths.${k}`, `paths.${k} must be a repo-relative path with no '..' segment`);
+				const pathCheck = inspectConsumerPath("/", v, `paths.${k}`, { checkRealpath: false });
+				if (!pathCheck.ok) add(`paths.${k}`, pathCheck.message);
 			}
 		}
 	}

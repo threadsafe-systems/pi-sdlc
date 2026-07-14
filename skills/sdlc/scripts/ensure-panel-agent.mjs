@@ -14,7 +14,7 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, isAbsolute, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import { agentDescription, agentName, fail, PHASE_TEMPLATE, PHASES, readConfig, resolveRoot } from "./lib.mjs";
+import { agentDescription, agentName, fail, PHASE_TEMPLATE, PHASES, readConfig, resolveConsumerPath, resolveRoot } from "./lib.mjs";
 
 const REVIEWER_TAG_REPLACEMENT = "one of several independent reviewers in a multi-model panel";
 const DEFAULT_TOOLS = "read,grep,find,ls,bash";
@@ -70,7 +70,7 @@ const body = rawBody.split("REVIEWER_TAG").join(REVIEWER_TAG_REPLACEMENT);
 
 const content = `${["---", `name: ${name}`, `description: ${description}`, `tools: ${tools}`, "---", "", body].join("\n")}\n`;
 
-const agentsDir = dir ? (isAbsolute(dir) ? dir : resolve(dir)) : join(root, cfg.paths.agents);
+const agentsDir = dir ? (isAbsolute(dir) ? dir : resolve(dir)) : resolveConsumerPath(root, cfg.paths.agents, "paths.agents").resolved;
 const out = join(agentsDir, `${name}.md`);
 
 if (existsSync(out) && !force) {

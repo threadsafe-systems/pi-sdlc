@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "taskId": "sp-t2",
+  "manifestPath": "docs/validation/skill-relative-path-plumbing/sp-t2.json",
+  "manifestSha256": "c9d7c2d59d86d7fc53788b5ad5cc81bbfe382452d053856095f8666797fe2ff1",
+  "runnerReportSha256": "0a2a020569a5c1f64ed8e8d7a34f5a6a8b9938ed5554e281d0380b12ebf7d055",
+  "generatedAgentSha256": "2e64d2b7427fb3cac6895979d79f3d6fb8f616c7b1872ffeebe7f855fb1fd722",
+  "model": "openai-codex/gpt-5.6-terra",
+  "runnerVerdict": "PASS",
+  "validatorVerdict": "PASS",
+  "createdAt": "2026-07-14T01:35:00Z"
+}

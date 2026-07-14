@@ -7,7 +7,7 @@ import { spawnSync } from "node:child_process";
 import { existsSync, readFileSync } from "node:fs";
 import { isAbsolute, join, relative, resolve, sep } from "node:path";
 import { fileURLToPath } from "node:url";
-import { inspectConfig, inspectRoot } from "./lib.mjs";
+import { inspectConfig, inspectConsumerPath, inspectRoot } from "./lib.mjs";
 
 const TRACKS = new Set(["irreversible", "reversible", "none"]);
 const SLUG_RE = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
@@ -292,15 +292,13 @@ function main(argv = process.argv.slice(2), cwd = process.cwd()) {
 			setResult(results, id, "skip", "prerequisite config.valid did not pass");
 			continue;
 		}
-		const normalizedConfigured = configured.replaceAll("\\", "/");
-		const absoluteDir = resolve(root, normalizedConfigured);
-		const rootRelative = relative(resolve(root), absoluteDir);
-		if (rootRelative.startsWith("..") || isAbsolute(rootRelative)) {
-			setResult(results, "config.valid", "error", `configured ${pathKey} path escapes the consumer root`);
+		const pathCheck = inspectConsumerPath(root, configured, `paths.${pathKey}`);
+		if (!pathCheck.ok) {
+			setResult(results, "config.valid", "error", pathCheck.message);
 			setResult(results, id, "skip", "prerequisite config.valid did not pass");
 			continue;
 		}
-		const treePath = `${prefix ? `${prefix}/` : ""}${normalizedConfigured.replace(/^\/+|\/+$/g, "")}`;
+		const treePath = `${prefix ? `${prefix}/` : ""}${pathCheck.normalized.replace(/^\/+|\/+$/g, "")}`;
 		const listing = git(root, ["ls-tree", "-r", "--name-only", "HEAD", "--", `${treePath}/`]);
 		if (listing.code !== 0) {
 			setResult(results, id, "error", "git could not inspect the committed artifact tree", "check repository integrity and current HEAD");
