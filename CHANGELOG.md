@@ -1,3 +1,10 @@
+# [0.6.0](https://github.com/threadsafe-systems/pi-sdlc/compare/v0.5.0...v0.6.0) (2026-07-14)
+
+
+### Features
+
+* **reference:** enforce normative-reference honesty ([a1a994d](https://github.com/threadsafe-systems/pi-sdlc/commit/a1a994dea864be0df59bf872ff4e0208a663d678))
+
 # [0.5.0](https://github.com/threadsafe-systems/pi-sdlc/compare/v0.4.0...v0.5.0) (2026-07-13)
 
 
