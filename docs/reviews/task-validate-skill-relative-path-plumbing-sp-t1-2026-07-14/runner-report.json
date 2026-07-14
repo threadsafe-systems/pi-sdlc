@@ -1,0 +1,163 @@
+{
+  "schemaVersion": 1,
+  "taskId": "sp-t1",
+  "manifest": "/home/neil/code/threadsafe/pi-sdlc.worktrees/feat-skill-relative-path-plumbing/docs/validation/skill-relative-path-plumbing/sp-t1.json",
+  "repoRoot": "/home/neil/code/threadsafe/pi-sdlc.worktrees/feat-skill-relative-path-plumbing",
+  "verdict": "PASS",
+  "exitCode": 0,
+  "errors": [],
+  "manifestErrors": [],
+  "commands": [
+    {
+      "id": "tests.paths",
+      "argv": [
+        "node",
+        "--test",
+        "test/readiness-lib.test.js",
+        "test/check-lifecycle-git.test.js",
+        "test/extraction.test.js",
+        "test/setup-sdlc.test.js"
+      ],
+      "evidence": [
+        "SP3-SP5 path override and compatibility tests"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 735,
+      "stdoutTail": "✔ irreversible artifacts pass only when all committed documents exist (75.453138ms)\n✔ missing artifact and missing artifact directory are contract failures (110.126135ms)\n✔ reversible never requires a specification (45.067591ms)\n✔ configured paths are authoritative and multiple dated matches pass (57.143747ms)\n✔ working-tree-only artifacts do not count (45.13884ms)\n✔ configured path escape is an operational config error (55.782835ms)\nunknown format \"uri\" ignored in schema at path \"#/properties/tracker/properties/board/properties/url\"\nunknown format \"uri\" ignored in schema at path \"#/properties/tracker/properties/board/properties/url\"\n✔ S2: no loom-domain content in the generic surface (2.87388ms)\n✔ S3: JSON schemas validate their examples (24.147193ms)\n✔ S3b: ensure-panel-agent rejects malformed config (exit 2) (183.721569ms)\n✔ S3c: resolve-panel rejects malformed models (exit 2) (122.922323ms)\n✔ S4: stamped name+tools+body byte-identical to golden; description == FS4 (87.938215ms)\n✔ S5: agent lands in the CONSUMER's .pi/agents (not the skill dir) (22.716421ms)\n✔ S6: resolve-panel --emit-tasks deep-equals golden under isolated env (103.060174ms)\n✔ S7: resolution terminal cases (95.103486ms)\n✔ RL1: inspectRoot explicit precedence — config over repoRoot over sdlcRoot; relative resolves against cwd (1.055187ms)\n✔ RL2: inspectRoot walks ancestors from cwd to a configured project root (0.364297ms)\n✔ RL3: inspectRoot falls back to the git top-level for a manifest-less repo (8.308365ms)\n✔ RL4: inspectRoot returns the error member (never exits) outside any project (2.307537ms)\n✔ RL5: inspectRoot honours $SDLC_ROOT when no explicit option is given (0.227793ms)\n✔ SP4: consumer path seam preserves spelling and rejects slash/backslash escapes (2.396959ms)\n✔ RL6: inspectConfig — valid input yields [], non-objects yield the deterministic issue (0.50686ms)\n✔ RL7: inspectConfig — aggregates every issue in validation-rule order, never throws (0.279421ms)\n✔ RL7b: inspectConfig — malformed nested structures aggregate without throwing (0.175848ms)\n✔ RL8: inspectModels — valid roster yields [], non-objects and aggregates are deterministic (0.427328ms)\n✔ RL8b: inspectModels — non-object phases and phase entries never throw (0.185469ms)\n✔ RL9: validateConfig first diagnostic is byte-identical to the first collector issue (exit 2) (164.905611ms)\n✔ RL10: validateModels first diagnostic is byte-identical to the first collector issue (exit 2) (120.883519ms)\n✔ RL11: validators still accept valid input (exit 0) after delegation (41.206156ms)\n✔ OH4: --yes writes a schema-valid config; bundle re-run refuses config changes; --force overwrites (89.319058ms)\n✔ OH5: --hook-use fields 3-4 = use, do = remainder after 4th colon (colons in do preserved) (26.71897ms)\n✔ OH5: --hook-run command = remainder after 2nd colon (colons preserved); trust warning on stderr (37.658007ms)\n✔ OH5: mixed repeated hook flags preserve argv order in the written list (42.248566ms)\n✔ OH5: malformed hook flags exit 2 (204.779608ms)\n✔ PR-fix: value-taking flags accept values that begin with '-' (e.g. --announce '--foo') (35.215545ms)\n✔ OH5: partial tracker flags exit 2 (all-or-none) (32.149218ms)\n✔ OH5: no config flags and no TTY exits 2 (interview needs a TTY) (33.714161ms)\n✔ OH6: package.json pi.prompts includes ./templates and the template has a description (0.670814ms)\nℹ tests 37\nℹ suites 0\nℹ pass 37\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 716.549645\n",
+      "stderrTail": ""
+    },
+    {
+      "id": "static.lib",
+      "argv": [
+        "node",
+        "--check",
+        "skills/sdlc/scripts/lib.mjs"
+      ],
+      "evidence": [
+        "resolver syntax"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 20,
+      "stdoutTail": "",
+      "stderrTail": ""
+    },
+    {
+      "id": "static.lifecycle",
+      "argv": [
+        "node",
+        "--check",
+        "skills/sdlc/scripts/check-lifecycle.mjs"
+      ],
+      "evidence": [
+        "checker syntax"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 22,
+      "stdoutTail": "",
+      "stderrTail": ""
+    },
+    {
+      "id": "static.lint",
+      "argv": [
+        "npm",
+        "run",
+        "lint"
+      ],
+      "evidence": [
+        "lint"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 120,
+      "stdoutTail": "\n> pi-sdlc@0.1.1 lint\n> biome check .\n\nChecked 63 files in 28ms. No fixes applied.\n",
+      "stderrTail": ""
+    },
+    {
+      "id": "patterns.diff",
+      "argv": [
+        "git",
+        "diff",
+        "--check",
+        "HEAD"
+      ],
+      "evidence": [
+        "diff whitespace"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 4,
+      "stdoutTail": "",
+      "stderrTail": ""
+    }
+  ],
+  "categories": [
+    {
+      "category": "tests",
+      "status": "PASS",
+      "checkIds": [
+        "tests.paths"
+      ]
+    },
+    {
+      "category": "static",
+      "status": "PASS",
+      "checkIds": [
+        "static.lib",
+        "static.lifecycle",
+        "static.lint"
+      ]
+    },
+    {
+      "category": "scenarios",
+      "status": "PASS"
+    },
+    {
+      "category": "standards",
+      "status": "N/A",
+      "reason": "Installed-consumer acceptance is owned by sp-t2."
+    },
+    {
+      "category": "bannedPatterns",
+      "status": "PASS",
+      "checkIds": [
+        "patterns.diff"
+      ]
+    }
+  ],
+  "scenarios": [
+    {
+      "scenarioId": "SP3",
+      "status": "PASS",
+      "checkIds": [
+        "tests.paths"
+      ]
+    },
+    {
+      "scenarioId": "SP4",
+      "status": "PASS",
+      "checkIds": [
+        "tests.paths"
+      ]
+    },
+    {
+      "scenarioId": "SP5",
+      "status": "PASS",
+      "checkIds": [
+        "tests.paths"
+      ]
+    }
+  ]
+}
