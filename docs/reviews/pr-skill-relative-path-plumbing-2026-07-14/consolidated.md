@@ -1,6 +1,6 @@
 # Consolidated PR review — skill-relative path plumbing (PR #33)
 
-- Head: `f1ed5fa`
+- Head: `277a3ed`
 - Base: `feat/normative-reference-honesty`
 - Declared track: irreversible
 - Orchestrator: openai
@@ -17,7 +17,9 @@ The configured PR panel requires three reviewers; current credentials resolved t
 - Prior low observation 2 (SP1 corpus gap): resolved with markdown/shell corpus coverage plus explicit workflow and JSON-asset assertions.
 - `npm test`: 158/158 pass.
 - `npm run lint`: pass, 63 files.
-- SP1–SP7: PASS through PV2 task receipts.
+- LSP diagnostics: 0 diagnostics on the edited test files.
+- SP1–SP7: PASS through refreshed PV2 task receipts.
+- Latest test hardening adds contextual JSON parse errors; no behavior change on valid fixtures.
 - Working tree: clean before review artifact write.
 
 No high or medium finding survives adjudication. Remaining low observations are non-blocking test hygiene/portability notes only. The PR is at the stop condition and ready for sign-off.
