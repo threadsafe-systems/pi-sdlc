@@ -1,6 +1,6 @@
 # Consolidated PR review — skill-relative path plumbing (PR #33)
 
-- Head: `277a3ed`
+- Head: `7fcce46` (reviewed source head `277a3ed`; final delta is review-artifact metadata only)
 - Base: `feat/normative-reference-honesty`
 - Declared track: irreversible
 - Orchestrator: openai
