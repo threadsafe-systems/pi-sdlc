@@ -11,7 +11,7 @@ import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { test } from "node:test";
 
-import { inspectConfig, inspectModels, inspectRoot } from "../skills/sdlc/scripts/lib.mjs";
+import { inspectConfig, inspectConsumerPath, inspectModels, inspectRoot } from "../skills/sdlc/scripts/lib.mjs";
 
 const here = dirname(fileURLToPath(import.meta.url));
 const repo = dirname(here);
@@ -132,6 +132,23 @@ const GOOD_CONFIG = {
 	hooks: { implement: { before: [{ use: "tool:worktree_session", do: "enter the worktree" }] } },
 };
 
+test("SP4: consumer path seam preserves spelling and rejects slash/backslash escapes", () => {
+	const root = tmp("sdlc-sp4-");
+	assert.deepEqual(inspectConsumerPath(root, "project\\plans", "paths.plans"), { ok: true, resolved: join(root, "project", "plans"), configured: "project\\plans", normalized: "project/plans" });
+	for (const bad of ["", "/absolute", "C:\\absolute", "../escape", "project/../escape", "project\\..\\escape"]) {
+		assert.equal(inspectConsumerPath(root, bad, "paths.plans").ok, false, bad);
+	}
+	const outside = join(root, "..", "sdlc-sp4-outside");
+	mkdirSync(outside, { recursive: true });
+	const link = join(root, "linked");
+	try {
+		execFileSync("ln", ["-s", outside, link]);
+		assert.equal(inspectConsumerPath(root, "linked", "paths.agents").ok, false);
+	} finally {
+		rmSync(root, { recursive: true, force: true });
+	}
+});
+
 test("RL6: inspectConfig — valid input yields [], non-objects yield the deterministic issue", () => {
 	assert.deepEqual(inspectConfig(GOOD_CONFIG), []);
 	for (const bad of [null, [], "x", 42, undefined, true]) {
@@ -227,6 +244,7 @@ test("RL9: validateConfig first diagnostic is byte-identical to the first collec
 		null,
 		{ bogus: 1, schemaVersion: 1, prefix: "acme", labelPrefix: "acme", announce: "a" },
 		{ schemaVersion: 1, prefix: "acme", labelPrefix: "acme", announce: "a", paths: { plans: "/abs" } },
+		{ schemaVersion: 1, prefix: "acme", labelPrefix: "acme", announce: "a", paths: { plans: "..\\\\escape" } },
 		{ schemaVersion: 1, prefix: "acme", labelPrefix: "acme", announce: "a", hooks: {} },
 		{ schemaVersion: 1, prefix: "acme", labelPrefix: "acme", announce: "a", hooks: { plan: { before: [{ run: "x", use: "tool:t", do: "y" }] } } },
 	];
