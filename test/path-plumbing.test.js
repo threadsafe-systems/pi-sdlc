@@ -40,18 +40,26 @@ function commitAll(consumer) {
 }
 
 test("SP1: shipped generic commands use skill-relative forms", () => {
-	const corpus = [readFileSync(join(ROOT, "skills", "sdlc", "SKILL.md"), "utf8"), readFileSync(join(ROOT, "README.md"), "utf8"), readFileSync(join(ROOT, "templates", "setup-sdlc.md"), "utf8"), ...requireFiles(join(ROOT, "skills", "sdlc", "prompts")), ...requireFiles(join(ROOT, "test", "fixtures", "golden"))];
+	const corpus = [
+		readFileSync(join(ROOT, "skills", "sdlc", "SKILL.md"), "utf8"),
+		readFileSync(join(ROOT, "README.md"), "utf8"),
+		readFileSync(join(ROOT, "templates", "setup-sdlc.md"), "utf8"),
+		...requireFiles(join(ROOT, "skills", "sdlc", "prompts")),
+		...requireFiles(join(ROOT, "skills", "sdlc", "assets")),
+		...requireFiles(join(ROOT, "skills", "sdlc", "scripts"), ".sh"),
+		...requireFiles(join(ROOT, "test", "fixtures", "golden")),
+	];
 	for (const text of corpus) {
 		assert.doesNotMatch(text, /<skill-dir>\/skills\/sdlc\//);
 		assert.doesNotMatch(text, /skills\/sdlc\/scripts\//);
 	}
 });
 
-function requireFiles(dir) {
-	return readdirNames(dir).map((name) => readFileSync(join(dir, name), "utf8"));
+function requireFiles(dir, suffix = ".md") {
+	return readdirNames(dir, suffix).map((name) => readFileSync(join(dir, name), "utf8"));
 }
-function readdirNames(dir) {
-	return readdirSync(dir).filter((name) => name.endsWith(".md"));
+function readdirNames(dir, suffix = ".md") {
+	return readdirSync(dir).filter((name) => name.endsWith(suffix));
 }
 
 test("SP2: installed skill commands run from consumer cwd", () => {

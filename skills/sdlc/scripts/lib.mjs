@@ -93,7 +93,7 @@ export function resolveRoot({ config, repoRoot } = {}) {
 
 // FS1 path seam: pure consumer-root resolution shared by artifact and generated-agent consumers.
 // It never exits or throws; callers choose their existing fatal/reporting surface.
-export function inspectConsumerPath(root, configured, label = "path") {
+export function inspectConsumerPath(root, configured, label = "path", { checkRealpath = true } = {}) {
 	if (typeof configured !== "string" || configured.length === 0) return { ok: false, message: `${label} must be a non-empty repo-relative path` };
 	const normalized = configured.replaceAll("\\", "/");
 	if (normalized.startsWith("/") || /^[A-Za-z]:\//.test(normalized) || normalized.split("/").includes("..")) {
@@ -103,7 +103,7 @@ export function inspectConsumerPath(root, configured, label = "path") {
 	const resolved = resolve(rootAbs, normalized);
 	const rel = relative(rootAbs, resolved);
 	if (rel === ".." || rel.startsWith(`..${sep}`) || isAbsolute(rel)) return { ok: false, message: `${label} escapes the consumer root` };
-	if (existsSync(resolved)) {
+	if (checkRealpath && existsSync(resolved)) {
 		const realRoot = realpathSync(rootAbs);
 		const realTarget = realpathSync(resolved);
 		const realRel = relative(realRoot, realTarget);
@@ -183,7 +183,7 @@ export function inspectConfig(raw) {
 					add(`paths.${k}`, `paths.${k} must be a non-empty string`);
 					continue;
 				}
-				const pathCheck = inspectConsumerPath(process.cwd(), v, `paths.${k}`);
+				const pathCheck = inspectConsumerPath(process.cwd(), v, `paths.${k}`, { checkRealpath: false });
 				if (!pathCheck.ok) add(`paths.${k}`, pathCheck.message);
 			}
 		}
