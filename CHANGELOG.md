@@ -1,3 +1,10 @@
+# [0.8.0](https://github.com/threadsafe-systems/pi-sdlc/compare/v0.7.0...v0.8.0) (2026-07-15)
+
+
+### Features
+
+* **lifecycle:** add opt-in configurable SDLC profiles ([d54895e](https://github.com/threadsafe-systems/pi-sdlc/commit/d54895eb58ad3a653145e7aaa328dd963cf12d41))
+
 # [0.7.0](https://github.com/threadsafe-systems/pi-sdlc/compare/v0.6.0...v0.7.0) (2026-07-14)
 
 
