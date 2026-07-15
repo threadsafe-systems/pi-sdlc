@@ -1,0 +1,209 @@
+{
+  "schemaVersion": 1,
+  "taskId": "ol-a-t3",
+  "manifest": "/home/neil/code/threadsafe/pi-sdlc.worktrees/feat-opt-in-lifecycle/docs/validation/opt-in-lifecycle-config/ol-a-t3.json",
+  "repoRoot": "/home/neil/code/threadsafe/pi-sdlc.worktrees/feat-opt-in-lifecycle",
+  "verdict": "PASS",
+  "exitCode": 0,
+  "errors": [],
+  "manifestErrors": [],
+  "commands": [
+    {
+      "id": "tests.setup-lifecycle",
+      "argv": [
+        "node",
+        "--test",
+        "test/setup-lifecycle.test.js"
+      ],
+      "evidence": [
+        "OLA14 exact preset expansion and example alignment",
+        "OLA15 real PTY default interview",
+        "OLA16 frozen non-profile path and existing-config refusal",
+        "OLA17 custom file/stdin contract and validation"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 1930,
+      "stdoutTail": "✔ OLA14: --profile standard writes the exact fully-expanded standard block (90.162809ms)\n✔ OLA14/NF-3: repeated preset runs produce identical lifecycle bytes (142.461812ms)\n✔ OLA15: the interactive profile question is first and defaults to standard (932.03951ms)\n✔ OLA16/NF-1(c): non-interactive setup without lifecycle flags remains v1-shaped (89.86196ms)\n✔ OLA16: applying a profile to an existing config refuses with the OL-B pointer (165.494835ms)\n✔ OLA17: custom profile requires lifecycle JSON and injects profile exactly (155.861824ms)\n✔ OLA17: custom payload usage and validation failures are pinned (195.793074ms)\nℹ tests 7\nℹ suites 0\nℹ pass 7\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 1870.52569\n",
+      "stderrTail": ""
+    },
+    {
+      "id": "tests.full",
+      "argv": [
+        "node",
+        "--test"
+      ],
+      "evidence": [
+        "NF-1(c), existing setup semantics, FS10 report envelope and complete corpus"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 6307,
+      "stdoutTail": "[...truncated; showing bounded tail...]\n✔ AR8: secret sentinels in the environment never appear in output (268.542053ms)\n✔ AR8: --format json anywhere in argv forces the envelope for argument errors (145.607182ms)\n✔ AR8: JSON envelope root falls back to absolute cwd on root-resolution failure (38.225847ms)\n✔ AR8: cli.arguments error envelope uses the single unambiguous explicit root when available (49.003443ms)\n✔ AR8/PR-panel: argument values after '=' are elided from diagnostics (53.899461ms)\n✔ AR4/PR-panel: a root flag never consumes a following option as its value (52.105485ms)\n✔ PR-panel: skips blocked by an errored check propagate that check's own message (32.069941ms)\n✔ AR7: missing committed models + workflow read failure both surface, exit 3 (66.808939ms)\n✔ AR7: malformed config + missing committed models both report; error precedence wins (exit 2) (81.011654ms)\n✔ AR7: skip pins — not-adopted repo (67.986473ms)\n✔ AR7: skip pins — dirty manifest still evaluates independent models/workflow checks (87.862224ms)\n✔ wrapper: sdlc-status.sh output and exit are identical to direct .mjs invocation (297.971011ms)\n✔ NR7: generic prompts do not require absent governing files (1.808937ms)\n✔ NR7: skill dispatch instructions are concrete and CI claims are bounded (1.55142ms)\n✔ NR7: inventory checker and ADR are shipped and versioned (0.930509ms)\n✔ NR8: source prompt extraction remains the fixture authority (0.566748ms)\n✔ OLA9: lifecycle floor supersedes models min_panel and v1 path remains byte-identical (139.739262ms)\n✔ OLA10a-b: same-provider models satisfy diversity and effort variants dedupe positionally (133.486151ms)\n✔ OLA10c: failure names the distinct-model floor (33.378953ms)\n✔ OLA10d-f: embedded versions, colon versions, and providers are identity (144.412614ms)\n✔ OLA11: lifecycle excludes the author model only when minPanel >= 2 (163.058441ms)\n✔ OLA11/OLA20: v1 bare-vendor author and invalid non-lifecycle config are frozen (460.267062ms)\n✔ OLA12: task validation has a fixed one-model floor or refuses when off (126.987746ms)\n✔ OLA13: gate decomposition and track selection govern panel availability (288.736122ms)\n✔ OLA13: absent per-track keys resolve from defaults without guessing (48.868249ms)\n✔ OLA21: an invalid lifecycle block fails on its first lifecycle issue (35.303077ms)\n✔ AR1: committed valid config+models, clean tree — exit 0, state ready, all checks pass (196.591786ms)\n✔ AR2: absent, untracked, staged, and ignored manifests all exit 1 not-adopted (237.076885ms)\n✔ AR4: argument errors exit 2 at cli.arguments with later checks skipped (234.170165ms)\n✔ AR4: unresolvable implicit root exits 2 at root.resolve (52.911186ms)\n✔ AR4: non-git explicit root exits 2 at git.repository, with or without a manifest (89.15663ms)\n✔ AR4: a git repository without HEAD exits 1 not-adopted, not 2 (40.232602ms)\n✔ AR4: --help prints usage, exits 0, and emits no status envelope (50.337464ms)\n✔ AR5: committed clean but invalid manifests exit 2 at config.valid (256.845593ms)\n✔ AR6: models absent from HEAD (filesystem-only variants) exits 3 at models.head (261.718796ms)\n✔ AR6: dirty committed models exits 3 at models.clean; models.valid skips (67.658812ms)\n✔ AR6: committed malformed / FS2-invalid / unreadable models exit 3 at models.valid (274.062322ms)\n✔ AR6: workflow.md present+readable passes; injected read failure exits 3 (237.024637ms)\n✔ AR3 (baseline): unrelated dirty files do not affect readiness (137.906469ms)\n✔ AR12: status completes with a PATH exposing only git (no other executable can run) (168.356755ms)\n✔ dogfood: this repo's committed config+models make sdlc-status exit 0 (133.857952ms)\n✔ fresh bundle provisions requested assets and idempotent rerun retains them (107.543588ms)\n✔ CI marker directories are not mistaken for CI files (73.010549ms)\n✔ existing CI suppresses workflow creation and reports refusal (79.78962ms)\n✔ template info strings must be exactly sdlc (63.484856ms)\n✔ consumer template with the wrong companion is refused byte-identically (58.78569ms)\n✔ consumer template with multiple declarations is refused (66.516736ms)\n✔ consumer template without the declaration is refused byte-identically (66.685785ms)\n✔ invalid assembled configuration fails before any bundle write (34.430514ms)\n✔ target parent conflicts fail before any bundle write (55.883555ms)\n✔ unreadable package sources fail before any bundle write (61.302765ms)\n✔ invalid existing config and models are refused without overwrite (120.177357ms)\n✔ workflow from another repository is refused (53.979449ms)\n✔ malformed CI marker fails before any bundle write (61.988718ms)\n✔ operational JSON errors preserve the resolved consumer root (43.445874ms)\n✔ existing target directories fail before any bundle write (36.65545ms)\n✔ bundle reports resolved package references before writing (39.140025ms)\n✔ OLA14: --profile standard writes the exact fully-expanded standard block (44.565566ms)\n✔ OLA14/NF-3: repeated preset runs produce identical lifecycle bytes (90.401265ms)\n✔ OLA15: the interactive profile question is first and defaults to standard (913.917436ms)\n✔ OLA16/NF-1(c): non-interactive setup without lifecycle flags remains v1-shaped (41.108587ms)\n✔ OLA16: applying a profile to an existing config refuses with the OL-B pointer (97.789793ms)\n✔ OLA17: custom profile requires lifecycle JSON and injects profile exactly (91.969513ms)\n✔ OLA17: custom payload usage and validation failures are pinned (137.376137ms)\n✔ OH4: --yes writes a schema-valid config; bundle re-run refuses config changes; --force overwrites (144.944363ms)\n✔ OH5: --hook-use fields 3-4 = use, do = remainder after 4th colon (colons in do preserved) (58.210288ms)\n✔ OH5: --hook-run command = remainder after 2nd colon (colons preserved); trust warning on stderr (51.825949ms)\n✔ OH5: mixed repeated hook flags preserve argv order in the written list (62.001409ms)\n✔ OH5: malformed hook flags exit 2 (380.560926ms)\n✔ PR-fix: value-taking flags accept values that begin with '-' (e.g. --announce '--foo') (57.161497ms)\n✔ OH5: partial tracker flags exit 2 (all-or-none) (36.637056ms)\n✔ OH5: no config flags and no TTY exits 2 (interview needs a TTY) (40.63537ms)\n✔ OH6: package.json pi.prompts includes ./templates and the template has a description (0.698265ms)\n✔ PV1: a valid JavaScript manifest runs only declared checks and passes (108.122331ms)\n✔ PV2: only declared argv run; an undeclared tool command never executes (189.839803ms)\n✔ PV3: schema and inspectManifest reject the mutation matrix before any command runs (101.654741ms)\n✔ PV4: command outcomes are complete and deterministic; runner continues after failures (66.039726ms)\n✔ PV4: a timeout is reported as FAIL with timedOut (1103.247022ms)\n✔ PV5: category applicability is exact; injected n/a shapes are rejected (180.166835ms)\n✔ PV6: scenario mapping gates the verdict (172.787236ms)\n✔ PV7: standards and banned patterns are commands, not judgement (234.007359ms)\n✔ PV8: evidence is bounded and secrets are redacted (183.743165ms)\n✔ PV8 unit: boundStream and redaction name-matching are precise (353.459126ms)\n✔ PV9: JSON/text/exit agree and JSON mode is order-independent (881.014428ms)\n✔ PV9: --report writes the exact JSON bytes atomically (254.35838ms)\n✔ PV9: --report outside the repo root is refused and clobbers nothing (225.589977ms)\n✔ PV10: generic validator law and generated agent are portable (0.947537ms)\n✔ PV11: receipt hash verification detects mutation of any stored file (6.89256ms)\n✔ PV11: a FAIL runner-report cannot ride under runnerVerdict PASS (1.098139ms)\n✔ parseArgs: recognises JSON anywhere and rejects bad flags (0.741206ms)\n✔ PV13: renderText is a faithful projection of the report (160.456696ms)\nℹ tests 185\nℹ suites 0\nℹ pass 185\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 6248.678948\n",
+      "stderrTail": ""
+    },
+    {
+      "id": "static.setup",
+      "argv": [
+        "node",
+        "--check",
+        "skills/sdlc/scripts/setup-sdlc.mjs"
+      ],
+      "evidence": [
+        "Setup script syntax"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 55,
+      "stdoutTail": "",
+      "stderrTail": ""
+    },
+    {
+      "id": "static.tests",
+      "argv": [
+        "node",
+        "--check",
+        "test/setup-lifecycle.test.js"
+      ],
+      "evidence": [
+        "New task suite exists and parses"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 50,
+      "stdoutTail": "",
+      "stderrTail": ""
+    },
+    {
+      "id": "static.models-example",
+      "argv": [
+        "node",
+        "-e",
+        "const e=JSON.parse(require('fs').readFileSync('skills/sdlc/schema/sdlc.models.example.json','utf8')); if(['plan_review','spec_review','pr_review'].some(p=>e.phases[p].min_panel!==2)||!e.$comment.includes('lifecycle-adopted repo, min_panel governs only the v1 path')||!e.$comment.includes('distinct-model floor')) throw new Error('models example lifecycle alignment missing')"
+      ],
+      "evidence": [
+        "Updated models example parses, aligns all review floors at 2, and carries the lifecycle precedence caveat"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 42,
+      "stdoutTail": "",
+      "stderrTail": ""
+    },
+    {
+      "id": "static.lint",
+      "argv": [
+        "npm",
+        "run",
+        "lint"
+      ],
+      "evidence": [
+        "Repository formatting and lint rules"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 307,
+      "stdoutTail": "\n> pi-sdlc@0.1.1 lint\n> biome check .\n\nChecked 69 files in 76ms. No fixes applied.\n",
+      "stderrTail": ""
+    },
+    {
+      "id": "patterns.diff",
+      "argv": [
+        "git",
+        "diff",
+        "--check",
+        "HEAD"
+      ],
+      "evidence": [
+        "No whitespace-error banned patterns in task diff"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 9,
+      "stdoutTail": "",
+      "stderrTail": ""
+    }
+  ],
+  "categories": [
+    {
+      "category": "tests",
+      "status": "PASS",
+      "checkIds": [
+        "tests.setup-lifecycle",
+        "tests.full"
+      ]
+    },
+    {
+      "category": "static",
+      "status": "PASS",
+      "checkIds": [
+        "static.setup",
+        "static.tests",
+        "static.models-example",
+        "static.lint"
+      ]
+    },
+    {
+      "category": "scenarios",
+      "status": "PASS"
+    },
+    {
+      "category": "standards",
+      "status": "N/A",
+      "reason": "No additional task-specific external standard applies; behavior is governed by the approved OL-A specification."
+    },
+    {
+      "category": "bannedPatterns",
+      "status": "PASS",
+      "checkIds": [
+        "patterns.diff"
+      ]
+    }
+  ],
+  "scenarios": [
+    {
+      "scenarioId": "OLA14",
+      "status": "PASS",
+      "checkIds": [
+        "tests.setup-lifecycle",
+        "static.models-example"
+      ]
+    },
+    {
+      "scenarioId": "OLA15",
+      "status": "PASS",
+      "checkIds": [
+        "tests.setup-lifecycle"
+      ]
+    },
+    {
+      "scenarioId": "OLA16",
+      "status": "PASS",
+      "checkIds": [
+        "tests.setup-lifecycle",
+        "tests.full"
+      ]
+    },
+    {
+      "scenarioId": "OLA17",
+      "status": "PASS",
+      "checkIds": [
+        "tests.setup-lifecycle"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "taskId": "ol-a-t3",
+  "manifestPath": "docs/validation/opt-in-lifecycle-config/ol-a-t3.json",
+  "manifestSha256": "62c0fa2f7f1ee1c55eba7ee260d36e376cabda6771062e430ded025e4c931a08",
+  "runnerReportSha256": "e4a77db5641704f092c92f51bd17596e26350d036d31c6a615988e82cb2c80f7",
+  "generatedAgentSha256": "2e64d2b7427fb3cac6895979d79f3d6fb8f616c7b1872ffeebe7f855fb1fd722",
+  "model": "openai-codex/gpt-5.6-terra",
+  "runnerVerdict": "PASS",
+  "validatorVerdict": "PASS",
+  "createdAt": "2026-07-15T19:55:05Z"
+}
