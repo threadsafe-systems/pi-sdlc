@@ -1,7 +1,10 @@
 # Spec: opt-in lifecycle — OL-A, config vocabulary and resolution
 
-- Date: 2026-07-14 (rev 2 — spec panel findings incorporated; see
-  `docs/reviews/spec-review-opt-in-lifecycle-config-2026-07-14/consolidated.md`)
+- Date: 2026-07-14 (rev 3 — rev 2 incorporated the spec panel's 10 finding
+  clusters (`docs/reviews/spec-review-opt-in-lifecycle-config-2026-07-14/
+  consolidated.md`); rev 3 carries the owner-directed diversity amendment:
+  the panel floor is **distinct models**, vendor is dropped from the
+  vocabulary entirely — see the amendments on #36/#37)
 - Sub-change: **OL-A** of the opt-in lifecycle stream (see
   `docs/plans/2026-07-14-opt-in-lifecycle.md`, "Spec decomposition"). OL-A
   delivers the `lifecycle` config vocabulary, its validation, profile-aware
@@ -25,7 +28,7 @@ Files changed (all under `skills/sdlc/` unless noted):
 |---|---|---|
 | FS1 manifest schema | `schema/sdlc.config.schema.json` | additive: `lifecycle` property + `automation` reservation `$comment` |
 | FS1 validation | `scripts/lib.mjs` (`inspectConfig`, new `decomposeGateMode`) | additive: `lifecycle` inspection; existing checks byte-identical |
-| Panel resolution | `scripts/resolve-panel.mjs` | floor sourcing precedence (**adds a raw, non-fatal read of `sdlc.config.json`** — see §4.2); vendor floor + deterministic selection; `--track` flag; `task_validate` rule |
+| Panel resolution | `scripts/resolve-panel.mjs` | floor sourcing precedence (**adds a raw, non-fatal read of `sdlc.config.json`** — see §4.2); distinct-model floor + deterministic selection; author-model exclusion; `--track` flag; `task_validate` rule |
 | Setup | `scripts/setup-sdlc.mjs` (+ `setup-sdlc.sh`) | profile interview/`--profile` flag (fresh adoption); `--lifecycle-json` custom payload |
 | Models example | `schema/sdlc.models.example.json` | review-gate `min_panel` values aligned to the preset floors (`pr_review` 3 → 2) so a fresh `--with-models` + `--profile full` adoption has agreeing floors |
 | Tests | `test/` | new OLA fixtures; existing fixtures untouched (see §6) |
@@ -58,16 +61,16 @@ precise byte-identity domain is NF-1, §5).
       // {"irreversible","reversible"} (at least one key; no other keys;
       // an empty object {} is invalid).
       "mode": GateMode | { "irreversible"?: GateMode, "reversible"?: GateMode },
-      "minPanel": int >= 1,        // optional; default 2
-      "minVendors": int >= 1       // optional; default min(2, minPanel); must be <= minPanel
+      "minPanel": int >= 1         // optional; default 2 — the diversity
+                                   // floor: DISTINCT MODELS (see identity rule)
     },
     "spec_review": {
       // per-track object may carry ONLY "irreversible" (reversible has no
       // spec phase — a "reversible" key here is a validation error).
       "mode": GateMode | { "irreversible": GateMode },
-      "minPanel": int >= 1, "minVendors": int >= 1
+      "minPanel": int >= 1
     },
-    "pr_review": { "mode": GateMode, "minPanel": int >= 1, "minVendors": int >= 1 }
+    "pr_review": { "mode": GateMode, "minPanel": int >= 1 }
   },
 
   "phases":  { "mergePlanSpec": bool },                        // default false
@@ -82,13 +85,20 @@ Structural rules (all `additionalProperties: false`, everywhere):
 - Unknown keys at any level are per-path issues in `inspectConfig`'s existing
   ordered-collector style (`lifecycle.gates: unknown key 'merge'`).
 - Cross-field rules, emitted as ordered issues:
-  1. `minVendors <= minPanel` (per gate).
-  2. `phases.mergePlanSpec == true` ⇒ `gates.spec_review` must be absent.
-  3. `gates.spec_review.mode` per-track object must not carry `reversible`.
-  4. `gates.brainstorm.mode` ∈ {`human`,`off`} only (panel modes structurally
+  1. `phases.mergePlanSpec == true` ⇒ `gates.spec_review` must be absent.
+  2. `gates.spec_review.mode` per-track object must not carry `reversible`.
+  3. `gates.brainstorm.mode` ∈ {`human`,`off`} only (panel modes structurally
      inexpressible).
-  5. A per-track `mode` object must carry at least one allowed key (empty
+  4. A per-track `mode` object must carry at least one allowed key (empty
      `{}` is invalid, on every gate that accepts the object form).
+- **Panellist identity (normative):** a panellist's identity is the
+  `provider/model` string with any `:thinking` suffix stripped, compared by
+  strict string equality. Version is part of identity (`anthropic/opus-5.4`
+  ≠ `anthropic/opus-5.6`); effort variants are the SAME panellist
+  (`zai/glm-5.2:high` ≡ `zai/glm-5.2:low` — dedupe keeps the most-preferred
+  entry's suffix for execution). There is **no vendor concept anywhere in
+  the lifecycle vocabulary**: no `minVendors` key (it is an unknown key), no
+  vendor dedupe, no vendor tie-break.
 - The kernel-protecting absences are **normative**: there is no `merge` gate
   key, no `scenarios` key, no `checks` off-switch, and `defaultTrack` cannot
   say `none`. These are enforced by the closed vocabulary itself.
@@ -126,20 +136,20 @@ interpret a committed config. `profile` records provenance only.
 | `gates.brainstorm.mode` | `"off"` | `"human"` | `"human"` |
 | `phases.mergePlanSpec` | `true` | `true` | `false` |
 | `gates.plan_review.mode` | `"human"` | `"human"` | `{"irreversible":"panel","reversible":"human"}` |
-| `gates.plan_review.minPanel/minVendors` | 1 / 1 | 1 / 1 | 2 / 2 |
-| `gates.spec_review` | absent | absent | `{"mode":{"irreversible":"panel"},"minPanel":2,"minVendors":2}` |
+| `gates.plan_review.minPanel` | 1 | 1 | 2 |
+| `gates.spec_review` | absent | absent | `{"mode":{"irreversible":"panel"},"minPanel":2}` |
 | `gates.pr_review.mode` | `"advisory"` | `"panel"` | `"panel"` |
-| `gates.pr_review.minPanel/minVendors` | 1 / 1 | 2 / 2 | 2 / 2 |
+| `gates.pr_review.minPanel` | 1 | 2 | 2 |
 | `tracker.publishThreshold` | `"never"` | `4` | `2` |
 | `taskValidation.mode` | `"self"` | `"subagent"` | `"subagent"` |
 | `tracks.defaultTrack` | `"irreversible"` | `"irreversible"` | `"irreversible"` |
 
-(`solo`/`standard` plan-gate floors are 1/1: with `mode: "human"` no panel
+(`solo`/`standard` plan-gate floors are 1: with `mode: "human"` no panel
 runs, but the committed floors must still be valid and coherent if a repo
 later dials the mode up.)
 
-**Floor agreement (normative).** `full`'s floors are the schema defaults
-(2/2). The shipped `sdlc.models.example.json` review-gate `min_panel` values
+**Floor agreement (normative).** `full`'s floors are the schema default
+(minPanel 2 — two distinct models, any vendor mix). The shipped `sdlc.models.example.json` review-gate `min_panel` values
 are aligned to these floors in OL-A (§1), so a fresh adoption
 (`--with-models --profile full`) has agreeing floors from both files. A repo
 whose *existing* models file carries a higher `min_panel` than a preset floor
@@ -182,28 +192,30 @@ naming the first validation issue.
 
 - **Review gates** (`plan_review`, `spec_review`, `pr_review`):
   - `lifecycle` present: floors come from
-    `lifecycle.gates.<phase>.{minPanel,minVendors}` (defaults per §2 when the
+    `lifecycle.gates.<phase>.minPanel` (defaults per §2 when the
     gate key is absent). The models file's `phases.<phase>.min_panel` is
     **ignored with a one-line stderr notice naming both values**:
-    `note: min_panel=<m> in sdlc.models.json superseded by lifecycle.gates.<phase> (minPanel=<p>, minVendors=<v>)`.
+    `note: min_panel=<m> in sdlc.models.json superseded by lifecycle.gates.<phase> (minPanel=<p>)`.
   - `lifecycle` absent: `min_panel` governs exactly as today (byte-identical
     output, including stderr).
-- **Vendor floor and selection (normative acceptance condition):** a
-  resolution succeeds only when **both** `panel.length >= minPanel` **and**
-  the count of distinct vendors in the selected panel `>= minVendors`.
-  Selection is deterministic, vendor-first: walk the phase's `prefer` list in
-  order, first taking the first credentialed model of each not-yet-selected
-  vendor until `minVendors` distinct vendors are selected, then filling
-  remaining slots in `prefer` order subject to a per-vendor cap of
-  `minPanel − minVendors + 1`. When `minVendors == minPanel` this reduces
-  exactly to today's one-model-per-vendor dedupe. On failure, the existing
-  floor-failure exit and message shape apply, extended to name whichever
-  floor (size or vendors) was unmet.
-- **Author-vendor exclusion:** activation condition becomes
-  `rules.exclude_author_vendor !== false && effectiveMinVendors >= 2`
-  (today's `min_panel >= 2` at defaults ⇒ unchanged behaviour; at
-  `minVendors: 1` exclusion is off — a solo panel cannot exclude the author's
-  vendor and still exist).
+- **Distinct-model floor and selection (normative acceptance condition):**
+  candidates are deduped to one entry per **model identity** (§2; the
+  most-preferred entry wins and carries its `:thinking` suffix into
+  execution). A resolution succeeds only when the selected panel contains
+  `>= minPanel` distinct models. Selection is deterministic: walk the
+  phase's `prefer` list in order, taking the first credentialed entry of
+  each not-yet-selected model identity, until `minPanel` is reached. On
+  failure, the existing floor-failure exit and message shape apply, naming
+  the distinct-model floor.
+- **Author-model exclusion:** with a `lifecycle` block present, `--author`
+  takes a `provider/model` value (`:thinking` suffix stripped; a bare vendor
+  value is a usage failure via `fail`). The author **model** is excluded
+  from candidacy when the gate's effective `minPanel >= 2`; at
+  `minPanel: 1` exclusion is off (a solo panel cannot exclude the author
+  and still exist; the self-review is visible in the panel artifacts).
+  Same-vendor siblings of the author model are legitimate panellists. On
+  the v1 path (no `lifecycle` block) the legacy vendor-scope rule
+  (`rules.exclude_author_vendor`, `min_panel >= 2`) governs byte-identically.
 - **Gate-mode awareness (expressed via the decomposition, never raw
   strings):** for a review gate whose effective mode decomposes to
   `reviewer: "none"` (`human`, `off`), `resolve-panel` **refuses**: exit 1,
@@ -226,7 +238,7 @@ naming the first validation issue.
 - **`task_validate`** (not a `gates` key; `--track` is irrelevant and
   accepted):
   - `lifecycle` present and `taskValidation.mode` ∈ {`subagent`,`self`}:
-    fixed floor 1 model / 1 vendor; models-file `min_panel` for
+    fixed floor 1 model; models-file `min_panel` for
     `task_validate` ignored with the same notice form.
   - `lifecycle` present and `taskValidation.mode == "off"`: refuses — exit 1,
     stderr
@@ -298,8 +310,9 @@ extensions to existing suites).
   invalid.
 - **OLA4** — `tracks.defaultTrack: "none"` yields an enum issue naming the
   allowed values; invalid.
-- **OLA5** — `pr_review: {minPanel: 2, minVendors: 3}` yields a
-  `minVendors ... <= minPanel` issue; invalid.
+- **OLA5** — `pr_review: {minPanel: 2, minVendors: 2}` yields an unknown-key
+  issue for `minVendors` (the vendor vocabulary does not exist); invalid.
+  `minPanel: 0` yields an integer-floor issue; invalid.
 - **OLA6** — `phases.mergePlanSpec: true` alongside any `gates.spec_review`
   yields the cross-rule issue; invalid.
 - **OLA7** — `spec_review.mode: {reversible: "panel"}` yields the structural
@@ -313,21 +326,24 @@ extensions to existing suites).
 
 **Resolution (resolve-panel):**
 
-- **OLA9** — with a `lifecycle` block present (`pr_review` floors 3/3),
-  `resolve-panel pr_review` enforces 3/3 and prints the supersede notice
-  naming both values; with the block absent, output is byte-identical to
-  shipped v1 for the same models file.
-- **OLA10** — vendor floor is real, not a cap artifact: (a)
-  `minPanel: 2, minVendors: 1` resolves two models from one vendor
-  (impossible today); (b) `minPanel: 5, minVendors: 3` against a
-  credentialed roster shaped A,A,A,B,B,C selects a panel with ≥ 3 distinct
-  vendors (vendor-first: A,B,C, then fill to 5 under the per-vendor cap) —
-  fails if any implementation satisfies size with only 2 vendors; (c)
-  `minVendors: 2` with only one credentialed vendor fails naming the vendor
-  floor.
-- **OLA11** — author-vendor exclusion: active at effective `minVendors >= 2`
-  (author's vendor dropped, as today); inactive at `minVendors: 1` (author's
-  vendor may appear).
+- **OLA9** — with a `lifecycle` block present (`pr_review` minPanel 3),
+  `resolve-panel pr_review` enforces the 3-distinct-model floor and prints
+  the supersede notice naming both values; with the block absent, output is
+  byte-identical to shipped v1 for the same models file.
+- **OLA10** — the floor counts distinct MODELS: (a) `minPanel: 2` resolves
+  two distinct models from ONE vendor (impossible under shipped v1's vendor
+  dedupe — the single-key-developer falsifier); (b) a `prefer` list carrying
+  `m1:high` and `m1:low` plus `m2` at `minPanel: 2` selects exactly
+  {`m1` (at `:high`, the most-preferred entry), `m2`} — effort variants can
+  never fake diversity; (c) `minPanel: 2` with only one distinct
+  credentialed model fails naming the distinct-model floor; (d) version
+  strictness: `p/m-5.4` and `p/m-5.6` count as two distinct models.
+- **OLA11** — author-model exclusion: with `--author p/m1` (or `p/m1:high` —
+  suffix stripped) at `minPanel >= 2`, `p/m1` never appears in the panel but
+  `p/m2` (same vendor) may; at `minPanel: 1` the author model may appear;
+  with a `lifecycle` block present, `--author anthropic` (bare vendor) is a
+  usage failure; on the v1 path (no block) bare-vendor `--author` behaves
+  byte-identically to shipped v1.
 - **OLA12** — `task_validate`: with `taskValidation.mode: "subagent"` floors
   are fixed 1/1 (models-file `min_panel: 3` for task_validate is ignored with
   the notice); with `mode: "off"`, exit 1 with the refusal message.
@@ -400,6 +416,10 @@ A scenario that cannot be made to fail is a defect in this spec.
   [OLA1–8, 18, 19]; (T2) `resolve-panel` [OLA9–13, 20, 21]; (T3) `setup-sdlc`
   fresh-adoption + models example alignment [OLA14–17]. T2/T3 depend on T1;
   T2 and T3 are independent of each other.
+- Rev 3 note for implementers: the models file's `$comment` describes
+  `min_panel` as a distinct-vendor floor — that description remains true only
+  on the v1 path; do not port vendor semantics into any lifecycle-present
+  code path.
 - The PR for OL-A declares slug `opt-in-lifecycle-config`; a thin sub-change
   plan doc (`docs/plans/2026-07-14-opt-in-lifecycle-config.md`, pointing at
   the stream plan) plus this spec and the build doc satisfy the FS9 v1

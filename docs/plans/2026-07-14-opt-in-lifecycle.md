@@ -1,7 +1,10 @@
 # Plan: the opt-in lifecycle (kernel, profiles, lanes-ready config)
 
-- Date: 2026-07-14 (rev 2 — plan-panel findings incorporated; see
-  `docs/reviews/plan-review-opt-in-lifecycle-2026-07-14/consolidated.md`)
+- Date: 2026-07-14 (rev 3 — rev 2 incorporated the plan panel's 14 findings
+  (`docs/reviews/plan-review-opt-in-lifecycle-2026-07-14/consolidated.md`);
+  rev 3 is an owner-directed backward amendment at the OL-A spec gate: the
+  panel diversity floor moves from vendor to **model identity**, vendor is
+  dropped from the vocabulary entirely — see the amendments on #36/#37)
 - Track: **irreversible** (freezes the `lifecycle` config vocabulary consumers
   commit to, widens the FS9 **checker** contract to schemaVersion 2 — the
   declaration grammar v1 is frozen and does NOT widen — and rewords ratified
@@ -95,15 +98,20 @@ resolution, refining #36/#40/#41's overlapping phrasings:
    Absent block ⇒ today's dial semantics byte-for-byte (see Binding migration
    decision for the envelope caveat). Dials: per-gate `mode`
    (`panel` | `advisory` | `human` | `off`, optionally per-track), per-gate
-   `minPanel`/`minVendors`, `phases.mergePlanSpec`,
+   `minPanel`, `phases.mergePlanSpec`,
    `tracker.publishThreshold`, `taskValidation.mode`, `tracks.defaultTrack`
    (`none` excluded by enum). Kernel safety is structural (closed vocabulary;
-   the merge gate has no key). Panel floors for the three review gates are
+   the merge gate has no key). **Panel diversity is model-identity based
+   (rev 3)**: `minPanel` is the single floor — ≥ minPanel **distinct
+   models**, identity = `provider/model` with the `:thinking` suffix
+   stripped, version-strict (`opus-5.4` ≠ `opus-5.6`); no vendor dial,
+   dedupe, or tie-break exists anywhere. Author exclusion is author-model,
+   active at `minPanel >= 2`. Panel floors for the three review gates are
    single-sourced here; `sdlc.models.json` `min_panel` is deprecated-with-
    notice (FS2 untouched this stream). **`task_validate` floor rule** (it is
    not a `gates` key): when the block is present and `taskValidation.mode` is
    `subagent` or `self`, `resolve-panel task_validate` uses a fixed floor of
-   1 model / 1 vendor, ignoring the models-file `min_panel` with the same
+   1 model, ignoring the models-file `min_panel` with the same
    deprecation notice; when `off`, `resolve-panel` is never invoked for
    `task_validate`. Future-proofing carried: gate `mode` modelled as
    reviewer × arbiter with the panel/blocking/mechanically-adjudicated
@@ -115,9 +123,10 @@ resolution, refining #36/#40/#41's overlapping phrasings:
    recorded provenance, with no pinned expansion). Setup gains the profile
    question, pre-selecting `standard`. The ratified matrix is authoritative
    (see #37 resolution): `solo` = brainstorm off, merged plan+spec, human plan
-   gate, **advisory** PR review 1/1, tracker never, self-run task validation;
-   `standard` = merged plan+spec, human design gates, PR panel 2/2, subagent
-   validation, tracker threshold 4; `full` = today, unchanged. **Existing
+   gate, **advisory** PR review (minPanel 1), tracker never, self-run task
+   validation; `standard` = merged plan+spec, human design gates, PR panel of
+   2 distinct models, subagent validation, tracker threshold 4; `full` =
+   today, unchanged (design + PR panels of 2 distinct models). **Existing
    adopters get a non-destructive path**: setup can apply a selected profile
    to an existing *valid* manifest by adding/replacing only the `lifecycle`
    key, preserving all other consumer-owned config (paths, tracker, hooks),
@@ -254,10 +263,11 @@ tasks publish per the tracker threshold as usual.
    with `attested` rows rendering UNVERIFIED and rung choice never changing
    exit codes.
 5. `resolve-panel` takes the three review-gate floors from the `lifecycle`
-   block when present (ignoring `min_panel` with a notice), supports
-   `minVendors < minPanel`, keeps author-vendor exclusion coherent at
-   `minVendors: 1`, and applies the `task_validate` rule from scope item 2
-   (fixed 1/1 floor under `subagent`/`self`; never invoked under `off`).
+   block when present (ignoring `min_panel` with a notice), enforces the
+   distinct-model floor with effort-suffix-insensitive, version-strict
+   identity, applies author-model exclusion (active at `minPanel >= 2`, off
+   at `minPanel: 1`), and applies the `task_validate` rule from scope item 2
+   (fixed 1-model floor under `subagent`/`self`; never invoked under `off`).
 6. The restructured SKILL.md ships with the #39 disposition ledger satisfied:
    every current normative statement kept, moved to a named asset, or
    re-expressed as `full`-profile semantics — none dropped; the kernel section
