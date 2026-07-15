@@ -24,3 +24,15 @@ After fixes: focused setup+resolver suites PASS (19/19), full corpus PASS (187/1
 ## Stop condition
 
 Initial panel's high findings: 0. Medium findings P1/P2 are fixed. Awaiting same-panel verification; no medium may remain.
+
+## Verification panel
+
+The same three-model panel verified fix commit `c30006a`:
+
+- P1 exact Boolean handling: **RESOLVED**.
+- P2 immediate textual per-field validation, with global renderer unchanged for NF-1(c): **RESOLVED**.
+- P3 non-ENOENT filesystem errors refuse while ENOENT/JSON parse retain v1 fallback: **RESOLVED**.
+- New high/medium findings: **none**.
+- Evidence: 19/19 focused, 187/187 full corpus, lint PASS; per-model verification files beside this consolidation.
+
+**Final stop condition: met.** No high or medium finding survives adjudication and verification.

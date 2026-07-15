@@ -9,3 +9,7 @@ Independent validator: `openai-codex/gpt-5.6-terra`.
 - The no-profile path remains inert and pinned to its existing text/config shape; the full corpus passes.
 - The models example aligns all review floors at 2 and carries the lifecycle precedence caveat.
 - No known acceptance defect. The validator's low race note was resolved by moving the models-example assertion out of the concurrently-run Node suite and into the manifest's sequential static check.
+
+## Post-task PR verification
+
+PR fix `c30006a` added exact, immediate validation for every custom-interview dial. The three-model PR verification panel marked P1/P2 RESOLVED with no new high/medium finding; refreshed PV1 runner report PASS.
