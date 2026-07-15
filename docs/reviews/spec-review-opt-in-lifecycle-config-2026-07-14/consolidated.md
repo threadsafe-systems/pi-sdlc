@@ -38,5 +38,5 @@ No high or medium finding survives adjudication (all incorporated in rev 2). Re-
 ## Gate record
 
 - Rev 2 (panel findings incorporated) committed as 01d8dcd.
-- Rev 3 (owner-directed diversity amendment: distinct-model floor, vendor dropped) committed as bd19bf8; the owner ratified rev 3 directly, explicitly declining a delta re-panel — recorded here as the human adjudication of that change.
-- **Spec gate passed 2026-07-14; human owner approved rev 3.** Tasks phase proceeds.
+- Rev 3 (owner-directed diversity amendment: distinct-model floor, vendor dropped) committed as bd19bf8.
+- The owner initially approved rev 3 directly, then reversed within the same session: a delta re-panel is cheap and best practice by the project's own standard. The direct approval is superseded; the delta panel's consolidation follows below.
