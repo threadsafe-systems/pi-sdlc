@@ -126,7 +126,10 @@ resolution, refining #36/#40/#41's overlapping phrasings:
    gate, **advisory** PR review (minPanel 1), tracker never, self-run task
    validation; `standard` = merged plan+spec, human design gates, PR panel of
    2 distinct models, subagent validation, tracker threshold 4; `full` =
-   today, unchanged (design + PR panels of 2 distinct models). **Existing
+   the maximal preset (design + PR panels of 2 distinct models — this
+   repo's own committed `pr_review` floor of 3 exceeds the preset and is
+   its preference to carry at application time, not the shipped floor).
+   **Existing
    adopters get a non-destructive path**: setup can apply a selected profile
    to an existing *valid* manifest by adding/replacing only the `lifecycle`
    key, preserving all other consumer-owned config (paths, tracker, hooks),
@@ -293,8 +296,8 @@ tasks publish per the tracker threshold as usual.
 
 ## Risks
 
-- **Solo profile still needs one live credential**: `advisory` PR review at
-  1/1 requires at least one model with credentials; setup's profile step
+- **Solo profile still needs one live credential**: `advisory` PR review
+  (minPanel 1) requires at least one model with credentials; setup's profile step
   should say so rather than let the first review fail cold.
 - **Envelope-fixture churn**: the v2 golden update (Binding migration
   decision, item 3) is a one-time mechanical change but touches the prior

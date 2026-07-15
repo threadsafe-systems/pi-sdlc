@@ -40,3 +40,24 @@ No high or medium finding survives adjudication (all incorporated in rev 2). Re-
 - Rev 2 (panel findings incorporated) committed as 01d8dcd.
 - Rev 3 (owner-directed diversity amendment: distinct-model floor, vendor dropped) committed as bd19bf8.
 - The owner initially approved rev 3 directly, then reversed within the same session: a delta re-panel is cheap and best practice by the project's own standard. The direct approval is superseded; the delta panel's consolidation follows below.
+
+## Delta panel — rev 3 (vendor → model identity), 2026-07-14
+
+- Delta: `git diff 01d8dcd..bd19bf8`; same three reviewers, remit scoped to the delta only (per-model files under `delta-rev3/`).
+- Orchestrating model: anthropic/claude (spec author; excluded from the panel).
+
+| # | Finding (deduped) | Raised by | Sev | Adjudication |
+|---|---|---|---|---|
+| D1 | Identity strip recogniser undefined — "any `:thinking` suffix" collides with Bedrock colon-version ids (`…-v1:0` vs `:1` would merge under strip-after-last-colon), violating the amendment's own version-strictness; provider-in-identity implied, never stated or gated | terra + glm (high) + deepseek (med) | high | **Incorporated** — exact recogniser pinned (strip only members of `{off,minimal,low,medium,high,xhigh,max}`); provider-prefix-is-identity stated with example; `vendor()`-reuse ban added; OLA10 gains (e) Bedrock colon-version distinctness and (f) provider distinctness falsifiers. |
+| D2 | `rules.exclude_author_vendor` interaction undefined on the lifecycle path — natural code reuse makes exclusion toggleable, contradicting active-at-2 | terra + glm | med | **Incorporated** — lifecycle path governed solely by `minPanel`; legacy toggle read only on the v1 path; OLA11 gains the toggle-false-still-excludes fixture. |
+| D3 | OLA12 retains vendor-era "floors … fixed 1/1" notation | all three | med | **Incorporated** — "fixed at 1 distinct model; no vendor count or diagnostic computed on the lifecycle path". |
+| D4 | OLA10(b) cannot distinguish positional from highest-effort-wins dedupe | glm | med | **Incorporated** — dedupe sentence reworded ("first credentialed entry in prefer order wins"); OLA10(b′) low-effort-first falsifier added. |
+| D5 | Example file `$comment` still describes `min_panel` as a distinct-vendor floor | glm | low | **Incorporated** — §1 surface row extends the `$comment` with the lifecycle-path caveat. |
+| D6 | Plan "full = today, unchanged" parenthetical overclaims vs dogfood `pr_review: 3`; plan Risks retained "1/1" | deepseek + glm | low | **Incorporated** — plan reworded ("the maximal preset"; dogfood's 3 is its preference at application time); Risks notation fixed. |
+| D7 | Dedupe "most-preferred wins" vs selection "first credentialed" tension | deepseek | low | **Incorporated** — folded into D4's rewording. |
+
+**Dismissed: none.** Rev 4 (this commit) incorporates all seven clusters. The owner's reversal to run this delta panel is vindicated by D1 — a HIGH in the identity function, the one frozen shape the amendment exists to define.
+
+## Stop condition (delta)
+
+No high or medium finding survives adjudication. Rev 4 awaits the human gate.

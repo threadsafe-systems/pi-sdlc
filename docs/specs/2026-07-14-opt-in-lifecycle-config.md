@@ -30,7 +30,7 @@ Files changed (all under `skills/sdlc/` unless noted):
 | FS1 validation | `scripts/lib.mjs` (`inspectConfig`, new `decomposeGateMode`) | additive: `lifecycle` inspection; existing checks byte-identical |
 | Panel resolution | `scripts/resolve-panel.mjs` | floor sourcing precedence (**adds a raw, non-fatal read of `sdlc.config.json`** — see §4.2); distinct-model floor + deterministic selection; author-model exclusion; `--track` flag; `task_validate` rule |
 | Setup | `scripts/setup-sdlc.mjs` (+ `setup-sdlc.sh`) | profile interview/`--profile` flag (fresh adoption); `--lifecycle-json` custom payload |
-| Models example | `schema/sdlc.models.example.json` | review-gate `min_panel` values aligned to the preset floors (`pr_review` 3 → 2) so a fresh `--with-models` + `--profile full` adoption has agreeing floors |
+| Models example | `schema/sdlc.models.example.json` | review-gate `min_panel` values aligned to the preset floors (`pr_review` 3 → 2); `$comment` gains: "on a `lifecycle`-adopted repo, `min_panel` governs only the v1 path — the lifecycle block supplies a distinct-model floor" |
 | Tests | `test/` | new OLA fixtures; existing fixtures untouched (see §6) |
 
 Explicitly untouched in OL-A: `check-lifecycle.mjs` (FS9 v1 as shipped),
@@ -92,13 +92,20 @@ Structural rules (all `additionalProperties: false`, everywhere):
   4. A per-track `mode` object must carry at least one allowed key (empty
      `{}` is invalid, on every gate that accepts the object form).
 - **Panellist identity (normative):** a panellist's identity is the
-  `provider/model` string with any `:thinking` suffix stripped, compared by
-  strict string equality. Version is part of identity (`anthropic/opus-5.4`
-  ≠ `anthropic/opus-5.6`); effort variants are the SAME panellist
-  (`zai/glm-5.2:high` ≡ `zai/glm-5.2:low` — dedupe keeps the most-preferred
-  entry's suffix for execution). There is **no vendor concept anywhere in
-  the lifecycle vocabulary**: no `minVendors` key (it is an unknown key), no
-  vendor dedupe, no vendor tie-break.
+  `provider/model` string with the thinking suffix stripped, compared by
+  strict string equality. **The stripping recogniser is exact:** the trailing
+  colon-segment is removed **only when it is a member of the thinking-level
+  set `{off, minimal, low, medium, high, xhigh, max}`**; any other trailing
+  colon-segment is part of the model id and is retained verbatim — e.g.
+  Bedrock's version qualifier: `amazon-bedrock/anthropic.claude-opus-4-8-v1:0`
+  ≠ `…-v1:1` (two distinct identities). Version is part of identity
+  (`anthropic/opus-5.4` ≠ `anthropic/opus-5.6`); the **provider prefix is
+  part of identity** (`amazon-bedrock/anthropic.claude-opus-4-8` ≠
+  `anthropic/claude-opus-4-8`); effort variants are the SAME panellist
+  (`zai/glm-5.2:high` ≡ `zai/glm-5.2:low`). There is **no vendor concept
+  anywhere in the lifecycle vocabulary**: no `minVendors` key (it is an
+  unknown key), no vendor dedupe, no vendor tie-break — and the existing
+  resolver `vendor()` heuristic must not be reused as the identity key.
 - The kernel-protecting absences are **normative**: there is no `merge` gate
   key, no `scenarios` key, no `checks` off-switch, and `defaultTrack` cannot
   say `none`. These are enforced by the closed vocabulary itself.
@@ -200,8 +207,8 @@ naming the first validation issue.
     output, including stderr).
 - **Distinct-model floor and selection (normative acceptance condition):**
   candidates are deduped to one entry per **model identity** (§2; the
-  most-preferred entry wins and carries its `:thinking` suffix into
-  execution). A resolution succeeds only when the selected panel contains
+  **first credentialed entry in `prefer` order** wins and carries its
+  `:thinking` suffix into execution — positional, never effort-ranked). A resolution succeeds only when the selected panel contains
   `>= minPanel` distinct models. Selection is deterministic: walk the
   phase's `prefer` list in order, taking the first credentialed entry of
   each not-yet-selected model identity, until `minPanel` is reached. On
@@ -213,9 +220,11 @@ naming the first validation issue.
   from candidacy when the gate's effective `minPanel >= 2`; at
   `minPanel: 1` exclusion is off (a solo panel cannot exclude the author
   and still exist; the self-review is visible in the panel artifacts).
-  Same-vendor siblings of the author model are legitimate panellists. On
-  the v1 path (no `lifecycle` block) the legacy vendor-scope rule
-  (`rules.exclude_author_vendor`, `min_panel >= 2`) governs byte-identically.
+  Same-vendor siblings of the author model are legitimate panellists. **On
+  the lifecycle path the exclusion is governed solely by `minPanel`;
+  `rules.exclude_author_vendor` is read only on the v1 path** (no
+  `lifecycle` block), where the legacy vendor-scope rule governs
+  byte-identically.
 - **Gate-mode awareness (expressed via the decomposition, never raw
   strings):** for a review gate whose effective mode decomposes to
   `reviewer: "none"` (`human`, `off`), `resolve-panel` **refuses**: exit 1,
@@ -333,20 +342,32 @@ extensions to existing suites).
 - **OLA10** — the floor counts distinct MODELS: (a) `minPanel: 2` resolves
   two distinct models from ONE vendor (impossible under shipped v1's vendor
   dedupe — the single-key-developer falsifier); (b) a `prefer` list carrying
-  `m1:high` and `m1:low` plus `m2` at `minPanel: 2` selects exactly
-  {`m1` (at `:high`, the most-preferred entry), `m2`} — effort variants can
-  never fake diversity; (c) `minPanel: 2` with only one distinct
-  credentialed model fails naming the distinct-model floor; (d) version
-  strictness: `p/m-5.4` and `p/m-5.6` count as two distinct models.
+  `m1:high` then `m1:low` plus `m2` at `minPanel: 2` selects exactly
+  {`m1` at `:high`, `m2`} — effort variants can never fake diversity;
+  (b′) the reversed order `m1:low` then `m1:high` plus `m2` selects `m1` at
+  **`:low`** — the winner is positional (first in `prefer`), falsifying any
+  highest-effort-wins implementation; (c) `minPanel: 2` with only one
+  distinct credentialed model fails naming the distinct-model floor;
+  (d) version strictness: `p/m-5.4` and `p/m-5.6` count as two distinct
+  models; (e) colon-version strictness: `p/bedrock-m:0` and `p/bedrock-m:1`
+  count as two distinct models at `minPanel: 2` — falsifies any
+  strip-after-last-colon implementation — while `p/m:high` and `p/m:low`
+  remain one; (f) the provider prefix is identity: `p/m` and `q/m` count as
+  two distinct models.
 - **OLA11** — author-model exclusion: with `--author p/m1` (or `p/m1:high` —
   suffix stripped) at `minPanel >= 2`, `p/m1` never appears in the panel but
   `p/m2` (same vendor) may; at `minPanel: 1` the author model may appear;
+  **with `rules.exclude_author_vendor: false` in the models file and a
+  `lifecycle` block present, the author model is still excluded at
+  `minPanel: 2`** (the legacy toggle has no effect on the lifecycle path);
   with a `lifecycle` block present, `--author anthropic` (bare vendor) is a
   usage failure; on the v1 path (no block) bare-vendor `--author` behaves
   byte-identically to shipped v1.
-- **OLA12** — `task_validate`: with `taskValidation.mode: "subagent"` floors
-  are fixed 1/1 (models-file `min_panel: 3` for task_validate is ignored with
-  the notice); with `mode: "off"`, exit 1 with the refusal message.
+- **OLA12** — `task_validate`: with `taskValidation.mode: "subagent"` the
+  floor is fixed at 1 distinct model — no vendor count or vendor diagnostic
+  is computed on the lifecycle path (models-file `min_panel: 3` for
+  task_validate is ignored with the notice); with `mode: "off"`, exit 1 with
+  the refusal message.
 - **OLA13** — gate modes and `--track`: (a) `plan_review` single mode
   `"human"` ⇒ exit 1 with the no-panel message; (b) single mode `"advisory"`
   ⇒ resolves a panel normally; (c) per-track
