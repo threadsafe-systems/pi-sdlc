@@ -1,0 +1,78 @@
+{
+  "schemaVersion": 1,
+  "taskId": "ol-a-t3",
+  "buildPlan": "docs/plans/2026-07-14-opt-in-lifecycle-config-build.md",
+  "repoRoot": ".",
+  "ownedScenarios": ["OLA14", "OLA15", "OLA16", "OLA17"],
+  "checks": [
+    {
+      "id": "tests.setup-lifecycle",
+      "argv": ["node", "--test", "test/setup-lifecycle.test.js"],
+      "timeoutMs": 120000,
+      "evidence": ["OLA14 exact preset expansion and example alignment", "OLA15 real PTY default interview", "OLA16 frozen non-profile path and existing-config refusal", "OLA17 custom file/stdin contract and validation"]
+    },
+    {
+      "id": "tests.full",
+      "argv": ["node", "--test"],
+      "timeoutMs": 240000,
+      "evidence": ["NF-1(c), existing setup semantics, FS10 report envelope and complete corpus"]
+    },
+    {
+      "id": "static.setup",
+      "argv": ["node", "--check", "skills/sdlc/scripts/setup-sdlc.mjs"],
+      "evidence": ["Setup script syntax"]
+    },
+    {
+      "id": "static.tests",
+      "argv": ["node", "--check", "test/setup-lifecycle.test.js"],
+      "evidence": ["New task suite exists and parses"]
+    },
+    {
+      "id": "static.models-example",
+      "argv": [
+        "node",
+        "-e",
+        "const e=JSON.parse(require('fs').readFileSync('skills/sdlc/schema/sdlc.models.example.json','utf8')); if(['plan_review','spec_review','pr_review'].some(p=>e.phases[p].min_panel!==2)||!e.$comment.includes('lifecycle-adopted repo, min_panel governs only the v1 path')||!e.$comment.includes('distinct-model floor')) throw new Error('models example lifecycle alignment missing')"
+      ],
+      "evidence": ["Updated models example parses, aligns all review floors at 2, and carries the lifecycle precedence caveat"]
+    },
+    {
+      "id": "static.lint",
+      "argv": ["npm", "run", "lint"],
+      "timeoutMs": 120000,
+      "evidence": ["Repository formatting and lint rules"]
+    },
+    {
+      "id": "patterns.diff",
+      "argv": ["git", "diff", "--check", "HEAD"],
+      "evidence": ["No whitespace-error banned patterns in task diff"]
+    }
+  ],
+  "categories": {
+    "tests": {
+      "applicability": "required",
+      "checkIds": ["tests.setup-lifecycle", "tests.full"]
+    },
+    "static": {
+      "applicability": "required",
+      "checkIds": ["static.setup", "static.tests", "static.models-example", "static.lint"]
+    },
+    "scenarios": {
+      "applicability": "required",
+      "evidence": {
+        "OLA14": ["tests.setup-lifecycle", "static.models-example"],
+        "OLA15": ["tests.setup-lifecycle"],
+        "OLA16": ["tests.setup-lifecycle", "tests.full"],
+        "OLA17": ["tests.setup-lifecycle"]
+      }
+    },
+    "standards": {
+      "applicability": "n/a",
+      "reason": "No additional task-specific external standard applies; behavior is governed by the approved OL-A specification."
+    },
+    "bannedPatterns": {
+      "applicability": "required",
+      "checkIds": ["patterns.diff"]
+    }
+  }
+}

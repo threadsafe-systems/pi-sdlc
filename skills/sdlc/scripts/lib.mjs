@@ -21,6 +21,7 @@ const PM_RE = /^[^/]+\/.+$/; // provider/model
 const REPO_RE = /^[^/]+\/[^/]+$/;
 export const USE_RE = /^(skill|tool):[a-z][a-z0-9_-]*$/;
 const SINGLE_LINE_RE = /^[^\r\n]+$/; // non-empty, single-line (run/do)
+const GATE_MODES = new Set(["panel", "advisory", "human", "off"]);
 
 // Hook phase vocabulary: the six lifecycle phases + '*' (every phase). This is
 // DISTINCT from PHASES (the four review-panel ids) and must not be conflated.
@@ -122,6 +123,19 @@ function isPlainObject(v) {
 	return typeof v === "object" && v !== null && !Array.isArray(v);
 }
 
+// Reviewer × arbiter is the extensibility seam for lifecycle gate modes.
+// Keep raw mode interpretation here; callers branch only on these fields.
+export function decomposeGateMode(value) {
+	const table = {
+		panel: { reviewer: "panel", arbiter: "human", blocking: true },
+		advisory: { reviewer: "panel", arbiter: "none", blocking: false },
+		human: { reviewer: "none", arbiter: "human", blocking: true },
+		off: { reviewer: "none", arbiter: "none", blocking: false },
+	};
+	if (!Object.hasOwn(table, value)) throw new RangeError(`unknown gate mode ${JSON.stringify(value)}`);
+	return table[value];
+}
+
 // FS1: read + validate sdlc.config.json. Default (no-manifest) returns built-in
 // defaults; with { requireManifest: true } a missing manifest exits 2 naming
 // /setup-sdlc (the opt-in gate; ensure-panel-agent keeps the default behaviour).
@@ -148,6 +162,7 @@ export function readConfig(root, { requireManifest = false } = {}) {
 		paths: { ...CONFIG_DEFAULTS.paths, ...(raw.paths ?? {}) },
 		tracker: raw.tracker,
 		hooks: raw.hooks,
+		...(raw.lifecycle === undefined ? {} : { lifecycle: raw.lifecycle }),
 	};
 }
 
@@ -161,7 +176,7 @@ export function inspectConfig(raw) {
 		add("", "must be a JSON object");
 		return issues;
 	}
-	const allowed = new Set(["schemaVersion", "prefix", "labelPrefix", "announce", "paths", "tracker", "hooks"]);
+	const allowed = new Set(["schemaVersion", "prefix", "labelPrefix", "announce", "paths", "tracker", "hooks", "lifecycle"]);
 	for (const k of Object.keys(raw)) {
 		if (!allowed.has(k)) add(k, `unknown key '${k}'`);
 	}
@@ -209,7 +224,109 @@ export function inspectConfig(raw) {
 		}
 	}
 	if (raw.hooks !== undefined) issues.push(...collectHookIssues(raw.hooks));
+	if (raw.lifecycle !== undefined) issues.push(...collectLifecycleIssues(raw.lifecycle));
 	return issues;
+}
+
+function collectLifecycleIssues(lifecycle) {
+	const issues = [];
+	const add = (path, message) => issues.push({ path, message });
+	if (!isPlainObject(lifecycle)) {
+		add("lifecycle", "lifecycle must be an object");
+		return issues;
+	}
+	const allowed = new Set(["profile", "gates", "phases", "tracker", "taskValidation", "tracks"]);
+	for (const k of Object.keys(lifecycle)) {
+		if (!allowed.has(k)) add("lifecycle", `unknown key '${k}'`);
+	}
+	if (!new Set(["solo", "standard", "full", "custom"]).has(lifecycle.profile)) {
+		add("lifecycle.profile", "lifecycle.profile must be one of solo, standard, full, custom");
+	}
+	if (lifecycle.gates !== undefined) collectLifecycleGates(lifecycle.gates, add);
+	collectLifecycleSection(lifecycle.phases, "phases", new Set(["mergePlanSpec"]), add, (key, value) => {
+		if (key === "mergePlanSpec" && typeof value !== "boolean") add("lifecycle.phases.mergePlanSpec", "lifecycle.phases.mergePlanSpec must be a boolean");
+	});
+	collectLifecycleSection(lifecycle.tracker, "tracker", new Set(["publishThreshold"]), add, (key, value) => {
+		if (key === "publishThreshold" && value !== "never" && (!Number.isInteger(value) || value < 1)) {
+			add("lifecycle.tracker.publishThreshold", "lifecycle.tracker.publishThreshold must be an integer >= 1 or 'never'");
+		}
+	});
+	collectLifecycleSection(lifecycle.taskValidation, "taskValidation", new Set(["mode"]), add, (key, value) => {
+		if (key === "mode" && !new Set(["subagent", "self", "off"]).has(value)) add("lifecycle.taskValidation.mode", "lifecycle.taskValidation.mode must be one of subagent, self, off");
+	});
+	collectLifecycleSection(lifecycle.tracks, "tracks", new Set(["defaultTrack"]), add, (key, value) => {
+		if (key === "defaultTrack" && !new Set(["irreversible", "reversible"]).has(value)) add("lifecycle.tracks.defaultTrack", "lifecycle.tracks.defaultTrack must be one of irreversible, reversible");
+	});
+	if (lifecycle.phases?.mergePlanSpec === true && isPlainObject(lifecycle.gates) && lifecycle.gates.spec_review !== undefined) {
+		add("lifecycle.gates.spec_review", "lifecycle.gates.spec_review must be absent when lifecycle.phases.mergePlanSpec is true");
+	}
+	return issues;
+}
+
+function collectLifecycleSection(value, name, allowed, add, validateEntry) {
+	if (value === undefined) return;
+	const at = `lifecycle.${name}`;
+	if (!isPlainObject(value)) {
+		add(at, `${at} must be an object`);
+		return;
+	}
+	for (const [key, entry] of Object.entries(value)) {
+		if (!allowed.has(key)) add(at, `unknown key '${key}'`);
+		else validateEntry(key, entry);
+	}
+}
+
+function collectLifecycleGates(gates, add) {
+	if (!isPlainObject(gates)) {
+		add("lifecycle.gates", "lifecycle.gates must be an object");
+		return;
+	}
+	const allowed = new Set(["brainstorm", "plan_review", "spec_review", "pr_review"]);
+	for (const key of Object.keys(gates)) {
+		if (!allowed.has(key)) add("lifecycle.gates", `unknown key '${key}'`);
+	}
+	for (const gate of ["brainstorm", "plan_review", "spec_review", "pr_review"]) {
+		if (gates[gate] !== undefined) collectLifecycleGate(gate, gates[gate], add);
+	}
+}
+
+function collectLifecycleGate(gate, value, add) {
+	const at = `lifecycle.gates.${gate}`;
+	if (!isPlainObject(value)) {
+		add(at, `${at} must be an object`);
+		return;
+	}
+	const allowed = gate === "brainstorm" ? new Set(["mode"]) : new Set(["mode", "minPanel"]);
+	for (const key of Object.keys(value)) {
+		if (!allowed.has(key)) add(at, `unknown key '${key}'`);
+	}
+	if (!("mode" in value)) add(`${at}.mode`, `${at}.mode is required`);
+	else validateLifecycleGateMode(gate, value.mode, add);
+	if (gate !== "brainstorm" && value.minPanel !== undefined && (!Number.isInteger(value.minPanel) || value.minPanel < 1)) {
+		add(`${at}.minPanel`, `${at}.minPanel must be an integer >= 1`);
+	}
+}
+
+function validateLifecycleGateMode(gate, mode, add) {
+	const at = `lifecycle.gates.${gate}.mode`;
+	if (gate === "brainstorm") {
+		if (!new Set(["human", "off"]).has(mode)) add(at, `${at} must be one of human, off`);
+		return;
+	}
+	if (typeof mode === "string") {
+		if (!GATE_MODES.has(mode)) add(at, `${at} must be one of panel, advisory, human, off`);
+		return;
+	}
+	if (gate === "pr_review" || !isPlainObject(mode)) {
+		add(at, `${at} must be a gate mode${gate === "pr_review" ? "" : " or per-track object"}`);
+		return;
+	}
+	const allowedTracks = gate === "spec_review" ? new Set(["irreversible"]) : new Set(["irreversible", "reversible"]);
+	if (Object.keys(mode).length === 0) add(at, `${at} must contain at least one track`);
+	for (const [track, trackMode] of Object.entries(mode)) {
+		if (!allowedTracks.has(track)) add(at, `unknown track '${track}'`);
+		else if (!GATE_MODES.has(trackMode)) add(`${at}.${track}`, `${at}.${track} must be one of panel, advisory, human, off`);
+	}
 }
 
 export function validateConfig(raw, p) {

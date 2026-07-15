@@ -72,9 +72,126 @@
         "pr": { "$ref": "#/definitions/phaseHooks" },
         "*": { "$ref": "#/definitions/phaseHooks" }
       }
+    },
+    "lifecycle": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["profile"],
+      "description": "Opt-in lifecycle scaffolding around the invariant verification kernel. The key `automation` is reserved for future unattended-lane policy (budget, escalation, graduation); nothing may squat on it.",
+      "properties": {
+        "profile": { "enum": ["solo", "standard", "full", "custom"] },
+        "gates": { "$ref": "#/definitions/lifecycleGates" },
+        "phases": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": { "mergePlanSpec": { "type": "boolean", "default": false } }
+        },
+        "tracker": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "publishThreshold": {
+              "oneOf": [{ "type": "integer", "minimum": 1 }, { "const": "never" }],
+              "default": 2
+            }
+          }
+        },
+        "taskValidation": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": { "mode": { "enum": ["subagent", "self", "off"], "default": "subagent" } }
+        },
+        "tracks": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": { "defaultTrack": { "enum": ["irreversible", "reversible"], "default": "irreversible" } }
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "phases": {
+                "required": ["mergePlanSpec"],
+                "properties": { "mergePlanSpec": { "const": true } }
+              }
+            },
+            "required": ["phases"]
+          },
+          "then": {
+            "properties": {
+              "gates": { "not": { "required": ["spec_review"] } }
+            }
+          }
+        }
+      ]
     }
   },
   "definitions": {
+    "gateMode": {
+      "enum": ["panel", "advisory", "human", "off"]
+    },
+    "perTrackMode": {
+      "type": "object",
+      "additionalProperties": false,
+      "minProperties": 1,
+      "properties": {
+        "irreversible": { "$ref": "#/definitions/gateMode" },
+        "reversible": { "$ref": "#/definitions/gateMode" }
+      }
+    },
+    "reviewGate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["mode"],
+      "properties": {
+        "mode": {
+          "oneOf": [{ "$ref": "#/definitions/gateMode" }, { "$ref": "#/definitions/perTrackMode" }]
+        },
+        "minPanel": { "type": "integer", "minimum": 1, "default": 2 }
+      }
+    },
+    "lifecycleGates": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "brainstorm": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["mode"],
+          "properties": { "mode": { "enum": ["human", "off"] } }
+        },
+        "plan_review": { "$ref": "#/definitions/reviewGate" },
+        "spec_review": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["mode"],
+          "properties": {
+            "mode": {
+              "oneOf": [
+                { "$ref": "#/definitions/gateMode" },
+                {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "minProperties": 1,
+                  "properties": { "irreversible": { "$ref": "#/definitions/gateMode" } }
+                }
+              ]
+            },
+            "minPanel": { "type": "integer", "minimum": 1, "default": 2 }
+          }
+        },
+        "pr_review": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["mode"],
+          "properties": {
+            "mode": { "$ref": "#/definitions/gateMode" },
+            "minPanel": { "type": "integer", "minimum": 1, "default": 2 }
+          }
+        }
+      }
+    },
     "phaseHooks": {
       "type": "object",
       "additionalProperties": false,

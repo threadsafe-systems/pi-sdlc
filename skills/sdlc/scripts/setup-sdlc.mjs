@@ -28,7 +28,40 @@ function packageRepository() {
 }
 const RUN_HOOK_WARNING = "sdlc: WARNING — 'run' hooks execute arbitrary shell commands with the agent's\nprivileges from the committed config. Only commit hooks you trust, exactly as\nyou would for .pi/prompts or project settings.";
 const PROMPT_BASES = ["adversary-plan", "adversary-spec", "adversary-review", "validator-task"];
-const USAGE = "usage: setup-sdlc.sh [--prefix V] [--label-prefix V] [--announce V] [--tracker-repo o/n --tracker-board-number N --tracker-board-url U] [--hook-run S] [--hook-use S] [--with-models] [--with-ci-workflow] [--copy-prompts] [--format text|json] [--force] [--yes] [--config DIR|--repo-root DIR]";
+const USAGE =
+	"usage: setup-sdlc.sh [--profile solo|standard|full|custom] [--lifecycle-json path|-] [--prefix V] [--label-prefix V] [--announce V] [--tracker-repo o/n --tracker-board-number N --tracker-board-url U] [--hook-run S] [--hook-use S] [--with-models] [--with-ci-workflow] [--copy-prompts] [--format text|json] [--force] [--yes] [--config DIR|--repo-root DIR]";
+
+export const LIFECYCLE_PRESETS = Object.freeze({
+	solo: {
+		profile: "solo",
+		gates: { brainstorm: { mode: "off" }, plan_review: { mode: "human", minPanel: 1 }, pr_review: { mode: "advisory", minPanel: 1 } },
+		phases: { mergePlanSpec: true },
+		tracker: { publishThreshold: "never" },
+		taskValidation: { mode: "self" },
+		tracks: { defaultTrack: "irreversible" },
+	},
+	standard: {
+		profile: "standard",
+		gates: { brainstorm: { mode: "human" }, plan_review: { mode: "human", minPanel: 1 }, pr_review: { mode: "panel", minPanel: 2 } },
+		phases: { mergePlanSpec: true },
+		tracker: { publishThreshold: 4 },
+		taskValidation: { mode: "subagent" },
+		tracks: { defaultTrack: "irreversible" },
+	},
+	full: {
+		profile: "full",
+		gates: {
+			brainstorm: { mode: "human" },
+			plan_review: { mode: { irreversible: "panel", reversible: "human" }, minPanel: 2 },
+			spec_review: { mode: { irreversible: "panel" }, minPanel: 2 },
+			pr_review: { mode: "panel", minPanel: 2 },
+		},
+		phases: { mergePlanSpec: false },
+		tracker: { publishThreshold: 2 },
+		taskValidation: { mode: "subagent" },
+		tracks: { defaultTrack: "irreversible" },
+	},
+});
 
 class SetupError extends Error {
 	constructor(message, code = 2) {
@@ -76,7 +109,28 @@ function assembleConfig(opts, tracker, hooks) {
 	const config = { schemaVersion: 1, prefix: opts.prefix ?? CONFIG_DEFAULTS.prefix, labelPrefix: opts.labelPrefix ?? CONFIG_DEFAULTS.labelPrefix, announce: opts.announce ?? CONFIG_DEFAULTS.announce };
 	if (tracker) config.tracker = tracker;
 	if (Object.keys(hooks).length) config.hooks = hooks;
+	const lifecycle = lifecycleFromOptions(opts, config);
+	if (lifecycle) config.lifecycle = lifecycle;
 	return config;
+}
+
+function lifecycleFromOptions(opts, config) {
+	if (opts.lifecycle) return structuredClone(opts.lifecycle);
+	if (opts.profile === undefined) return undefined;
+	if (opts.profile !== "custom") return structuredClone(LIFECYCLE_PRESETS[opts.profile]);
+	let payload;
+	try {
+		const text = opts.lifecycleJson === "-" ? readFileSync(0, "utf8") : readFileSync(opts.lifecycleJson, "utf8");
+		payload = JSON.parse(text);
+	} catch (error) {
+		throw new SetupError(`setup-sdlc: cannot read --lifecycle-json ${opts.lifecycleJson}: ${error.message}`);
+	}
+	if (payload === null || typeof payload !== "object" || Array.isArray(payload)) throw new SetupError("setup-sdlc: --lifecycle-json must contain a JSON object");
+	if (Object.hasOwn(payload, "profile")) throw new SetupError("setup-sdlc: --lifecycle-json payload must not contain a profile key");
+	const lifecycle = { ...payload, profile: "custom" };
+	const issue = inspectConfig({ ...config, lifecycle }).find(({ path }) => path === "lifecycle" || path.startsWith("lifecycle."));
+	if (issue) throw new SetupError(`setup-sdlc: invalid --lifecycle-json at ${issue.path}: ${issue.message}`, 1);
+	return lifecycle;
 }
 function trackerFromFlags(opts) {
 	const values = [opts.trackerRepo, opts.trackerBoardNumber, opts.trackerBoardUrl];
@@ -92,6 +146,16 @@ function parseArgs(argv) {
 		const a = argv[i];
 		const value = (name = a) => needValue(argv, ++i, name);
 		switch (a) {
+			case "--profile":
+				opts.profile = value();
+				opts.runFlag = true;
+				opts.rootFlagOnly = false;
+				break;
+			case "--lifecycle-json":
+				opts.lifecycleJson = value();
+				opts.runFlag = true;
+				opts.rootFlagOnly = false;
+				break;
 			case "--prefix":
 				opts.prefix = value();
 				opts.runFlag = true;
@@ -179,6 +243,9 @@ function parseArgs(argv) {
 	}
 	if (opts.config !== undefined && opts.repoRoot !== undefined) throw new SetupError("setup-sdlc: --config and --repo-root are mutually exclusive");
 	if (opts.help) return opts;
+	if (opts.profile !== undefined && !new Set(["solo", "standard", "full", "custom"]).has(opts.profile)) throw new SetupError("setup-sdlc: --profile must be solo, standard, full, or custom");
+	if (opts.lifecycleJson !== undefined && opts.profile !== "custom") throw new SetupError("setup-sdlc: --lifecycle-json requires --profile custom");
+	if (opts.profile === "custom" && opts.lifecycleJson === undefined) throw new SetupError("setup-sdlc: --profile custom requires --lifecycle-json for non-interactive setup", 1);
 	return opts;
 }
 function jsonMode(argv) {
@@ -379,12 +446,19 @@ function writeBundle(root, opts, cfg, hooks, tracker) {
 	const configExists = existsSync(configTarget);
 	const configIssue = existingAssetIssue(configTarget, inspectConfig, "config");
 	const modelIssue = opts.withModels ? existingAssetIssue(modelTarget, inspectModels, "models") : null;
-	const configMutating = opts.prefix !== undefined || opts.labelPrefix !== undefined || opts.announce !== undefined || tracker !== undefined || (hooks && Object.keys(hooks).length > 0);
+	const configMutating = opts.profile !== undefined || opts.prefix !== undefined || opts.labelPrefix !== undefined || opts.announce !== undefined || tracker !== undefined || (hooks && Object.keys(hooks).length > 0);
 	if (!configExists) {
 		mkdirSync(dirname(configTarget), { recursive: true });
 		writeFileSync(configTarget, `${JSON.stringify(cfg, null, 2)}\n`);
 		report.assets.push({ id: "config", action: "created", message: `created ${configTarget}` });
 	} else if (configIssue) report.assets.push({ id: "config", action: "refused", message: `refused invalid existing config ${configTarget}: ${configIssue}`, remediation: `repair or delete ${configTarget} and re-run setup` });
+	else if (opts.profile !== undefined)
+		report.assets.push({
+			id: "config",
+			action: "refused",
+			message: `refused profile application to existing config ${configTarget}: existing-adopter profile application is deferred to OL-B`,
+			remediation: "use the OL-B profile-application path after its FS10 v2 migration (docs/plans/2026-07-14-opt-in-lifecycle.md)",
+		});
 	else if (configMutating && opts.force) {
 		writeFileSync(configTarget, `${JSON.stringify(cfg, null, 2)}\n`);
 		report.assets.push({ id: "config", action: "upgraded", message: `upgraded ${configTarget}` });
@@ -414,27 +488,88 @@ function writeBundle(root, opts, cfg, hooks, tracker) {
 	report.exitCode = report.assets.some((item) => item.action === "refused") ? 1 : 0;
 	return report;
 }
+async function interviewLifecycle(ask) {
+	const profile = await ask("lifecycle profile — solo: light, advisory PR (needs >=1 live model credential); standard: merged plan/spec + PR panel; full: separate design panels + PR panel; custom: choose every dial (solo/standard/full/custom)", "standard");
+	if (Object.hasOwn(LIFECYCLE_PRESETS, profile)) return structuredClone(LIFECYCLE_PRESETS[profile]);
+	if (profile !== "custom") throw new SetupError("setup-sdlc: profile must be solo, standard, full, or custom", 1);
+	const choice = async (question, values, fallback) => {
+		const answer = await ask(question, fallback);
+		if (!values.includes(answer)) throw new SetupError(`setup-sdlc: ${question} must be one of ${values.join(", ")}`, 1);
+		return answer;
+	};
+	const positiveInt = async (question, fallback) => {
+		const value = Number(await ask(question, String(fallback)));
+		if (!Number.isInteger(value) || value < 1) throw new SetupError(`setup-sdlc: ${question} must be an integer >= 1`, 1);
+		return value;
+	};
+	const gateModes = ["panel", "advisory", "human", "off"];
+	const mergeAnswer = await choice("merge plan and spec? (true/false)", ["true", "false"], "false");
+	const mergePlanSpec = mergeAnswer === "true";
+	const planMode = {
+		irreversible: await choice("irreversible plan review mode (panel/advisory/human/off)", gateModes, "panel"),
+		reversible: await choice("reversible plan review mode (panel/advisory/human/off)", gateModes, "human"),
+	};
+	let specReview;
+	if (!mergePlanSpec) {
+		specReview = {
+			mode: { irreversible: await choice("irreversible spec review mode (panel/advisory/human/off)", gateModes, "panel") },
+			minPanel: await positiveInt("spec review minPanel", 2),
+		};
+	}
+	const gates = {
+		brainstorm: { mode: await choice("brainstorm mode (human/off)", ["human", "off"], "human") },
+		plan_review: { mode: planMode, minPanel: await positiveInt("plan review minPanel", 2) },
+		...(specReview ? { spec_review: specReview } : {}),
+		pr_review: { mode: await choice("PR review mode (panel/advisory/human/off)", gateModes, "panel"), minPanel: await positiveInt("PR review minPanel", 2) },
+	};
+	const thresholdAnswer = await ask("tracker publishThreshold (integer >=1 or never)", "2");
+	const numericThreshold = Number(thresholdAnswer);
+	if (thresholdAnswer !== "never" && (!Number.isInteger(numericThreshold) || numericThreshold < 1)) {
+		throw new SetupError("setup-sdlc: tracker publishThreshold must be an integer >= 1 or never", 1);
+	}
+	return {
+		profile: "custom",
+		gates,
+		phases: { mergePlanSpec },
+		tracker: { publishThreshold: thresholdAnswer === "never" ? "never" : numericThreshold },
+		taskValidation: { mode: await choice("task validation mode (subagent/self/off)", ["subagent", "self", "off"], "subagent") },
+		tracks: { defaultTrack: await choice("default track (irreversible/reversible)", ["irreversible", "reversible"], "irreversible") },
+	};
+}
+
 async function interview(root) {
 	if (!stdin.isTTY) throw new SetupError("setup-sdlc: no config flags and no TTY for an interactive interview; pass flags or --yes");
 	const rl = createInterface({ input: stdin, output: stdout });
 	try {
-		const ask = async (question, fallback) => (await rl.question(fallback ? `${question} [${fallback}]: ` : `${question}: `)).trim() || fallback || "";
+		const ask = async (question, fallback) => {
+			const answer = await rl.question(fallback ? `${question} [${fallback}]: ` : `${question}: `);
+			return answer.trim() || fallback || "";
+		};
+		const lifecycle = await interviewLifecycle(ask);
+		const prefix = await ask("prefix", CONFIG_DEFAULTS.prefix);
+		const labelPrefix = await ask("labelPrefix", CONFIG_DEFAULTS.labelPrefix);
+		const announce = await ask("announce", CONFIG_DEFAULTS.announce);
+		const workflowAnswer = await ask("offer a GitHub workflow when no CI exists? (y/N)", "n");
+		const promptsAnswer = await ask("copy package prompts for local overrides? (y/N)", "n");
 		const opts = {
 			hookSpecs: [],
 			format: "text",
 			yes: true,
 			runFlag: true,
 			rootFlagOnly: false,
-			prefix: await ask("prefix", CONFIG_DEFAULTS.prefix),
-			labelPrefix: await ask("labelPrefix", CONFIG_DEFAULTS.labelPrefix),
-			announce: await ask("announce", CONFIG_DEFAULTS.announce),
+			profile: lifecycle.profile,
+			lifecycle,
+			prefix,
+			labelPrefix,
+			announce,
 			withModels: false,
-			withCiWorkflow: (await ask("offer a GitHub workflow when no CI exists? (y/N)", "n")).toLowerCase().startsWith("y"),
-			copyPrompts: (await ask("copy package prompts for local overrides? (y/N)", "n")).toLowerCase().startsWith("y"),
+			withCiWorkflow: workflowAnswer.toLowerCase().startsWith("y"),
+			copyPrompts: promptsAnswer.toLowerCase().startsWith("y"),
 		};
 		const tracker = undefined;
 		const hooks = {};
-		if ((await ask("write this config now? (Y/n)", "y")).toLowerCase().startsWith("n")) {
+		const confirmation = await ask("write this config now? (Y/n)", "y");
+		if (confirmation.toLowerCase().startsWith("n")) {
 			console.error("setup-sdlc: aborted at your request; nothing written.");
 			return 1;
 		}
