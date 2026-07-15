@@ -34,3 +34,9 @@ No high or medium finding survives adjudication (all incorporated in rev 2). Re-
 
 - deepseek: all seven surfaces attested (contracts buildable against current code; scenarios falsifiable; presets exactly match #37; `profile` correctly provenance-only; honesty sweep passed).
 - glm: closed-vocabulary kernel protection and OL-A/OL-B/OL-C scope discipline explicitly examined and found sound.
+
+## Gate record
+
+- Rev 2 (panel findings incorporated) committed as 01d8dcd.
+- Rev 3 (owner-directed diversity amendment: distinct-model floor, vendor dropped) committed as bd19bf8; the owner ratified rev 3 directly, explicitly declining a delta re-panel — recorded here as the human adjudication of that change.
+- **Spec gate passed 2026-07-14; human owner approved rev 3.** Tasks phase proceeds.
