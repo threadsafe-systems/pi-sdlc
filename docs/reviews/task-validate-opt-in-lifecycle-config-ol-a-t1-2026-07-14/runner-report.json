@@ -1,0 +1,251 @@
+{
+  "schemaVersion": 1,
+  "taskId": "ol-a-t1",
+  "manifest": "/home/neil/code/threadsafe/pi-sdlc.worktrees/feat-opt-in-lifecycle/docs/validation/opt-in-lifecycle-config/ol-a-t1.json",
+  "repoRoot": "/home/neil/code/threadsafe/pi-sdlc.worktrees/feat-opt-in-lifecycle",
+  "verdict": "PASS",
+  "exitCode": 0,
+  "errors": [],
+  "manifestErrors": [],
+  "commands": [
+    {
+      "id": "tests.lifecycle-config",
+      "argv": [
+        "node",
+        "--test",
+        "test/lifecycle-config.test.js"
+      ],
+      "evidence": [
+        "OLA1-OLA8 lifecycle schema and ordered inspectConfig validation",
+        "OLA18 gate-mode decomposition",
+        "OLA19 automation reservation and rejection"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 174,
+      "stdoutTail": "✔ OLA1: lifecycle absence preserves the dogfood config and existing collector (3.628669ms)\n✔ OLA2: all three normative preset expansions validate (0.964095ms)\n✔ OLA3/OLA19: lifecycle is closed, including merge and reserved automation (0.922333ms)\n✔ OLA4: defaultTrack rejects none and names the allowed enum (0.341568ms)\n✔ OLA5: vendor vocabulary and non-positive panel floors are invalid (0.456731ms)\n✔ OLA6: merged plan/spec forbids a separate spec-review gate (0.431381ms)\n✔ OLA7: spec-review has no reversible track and per-track maps cannot be empty (0.708498ms)\n✔ OLA8: profile is required and provenance never constrains dial values (0.478538ms)\n✔ OLA18: decomposeGateMode is total over the frozen four-value enum (1.269666ms)\n✔ nested lifecycle vocabulary is closed and types are checked in deterministic order (0.60595ms)\nℹ tests 10\nℹ suites 0\nℹ pass 10\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 120.394302\n",
+      "stderrTail": ""
+    },
+    {
+      "id": "tests.full",
+      "argv": [
+        "node",
+        "--test"
+      ],
+      "evidence": [
+        "OLA1 and NF-1(a): existing corpus remains green"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 5668,
+      "stdoutTail": "[...truncated; showing bounded tail...]\n✔ RL2: inspectRoot walks ancestors from cwd to a configured project root (0.658425ms)\n✔ RL3: inspectRoot falls back to the git top-level for a manifest-less repo (7.578396ms)\n✔ RL4: inspectRoot returns the error member (never exits) outside any project (3.141782ms)\n✔ RL5: inspectRoot honours $SDLC_ROOT when no explicit option is given (0.429149ms)\n✔ SP4: consumer path seam preserves spelling and rejects slash/backslash escapes (2.945529ms)\n✔ RL6: inspectConfig — valid input yields [], non-objects yield the deterministic issue (0.767225ms)\n✔ RL7: inspectConfig — aggregates every issue in validation-rule order, never throws (0.494007ms)\n✔ RL7b: inspectConfig — malformed nested structures aggregate without throwing (0.270297ms)\n✔ RL8: inspectModels — valid roster yields [], non-objects and aggregates are deterministic (0.784741ms)\n✔ RL8b: inspectModels — non-object phases and phase entries never throw (0.288068ms)\n✔ RL9: validateConfig first diagnostic is byte-identical to the first collector issue (exit 2) (273.029496ms)\n✔ RL10: validateModels first diagnostic is byte-identical to the first collector issue (exit 2) (165.190002ms)\n✔ RL11: validators still accept valid input (exit 0) after delegation (63.902471ms)\n✔ AR8: ready fixture — exact text golden (137.336358ms)\n✔ AR8: ready fixture — exact JSON golden (deterministic serialization) (222.681607ms)\n✔ AR8: not-adopted — text carries fail + remediation and pinned skips (exit 1) (52.287522ms)\n✔ AR8: JSON on every state 0-3 is a single valid envelope with only FS8 fields (325.670461ms)\n✔ AR8: secret sentinels in the environment never appear in output (299.644814ms)\n✔ AR8: --format json anywhere in argv forces the envelope for argument errors (183.479794ms)\n✔ AR8: JSON envelope root falls back to absolute cwd on root-resolution failure (52.628843ms)\n✔ AR8: cli.arguments error envelope uses the single unambiguous explicit root when available (49.604743ms)\n✔ AR8/PR-panel: argument values after '=' are elided from diagnostics (35.479066ms)\n✔ AR4/PR-panel: a root flag never consumes a following option as its value (32.894133ms)\n✔ PR-panel: skips blocked by an errored check propagate that check's own message (34.776506ms)\n✔ AR7: missing committed models + workflow read failure both surface, exit 3 (97.734838ms)\n✔ AR7: malformed config + missing committed models both report; error precedence wins (exit 2) (112.647306ms)\n✔ AR7: skip pins — not-adopted repo (64.154247ms)\n✔ AR7: skip pins — dirty manifest still evaluates independent models/workflow checks (109.440904ms)\n✔ wrapper: sdlc-status.sh output and exit are identical to direct .mjs invocation (431.387513ms)\n✔ NR7: generic prompts do not require absent governing files (0.991673ms)\n✔ NR7: skill dispatch instructions are concrete and CI claims are bounded (4.917817ms)\n✔ NR7: inventory checker and ADR are shipped and versioned (0.798322ms)\n✔ NR8: source prompt extraction remains the fixture authority (0.519374ms)\n✔ AR1: committed valid config+models, clean tree — exit 0, state ready, all checks pass (202.901885ms)\n✔ AR2: absent, untracked, staged, and ignored manifests all exit 1 not-adopted (241.824094ms)\n✔ AR4: argument errors exit 2 at cli.arguments with later checks skipped (259.828159ms)\n✔ AR4: unresolvable implicit root exits 2 at root.resolve (40.0491ms)\n✔ AR4: non-git explicit root exits 2 at git.repository, with or without a manifest (90.857926ms)\n✔ AR4: a git repository without HEAD exits 1 not-adopted, not 2 (63.678903ms)\n✔ AR4: --help prints usage, exits 0, and emits no status envelope (50.853773ms)\n✔ AR5: committed clean but invalid manifests exit 2 at config.valid (271.945765ms)\n✔ AR6: models absent from HEAD (filesystem-only variants) exits 3 at models.head (298.173629ms)\n✔ AR6: dirty committed models exits 3 at models.clean; models.valid skips (100.26925ms)\n✔ AR6: committed malformed / FS2-invalid / unreadable models exit 3 at models.valid (395.253264ms)\n✔ AR6: workflow.md present+readable passes; injected read failure exits 3 (208.486197ms)\n✔ AR3 (baseline): unrelated dirty files do not affect readiness (106.029178ms)\n✔ AR12: status completes with a PATH exposing only git (no other executable can run) (99.245682ms)\n✔ dogfood: this repo's committed config+models make sdlc-status exit 0 (117.270786ms)\n✔ fresh bundle provisions requested assets and idempotent rerun retains them (109.721972ms)\n✔ CI marker directories are not mistaken for CI files (46.704507ms)\n✔ existing CI suppresses workflow creation and reports refusal (47.693206ms)\n✔ template info strings must be exactly sdlc (62.954574ms)\n✔ consumer template with the wrong companion is refused byte-identically (71.754691ms)\n✔ consumer template with multiple declarations is refused (66.363095ms)\n✔ consumer template without the declaration is refused byte-identically (62.17132ms)\n✔ invalid assembled configuration fails before any bundle write (38.934743ms)\n✔ target parent conflicts fail before any bundle write (42.464175ms)\n✔ unreadable package sources fail before any bundle write (48.787296ms)\n✔ invalid existing config and models are refused without overwrite (88.470135ms)\n✔ workflow from another repository is refused (50.856916ms)\n✔ malformed CI marker fails before any bundle write (60.856319ms)\n✔ operational JSON errors preserve the resolved consumer root (54.48539ms)\n✔ existing target directories fail before any bundle write (42.831394ms)\n✔ bundle reports resolved package references before writing (37.382169ms)\n✔ OH4: --yes writes a schema-valid config; bundle re-run refuses config changes; --force overwrites (178.374665ms)\n✔ OH5: --hook-use fields 3-4 = use, do = remainder after 4th colon (colons in do preserved) (59.911623ms)\n✔ OH5: --hook-run command = remainder after 2nd colon (colons preserved); trust warning on stderr (44.954092ms)\n✔ OH5: mixed repeated hook flags preserve argv order in the written list (45.919316ms)\n✔ OH5: malformed hook flags exit 2 (307.926489ms)\n✔ PR-fix: value-taking flags accept values that begin with '-' (e.g. --announce '--foo') (46.305586ms)\n✔ OH5: partial tracker flags exit 2 (all-or-none) (53.315557ms)\n✔ OH5: no config flags and no TTY exits 2 (interview needs a TTY) (61.54039ms)\n✔ OH6: package.json pi.prompts includes ./templates and the template has a description (1.804231ms)\n✔ PV1: a valid JavaScript manifest runs only declared checks and passes (127.244005ms)\n✔ PV2: only declared argv run; an undeclared tool command never executes (230.844666ms)\n✔ PV3: schema and inspectManifest reject the mutation matrix before any command runs (120.611572ms)\n✔ PV4: command outcomes are complete and deterministic; runner continues after failures (60.07414ms)\n✔ PV4: a timeout is reported as FAIL with timedOut (1081.660936ms)\n✔ PV5: category applicability is exact; injected n/a shapes are rejected (151.02785ms)\n✔ PV6: scenario mapping gates the verdict (113.117038ms)\n✔ PV7: standards and banned patterns are commands, not judgement (152.885056ms)\n✔ PV8: evidence is bounded and secrets are redacted (138.416398ms)\n✔ PV8 unit: boundStream and redaction name-matching are precise (365.386485ms)\n✔ PV9: JSON/text/exit agree and JSON mode is order-independent (992.994008ms)\n✔ PV9: --report writes the exact JSON bytes atomically (243.904811ms)\n✔ PV9: --report outside the repo root is refused and clobbers nothing (244.462403ms)\n✔ PV10: generic validator law and generated agent are portable (0.915005ms)\n✔ PV11: receipt hash verification detects mutation of any stored file (8.125153ms)\n✔ PV11: a FAIL runner-report cannot ride under runnerVerdict PASS (2.251935ms)\n✔ parseArgs: recognises JSON anywhere and rejects bad flags (1.101755ms)\n✔ PV13: renderText is a faithful projection of the report (173.093669ms)\nℹ tests 168\nℹ suites 0\nℹ pass 168\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 5598.501561\n",
+      "stderrTail": ""
+    },
+    {
+      "id": "static.sources",
+      "argv": [
+        "node",
+        "--check",
+        "skills/sdlc/scripts/lib.mjs"
+      ],
+      "evidence": [
+        "Shared library syntax"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 48,
+      "stdoutTail": "",
+      "stderrTail": ""
+    },
+    {
+      "id": "static.tests",
+      "argv": [
+        "node",
+        "--check",
+        "test/lifecycle-config.test.js"
+      ],
+      "evidence": [
+        "New task suite exists and parses"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 49,
+      "stdoutTail": "",
+      "stderrTail": ""
+    },
+    {
+      "id": "static.schema",
+      "argv": [
+        "node",
+        "-e",
+        "JSON.parse(require('fs').readFileSync('skills/sdlc/schema/sdlc.config.schema.json','utf8'))"
+      ],
+      "evidence": [
+        "FS1 JSON schema parses"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 47,
+      "stdoutTail": "",
+      "stderrTail": ""
+    },
+    {
+      "id": "static.lint",
+      "argv": [
+        "npm",
+        "run",
+        "lint"
+      ],
+      "evidence": [
+        "Repository formatting and lint rules"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 317,
+      "stdoutTail": "\n> pi-sdlc@0.1.1 lint\n> biome check .\n\nChecked 65 files in 72ms. No fixes applied.\n",
+      "stderrTail": ""
+    },
+    {
+      "id": "patterns.diff",
+      "argv": [
+        "git",
+        "diff",
+        "--check",
+        "HEAD"
+      ],
+      "evidence": [
+        "No whitespace-error banned patterns in task diff"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 8,
+      "stdoutTail": "",
+      "stderrTail": ""
+    }
+  ],
+  "categories": [
+    {
+      "category": "tests",
+      "status": "PASS",
+      "checkIds": [
+        "tests.lifecycle-config",
+        "tests.full"
+      ]
+    },
+    {
+      "category": "static",
+      "status": "PASS",
+      "checkIds": [
+        "static.sources",
+        "static.tests",
+        "static.schema",
+        "static.lint"
+      ]
+    },
+    {
+      "category": "scenarios",
+      "status": "PASS"
+    },
+    {
+      "category": "standards",
+      "status": "N/A",
+      "reason": "No additional task-specific external standard applies; OL-A's PR gate verifies the irreversible stream contract."
+    },
+    {
+      "category": "bannedPatterns",
+      "status": "PASS",
+      "checkIds": [
+        "patterns.diff"
+      ]
+    }
+  ],
+  "scenarios": [
+    {
+      "scenarioId": "OLA1",
+      "status": "PASS",
+      "checkIds": [
+        "tests.lifecycle-config",
+        "tests.full"
+      ]
+    },
+    {
+      "scenarioId": "OLA18",
+      "status": "PASS",
+      "checkIds": [
+        "tests.lifecycle-config",
+        "static.sources"
+      ]
+    },
+    {
+      "scenarioId": "OLA19",
+      "status": "PASS",
+      "checkIds": [
+        "tests.lifecycle-config",
+        "static.schema"
+      ]
+    },
+    {
+      "scenarioId": "OLA2",
+      "status": "PASS",
+      "checkIds": [
+        "tests.lifecycle-config"
+      ]
+    },
+    {
+      "scenarioId": "OLA3",
+      "status": "PASS",
+      "checkIds": [
+        "tests.lifecycle-config"
+      ]
+    },
+    {
+      "scenarioId": "OLA4",
+      "status": "PASS",
+      "checkIds": [
+        "tests.lifecycle-config"
+      ]
+    },
+    {
+      "scenarioId": "OLA5",
+      "status": "PASS",
+      "checkIds": [
+        "tests.lifecycle-config"
+      ]
+    },
+    {
+      "scenarioId": "OLA6",
+      "status": "PASS",
+      "checkIds": [
+        "tests.lifecycle-config"
+      ]
+    },
+    {
+      "scenarioId": "OLA7",
+      "status": "PASS",
+      "checkIds": [
+        "tests.lifecycle-config"
+      ]
+    },
+    {
+      "scenarioId": "OLA8",
+      "status": "PASS",
+      "checkIds": [
+        "tests.lifecycle-config"
+      ]
+    }
+  ]
+}
