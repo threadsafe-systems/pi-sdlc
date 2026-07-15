@@ -1,7 +1,7 @@
 // OL-A T2: lifecycle-aware panel resolution and frozen v1 fallback.
 
 import assert from "node:assert/strict";
-import { mkdirSync, mkdtempSync, writeFileSync } from "node:fs";
+import { chmodSync, mkdirSync, mkdtempSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -216,4 +216,12 @@ test("OLA21: an invalid lifecycle block fails on its first lifecycle issue", () 
 	const result = run(f, "pr_review");
 	assert.equal(result.status, 1);
 	assert.match(result.stderr, /invalid lifecycle at lifecycle\.gates: unknown key 'merge'/);
+});
+
+test("lifecycle config filesystem errors never silently select the v1 path", () => {
+	const f = fixture({ lifecycle: { profile: "custom", gates: { pr_review: { mode: "panel", minPanel: 1 } } } });
+	chmodSync(join(f.root, ".pi", "sdlc", "sdlc.config.json"), 0);
+	const result = run(f, "pr_review");
+	assert.equal(result.status, 1);
+	assert.match(result.stderr, /cannot read .*sdlc\.config\.json/);
 });

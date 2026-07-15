@@ -491,40 +491,49 @@ function writeBundle(root, opts, cfg, hooks, tracker) {
 async function interviewLifecycle(ask) {
 	const profile = await ask("lifecycle profile — solo: light, advisory PR (needs >=1 live model credential); standard: merged plan/spec + PR panel; full: separate design panels + PR panel; custom: choose every dial (solo/standard/full/custom)", "standard");
 	if (Object.hasOwn(LIFECYCLE_PRESETS, profile)) return structuredClone(LIFECYCLE_PRESETS[profile]);
-	if (profile !== "custom") throw new SetupError("setup-sdlc: profile must be solo, standard, full, or custom");
+	if (profile !== "custom") throw new SetupError("setup-sdlc: profile must be solo, standard, full, or custom", 1);
+	const choice = async (question, values, fallback) => {
+		const answer = await ask(question, fallback);
+		if (!values.includes(answer)) throw new SetupError(`setup-sdlc: ${question} must be one of ${values.join(", ")}`, 1);
+		return answer;
+	};
 	const positiveInt = async (question, fallback) => {
 		const value = Number(await ask(question, String(fallback)));
-		if (!Number.isInteger(value) || value < 1) throw new SetupError(`setup-sdlc: ${question} must be an integer >= 1`);
+		if (!Number.isInteger(value) || value < 1) throw new SetupError(`setup-sdlc: ${question} must be an integer >= 1`, 1);
 		return value;
 	};
-	const mergeAnswer = await ask("merge plan and spec? (true/false)", "false");
-	const mergePlanSpec = mergeAnswer.toLowerCase() === "true";
+	const gateModes = ["panel", "advisory", "human", "off"];
+	const mergeAnswer = await choice("merge plan and spec? (true/false)", ["true", "false"], "false");
+	const mergePlanSpec = mergeAnswer === "true";
 	const planMode = {
-		irreversible: await ask("irreversible plan review mode (panel/advisory/human/off)", "panel"),
-		reversible: await ask("reversible plan review mode (panel/advisory/human/off)", "human"),
+		irreversible: await choice("irreversible plan review mode (panel/advisory/human/off)", gateModes, "panel"),
+		reversible: await choice("reversible plan review mode (panel/advisory/human/off)", gateModes, "human"),
 	};
 	let specReview;
 	if (!mergePlanSpec) {
 		specReview = {
-			mode: { irreversible: await ask("irreversible spec review mode (panel/advisory/human/off)", "panel") },
+			mode: { irreversible: await choice("irreversible spec review mode (panel/advisory/human/off)", gateModes, "panel") },
 			minPanel: await positiveInt("spec review minPanel", 2),
 		};
 	}
 	const gates = {
-		brainstorm: { mode: await ask("brainstorm mode (human/off)", "human") },
+		brainstorm: { mode: await choice("brainstorm mode (human/off)", ["human", "off"], "human") },
 		plan_review: { mode: planMode, minPanel: await positiveInt("plan review minPanel", 2) },
 		...(specReview ? { spec_review: specReview } : {}),
-		pr_review: { mode: await ask("PR review mode (panel/advisory/human/off)", "panel"), minPanel: await positiveInt("PR review minPanel", 2) },
+		pr_review: { mode: await choice("PR review mode (panel/advisory/human/off)", gateModes, "panel"), minPanel: await positiveInt("PR review minPanel", 2) },
 	};
 	const thresholdAnswer = await ask("tracker publishThreshold (integer >=1 or never)", "2");
-	const publishThreshold = thresholdAnswer === "never" ? "never" : Number(thresholdAnswer);
+	const numericThreshold = Number(thresholdAnswer);
+	if (thresholdAnswer !== "never" && (!Number.isInteger(numericThreshold) || numericThreshold < 1)) {
+		throw new SetupError("setup-sdlc: tracker publishThreshold must be an integer >= 1 or never", 1);
+	}
 	return {
 		profile: "custom",
 		gates,
 		phases: { mergePlanSpec },
-		tracker: { publishThreshold },
-		taskValidation: { mode: await ask("task validation mode (subagent/self/off)", "subagent") },
-		tracks: { defaultTrack: await ask("default track (irreversible/reversible)", "irreversible") },
+		tracker: { publishThreshold: thresholdAnswer === "never" ? "never" : numericThreshold },
+		taskValidation: { mode: await choice("task validation mode (subagent/self/off)", ["subagent", "self", "off"], "subagent") },
+		tracks: { defaultTrack: await choice("default track (irreversible/reversible)", ["irreversible", "reversible"], "irreversible") },
 	};
 }
 

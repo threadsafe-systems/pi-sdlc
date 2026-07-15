@@ -94,9 +94,17 @@ const ENV_VARS = {
 };
 
 function readLifecycle(consumerRoot) {
+	const configPath = join(consumerRoot, ".pi", "sdlc", "sdlc.config.json");
+	let text;
+	try {
+		text = readFileSync(configPath, "utf8");
+	} catch (error) {
+		if (error?.code === "ENOENT") return null;
+		fail(`resolve-panel: cannot read ${configPath}: ${error?.message || error}`, 1);
+	}
 	let raw;
 	try {
-		raw = JSON.parse(readFileSync(join(consumerRoot, ".pi", "sdlc", "sdlc.config.json"), "utf8"));
+		raw = JSON.parse(text);
 	} catch {
 		return null;
 	}

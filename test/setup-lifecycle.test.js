@@ -2,7 +2,7 @@
 
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
-import { mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -51,6 +51,12 @@ function shQuote(value) {
 	return `'${value.replaceAll("'", `'"'"'`)}'`;
 }
 
+function interactive(root, answers) {
+	const command = `${shQuote(process.execPath)} ${shQuote(setupMjs)} --repo-root ${shQuote(root)}`;
+	const feed = answers.map((answer) => `printf '%s\\n' ${shQuote(answer)}; sleep 0.1`).join("; ");
+	return spawnSync("bash", ["-c", `(sleep 0.2; ${feed}) | script -qec ${shQuote(command)} /dev/null`], { encoding: "utf8" });
+}
+
 test("OLA14: --profile standard writes the exact fully-expanded standard block", () => {
 	const dir = mkTemp();
 	try {
@@ -81,14 +87,29 @@ test("OLA14/NF-3: repeated preset runs produce identical lifecycle bytes", () =>
 test("OLA15: the interactive profile question is first and defaults to standard", () => {
 	const dir = mkTemp();
 	try {
-		const command = `${shQuote(process.execPath)} ${shQuote(setupMjs)} --repo-root ${shQuote(dir)}`;
-		const feedDefaults = `(sleep 0.2; for i in 1 2 3 4 5 6 7; do printf '\\n'; sleep 0.1; done) | script -qec ${shQuote(command)} /dev/null`;
-		const result = spawnSync("bash", ["-c", feedDefaults], { encoding: "utf8" });
+		const result = interactive(dir, ["", "", "", "", "", "", ""]);
 		assert.equal(result.status, 0, result.stderr);
 		assert.match(result.stdout, /lifecycle profile[^\r\n]*solo:[^\r\n]*standard:[^\r\n]*full:[^\r\n]*custom:[^\r\n]*\[standard\]/);
 		assert.deepEqual(readJson(configPath(dir)).lifecycle, standard);
 	} finally {
 		rmSync(dir, { recursive: true, force: true });
+	}
+});
+
+test("custom interview rejects invalid Boolean and gate answers immediately with text", () => {
+	for (const { answers, message } of [
+		{ answers: ["custom", "yes"], message: /merge plan and spec.*must be one of true, false/ },
+		{ answers: ["custom", "false", "banana"], message: /irreversible plan review mode.*must be one of panel, advisory, human, off/ },
+	]) {
+		const dir = mkTemp();
+		try {
+			const result = interactive(dir, answers);
+			assert.equal(result.status, 1);
+			assert.match(result.stdout, message);
+			assert.equal(existsSync(configPath(dir)), false);
+		} finally {
+			rmSync(dir, { recursive: true, force: true });
+		}
 	}
 });
 
