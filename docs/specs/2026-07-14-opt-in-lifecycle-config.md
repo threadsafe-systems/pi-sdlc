@@ -1,12 +1,17 @@
 # Spec: opt-in lifecycle — OL-A, config vocabulary and resolution
 
-- Date: 2026-07-14
+- Date: 2026-07-14 (rev 2 — spec panel findings incorporated; see
+  `docs/reviews/spec-review-opt-in-lifecycle-config-2026-07-14/consolidated.md`)
 - Sub-change: **OL-A** of the opt-in lifecycle stream (see
   `docs/plans/2026-07-14-opt-in-lifecycle.md`, "Spec decomposition"). OL-A
   delivers the `lifecycle` config vocabulary, its validation, profile-aware
-  setup, and panel-floor resolution. **No checker (`check-lifecycle`) change
-  ships in OL-A** — that is OL-B. No skill-prose change ships in OL-A — that
-  is OL-C.
+  setup **for fresh adoption**, and panel-floor resolution. **No checker
+  (`check-lifecycle`) change ships in OL-A** — that is OL-B. No skill-prose
+  change ships in OL-A — that is OL-C. **Profile application to an
+  already-adopted repo is deferred to OL-B** (adjudicated at spec review: it
+  requires FS10 report-semantics evolution, which ADR 0018 permits only via an
+  explicit schema-version bump — OL-B already carries the one FS10 v2 bump for
+  the nudge line, and both changes ride it together).
 - Track: irreversible (freezes the `lifecycle` vocabulary consumers commit to;
   FS1-additive).
 - Upstream: plan rev 2 (canonical); ticket resolutions #35–#38 + amendments
@@ -18,23 +23,25 @@ Files changed (all under `skills/sdlc/` unless noted):
 
 | Surface | File | Nature |
 |---|---|---|
-| FS1 manifest schema | `schema/sdlc.config.schema.json` | additive: `lifecycle` property + `$comment` reservation |
-| FS1 validation | `scripts/lib.mjs` (`inspectConfig`) | additive: `lifecycle` inspection; existing checks byte-identical |
-| Panel resolution | `scripts/resolve-panel.mjs` | floor sourcing precedence; vendor-dedupe relaxation; `task_validate` rule |
-| Setup | `scripts/setup-sdlc.mjs` (+ `setup-sdlc.sh`) | profile interview/flag; preset expansion; non-destructive application |
+| FS1 manifest schema | `schema/sdlc.config.schema.json` | additive: `lifecycle` property + `automation` reservation `$comment` |
+| FS1 validation | `scripts/lib.mjs` (`inspectConfig`, new `decomposeGateMode`) | additive: `lifecycle` inspection; existing checks byte-identical |
+| Panel resolution | `scripts/resolve-panel.mjs` | floor sourcing precedence (**adds a raw, non-fatal read of `sdlc.config.json`** — see §4.2); vendor floor + deterministic selection; `--track` flag; `task_validate` rule |
+| Setup | `scripts/setup-sdlc.mjs` (+ `setup-sdlc.sh`) | profile interview/`--profile` flag (fresh adoption); `--lifecycle-json` custom payload |
+| Models example | `schema/sdlc.models.example.json` | review-gate `min_panel` values aligned to the preset floors (`pr_review` 3 → 2) so a fresh `--with-models` + `--profile full` adoption has agreeing floors |
 | Tests | `test/` | new OLA fixtures; existing fixtures untouched (see §6) |
 
 Explicitly untouched in OL-A: `check-lifecycle.mjs` (FS9 v1 as shipped),
-`sdlc-status.mjs` (FS8 frozen), the FS10 report envelope (`SetupReportV1`
-gains **no** new line kinds in OL-A), `sdlc.models.json` schema (FS2 —
-`min_panel` remains schema-valid; it is ignored-with-notice at *runtime* when
-a `lifecycle` block is present), prompts, assets.
+`sdlc-status.mjs` (FS8 frozen), the FS10 report envelope and action semantics
+(`SetupReportV1` byte-identical; the FS10 v2 bump is OL-B's), `sdlc.models.json`
+FS2 schema (`min_panel` remains schema-valid; ignored-with-notice at *runtime*
+when a `lifecycle` block is present), prompts, assets.
 
 ## 2. The `lifecycle` block — normative schema
 
 One optional top-level key in `.pi/sdlc/sdlc.config.json`. `schemaVersion`
 stays `1` (FS1 is additive within a major). **Absence of the block means
-every consumer surface OL-A touches behaves byte-identically to today.**
+every consumer surface OL-A touches behaves byte-identically to today** (the
+precise byte-identity domain is NF-1, §5).
 
 ```jsonc
 "lifecycle": {
@@ -48,7 +55,8 @@ every consumer surface OL-A touches behaves byte-identically to today.**
     "plan_review": {
       // GateMode = "panel" | "advisory" | "human" | "off"
       // mode: single GateMode, or per-track object with keys drawn from
-      // {"irreversible","reversible"} (at least one key; no other keys).
+      // {"irreversible","reversible"} (at least one key; no other keys;
+      // an empty object {} is invalid).
       "mode": GateMode | { "irreversible"?: GateMode, "reversible"?: GateMode },
       "minPanel": int >= 1,        // optional; default 2
       "minVendors": int >= 1       // optional; default min(2, minPanel); must be <= minPanel
@@ -79,13 +87,14 @@ Structural rules (all `additionalProperties: false`, everywhere):
   3. `gates.spec_review.mode` per-track object must not carry `reversible`.
   4. `gates.brainstorm.mode` ∈ {`human`,`off`} only (panel modes structurally
      inexpressible).
+  5. A per-track `mode` object must carry at least one allowed key (empty
+     `{}` is invalid, on every gate that accepts the object form).
 - The kernel-protecting absences are **normative**: there is no `merge` gate
   key, no `scenarios` key, no `checks` off-switch, and `defaultTrack` cannot
   say `none`. These are enforced by the closed vocabulary itself.
 
-**Reviewer × arbiter modelling (plan DoD-8, #36 amendment).** The validator
-and every consumer of gate modes MUST resolve a `GateMode` value through a
-single total decomposition function:
+**Reviewer × arbiter modelling (plan DoD-8, #36 amendment).** `lib.mjs`
+exports a single total decomposition function `decomposeGateMode(value)`:
 
 | value | reviewer | arbiter | blocking |
 |---|---|---|---|
@@ -94,10 +103,12 @@ single total decomposition function:
 | `human` | none | human | yes |
 | `off` | none | none | no |
 
-exported from `lib.mjs` (e.g. `decomposeGateMode(value)`), such that adding a
-fifth value (the reserved panel/mechanical/blocking quadrant) is one row in
-this table plus enum growth — never a remodel. `panel`'s human-approval
-coupling exists **only** in this table.
+Every gate-mode decision in the changed scripts is expressed against the
+decomposition's fields (`reviewer`/`arbiter`/`blocking`), **never against raw
+mode strings** — so adding a fifth value (the reserved
+panel/mechanical/blocking quadrant) is one row in this table plus enum
+growth, never a remodel. `panel`'s human-approval coupling exists **only** in
+this table.
 
 **Reservation.** The shipped `schema/sdlc.config.schema.json` `lifecycle`
 description carries verbatim: *"The key `automation` is reserved for future
@@ -127,9 +138,20 @@ interpret a committed config. `profile` records provenance only.
 runs, but the committed floors must still be valid and coherent if a repo
 later dials the mode up.)
 
-`custom` is **not a preset**: the interview collects every dial explicitly
-(non-interactive: requires explicit `--lifecycle-*` flags or a
-`--lifecycle-json` payload; refusing to guess is correct behaviour).
+**Floor agreement (normative).** `full`'s floors are the schema defaults
+(2/2). The shipped `sdlc.models.example.json` review-gate `min_panel` values
+are aligned to these floors in OL-A (§1), so a fresh adoption
+(`--with-models --profile full`) has agreeing floors from both files. A repo
+whose *existing* models file carries a higher `min_panel` than a preset floor
+(e.g. this repo's `pr_review: 3`) keeps its higher effective floor only by
+committing higher `lifecycle` floors — that situation arises on profile
+application to an adopted repo, which is **OL-B**; the supersede notice (§4.2)
+always names both values so the divergence is visible, never silent.
+
+`custom` is **not a preset**. Interactively, the interview collects every
+dial explicitly. Non-interactively, the **only** input path is
+`--lifecycle-json <path|->` (§4.3); the placeholder idea of per-dial
+`--lifecycle-*` flags is dropped from OL-A.
 
 ## 4. Behavioural contracts
 
@@ -147,71 +169,116 @@ later dials the mode up.)
 
 ### 4.2 `resolve-panel.mjs`
 
-Floor sourcing precedence, per phase:
+**Config read (new, non-fatal).** `resolve-panel` gains a raw read of
+`.pi/sdlc/sdlc.config.json`: if the file is missing, unparseable, or parses
+without a `lifecycle` key, the resolver takes the **v1 path — byte-identical
+stdout/stderr/exit to shipped v1** (an invalid config with no `lifecycle`
+block must not change resolver behaviour; it is FS8's problem, not the
+resolver's). Only when a `lifecycle` key is present is the block validated
+(via `inspectConfig`); an invalid block fails resolution: exit 1, stderr
+naming the first validation issue.
+
+**Floor sourcing precedence, per phase:**
 
 - **Review gates** (`plan_review`, `spec_review`, `pr_review`):
   - `lifecycle` present: floors come from
     `lifecycle.gates.<phase>.{minPanel,minVendors}` (defaults per §2 when the
     gate key is absent). The models file's `phases.<phase>.min_panel` is
-    **ignored with a one-line stderr notice**:
-    `note: min_panel in sdlc.models.json superseded by lifecycle.gates.<phase>`.
-  - `lifecycle` absent: `min_panel` governs exactly as today (bit-identical
+    **ignored with a one-line stderr notice naming both values**:
+    `note: min_panel=<m> in sdlc.models.json superseded by lifecycle.gates.<phase> (minPanel=<p>, minVendors=<v>)`.
+  - `lifecycle` absent: `min_panel` governs exactly as today (byte-identical
     output, including stderr).
-- **Vendor dedupe relaxation:** when `minVendors < minPanel`, allow up to
-  `minPanel − minVendors + 1` models from one vendor; when
-  `minVendors == minPanel`, behaviour is today's one-model-per-vendor dedupe.
+- **Vendor floor and selection (normative acceptance condition):** a
+  resolution succeeds only when **both** `panel.length >= minPanel` **and**
+  the count of distinct vendors in the selected panel `>= minVendors`.
+  Selection is deterministic, vendor-first: walk the phase's `prefer` list in
+  order, first taking the first credentialed model of each not-yet-selected
+  vendor until `minVendors` distinct vendors are selected, then filling
+  remaining slots in `prefer` order subject to a per-vendor cap of
+  `minPanel − minVendors + 1`. When `minVendors == minPanel` this reduces
+  exactly to today's one-model-per-vendor dedupe. On failure, the existing
+  floor-failure exit and message shape apply, extended to name whichever
+  floor (size or vendors) was unmet.
 - **Author-vendor exclusion:** activation condition becomes
   `rules.exclude_author_vendor !== false && effectiveMinVendors >= 2`
   (today's `min_panel >= 2` at defaults ⇒ unchanged behaviour; at
   `minVendors: 1` exclusion is off — a solo panel cannot exclude the author's
   vendor and still exist).
-- **`task_validate`** (not a `gates` key):
+- **Gate-mode awareness (expressed via the decomposition, never raw
+  strings):** for a review gate whose effective mode decomposes to
+  `reviewer: "none"` (`human`, `off`), `resolve-panel` **refuses**: exit 1,
+  stderr
+  `resolve-panel: <phase> gate mode is '<mode>' in the committed lifecycle shape — no panel to resolve`.
+  Modes decomposing to `reviewer: "panel"` (`panel`, `advisory`) resolve
+  normally.
+  - **`--track` flag (new):** accepts exactly `irreversible` or
+    `reversible`; any other value is a usage error via the existing `fail`
+    path (exit 1). When the gate's `mode` is a **single value**, `--track` is
+    accepted and irrelevant. When the gate's `mode` is a **per-track
+    object**, `--track` is **required**: without it the resolver refuses —
+    exit 1, stderr
+    `resolve-panel: <phase> mode is per-track in the committed lifecycle shape — pass --track irreversible|reversible`.
+    (No "strictest value" heuristic exists; the ambiguity is refused, not
+    guessed.) `--track` with a track whose key is absent from the object
+    resolves that track's effective mode from the §2 defaults (e.g.
+    `spec_review` for `reversible` has no spec phase and refuses with the
+    no-panel message).
+- **`task_validate`** (not a `gates` key; `--track` is irrelevant and
+  accepted):
   - `lifecycle` present and `taskValidation.mode` ∈ {`subagent`,`self`}:
     fixed floor 1 model / 1 vendor; models-file `min_panel` for
     `task_validate` ignored with the same notice form.
-  - `lifecycle` present and `taskValidation.mode == "off"`: `resolve-panel
-    task_validate` **refuses**: exit 1, stderr
+  - `lifecycle` present and `taskValidation.mode == "off"`: refuses — exit 1,
+    stderr
     `resolve-panel: task validation is off in the committed lifecycle shape`.
   - `lifecycle` absent: today's behaviour.
-- Gate-mode awareness: `resolve-panel <review-gate>` for a gate whose
-  *effective* mode (single value, or the value for the track passed via a new
-  optional `--track` flag; without `--track`, the strictest configured value)
-  is `human` or `off` **refuses**: exit 1, stderr
-  `resolve-panel: <phase> gate mode is '<mode>' in the committed lifecycle shape — no panel to resolve`.
-  (`advisory` resolves normally — the panel runs, adjudication differs.)
 
-### 4.3 `setup-sdlc.mjs`
+### 4.3 `setup-sdlc.mjs` — fresh adoption only (application to adopted repos is OL-B)
 
 - New interview step (first substantive question) and `--profile
   <solo|standard|full|custom>` flag; interactive default pre-selects
   `standard`. The step's prose names the three presets in one line each and
   states the `solo` credential fact (advisory review needs ≥ 1 live model
   credential).
-- Fresh adoption: the written config carries the fully-expanded `lifecycle`
-  block per §3.
-- **Non-destructive application to an existing valid manifest** (new): when
-  the target repo already has a valid `.pi/sdlc/sdlc.config.json`, setup with
-  `--profile <p>` (or the interview) **adds or replaces only the `lifecycle`
-  key**, byte-preserving every other key (including formatting produced by
-  re-serialisation being limited to the `lifecycle` key's addition — the
-  implementation re-serialises the parsed object with 2-space indent, which
-  MUST be the same serialisation the file already uses from setup). An
-  *invalid* existing manifest is refused with the existing refusal semantics
-  (exit 1, `refused` asset action) — never partially rewritten.
-- FS10 report: the `config` asset's existing action vocabulary
-  (`created|retained|upgraded|refused`) is reused — profile application to an
-  existing manifest reports `upgraded`. **No new report line kinds in OL-A.**
+- **Fresh adoption** (no existing config): the written config carries the
+  fully-expanded `lifecycle` block per §3. Non-interactive `--profile <p>
+  --yes` writes preset `<p>`; `--profile custom` non-interactively requires
+  `--lifecycle-json` (below) and is otherwise **refused** (exit 1, message
+  naming the requirement).
+- **`--lifecycle-json <path|->` (new, the only non-interactive custom
+  input):** reads a complete `lifecycle` block as JSON from the file path (or
+  stdin when `-`). The payload must NOT contain a `profile` key (usage error
+  via `fail` if it does); setup injects `profile: "custom"`, validates the
+  assembled block through `inspectConfig`, writes it on success, refuses
+  (exit 1, first validation issue) otherwise. Supplying `--lifecycle-json`
+  with a non-`custom` `--profile` is a usage error.
+- **No `--profile` flag, non-interactive (`--yes`):** byte-identical v1
+  behaviour — no `lifecycle` block is written, no new output lines
+  (script/CI compatibility; NF-1). Interactive runs always ask the profile
+  question — that is an intentional, accepted change to the interview.
+- **Existing config present:** OL-A behaviour is byte-identical v1
+  (`retained`/`refused` per the shipped `configMutating`/`--force` ladder;
+  `--profile` against an existing config is **refused** with a message
+  pointing at OL-B's application path). The FS10 report envelope, action
+  vocabulary, and semantics are byte-identical in OL-A.
 - `--with-models` and all other flags unchanged.
 
 ## 5. Non-functional requirements
 
-- **NF-1 (non-regression):** with no `lifecycle` block, `inspectConfig`,
-  `resolve-panel` (all four phases), and `setup-sdlc` produce byte-identical
-  stdout/stderr/exit codes to the shipped v1 for the existing test corpus.
+- **NF-1 (non-regression, precise domain):** byte-identical
+  stdout/stderr/exit codes to shipped v1 for: (a) `inspectConfig` on any
+  config without a `lifecycle` key; (b) `resolve-panel` (all four phases)
+  when the config is missing, unparseable, or lacks a `lifecycle` key —
+  regardless of whether the config is otherwise valid; (c) `setup-sdlc`
+  invoked without `--profile` and without `--lifecycle-json`, non-interactive.
+  Fresh-adoption runs *with* `--profile`, and interactive interviews, are the
+  intentional changed paths and are outside NF-1's domain.
 - **NF-2 (closed vocabulary):** no code path interprets an unknown
   `lifecycle` key permissively; validation failure always precedes use.
 - **NF-3 (determinism):** preset expansion is a pure data table; two runs of
-  setup with the same inputs produce identical `lifecycle` blocks.
+  setup with the same inputs produce identical `lifecycle` blocks; panel
+  selection under §4.2 is deterministic for a fixed roster and credential
+  set.
 
 ## 6. Verification scenarios (falsifiable; ids stable)
 
@@ -236,7 +303,9 @@ extensions to existing suites).
 - **OLA6** — `phases.mergePlanSpec: true` alongside any `gates.spec_review`
   yields the cross-rule issue; invalid.
 - **OLA7** — `spec_review.mode: {reversible: "panel"}` yields the structural
-  issue; invalid. `plan_review.mode: {}` (empty per-track object) is invalid.
+  issue; invalid. **Empty per-track objects on every gate that accepts the
+  object form** (`plan_review.mode: {}`, `spec_review.mode: {}`) each yield
+  the at-least-one-key issue; invalid.
 - **OLA8** — `lifecycle.profile` absent, or any value outside the four-value
   enum, is invalid; `profile: "standard"` with hand-edited dials differing
   from the preset table remains **valid** (provenance-only; falsifies any
@@ -245,25 +314,37 @@ extensions to existing suites).
 **Resolution (resolve-panel):**
 
 - **OLA9** — with a `lifecycle` block present (`pr_review` floors 3/3),
-  `resolve-panel pr_review` enforces 3/3 and prints the supersede notice;
-  with the block absent, output is byte-identical to shipped v1 for the same
-  models file.
-- **OLA10** — `minPanel: 2, minVendors: 1` resolves a panel of two models
-  from one vendor (impossible today); `minVendors: 2` with only one
-  credentialed vendor fails with the existing floor-failure exit.
+  `resolve-panel pr_review` enforces 3/3 and prints the supersede notice
+  naming both values; with the block absent, output is byte-identical to
+  shipped v1 for the same models file.
+- **OLA10** — vendor floor is real, not a cap artifact: (a)
+  `minPanel: 2, minVendors: 1` resolves two models from one vendor
+  (impossible today); (b) `minPanel: 5, minVendors: 3` against a
+  credentialed roster shaped A,A,A,B,B,C selects a panel with ≥ 3 distinct
+  vendors (vendor-first: A,B,C, then fill to 5 under the per-vendor cap) —
+  fails if any implementation satisfies size with only 2 vendors; (c)
+  `minVendors: 2` with only one credentialed vendor fails naming the vendor
+  floor.
 - **OLA11** — author-vendor exclusion: active at effective `minVendors >= 2`
   (author's vendor dropped, as today); inactive at `minVendors: 1` (author's
   vendor may appear).
 - **OLA12** — `task_validate`: with `taskValidation.mode: "subagent"` floors
   are fixed 1/1 (models-file `min_panel: 3` for task_validate is ignored with
   the notice); with `mode: "off"`, exit 1 with the refusal message.
-- **OLA13** — gate-mode refusal: `plan_review` effective mode `human` ⇒
-  `resolve-panel plan_review` exits 1 with the no-panel message; mode
-  `advisory` resolves a panel normally; per-track mode
-  `{irreversible: "panel", reversible: "human"}` with `--track reversible`
-  refuses and with `--track irreversible` resolves.
+- **OLA13** — gate modes and `--track`: (a) `plan_review` single mode
+  `"human"` ⇒ exit 1 with the no-panel message; (b) single mode `"advisory"`
+  ⇒ resolves a panel normally; (c) per-track
+  `{irreversible: "panel", reversible: "human"}` **without `--track`** ⇒
+  exit 1 with the pass-`--track` message; (d) same gate with
+  `--track irreversible` resolves and with `--track reversible` refuses with
+  the no-panel message; (e) `--track banana` ⇒ usage failure (exit 1).
+- **OLA20** — robustness: an **invalid** config (bad non-lifecycle key) with
+  **no** `lifecycle` block + a valid models file ⇒ `resolve-panel` output
+  byte-identical to shipped v1 (no new exit, no new stderr).
+- **OLA21** — a config whose `lifecycle` block is invalid ⇒ `resolve-panel`
+  exits 1 with stderr naming the first `lifecycle` validation issue.
 
-**Setup (setup-sdlc):**
+**Setup (setup-sdlc, fresh adoption):**
 
 - **OLA14** — non-interactive `--profile standard --yes` on a fresh repo
   writes a config whose `lifecycle` block equals the §3 `standard` expansion
@@ -271,22 +352,29 @@ extensions to existing suites).
   `inspectConfig` with zero issues.
 - **OLA15** — interactive run's profile step pre-selects `standard`
   (falsifier: accepting all defaults yields the `standard` expansion).
-- **OLA16** — applying `--profile solo` to an existing **valid** manifest
-  changes only the `lifecycle` key: every other top-level key deep-equals its
-  prior value, and the FS10 report records the `config` asset as `upgraded`;
-  applying to an **invalid** manifest is `refused` (exit 1) with the manifest
-  unmodified byte-for-byte.
-- **OLA17** — `--profile custom` non-interactively without explicit dial
-  flags/payload is refused with a message naming the requirement; with a full
-  `--lifecycle-json` payload it writes exactly that block (validated), with
-  `profile: "custom"`.
+- **OLA16** — NF-1(c): non-interactive `--yes` without `--profile` on a fresh
+  repo produces stdout/stderr/exit and a written config byte-identical to
+  shipped v1 (no `lifecycle` block, no new lines). `--profile solo` against
+  an **existing** config is refused (exit 1) with the OL-B pointer message
+  and the manifest unmodified byte-for-byte.
+- **OLA17** — custom: (a) `--profile custom --yes` without `--lifecycle-json`
+  is refused naming the requirement; (b) `--lifecycle-json` with a valid
+  complete block (no `profile` key) writes exactly that block plus injected
+  `profile: "custom"`, and the config validates; (c) a payload containing a
+  `profile` key, or `--lifecycle-json` combined with `--profile standard`,
+  is a usage failure; (d) an invalid payload is refused with the first
+  validation issue.
 
 **Structure (future-proofing):**
 
 - **OLA18** — `decomposeGateMode` is exported, total over the four-value
-  enum, and returns the §2 table exactly; no other module hard-codes a
-  `mode === "panel"` human-approval branch (falsifier: grep for `"panel"`
-  comparisons outside the decomposition module in the changed scripts).
+  enum, and returns the §2 table exactly. Falsifier: in the changed scripts
+  (`resolve-panel.mjs`, `setup-sdlc.mjs`, the new validation paths of
+  `lib.mjs`), **no comparison against any raw gate-mode string**
+  (`"panel"`/`"advisory"`/`"human"`/`"off"`) exists outside the
+  decomposition function itself and the §2 validation enum table — every
+  behavioural branch reads the decomposition's `reviewer`/`arbiter`/
+  `blocking` fields.
 - **OLA19** — the shipped `schema/sdlc.config.schema.json` contains the
   `automation` reservation text verbatim, and `lifecycle.automation: {}` in a
   config is rejected as an unknown key.
@@ -297,16 +385,21 @@ A scenario that cannot be made to fail is a defect in this spec.
 
 - Any `check-lifecycle` change (shape-of-record, `shape` field, evidence
   checks) — OL-B.
-- The FS10 report nudge line and its ADR 0018 bump — OL-B.
-- SKILL.md/asset prose, standalone entrypoints — OL-C.
+- **Profile application to an already-adopted repo** (non-destructive
+  `lifecycle`-key application, its value-preservation semantics — NOT
+  byte-preservation, which whole-object re-serialisation cannot honestly
+  promise — and its FS10 report action) — OL-B, riding the single FS10 v2
+  schema-version bump together with the setup nudge line (ADR 0018 revision).
 - The `evidence.channels.json` format — OL-B.
+- SKILL.md/asset prose, standalone entrypoints — OL-C.
 - FS2 schema changes (`min_panel` remains schema-valid).
 
 ## 8. Context for Tasks
 
 - Suggested slicing: (T1) schema + `inspectConfig` + `decomposeGateMode`
-  [OLA1–8, 18, 19]; (T2) `resolve-panel` [OLA9–13]; (T3) `setup-sdlc`
-  [OLA14–17]. T2/T3 depend on T1; T2 and T3 are independent of each other.
+  [OLA1–8, 18, 19]; (T2) `resolve-panel` [OLA9–13, 20, 21]; (T3) `setup-sdlc`
+  fresh-adoption + models example alignment [OLA14–17]. T2/T3 depend on T1;
+  T2 and T3 are independent of each other.
 - The PR for OL-A declares slug `opt-in-lifecycle-config`; a thin sub-change
   plan doc (`docs/plans/2026-07-14-opt-in-lifecycle-config.md`, pointing at
   the stream plan) plus this spec and the build doc satisfy the FS9 v1
