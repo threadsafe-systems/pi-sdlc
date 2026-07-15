@@ -61,3 +61,8 @@ No high or medium finding survives adjudication (all incorporated in rev 2). Re-
 ## Stop condition (delta)
 
 No high or medium finding survives adjudication. Rev 4 awaits the human gate.
+
+## Gate record (final)
+
+- Rev 4 (delta panel's 7 clusters incorporated) committed as bb61b7c.
+- **Spec gate passed 2026-07-14; human owner approved rev 4.** Tasks phase proceeds (T1–T3 per spec §8).
