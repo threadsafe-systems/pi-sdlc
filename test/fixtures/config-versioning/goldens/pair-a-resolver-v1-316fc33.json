@@ -1,0 +1,29 @@
+{
+  "provenance": {
+    "commit": "316fc33",
+    "fixture": "pair-a v1 migration input",
+    "credentials": ["openai-codex", "zai", "anthropic", "deepseek"]
+  },
+  "phases": {
+    "plan_review": {
+      "exitCode": 0,
+      "stdout": "openai-codex/gpt-5.6-sol:high\nzai/glm-5.2:high\ndeepseek/deepseek-v4-pro:high\n",
+      "stderr": "panel[plan_review]: 3 model(s) across 3 vendor(s); need >= 2; author vendor excluded: anthropic (anthropic/claude-opus-4-8:high)\n  dropped anthropic/claude-opus-4-8:high: author vendor (anthropic)\n"
+    },
+    "spec_review": {
+      "exitCode": 0,
+      "stdout": "openai-codex/gpt-5.6-luna:high\nzai/glm-5.2:high\ndeepseek/deepseek-v4-pro:high\n",
+      "stderr": "panel[spec_review]: 3 model(s) across 3 vendor(s); need >= 2; author vendor excluded: anthropic (anthropic/claude-opus-4-8:high)\n  dropped anthropic/claude-opus-4-8:high: author vendor (anthropic)\n"
+    },
+    "pr_review": {
+      "exitCode": 0,
+      "stdout": "openai-codex/gpt-5.6-sol:medium\nzai/glm-5.2:medium\ndeepseek/deepseek-v4-pro:medium\n",
+      "stderr": "panel[pr_review]: 3 model(s) across 3 vendor(s); need >= 3; author vendor excluded: anthropic (anthropic/claude-opus-4-8:high)\n  dropped anthropic/claude-opus-4-8:medium: author vendor (anthropic)\n"
+    },
+    "task_validate": {
+      "exitCode": 0,
+      "stdout": "openai-codex/gpt-5.6-terra\nanthropic/claude-haiku-4-5\ndeepseek/deepseek-v4-flash\nzai/glm-5.2:low\n",
+      "stderr": "panel[task_validate]: 4 model(s) across 4 vendor(s); need >= 1\n"
+    }
+  }
+}
