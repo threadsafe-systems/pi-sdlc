@@ -1,0 +1,195 @@
+{
+  "schemaVersion": 1,
+  "taskId": "config-versioning-migration-t4",
+  "manifest": "/home/neil/code/threadsafe/pi-sdlc.worktrees/feat-config-versioning-migration/docs/validation/config-versioning-migration/config-versioning-migration-t4.json",
+  "repoRoot": "/home/neil/code/threadsafe/pi-sdlc.worktrees/feat-config-versioning-migration",
+  "verdict": "PASS",
+  "exitCode": 0,
+  "errors": [],
+  "manifestErrors": [],
+  "commands": [
+    {
+      "id": "tests.status-checker",
+      "argv": [
+        "node",
+        "--test",
+        "test/sdlc-status.test.js",
+        "test/readiness-output.test.js",
+        "test/check-lifecycle.test.js"
+      ],
+      "evidence": [
+        "CV17-CV20 FS8 v2 status drift/readiness and CV27 checker compatibility"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 1256,
+      "stdoutTail": "✔ help is available without a declaration source (31.547473ms)\n✔ flags mode accepts a reversible declaration (38.24298ms)\n✔ invalid track stays null in the report envelope (32.08299ms)\n✔ track none requires a reason and demands no artifacts (56.505696ms)\n✔ body grammar rejects ambiguity and invalid lines (58.869817ms)\n✔ bot exemption applies only without a valid declaration (92.172394ms)\n✔ empty body and event filenames remain source errors (62.179572ms)\n✔ event payload null body is an empty body and missing login is not exempt (25.101755ms)\n✔ JSON mode is inert for shell metacharacters and emits one envelope (30.403716ms)\n✔ CV27: config classification precedes inspection while FS9 semantics and envelope stay unchanged (91.628816ms)\n✔ AR8: ready fixture — exact text golden (43.385023ms)\n✔ AR8: ready fixture — exact JSON golden (deterministic serialization) (92.558798ms)\n✔ AR8: not-adopted — text carries fail + remediation and pinned skips (exit 1) (35.747514ms)\n✔ AR8: JSON on every state 0-3 is a single valid envelope with only FS8 fields (183.246387ms)\n✔ AR8: secret sentinels in the environment never appear in output (176.608739ms)\n✔ AR8: --format json anywhere in argv forces the envelope for argument errors (95.510156ms)\n✔ AR8: JSON envelope root falls back to absolute cwd on root-resolution failure (33.694267ms)\n✔ AR8: cli.arguments error envelope uses the single unambiguous explicit root when available (32.736351ms)\n✔ AR8/PR-panel: argument values after '=' are elided from diagnostics (19.826949ms)\n✔ AR4/PR-panel: a root flag never consumes a following option as its value (20.973857ms)\n✔ PR-panel: skips blocked by an errored check propagate that check's own message (20.220772ms)\n✔ AR7: missing panels + workflow read failure both surface, exit 3 (55.806051ms)\n✔ AR7: malformed config still evaluates independent workflow check; error precedence wins (56.110517ms)\n✔ AR7: skip pins — not-adopted repo (32.20608ms)\n✔ AR7: skip pins — dirty manifest still evaluates independent workflow checks (37.456805ms)\n✔ wrapper: sdlc-status.sh output and exit are identical to direct .mjs invocation (229.587122ms)\n✔ CV19: committed migrated v2 config without a models file is ready in text and JSON (99.381038ms)\n✔ CV17: recognised v1 is not-ready with canonical migration remedy and unrelated checks still report (51.454031ms)\n✔ CV18: schemaVersion 3 is an error with the canonical newer remedy (52.018824ms)\n✔ CV19: a panels-less v2 config is valid but not-ready (41.774641ms)\n✔ CV20: malformed JSON and invalid schemaVersion remain config errors (97.101299ms)\n✔ current v2 structural validation errors remain config.valid errors (104.118258ms)\n✔ filesystem-only manifests are not committed adoption (134.919526ms)\n✔ argument, root, and git errors retain exit 2 (160.191326ms)\n✔ workflow readability remains an independent readiness check (83.618866ms)\n✔ unrelated dirty files do not affect readiness (37.812078ms)\n✔ status completes with a PATH exposing only git (57.406218ms)\nℹ tests 37\nℹ suites 0\nℹ pass 37\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 1223.892243\n",
+      "stderrTail": ""
+    },
+    {
+      "id": "static.status",
+      "argv": [
+        "node",
+        "--check",
+        "skills/sdlc/scripts/sdlc-status.mjs"
+      ],
+      "evidence": [
+        "FS8 v2 status syntax"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 36,
+      "stdoutTail": "",
+      "stderrTail": ""
+    },
+    {
+      "id": "static.checker",
+      "argv": [
+        "node",
+        "--check",
+        "skills/sdlc/scripts/check-lifecycle.mjs"
+      ],
+      "evidence": [
+        "Version-aware lifecycle checker syntax"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 18,
+      "stdoutTail": "",
+      "stderrTail": ""
+    },
+    {
+      "id": "static.tests",
+      "argv": [
+        "node",
+        "--check",
+        "test/sdlc-status.test.js"
+      ],
+      "evidence": [
+        "Focused FS8 test suite exists and parses"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 23,
+      "stdoutTail": "",
+      "stderrTail": ""
+    },
+    {
+      "id": "static.lint",
+      "argv": [
+        "npm",
+        "run",
+        "lint"
+      ],
+      "evidence": [
+        "Repository formatting and lint rules"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 152,
+      "stdoutTail": "\n> pi-sdlc@0.1.1 lint\n> biome check .\n\nChecked 83 files in 55ms. No fixes applied.\n",
+      "stderrTail": ""
+    },
+    {
+      "id": "patterns.diff",
+      "argv": [
+        "git",
+        "diff",
+        "--check",
+        "HEAD"
+      ],
+      "evidence": [
+        "No whitespace-error banned patterns in task diff"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 3,
+      "stdoutTail": "",
+      "stderrTail": ""
+    }
+  ],
+  "categories": [
+    {
+      "category": "tests",
+      "status": "PASS",
+      "checkIds": [
+        "tests.status-checker"
+      ]
+    },
+    {
+      "category": "static",
+      "status": "PASS",
+      "checkIds": [
+        "static.status",
+        "static.checker",
+        "static.tests",
+        "static.lint"
+      ]
+    },
+    {
+      "category": "scenarios",
+      "status": "PASS"
+    },
+    {
+      "category": "standards",
+      "status": "N/A",
+      "reason": "Full repository compatibility is owned by T5; T4 has no additional external standard."
+    },
+    {
+      "category": "bannedPatterns",
+      "status": "PASS",
+      "checkIds": [
+        "patterns.diff"
+      ]
+    }
+  ],
+  "scenarios": [
+    {
+      "scenarioId": "CV17",
+      "status": "PASS",
+      "checkIds": [
+        "tests.status-checker"
+      ]
+    },
+    {
+      "scenarioId": "CV18",
+      "status": "PASS",
+      "checkIds": [
+        "tests.status-checker"
+      ]
+    },
+    {
+      "scenarioId": "CV19",
+      "status": "PASS",
+      "checkIds": [
+        "tests.status-checker"
+      ]
+    },
+    {
+      "scenarioId": "CV20",
+      "status": "PASS",
+      "checkIds": [
+        "tests.status-checker"
+      ]
+    },
+    {
+      "scenarioId": "CV27",
+      "status": "PASS",
+      "checkIds": [
+        "tests.status-checker"
+      ]
+    }
+  ]
+}
