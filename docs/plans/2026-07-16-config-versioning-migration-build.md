@@ -51,7 +51,10 @@ native blocking edges; all six issues are on board #5 at `Todo`.
 | CV17–CV20, CV27 | T4 | FS8 v2 status fixtures and checker compatibility tests |
 | CV28–CV32 | T5 | release guard, binding/prose/ADR assertions, dogfood and full sweep |
 
-T5 also reruns the complete suite as the regression proof for CV1–CV27.
+T5 is the first task that runs the complete suite as the regression proof for
+CV1–CV27. T1–T4 validators run their owned focused suites while the remaining
+consumers are intentionally migrated in sequence; this avoids treating known
+transitional failures as task-local defects.
 
 ## Task dependency graph
 
@@ -154,7 +157,6 @@ CV6–CV16.
 node --check skills/sdlc/scripts/migrate.mjs
 node --check skills/sdlc/scripts/setup-sdlc.mjs
 node --test test/migration.test.js test/setup-sdlc.test.js
-node --test
 npm run lint
 ```
 
@@ -205,7 +207,6 @@ CV21–CV26.
 ```bash
 node --check skills/sdlc/scripts/resolve-panel.mjs
 node --test test/resolve-panel.test.js test/resolve-panel-lifecycle.test.js
-node --test
 npm run lint
 ```
 
@@ -255,7 +256,6 @@ CV17–CV20, CV27.
 node --check skills/sdlc/scripts/sdlc-status.mjs
 node --check skills/sdlc/scripts/check-lifecycle.mjs
 node --test test/sdlc-status.test.js test/readiness-output.test.js test/check-lifecycle.test.js
-node --test
 npm run lint
 ```
 
