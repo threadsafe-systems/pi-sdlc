@@ -1,0 +1,182 @@
+{
+  "schemaVersion": 1,
+  "taskId": "config-versioning-migration-t3",
+  "manifest": "/home/neil/code/threadsafe/pi-sdlc.worktrees/feat-config-versioning-migration/docs/validation/config-versioning-migration/config-versioning-migration-t3.json",
+  "repoRoot": "/home/neil/code/threadsafe/pi-sdlc.worktrees/feat-config-versioning-migration",
+  "verdict": "PASS",
+  "exitCode": 0,
+  "errors": [],
+  "manifestErrors": [],
+  "commands": [
+    {
+      "id": "tests.resolve-panel",
+      "argv": [
+        "node",
+        "--test",
+        "test/resolve-panel.test.js",
+        "test/resolve-panel-lifecycle.test.js"
+      ],
+      "evidence": [
+        "CV21-CV26 merged-roster resolution, preference/strict posture, author demotion, refusals, and conservation goldens"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 582,
+      "stdoutTail": "✔ CV4/CV21: lifecycle floor exclusively supersedes minVendor and reports model shortfall (70.8507ms)\n✔ strict model-axis ordering and recognised effort suffix dedupe are conserved (31.362547ms)\n✔ same-provider distinct models, embedded versions, and provider identity remain distinct (86.596709ms)\n✔ CV23: lifecycle author model is readmitted only for preference shortfall (43.049145ms)\n✔ gate decomposition, track selection, and task-validation off refuse in preference (134.011725ms)\n✔ task validation retains its fixed one-model model-axis floor (46.993036ms)\n✔ CV21: preference shortfalls proceed on both axes and keep machine stdout parseable (67.798407ms)\n✔ CV22: strict shortfalls fail and absent enforcement defaults to preference (43.70993ms)\n✔ CV23: author readmission is shortfall-only; empty panels and gate modes still refuse (193.556771ms)\n✔ CV24/CV25: retired input and manifest/version/roster halts are distinct (97.949821ms)\n✔ CV26: folded pair-A strict output and exit match real pre-T1 v1 goldens (111.721345ms)\nℹ tests 11\nℹ suites 0\nℹ pass 11\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 558.43094\n",
+      "stderrTail": ""
+    },
+    {
+      "id": "static.resolve-panel",
+      "argv": [
+        "node",
+        "--check",
+        "skills/sdlc/scripts/resolve-panel.mjs"
+      ],
+      "evidence": [
+        "Merged-roster resolver syntax"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 24,
+      "stdoutTail": "",
+      "stderrTail": ""
+    },
+    {
+      "id": "static.tests",
+      "argv": [
+        "node",
+        "--check",
+        "test/resolve-panel.test.js"
+      ],
+      "evidence": [
+        "Focused resolver test suite exists and parses"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 22,
+      "stdoutTail": "",
+      "stderrTail": ""
+    },
+    {
+      "id": "static.lint",
+      "argv": [
+        "npm",
+        "run",
+        "lint"
+      ],
+      "evidence": [
+        "Repository formatting and lint rules"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 149,
+      "stdoutTail": "\n> pi-sdlc@0.1.1 lint\n> biome check .\n\nChecked 82 files in 43ms. No fixes applied.\n",
+      "stderrTail": ""
+    },
+    {
+      "id": "patterns.diff",
+      "argv": [
+        "git",
+        "diff",
+        "--check",
+        "HEAD"
+      ],
+      "evidence": [
+        "No whitespace-error banned patterns in task diff"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 2,
+      "stdoutTail": "",
+      "stderrTail": ""
+    }
+  ],
+  "categories": [
+    {
+      "category": "tests",
+      "status": "PASS",
+      "checkIds": [
+        "tests.resolve-panel"
+      ]
+    },
+    {
+      "category": "static",
+      "status": "PASS",
+      "checkIds": [
+        "static.resolve-panel",
+        "static.tests",
+        "static.lint"
+      ]
+    },
+    {
+      "category": "scenarios",
+      "status": "PASS"
+    },
+    {
+      "category": "standards",
+      "status": "N/A",
+      "reason": "Full repository compatibility is owned by T5; T3 has no additional external standard."
+    },
+    {
+      "category": "bannedPatterns",
+      "status": "PASS",
+      "checkIds": [
+        "patterns.diff"
+      ]
+    }
+  ],
+  "scenarios": [
+    {
+      "scenarioId": "CV21",
+      "status": "PASS",
+      "checkIds": [
+        "tests.resolve-panel"
+      ]
+    },
+    {
+      "scenarioId": "CV22",
+      "status": "PASS",
+      "checkIds": [
+        "tests.resolve-panel"
+      ]
+    },
+    {
+      "scenarioId": "CV23",
+      "status": "PASS",
+      "checkIds": [
+        "tests.resolve-panel"
+      ]
+    },
+    {
+      "scenarioId": "CV24",
+      "status": "PASS",
+      "checkIds": [
+        "tests.resolve-panel"
+      ]
+    },
+    {
+      "scenarioId": "CV25",
+      "status": "PASS",
+      "checkIds": [
+        "tests.resolve-panel"
+      ]
+    },
+    {
+      "scenarioId": "CV26",
+      "status": "PASS",
+      "checkIds": [
+        "tests.resolve-panel"
+      ]
+    }
+  ]
+}
