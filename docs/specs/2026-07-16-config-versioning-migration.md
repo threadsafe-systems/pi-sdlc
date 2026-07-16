@@ -1,6 +1,9 @@
 # Spec: config versioning & migration contract for consumer surfaces
 
-- Date: 2026-07-16 (rev 1 — pre-panel draft)
+- Date: 2026-07-16 (rev 2 — rev 1 was the pre-panel draft; rev 2
+  incorporates all 14 adjudicated findings from the spec-review panel cycle
+  1, see `docs/reviews/spec-review-config-versioning-migration-2026-07-16/
+  consolidated.md`)
 - Slug: `config-versioning-migration`
 - Track: **irreversible** (merges FS1 + FS2 into one committed schema v2,
   reopens FS8 → v2, reopens the FS5 `resolve-panel` CLI contract, reopens the
@@ -32,7 +35,7 @@ Files changed (under `skills/sdlc/` unless noted):
 | Migration entrypoint | `scripts/setup-sdlc.mjs` (+ `.sh`) | migration mode (detect/prompt/fold), merged-file write, `--with-models` retired, `--seed-panels` added, FS10 report `schemaVersion: 2` |
 | Panel resolution | `scripts/resolve-panel.mjs` (+ `.sh`) | roster from merged config; `enforcement` toggle; stderr shortfall advisories; `--models-file` retired |
 | Status | `scripts/sdlc-status.mjs` (+ `.sh`) | FS8 v2: `config.schema-current` + `config.panels` checks, three `models.*` checks retired, report `schemaVersion: 2` |
-| Checker compat | `scripts/check-lifecycle.mjs` | `config.valid` accepts v2; v1 → error with the canonical remedy (never a bare reject); FS9 semantics otherwise untouched |
+| Checker compat | `scripts/check-lifecycle.mjs` | `config.valid` routes through `classifyConfigVersion` **before** calling `inspectConfig` (a new branch, not a widened `inspectConfig`): v2 → validate as today; v1 → error with the canonical remedy (never a bare reject); FS9 semantics otherwise untouched |
 | Agent stamping | `scripts/ensure-panel-agent.mjs` | inherits the loader guard (halts with remedy on v1); no other change |
 | CI guard | `scripts/check-schema-break.mjs` (**new**) + `.github/workflows/ci.yml` | release-channel guard: schema-shape diff requires a breaking-change signal on the release-visible subject |
 | Skill prose | `SKILL.md` | startup exit-3 flow sanctions the migration entrypoint; panel prose names the merged file; orchestrator shortfall-carry instruction |
@@ -188,17 +191,30 @@ check messages, report remediation fields) but never rewrite the body text.
 - `current`: full v2 validation via `inspectConfig`, then the parsed config
   (now including `panels` when present) is returned.
 
-`readModels` is **deleted** from `lib.mjs`. No v2 code path reads
-`.pi/sdlc/sdlc.models.json` — which is precisely what makes the fold residue
-(§3.4) cleanup-safe by construction.
+`readModels`, `inspectModels`, and `validateModels` are **deleted** from
+`lib.mjs` — all their callers (`sdlc-status.mjs`'s retired `models.valid`
+check, `setup-sdlc.mjs`'s retired `--with-models` path) are themselves
+removed by this change, so nothing is left as an unmaintained validator for
+a deleted schema. No v2 code path reads `.pi/sdlc/sdlc.models.json` — which
+is precisely what makes the fold residue (§3.4) cleanup-safe by
+construction.
 
 **Raw-read bypass (scoped):** `lib.mjs` exports
-`readConfigRawForMigration(root)` → `{ config: <parsed-or-null>,
-models: <parsed-or-null>, configText, modelsText }`, reading both v1 files
-with **no version guard and no validation**. Greppable containment rule
-(CONTRIBUTORS-class, asserted by test): the only importer of
-`readConfigRawForMigration` outside `test/` is `setup-sdlc.mjs`/`migrate.mjs`
-— no other consumer gets the bypass.
+`readConfigRawForMigration(root)`, reading both v1 files with **no version
+guard and no validation**. Per file it returns one of three states —
+**absence and malformation are never conflated** (a malformed file must
+refuse per §3.3, not silently fold as if the file were absent):
+
+```js
+{ status: "absent" }
+{ status: "parsed", value: <object>, text: <string> }
+{ status: "malformed", error: <string>, text: <string> }  // unreadable or not valid JSON
+```
+
+Return shape: `{ config: <one of the above>, models: <one of the above> }`.
+Greppable containment rule (CONTRIBUTORS-class, asserted by test): the only
+importer of `readConfigRawForMigration` outside `test/` is
+`setup-sdlc.mjs`/`migrate.mjs` — no other consumer gets the bypass.
 
 ### 3.2 The migration engine (`migrate.mjs`) — OL-B's seam
 
@@ -236,9 +252,11 @@ it is **unmappable** (report + write nothing).
 | models `$comment` | `panels.$comment` | verbatim |
 | models `author_default` | `panels.authorDefault` | verbatim value |
 | models `rules.exclude_author_vendor` | `panels.rules.excludeAuthorVendor` | verbatim value; `rules` omitted when absent |
-| models `phases.<p>.min_panel` | `panels.phases.<p>.minVendor` | verbatim value (rename is honest: v1's vendor-deduped `min_panel` *was* a distinct-vendor floor) |
+| models `phases.<p>.min_panel` | `panels.phases.<p>.minVendor` | verbatim value when present (rename is honest: v1's vendor-deduped `min_panel` *was* a distinct-vendor floor); **absent** `min_panel` on a phase → `minVendor` omitted (the v2 default of 1 applies per §2) — not unmappable |
 | models `phases.<p>.prefer` | `panels.phases.<p>.prefer` | verbatim array |
+| models `$comment` (non-string) | — | **unmappable** — v1's FS2 validator (`inspectModels`) never type-checks `$comment`'s value, only its key presence, so a non-string `$comment` is legal v1 input; v2's `panels.$comment` is typed `string` (§2), so this is reported like any other unmappable path, never silently coerced |
 | models: any other key | — | unmappable |
+| models file present but **malformed** (unreadable or not valid JSON) | — | **unmappable** — reported as `cannot map <the models file path>: <parse error>`, exactly as an unknown key would be; **never** treated as an absent roster (see §3.1's `readConfigRawForMigration` three-state contract) — a malformed consumer file must refuse, not silently vanish |
 | — (synthesised) | top-level `enforcement: "strict"` | **always** (even when the models file is absent); preserves today's blocking behaviour on the adopter's existing axis (decision 4) |
 | absent models file | `panels` absent | a roster-less v1 repo folds to a roster-less v2 config (readiness parity via `config.panels`, §6.2) |
 
@@ -258,12 +276,21 @@ directory-bytes-untouched (CV9).
 ### 3.4 Recovery contract (fold write ordering)
 
 Ordinary file operations cannot make a two-file transition atomic; the
-guarantee is **recoverability**:
+guarantee is **recoverability** across a process crash or kill between any
+two steps — not against arbitrary host power-loss, which is bounded instead
+by the config being a git-tracked file the adopter is expected to commit
+(the same durability boundary every other file this skill writes already
+has; this change adds no new promise there):
 
 1. Write the merged v2 document to a staging file in the same directory
-   (`.pi/sdlc/.sdlc.config.json.migrate-tmp`), flush/fsync.
-2. Atomically `rename` the staging file over `.pi/sdlc/sdlc.config.json`.
-3. `unlink` `.pi/sdlc/sdlc.models.json`.
+   (`.pi/sdlc/.sdlc.config.json.migrate-tmp`), flush/fsync the file.
+2. Atomically `rename` the staging file over `.pi/sdlc/sdlc.config.json`,
+   then `fsync` the containing directory (`.pi/sdlc/`) so the rename's
+   directory-entry update is durable before step 3 proceeds — a rename
+   without a directory fsync is not guaranteed durable across a crash on
+   every POSIX filesystem, and step 3 must never begin against a
+   non-durable rename.
+3. `unlink` `.pi/sdlc/sdlc.models.json`, then `fsync` the directory again.
 
 Post-recovery observable states at every failure boundary:
 
@@ -300,7 +327,7 @@ setup enters **migration mode before all other behaviour**:
   rule (DoD 5), mechanically. There is no `--migrate-yes`, no env override.
 - **No flag mixing:** migration mode combined with any config-mutating flag
   (`--profile`, `--prefix`, `--label-prefix`, `--announce`, tracker flags,
-  hook flags, `--seed-panels`, `--force`) is refused — exit 1,
+  hook flags, `--seed-panels`, `--enforcement`, `--force`) is refused — exit 1,
   `setup-sdlc: migrate first — re-run with no config flags to fold the v1 config, then apply changes` —
   one mutation class per run, so the fold is never entangled with a
   simultaneous reconfiguration. (`--config`/`--repo-root`/`--format` remain
@@ -311,17 +338,30 @@ A config classified `newer` refuses with `REMEDY_SCHEMA_NEWER` (exit 1);
 
 ### 4.2 Residue cleanup
 
-When the root carries a **current** (v2) config *and*
-`.pi/sdlc/sdlc.models.json` exists (or a leftover staging tmp file): on a
-TTY, offer removal
-(`remove leftover .pi/sdlc/sdlc.models.json (folded into sdlc.config.json)? (y/N)`);
-accept → unlink + report `models: removed`; decline or non-TTY → report a
-non-fatal note (`models: retained` with remediation naming the residue), no
-write, and the run otherwise proceeds normally. **[spec decision]** The
-prompt (rather than unconditional deletion) keeps every mutation in this
-change behind an interactive confirmation; the plan's "detects and removes"
-is satisfied on the accept path, and the residue is harmless meanwhile by
-§3.1.
+Two independent residue kinds, each detected and offered separately (a run
+may clean up one, both, or neither depending on the answers):
+
+- **Models-file residue:** the root carries a **current** (v2) config *and*
+  `.pi/sdlc/sdlc.models.json` exists. On a TTY, offer removal
+  (`remove leftover .pi/sdlc/sdlc.models.json (folded into sdlc.config.json)? (y/N)`);
+  accept → unlink + report `models: removed`; decline or non-TTY → report a
+  non-fatal note (`models: retained` with remediation naming the residue),
+  no write.
+- **Staging-tmp residue:** `.pi/sdlc/.sdlc.config.json.migrate-tmp` exists
+  from an interrupted prior fold (§3.4 boundaries 1–2). On a TTY, offer
+  removal (`remove leftover migration staging file .sdlc.config.json.migrate-tmp? (y/N)`);
+  accept → unlink + report `staging: removed`; decline or non-TTY → report
+  `staging: retained` with remediation naming the file, no write. This
+  check runs regardless of the config's classified version (a staging file
+  can outlive an interrupted fold even if the rename never landed, leaving
+  the config still `older`).
+
+**[spec decision]** The prompt (rather than unconditional deletion) keeps
+every mutation in this change behind an interactive confirmation; the
+plan's "detects and removes" is satisfied on the accept path, and both
+residue kinds are harmless meanwhile — models residue by §3.1, staging
+residue because nothing ever reads the tmp path — and the run otherwise
+proceeds normally regardless of either answer.
 
 ### 4.3 Fresh adoption and the retired flags
 
@@ -370,10 +410,26 @@ once).
 
 - Roster source: `readConfig(root).panels`. The loader guard (§3.1) makes a
   v1 config halt with the remedy (exit 2 via `fail`) before any resolution.
-- Missing manifest entirely: `sdlc: this project requires .pi/sdlc/sdlc.config.json with a panels roster to resolve a panel (the skill ships no built-in model roster)`
-  — exit 2 (the FS2-required posture carried to the merged file).
+- **Detection mechanism (normative):** `readConfig` alone cannot
+  distinguish "manifest absent" from "manifest present, `panels` absent" —
+  a missing manifest returns `CONFIG_DEFAULTS` silently (§3.1), which has
+  no `panels` key either. `resolve-panel` therefore performs its own
+  `existsSync` check on `.pi/sdlc/sdlc.config.json` **before** calling
+  `readConfig`, to select between the two distinct failures below.
+- Missing manifest entirely (the `existsSync` check fails): `sdlc: this project requires .pi/sdlc/sdlc.config.json with a panels roster to resolve a panel (the skill ships no built-in model roster)`
+  — exit 2 (the FS2-required posture carried to the merged file — this is
+  resolve-panel's own message, not `readConfig`'s `requireManifest`
+  message, which resolve-panel does not use).
 - Manifest present (v2) but `panels` absent, or `panels.phases.<phase>`
   unusable: exit 1, `resolve-panel: no panels roster for <phase> in .pi/sdlc/sdlc.config.json — add a panels block (see schema/sdlc.config.example.json)`.
+  **Note (deliberate v1 divergence):** in v1, a missing *models file* was a
+  distinct file from the config and `readModels` exited **2** for its
+  absence (`lib.mjs` `fail()` default). In v2 there is one file: an
+  existing, valid v2 manifest with no `panels` key is a *content*
+  shortfall on an otherwise-valid input, not a *usage* error — hence exit
+  **1** here, only exit 2 above when the manifest itself does not exist.
+  This is an intentional exit-code reclassification carried by the ADR
+  0005 revision (§10), not a byte-identity claim.
 - **`--models-file` is retired**: exit 2 (usage), message
   `resolve-panel: --models-file is retired — the panel roster now lives in .pi/sdlc/sdlc.config.json (schemaVersion 2)`.
 - All other flags (`--author`, `--pong`, `--track`, `--emit-tasks`,
@@ -381,10 +437,21 @@ once).
 
 ### 5.2 Axis selection (unchanged) and floor sourcing
 
-- `lifecycle` absent ⇒ **vendor axis**: shipped v1 semantics verbatim —
-  vendor dedupe, floor = `panels.phases.<p>.minVendor` (default 1),
-  author-vendor exclusion governed by `panels.rules.excludeAuthorVendor !==
-  false && floor >= 2`. Diagnostics keep their v1 shapes.
+- `lifecycle` absent ⇒ **vendor axis**: shipped v1 *resolution algorithm*
+  verbatim (dedupe order, floor comparison, exclusion rule
+  `panels.rules.excludeAuthorVendor !== false && floor >= 2`, diagnostic
+  shapes) **for a manifest that itself passes `readConfig`'s v2 validation
+  gate**. This narrows OL-A's NF-1(b)/OLA21 byte-identity guarantee, which
+  covered "regardless of whether the config is otherwise valid" against the
+  old raw, tolerant, lifecycle-only read (`resolve-panel.mjs`'s prior
+  `readLifecycle`, deleted by this change): an invalid v2 config (a bad
+  non-lifecycle field, or an invalid `lifecycle` block) now halts at
+  `readConfig`'s `inspectConfig` gate — exit 2 via `fail()` — **before**
+  reaching resolution, superseding the old exit-1/tolerant behaviour for
+  that narrow case. "Verbatim" in this bullet governs the resolution
+  algorithm for a config that validates; it is not a re-statement of
+  OLA21's exit code for an invalid one.
+  Floor = `panels.phases.<p>.minVendor` (default 1).
 - `lifecycle` present ⇒ **model axis**: OL-A semantics verbatim — distinct
   model identities, floor from `lifecycle.gates.<p>.minPanel` /
   `taskValidation`, author-model exclusion at `minPanel >= 2`, `--track`
@@ -412,7 +479,12 @@ Effective value: top-level `enforcement ?? "preference"`.
      are readmitted in `prefer` order (still deduped on the axis identity)
      until the floor is met or candidates are exhausted. Each readmitted
      panellist is flagged (below). Author exclusion therefore still holds
-     whenever the floor is reachable without the author.
+     whenever the floor is reachable without the author. This readmission
+     rule applies only where a panel is being resolved at all — a gate
+     whose mode decomposes to `reviewer: "none"`, or `taskValidation.mode:
+     "off"`, still refuses (exit 1) under `preference` exactly as under
+     `strict` (§5.2's mode-question/floor-question distinction; CV23
+     asserts this).
   3. **Machine stdout is sacred:** the panel list / `--emit-tasks` JSON on
      stdout stays byte-parseable and format-identical in both modes; every
      advisory goes to **stderr** (#54 as panel-adjudicated).
@@ -521,9 +593,16 @@ report `schemaVersion` stays 1.
 A new read-only script + CI step making "a shape break rides a major"
 mechanical (plan scope 10):
 
-- **Watched shape surface:** `skills/sdlc/schema/*.schema.json` (any diff)
-  and the `CONFIG_SCHEMA_VERSION` constant line in
-  `skills/sdlc/scripts/lib.mjs`.
+- **Watched shape surface:** named, not globbed — the guard watches exactly
+  `skills/sdlc/schema/sdlc.config.schema.json` (and, transitionally, the
+  deletion of `skills/sdlc/schema/sdlc.models.schema.json` in this same
+  change) and the `CONFIG_SCHEMA_VERSION` constant line in
+  `skills/sdlc/scripts/lib.mjs`. **Explicitly not watched:**
+  `skills/sdlc/schema/task-validation-manifest.schema.json` — PV1, an
+  independent frozen surface under ADR 0013/0014 with its own version axis
+  (spec §1) — nor any future schema file a later change adds (e.g. OL-B's
+  evidence schema); a blanket `*.schema.json` glob would wrongly conflate
+  those with a config-schema break.
 - **Signal source (merge-mode aware):** under this repo's squash workflow the
   release-visible subject is the **PR title** (the commit semantic-release
   reads, ADR 0012). The guard reads the PR title and body from
@@ -624,8 +703,9 @@ deep-equal.
 - **CV4** — axis coexistence: a v2 config with both `lifecycle` and
   `minVendor` values is schema-valid; `resolve-panel` on the model axis
   prints the supersede notice naming both values and never reads `minVendor`
-  as a floor (falsifier: set `minVendor: 99` — resolution still succeeds at
-  `minPanel`).
+  as a floor (falsifier: set `minVendor: 99` **and `minPanel: 1`** —
+  resolution still succeeds, proving the high `minVendor` was never
+  consulted as the effective floor rather than merely being unreachable).
 - **CV5** — loader detection-only: `readConfig` on a v1 config exits 2 with
   `REMEDY_SCHEMA_OLDER` verbatim, **with stdin a TTY-like interactive
   stream**, never prompting (no stdin read) and never writing (directory
@@ -645,25 +725,39 @@ deep-equal.
   to a v2 config with no `panels` key.
 - **CV8** — **zero effective-panel change**: for pair-A and pair-B, across
   all four phases, with author-exclusion cases (author in/not in roster) and
-  a fixed simulated credential set, `resolve-panel`'s stdout panel (members,
-  order, suffixes) and exit code are identical before the fold (v1 skill
-  semantics, from the recorded v1 goldens) and after (v2 on the folded
-  config, `strict`). Fails on any single divergence.
-- **CV9** — refusal honesty: a v1 models file with one unknown key (e.g.
-  `phases.plan_review.weight`) produces `ok: false` with `cannot map
-  phases.plan_review.weight` (and every other unmappable path listed), and
-  the setup run reports them and writes **nothing** (recursive directory
-  hash unchanged).
+  a fixed simulated credential set, `resolve-panel`'s **stdout panel
+  content (members, order, suffixes) and exit code** are identical before
+  the fold (v1 skill semantics, from the recorded v1 goldens) and after (v2
+  on the folded config, `strict`). Fails on any single divergence. Scope
+  note: the comparison is stdout + exit code only — stderr may legitimately
+  differ in file-path and key-name references (the models filename vs the
+  merged config's `panels` path); see CV26 for the enumerated stderr diff.
+- **CV9** — refusal honesty, two distinct unmappable causes: (a) a v1
+  models file with one unknown key (e.g. `phases.plan_review.weight`)
+  produces `ok: false` with `cannot map phases.plan_review.weight` (and
+  every other unmappable path listed); (b) a v1 models file that **exists
+  but is not valid JSON** (or unreadable) is reported as `cannot map <the
+  models file path>: <parse error>` — **never** silently treated as an
+  absent roster (falsifier: the fold must not proceed to a roster-less v2
+  config for case (b), which is the failure mode a naive
+  parsed-or-null-collapsing implementation produces). Both cases: the setup
+  run reports every unmappable path and writes **nothing** (recursive
+  directory hash unchanged).
 - **CV10** — recovery contract, fault-injected at each boundary (write,
   fsync/rename, unlink): post-state is the complete original v1 pair
   (boundaries 1–2) or valid-v2-plus-residue (boundary 3); no other state is
   observed. Residue cleanup-safety: with residue present, `resolve-panel` /
   `sdlc-status` / `check-lifecycle` behave identically to the residue-free
   v2 repo (falsifier: any read of the leftover models file).
-- **CV11** — residue removal: on a v2 repo with residue, an interactive
-  setup run offers removal; accept unlinks and reports `models: removed`;
-  decline and non-TTY leave the file and report the retained note; the
-  stale migration staging tmp file is likewise removed on accept.
+- **CV11** — residue removal: on a v2 repo with models-file residue, an
+  interactive setup run offers removal; accept unlinks and reports
+  `models: removed`; decline and non-TTY leave the file and report the
+  `models: retained` note. Independently, on a repo with a stale migration
+  staging tmp file, setup offers its removal; accept unlinks and reports
+  `staging: removed`; decline and non-TTY report `staging: retained`. A
+  repo with both residues in one run reports both actions independently
+  (falsifier: either residue kind silently piggy-backing on the other's
+  answer).
 
 **Migration entrypoint:**
 
@@ -719,7 +813,12 @@ deep-equal.
   when not reachable, the author is readmitted, flagged with the exact §5.3
   advisory, and exit is 0; under `strict` the author is never readmitted
   (exit 1 on shortfall). Empty-panel: zero credentialed models exits 1 in
-  **both** modes.
+  **both** modes. **Gate-mode refusal under `preference` (falsifier for a
+  toggle that leaks into mode):** a `plan_review` gate with single mode
+  `"human"` (decomposes to `reviewer: "none"`) under `enforcement:
+  "preference"` exits **1** with the same no-panel message as under
+  `strict` — never exit 0. Same assertion for `taskValidation.mode: "off"`
+  under `preference`.
 - **CV24** — `--models-file <path>` exits 2 with the exact retirement
   message, without reading the path (falsifier: point it at a
   crash-inducing fixture).
