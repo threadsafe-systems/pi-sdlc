@@ -11,7 +11,7 @@
     },
     "spec_review": {
       "min_panel": 2,
-      "prefer": ["anthropic/claude-opus-4-8:high", "openai-codex/gpt-5.6-terra:high", "zai/glm-5.2:high", "deepseek/deepseek-v4-pro:high"]
+      "prefer": ["anthropic/claude-opus-4-8:high", "openai-codex/gpt-5.6-luna:high", "zai/glm-5.2:high", "deepseek/deepseek-v4-pro:high"]
     },
     "pr_review": {
       "min_panel": 3,
