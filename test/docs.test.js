@@ -5,7 +5,7 @@
 // required startup branch or prohibition is detected.
 
 import assert from "node:assert/strict";
-import { readFileSync, readdirSync } from "node:fs";
+import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { test } from "node:test";
@@ -97,7 +97,7 @@ const STARTUP_FRAGMENTS = {
 	"exit 2 (error) branch": /\*\*Exit 2 \(`error`\)\*\*: do NOT announce/,
 	"exit 3 (not-ready) branch": /\*\*Exit 3 \(`not-ready`\)\*\*: do NOT announce/,
 	"error is never advisory": /never .*downgraded to advisory/,
-	"not-ready is not bypassed": /Do not offer advisory mode as a bypass/,
+	"not-ready is not bypassed": /Do not\s+offer advisory mode as a bypass/,
 	"prohibition: enter a phase": /MUST\s+NOT\s+enter\s+any\s+lifecycle\s+phase/,
 	"prohibition: fire hooks": /MUST\s+NOT\s+fire\s+configured\s+hooks/,
 	"prohibition: stamp agents": /MUST\s+NOT\s+stamp\s+panel\s+agents/,
@@ -185,4 +185,58 @@ test("AR11: the setup template requires committing .pi\u2044sdlc and points at t
 	assert.match(setupTemplate, /commit `\.pi\/sdlc\/`/);
 	assert.match(setupTemplate, /sdlc-status/);
 	assert.match(setupTemplate, /exit 0|ready/);
+});
+
+// ---------------------------------------------------------------------------
+// CV29-CV32 — merged bindings, dogfood, skill law, and ADR ledger.
+// ---------------------------------------------------------------------------
+
+test("CV29: CI and shipped bindings point at the merged config surface", () => {
+	assert.match(ciWorkflow, /fetch-depth: 0/);
+	assert.match(ciWorkflow, /check-schema-break\.mjs --event/);
+	for (const [name, body] of Object.entries({ "SKILL.md": skillMd, "ci.yml": ciWorkflow, "README.md": readme })) {
+		assert.doesNotMatch(body, /sdlc\.models\.json/, `${name} retains the retired binding`);
+	}
+	assert.doesNotMatch(skillMd, /sdlc\.models\.schema\.json/);
+});
+
+test("CV30: repository and consumer dogfood fixtures use one schemaVersion-2 config", () => {
+	for (const root of [repo, join(repo, "test", "fixtures", "consumer")]) {
+		const dir = join(root, ".pi", "sdlc");
+		let config;
+		try {
+			config = JSON.parse(readFileSync(join(dir, "sdlc.config.json"), "utf8"));
+		} catch (error) {
+			assert.fail(`invalid dogfood config at ${root}: ${error.message}`);
+		}
+		assert.equal(config.schemaVersion, 2);
+		assert.ok(config.panels && typeof config.panels === "object", `${root} lacks merged panels`);
+		assert.equal(existsSync(join(dir, "sdlc.models.json")), false, `${root} retains the retired models file`);
+	}
+});
+
+test("CV31: startup migration and preference-shortfall carry instructions are explicit", () => {
+	assert.match(skillMd, /`config\.schema-current`[\s\S]*one sanctioned action[\s\S]*`setup-sdlc` migration[\s\S]*interactively/);
+	assert.match(skillMd, /Never hand-edit `schemaVersion` or the config shape/);
+	assert.match(skillMd, /merged config's `panels` block/);
+	assert.match(skillMd, /preference-mode shortfall advisory[\s\S]*consolidated writeup[\s\S]*PR\s+itself/);
+	assert.match(skillMd, /Do not\s+commit a standalone\s+decision log/);
+});
+
+test("CV32: five migration ADRs exist and amended decisions link forward", () => {
+	const decisions = ["0021-merged-config-schema-and-release-guard.md", "0022-user-owned-panel-enforcement-posture.md", "0023-status-surface-fs8-v2.md", "0024-script-clis-fs5-v2.md", "0025-adoption-bundle-fs10-v2.md"];
+	for (const file of decisions) {
+		const body = readFileSync(join(adrDir, file), "utf8");
+		for (const marker of [/## Context/, /## Decision/, /## Consequences/]) assert.match(body, marker, `${file} missing ${marker}`);
+	}
+	const forwards = {
+		"0001-config-schema-fs1.md": "ADR 0021",
+		"0002-models-schema-fs2.md": "ADR 0021",
+		"0005-script-clis-fs5.md": "ADR 0024",
+		"0012-release-versioning-policy.md": "ADR 0021",
+		"0015-adoption-readiness-policy.md": "ADR 0023",
+		"0016-status-surface-fs8.md": "ADR 0023",
+		"0018-adoption-bundle-fs10.md": "ADR 0025",
+	};
+	for (const [file, marker] of Object.entries(forwards)) assert.match(readFileSync(join(adrDir, file), "utf8"), new RegExp(marker), `${file} lacks ${marker}`);
 });

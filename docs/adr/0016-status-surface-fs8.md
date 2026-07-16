@@ -1,5 +1,7 @@
 # ADR 0016: FS8 — the frozen sdlc-status machine surface (schema version 1)
 
+- Amended by: [ADR 0023](0023-status-surface-fs8-v2.md)
+
 - Context: readiness (ADR 0015) is consumed by agents, shell callers, and CI.
   Like FS1/FS2, its machine surface must be frozen so consumers can bind to it
   without chasing output drift.

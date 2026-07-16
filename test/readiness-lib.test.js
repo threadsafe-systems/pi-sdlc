@@ -1,17 +1,17 @@
 // Offline tests for the non-fatal readiness inspection seams (AR build T1):
-// inspectRoot / inspectConfig / inspectModels (spec §2.3, §2.5, §2.6), plus
-// byte-compatibility of the existing exiting validators that now delegate to
+// inspectRoot / inspectConfig (spec §2.3, §2.5), plus byte-compatibility of
+// the existing exiting config validator that now delegates to
 // the collectors. No live/paid model calls, no network (AR12 / NFR).
 
 import { execFileSync } from "node:child_process";
 import assert from "node:assert/strict";
-import { mkdirSync, mkdtempSync, readFileSync, realpathSync, rmSync, writeFileSync } from "node:fs";
+import { mkdirSync, mkdtempSync, realpathSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { test } from "node:test";
 
-import { inspectConfig, inspectConsumerPath, inspectModels, inspectRoot } from "../skills/sdlc/scripts/lib.mjs";
+import { inspectConfig, inspectConsumerPath, inspectRoot } from "../skills/sdlc/scripts/lib.mjs";
 
 const here = dirname(fileURLToPath(import.meta.url));
 const repo = dirname(here);
@@ -21,14 +21,6 @@ const libPath = join(skill, "scripts", "lib.mjs");
 function tmp(prefix) {
 	// realpath: mkdtemp may hand back a symlinked path (e.g. /var -> /private/var).
 	return realpathSync(mkdtempSync(join(tmpdir(), prefix)));
-}
-
-function readJson(path) {
-	try {
-		return JSON.parse(readFileSync(path, "utf8"));
-	} catch (error) {
-		throw new Error(`invalid JSON fixture ${path}: ${error.message}`);
-	}
 }
 
 function withoutEnv(name, fn) {
@@ -42,7 +34,7 @@ function withoutEnv(name, fn) {
 	}
 }
 
-// Run validateConfig/validateModels in a child (they exit the process on failure).
+// Run validateConfig in a child (it exits the process on failure).
 function validatorExit(fnName, raw, p) {
 	const script = `import { ${fnName} } from ${JSON.stringify(libPath)}; ${fnName}(JSON.parse(process.argv[1]), process.argv[2]);`;
 	try {
@@ -128,7 +120,7 @@ test("RL5: inspectRoot honours $SDLC_ROOT when no explicit option is given", () 
 });
 
 // ---------------------------------------------------------------------------
-// inspectConfig / inspectModels (spec §2.5): deterministic, non-exiting.
+// inspectConfig (spec §2.5): deterministic, non-exiting.
 // ---------------------------------------------------------------------------
 
 const GOOD_CONFIG = {
@@ -204,43 +196,6 @@ test("RL7b: inspectConfig — malformed nested structures aggregate without thro
 	assert.ok(messages.some((m) => m.startsWith("hooks.plan.before[1].run ")));
 });
 
-test("RL8: inspectModels — valid roster yields [], non-objects and aggregates are deterministic", () => {
-	const example = readJson(join(skill, "schema", "sdlc.models.example.json"));
-	assert.deepEqual(inspectModels(example), []);
-	for (const bad of [null, [], "x", 7]) {
-		assert.deepEqual(inspectModels(bad), [{ path: "", message: "must be a JSON object" }]);
-	}
-	const raw = {
-		junk: true,
-		author_default: "no-slash",
-		rules: { unknown_rule: 1 },
-		phases: { plan_review: { min_panel: 0, prefer: ["also-bad"] } },
-	};
-	const issues = inspectModels(raw);
-	assert.deepEqual(inspectModels(raw), issues);
-	assert.equal(issues[0].message, "unknown key 'junk'");
-	const messages = issues.map((i) => i.message);
-	assert.ok(messages.includes("author_default must be provider/model"));
-	assert.ok(messages.includes("unknown rules key 'unknown_rule'"));
-	assert.ok(messages.some((m) => m.startsWith("phases must contain exactly ")));
-});
-
-test("RL8b: inspectModels — non-object phases and phase entries never throw", () => {
-	const messages = (raw) => inspectModels(raw).map((i) => i.message);
-	assert.ok(messages({ phases: null }).includes("phases must be an object"));
-	const roster = (over) => ({
-		phases: {
-			plan_review: { min_panel: 1, prefer: ["a/b"] },
-			spec_review: { min_panel: 1, prefer: ["a/b"] },
-			pr_review: { min_panel: 1, prefer: ["a/b"] },
-			task_validate: { min_panel: 1, prefer: ["a/b"] },
-			...over,
-		},
-	});
-	assert.ok(messages(roster({ pr_review: 5 })).includes("phases.pr_review must be an object"));
-	assert.ok(messages(roster({ pr_review: { min_panel: 1, prefer: [] } })).includes("phases.pr_review.prefer must be a non-empty array"));
-});
-
 // ---------------------------------------------------------------------------
 // Delegation compatibility (spec §2.5): the exiting validators keep their
 // acceptance, first-diagnostic text, and exit code.
@@ -265,20 +220,6 @@ test("RL9: validateConfig first diagnostic is byte-identical to the first collec
 	}
 });
 
-test("RL10: validateModels first diagnostic is byte-identical to the first collector issue (exit 2)", () => {
-	const p = "/x/.pi/sdlc/sdlc.models.json";
-	const cases = [[], { author_default: "nope", phases: {} }, { phases: { plan_review: {} } }, { phases: { plan_review: { min_panel: 0, prefer: ["a/b"] }, spec_review: { min_panel: 1, prefer: ["a/b"] }, pr_review: { min_panel: 1, prefer: ["a/b"] }, task_validate: { min_panel: 1, prefer: ["a/b"] } } }];
-	for (const raw of cases) {
-		const { code, stderr } = validatorExit("validateModels", raw, p);
-		assert.equal(code, 2, `expected exit 2 for ${JSON.stringify(raw)}`);
-		const first = inspectModels(raw)[0];
-		assert.ok(first, "collector must report at least one issue");
-		assert.equal(stderr, `sdlc models ${p}: ${first.message}`);
-	}
-});
-
-test("RL11: validators still accept valid input (exit 0) after delegation", () => {
-	const example = readJson(join(skill, "schema", "sdlc.models.example.json"));
-	assert.equal(validatorExit("validateModels", example, "/x/m.json").code, 0);
+test("RL11: config validator still accepts valid input (exit 0) after delegation", () => {
 	assert.equal(validatorExit("validateConfig", GOOD_CONFIG, "/x/c.json").code, 0);
 });

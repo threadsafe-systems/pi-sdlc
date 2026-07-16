@@ -33,13 +33,13 @@ function run(nodeScript, args, cwd, env = {}) {
 }
 
 function config(paths) {
-	return { schemaVersion: 1, prefix: "fixture", labelPrefix: "fixture", announce: "fixture", paths };
+	const merged = parseJson(readFileSync(join(ROOT, "test", "fixtures", "consumer", ".pi", "sdlc", "sdlc.config.json"), "utf8"), "consumer fixture");
+	return { ...merged, prefix: "fixture", labelPrefix: "fixture", announce: "fixture", paths };
 }
 
 function writeConsumerConfig(consumer, paths) {
 	mkdirSync(join(consumer, ".pi", "sdlc"), { recursive: true });
 	writeFileSync(join(consumer, ".pi", "sdlc", "sdlc.config.json"), JSON.stringify(config(paths), null, 2));
-	cpSync(join(ROOT, "test", "fixtures", "consumer", ".pi", "sdlc", "sdlc.models.json"), join(consumer, ".pi", "sdlc", "sdlc.models.json"));
 }
 
 function commitAll(consumer) {
@@ -89,7 +89,7 @@ test("SP2: installed skill commands run from consumer cwd", () => {
 		const status = run(join(f.installed, "scripts", "sdlc-status.mjs"), ["--repo-root", f.consumer, "--format", "json"], f.consumer);
 		assert.equal(status.status, 0, status.stderr);
 		assert.equal(parseJson(status.stdout, "status").state, "ready");
-		const setup = run(join(f.installed, "scripts", "setup-sdlc.mjs"), ["--repo-root", f.consumer, "--yes", "--with-models"], f.consumer, { HOME: join(f.root, "home") });
+		const setup = run(join(f.installed, "scripts", "setup-sdlc.mjs"), ["--repo-root", f.consumer, "--yes"], f.consumer, { HOME: join(f.root, "home") });
 		assert.equal(setup.status, 0, "bundle setup succeeds from consumer cwd while retaining the existing config");
 		const agent = run(join(f.installed, "scripts", "ensure-panel-agent.mjs"), ["pr_review", "--repo-root", f.consumer, "--force"], f.consumer);
 		assert.equal(agent.status, 0, agent.stderr);

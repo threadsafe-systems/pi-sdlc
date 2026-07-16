@@ -34,6 +34,13 @@ function run(scriptMjs, args, { env } = {}) {
 		return { code: e.status ?? 1, stdout: e.stdout ?? "", stderr: e.stderr ?? "" };
 	}
 }
+function parseJson(text, label) {
+	try {
+		return JSON.parse(text);
+	} catch (error) {
+		throw new Error(`invalid JSON ${label}: ${error.message}`);
+	}
+}
 // Isolated env for resolve-panel: stub HOME auth, no ambient cred vars, no pong.
 function isolatedEnv() {
 	return { PATH: process.env.PATH, HOME: fxHome };
@@ -73,9 +80,9 @@ test("S2: no loom-domain content in the generic surface", () => {
 
 test("S3: JSON schemas validate their examples", () => {
 	const ajv = new Ajv({ allErrors: true, strict: false });
-	for (const name of ["sdlc.config", "sdlc.models"]) {
-		const schema = JSON.parse(readFileSync(join(skill, "schema", `${name}.schema.json`), "utf8"));
-		const example = JSON.parse(readFileSync(join(skill, "schema", `${name}.example.json`), "utf8"));
+	for (const name of ["sdlc.config"]) {
+		const schema = parseJson(readFileSync(join(skill, "schema", `${name}.schema.json`), "utf8"), `${name} schema`);
+		const example = parseJson(readFileSync(join(skill, "schema", `${name}.example.json`), "utf8"), `${name} example`);
 		const validate = ajv.compile(schema);
 		assert.ok(validate(example), `${name} example invalid: ${JSON.stringify(validate.errors)}`);
 	}
@@ -83,32 +90,27 @@ test("S3: JSON schemas validate their examples", () => {
 
 test("S3b: ensure-panel-agent rejects malformed config (exit 2)", () => {
 	const mutations = [
-		'{"schemaVersion":2,"prefix":"loom","labelPrefix":"loom-sdlc","announce":"a"}',
-		'{"schemaVersion":1,"prefix":"Loom","labelPrefix":"loom-sdlc","announce":"a"}',
-		'{"schemaVersion":1,"prefix":"loom","labelPrefix":"loom-sdlc"}',
-		'{"schemaVersion":1,"prefix":"loom","labelPrefix":"loom-sdlc","announce":"a","extra":1}',
-		'{"schemaVersion":1,"prefix":"loom","labelPrefix":"loom-sdlc","announce":"a","tracker":{"repo":"bad","board":{"number":1,"url":"https://x/1"}}}',
-		'{"schemaVersion":1,"prefix":"loom","labelPrefix":"loom-sdlc","announce":"a","tracker":{"repo":"o/n","board":{"number":1,"url":"not-a-url"}}}',
-		'{"schemaVersion":1,"prefix":"loom","labelPrefix":"loom-sdlc","announce":"a","paths":{"agents":"../escape"}}',
-		'{"schemaVersion":1,"prefix":"loom","labelPrefix":"loom-sdlc","announce":"a","paths":{"agents":"/abs"}}',
+		'{"schemaVersion":3,"prefix":"loom","labelPrefix":"loom-sdlc","announce":"a"}',
+		'{"schemaVersion":2,"prefix":"Loom","labelPrefix":"loom-sdlc","announce":"a"}',
+		'{"schemaVersion":2,"prefix":"loom","labelPrefix":"loom-sdlc"}',
+		'{"schemaVersion":2,"prefix":"loom","labelPrefix":"loom-sdlc","announce":"a","extra":1}',
+		'{"schemaVersion":2,"prefix":"loom","labelPrefix":"loom-sdlc","announce":"a","tracker":{"repo":"bad","board":{"number":1,"url":"https://x/1"}}}',
+		'{"schemaVersion":2,"prefix":"loom","labelPrefix":"loom-sdlc","announce":"a","tracker":{"repo":"o/n","board":{"number":1,"url":"not-a-url"}}}',
+		'{"schemaVersion":2,"prefix":"loom","labelPrefix":"loom-sdlc","announce":"a","paths":{"agents":"../escape"}}',
+		'{"schemaVersion":2,"prefix":"loom","labelPrefix":"loom-sdlc","announce":"a","paths":{"agents":"/abs"}}',
 	];
 	for (const bad of mutations) {
-		const dir = mkdtempSync(join(tmpdir(), "sdlc-badc-"));
-		writeFileSync(join(dir, "cfg.json"), "");
-		cpSync(join(consumer, ".pi", "sdlc", "sdlc.models.json"), join(dir, "models.json"));
 		const cdir = mkdtempSync(join(tmpdir(), "sdlc-badcc-"));
 		const pj = join(cdir, ".pi", "sdlc");
 		execFileSync("mkdir", ["-p", pj]);
 		writeFileSync(join(pj, "sdlc.config.json"), bad);
-		cpSync(join(consumer, ".pi", "sdlc", "sdlc.models.json"), join(pj, "sdlc.models.json"));
 		const r = run("ensure-panel-agent.mjs", ["pr_review", "--config", cdir]);
 		assert.equal(r.code, 2, `mutation should exit 2: ${bad}`);
-		rmSync(dir, { recursive: true, force: true });
 		rmSync(cdir, { recursive: true, force: true });
 	}
 });
 
-test("S3c: resolve-panel rejects malformed models (exit 2)", () => {
+test("S3c: resolve-panel rejects malformed merged panels (exit 2)", () => {
 	const mutations = [
 		'{"phases":{"plan_review":{"min_panel":0,"prefer":["a/b"]},"spec_review":{"min_panel":1,"prefer":["a/b"]},"pr_review":{"min_panel":1,"prefer":["a/b"]},"task_validate":{"min_panel":1,"prefer":["a/b"]}}}',
 		'{"phases":{"plan_review":{"min_panel":1,"prefer":[]},"spec_review":{"min_panel":1,"prefer":["a/b"]},"pr_review":{"min_panel":1,"prefer":["a/b"]},"task_validate":{"min_panel":1,"prefer":["a/b"]}}}',
@@ -119,8 +121,9 @@ test("S3c: resolve-panel rejects malformed models (exit 2)", () => {
 		const cdir = mkdtempSync(join(tmpdir(), "sdlc-badm-"));
 		const pj = join(cdir, ".pi", "sdlc");
 		execFileSync("mkdir", ["-p", pj]);
-		cpSync(join(consumer, ".pi", "sdlc", "sdlc.config.json"), join(pj, "sdlc.config.json"));
-		writeFileSync(join(pj, "sdlc.models.json"), bad);
+		const config = parseJson(readFileSync(join(consumer, ".pi", "sdlc", "sdlc.config.json"), "utf8"), "consumer config");
+		config.panels = parseJson(bad, "panels mutation");
+		writeFileSync(join(pj, "sdlc.config.json"), JSON.stringify(config));
 		const r = run("resolve-panel.mjs", ["plan_review", "--config", cdir], { env: isolatedEnv() });
 		assert.equal(r.code, 2, `mutation should exit 2: ${bad}`);
 		rmSync(cdir, { recursive: true, force: true });
@@ -155,7 +158,7 @@ test("S6: resolve-panel --emit-tasks deep-equals golden under isolated env", () 
 		const an = agentName("loom", phase);
 		const r = run("resolve-panel.mjs", [phase, "--author", "anthropic", "--config", consumer, "--emit-tasks", an], { env: isolatedEnv() });
 		const golden = readFileSync(join(fx, "golden", `${phase}.resolve.json`), "utf8");
-		assert.deepEqual(JSON.parse(r.stdout), JSON.parse(golden), `${phase} resolve mismatch`);
+		assert.deepEqual(parseJson(r.stdout, `${phase} resolver output`), parseJson(golden, `${phase} resolver golden`), `${phase} resolve mismatch`);
 	}
 });
 
@@ -177,13 +180,15 @@ test("S7: resolution terminal cases", () => {
 		outside = { code: e.status, stderr: e.stderr };
 	}
 	assert.equal(outside.code, 2, "outside a repo with no flag/env must exit 2");
-	// missing models file -> resolve-panel errors clearly
+	// missing merged panels block -> resolve-panel errors clearly
 	const cdir = mkdtempSync(join(tmpdir(), "sdlc-nomodels-"));
 	execFileSync("mkdir", ["-p", join(cdir, ".pi", "sdlc")]);
-	cpSync(join(consumer, ".pi", "sdlc", "sdlc.config.json"), join(cdir, ".pi", "sdlc", "sdlc.config.json"));
+	const config = parseJson(readFileSync(join(consumer, ".pi", "sdlc", "sdlc.config.json"), "utf8"), "consumer config");
+	delete config.panels;
+	writeFileSync(join(cdir, ".pi", "sdlc", "sdlc.config.json"), JSON.stringify(config));
 	const rm = run("resolve-panel.mjs", ["pr_review", "--config", cdir], { env: isolatedEnv() });
-	assert.equal(rm.code, 2, "missing models file must exit non-zero");
-	assert.match(rm.stderr, /requires .*sdlc\.models\.json/, "clear missing-models message");
+	assert.equal(rm.code, 1, "missing panels block must exit non-zero");
+	assert.match(rm.stderr, /no panels roster .*sdlc\.config\.json/, "clear missing-panels message");
 	rmSync(empty, { recursive: true, force: true });
 	rmSync(cdir, { recursive: true, force: true });
 });

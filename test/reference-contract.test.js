@@ -40,6 +40,17 @@ test("NR7: inventory checker and ADR are shipped and versioned", () => {
 	assert.match(read("docs/adr/0019-normative-reference-honesty-fs11.md"), /FS11/);
 });
 
+test("CV29: normative inventory rebinds readiness to merged panels", () => {
+	const inventory = parseJson("skills/sdlc/assets/normative-references.json");
+	const ids = inventory.sources.map(({ id }) => id);
+	assert.ok(ids.includes("consumer.panels"));
+	assert.ok(!ids.includes("consumer.models"));
+	assert.ok(!ids.includes("schema.models"));
+	const panels = inventory.sources.find(({ id }) => id === "consumer.panels");
+	assert.equal(panels.target, ".pi/sdlc/sdlc.config.json");
+	assert.match(panels.verification.assertion, /config\.panels/);
+});
+
 test("NR8: source prompt extraction remains the fixture authority", () => {
 	for (const path of ["test/fixtures/golden/plan_review.agent.md", "test/fixtures/golden/spec_review.agent.md", "test/fixtures/golden/pr_review.agent.md", "test/fixtures/golden/task_validate.agent.md"]) assert.ok(read(path).length > 0, path);
 });
