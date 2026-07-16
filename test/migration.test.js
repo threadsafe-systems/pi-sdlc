@@ -1,6 +1,6 @@
 // T2 migration and setup contract coverage (CV6-CV16).
 import assert from "node:assert/strict";
-import { cpSync, existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { cpSync, existsSync, mkdtempSync, readFileSync, rmSync, symlinkSync, writeFileSync } from "node:fs";
 import * as fs from "node:fs";
 import { spawnSync } from "node:child_process";
 import { tmpdir } from "node:os";
@@ -27,6 +27,13 @@ function interactive(root, answers, args = []) {
 	const command = `${JSON.stringify(process.execPath)} ${JSON.stringify(setup)} --repo-root ${JSON.stringify(root)} ${args.join(" ")}`;
 	const feed = answers.map((answer) => `printf '%s\\n' ${JSON.stringify(answer)}; sleep 0.1`).join("; ");
 	return spawnSync("bash", ["-c", `(sleep 0.2; ${feed}) | script -qec ${JSON.stringify(command)} /dev/null`], { cwd: repo, encoding: "utf8" });
+}
+function interactiveJson(root, answers, args = []) {
+	const output = join(root, "setup-report.json");
+	const command = `${JSON.stringify(process.execPath)} ${JSON.stringify(setup)} --repo-root ${JSON.stringify(root)} --format json ${args.join(" ")} >${JSON.stringify(output)}`;
+	const feed = answers.map((answer) => `printf '%s\\n' ${JSON.stringify(answer)}; sleep 0.1`).join("; ");
+	const result = spawnSync("bash", ["-c", `(sleep 0.2; ${feed}) | script -qec ${JSON.stringify(command)} /dev/null`], { cwd: repo, encoding: "utf8" });
+	return { ...result, report: JSON.parse(readFileSync(output, "utf8")) };
 }
 function readJson(path) {
 	try {
@@ -117,6 +124,26 @@ test("CV10: write, fsync, rename, and unlink faults expose only allowed recovery
 		}
 	}
 
+	const symlinkRoot = temp();
+	try {
+		pair(symlinkRoot, "pair-a");
+		const stagingPath = join(symlinkRoot, ".pi/sdlc/.sdlc.config.json.migrate-tmp");
+		const sentinelPath = join(symlinkRoot, "sentinel.txt");
+		const configPath = join(symlinkRoot, ".pi/sdlc/sdlc.config.json");
+		const modelsPath = join(symlinkRoot, ".pi/sdlc/sdlc.models.json");
+		const configBefore = readFileSync(configPath, "utf8");
+		const modelsBefore = readFileSync(modelsPath, "utf8");
+		writeFileSync(sentinelPath, "sentinel\n");
+		symlinkSync(sentinelPath, stagingPath);
+		const plan = planMigration({ config: readJson(configPath), models: readJson(modelsPath) });
+		assert.throws(() => applyMigration(symlinkRoot, plan), /ELOOP/);
+		assert.equal(readFileSync(sentinelPath, "utf8"), "sentinel\n");
+		assert.equal(readFileSync(configPath, "utf8"), configBefore);
+		assert.equal(readFileSync(modelsPath, "utf8"), modelsBefore);
+	} finally {
+		rmSync(symlinkRoot, { recursive: true, force: true });
+	}
+
 	const root = temp();
 	try {
 		pair(root, "pair-a");
@@ -150,6 +177,16 @@ test("CV12-CV14: accept, decline, non-TTY, and mixed flags follow migration conf
 		assert.match(accepted.stdout, /asset: models removed/);
 		assert.equal(readJson(join(root, ".pi/sdlc/sdlc.config.json")).schemaVersion, 2);
 		assert.equal(existsSync(join(root, ".pi/sdlc/sdlc.models.json")), false);
+	} finally {
+		rmSync(root, { recursive: true, force: true });
+	}
+	root = temp();
+	try {
+		pair(root, "pair-a");
+		const accepted = interactiveJson(root, ["y"]);
+		assert.equal(accepted.status, 0, accepted.stderr);
+		assert.equal(accepted.report.exitCode, 0);
+		assert.equal(accepted.report.assets.find((asset) => asset.id === "config")?.action, "migrated");
 	} finally {
 		rmSync(root, { recursive: true, force: true });
 	}

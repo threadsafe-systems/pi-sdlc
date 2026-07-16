@@ -1,7 +1,7 @@
 // migrate.mjs — pure config migration planning and setup-only staged writes.
 // The registry is the forward-composition seam for later schema migrations.
 
-import { closeSync, fsyncSync, openSync, renameSync, unlinkSync, writeFileSync } from "node:fs";
+import { closeSync, constants, fsyncSync, openSync, renameSync, unlinkSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { CONFIG_SCHEMA_VERSION, PHASES, inspectConfig } from "./lib.mjs";
 
@@ -162,7 +162,8 @@ export function applyMigration(root, plan, { io = DEFAULT_IO } = {}) {
 	const modelsPath = join(directory, "sdlc.models.json");
 	const stagingPath = join(directory, ".sdlc.config.json.migrate-tmp");
 	const content = `${JSON.stringify(plan.config, null, 2)}\n`;
-	const fd = io.openSync(stagingPath, "w");
+	const flags = constants.O_WRONLY | constants.O_CREAT | constants.O_TRUNC | constants.O_NOFOLLOW;
+	const fd = io.openSync(stagingPath, flags, 0o600);
 	try {
 		io.writeFileSync(fd, content, "utf8");
 		io.fsyncSync(fd);

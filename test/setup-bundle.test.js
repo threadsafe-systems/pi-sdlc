@@ -184,6 +184,7 @@ test("invalid existing config and models are refused without overwrite", () => {
 			undefined,
 		);
 		assert.equal(readFileSync(join(root, ".pi/sdlc/sdlc.config.json"), "utf8"), "{bad\n");
+		assert.equal(existsSync(join(root, ".github/pull_request_template.md")), false);
 		const forced = jsonRun(root, ["--yes", "--prefix", "changed", "--force"]);
 		assert.equal(forced.status, 1);
 		assert.equal(forced.report.assets.find((asset) => asset.id === "config").action, "refused");

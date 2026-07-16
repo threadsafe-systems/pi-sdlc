@@ -7,7 +7,7 @@ import { existsSync, lstatSync, mkdirSync, readdirSync, readFileSync, realpathSy
 import { dirname, join, relative, resolve, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 import { createInterface } from "node:readline/promises";
-import { stdin, stdout } from "node:process";
+import { stderr, stdin, stdout } from "node:process";
 import { CONFIG_DEFAULTS, CONFIG_SCHEMA_VERSION, HOOK_PHASES, REMEDY_SCHEMA_NEWER, REMEDY_SCHEMA_OLDER, USE_RE, classifyConfigVersion, inspectConfig, readConfigRawForMigration, resolveRoot } from "./lib.mjs";
 import { applyMigration, planMigration } from "./migrate.mjs";
 
@@ -412,7 +412,7 @@ function renderReport(report) {
 }
 async function askConfirmation(question) {
 	if (!stdin.isTTY) return false;
-	const rl = createInterface({ input: stdin, output: stdout });
+	const rl = createInterface({ input: stdin, output: stderr });
 	try {
 		const answer = await rl.question(`${question} (y/N) `);
 		return answer.trim().toLowerCase().startsWith("y");
@@ -442,6 +442,17 @@ function migrationFlagsPresent(opts) {
 
 async function migrateConfig(root, opts) {
 	const files = readConfigRawForMigration(root);
+	if (files.config.status === "malformed") {
+		const report = {
+			root,
+			format: opts.format,
+			exitCode: 1,
+			references: [],
+			assets: [{ id: "config", action: "refused", message: `existing config is malformed: ${files.config.error}` }],
+		};
+		process.stdout.write(renderReport(report));
+		return report;
+	}
 	if (files.config.status !== "parsed") return null;
 	const classification = classifyConfigVersion(files.config.value);
 	if (classification.kind === "newer") throw new SetupError(`setup-sdlc: ${REMEDY_SCHEMA_NEWER(classification.version)}`, 1);
