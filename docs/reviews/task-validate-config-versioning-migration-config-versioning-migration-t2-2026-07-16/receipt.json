@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "taskId": "config-versioning-migration-t2",
+  "manifestPath": "docs/validation/config-versioning-migration/config-versioning-migration-t2.json",
+  "manifestSha256": "71ccabc46b6f9cee32877fb749fbf2ed423d27752b4d579e37d16f138ce5a221",
+  "runnerReportSha256": "80a197c402fc7a50332d74cea3baf247bc9c0893eefb5fe899f1c704cfd02c53",
+  "generatedAgentSha256": "81de26fbbd55fe79d75f8341d074c8bd65b93314fa72e084076bb7da325b3baa",
+  "model": "deepseek/deepseek-v4-flash:low",
+  "runnerVerdict": "PASS",
+  "validatorVerdict": "PASS",
+  "createdAt": "2026-07-16T23:30:00Z"
+}
