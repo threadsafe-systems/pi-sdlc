@@ -87,7 +87,7 @@ test("OLA14/NF-3: repeated preset runs produce identical lifecycle bytes", () =>
 test("OLA15: the interactive profile question is first and defaults to standard", () => {
 	const dir = mkTemp();
 	try {
-		const result = interactive(dir, ["", "", "", "", "", "", ""]);
+		const result = interactive(dir, ["", "", "", "", "", "", "", "", ""]);
 		assert.equal(result.status, 0, result.stderr);
 		assert.match(result.stdout, /lifecycle profile[^\r\n]*solo:[^\r\n]*standard:[^\r\n]*full:[^\r\n]*custom:[^\r\n]*\[standard\]/);
 		assert.deepEqual(readJson(configPath(dir)).lifecycle, standard);
@@ -119,6 +119,7 @@ test("OLA16/NF-1(c): non-interactive setup without lifecycle flags remains v1-sh
 		const result = setup(dir, ["--prefix", "x", "--label-prefix", "y", "--yes"]);
 		assert.equal(result.code, 0, result.stderr);
 		const expectedOutput = [
+			"schema-version: 2",
 			`root: ${dir}`,
 			"exit-code: 0",
 			`reference: reference.pr-template ok — resolved ${join(repo, "skills", "sdlc", "assets", "pull_request_template.md")}`,
@@ -131,10 +132,11 @@ test("OLA16/NF-1(c): non-interactive setup without lifecycle flags remains v1-sh
 		assert.equal(result.stderr, "");
 		const config = readJson(configPath(dir));
 		assert.deepEqual(config, {
-			schemaVersion: 1,
+			schemaVersion: 2,
 			prefix: "x",
 			labelPrefix: "y",
 			announce: "Using the sdlc skill to drive this change through its lifecycle.",
+			enforcement: "preference",
 		});
 	} finally {
 		rmSync(dir, { recursive: true, force: true });

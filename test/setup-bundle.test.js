@@ -25,13 +25,14 @@ function jsonRun(root, args) {
 test("fresh bundle provisions requested assets and idempotent rerun retains them", () => {
 	const root = temp();
 	try {
-		const first = jsonRun(root, ["--yes", "--with-models", "--with-ci-workflow", "--copy-prompts"]);
+		const first = jsonRun(root, ["--yes", "--seed-panels", "--with-ci-workflow", "--copy-prompts"]);
 		assert.equal(first.status, 0, first.stderr);
 		assert.equal(first.report.exitCode, 0);
-		for (const path of [".pi/sdlc/sdlc.config.json", ".pi/sdlc/sdlc.models.json", ".github/pull_request_template.md", ".github/workflows/sdlc-lifecycle.yml", ".pi/sdlc/prompts/adversary-plan.prompt.md"]) assert.equal(existsSync(join(root, path)), true, path);
+		for (const path of [".pi/sdlc/sdlc.config.json", ".github/pull_request_template.md", ".github/workflows/sdlc-lifecycle.yml", ".pi/sdlc/prompts/adversary-plan.prompt.md"]) assert.equal(existsSync(join(root, path)), true, path);
+		assert.equal(existsSync(join(root, ".pi/sdlc/sdlc.models.json")), false);
 		assert.doesNotMatch(readFileSync(join(root, ".github/workflows/sdlc-lifecycle.yml"), "utf8"), /__PI_SDLC_REF__/);
 		const before = readFileSync(join(root, ".github/pull_request_template.md"), "utf8");
-		const second = jsonRun(root, ["--yes", "--with-models", "--with-ci-workflow", "--copy-prompts"]);
+		const second = jsonRun(root, ["--yes", "--with-ci-workflow", "--copy-prompts"]);
 		assert.equal(second.status, 0, second.stderr);
 		assert.equal(second.report.assets.filter((asset) => asset.action === "retained").length >= 5, true);
 		assert.equal(readFileSync(join(root, ".github/pull_request_template.md"), "utf8"), before);
@@ -153,12 +154,12 @@ test("target parent conflicts fail before any bundle write", () => {
 
 test("unreadable package sources fail before any bundle write", () => {
 	const root = temp();
-	const source = join(ROOT, "skills", "sdlc", "schema", "sdlc.models.example.json");
+	const source = join(ROOT, "skills", "sdlc", "schema", "sdlc.config.example.json");
 	const backup = `${source}.panel-test-${process.pid}`;
 	try {
 		renameSync(source, backup);
 		spawnSync("mkdir", [source]);
-		const result = jsonRun(root, ["--yes", "--with-models"]);
+		const result = jsonRun(root, ["--yes", "--seed-panels"]);
 		assert.equal(result.status, 2);
 		assert.equal(result.report.assets.length, 0);
 		assert.equal(existsSync(join(root, ".pi/sdlc/sdlc.config.json")), false);
@@ -175,10 +176,13 @@ test("invalid existing config and models are refused without overwrite", () => {
 		spawnSync("mkdir", ["-p", join(root, ".pi/sdlc")]);
 		writeFileSync(join(root, ".pi/sdlc/sdlc.config.json"), "{bad\n");
 		writeFileSync(join(root, ".pi/sdlc/sdlc.models.json"), "{bad\n");
-		const result = jsonRun(root, ["--yes", "--with-models"]);
+		const result = jsonRun(root, ["--yes", "--seed-panels"]);
 		assert.equal(result.status, 1);
 		assert.equal(result.report.assets.find((asset) => asset.id === "config").action, "refused");
-		assert.equal(result.report.assets.find((asset) => asset.id === "models").action, "refused");
+		assert.equal(
+			result.report.assets.find((asset) => asset.id === "models"),
+			undefined,
+		);
 		assert.equal(readFileSync(join(root, ".pi/sdlc/sdlc.config.json"), "utf8"), "{bad\n");
 		const forced = jsonRun(root, ["--yes", "--prefix", "changed", "--force"]);
 		assert.equal(forced.status, 1);
