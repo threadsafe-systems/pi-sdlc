@@ -12,7 +12,22 @@ export const repoRootDir = dirname(here);
 export const statusMjs = join(repoRootDir, "skills", "sdlc", "scripts", "sdlc-status.mjs");
 export const statusSh = join(repoRootDir, "skills", "sdlc", "scripts", "sdlc-status.sh");
 
-export const VALID_CONFIG = { schemaVersion: 1, prefix: "acme", labelPrefix: "acme-sdlc", announce: "a" };
+export const VALID_CONFIG = {
+	schemaVersion: 2,
+	prefix: "acme",
+	labelPrefix: "acme-sdlc",
+	announce: "a",
+	enforcement: "preference",
+	panels: {
+		phases: {
+			plan_review: { minVendor: 1, prefer: ["prov/model"] },
+			spec_review: { minVendor: 1, prefer: ["prov/model"] },
+			pr_review: { minVendor: 1, prefer: ["prov/model"] },
+			task_validate: { minVendor: 1, prefer: ["prov/model"] },
+		},
+	},
+};
+// Retained only for pre-v2 migration/status fixtures outside the T4 focused set.
 export const VALID_MODELS = {
 	phases: {
 		plan_review: { min_panel: 1, prefer: ["prov/model"] },
@@ -62,7 +77,6 @@ export function readyFixture(over = {}) {
 	return gitFixture({
 		files: {
 			".pi/sdlc/sdlc.config.json": JSON.stringify(VALID_CONFIG),
-			".pi/sdlc/sdlc.models.json": JSON.stringify(VALID_MODELS),
 			...over,
 		},
 	});

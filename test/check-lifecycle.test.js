@@ -1,19 +1,38 @@
 import assert from "node:assert/strict";
-import { existsSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { spawnSync } from "node:child_process";
-import test from "node:test";
+import { execFileSync, spawnSync } from "node:child_process";
+import test, { after } from "node:test";
 
 const ROOT = new URL("..", import.meta.url).pathname.replace(/\/$/, "");
 const SCRIPT = join(ROOT, "skills", "sdlc", "scripts", "check-lifecycle.mjs");
 const BODY = "```sdlc\ntrack: reversible\nslug: sdlc-adoption-bundle\n```\n";
+const OLDER_REMEDY = "config schemaVersion 1 predates this skill (requires 2) — run the setup-sdlc migration interactively to fold it forward, or pin pi-sdlc to a release before the schema-2 major";
+const NEWER_REMEDY = "config schemaVersion 3 is newer than this skill (requires 2) — upgrade pi-sdlc, or run the pinned pi-sdlc release that wrote this config";
 
-function run(args, cwd = ROOT) {
+function consumerFixture(schemaVersion = 2) {
+	const dir = mkdtempSync(join(tmpdir(), "sdlc-lifecycle-consumer-"));
+	mkdirSync(join(dir, ".pi", "sdlc"), { recursive: true });
+	mkdirSync(join(dir, "docs", "plans"), { recursive: true });
+	const config = { schemaVersion, prefix: "sdlc", labelPrefix: "sdlc", announce: "test" };
+	writeFileSync(join(dir, ".pi", "sdlc", "sdlc.config.json"), JSON.stringify(config));
+	writeFileSync(join(dir, "docs", "plans", "2026-07-16-sdlc-adoption-bundle.md"), "# plan\n");
+	writeFileSync(join(dir, "docs", "plans", "2026-07-16-sdlc-adoption-bundle-build.md"), "# build\n");
+	execFileSync("git", ["-C", dir, "init", "-q"]);
+	execFileSync("git", ["-C", dir, "-c", "user.email=test@example.com", "-c", "user.name=Test", "add", "."]);
+	execFileSync("git", ["-C", dir, "-c", "user.email=test@example.com", "-c", "user.name=Test", "-c", "commit.gpgsign=false", "commit", "-qm", "fixture"]);
+	return dir;
+}
+
+const CONSUMER = consumerFixture();
+after(() => rmSync(CONSUMER, { recursive: true, force: true }));
+
+function run(args, cwd = CONSUMER) {
 	return spawnSync(process.execPath, [SCRIPT, "--repo-root", cwd, ...args], { cwd, encoding: "utf8" });
 }
 
-function jsonRun(args, cwd = ROOT) {
+function jsonRun(args, cwd = CONSUMER) {
 	const result = run(["--format", "json", ...args], cwd);
 	try {
 		return { ...result, report: JSON.parse(result.stdout) };
@@ -37,6 +56,7 @@ test("help is available without a declaration source", () => {
 test("flags mode accepts a reversible declaration", () => {
 	const result = jsonRun(["--track", "reversible", "--slug", "sdlc-adoption-bundle"]);
 	assert.equal(result.status, 0);
+	assert.equal(result.report.schemaVersion, 1, "the independent FS9 envelope stays at schemaVersion 1");
 	assert.equal(result.report.state, "pass");
 	assert.equal(result.report.track, "reversible");
 	assert.equal(result.report.slug, "sdlc-adoption-bundle");
@@ -135,5 +155,35 @@ test("JSON mode is inert for shell metacharacters and emits one envelope", () =>
 		assert.equal(existsSync("/tmp/pwned"), false);
 	} finally {
 		rmSync(dir, { recursive: true, force: true });
+	}
+});
+
+test("CV27: config classification precedes inspection while FS9 semantics and envelope stay unchanged", () => {
+	const current = jsonRun(["--track", "none", "--reason", "compatibility check"]);
+	assert.equal(current.status, 0);
+	assert.equal(current.report.schemaVersion, 1);
+	assert.equal(current.report.checks.find((check) => check.id === "config.valid").status, "pass");
+
+	const olderRoot = consumerFixture(1);
+	try {
+		const older = jsonRun(["--track", "none", "--reason", "compatibility check"], olderRoot);
+		assert.equal(older.status, 2);
+		assert.equal(older.report.schemaVersion, 1);
+		const configCheck = older.report.checks.find((check) => check.id === "config.valid");
+		assert.equal(configCheck.status, "error");
+		assert.equal(configCheck.message, `manifest is superseded: ${OLDER_REMEDY}`);
+		assert.equal(older.report.checks.find((check) => check.id === "declaration.track").status, "pass", "declaration semantics still evaluate independently");
+		for (const id of ["artifact.plan", "artifact.spec", "artifact.build"]) assert.equal(older.report.checks.find((check) => check.id === id).status, "skip");
+	} finally {
+		rmSync(olderRoot, { recursive: true, force: true });
+	}
+
+	const newerRoot = consumerFixture(3);
+	try {
+		const newer = jsonRun(["--track", "none", "--reason", "compatibility check"], newerRoot);
+		assert.equal(newer.status, 2);
+		assert.equal(newer.report.checks.find((check) => check.id === "config.valid").message, NEWER_REMEDY);
+	} finally {
+		rmSync(newerRoot, { recursive: true, force: true });
 	}
 });

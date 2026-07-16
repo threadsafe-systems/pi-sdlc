@@ -11,10 +11,9 @@ import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { test } from "node:test";
 
-import { git, gitFixture, readyFixture, runStatus, VALID_CONFIG, VALID_MODELS } from "./fs8-helpers.js";
+import { git, gitFixture, readyFixture, runStatus, VALID_CONFIG } from "./fs8-helpers.js";
 
 const CONFIG_REL = ".pi/sdlc/sdlc.config.json";
-const MODELS_REL = ".pi/sdlc/sdlc.models.json";
 
 function checkStatus(stdout, id) {
 	const m = stdout.split("\n").find((l) => l.startsWith(`check: ${id} `));
@@ -27,7 +26,7 @@ function tmp(prefix) {
 }
 
 // ---------------------------------------------------------------------------
-// AR3 — the dirty matrix, for the manifest and for models
+// AR3 — the dirty matrix for the merged manifest
 // ---------------------------------------------------------------------------
 
 const DIRTY_MUTATIONS = {
@@ -66,21 +65,6 @@ test("AR3: every manifest dirty variant exits 3 at adoption.manifest-clean", () 
 			assert.ok(r.stdout.includes("state: not-ready"), label);
 			assert.equal(checkStatus(r.stdout, "adoption.manifest-clean"), "fail", label);
 			assert.equal(checkStatus(r.stdout, "config.valid"), "skip", label);
-		} finally {
-			rmSync(dir, { recursive: true, force: true });
-		}
-	}
-});
-
-test("AR3: every models dirty variant exits 3 at models.clean", () => {
-	for (const [label, mutate] of Object.entries(DIRTY_MUTATIONS)) {
-		const dir = readyFixture();
-		try {
-			mutate(dir, MODELS_REL, JSON.stringify(VALID_MODELS));
-			const r = runStatus(["--repo-root", dir]);
-			assert.equal(r.code, 3, `${label}: expected exit 3, got ${r.code}\n${r.stdout}${r.stderr}`);
-			assert.equal(checkStatus(r.stdout, "models.clean"), "fail", label);
-			assert.equal(checkStatus(r.stdout, "models.valid"), "skip", label);
 		} finally {
 			rmSync(dir, { recursive: true, force: true });
 		}
@@ -155,7 +139,6 @@ test("AR9: a configured monorepo subdirectory uses prefixed HEAD blob paths and 
 		files: {
 			"README.md": "monorepo",
 			[`sub/${CONFIG_REL}`]: JSON.stringify(VALID_CONFIG),
-			[`sub/${MODELS_REL}`]: JSON.stringify(VALID_MODELS),
 		},
 	});
 	try {
@@ -194,25 +177,16 @@ test("AR9: a consumer root that is a git submodule is inspected as its own workt
 test("AR9: sparse checkout omitting required committed files deterministically fails, never ready", () => {
 	const src = readyFixture();
 	const cloneParent = tmp("sdlc-sparse-");
-	const missingBoth = join(cloneParent, "missing-both");
-	const missingModels = join(cloneParent, "missing-models");
+	const missingManifest = join(cloneParent, "missing-manifest");
 	try {
 		// omit the whole .pi tree: manifest committed in HEAD but absent from the working tree
-		execFileSync("git", ["clone", "-q", "--no-checkout", src, missingBoth], { stdio: ["ignore", "pipe", "pipe"] });
-		git(missingBoth, ["sparse-checkout", "init", "--cone"]);
-		git(missingBoth, ["sparse-checkout", "set"]);
-		git(missingBoth, ["checkout", "-q"]);
-		const r1 = runStatus(["--repo-root", missingBoth]);
-		assert.equal(r1.code, 2, `sparse-omitted manifest must be config.valid:error\n${r1.stdout}${r1.stderr}`);
-		assert.equal(checkStatus(r1.stdout, "config.valid"), "error");
-
-		// omit only the models file: config validates, models.valid fails (exit 3)
-		execFileSync("git", ["clone", "-q", "--no-checkout", src, missingModels], { stdio: ["ignore", "pipe", "pipe"] });
-		git(missingModels, ["sparse-checkout", "set", "--no-cone", "/*", `!/${MODELS_REL}`]);
-		git(missingModels, ["checkout", "-q"]);
-		const r2 = runStatus(["--repo-root", missingModels]);
-		assert.equal(r2.code, 3, `sparse-omitted models must be models.valid:fail\n${r2.stdout}${r2.stderr}`);
-		assert.equal(checkStatus(r2.stdout, "models.valid"), "fail");
+		execFileSync("git", ["clone", "-q", "--no-checkout", src, missingManifest], { stdio: ["ignore", "pipe", "pipe"] });
+		git(missingManifest, ["sparse-checkout", "init", "--cone"]);
+		git(missingManifest, ["sparse-checkout", "set"]);
+		git(missingManifest, ["checkout", "-q"]);
+		const result = runStatus(["--repo-root", missingManifest]);
+		assert.equal(result.code, 2, `sparse-omitted manifest must be config.valid:error\n${result.stdout}${result.stderr}`);
+		assert.equal(checkStatus(result.stdout, "config.valid"), "error");
 	} finally {
 		rmSync(cloneParent, { recursive: true, force: true });
 		rmSync(src, { recursive: true, force: true });
@@ -224,9 +198,8 @@ test("AR9/PR-panel: a manifest committed as a symlink is never trusted as adopti
 	// so following it would validate content that is not the HEAD blob
 	const outside = tmp("sdlc-symtarget-");
 	writeFileSync(join(outside, "config.json"), JSON.stringify(VALID_CONFIG));
-	writeFileSync(join(outside, "models.json"), JSON.stringify(VALID_MODELS));
-	const viaConfig = gitFixture({ files: { ".pi/sdlc/sdlc.models.json": JSON.stringify(VALID_MODELS) }, commit: false });
-	const viaModels = gitFixture({ files: { ".pi/sdlc/sdlc.config.json": JSON.stringify(VALID_CONFIG) }, commit: false });
+	const viaConfig = gitFixture({ files: {}, commit: false });
+	mkdirSync(join(viaConfig, ".pi", "sdlc"), { recursive: true });
 	try {
 		// the active bytes (symlink target) are not the HEAD blob bytes (link
 		// text), so cleanliness itself refuses the byte-identity claim (exit 3);
@@ -238,36 +211,23 @@ test("AR9/PR-panel: a manifest committed as a symlink is never trusted as adopti
 		assert.equal(r1.code, 3, `symlinked manifest must never be ready\n${r1.stdout}${r1.stderr}`);
 		assert.equal(checkStatus(r1.stdout, "adoption.manifest-clean"), "fail");
 		assert.equal(checkStatus(r1.stdout, "config.valid"), "skip");
-
-		symlinkSync(join(outside, "models.json"), join(viaModels, MODELS_REL));
-		git(viaModels, ["add", "-A"]);
-		git(viaModels, ["commit", "-q", "-m", "symlinked models"]);
-		const r2 = runStatus(["--repo-root", viaModels]);
-		assert.equal(r2.code, 3, `symlinked models must never be ready\n${r2.stdout}${r2.stderr}`);
-		assert.equal(checkStatus(r2.stdout, "models.clean"), "fail");
 	} finally {
 		rmSync(outside, { recursive: true, force: true });
 		rmSync(viaConfig, { recursive: true, force: true });
-		rmSync(viaModels, { recursive: true, force: true });
 	}
 });
 
 test("AR3/PR-panel: assume-unchanged and skip-worktree index flags cannot smuggle uncommitted content", () => {
 	for (const flag of ["--assume-unchanged", "--skip-worktree"]) {
-		for (const [rel, failCheck, other] of [
-			[CONFIG_REL, "adoption.manifest-clean", VALID_CONFIG],
-			[MODELS_REL, "models.clean", VALID_MODELS],
-		]) {
-			const dir = readyFixture();
-			try {
-				git(dir, ["update-index", flag, rel]);
-				writeFileSync(join(dir, rel), JSON.stringify({ ...other, $comment: "smuggled" }));
-				const r = runStatus(["--repo-root", dir]);
-				assert.equal(r.code, 3, `${flag} ${rel}: expected exit 3, got ${r.code}\n${r.stdout}${r.stderr}`);
-				assert.equal(checkStatus(r.stdout, failCheck), "fail", `${flag} ${rel}`);
-			} finally {
-				rmSync(dir, { recursive: true, force: true });
-			}
+		const dir = readyFixture();
+		try {
+			git(dir, ["update-index", flag, CONFIG_REL]);
+			writeFileSync(join(dir, CONFIG_REL), JSON.stringify({ ...VALID_CONFIG, $comment: "smuggled" }));
+			const r = runStatus(["--repo-root", dir]);
+			assert.equal(r.code, 3, `${flag}: expected exit 3, got ${r.code}\n${r.stdout}${r.stderr}`);
+			assert.equal(checkStatus(r.stdout, "adoption.manifest-clean"), "fail", flag);
+		} finally {
+			rmSync(dir, { recursive: true, force: true });
 		}
 	}
 });
