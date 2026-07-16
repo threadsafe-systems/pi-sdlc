@@ -19,7 +19,7 @@ function readJson(path) {
 }
 
 const minimal = (lifecycle) => ({
-	schemaVersion: 1,
+	schemaVersion: 2,
 	prefix: "sdlc",
 	labelPrefix: "sdlc",
 	announce: "Using the sdlc skill.",

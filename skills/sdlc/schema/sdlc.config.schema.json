@@ -2,15 +2,15 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "https://github.com/threadsafe-systems/pi-sdlc/skills/sdlc/schema/sdlc.config.schema.json",
   "title": "sdlc.config.json",
-  "description": "Per-project configuration for the sdlc skill. Frozen surface FS1: additive within a major.",
+  "description": "Per-project configuration for the sdlc skill. Merged schemaVersion-2 surface: configuration and panel roster shape/types.",
   "type": "object",
   "additionalProperties": false,
   "required": ["schemaVersion", "prefix", "labelPrefix", "announce"],
   "properties": {
     "schemaVersion": {
       "type": "integer",
-      "const": 1,
-      "description": "Config major version. v1 scripts accept 1 only."
+      "const": 2,
+      "description": "Independent config schema version. Version 2 is the merged single-file shape."
     },
     "prefix": {
       "type": "string",
@@ -31,10 +31,22 @@
       "type": "object",
       "additionalProperties": false,
       "properties": {
-        "plans": { "type": "string", "minLength": 1 },
-        "specs": { "type": "string", "minLength": 1 },
-        "reviews": { "type": "string", "minLength": 1 },
-        "agents": { "type": "string", "minLength": 1 }
+        "plans": {
+          "type": "string",
+          "minLength": 1
+        },
+        "specs": {
+          "type": "string",
+          "minLength": 1
+        },
+        "reviews": {
+          "type": "string",
+          "minLength": 1
+        },
+        "agents": {
+          "type": "string",
+          "minLength": 1
+        }
       }
     },
     "tracker": {
@@ -52,8 +64,14 @@
           "additionalProperties": false,
           "required": ["number", "url"],
           "properties": {
-            "number": { "type": "integer", "minimum": 1 },
-            "url": { "type": "string", "format": "uri" }
+            "number": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "url": {
+              "type": "string",
+              "format": "uri"
+            }
           }
         }
       }
@@ -64,13 +82,27 @@
       "minProperties": 1,
       "description": "Per-phase local workflow hooks (lifecycle phase names + '*'), agent-executed under announce-on-fire discipline. before=block, after=warn.",
       "properties": {
-        "brainstorm": { "$ref": "#/definitions/phaseHooks" },
-        "plan": { "$ref": "#/definitions/phaseHooks" },
-        "spec": { "$ref": "#/definitions/phaseHooks" },
-        "build": { "$ref": "#/definitions/phaseHooks" },
-        "implement": { "$ref": "#/definitions/phaseHooks" },
-        "pr": { "$ref": "#/definitions/phaseHooks" },
-        "*": { "$ref": "#/definitions/phaseHooks" }
+        "brainstorm": {
+          "$ref": "#/definitions/phaseHooks"
+        },
+        "plan": {
+          "$ref": "#/definitions/phaseHooks"
+        },
+        "spec": {
+          "$ref": "#/definitions/phaseHooks"
+        },
+        "build": {
+          "$ref": "#/definitions/phaseHooks"
+        },
+        "implement": {
+          "$ref": "#/definitions/phaseHooks"
+        },
+        "pr": {
+          "$ref": "#/definitions/phaseHooks"
+        },
+        "*": {
+          "$ref": "#/definitions/phaseHooks"
+        }
       }
     },
     "lifecycle": {
@@ -79,19 +111,36 @@
       "required": ["profile"],
       "description": "Opt-in lifecycle scaffolding around the invariant verification kernel. The key `automation` is reserved for future unattended-lane policy (budget, escalation, graduation); nothing may squat on it.",
       "properties": {
-        "profile": { "enum": ["solo", "standard", "full", "custom"] },
-        "gates": { "$ref": "#/definitions/lifecycleGates" },
+        "profile": {
+          "enum": ["solo", "standard", "full", "custom"]
+        },
+        "gates": {
+          "$ref": "#/definitions/lifecycleGates"
+        },
         "phases": {
           "type": "object",
           "additionalProperties": false,
-          "properties": { "mergePlanSpec": { "type": "boolean", "default": false } }
+          "properties": {
+            "mergePlanSpec": {
+              "type": "boolean",
+              "default": false
+            }
+          }
         },
         "tracker": {
           "type": "object",
           "additionalProperties": false,
           "properties": {
             "publishThreshold": {
-              "oneOf": [{ "type": "integer", "minimum": 1 }, { "const": "never" }],
+              "oneOf": [
+                {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                {
+                  "const": "never"
+                }
+              ],
               "default": 2
             }
           }
@@ -99,12 +148,22 @@
         "taskValidation": {
           "type": "object",
           "additionalProperties": false,
-          "properties": { "mode": { "enum": ["subagent", "self", "off"], "default": "subagent" } }
+          "properties": {
+            "mode": {
+              "enum": ["subagent", "self", "off"],
+              "default": "subagent"
+            }
+          }
         },
         "tracks": {
           "type": "object",
           "additionalProperties": false,
-          "properties": { "defaultTrack": { "enum": ["irreversible", "reversible"], "default": "irreversible" } }
+          "properties": {
+            "defaultTrack": {
+              "enum": ["irreversible", "reversible"],
+              "default": "irreversible"
+            }
+          }
         }
       },
       "allOf": [
@@ -113,18 +172,76 @@
             "properties": {
               "phases": {
                 "required": ["mergePlanSpec"],
-                "properties": { "mergePlanSpec": { "const": true } }
+                "properties": {
+                  "mergePlanSpec": {
+                    "const": true
+                  }
+                }
               }
             },
             "required": ["phases"]
           },
           "then": {
             "properties": {
-              "gates": { "not": { "required": ["spec_review"] } }
+              "gates": {
+                "not": {
+                  "required": ["spec_review"]
+                }
+              }
             }
           }
         }
       ]
+    },
+    "enforcement": {
+      "enum": ["strict", "preference"],
+      "default": "preference",
+      "description": "Whether panel diversity-floor shortfalls fail or proceed with an advisory."
+    },
+    "panels": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["phases"],
+      "description": "Optional panel roster. Presence is a readiness concern, not structural validity.",
+      "properties": {
+        "$comment": {
+          "type": "string"
+        },
+        "authorDefault": {
+          "type": "string",
+          "pattern": "^[^/]+/.+$",
+          "description": "Fallback author (provider/model) when --author is omitted."
+        },
+        "rules": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "excludeAuthorVendor": {
+              "type": "boolean"
+            }
+          }
+        },
+        "phases": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["plan_review", "spec_review", "pr_review", "task_validate"],
+          "description": "Exactly the four panel phases; each required when panels is present.",
+          "properties": {
+            "plan_review": {
+              "$ref": "#/definitions/panelPhase"
+            },
+            "spec_review": {
+              "$ref": "#/definitions/panelPhase"
+            },
+            "pr_review": {
+              "$ref": "#/definitions/panelPhase"
+            },
+            "task_validate": {
+              "$ref": "#/definitions/panelPhase"
+            }
+          }
+        }
+      }
     }
   },
   "definitions": {
@@ -136,8 +253,12 @@
       "additionalProperties": false,
       "minProperties": 1,
       "properties": {
-        "irreversible": { "$ref": "#/definitions/gateMode" },
-        "reversible": { "$ref": "#/definitions/gateMode" }
+        "irreversible": {
+          "$ref": "#/definitions/gateMode"
+        },
+        "reversible": {
+          "$ref": "#/definitions/gateMode"
+        }
       }
     },
     "reviewGate": {
@@ -146,9 +267,20 @@
       "required": ["mode"],
       "properties": {
         "mode": {
-          "oneOf": [{ "$ref": "#/definitions/gateMode" }, { "$ref": "#/definitions/perTrackMode" }]
+          "oneOf": [
+            {
+              "$ref": "#/definitions/gateMode"
+            },
+            {
+              "$ref": "#/definitions/perTrackMode"
+            }
+          ]
         },
-        "minPanel": { "type": "integer", "minimum": 1, "default": 2 }
+        "minPanel": {
+          "type": "integer",
+          "minimum": 1,
+          "default": 2
+        }
       }
     },
     "lifecycleGates": {
@@ -159,9 +291,15 @@
           "type": "object",
           "additionalProperties": false,
           "required": ["mode"],
-          "properties": { "mode": { "enum": ["human", "off"] } }
+          "properties": {
+            "mode": {
+              "enum": ["human", "off"]
+            }
+          }
         },
-        "plan_review": { "$ref": "#/definitions/reviewGate" },
+        "plan_review": {
+          "$ref": "#/definitions/reviewGate"
+        },
         "spec_review": {
           "type": "object",
           "additionalProperties": false,
@@ -169,16 +307,26 @@
           "properties": {
             "mode": {
               "oneOf": [
-                { "$ref": "#/definitions/gateMode" },
+                {
+                  "$ref": "#/definitions/gateMode"
+                },
                 {
                   "type": "object",
                   "additionalProperties": false,
                   "minProperties": 1,
-                  "properties": { "irreversible": { "$ref": "#/definitions/gateMode" } }
+                  "properties": {
+                    "irreversible": {
+                      "$ref": "#/definitions/gateMode"
+                    }
+                  }
                 }
               ]
             },
-            "minPanel": { "type": "integer", "minimum": 1, "default": 2 }
+            "minPanel": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 2
+            }
           }
         },
         "pr_review": {
@@ -186,8 +334,14 @@
           "additionalProperties": false,
           "required": ["mode"],
           "properties": {
-            "mode": { "$ref": "#/definitions/gateMode" },
-            "minPanel": { "type": "integer", "minimum": 1, "default": 2 }
+            "mode": {
+              "$ref": "#/definitions/gateMode"
+            },
+            "minPanel": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 2
+            }
           }
         }
       }
@@ -197,14 +351,20 @@
       "additionalProperties": false,
       "minProperties": 1,
       "properties": {
-        "before": { "$ref": "#/definitions/hookList" },
-        "after": { "$ref": "#/definitions/hookList" }
+        "before": {
+          "$ref": "#/definitions/hookList"
+        },
+        "after": {
+          "$ref": "#/definitions/hookList"
+        }
       }
     },
     "hookList": {
       "type": "array",
       "minItems": 1,
-      "items": { "$ref": "#/definitions/hookItem" }
+      "items": {
+        "$ref": "#/definitions/hookItem"
+      }
     },
     "hookItem": {
       "oneOf": [
@@ -213,7 +373,10 @@
           "additionalProperties": false,
           "required": ["run"],
           "properties": {
-            "run": { "type": "string", "pattern": "^[^\\r\\n]+$" }
+            "run": {
+              "type": "string",
+              "pattern": "^[^\\r\\n]+$"
+            }
           }
         },
         {
@@ -221,11 +384,38 @@
           "additionalProperties": false,
           "required": ["use", "do"],
           "properties": {
-            "use": { "type": "string", "pattern": "^(skill|tool):[a-z][a-z0-9_-]*$" },
-            "do": { "type": "string", "pattern": "^[^\\r\\n]+$" }
+            "use": {
+              "type": "string",
+              "pattern": "^(skill|tool):[a-z][a-z0-9_-]*$"
+            },
+            "do": {
+              "type": "string",
+              "pattern": "^[^\\r\\n]+$"
+            }
           }
         }
       ]
+    },
+    "panelPhase": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["prefer"],
+      "properties": {
+        "minVendor": {
+          "type": "integer",
+          "minimum": 1,
+          "default": 1
+        },
+        "prefer": {
+          "type": "array",
+          "minItems": 1,
+          "description": "Ordered provider/model preference strings. Each entry may optionally carry pi's ':<thinking>' suffix. Shape-only validation deliberately permits provider version suffixes.",
+          "items": {
+            "type": "string",
+            "pattern": "^[^/]+/.+$"
+          }
+        }
+      }
     }
   }
 }

@@ -132,7 +132,7 @@ test("RL5: inspectRoot honours $SDLC_ROOT when no explicit option is given", () 
 // ---------------------------------------------------------------------------
 
 const GOOD_CONFIG = {
-	schemaVersion: 1,
+	schemaVersion: 2,
 	prefix: "acme",
 	labelPrefix: "acme-sdlc",
 	announce: "hi",
@@ -167,7 +167,7 @@ test("RL6: inspectConfig — valid input yields [], non-objects yield the determ
 test("RL7: inspectConfig — aggregates every issue in validation-rule order, never throws", () => {
 	const raw = {
 		bogus: 1,
-		schemaVersion: 2,
+		schemaVersion: 3,
 		prefix: "BAD CAPS",
 		labelPrefix: "ok",
 		announce: "",
@@ -181,7 +181,7 @@ test("RL7: inspectConfig — aggregates every issue in validation-rule order, ne
 	assert.deepEqual(inspectConfig(raw), issues);
 	// validation-rule order: unknown key first, then schemaVersion, then prefix...
 	assert.equal(issues[0].message, "unknown key 'bogus'");
-	assert.equal(issues[1].message, "schemaVersion must be 1 (got 2)");
+	assert.equal(issues[1].message, "schemaVersion must be 2 (got 3)");
 	assert.match(issues[2].message, /^prefix must match /);
 	const messages = issues.map((i) => i.message);
 	assert.ok(messages.includes("announce must be a non-empty string"));
@@ -250,11 +250,11 @@ test("RL9: validateConfig first diagnostic is byte-identical to the first collec
 	const p = "/x/.pi/sdlc/sdlc.config.json";
 	const cases = [
 		null,
-		{ bogus: 1, schemaVersion: 1, prefix: "acme", labelPrefix: "acme", announce: "a" },
-		{ schemaVersion: 1, prefix: "acme", labelPrefix: "acme", announce: "a", paths: { plans: "/abs" } },
-		{ schemaVersion: 1, prefix: "acme", labelPrefix: "acme", announce: "a", paths: { plans: "..\\\\escape" } },
-		{ schemaVersion: 1, prefix: "acme", labelPrefix: "acme", announce: "a", hooks: {} },
-		{ schemaVersion: 1, prefix: "acme", labelPrefix: "acme", announce: "a", hooks: { plan: { before: [{ run: "x", use: "tool:t", do: "y" }] } } },
+		{ bogus: 1, schemaVersion: 2, prefix: "acme", labelPrefix: "acme", announce: "a" },
+		{ schemaVersion: 2, prefix: "acme", labelPrefix: "acme", announce: "a", paths: { plans: "/abs" } },
+		{ schemaVersion: 2, prefix: "acme", labelPrefix: "acme", announce: "a", paths: { plans: "..\\\\escape" } },
+		{ schemaVersion: 2, prefix: "acme", labelPrefix: "acme", announce: "a", hooks: {} },
+		{ schemaVersion: 2, prefix: "acme", labelPrefix: "acme", announce: "a", hooks: { plan: { before: [{ run: "x", use: "tool:t", do: "y" }] } } },
 	];
 	for (const raw of cases) {
 		const { code, stderr } = validatorExit("validateConfig", raw, p);
