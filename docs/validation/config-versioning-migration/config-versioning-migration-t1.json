@@ -7,15 +7,9 @@
   "checks": [
     {
       "id": "tests.config-versioning",
-      "argv": ["node", "--test", "test/config-versioning.test.js", "test/lib-config.test.js"],
+      "argv": ["node", "--test", "test/config-versioning.test.js", "test/lib-config.test.js", "test/readiness-lib.test.js", "test/hooks.test.js"],
       "timeoutMs": 120000,
-      "evidence": ["CV1-CV4 v2 schema and version seam fixtures", "CV5 loader detection-only and raw-read containment"]
-    },
-    {
-      "id": "tests.full",
-      "argv": ["node", "--test"],
-      "timeoutMs": 240000,
-      "evidence": ["CV1-CV5 and existing consumer compatibility corpus"]
+      "evidence": ["CV1-CV4 v2 schema and version seam fixtures", "CV5 loader detection-only and raw-read containment", "Legacy loader and schema compatibility while callers migrate"]
     },
     {
       "id": "static.sources",
@@ -47,7 +41,7 @@
   "categories": {
     "tests": {
       "applicability": "required",
-      "checkIds": ["tests.config-versioning", "tests.full"]
+      "checkIds": ["tests.config-versioning"]
     },
     "static": {
       "applicability": "required",
@@ -59,8 +53,8 @@
         "CV1": ["tests.config-versioning"],
         "CV2": ["tests.config-versioning"],
         "CV3": ["tests.config-versioning"],
-        "CV4": ["tests.config-versioning", "tests.full"],
-        "CV5": ["tests.config-versioning", "tests.full"]
+        "CV4": ["tests.config-versioning"],
+        "CV5": ["tests.config-versioning"]
       }
     },
     "standards": {

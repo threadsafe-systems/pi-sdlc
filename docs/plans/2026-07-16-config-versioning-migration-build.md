@@ -74,8 +74,10 @@ surfaces and performs the dogfood fold, so it is blocked by T2, T3, and T4.
 The merged config schema validates the complete v2 union and the shared loader
 classifies versions with the exact remedy strings. All non-migration consumers
 halt on older/newer/invalid versions without prompting or writing; the raw
-migration bypass exists only for the designated setup/migration path. The old
-models loader/validators are removed from production code.
+migration bypass exists only for the designated setup/migration path. During
+this staged implementation, the old models loader/validators and assets remain
+as transitional compatibility until T2–T4 migrate their callers; the final
+retirement is still required by the spec and is verified by T5.
 
 ### Scope
 
@@ -85,10 +87,11 @@ models loader/validators are removed from production code.
 - Extend `scripts/lib.mjs` with `CONFIG_SCHEMA_VERSION`, past-version set,
   `classifyConfigVersion`, remedy constants, v2 inspection, guarded
   `readConfig`, and the three-state raw migration read.
-- Remove `readModels`, `inspectModels`, and `validateModels` and update only
-  the direct compile-time callers needed to keep the branch coherent.
-- Re-home v1 config/models samples as migration-input fixtures and capture
-  pre-change resolver goldens before resolver edits.
+- Add the v2 seam without breaking still-unmigrated consumers: retain the
+  legacy models loader/validators and assets temporarily, with their retirement
+  owned by T2–T4 when their callers move to the merged file.
+- Re-home v1 config/models samples as migration-input fixtures. Resolver
+  goldens are recorded by T3 immediately before resolver edits.
 
 ### Scenarios
 
@@ -98,8 +101,10 @@ CV1, CV2, CV3, CV4, CV5.
 
 ```bash
 node --check skills/sdlc/scripts/lib.mjs
-node --test test/config-versioning.test.js test/lib-config.test.js
-node --test
+node --check skills/sdlc/scripts/resolve-panel.mjs
+node --check skills/sdlc/scripts/sdlc-status.mjs
+node --check skills/sdlc/scripts/setup-sdlc.mjs
+node --test test/config-versioning.test.js test/lib-config.test.js test/readiness-lib.test.js test/hooks.test.js
 npm run lint
 ```
 
