@@ -17,21 +17,23 @@ while making every floor advisory would discard adopters' deliberate controls.
 
 ## Decision
 
-The consumer owns the `strict | preference` enforcement toggle and its panel
-floors. `strict` keeps shortfall and reachable author-exclusion failures
-blocking. `preference` forms the best available panel, may readmit the author
-model only to address a shortfall, reports the shortfall on stderr, and exits 0
-when a panel can form. The advisory is carried into the phase writeup and, for a
-PR review, into the PR; no standalone decision log is committed.
+The consumer owns the `review.onShortfall` toggle (`fail | proceed`; renamed
+from the original `strict | preference` in v3, ADR 0026) and its panel floors.
+`fail` keeps shortfall and reachable author-exclusion failures blocking.
+`proceed` forms the best available panel, may readmit the author model only to
+address a shortfall, reports the shortfall on stderr, and exits 0 when a panel
+can form. The advisory is carried into the phase writeup and, for a PR review,
+into the PR; no standalone decision log is committed.
 
-The toggle is subordinate to OL-A gate modes: a gate that is off or human does
-not become a panel gate. Where a panel forms, lifecycle `minPanel` is the model
-axis and excludes `minVendor`; without lifecycle configuration, `minVendor` is
-the vendor axis. Maintainers recommend defaults but do not wield the floor.
+The toggle is subordinate to the gate modes: a gate that is off or human does
+not become a panel gate. Where a panel forms, `review.panelSize` (with an
+optional per-phase `panels.phases.<phase>.panelSize` override) is the single
+distinct-model floor on the model-identity axis; there is no vendor axis in v3.
+Maintainers recommend defaults but do not wield the floor.
 
 ## Consequences
 
 - Adopters can retain hard gates or choose best-effort governance explicitly.
 - Machine stdout remains reserved for panel/list and `--emit-tasks` output;
   advisories use stderr.
-- The durable waiver is the committed `preference` posture, not a generated log.
+- The durable waiver is the committed `proceed` posture, not a generated log.

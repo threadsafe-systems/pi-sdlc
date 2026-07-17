@@ -168,7 +168,9 @@ if (phase === "spec_review" && shape.separateSpec === false) {
 	fail("resolve-panel: the committed shape has no spec gate (shape.separateSpec is false) — no panel to resolve", 1);
 }
 if (phase === "task_validate") {
-	if (effective("tasks") === "off") fail("resolve-panel: task validation is off in the committed shape (review.tasks)", 1);
+	const mode = effective("tasks");
+	if (mode === "off") fail("resolve-panel: task validation is off in the committed shape (review.tasks)", 1);
+	if (mode !== "subagent") fail(`resolve-panel: task validation is '${mode}' in the committed shape (review.tasks) — only 'subagent' resolves a validator panel`, 1);
 } else {
 	const mode = effective(DIAL_FOR[phase]);
 	if (decomposeGateMode(mode).reviewer === "none") fail(`resolve-panel: ${DIAL_FOR[phase]} gate mode is '${mode}' in the committed shape — no panel to resolve`, 1);

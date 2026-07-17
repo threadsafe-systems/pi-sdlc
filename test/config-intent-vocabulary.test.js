@@ -171,3 +171,33 @@ test("ICA6: classifyConfigVersion is total over the version matrix", () => {
 	assert.equal(classifyConfigVersion({}).kind, "invalid");
 	assert.equal(classifyConfigVersion(null).kind, "invalid");
 });
+
+// ICA20: syntax-aware purge — retired config vocabulary is not read from any
+// runtime path (allowlist: retired-flag diagnostics in setup-sdlc.mjs).
+test("ICA20: retired config vocabulary has no runtime reader", () => {
+	const retired = ["profile", "minVendor", "excludeAuthorVendor", "enforcement", "mergePlanSpec", "publishThreshold"];
+	const runtimeScripts = ["lib.mjs", "resolve-panel.mjs", "check-lifecycle.mjs", "sdlc-status.mjs"];
+	for (const file of runtimeScripts) {
+		const body = readFileSync(join(scripts, file), "utf8");
+		for (const token of retired) assert.doesNotMatch(body, new RegExp(`\\b${token}\\b`), `${file} references retired '${token}'`);
+	}
+	// setup-sdlc.mjs may only name retired FLAGS in its retirement diagnostics.
+	const setup = readFileSync(join(scripts, "setup-sdlc.mjs"), "utf8");
+	for (const token of ["minVendor", "excludeAuthorVendor", "mergePlanSpec", "publishThreshold"]) {
+		assert.doesNotMatch(setup, new RegExp(`\\b${token}\\b`), `setup-sdlc.mjs references retired '${token}'`);
+	}
+	// 'profile'/'enforcement' appear only inside the retired-flag handling (case label or SetupError).
+	for (const line of setup.split("\n")) {
+		if (/\b(profile|enforcement)\b/.test(line)) assert.match(line, /retired|case "--(profile|enforcement)"/, `unexpected retired vocab: ${line.trim()}`);
+	}
+});
+
+// ICA21: SKILL points the tracker-publish decision at shape.publishToTracker.
+test("ICA21: SKILL reads shape.publishToTracker (no hardcoded task-count law)", () => {
+	const skill = readFileSync(join(repo, "skills", "sdlc", "SKILL.md"), "utf8");
+	assert.match(skill, /shape\.publishToTracker/);
+	// the tracker-backed Build section must not re-assert a fixed "two or more tasks" law
+	const start = skill.indexOf("## Build — tracker-backed");
+	const section = skill.slice(start, start + 2500);
+	assert.doesNotMatch(section, /\btwo or more tasks\b/);
+});

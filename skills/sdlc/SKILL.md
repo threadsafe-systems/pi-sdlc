@@ -230,8 +230,9 @@ reopening the build-plan doc:
   `→ Done` on merge/close, `→ Blocked` on an external stall. The epic itself
   moves to `Done` only once every sub-issue is closed.
 
-A single-task build stays a plain committed build-plan doc — the tracker
-overhead isn't proportionate for one task. **Implement** then works the
+A build below the committed `shape.publishToTracker` threshold (or any build
+when it is `"never"`) stays a plain committed build-plan doc — the tracker
+overhead isn't proportionate. **Implement** then works the
 board's frontier one sub-issue at a time, same discipline as working a map:
 claim before starting, close and update the board on completion, and let a
 PR's `Closes #<sub-issue>` list do the bookkeeping it already does today.
@@ -529,7 +530,8 @@ governing docs are historical record and are not migrated.
   implementation without a Build correction and renewed approval.
 - A stale whole-file validator prompt override claiming portable validation
   without adopting the PV1 manifest / PV2 runner contract.
-- A build plan with two or more tasks that skips the epic/sub-issue/board
+- A build plan meeting the committed `shape.publishToTracker` threshold that
+  skips the epic/sub-issue/board
   publish step.
 - Treating the tracker (map, epic, sub-issues, board) as the source of truth
   instead of the committed doc it projects.

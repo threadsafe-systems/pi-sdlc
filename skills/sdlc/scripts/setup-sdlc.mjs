@@ -128,13 +128,15 @@ function assembleConfig(opts, tracker, hooks) {
 	return config;
 }
 
-// Build the explicit v3 review/shape/overrides from a preset seed + per-dial
-// flag overrides + repeatable --override entries. Presets are never persisted.
-function reviewShapeFromOptions(opts) {
-	const base = structuredClone(PRESETS[opts.preset ?? "standard"]);
-	const review = base.review;
-	const shape = base.shape;
-	let overrides = base.overrides;
+// Build the explicit v3 review/shape/overrides from a seed + per-dial flag
+// overrides + repeatable --override entries. The seed is the chosen preset
+// (or standard) for a fresh write, or an existing config's intent blocks when
+// patching a single dial. Presets are never persisted.
+function reviewShapeFromOptions(opts, base) {
+	const seed = base ?? structuredClone(PRESETS[opts.preset ?? "standard"]);
+	const review = { ...seed.review };
+	const shape = { ...seed.shape };
+	let overrides = seed.overrides ? structuredClone(seed.overrides) : undefined;
 	if (opts.reviewBrainstorm !== undefined) review.brainstorm = opts.reviewBrainstorm;
 	if (opts.reviewDesign !== undefined) review.design = opts.reviewDesign;
 	if (opts.reviewCode !== undefined) review.code = opts.reviewCode;
@@ -227,6 +229,7 @@ function parseArgs(argv) {
 			}
 			case "--default-track":
 				opts.defaultTrack = value();
+				if (opts.defaultTrack !== "irreversible" && opts.defaultTrack !== "reversible") throw new SetupError("setup-sdlc: --default-track must be irreversible or reversible");
 				opts.runFlag = true;
 				opts.rootFlagOnly = false;
 				break;
@@ -561,16 +564,27 @@ function writeBundle(root, opts, cfg, hooks, tracker, residueAssets = []) {
 		report.assets.push({ id: "config", action: "refused", message: `refused ${configTarget}: ${REMEDY_SCHEMA_NEWER(existingVersion.version)}`, remediation: "upgrade pi-sdlc or run the pinned release; --force to overwrite" });
 	} else if (existingVersion && existingVersion.kind === "older" && !opts.force) {
 		report.assets.push({ id: "config", action: "refused", message: `refused ${configTarget}: ${REMEDY_SCHEMA_OLDER(existingVersion.version)}`, remediation: "re-run with --force to write a fresh v3 config, or pin the prior release" });
+	} else if (existingVersion && existingVersion.kind !== "current" && opts.force) {
+		// Older/newer schema + --force: honest clean-break replacement.
+		writeFileSync(configTarget, `${JSON.stringify(cfg, null, 2)}\n`);
+		report.assets.push({ id: "config", action: "upgraded", message: `upgraded ${configTarget}` });
 	} else if (intentFlags && !identityFlags && existingVersion && existingVersion.kind === "current") {
 		const existing = JSON.parse(readFileSync(configTarget, "utf8"));
-		if (existing.overrides !== undefined && cfg.overrides === undefined && !opts.force) {
-			report.assets.push({ id: "config", action: "refused", message: `refused patch that would delete consumer-authored overrides in ${configTarget}`, remediation: "re-run with --force to drop the existing overrides block" });
+		// A preset is a whole intent statement; per-dial-only flags patch the
+		// existing blocks so unrelated dials are preserved (not reset to standard).
+		const patched = opts.preset === undefined ? reviewShapeFromOptions(opts, { review: existing.review, shape: existing.shape, overrides: existing.overrides }) : { review: cfg.review, shape: cfg.shape, overrides: cfg.overrides };
+		// Data-loss guard: refuse (without --force) when the new intent blocks
+		// would delete or alter an existing overrides track they do not carry.
+		const existingTracks = Object.keys(existing.overrides ?? {});
+		const clobbered = existingTracks.filter((t) => JSON.stringify(existing.overrides[t]) !== JSON.stringify(patched.overrides?.[t]));
+		if (clobbered.length > 0 && !opts.force) {
+			report.assets.push({ id: "config", action: "refused", message: `refused patch that would delete or alter consumer-authored overrides (${clobbered.join(", ")}) in ${configTarget}`, remediation: "re-run with --force to change the existing overrides block" });
 		} else {
 			const before = { review: existing.review, shape: existing.shape, overrides: existing.overrides };
-			existing.review = cfg.review;
-			existing.shape = cfg.shape;
-			if (cfg.overrides === undefined) delete existing.overrides;
-			else existing.overrides = cfg.overrides;
+			existing.review = patched.review;
+			existing.shape = patched.shape;
+			if (patched.overrides === undefined) delete existing.overrides;
+			else existing.overrides = patched.overrides;
 			const patchIssues = inspectConfig(existing);
 			if (patchIssues.length > 0) {
 				report.exitCode = 2;

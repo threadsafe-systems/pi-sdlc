@@ -189,26 +189,6 @@ export function readConfig(root, { requireManifest = false } = {}) {
 	};
 }
 
-// Setup/migration-only bypass. Absence and malformation remain distinct so a
-// malformed consumer file can never be mistaken for an absent roster.
-export function readConfigRawForMigration(root) {
-	const readRaw = (p) => {
-		if (!existsSync(p)) return { status: "absent" };
-		let text = "";
-		try {
-			text = readFileSync(p, "utf8");
-			return { status: "parsed", value: JSON.parse(text), text };
-		} catch (error) {
-			return { status: "malformed", error: String(error?.message ?? error), text };
-		}
-	};
-	const dir = join(root, ".pi", "sdlc");
-	return {
-		config: readRaw(join(dir, "sdlc.config.json")),
-		models: readRaw(join(dir, "sdlc.models.json")),
-	};
-}
-
 // Non-exiting FS1 issue collector (spec §2.5). Empty array means structurally
 // valid. Issue order is deterministic by validation-rule order; the first
 // element is always the diagnostic the exiting validator reports.

@@ -158,3 +158,17 @@ test("ICA16: onShortfall fail exits 1 below floor", () => {
 	assert.equal(status, 1);
 	assert.match(stderr, /FAILED to reach distinct-model minPanel/);
 });
+
+// M1 (PR panel): task_validate refuses any tasks mode except subagent.
+test("ICA14: review.tasks self refuses task_validate (only subagent resolves)", () => {
+	const { status, stderr } = run(fixture({ review: { tasks: "self" } }), "task_validate");
+	assert.equal(status, 1);
+	assert.match(stderr, /only 'subagent' resolves/);
+});
+
+// ICA24: refusal precedence — separateSpec:false + design:human → no-spec-gate, not no-panel.
+test("ICA24: separateSpec false precedes the human/off refusal for spec_review", () => {
+	const { status, stderr } = run(fixture({ review: { design: "human" }, shape: { separateSpec: false } }), "spec_review");
+	assert.equal(status, 1);
+	assert.match(stderr, /no spec gate \(shape.separateSpec is false\)/);
+});

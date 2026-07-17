@@ -3,7 +3,7 @@
 # All logic lives in resolve-panel.mjs (JSON handling is cleaner in node).
 #
 # Usage: resolve-panel.sh <plan_review|spec_review|pr_review|task_validate> \
-#          [--author <provider/model|vendor>] [--pong] \
+#          [--author <provider/model>] [--pong] \
 #          [--track irreversible|reversible] [--emit-tasks <agent>] \
 #          [--config DIR|--repo-root DIR]
 set -euo pipefail

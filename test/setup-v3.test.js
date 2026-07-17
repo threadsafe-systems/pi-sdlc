@@ -2,7 +2,7 @@
 
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
-import { mkdtempSync, readFileSync } from "node:fs";
+import { mkdirSync, mkdtempSync, readFileSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -90,7 +90,7 @@ test("ICA19: patch that would delete consumer overrides refuses without --force"
 	run(root, ["--preset", "full", "--prefix", "keep", "--label-prefix", "keep-sdlc", "--yes"]); // has overrides
 	const r = run(root, ["--preset", "solo"]); // solo has no overrides
 	assert.equal(r.code, 1);
-	assert.match(r.stdout, /refused patch that would delete consumer-authored overrides/);
+	assert.match(r.stdout, /delete or alter consumer-authored overrides/);
 	assert.deepEqual(cfg(root).overrides, { reversible: { review: { design: "human" } } }); // untouched
 	const forced = run(root, ["--preset", "solo", "--force"]);
 	assert.equal(forced.code, 0, forced.stderr);
@@ -113,3 +113,47 @@ for (const [spec, needle] of [
 		assert.match(r.stderr, needle);
 	});
 }
+
+// M2 (PR panel): older-schema config + --force is an honest clean-break replacement.
+test("ICA6: older-schema config + --force replaces with a fresh v3 config", () => {
+	const root = mkRoot();
+	const p = join(root, ".pi", "sdlc", "sdlc.config.json");
+	mkdirSync(join(root, ".pi", "sdlc"), { recursive: true });
+	writeFileSync(p, JSON.stringify({ schemaVersion: 2, prefix: "x", labelPrefix: "x", announce: "x" }));
+	const refused = run(root, ["--preset", "standard"]);
+	assert.equal(refused.code, 1);
+	assert.match(refused.stdout, /refused/);
+	assert.equal(JSON.parse(readFileSync(p, "utf8")).schemaVersion, 2, "untouched without --force");
+	const forced = run(root, ["--preset", "standard", "--prefix", "x", "--label-prefix", "x", "--force"]);
+	assert.equal(forced.code, 0, forced.stderr);
+	assert.equal(cfg(root).schemaVersion, 3);
+});
+
+// M3 (PR panel): a single-dial patch (no --preset) preserves unrelated dials.
+test("ICA19: a single-dial patch preserves the other committed dials", () => {
+	const root = mkRoot();
+	run(root, ["--preset", "solo", "--prefix", "keep", "--label-prefix", "keep-sdlc", "--yes"]);
+	const before = cfg(root);
+	const r = run(root, ["--review-code", "human"]);
+	assert.equal(r.code, 0, r.stderr);
+	const after = cfg(root);
+	assert.equal(after.review.code, "human"); // changed
+	assert.equal(after.review.brainstorm, before.review.brainstorm); // preserved (off)
+	assert.equal(after.review.tasks, before.review.tasks); // preserved (self)
+	assert.equal(after.review.panelSize, before.review.panelSize); // preserved (1)
+	assert.equal(after.shape.publishToTracker, before.shape.publishToTracker); // preserved (never)
+});
+
+// H1 (PR panel): a preset patch that would drop a consumer's other-track override refuses.
+test("ICA19: preset patch refuses when it would drop a consumer override track", () => {
+	const root = mkRoot();
+	run(root, ["--preset", "full", "--override", "irreversible:code:advisory", "--prefix", "keep", "--label-prefix", "keep-sdlc", "--yes"]);
+	// full carries only overrides.reversible; re-applying full would drop overrides.irreversible.
+	const r = run(root, ["--preset", "full"]);
+	assert.equal(r.code, 1);
+	assert.match(r.stdout, /delete or alter consumer-authored overrides.*irreversible/);
+	assert.ok(cfg(root).overrides.irreversible, "irreversible override preserved");
+	const forced = run(root, ["--preset", "full", "--force"]);
+	assert.equal(forced.code, 0, forced.stderr);
+	assert.equal(cfg(root).overrides.irreversible, undefined);
+});

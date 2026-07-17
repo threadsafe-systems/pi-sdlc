@@ -1,7 +1,8 @@
 #!/usr/bin/env node
-// sdlc-status.mjs — FS8 v2 four-state readiness inspection (spec
-// docs/specs/2026-07-16-config-versioning-migration.md §6). Read-only: bounded
-// git/filesystem checks, no hooks, no model calls, no network, no mutation.
+// sdlc-status.mjs — FS8 four-state readiness inspection (config-versioning
+// spec §6; version classification updated for schemaVersion 3 per ADR 0026).
+// Read-only: bounded git/filesystem checks, no hooks, no model calls, no
+// network, no mutation.
 //
 // Usage: sdlc-status.mjs [--config DIR | --repo-root DIR] [--format text|json]
 // Exit: 0 ready; 1 not-adopted (HEAD has no manifest blob); 2 error
