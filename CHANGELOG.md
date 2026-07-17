@@ -1,3 +1,31 @@
+## [2.0.0](https://github.com/threadsafe-systems/pi-sdlc/compare/v1.0.0...v2.0.0) (2026-07-17)
+
+### ⚠ BREAKING CHANGES
+
+* **release:** shorthand (verified: 39748ab's feat(config)!: commit produced
+"no release"). conventionalcommits recognises both the ! shorthand and the
+* **release:** footer, so either form now correctly triggers a major
+release. No commit-type vocabulary change; existing conventional commits
+continue to classify the same way (verified via analyzeCommits fixture).
+
+* fix(release): pin conventionalcommits preset to 9.3.1
+
+v10.2.1 (npm latest) ships a function-based template writer that
+@semantic-release/release-notes-generator's Handlebars-based
+conventional-changelog-writer 8.4.0 cannot render: generateNotes()
+silently produced only the version heading, dropping every Features/Bug
+Fixes/BREAKING CHANGES section (reproduced and confirmed). 9.3.1 is the
+version release-notes-generator's own devDependencies test against;
+commit-analyzer (tested against 8.0.0) still classifies major releases
+correctly against 9.3.1 (reproduced). Caret range stays within 9.x so an
+untested major bump can't silently regress this again.
+
+* chore: retrigger CI against the corrected PR body
+
+### Bug Fixes
+
+* **release:** switch semantic-release to conventionalcommits preset, pinned 9.3.1 ([#72](https://github.com/threadsafe-systems/pi-sdlc/issues/72)) ([04d6361](https://github.com/threadsafe-systems/pi-sdlc/commit/04d6361a90215fb08a9a43281dddcc7bdc28387e))
+
 # [1.0.0](https://github.com/threadsafe-systems/pi-sdlc/compare/v0.8.0...v1.0.0) (2026-07-17)
 
 
