@@ -109,7 +109,7 @@
     {
       "id": "setup-template.source",
       "source": "templates/setup-sdlc.md",
-      "assertion": "In pi, run the skill-relative command below",
+      "assertion": "This template can run before the `sdlc` skill has ever been loaded in this",
       "targetKind": "file",
       "ownership": "package",
       "required": true,
