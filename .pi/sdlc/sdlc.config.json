@@ -44,7 +44,7 @@
       },
       "pr_review": {
         "minVendor": 3,
-        "prefer": ["anthropic/claude-opus-4-8:medium", "openai-codex/gpt-5.6-sol:medium", "zai/glm-5.2:medium", "deepseek/deepseek-v4-pro:medium"]
+        "prefer": ["anthropic/claude-fable-5:high", "openai-codex/gpt-5.6-sol:high", "google/gemini-3.1-pro-preview:high", "deepseek/deepseek-v4-pro:high"]
       },
       "task_validate": {
         "minVendor": 1,

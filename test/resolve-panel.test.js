@@ -25,6 +25,8 @@ const credentialVars = [
 	"AWS_SECRET_ACCESS_KEY",
 	"AWS_WEB_IDENTITY_TOKEN_FILE",
 	"DEEPSEEK_API_KEY",
+	"GEMINI_API_KEY",
+	"GOOGLE_API_KEY",
 	"KIMI_API_KEY",
 	"MINIMAX_API_KEY",
 	"MOONSHOT_API_KEY",
@@ -60,9 +62,10 @@ function fixture(config, providers = []) {
 	return { root, home };
 }
 
-function run({ root, home }, phase = "plan_review", args = []) {
+function run({ root, home }, phase = "plan_review", args = [], extraEnv = {}) {
 	const env = { ...process.env, HOME: home };
 	for (const key of credentialVars) delete env[key];
+	Object.assign(env, extraEnv);
 	const result = spawnSync(process.execPath, [resolver, phase, "--config", root, ...args], { encoding: "utf8", env });
 	return { status: result.status, stdout: result.stdout, stderr: result.stderr };
 }
@@ -96,6 +99,13 @@ test("CV21: preference shortfalls proceed on both axes and keep machine stdout p
 	result = run(fixture(baseConfig({ enforcement: "preference", lifecycle }), ["p", "q"]));
 	assert.equal(result.status, 0);
 	assert.match(result.stderr, /panel below target: minPanel=3, achieved=2/);
+});
+
+test("Google panel entries recognize Gemini environment credentials", () => {
+	const config = baseConfig({ prefer: ["google/gemini-3.5-flash"] });
+	const result = run(fixture(config), "pr_review", [], { GEMINI_API_KEY: "fixture" });
+	assert.equal(result.status, 0, result.stderr);
+	assert.deepEqual(lines(result.stdout), ["google/gemini-3.5-flash"]);
 });
 
 test("CV22: strict shortfalls fail and absent enforcement defaults to preference", () => {

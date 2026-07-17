@@ -90,6 +90,7 @@ const ENV_VARS = {
 	moonshotai: ["MOONSHOT_API_KEY"],
 	"kimi-coding": ["KIMI_API_KEY"],
 	deepseek: ["DEEPSEEK_API_KEY"],
+	google: ["GEMINI_API_KEY", "GOOGLE_API_KEY"],
 	openai: ["OPENAI_API_KEY"],
 	zai: ["ZAI_API_KEY"],
 	"zai-coding-cn": ["ZAI_CODING_CN_API_KEY"],
