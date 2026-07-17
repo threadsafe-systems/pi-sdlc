@@ -14,7 +14,9 @@
   `docs/reviews/plan-sdlc-lifecycle-telemetry-2026-07-17/consolidated.md`
   (this is revision 2: rev 2 incorporated all 11 findings F1–F11; none
   dismissed).
-- Human gate: pending.
+- Human gate: Plan rev 2 approved by Neil Chambers on 2026-07-17 (round-2
+  verification pass waived; all round-1 findings incorporated, none
+  disputed).
 
 ## Objective
 
