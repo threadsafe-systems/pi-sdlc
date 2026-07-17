@@ -140,7 +140,8 @@ and emits the schemaVersion-2 FS10 report with retired/seeding flags enforced.
 
 - Add `scripts/migrate.mjs` with exhaustive mapping, unmappable reporting,
   fsync/rename/unlink recovery ordering, and fault-injection seams.
-- Add setup migration detection, live-TTY confirmation, non-TTY/decline and
+- Add setup migration detection, live-TTY confirmation with an explicit
+  single-writer boundary, prompt-time input revalidation, non-TTY/decline and
   flag-mixing refusals, independent models/staging residue prompts, and
   `--yes` non-confirmation behavior.
 - Change fresh setup to write explicit `enforcement` and optional seeded
@@ -167,8 +168,9 @@ npm run lint
       unmappable path and leave directory bytes untouched.
 - [ ] Faults at staging write/fsync/rename/unlink expose only the two allowed
       recovery classes; v2 consumers ignore models residue.
-- [ ] TTY accept/decline, non-TTY, `--yes`, and mutation-flag mixing match the
-      exact migration contract and reports.
+- [ ] TTY accept/decline, the single-writer warning and prompt-time edit
+      refusal, non-TTY, `--yes`, and mutation-flag mixing match the exact
+      migration contract and reports.
 - [ ] Fresh setup defaults to explicit preference; strict and panel seeding
       are opt-in and `--with-models` is a usage error.
 - [ ] Every report envelope, including refusal and catastrophic paths, is

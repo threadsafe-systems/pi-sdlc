@@ -466,6 +466,7 @@ async function migrateConfig(root, opts) {
 	if (migrationFlagsPresent(opts)) throw new SetupError(MIGRATE_FIRST, 1);
 	if (!stdin.isTTY) throw new SetupError(`setup-sdlc: ${REMEDY_SCHEMA_OLDER(classification.version)}`, 1);
 	console.error(`setup-sdlc: migration will fold .pi/sdlc/sdlc.models.json into .pi/sdlc/sdlc.config.json (schemaVersion ${CONFIG_SCHEMA_VERSION}).`);
+	console.error("setup-sdlc: single-writer boundary — after answering yes, do not modify either config file or run another setup/migration until this command finishes.");
 	if (!(await askConfirmation("migrate .pi/sdlc/sdlc.config.json to schemaVersion 2 now?"))) throw new SetupError(`setup-sdlc: ${REMEDY_SCHEMA_OLDER(classification.version)}`, 1);
 	const confirmedFiles = readConfigRawForMigration(root);
 	if (!rawFileUnchanged(files.config, confirmedFiles.config) || !rawFileUnchanged(files.models, confirmedFiles.models)) {

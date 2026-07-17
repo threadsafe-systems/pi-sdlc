@@ -1,9 +1,9 @@
 # Spec: config versioning & migration contract for consumer surfaces
 
-- Date: 2026-07-16 (rev 2 — rev 1 was the pre-panel draft; rev 2
-  incorporates all 14 adjudicated findings from the spec-review panel cycle
-  1, see `docs/reviews/spec-review-config-versioning-migration-2026-07-16/
-  consolidated.md`)
+- Date: 2026-07-16 (rev 3 — rev 1 was the pre-panel draft; rev 2
+  incorporated all 14 adjudicated findings from the spec-review panel cycle;
+  rev 3 records the owner-ratified single-writer boundary from PR review, see
+  `docs/reviews/pr-review-config-versioning-migration-2026-07-16/consolidated.md`)
 - Slug: `config-versioning-migration`
 - Track: **irreversible** (merges FS1 + FS2 into one committed schema v2,
   reopens FS8 → v2, reopens the FS5 `resolve-panel` CLI contract, reopens the
@@ -277,8 +277,9 @@ directory-bytes-untouched (CV9).
 
 Ordinary file operations cannot make a two-file transition atomic; the
 guarantee is **recoverability** across a process crash or kill between any
-two steps — not against arbitrary host power-loss, which is bounded instead
-by the config being a git-tracked file the adopter is expected to commit
+two steps under §4.1's single-writer boundary — not against arbitrary
+host power-loss or an uncooperative concurrent writer, which are bounded
+instead by the config being a git-tracked file the adopter is expected to commit
 (the same durability boundary every other file this skill writes already
 has; this change adds no new promise there):
 
@@ -314,8 +315,17 @@ boundary (CV10).
 On any invocation whose resolved root carries a config classified `older`,
 setup enters **migration mode before all other behaviour**:
 
-- **TTY:** print what will happen (both file paths, the target version), then
-  prompt: `migrate .pi/sdlc/sdlc.config.json to schemaVersion 2 now? (y/N)`.
+- **TTY:** print what will happen (both file paths, the target version) and the
+  **single-writer boundary**, then prompt:
+  `migrate .pi/sdlc/sdlc.config.json to schemaVersion 2 now? (y/N)`.
+  An affirmative answer grants this setup process exclusive ownership of both
+  config paths until it reports completion: the operator must not edit either
+  file or run another setup/migration concurrently. Setup re-reads and
+  byte-compares both inputs after the prompt to catch edits made while the
+  question was pending, but portable Node filesystem operations provide no
+  cross-file compare-and-swap for later uncooperative writes. Such concurrent
+  writes are outside the supported contract; this residual risk was explicitly ratified
+  by the human owner during PR-panel adjudication on 2026-07-17.
   - **Accept:** `planMigration` → on `ok`, `applyMigration` (§3.4); report
     (FS10 v2, §4.4) with `config: migrated` and `models: removed` actions;
     exit 0. On unmappable: report every path, write nothing, exit 1.

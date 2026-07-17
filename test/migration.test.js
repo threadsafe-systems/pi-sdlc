@@ -181,6 +181,7 @@ test("CV12-CV14: accept, decline, non-TTY, and mixed flags follow migration conf
 		pair(root, "pair-a");
 		const accepted = interactive(root, ["y"]);
 		assert.equal(accepted.status, 0, accepted.stderr);
+		assert.match(accepted.stdout, /single-writer boundary.*after answering yes.*do not modify either config file/s);
 		assert.match(accepted.stdout, /schema-version: 2/);
 		assert.match(accepted.stdout, /asset: config migrated/);
 		assert.match(accepted.stdout, /asset: models removed/);

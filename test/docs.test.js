@@ -229,6 +229,12 @@ test("CV32: five migration ADRs exist and amended decisions link forward", () =>
 		const body = readFileSync(join(adrDir, file), "utf8");
 		for (const marker of [/## Context/, /## Decision/, /## Consequences/]) assert.match(body, marker, `${file} missing ${marker}`);
 	}
+	const fs10v2 = readFileSync(join(adrDir, "0025-adoption-bundle-fs10-v2.md"), "utf8");
+	const migrationSpec = readFileSync(join(repo, "docs/specs/2026-07-16-config-versioning-migration.md"), "utf8");
+	for (const [name, body] of Object.entries({ fs10v2, migrationSpec })) {
+		assert.match(body, /single-writer boundary/i, `${name} lacks the ratified concurrency boundary`);
+		assert.match(body, /concurrent\s+writes[\s\S]*residual risk/i, `${name} lacks the residual-risk disposition`);
+	}
 	const forwards = {
 		"0001-config-schema-fs1.md": "ADR 0021",
 		"0002-models-schema-fs2.md": "ADR 0021",
