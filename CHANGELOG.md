@@ -1,3 +1,9 @@
+## [1.0.2](https://github.com/threadsafe-systems/pi-sdlc/compare/v1.0.1...v1.0.2) (2026-07-17)
+
+### Bug Fixes
+
+* **templates:** ground /setup-sdlc's skill-relative paths before use ([a01a410](https://github.com/threadsafe-systems/pi-sdlc/commit/a01a410a419902e8ecede78966d505ea4814f734))
+
 ## [1.0.1](https://github.com/threadsafe-systems/pi-sdlc/compare/v1.0.0...v1.0.1) (2026-07-17)
 
 > **Provenance note:** this fix was briefly auto-tagged `v2.0.0` by
