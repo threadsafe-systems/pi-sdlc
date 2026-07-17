@@ -162,7 +162,12 @@ export function applyMigration(root, plan, { io = DEFAULT_IO } = {}) {
 	const modelsPath = join(directory, "sdlc.models.json");
 	const stagingPath = join(directory, ".sdlc.config.json.migrate-tmp");
 	const content = `${JSON.stringify(plan.config, null, 2)}\n`;
-	const flags = constants.O_WRONLY | constants.O_CREAT | constants.O_TRUNC | constants.O_NOFOLLOW;
+	try {
+		io.unlinkSync(stagingPath);
+	} catch (error) {
+		if (error?.code !== "ENOENT") throw error;
+	}
+	const flags = constants.O_WRONLY | constants.O_CREAT | constants.O_EXCL | constants.O_NOFOLLOW;
 	const fd = io.openSync(stagingPath, flags, 0o600);
 	try {
 		io.writeFileSync(fd, content, "utf8");

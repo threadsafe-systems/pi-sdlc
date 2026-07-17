@@ -421,6 +421,12 @@ async function askConfirmation(question) {
 	}
 }
 
+function rawFileUnchanged(before, after) {
+	if (before.status !== after.status) return false;
+	if (before.status === "absent") return true;
+	return before.text === after.text;
+}
+
 function migrationFlagsPresent(opts) {
 	return (
 		opts.profile !== undefined ||
@@ -461,9 +467,13 @@ async function migrateConfig(root, opts) {
 	if (!stdin.isTTY) throw new SetupError(`setup-sdlc: ${REMEDY_SCHEMA_OLDER(classification.version)}`, 1);
 	console.error(`setup-sdlc: migration will fold .pi/sdlc/sdlc.models.json into .pi/sdlc/sdlc.config.json (schemaVersion ${CONFIG_SCHEMA_VERSION}).`);
 	if (!(await askConfirmation("migrate .pi/sdlc/sdlc.config.json to schemaVersion 2 now?"))) throw new SetupError(`setup-sdlc: ${REMEDY_SCHEMA_OLDER(classification.version)}`, 1);
+	const confirmedFiles = readConfigRawForMigration(root);
+	if (!rawFileUnchanged(files.config, confirmedFiles.config) || !rawFileUnchanged(files.models, confirmedFiles.models)) {
+		throw new SetupError("setup-sdlc: migration refused; config inputs changed while confirmation was pending; no files were written — review the edits and re-run setup-sdlc", 1);
+	}
 	let plan;
-	if (files.models.status === "malformed") plan = { ok: false, unmappable: [{ path: ".pi/sdlc/sdlc.models.json", message: files.models.error }] };
-	else plan = planMigration({ config: files.config.value, models: files.models.status === "parsed" ? files.models.value : undefined });
+	if (confirmedFiles.models.status === "malformed") plan = { ok: false, unmappable: [{ path: ".pi/sdlc/sdlc.models.json", message: confirmedFiles.models.error }] };
+	else plan = planMigration({ config: confirmedFiles.config.value, models: confirmedFiles.models.status === "parsed" ? confirmedFiles.models.value : undefined });
 	if (!plan.ok) {
 		const details = plan.unmappable.map(({ path, message }) => `cannot map ${path}: ${message}`).join("\n");
 		throw new SetupError(`setup-sdlc: migration refused; no files were written.\n${details}`, 1);

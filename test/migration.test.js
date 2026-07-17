@@ -1,6 +1,6 @@
 // T2 migration and setup contract coverage (CV6-CV16).
 import assert from "node:assert/strict";
-import { cpSync, existsSync, mkdtempSync, readFileSync, rmSync, symlinkSync, writeFileSync } from "node:fs";
+import { cpSync, existsSync, linkSync, mkdtempSync, readFileSync, rmSync, symlinkSync, writeFileSync } from "node:fs";
 import * as fs from "node:fs";
 import { spawnSync } from "node:child_process";
 import { tmpdir } from "node:os";
@@ -34,6 +34,11 @@ function interactiveJson(root, answers, args = []) {
 	const feed = answers.map((answer) => `printf '%s\\n' ${JSON.stringify(answer)}; sleep 0.1`).join("; ");
 	const result = spawnSync("bash", ["-c", `(sleep 0.2; ${feed}) | script -qec ${JSON.stringify(command)} /dev/null`], { cwd: repo, encoding: "utf8" });
 	return { ...result, report: JSON.parse(readFileSync(output, "utf8")) };
+}
+function interactiveWithPendingEdit(root, target) {
+	const command = `${JSON.stringify(process.execPath)} ${JSON.stringify(setup)} --repo-root ${JSON.stringify(root)}`;
+	const feed = `sleep 0.4; printf '\\n' >>${JSON.stringify(target)}; printf 'y\\n'`;
+	return spawnSync("bash", ["-c", `(${feed}) | script -qec ${JSON.stringify(command)} /dev/null`], { cwd: repo, encoding: "utf8" });
 }
 function readJson(path) {
 	try {
@@ -124,24 +129,25 @@ test("CV10: write, fsync, rename, and unlink faults expose only allowed recovery
 		}
 	}
 
-	const symlinkRoot = temp();
-	try {
-		pair(symlinkRoot, "pair-a");
-		const stagingPath = join(symlinkRoot, ".pi/sdlc/.sdlc.config.json.migrate-tmp");
-		const sentinelPath = join(symlinkRoot, "sentinel.txt");
-		const configPath = join(symlinkRoot, ".pi/sdlc/sdlc.config.json");
-		const modelsPath = join(symlinkRoot, ".pi/sdlc/sdlc.models.json");
-		const configBefore = readFileSync(configPath, "utf8");
-		const modelsBefore = readFileSync(modelsPath, "utf8");
-		writeFileSync(sentinelPath, "sentinel\n");
-		symlinkSync(sentinelPath, stagingPath);
-		const plan = planMigration({ config: readJson(configPath), models: readJson(modelsPath) });
-		assert.throws(() => applyMigration(symlinkRoot, plan), /ELOOP/);
-		assert.equal(readFileSync(sentinelPath, "utf8"), "sentinel\n");
-		assert.equal(readFileSync(configPath, "utf8"), configBefore);
-		assert.equal(readFileSync(modelsPath, "utf8"), modelsBefore);
-	} finally {
-		rmSync(symlinkRoot, { recursive: true, force: true });
+	for (const linkType of ["symbolic", "hard"]) {
+		const linkRoot = temp();
+		try {
+			pair(linkRoot, "pair-a");
+			const stagingPath = join(linkRoot, ".pi/sdlc/.sdlc.config.json.migrate-tmp");
+			const sentinelPath = join(linkRoot, "sentinel.txt");
+			const configPath = join(linkRoot, ".pi/sdlc/sdlc.config.json");
+			const modelsPath = join(linkRoot, ".pi/sdlc/sdlc.models.json");
+			writeFileSync(sentinelPath, "sentinel\n");
+			if (linkType === "symbolic") symlinkSync(sentinelPath, stagingPath);
+			else linkSync(sentinelPath, stagingPath);
+			const plan = planMigration({ config: readJson(configPath), models: readJson(modelsPath) });
+			applyMigration(linkRoot, plan);
+			assert.equal(readFileSync(sentinelPath, "utf8"), "sentinel\n", linkType);
+			assert.equal(readJson(configPath).schemaVersion, 2, linkType);
+			assert.equal(existsSync(modelsPath), false, linkType);
+		} finally {
+			rmSync(linkRoot, { recursive: true, force: true });
+		}
 	}
 
 	const root = temp();
@@ -150,9 +156,12 @@ test("CV10: write, fsync, rename, and unlink faults expose only allowed recovery
 		const config = readJson(join(root, ".pi/sdlc/sdlc.config.json"));
 		const models = readJson(join(root, ".pi/sdlc/sdlc.models.json"));
 		const plan = planMigration({ config, models });
+		let unlinkCalls = 0;
 		const io = {
 			...fs,
-			unlinkSync() {
+			unlinkSync(path) {
+				unlinkCalls += 1;
+				if (unlinkCalls === 1) return fs.unlinkSync(path);
 				const error = new Error("injected unlink failure");
 				error.code = "EIO";
 				throw error;
@@ -189,6 +198,22 @@ test("CV12-CV14: accept, decline, non-TTY, and mixed flags follow migration conf
 		assert.equal(accepted.report.assets.find((asset) => asset.id === "config")?.action, "migrated");
 	} finally {
 		rmSync(root, { recursive: true, force: true });
+	}
+	for (const name of ["sdlc.config.json", "sdlc.models.json"]) {
+		root = temp();
+		try {
+			pair(root, "pair-a");
+			const target = join(root, ".pi/sdlc", name);
+			const before = readFileSync(target, "utf8");
+			const changed = interactiveWithPendingEdit(root, target);
+			assert.equal(changed.status, 1, changed.stdout + changed.stderr);
+			assert.match(changed.stdout + changed.stderr, /inputs changed while confirmation was pending/);
+			assert.equal(readFileSync(target, "utf8"), `${before}\n`, name);
+			assert.equal(readJson(join(root, ".pi/sdlc/sdlc.config.json")).schemaVersion, 1, name);
+			assert.equal(existsSync(join(root, ".pi/sdlc/sdlc.models.json")), true, name);
+		} finally {
+			rmSync(root, { recursive: true, force: true });
+		}
 	}
 	root = temp();
 	try {
