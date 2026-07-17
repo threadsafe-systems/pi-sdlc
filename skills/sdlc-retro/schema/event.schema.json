@@ -10,10 +10,7 @@
     "schemaVersion": { "type": "integer", "const": 1 },
     "ts": { "type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d+)?Z$" },
     "slug": { "type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$" },
-    "event": {
-      "type": "string",
-      "enum": ["run.started", "phase.entered", "phase.exited", "phase.backward", "gate.approved", "artifact.revised", "panel.resolved", "panel.agent_stamped", "panel.dispatched", "panel.harvested", "panel.consolidated", "task.validated", "lifecycle.checked", "pr.opened", "pr.fix_wave"]
-    },
+    "event": { "type": "string", "minLength": 1 },
     "by": { "type": "string", "pattern": "^(script:[a-z][a-z0-9-]*|agent|human:[a-z0-9][a-z0-9-]*)$" },
     "payload": { "type": "object" }
   },
@@ -35,36 +32,44 @@
     }
   },
   "allOf": [
-    { "if": { "properties": { "event": { "const": "run.started" } } }, "then": { "properties": { "payload": { "required": ["title", "track"], "properties": { "title": { "$ref": "#/definitions/nonEmptyString" }, "track": { "$ref": "#/definitions/nonEmptyString" } } } } } },
-    { "if": { "properties": { "event": { "const": "phase.entered" } } }, "then": { "properties": { "payload": { "required": ["phase"], "properties": { "phase": { "$ref": "#/definitions/lifecyclePhase" } } } } } },
-    { "if": { "properties": { "event": { "const": "phase.exited" } } }, "then": { "properties": { "payload": { "required": ["phase"], "properties": { "phase": { "$ref": "#/definitions/lifecyclePhase" } } } } } },
+    { "if": { "properties": { "event": { "const": "run.started" } } }, "then": { "properties": { "payload": { "type": "object", "required": ["title", "track"], "properties": { "title": { "$ref": "#/definitions/nonEmptyString" }, "track": { "$ref": "#/definitions/nonEmptyString" } } } } } },
+    { "if": { "properties": { "event": { "const": "phase.entered" } } }, "then": { "properties": { "payload": { "type": "object", "required": ["phase"], "properties": { "phase": { "$ref": "#/definitions/lifecyclePhase" } } } } } },
+    { "if": { "properties": { "event": { "const": "phase.exited" } } }, "then": { "properties": { "payload": { "type": "object", "required": ["phase"], "properties": { "phase": { "$ref": "#/definitions/lifecyclePhase" } } } } } },
     {
       "if": { "properties": { "event": { "const": "phase.backward" } } },
-      "then": { "properties": { "payload": { "required": ["from", "to", "reason"], "properties": { "from": { "$ref": "#/definitions/nonEmptyString" }, "to": { "$ref": "#/definitions/nonEmptyString" }, "reason": { "$ref": "#/definitions/nonEmptyString" } } } } }
+      "then": { "properties": { "payload": { "type": "object", "required": ["from", "to", "reason"], "properties": { "from": { "$ref": "#/definitions/nonEmptyString" }, "to": { "$ref": "#/definitions/nonEmptyString" }, "reason": { "$ref": "#/definitions/nonEmptyString" } } } } }
     },
     {
       "if": { "properties": { "event": { "const": "gate.approved" } } },
       "then": {
-        "properties": { "payload": { "required": ["phase", "artifact", "rev", "approver"], "properties": { "phase": { "$ref": "#/definitions/lifecyclePhase" }, "artifact": { "$ref": "#/definitions/nonEmptyString" }, "rev": { "$ref": "#/definitions/posInt" }, "approver": { "$ref": "#/definitions/nonEmptyString" } } } }
+        "properties": {
+          "payload": {
+            "type": "object",
+            "required": ["phase", "artifact", "rev", "approver"],
+            "properties": { "phase": { "$ref": "#/definitions/lifecyclePhase" }, "artifact": { "$ref": "#/definitions/nonEmptyString" }, "rev": { "$ref": "#/definitions/posInt" }, "approver": { "$ref": "#/definitions/nonEmptyString" } }
+          }
+        }
       }
     },
     {
       "if": { "properties": { "event": { "const": "artifact.revised" } } },
-      "then": { "properties": { "payload": { "required": ["artifact", "rev", "reason"], "properties": { "artifact": { "$ref": "#/definitions/nonEmptyString" }, "rev": { "$ref": "#/definitions/posInt" }, "reason": { "$ref": "#/definitions/nonEmptyString" } } } } }
+      "then": { "properties": { "payload": { "type": "object", "required": ["artifact", "rev", "reason"], "properties": { "artifact": { "$ref": "#/definitions/nonEmptyString" }, "rev": { "$ref": "#/definitions/posInt" }, "reason": { "$ref": "#/definitions/nonEmptyString" } } } } }
     },
     {
       "if": { "properties": { "event": { "const": "panel.resolved" } } },
-      "then": { "properties": { "payload": { "required": ["panelPhase", "models", "authorExcluded"], "properties": { "panelPhase": { "$ref": "#/definitions/panelPhase" }, "models": { "$ref": "#/definitions/stringArray" }, "authorExcluded": { "type": "string" } } } } }
+      "then": { "properties": { "payload": { "type": "object", "required": ["panelPhase", "models", "authorExcluded"], "properties": { "panelPhase": { "$ref": "#/definitions/panelPhase" }, "models": { "$ref": "#/definitions/stringArray" }, "authorExcluded": { "type": "string" } } } } }
     },
-    { "if": { "properties": { "event": { "const": "panel.agent_stamped" } } }, "then": { "properties": { "payload": { "required": ["panelPhase", "agent"], "properties": { "panelPhase": { "$ref": "#/definitions/panelPhase" }, "agent": { "$ref": "#/definitions/nonEmptyString" } } } } } },
+    { "if": { "properties": { "event": { "const": "panel.agent_stamped" } } }, "then": { "properties": { "payload": { "type": "object", "required": ["panelPhase", "agent"], "properties": { "panelPhase": { "$ref": "#/definitions/panelPhase" }, "agent": { "$ref": "#/definitions/nonEmptyString" } } } } } },
     {
       "if": { "properties": { "event": { "const": "panel.dispatched" } } },
-      "then": { "properties": { "payload": { "required": ["panelPhase", "round", "models"], "properties": { "panelPhase": { "$ref": "#/definitions/panelPhase" }, "round": { "$ref": "#/definitions/posInt" }, "models": { "$ref": "#/definitions/stringArray" } } } } }
+      "then": { "properties": { "payload": { "type": "object", "required": ["panelPhase", "round", "models"], "properties": { "panelPhase": { "$ref": "#/definitions/panelPhase" }, "round": { "$ref": "#/definitions/posInt" }, "models": { "$ref": "#/definitions/stringArray" } } } } }
     },
     {
       "if": { "properties": { "event": { "const": "panel.harvested" } } },
       "then": {
-        "properties": { "payload": { "required": ["panelPhase", "round", "dir", "missed"], "properties": { "panelPhase": { "$ref": "#/definitions/panelPhase" }, "round": { "$ref": "#/definitions/posInt" }, "dir": { "$ref": "#/definitions/nonEmptyString" }, "missed": { "$ref": "#/definitions/stringArray" } } } }
+        "properties": {
+          "payload": { "type": "object", "required": ["panelPhase", "round", "dir", "missed"], "properties": { "panelPhase": { "$ref": "#/definitions/panelPhase" }, "round": { "$ref": "#/definitions/posInt" }, "dir": { "$ref": "#/definitions/nonEmptyString" }, "missed": { "$ref": "#/definitions/stringArray" } } }
+        }
       }
     },
     {
@@ -72,6 +77,7 @@
       "then": {
         "properties": {
           "payload": {
+            "type": "object",
             "required": ["panelPhase", "round", "findings", "incorporated", "dismissed"],
             "properties": { "panelPhase": { "$ref": "#/definitions/panelPhase" }, "round": { "$ref": "#/definitions/posInt" }, "findings": { "$ref": "#/definitions/findings" }, "incorporated": { "$ref": "#/definitions/nonNegInt" }, "dismissed": { "$ref": "#/definitions/nonNegInt" } }
           }
@@ -80,10 +86,10 @@
     },
     {
       "if": { "properties": { "event": { "const": "task.validated" } } },
-      "then": { "properties": { "payload": { "required": ["task", "verdict", "scenarioIds"], "properties": { "task": { "$ref": "#/definitions/nonEmptyString" }, "verdict": { "$ref": "#/definitions/nonEmptyString" }, "scenarioIds": { "$ref": "#/definitions/stringArray" } } } } }
+      "then": { "properties": { "payload": { "type": "object", "required": ["task", "verdict", "scenarioIds"], "properties": { "task": { "$ref": "#/definitions/nonEmptyString" }, "verdict": { "$ref": "#/definitions/nonEmptyString" }, "scenarioIds": { "$ref": "#/definitions/stringArray" } } } } }
     },
-    { "if": { "properties": { "event": { "const": "lifecycle.checked" } } }, "then": { "properties": { "payload": { "required": ["verdict"], "properties": { "verdict": { "$ref": "#/definitions/nonEmptyString" } } } } } },
-    { "if": { "properties": { "event": { "const": "pr.opened" } } }, "then": { "properties": { "payload": { "required": ["number"], "properties": { "number": { "$ref": "#/definitions/posInt" } } } } } },
-    { "if": { "properties": { "event": { "const": "pr.fix_wave" } } }, "then": { "properties": { "payload": { "required": ["number", "sha"], "properties": { "number": { "$ref": "#/definitions/posInt" }, "sha": { "$ref": "#/definitions/nonEmptyString" } } } } } }
+    { "if": { "properties": { "event": { "const": "lifecycle.checked" } } }, "then": { "properties": { "payload": { "type": "object", "required": ["verdict"], "properties": { "verdict": { "$ref": "#/definitions/nonEmptyString" } } } } } },
+    { "if": { "properties": { "event": { "const": "pr.opened" } } }, "then": { "properties": { "payload": { "type": "object", "required": ["number"], "properties": { "number": { "$ref": "#/definitions/posInt" } } } } } },
+    { "if": { "properties": { "event": { "const": "pr.fix_wave" } } }, "then": { "properties": { "payload": { "type": "object", "required": ["number", "sha"], "properties": { "number": { "$ref": "#/definitions/posInt" }, "sha": { "$ref": "#/definitions/nonEmptyString" } } } } } }
   ]
 }

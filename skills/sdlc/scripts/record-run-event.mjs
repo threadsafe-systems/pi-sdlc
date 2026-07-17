@@ -37,6 +37,7 @@ const argv = process.argv.slice(2);
 let event = "";
 let slug = "";
 let by = "";
+let bySeen = false;
 let payloadRaw = "";
 let payloadSeen = false;
 let config = "";
@@ -55,6 +56,7 @@ for (let i = 0; i < argv.length; i++) {
 		i++;
 	} else if (a === "--by") {
 		by = needVal("--by", i);
+		bySeen = true;
 		i++;
 	} else if (a === "--payload") {
 		payloadRaw = needVal("--payload", i);
@@ -79,7 +81,7 @@ for (let i = 0; i < argv.length; i++) {
 if (!event) bail("usage: record-run-event <event> [--slug S] [--by WHO] [--payload JSON] [--config DIR|--repo-root DIR]");
 if (!KNOWN_EVENTS.includes(event)) bail(`unknown event type '${event}'. Known: ${KNOWN_EVENTS.join(", ")}`);
 
-const byValue = by || "agent";
+const byValue = bySeen ? by : "agent";
 if (!BY_RE.test(byValue)) bail(`--by value '${byValue}' violates the grammar script:<name>|agent|human:<slug>`);
 
 let payload;
@@ -125,7 +127,9 @@ try {
 	mkdirSync(dirname(path), { recursive: true });
 	const fd = openSync(path, "a");
 	try {
-		writeSync(fd, Buffer.from(line, "utf8"));
+		const bytes = Buffer.from(line, "utf8");
+		const written = writeSync(fd, bytes);
+		if (written !== bytes.length) throw new Error(`short write: ${written} of ${bytes.length} bytes`);
 	} finally {
 		closeSync(fd);
 	}

@@ -11,12 +11,23 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { test } from "node:test";
 
+import Ajv from "ajv";
 import { KNOWN_EVENTS, MAX_EVENT_BYTES, validateEnvelope, validatePayload } from "../skills/sdlc/scripts/telemetry.mjs";
 
 const here = dirname(fileURLToPath(import.meta.url));
 const repoRoot = dirname(here);
 const emitter = join(repoRoot, "skills", "sdlc", "scripts", "record-run-event.mjs");
 const emitterSh = join(repoRoot, "skills", "sdlc", "scripts", "record-run-event.sh");
+
+function readEventSchema() {
+	try {
+		return JSON.parse(readFileSync(join(repoRoot, "skills", "sdlc-retro", "schema", "event.schema.json"), "utf8"));
+	} catch (error) {
+		assert.fail(`event schema is not valid JSON: ${error.message}`);
+	}
+}
+
+const schemaValidate = new Ajv().compile(readEventSchema());
 
 function baseEnv(extra = {}) {
 	// Deliberately drop any ambient SDLC_RUN_SLUG / SDLC_ROOT.
@@ -71,6 +82,7 @@ function assertConforms(line) {
 	assert.deepEqual(envIssues, [], `envelope issues: ${envIssues.join("; ")}`);
 	const payIssues = validatePayload(obj.event, obj.payload);
 	assert.deepEqual(payIssues, [], `payload issues: ${payIssues.join("; ")}`);
+	assert.equal(schemaValidate(obj), true, `schema issues: ${JSON.stringify(schemaValidate.errors)}`);
 }
 
 // ---------------------------------------------------------------------------
@@ -130,6 +142,7 @@ test("LT2: bad inputs exit 2 and never touch the manifest", () => {
 			"malformed payload JSON": ["phase.entered", "--repo-root", root, "--slug", "s", "--payload", "{not json"],
 			"oversized payload": ["run.started", "--repo-root", root, "--slug", "s", "--payload", JSON.stringify({ title: big, track: "reversible" })],
 			"bad --by grammar": ["run.started", "--repo-root", root, "--slug", "s", "--by", "human:Neil Chambers", "--payload", JSON.stringify({ title: "T", track: "reversible" })],
+			"explicit empty --by": ["run.started", "--repo-root", root, "--slug", "s", "--by", "", "--payload", JSON.stringify({ title: "T", track: "reversible" })],
 			"missing required payload field": ["run.started", "--repo-root", root, "--slug", "s", "--payload", JSON.stringify({ title: "T" })],
 		};
 		for (const [label, args] of Object.entries(cases)) {
@@ -142,6 +155,12 @@ test("LT2: bad inputs exit 2 and never touch the manifest", () => {
 	} finally {
 		rmSync(root, { recursive: true, force: true });
 	}
+});
+
+test("schema agreement: unknown event types remain valid for forward-compatible consumers", () => {
+	const future = { schemaVersion: 1, ts: "2026-01-01T00:00:00Z", slug: "future", event: "future.event", by: "agent", payload: {} };
+	assert.deepEqual(validateEnvelope(future), []);
+	assert.equal(schemaValidate(future), true, JSON.stringify(schemaValidate.errors));
 });
 
 test("LT2b: a bad input against a non-existent store attempts no write", () => {

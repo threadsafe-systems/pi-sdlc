@@ -3,7 +3,7 @@
   "taskId": "lt-t1",
   "manifestPath": "docs/validation/sdlc-lifecycle-telemetry/lt-t1.json",
   "manifestSha256": "bf6564711a59b108d7b2065232208f8a117ff7cc8d95742c3184a95aa980a371",
-  "runnerReportSha256": "7a2864677dd4f8cef2239b92605995a600fca352e29a3726b38af247404271ae",
+  "runnerReportSha256": "2d59d6f5102b735ff9c32ae6275b59eb4badd82108a01dc74d00c907ef3dd9a4",
   "generatedAgentSha256": "2e64d2b7427fb3cac6895979d79f3d6fb8f616c7b1872ffeebe7f855fb1fd722",
   "model": "deepseek/deepseek-v4-flash",
   "runnerVerdict": "PASS",
