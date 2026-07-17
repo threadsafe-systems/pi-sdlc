@@ -35,7 +35,7 @@ function skip(msg) {
 
 const argv = process.argv.slice(2);
 let event = "";
-let slug = "";
+let slug;
 let by = "";
 let bySeen = false;
 let payloadRaw = "";

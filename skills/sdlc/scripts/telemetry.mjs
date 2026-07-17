@@ -203,7 +203,7 @@ export function currentBranch(cwd = process.cwd()) {
 // explicit but non-conforming flag/env value is a skip, not a usage error
 // (§3.1 lists neither as an exit-2 case).
 export function resolveRunSlug({ slug, env = process.env, cwd = process.cwd() } = {}) {
-	if (typeof slug === "string" && slug !== "") {
+	if (slug !== undefined) {
 		return SLUG_RE.test(slug) ? { slug } : { skip: `--slug value '${slug}' is not a valid run slug` };
 	}
 	const envSlug = env.SDLC_RUN_SLUG;

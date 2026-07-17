@@ -215,6 +215,18 @@ test("LT3: concurrent emitters produce N complete, non-interleaved lines", async
 	}
 });
 
+test("explicit empty --slug does not fall through to env or branch", () => {
+	const repo = gitRepo({ branch: "feat/right" });
+	try {
+		const r = run(["phase.entered", "--repo-root", repo, "--slug", "", "--payload", JSON.stringify({ phase: "plan" })], { cwd: repo, env: baseEnv({ SDLC_RUN_SLUG: "envslug" }) });
+		assert.equal(r.code, 0, r.stderr);
+		assert.ok(r.stderr.includes("skipping emission"), "invalid explicit slug is a soft skip");
+		assert.equal(existsSync(join(repo, ".pi", "sdlc", "runs")), false, "empty flag must not fall through to another identity");
+	} finally {
+		rmSync(repo, { recursive: true, force: true });
+	}
+});
+
 // ---------------------------------------------------------------------------
 // LT4 — identity resolution order: --slug beats SDLC_RUN_SLUG beats branch;
 // branch feat/some-thing maps to some-thing.
