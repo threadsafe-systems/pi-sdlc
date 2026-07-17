@@ -96,7 +96,7 @@ test("SP2: installed skill commands run from consumer cwd", () => {
 		assert.ok(existsSync(join(f.consumer, ".pi", "generated-agents", "fixture-pr-review.md")));
 		const home = join(f.root, "home");
 		cpSync(FIXTURE_HOME, home, { recursive: true });
-		const panel = run(join(f.installed, "scripts", "resolve-panel.mjs"), ["pr_review", "--author", "anthropic", "--repo-root", f.consumer, "--emit-tasks", "fixture-pr-review"], f.consumer, { HOME: home });
+		const panel = run(join(f.installed, "scripts", "resolve-panel.mjs"), ["pr_review", "--author", "anthropic/claude-fable-5", "--repo-root", f.consumer, "--emit-tasks", "fixture-pr-review"], f.consumer, { HOME: home });
 		assert.equal(panel.status, 0, panel.stderr);
 		assert.ok(parseJson(panel.stdout, "panel").tasks.length >= 1);
 		const body = join(f.consumer, "pr-body.md");

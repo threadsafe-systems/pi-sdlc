@@ -215,8 +215,8 @@ function buildReport(argv, cwd) {
 		else set("adoption.manifest-clean", "error", "git could not compare the manifest against HEAD", "check repository integrity with git status");
 	}
 
-	// FS8 v2 version split: recognised older schemas are structurally deferred
-	// to migration, while newer/invalid schemas remain resolution errors.
+	// Version split: recognised older schemas defer full validation (there is no
+	// pre-adoption fold-forward), while newer/invalid schemas remain resolution errors.
 	let manifestRaw;
 	let versionClassification;
 	if (statusOf(results, "adoption.manifest-clean") === "pass") {
@@ -235,7 +235,7 @@ function buildReport(argv, cwd) {
 				const issues = inspectConfig(manifestRaw);
 				if (issues.length > 0) failure = `manifest is invalid: ${issues[0].message}`;
 			} else if (versionClassification.kind === "older") {
-				set("config.valid", "pass", `manifest parses; schemaVersion ${versionClassification.version} is a recognised superseded schema (full validation deferred to migration)`);
+				set("config.valid", "pass", `manifest parses; schemaVersion ${versionClassification.version} is a recognised superseded schema (full validation deferred until re-adoption on the current schema)`);
 			} else if (versionClassification.kind === "newer") {
 				set("config.valid", "error", REMEDY_SCHEMA_NEWER(versionClassification.version));
 			} else {

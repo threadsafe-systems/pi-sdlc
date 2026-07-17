@@ -2,6 +2,12 @@
 
 - Status: accepted
 - Date: 2026-07-16
+- Revised: 2026-07-17 (ADR 0026) — the posture toggle is renamed and relocated
+  to `review.onShortfall` in schemaVersion 3: `strict` → `fail`, `preference`
+  → `proceed`. The semantics below are unchanged; only the key's name and
+  position (now inside `review`, beside the floor it governs) changed. The
+  vendor-axis `minVendor` referenced below is retired in v3 — `panelSize`
+  (model-identity) is the single floor.
 
 ## Context
 

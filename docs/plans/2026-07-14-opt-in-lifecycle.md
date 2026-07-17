@@ -1,5 +1,17 @@
 # Plan: the opt-in lifecycle (kernel, profiles, lanes-ready config)
 
+> **rev-4 amendment (2026-07-17, config-intent-vocabulary stream).** This plan
+> is amended by `docs/plans/2026-07-17-config-intent-vocabulary.md` (rev 5).
+> The persisted `lifecycle`/`profile` vocabulary of scope item 3 is superseded
+> by the schemaVersion-3 intent vocabulary (`review`/`shape`/`overrides`;
+> ADR 0026); `profile` and the deferred existing-adopter profile-application
+> deliverable are **cancelled, not moved**. OL-B re-bases on v3 (shape-
+> parameterised demands read `shape.separateSpec`/track overrides; the evidence
+> opt-in is re-decided at OL-B Spec as an optional additive `evidence` key,
+> since the clean break (ADR 0027) leaves no v2 block-presence bit to
+> preserve). OL-C documents v3 only. Read that plan as canonical where the two
+> disagree.
+
 - Date: 2026-07-14 (rev 3 — rev 2 incorporated the plan panel's 14 findings
   (`docs/reviews/plan-review-opt-in-lifecycle-2026-07-14/consolidated.md`);
   rev 3 is an owner-directed backward amendment at the OL-A spec gate: the

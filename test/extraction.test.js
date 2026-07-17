@@ -156,7 +156,7 @@ test("S5: agent lands in the CONSUMER's .pi/agents (not the skill dir)", () => {
 test("S6: resolve-panel --emit-tasks deep-equals golden under isolated env", () => {
 	for (const phase of PHASES) {
 		const an = agentName("loom", phase);
-		const r = run("resolve-panel.mjs", [phase, "--author", "anthropic", "--config", consumer, "--emit-tasks", an], { env: isolatedEnv() });
+		const r = run("resolve-panel.mjs", [phase, "--author", "anthropic/claude-fable-5", "--config", consumer, "--emit-tasks", an], { env: isolatedEnv() });
 		const golden = readFileSync(join(fx, "golden", `${phase}.resolve.json`), "utf8");
 		assert.deepEqual(parseJson(r.stdout, `${phase} resolver output`), parseJson(golden, `${phase} resolver golden`), `${phase} resolve mismatch`);
 	}

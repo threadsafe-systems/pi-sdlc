@@ -17,7 +17,15 @@ function fixture({ plan = true, spec = true, build = true, paths = undefined, sl
 	git(dir, "init", "-q");
 	git(dir, "config", "user.email", "test@example.com");
 	git(dir, "config", "user.name", "Lifecycle Test");
-	const config = { schemaVersion: 2, prefix: "sdlc", labelPrefix: "sdlc", announce: "test", ...(paths ? { paths } : {}) };
+	const config = {
+		schemaVersion: 3,
+		prefix: "sdlc",
+		labelPrefix: "sdlc",
+		announce: "test",
+		review: { brainstorm: "human", design: "panel", code: "panel", tasks: "subagent", panelSize: 2, onShortfall: "proceed" },
+		shape: { separateSpec: true, publishToTracker: 2, defaultTrack: "irreversible" },
+		...(paths ? { paths } : {}),
+	};
 	writeFileSync(join(dir, ".gitignore"), "");
 	writeFileSync(join(dir, "config.json"), JSON.stringify(config));
 	mkdir(dir, ".pi/sdlc");

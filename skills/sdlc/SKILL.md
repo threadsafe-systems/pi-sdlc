@@ -40,10 +40,11 @@ code (prefer `--format json` when parsing):
 5. **Exit 3 (`not-ready`)**: do NOT announce. State that the repo is adopted
    but incomplete (for example uncommitted manifest changes or a missing
    `panels` block), list the report's remediations, and stop the SDLC. When
-   `config.schema-current` is the failing check, the one sanctioned action
-   besides pinning the older skill release is to run the `setup-sdlc` migration
-   interactively. Never hand-edit `schemaVersion` or the config shape. Do not
-   offer advisory mode as a bypass.
+   `config.schema-current` is the failing check, the sanctioned actions are to
+   pin the older skill release, or (accepting the clean break) re-run `setup-sdlc`
+   to write a fresh current-schema config (`--force` to replace an existing one) —
+   there is no pre-adoption config fold-forward.
+   Never hand-edit `schemaVersion` or the config shape. Do not offer advisory mode as a bypass.
 
 Before `sdlc-status` exits 0 the agent MUST NOT enter any lifecycle phase, MUST
 NOT fire configured hooks, MUST NOT stamp panel agents, MUST NOT create or
@@ -71,7 +72,17 @@ A change is **irreversible** if it freezes a shape other code, data, or
 extensions bind to: public interfaces, contracts, persisted schemas, wire
 formats, stored-record shapes, anything a consumer or stored record commits to.
 Everything else is **reversible** (internal refactors, docs, tests, tooling).
-When in doubt, it is irreversible.
+When in doubt, use the repo's committed `shape.defaultTrack` (default
+`irreversible`).
+
+The phase/gate table below states the **maximal** shape. Which gates actually
+run, and at what strength, is the repo's committed config: `review.design`
+gates plan+spec, `review.code` gates the PR, `review.tasks` sets per-task
+validation, and `review.brainstorm` sets the brainstorm gate (each
+`panel` | `advisory` | `human` | `off`, with optional per-track `overrides`).
+`shape.separateSpec: false` merges Plan and Spec into one gated artifact. Read
+the committed `.pi/sdlc/sdlc.config.json` (and its `CONFIG.md` companion when
+present) for the authoritative dials.
 
 | Track | Phases required | Design panels |
 |---|---|---|
@@ -199,8 +210,10 @@ brainstorm dialogue instead.
 The committed build-plan doc (`<configured paths.plans>/<date>-<feat>-build.md`) stays the
 canonical task breakdown — objectives, rationale, check commands, and
 scenario ids per task never live only in the tracker. Whenever that breakdown
-has **two or more tasks**, publish it as tracker objects too, so the work is
-visible and resumable across sessions without reopening the build-plan doc:
+has at least the repo's committed `shape.publishToTracker` count of tasks
+(default **two**; `"never"` disables the publish step), publish it as tracker
+objects too, so the work is visible and resumable across sessions without
+reopening the build-plan doc:
 
 - One **epic issue** (label `<LABEL_PREFIX>:epic`), body linking the plan/spec/
   build-plan docs and restating the definition of done.
@@ -247,10 +260,12 @@ per model.
    ```
 
    It reads the merged config's `panels` block, keeps models with credentials,
-   and applies the configured phase floor and author-exclusion rule under the
-   config's `strict` or `preference` enforcement posture. Add `--pong` for a
+   and applies the configured phase floor (`review.panelSize`, or a per-phase
+   `panels.phases.<phase>.panelSize` override) and author-exclusion rule under
+   the config's `review.onShortfall` posture (`fail` = hard-fail below the
+   floor; `proceed` = best-effort and surface it). Add `--pong` for a
    live smoke test when you want it (costs a call per candidate; off by default
-   for cost). When `resolve-panel` prints a preference-mode shortfall advisory,
+   for cost). When `resolve-panel` prints a `proceed`-mode shortfall advisory,
    carry it into that phase's consolidated writeup and, at PR phase, into the PR
    itself as a comment or adjudication note. Do not commit a standalone
    decision log for the shortfall.
