@@ -7,16 +7,17 @@
 > squashed source commits' prose — describing what the new preset now
 > recognises — contained a line that happened to start with the note
 > parser's exact breaking-change keyword, not an actual breaking-change
-> footer. That was caught before anything consumed the tag: `v2.0.0`'s tag
-> and GitHub Release were deleted, and this correct patch release,
-> `v1.0.1`, was cut by hand in their place. No `v2.0.0` was ever published.
+> footer. That was caught before anything else consumed the tag or
+> release: `v2.0.0`'s GitHub Release was briefly published, then deleted
+> along with its tag, and this correct patch release, `v1.0.1`, was cut by
+> hand in their place.
 
 ### Bug Fixes
 
 * **release:** switch semantic-release to the `conventionalcommits` preset,
-  pinned to `9.3.1`, so the analyzer correctly parses both the `!`
-  shorthand and a trailing breaking-change footer (the previous `angular`
-  preset recognised neither), and so release notes render correctly (npm's
+  pinned to `9.3.1`, so the analyzer correctly parses the `!` shorthand for
+  a breaking change (the previous `angular` preset recognised only the
+  trailing `BREAKING CHANGE:` footer form, not `!`), and so release notes render correctly (npm's
   latest `10.2.1` silently produced empty notes against the installed
   writer) ([#72](https://github.com/threadsafe-systems/pi-sdlc/issues/72)) ([04d6361](https://github.com/threadsafe-systems/pi-sdlc/commit/04d6361a90215fb08a9a43281dddcc7bdc28387e))
 
