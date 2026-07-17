@@ -593,7 +593,7 @@ function writeBundle(root, opts, cfg, hooks, tracker, residueAssets = []) {
 			}
 			writeFileSync(configTarget, `${JSON.stringify(existing, null, 2)}\n`);
 			const fmt = (b) => JSON.stringify({ review: b.review, shape: b.shape, ...(b.overrides === undefined ? {} : { overrides: b.overrides }) });
-			report.assets.push({ id: "config", action: "patched", message: `patched review/shape/overrides in ${configTarget} (was ${fmt(before)})` });
+			report.assets.push({ id: "config", action: "patched", message: `patched review/shape/overrides in ${configTarget} (was ${fmt(before)} → now ${fmt({ review: existing.review, shape: existing.shape, overrides: existing.overrides })})` });
 		}
 	} else if (configMutating && opts.force) {
 		writeFileSync(configTarget, `${JSON.stringify(cfg, null, 2)}\n`);

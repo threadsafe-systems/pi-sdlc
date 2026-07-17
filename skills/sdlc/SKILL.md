@@ -77,12 +77,14 @@ When in doubt, use the repo's committed `shape.defaultTrack` (default
 
 The phase/gate table below states the **maximal** shape. Which gates actually
 run, and at what strength, is the repo's committed config: `review.design`
-gates plan+spec, `review.code` gates the PR, `review.tasks` sets per-task
-validation, and `review.brainstorm` sets the brainstorm gate (each
-`panel` | `advisory` | `human` | `off`, with optional per-track `overrides`).
-`shape.separateSpec: false` merges Plan and Spec into one gated artifact. Read
-the committed `.pi/sdlc/sdlc.config.json` (and its `CONFIG.md` companion when
-present) for the authoritative dials.
+(`panel` | `advisory` | `human` | `off`) gates plan+spec, `review.code`
+(same four) gates the PR, `review.tasks` (`subagent` | `self` | `off`) sets
+per-task validation, and `review.brainstorm` (`human` | `off`) sets the
+brainstorm gate; per-track `overrides` (keys `irreversible`/`reversible`) may
+adjust `design`/`code`/`tasks`/`panelSize`. `shape.separateSpec: false` merges
+Plan and Spec into one gated artifact. Read the committed
+`.pi/sdlc/sdlc.config.json` (and its `CONFIG.md` companion when present) for
+the authoritative dials.
 
 | Track | Phases required | Design panels |
 |---|---|---|
@@ -112,8 +114,9 @@ present declaration always dominates.
 ¹ Both have a second mode for scale, backed by GitHub's native sub-issue and
 blocking relationships (see `assets/tracker-ops.md`) — see the two sections
 below. Brainstorm can run as a **map** for oversized/foggy efforts; Build can
-publish as an **epic + sub-issues + board** once a build plan has two or more
-tasks. Each mode has its own canonical source (map mode: the map issue itself;
+publish as an **epic + sub-issues + board** once a build plan meets the
+committed `shape.publishToTracker` threshold. Each mode has its own canonical
+source (map mode: the map issue itself;
 tracker-backed build: the committed build-plan doc) — see each section for
 which.
 
@@ -257,7 +260,7 @@ per model.
 1. **Resolve the panel** for the phase (live, deduped, author-excluded):
 
    ```bash
-   scripts/resolve-panel.sh <plan_review|spec_review|pr_review|task_validate> --author <author-vendor>
+   scripts/resolve-panel.sh <plan_review|spec_review|pr_review|task_validate> --author <provider/model>
    ```
 
    It reads the merged config's `panels` block, keeps models with credentials,
@@ -278,7 +281,7 @@ per model.
 
      ```bash
      scripts/ensure-panel-agent.sh pr_review   # writes .pi/agents/<prefix>-pr-review.md
-     scripts/resolve-panel.sh pr_review --author <vendor> --emit-tasks <prefix>-pr-review
+     scripts/resolve-panel.sh pr_review --author <provider/model> --emit-tasks <prefix>-pr-review
      ```
 
      `--emit-tasks` prints a ready-to-paste `subagent` `tasks: [...]` array. Replace
@@ -327,7 +330,12 @@ and the orchestrating model.
 
 ## Per-task validator (implementation)
 
-Each task ends with one validator subagent, a checklist executor, not a judge.
+The committed `review.tasks` dial selects how each task is validated:
+`subagent` (the default described here) ends each task with one validator
+subagent; `self` has the implementer run the same declared checks directly (no
+subagent dispatch — `resolve-panel task_validate` refuses); `off` skips
+per-task validation entirely. Under `subagent`, each task ends with one
+validator subagent, a checklist executor, not a judge.
 Validation is **portable and deterministic**: the task's checks are whatever its
 approved Build task declared, never a language or tool the skill imposes. There
 is no unconditional `npx tsc --noEmit` and no assumed `CONTRIBUTORS` file; a
@@ -368,7 +376,8 @@ Specification, Build plan; reversible: plan and Build plan, never a
 Specification; none: a reason — and, for a tracker-backed Build, list the
 epic, every task sub-issue, and the shared board. Add `Closes #<task-issue>`
 for each task completed by merging the PR; use the explicit no-tracker
-exemption for single-task or `track: none` changes. The PR body describes the
+exemption for a below-threshold (per `shape.publishToTracker`) or `track: none`
+change. The PR body describes the
 change for its audience; it does not carry the local panel's development
 findings.
 
