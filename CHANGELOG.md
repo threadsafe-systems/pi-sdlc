@@ -1,3 +1,19 @@
+# [1.0.0](https://github.com/threadsafe-systems/pi-sdlc/compare/v0.8.0...v1.0.0) (2026-07-17)
+
+
+### Features
+
+* **config:** release the config versioning and migration contract ([80d9c53](https://github.com/threadsafe-systems/pi-sdlc/commit/80d9c53f4dbac3cdfd9fcb5551ac701766799def))
+
+
+### BREAKING CHANGES
+
+* **config:** sdlc.config.json is now schemaVersion 2. The standalone
+sdlc.models.json (FS2) is retired; the panel roster lives in the config's
+panels block (min_panel -> minVendor, author_default -> authorDefault,
+exclude_author_vendor -> excludeAuthorVendor). Existing consumers migrate
+via scripts/migrate.mjs; setup provisions v2 for fresh adoptions.
+
 # [0.8.0](https://github.com/threadsafe-systems/pi-sdlc/compare/v0.7.0...v0.8.0) (2026-07-15)
 
 
