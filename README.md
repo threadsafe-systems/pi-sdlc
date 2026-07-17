@@ -20,13 +20,11 @@ pi discovers the skill via its git package metadata (`package.json`'s
 
 Create `.pi/sdlc/` in your repo:
 
-- `sdlc.config.json` — identity: `prefix`, `labelPrefix`, `announce`, optional
-  `paths` and `tracker`. See `skills/sdlc/schema/sdlc.config.example.json` and its
-  JSON Schema.
-- `sdlc.models.json` — the per-phase panel model roster (required to run panels).
-  See `skills/sdlc/schema/sdlc.models.example.json`.
-- `sdlc.config.json` and `sdlc.models.json` are the **frozen surfaces** consumers
-  bind to (additive within a major).
+- `sdlc.config.json` — identity (`prefix`, `labelPrefix`, `announce`), optional
+  paths/tracker/hooks/lifecycle settings, and the merged per-phase `panels`
+  roster with its enforcement posture. See
+  `skills/sdlc/schema/sdlc.config.example.json` and its JSON Schema. This
+  schemaVersion-2 file is the single frozen consumer configuration surface.
 - `prompts/<name>.prompt.md` (optional) — override a phase reviewer prompt when
   your project needs a specific grounding the generic prompt does not carry.
 
@@ -34,8 +32,8 @@ Without adoption the skill does not run as project law. `sdlc-status` is the
 mechanical four-state gate: exit 0 `ready`, 1 `not-adopted`, 2 `error`, 3
 `not-ready`. Adoption means the **current git `HEAD`** contains
 `.pi/sdlc/sdlc.config.json` — a file merely on disk is not adoption — and
-readiness (exit 0) additionally requires that manifest clean and valid plus a
-committed, clean, valid `sdlc.models.json`. Invoking the skill in a repo whose
+readiness (exit 0) additionally requires that manifest clean and valid with a
+merged `panels` roster. Invoking the skill in a repo whose
 `HEAD` has no manifest prompts you to adopt it with `/setup-sdlc`, or to
 continue in a clearly-labelled session-only advisory mode. The fastest way to
 opt in is the `/setup-sdlc` scaffolder, which interviews you (identity,
@@ -49,7 +47,7 @@ exits:
 
 - Exit 0 used to mean "manifest present and valid"; it now means fully ready.
   A repo that formerly exited 0 on a filesystem-only or dirty manifest may now
-  exit 3 until config and models are committed and clean.
+  exit 3 until the merged config is committed, clean, and carries `panels`.
 - Exit 3 is new (adopted but incomplete or dirty); shell callers must branch
   on 0/1/2/3 explicitly.
 - Non-git roots move to exit 2: they historically exited 1 without a manifest
@@ -79,7 +77,7 @@ scripts/ensure-panel-agent.sh pr_review          # skill-relative in pi
 scripts/resolve-panel.sh pr_review --author <vendor> --emit-tasks <agent>
 ```
 
-`resolve-panel` reconciles your `sdlc.models.json` preference against live
+`resolve-panel` reconciles the merged config's `panels` preference against live
 credentials and prints a ready-to-paste `subagent` `tasks: [...]` array (one task
 per resolved model, per-task `model` override). The full process law is in
 `skills/sdlc/SKILL.md`.

@@ -17,7 +17,7 @@ function fixture({ plan = true, spec = true, build = true, paths = undefined, sl
 	git(dir, "init", "-q");
 	git(dir, "config", "user.email", "test@example.com");
 	git(dir, "config", "user.name", "Lifecycle Test");
-	const config = { schemaVersion: 1, prefix: "sdlc", labelPrefix: "sdlc", announce: "test", ...(paths ? { paths } : {}) };
+	const config = { schemaVersion: 2, prefix: "sdlc", labelPrefix: "sdlc", announce: "test", ...(paths ? { paths } : {}) };
 	writeFileSync(join(dir, ".gitignore"), "");
 	writeFileSync(join(dir, "config.json"), JSON.stringify(config));
 	mkdir(dir, ".pi/sdlc");
@@ -47,7 +47,11 @@ function run(root, ...args) {
 
 function report(result) {
 	assert.equal(result.stderr, "");
-	return JSON.parse(result.stdout);
+	try {
+		return JSON.parse(result.stdout);
+	} catch (error) {
+		throw new Error(`invalid JSON lifecycle report: ${error.message}\nstdout: ${result.stdout}`);
+	}
 }
 
 test("irreversible artifacts pass only when all committed documents exist", () => {

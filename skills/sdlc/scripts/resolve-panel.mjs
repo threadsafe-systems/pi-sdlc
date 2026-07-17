@@ -1,20 +1,16 @@
 #!/usr/bin/env node
 // resolve-panel.mjs — resolve a live, deduped, author-excluded review panel for
-// an sdlc phase from the consumer's .pi/sdlc/sdlc.models.json.
-//
-// Without a lifecycle block this retains the frozen v1 vendor-based resolver.
-// With a lifecycle block it resolves the configured gate against distinct model
-// identities (provider/model, with only recognised thinking suffixes stripped).
+// an sdlc phase from the consumer's validated merged config.
 //
 // Usage: resolve-panel.mjs <phase> [--author <provider/model|vendor>] [--pong]
-//          [--track irreversible|reversible] [--models-file <path>]
-//          [--emit-tasks <agent>] [--config DIR|--repo-root DIR]
+//          [--track irreversible|reversible] [--emit-tasks <agent>]
+//          [--config DIR|--repo-root DIR]
 
 import { execFileSync } from "node:child_process";
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { homedir } from "node:os";
 import { join } from "node:path";
-import { decomposeGateMode, fail, inspectConfig, inspectRoot, PHASES, readModels } from "./lib.mjs";
+import { decomposeGateMode, fail, inspectRoot, PHASES, readConfig } from "./lib.mjs";
 
 const argv = process.argv.slice(2);
 let phase = "";
@@ -23,7 +19,6 @@ let pong = false;
 let track = "";
 let trackSeen = false;
 let trackMissing = false;
-let modelsFile = "";
 let emitTasksAgent = "";
 let config = "";
 let repoRoot = "";
@@ -51,14 +46,14 @@ for (let i = 0; i < argv.length; i++) {
 		if (candidate === undefined || candidate.startsWith("-")) trackMissing = true;
 		else track = argv[++i];
 	} else if (a === "--emit-tasks") emitTasksAgent = needVal("--emit-tasks");
-	else if (a === "--models-file") modelsFile = needVal("--models-file");
+	else if (a === "--models-file") fail("resolve-panel: --models-file is retired — the panel roster now lives in .pi/sdlc/sdlc.config.json (schemaVersion 2)");
 	else if (a === "--config") config = needVal("--config");
 	else if (a === "--repo-root") repoRoot = needVal("--repo-root");
 	else if (a.startsWith("-")) reportParseError(`resolve-panel: unexpected argument: ${a}`);
 	else if (!phase) phase = a;
 	else reportParseError(`resolve-panel: unexpected argument: ${a}`);
 }
-if (!phase) fail("usage: resolve-panel <phase> [--author <provider/model|vendor>] [--pong] [--track irreversible|reversible] [--models-file <path>] [--emit-tasks <agent>] [--config DIR|--repo-root DIR]");
+if (!phase) fail("usage: resolve-panel <phase> [--author <provider/model|vendor>] [--pong] [--track irreversible|reversible] [--emit-tasks <agent>] [--config DIR|--repo-root DIR]");
 if (!PHASES.includes(phase)) fail(`resolve-panel: unknown phase '${phase}'. Known: ${PHASES.join(", ")}`);
 
 const rootResult = inspectRoot({ config, repoRoot });
@@ -67,13 +62,22 @@ if (!rootResult.ok) {
 	fail(`sdlc: ${rootResult.message}`);
 }
 const root = rootResult.root;
-const lifecycle = readLifecycle(root);
+const configPath = join(root, ".pi", "sdlc", "sdlc.config.json");
+if (!existsSync(configPath)) {
+	fail("sdlc: this project requires .pi/sdlc/sdlc.config.json with a panels roster to resolve a panel (the skill ships no built-in model roster)");
+}
+const cfg = readConfig(root);
+const lifecycle = cfg.lifecycle ?? null;
 if (lifecycle === null && trackSeen) fail("resolve-panel: unexpected argument: --track");
 if (deferredError) fail(deferredError);
 if (trackMissing) fail("resolve-panel: --track requires a value");
 if (track !== "" && track !== "irreversible" && track !== "reversible") fail("resolve-panel: --track must be irreversible or reversible", 1);
-const cfg = readModels(root, modelsFile || undefined);
-const ph = cfg.phases[phase];
+const panels = cfg.panels;
+const ph = panels?.phases?.[phase];
+if (!panels || !ph) {
+	fail(`resolve-panel: no panels roster for ${phase} in .pi/sdlc/sdlc.config.json — add a panels block (see schema/sdlc.config.example.json)`, 1);
+}
+const enforcement = cfg.enforcement ?? "preference";
 
 // Credentials: a provider is usable if it has an auth.json entry or its env var.
 let authKeys = [];
@@ -86,33 +90,13 @@ const ENV_VARS = {
 	moonshotai: ["MOONSHOT_API_KEY"],
 	"kimi-coding": ["KIMI_API_KEY"],
 	deepseek: ["DEEPSEEK_API_KEY"],
+	google: ["GEMINI_API_KEY", "GOOGLE_API_KEY"],
 	openai: ["OPENAI_API_KEY"],
 	zai: ["ZAI_API_KEY"],
 	"zai-coding-cn": ["ZAI_CODING_CN_API_KEY"],
 	anthropic: ["ANTHROPIC_API_KEY", "ANTHROPIC_OAUTH_TOKEN"],
 	minimax: ["MINIMAX_API_KEY"],
 };
-
-function readLifecycle(consumerRoot) {
-	const configPath = join(consumerRoot, ".pi", "sdlc", "sdlc.config.json");
-	let text;
-	try {
-		text = readFileSync(configPath, "utf8");
-	} catch (error) {
-		if (error?.code === "ENOENT") return null;
-		fail(`resolve-panel: cannot read ${configPath}: ${error?.message || error}`, 1);
-	}
-	let raw;
-	try {
-		raw = JSON.parse(text);
-	} catch {
-		return null;
-	}
-	if (raw === null || typeof raw !== "object" || Array.isArray(raw) || !Object.hasOwn(raw, "lifecycle")) return null;
-	const issue = inspectConfig(raw).find(({ path }) => path === "lifecycle" || path.startsWith("lifecycle."));
-	if (issue) fail(`resolve-panel: invalid lifecycle at ${issue.path || "lifecycle"}: ${issue.message}`, 1);
-	return raw.lifecycle;
-}
 
 function hasAwsCreds() {
 	const e = process.env;
@@ -129,8 +113,7 @@ function hasCreds(pm) {
 	return (ENV_VARS[provider] ?? []).some((v) => process.env[v]);
 }
 
-// Frozen v1 vendor heuristic. Lifecycle resolution must never use this as an
-// identity key.
+// Frozen v1 vendor heuristic. Lifecycle resolution must never use this as an identity key.
 function vendor(pm) {
 	const s = pm.toLowerCase();
 	if (s.includes("claude") || s.includes("anthropic")) return "anthropic";
@@ -173,18 +156,24 @@ function printPanel(panel) {
 	}
 }
 
-function resolveV1() {
-	const minPanel = ph.min_panel ?? 1;
-	const excludeAuthor = cfg.rules?.exclude_author_vendor !== false && minPanel >= 2;
-	const authorSpec = author || cfg.author_default || "";
+function adviseShortfall(axis, target, achieved) {
+	console.error(`advisory[${phase}]: enforcement is 'preference' — panel below target: ${axis}=${target}, achieved=${achieved}; proceeding. Carry this shortfall into the phase writeup and the PR.`);
+}
+
+function resolveVendor() {
+	const floor = ph.minVendor ?? 1;
+	const excludeAuthor = panels.rules?.excludeAuthorVendor !== false && floor >= 2;
+	const authorSpec = author || panels.authorDefault || "";
 	const authorVendor = authorSpec ? vendor(authorSpec) : "";
 	const seenVendors = new Set();
 	const panel = [];
 	const dropped = [];
-	for (const pm of ph.prefer ?? []) {
+	const excludedAuthors = [];
+	for (const pm of ph.prefer) {
 		const v = vendor(pm);
 		if (excludeAuthor && authorVendor && v === authorVendor) {
 			dropped.push([pm, `author vendor (${v})`]);
+			excludedAuthors.push([pm, v]);
 			continue;
 		}
 		if (seenVendors.has(v)) {
@@ -202,12 +191,25 @@ function resolveV1() {
 		seenVendors.add(v);
 		panel.push(pm);
 	}
+	if (enforcement === "preference" && panel.length < floor) {
+		for (const [pm, v] of excludedAuthors) {
+			if (seenVendors.has(v) || !hasCreds(pm) || (pong && !pongOk(pm))) continue;
+			seenVendors.add(v);
+			panel.push(pm);
+			console.error(`advisory[${phase}]: author vendor ${v} included — author exclusion demoted under 'preference'`);
+			if (panel.length >= floor) break;
+		}
+	}
 	printPanel(panel);
-	console.error(`panel[${phase}]: ${panel.length} model(s) across ${seenVendors.size} vendor(s); need >= ${minPanel}${excludeAuthor && authorVendor ? `; author vendor excluded: ${authorVendor} (${authorSpec})` : ""}`);
+	console.error(`panel[${phase}]: ${panel.length} model(s) across ${seenVendors.size} vendor(s); need >= ${floor}${excludeAuthor && authorVendor ? `; author vendor excluded: ${authorVendor} (${authorSpec})` : ""}`);
 	for (const [pm, why] of dropped) console.error(`  dropped ${pm}: ${why}`);
-	if (panel.length < minPanel) {
-		console.error(`resolve-panel: FAILED to reach min_panel=${minPanel} for ${phase} with live credentials.`);
-		process.exit(1);
+	if (panel.length === 0 && !(enforcement === "strict" && excludedAuthors.length > 0)) fail(`resolve-panel: no credentialed models available for ${phase}`, 1);
+	if (panel.length < floor) {
+		if (enforcement === "preference") adviseShortfall("minVendor", floor, seenVendors.size);
+		else {
+			console.error(`resolve-panel: FAILED to reach min_panel=${floor} for ${phase} with live credentials.`);
+			process.exit(1);
+		}
 	}
 }
 
@@ -217,12 +219,12 @@ function defaultGateMode(gatePhase, selectedTrack) {
 }
 
 function resolveLifecycle() {
-	let minPanel;
+	let floor;
 	let source;
 	if (phase === "task_validate") {
 		const validationMode = lifecycle.taskValidation?.mode ?? "subagent";
 		if (validationMode === "off") fail("resolve-panel: task validation is off in the committed lifecycle shape", 1);
-		minPanel = 1;
+		floor = 1;
 		source = "lifecycle.taskValidation";
 	} else {
 		const gate = lifecycle.gates?.[phase];
@@ -231,26 +233,26 @@ function resolveLifecycle() {
 		if (typeof configuredMode === "object") {
 			if (!track) fail(`resolve-panel: ${phase} mode is per-track in the committed lifecycle shape — pass --track irreversible|reversible`, 1);
 			mode = configuredMode[track] ?? defaultGateMode(phase, track);
-		} else {
-			mode = configuredMode;
-		}
+		} else mode = configuredMode;
 		if (decomposeGateMode(mode).reviewer === "none") fail(`resolve-panel: ${phase} gate mode is '${mode}' in the committed lifecycle shape — no panel to resolve`, 1);
-		minPanel = gate?.minPanel ?? 2;
+		floor = gate?.minPanel ?? 2;
 		source = `lifecycle.gates.${phase}`;
 	}
-	console.error(`note: min_panel=${ph.min_panel ?? 1} in sdlc.models.json superseded by ${source} (minPanel=${minPanel})`);
+	console.error(`note: minVendor=${ph.minVendor ?? 1} in sdlc.config.json panels superseded by ${source} (minPanel=${floor})`);
 
-	const authorSpec = author || cfg.author_default || "";
+	const authorSpec = author || panels.authorDefault || "";
 	if (authorSpec && !/^[^/]+\/.+$/.test(authorSpec)) fail("resolve-panel: --author must be provider/model when lifecycle block is present", 1);
 	const authorIdentity = authorSpec ? modelIdentity(authorSpec) : "";
-	const excludeAuthor = minPanel >= 2;
+	const excludeAuthor = floor >= 2;
 	const seenModels = new Set();
 	const panel = [];
 	const dropped = [];
-	for (const pm of ph.prefer ?? []) {
+	const excludedAuthors = [];
+	for (const pm of ph.prefer) {
 		const identity = modelIdentity(pm);
 		if (excludeAuthor && authorIdentity && identity === authorIdentity) {
 			dropped.push([pm, `author model (${identity})`]);
+			excludedAuthors.push([pm, identity]);
 			continue;
 		}
 		if (!hasCreds(pm)) {
@@ -267,16 +269,29 @@ function resolveLifecycle() {
 		}
 		seenModels.add(identity);
 		panel.push(pm);
-		if (panel.length >= minPanel) break;
+		if (panel.length >= floor) break;
+	}
+	if (enforcement === "preference" && panel.length < floor) {
+		for (const [pm, identity] of excludedAuthors) {
+			if (seenModels.has(identity) || !hasCreds(pm) || (pong && !pongOk(pm))) continue;
+			seenModels.add(identity);
+			panel.push(pm);
+			console.error(`advisory[${phase}]: author model ${identity} included — author exclusion demoted under 'preference'`);
+			if (panel.length >= floor) break;
+		}
 	}
 	printPanel(panel);
-	console.error(`panel[${phase}]: ${panel.length} distinct model(s); need >= ${minPanel}${excludeAuthor && authorIdentity ? `; author model excluded: ${authorIdentity} (${authorSpec})` : ""}`);
+	console.error(`panel[${phase}]: ${panel.length} distinct model(s); need >= ${floor}${excludeAuthor && authorIdentity ? `; author model excluded: ${authorIdentity} (${authorSpec})` : ""}`);
 	for (const [pm, why] of dropped) console.error(`  dropped ${pm}: ${why}`);
-	if (panel.length < minPanel) {
-		console.error(`resolve-panel: FAILED to reach distinct-model minPanel=${minPanel} for ${phase} with live credentials.`);
-		process.exit(1);
+	if (panel.length === 0 && !(enforcement === "strict" && excludedAuthors.length > 0)) fail(`resolve-panel: no credentialed models available for ${phase}`, 1);
+	if (panel.length < floor) {
+		if (enforcement === "preference") adviseShortfall("minPanel", floor, seenModels.size);
+		else {
+			console.error(`resolve-panel: FAILED to reach distinct-model minPanel=${floor} for ${phase} with live credentials.`);
+			process.exit(1);
+		}
 	}
 }
 
-if (lifecycle === null) resolveV1();
+if (lifecycle === null) resolveVendor();
 else resolveLifecycle();

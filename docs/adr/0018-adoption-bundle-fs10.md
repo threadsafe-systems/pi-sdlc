@@ -1,5 +1,7 @@
 # ADR 0018: FS10 — setup adoption-bundle report surface
 
+- Amended by: [ADR 0025](0025-adoption-bundle-fs10-v2.md)
+
 - Context: `setup-sdlc` previously wrote only configuration (+ optional models)
   and hard-failed when configuration already existed. The skill's PR contract
   names a template and lifecycle integration that were not provisioned. A

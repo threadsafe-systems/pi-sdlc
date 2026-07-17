@@ -23,11 +23,18 @@ export const USE_RE = /^(skill|tool):[a-z][a-z0-9_-]*$/;
 const SINGLE_LINE_RE = /^[^\r\n]+$/; // non-empty, single-line (run/do)
 const GATE_MODES = new Set(["panel", "advisory", "human", "off"]);
 
+export const CONFIG_SCHEMA_VERSION = 2;
+export const KNOWN_PAST_VERSIONS = new Set([1]);
+export const REMEDY_SCHEMA_OLDER = (found) => `config schemaVersion ${found} predates this skill (requires ${CONFIG_SCHEMA_VERSION}) — run the setup-sdlc migration interactively to fold it forward, or pin pi-sdlc to a release before the schema-2 major`;
+export const REMEDY_SCHEMA_NEWER = (found) => `config schemaVersion ${found} is newer than this skill (requires ${CONFIG_SCHEMA_VERSION}) — upgrade pi-sdlc, or run the pinned pi-sdlc release that wrote this config`;
+
 // Hook phase vocabulary: the six lifecycle phases + '*' (every phase). This is
 // DISTINCT from PHASES (the four review-panel ids) and must not be conflated.
 export const HOOK_PHASES = ["brainstorm", "plan", "spec", "build", "implement", "pr", "*"];
 
 export const CONFIG_DEFAULTS = Object.freeze({
+	// Missing manifests retain the pre-v2 default behavior; this is not a
+	// persisted schema declaration and never enters the version seam.
 	schemaVersion: 1,
 	prefix: "sdlc",
 	labelPrefix: "sdlc",
@@ -136,9 +143,19 @@ export function decomposeGateMode(value) {
 	return table[value];
 }
 
-// FS1: read + validate sdlc.config.json. Default (no-manifest) returns built-in
-// defaults; with { requireManifest: true } a missing manifest exits 2 naming
-// /setup-sdlc (the opt-in gate; ensure-panel-agent keeps the default behaviour).
+// Pure, total version seam shared by every version-sensitive consumer.
+export function classifyConfigVersion(raw) {
+	if (!isPlainObject(raw)) return { kind: "invalid" };
+	const version = raw.schemaVersion;
+	if (!Number.isInteger(version) || version < 1) return { kind: "invalid" };
+	if (version === CONFIG_SCHEMA_VERSION) return { kind: "current" };
+	if (KNOWN_PAST_VERSIONS.has(version)) return { kind: "older", version };
+	if (version > CONFIG_SCHEMA_VERSION) return { kind: "newer", version };
+	return { kind: "invalid" };
+}
+
+// FS1: read + validate sdlc.config.json. The shared loader owns detection only:
+// it never prompts and never writes. Migration IO uses the scoped raw reader.
 export function readConfig(root, { requireManifest = false } = {}) {
 	const p = join(root, ".pi", "sdlc", "sdlc.config.json");
 	if (!existsSync(p)) {
@@ -153,6 +170,9 @@ export function readConfig(root, { requireManifest = false } = {}) {
 	} catch (e) {
 		fail(`sdlc: cannot parse ${p}: ${e?.message || e}`);
 	}
+	const classification = classifyConfigVersion(raw);
+	if (classification.kind === "older") fail(`sdlc: ${REMEDY_SCHEMA_OLDER(classification.version)}`);
+	if (classification.kind === "newer") fail(`sdlc: ${REMEDY_SCHEMA_NEWER(classification.version)}`);
 	validateConfig(raw, p);
 	return {
 		schemaVersion: raw.schemaVersion,
@@ -163,6 +183,28 @@ export function readConfig(root, { requireManifest = false } = {}) {
 		tracker: raw.tracker,
 		hooks: raw.hooks,
 		...(raw.lifecycle === undefined ? {} : { lifecycle: raw.lifecycle }),
+		...(raw.enforcement === undefined ? {} : { enforcement: raw.enforcement }),
+		...(raw.panels === undefined ? {} : { panels: raw.panels }),
+	};
+}
+
+// Setup/migration-only bypass. Absence and malformation remain distinct so a
+// malformed consumer file can never be mistaken for an absent roster.
+export function readConfigRawForMigration(root) {
+	const readRaw = (p) => {
+		if (!existsSync(p)) return { status: "absent" };
+		let text = "";
+		try {
+			text = readFileSync(p, "utf8");
+			return { status: "parsed", value: JSON.parse(text), text };
+		} catch (error) {
+			return { status: "malformed", error: String(error?.message ?? error), text };
+		}
+	};
+	const dir = join(root, ".pi", "sdlc");
+	return {
+		config: readRaw(join(dir, "sdlc.config.json")),
+		models: readRaw(join(dir, "sdlc.models.json")),
 	};
 }
 
@@ -176,11 +218,11 @@ export function inspectConfig(raw) {
 		add("", "must be a JSON object");
 		return issues;
 	}
-	const allowed = new Set(["schemaVersion", "prefix", "labelPrefix", "announce", "paths", "tracker", "hooks", "lifecycle"]);
+	const allowed = new Set(["schemaVersion", "prefix", "labelPrefix", "announce", "paths", "tracker", "hooks", "lifecycle", "enforcement", "panels"]);
 	for (const k of Object.keys(raw)) {
 		if (!allowed.has(k)) add(k, `unknown key '${k}'`);
 	}
-	if (raw.schemaVersion !== 1) add("schemaVersion", `schemaVersion must be 1 (got ${JSON.stringify(raw.schemaVersion)})`);
+	if (raw.schemaVersion !== CONFIG_SCHEMA_VERSION) add("schemaVersion", `schemaVersion must be ${CONFIG_SCHEMA_VERSION} (got ${JSON.stringify(raw.schemaVersion)})`);
 	if (typeof raw.prefix !== "string" || !PREFIX_RE.test(raw.prefix)) add("prefix", `prefix must match ${PREFIX_RE}`);
 	if (typeof raw.labelPrefix !== "string" || !PREFIX_RE.test(raw.labelPrefix)) add("labelPrefix", `labelPrefix must match ${PREFIX_RE}`);
 	if (typeof raw.announce !== "string" || raw.announce.length === 0) add("announce", "announce must be a non-empty string");
@@ -225,6 +267,72 @@ export function inspectConfig(raw) {
 	}
 	if (raw.hooks !== undefined) issues.push(...collectHookIssues(raw.hooks));
 	if (raw.lifecycle !== undefined) issues.push(...collectLifecycleIssues(raw.lifecycle));
+	if (raw.enforcement !== undefined && raw.enforcement !== "strict" && raw.enforcement !== "preference") {
+		add("enforcement", "enforcement must be one of strict, preference");
+	}
+	if (raw.panels !== undefined) issues.push(...collectPanelIssues(raw.panels));
+	return issues;
+}
+
+function collectPanelIssues(panels) {
+	const issues = [];
+	const add = (path, message) => issues.push({ path, message });
+	if (!isPlainObject(panels)) {
+		add("panels", "panels must be an object");
+		return issues;
+	}
+	const allowed = new Set(["$comment", "authorDefault", "rules", "phases"]);
+	for (const key of Object.keys(panels)) {
+		if (!allowed.has(key)) add(`panels.${key}`, `unknown panels key '${key}'`);
+	}
+	if (panels.$comment !== undefined && typeof panels.$comment !== "string") add("panels.$comment", "panels.$comment must be a string");
+	if (panels.authorDefault !== undefined && (typeof panels.authorDefault !== "string" || !PM_RE.test(panels.authorDefault))) {
+		add("panels.authorDefault", "panels.authorDefault must be provider/model");
+	}
+	if (panels.rules !== undefined) {
+		if (!isPlainObject(panels.rules)) {
+			add("panels.rules", "panels.rules must be an object");
+		} else {
+			for (const key of Object.keys(panels.rules)) {
+				if (key !== "excludeAuthorVendor") add(`panels.rules.${key}`, `unknown panels.rules key '${key}'`);
+			}
+			if (panels.rules.excludeAuthorVendor !== undefined && typeof panels.rules.excludeAuthorVendor !== "boolean") {
+				add("panels.rules.excludeAuthorVendor", "panels.rules.excludeAuthorVendor must be boolean");
+			}
+		}
+	}
+	if (!isPlainObject(panels.phases)) {
+		add("panels.phases", "panels.phases must be an object");
+		return issues;
+	}
+	for (const key of Object.keys(panels.phases)) {
+		if (!PHASES.includes(key)) add(`panels.phases.${key}`, `unknown panels phase '${key}'`);
+	}
+	for (const phase of PHASES) {
+		const value = panels.phases[phase];
+		const at = `panels.phases.${phase}`;
+		if (value === undefined) {
+			add(at, `${at} is required`);
+			continue;
+		}
+		if (!isPlainObject(value)) {
+			add(at, `${at} must be an object`);
+			continue;
+		}
+		for (const key of Object.keys(value)) {
+			if (key !== "minVendor" && key !== "prefer") add(`${at}.${key}`, `unknown key ${at}.${key}`);
+		}
+		if (value.minVendor !== undefined && (!Number.isInteger(value.minVendor) || value.minVendor < 1)) {
+			add(`${at}.minVendor`, `${at}.minVendor must be an integer >= 1`);
+		}
+		if (!Array.isArray(value.prefer) || value.prefer.length === 0) {
+			add(`${at}.prefer`, `${at}.prefer must be a non-empty array`);
+			continue;
+		}
+		value.prefer.forEach((model, index) => {
+			if (typeof model !== "string" || !PM_RE.test(model)) add(`${at}.prefer[${index}]`, `${at}.prefer entries must be provider/model`);
+		});
+	}
 	return issues;
 }
 
@@ -407,83 +515,4 @@ function collectHookItemIssues(item, at) {
 		if (typeof item.do !== "string" || !SINGLE_LINE_RE.test(item.do)) add(`${at}.do`, `${at}.do must be a non-empty single-line string`);
 	}
 	return issues;
-}
-
-// FS2: read + validate sdlc.models.json (REQUIRED). resolve-panel only.
-export function readModels(root, explicitPath) {
-	const p = explicitPath ?? join(root, ".pi", "sdlc", "sdlc.models.json");
-	if (!existsSync(p)) {
-		fail(`sdlc: this project requires ${p} to resolve a panel (the skill ships no built-in model roster)`);
-	}
-	let raw;
-	try {
-		raw = JSON.parse(readFileSync(p, "utf8"));
-	} catch (e) {
-		fail(`sdlc: cannot parse ${p}: ${e?.message || e}`);
-	}
-	validateModels(raw, p);
-	return raw;
-}
-
-// Non-exiting FS2 issue collector (spec §2.5/§2.6). Same contract as inspectConfig.
-export function inspectModels(raw) {
-	const issues = [];
-	const add = (path, message) => issues.push({ path, message });
-	if (!isPlainObject(raw)) {
-		add("", "must be a JSON object");
-		return issues;
-	}
-	const allowed = new Set(["author_default", "rules", "phases", "$comment"]);
-	for (const k of Object.keys(raw)) {
-		if (!allowed.has(k)) add(k, `unknown key '${k}'`);
-	}
-	if (raw.author_default !== undefined && (typeof raw.author_default !== "string" || !PM_RE.test(raw.author_default))) {
-		add("author_default", "author_default must be provider/model");
-	}
-	if (raw.rules !== undefined) {
-		if (!isPlainObject(raw.rules)) {
-			add("rules", "rules must be an object");
-		} else {
-			for (const k of Object.keys(raw.rules)) {
-				if (k !== "exclude_author_vendor") add(`rules.${k}`, `unknown rules key '${k}'`);
-			}
-			if (raw.rules.exclude_author_vendor !== undefined && typeof raw.rules.exclude_author_vendor !== "boolean") {
-				add("rules.exclude_author_vendor", "rules.exclude_author_vendor must be boolean");
-			}
-		}
-	}
-	if (!isPlainObject(raw.phases)) {
-		add("phases", "phases must be an object");
-		return issues;
-	}
-	const keys = Object.keys(raw.phases).sort();
-	const want = [...PHASES].sort();
-	if (keys.length !== want.length || keys.some((k, i) => k !== want[i])) {
-		add("phases", `phases must contain exactly ${want.join(", ")}`);
-		return issues;
-	}
-	for (const phase of PHASES) {
-		const ph = raw.phases[phase];
-		if (!isPlainObject(ph)) {
-			add(`phases.${phase}`, `phases.${phase} must be an object`);
-			continue;
-		}
-		for (const k of Object.keys(ph)) {
-			if (k !== "min_panel" && k !== "prefer") add(`phases.${phase}.${k}`, `unknown key phases.${phase}.${k}`);
-		}
-		if (!Number.isInteger(ph.min_panel) || ph.min_panel < 1) add(`phases.${phase}.min_panel`, `phases.${phase}.min_panel must be an integer >= 1`);
-		if (!Array.isArray(ph.prefer) || ph.prefer.length === 0) {
-			add(`phases.${phase}.prefer`, `phases.${phase}.prefer must be a non-empty array`);
-			continue;
-		}
-		ph.prefer.forEach((m, i) => {
-			if (typeof m !== "string" || !PM_RE.test(m)) add(`phases.${phase}.prefer[${i}]`, `phases.${phase}.prefer entries must be provider/model`);
-		});
-	}
-	return issues;
-}
-
-export function validateModels(raw, p) {
-	const issues = inspectModels(raw);
-	if (issues.length > 0) fail(`sdlc models ${p}: ${issues[0].message}`);
 }

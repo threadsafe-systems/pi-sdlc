@@ -1,5 +1,7 @@
 # ADR 0002: sdlc.models.json is a frozen surface (FS2)
 
+- Superseded by: [ADR 0021](0021-merged-config-schema-and-release-guard.md)
+
 - Context: `resolve-panel` reads the per-phase model roster; consumers author it.
 - Decision: freeze the schema — exactly the four v1 phase keys, each with
   `min_panel >= 1` and a non-empty `prefer` of `provider/model` strings; optional

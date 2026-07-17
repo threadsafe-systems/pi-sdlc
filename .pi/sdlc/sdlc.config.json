@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "prefix": "pi-sdlc",
   "labelPrefix": "sdlc",
   "announce": "Using the sdlc skill to drive this change through its lifecycle (pi-sdlc, dogfooding itself).",
@@ -24,6 +24,32 @@
           "do": "Create AND enter a worktree for the feature branch so the session's working root moves into it (create-then-enter); target all subsequent writes there."
         }
       ]
+    }
+  },
+  "enforcement": "strict",
+  "panels": {
+    "$comment": "Panel roster for pi-sdlc itself. Preference reconciled against live credentials by resolve-panel; model ids drift, re-check with `pi --list-models`. Entries may carry pi's ':<thinking>' suffix (off/minimal/low/medium/high/xhigh/max) to set that model's reasoning level; see docs/plans/2026-07-11-model-thinking-levels.md for the reasoning behind the levels below.",
+    "authorDefault": "anthropic/claude-opus-4-8:high",
+    "rules": {
+      "excludeAuthorVendor": true
+    },
+    "phases": {
+      "plan_review": {
+        "minVendor": 2,
+        "prefer": ["openai-codex/gpt-5.6-sol:high", "zai/glm-5.2:high", "anthropic/claude-opus-4-8:high", "deepseek/deepseek-v4-pro:high"]
+      },
+      "spec_review": {
+        "minVendor": 2,
+        "prefer": ["anthropic/claude-opus-4-8:high", "openai-codex/gpt-5.6-luna:high", "zai/glm-5.2:high", "deepseek/deepseek-v4-pro:high"]
+      },
+      "pr_review": {
+        "minVendor": 3,
+        "prefer": ["anthropic/claude-fable-5:high", "openai-codex/gpt-5.6-sol:high", "google/gemini-3.1-pro-preview:high", "deepseek/deepseek-v4-pro:high"]
+      },
+      "task_validate": {
+        "minVendor": 1,
+        "prefer": ["openai-codex/gpt-5.6-terra", "anthropic/claude-haiku-4-5", "deepseek/deepseek-v4-flash", "zai/glm-5.2:low"]
+      }
     }
   }
 }

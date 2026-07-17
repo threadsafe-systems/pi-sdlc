@@ -1,5 +1,7 @@
 # ADR 0012: release & versioning policy — GitHub Releases, no npm publish
 
+- Amended by: [ADR 0021](0021-merged-config-schema-and-release-guard.md)
+
 - Context: pi-sdlc versioning was manual (`v0.1.0`, `v0.1.1`, hand-set
   `package.json` `version`), which drifts from what actually shipped. Adopting
   semantic-release automates semver bumps, a `CHANGELOG.md`, git tags, and a

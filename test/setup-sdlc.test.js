@@ -18,7 +18,11 @@ function setup(root, args) {
 	return { code: r.status ?? 1, stdout: r.stdout ?? "", stderr: r.stderr ?? "" };
 }
 function readCfg(root) {
-	return JSON.parse(readFileSync(join(root, ".pi", "sdlc", "sdlc.config.json"), "utf8"));
+	try {
+		return JSON.parse(readFileSync(join(root, ".pi", "sdlc", "sdlc.config.json"), "utf8"));
+	} catch (error) {
+		throw new Error(`invalid setup config: ${error.message}`);
+	}
 }
 function mkTemp() {
 	return mkdtempSync(join(tmpdir(), "sdlc-setup-"));
@@ -32,7 +36,8 @@ test("OH4: --yes writes a schema-valid config; bundle re-run refuses config chan
 		const cfg = readCfg(dir);
 		assert.equal(cfg.prefix, "x");
 		assert.equal(cfg.labelPrefix, "y");
-		assert.equal(cfg.schemaVersion, 1);
+		assert.equal(cfg.schemaVersion, 2);
+		assert.equal(cfg.enforcement, "preference");
 		const before = readFileSync(join(dir, ".pi", "sdlc", "sdlc.config.json"), "utf8");
 
 		const r2 = setup(dir, ["--prefix", "z", "--label-prefix", "y"]);
@@ -139,7 +144,12 @@ test("OH5: no config flags and no TTY exits 2 (interview needs a TTY)", () => {
 });
 
 test("OH6: package.json pi.prompts includes ./templates and the template has a description", () => {
-	const pkg = JSON.parse(readFileSync(join(repo, "package.json"), "utf8"));
+	let pkg;
+	try {
+		pkg = JSON.parse(readFileSync(join(repo, "package.json"), "utf8"));
+	} catch (error) {
+		assert.fail(`invalid package.json: ${error.message}`);
+	}
 	assert.ok(Array.isArray(pkg.pi?.prompts) && pkg.pi.prompts.includes("./templates"), "pi.prompts must include ./templates");
 	const tmpl = readFileSync(join(repo, "templates", "setup-sdlc.md"), "utf8");
 	assert.match(tmpl, /^---\n[\s\S]*description:/m, "template must carry a description frontmatter");

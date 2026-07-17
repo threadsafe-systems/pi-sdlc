@@ -1,0 +1,199 @@
+{
+  "schemaVersion": 1,
+  "taskId": "config-versioning-migration-t5",
+  "manifest": "/home/neil/code/threadsafe/pi-sdlc.worktrees/feat-config-versioning-migration/docs/validation/config-versioning-migration/config-versioning-migration-t5.json",
+  "repoRoot": "/home/neil/code/threadsafe/pi-sdlc.worktrees/feat-config-versioning-migration",
+  "verdict": "PASS",
+  "exitCode": 0,
+  "errors": [],
+  "manifestErrors": [],
+  "commands": [
+    {
+      "id": "tests.integration",
+      "argv": [
+        "node",
+        "--test",
+        "test/schema-break.test.js",
+        "test/docs.test.js",
+        "test/reference-contract.test.js"
+      ],
+      "evidence": [
+        "CV28 release guard, CV29 bindings/CI, CV30 dogfood, CV31 prose, CV32 ADR cross-references"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 650,
+      "stdoutTail": "✔ OH7: SKILL.md carries the opt-in, advisory, hooks headings + red flags (0.981526ms)\n✔ OH7: the Implement table row no longer prescribes 'in a worktree' (0.196864ms)\n✔ OH8: SKILL.md contains the announce-on-fire block and the workflow.md rule (0.131855ms)\n✔ OH9: exactly two new ADRs (opt-in, hooks) with context/decision/consequences (0.339119ms)\n✔ OH12: README has the opt-in story and drops the old no-manifest-defaults claim (0.164316ms)\n✔ FS9/FS10 dogfood assets are present (0.184171ms)\n✔ FS9 documentation carries declaration rules and reversible grounding (0.222483ms)\n✔ FS9 and FS10 ADRs freeze the new surfaces (0.658714ms)\n✔ AR10: all four startup branches and every prohibition are present and mutation-detectable (0.267792ms)\n✔ AR10: docs never equate manifest presence with readiness or claim mechanical agent enforcement (0.171764ms)\n✔ AR11: README carries the complete migration story (0.185686ms)\n✔ AR11: ADR 0010 is superseded and the policy ADR 0015 restates the migration (0.15328ms)\n✔ AR11: ADR 0016 freezes the FS8 machine surface (0.116229ms)\n✔ AR11: no stale opted-in output claim remains in shipped guidance (0.110954ms)\n✔ AR11: wrapper help/comments and .mjs usage match the FS8 invocation (0.118724ms)\n✔ AR11: the setup template requires committing .pi⁄sdlc and points at the status gate (0.063547ms)\n✔ CV29: CI and shipped bindings point at the merged config surface (0.091883ms)\n✔ CV30: repository and consumer dogfood fixtures use one schemaVersion-2 config (0.188831ms)\n✔ CV31: startup migration and preference-shortfall carry instructions are explicit (0.193736ms)\n✔ CV32: five migration ADRs exist and amended decisions link forward (0.25461ms)\n✔ NR7: generic prompts do not require absent governing files (0.857425ms)\n✔ NR7: skill dispatch instructions are concrete and CI claims are bounded (3.646263ms)\n✔ NR7: inventory checker and ADR are shipped and versioned (0.255893ms)\n✔ CV29: normative inventory rebinds readiness to merged panels (0.168317ms)\n✔ NR8: source prompt extraction remains the fixture authority (0.126182ms)\n✔ CV28: watched config schema changes require the PR release signal (330.868968ms)\n✔ CV28: inner breaking commits are ignored in favour of the squash title (64.781623ms)\n✔ CV28: only the named schemas and CONFIG_SCHEMA_VERSION line are watched (176.496966ms)\nℹ tests 28\nℹ suites 0\nℹ pass 28\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 618.860853\n",
+      "stderrTail": ""
+    },
+    {
+      "id": "tests.full",
+      "argv": [
+        "node",
+        "--test"
+      ],
+      "evidence": [
+        "Integrated CV1-CV32 regression corpus"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 4274,
+      "stdoutTail": "[...truncated; showing bounded tail...]\n✔ AR8: JSON envelope root falls back to absolute cwd on root-resolution failure (39.847402ms)\n✔ AR8: cli.arguments error envelope uses the single unambiguous explicit root when available (33.171587ms)\n✔ AR8/PR-panel: argument values after '=' are elided from diagnostics (35.502376ms)\n✔ AR4/PR-panel: a root flag never consumes a following option as its value (24.93616ms)\n✔ PR-panel: skips blocked by an errored check propagate that check's own message (22.321223ms)\n✔ AR7: missing panels + workflow read failure both surface, exit 3 (56.355845ms)\n✔ AR7: malformed config still evaluates independent workflow check; error precedence wins (50.761375ms)\n✔ AR7: skip pins — not-adopted repo (39.233911ms)\n✔ AR7: skip pins — dirty manifest still evaluates independent workflow checks (41.029045ms)\n✔ wrapper: sdlc-status.sh output and exit are identical to direct .mjs invocation (160.283718ms)\n✔ NR7: generic prompts do not require absent governing files (0.682826ms)\n✔ NR7: skill dispatch instructions are concrete and CI claims are bounded (7.57497ms)\n✔ NR7: inventory checker and ADR are shipped and versioned (0.350583ms)\n✔ CV29: normative inventory rebinds readiness to merged panels (0.397232ms)\n✔ NR8: source prompt extraction remains the fixture authority (0.166707ms)\n✔ CV4/CV21: lifecycle floor exclusively supersedes minVendor and reports model shortfall (70.567719ms)\n✔ strict model-axis ordering and recognised effort suffix dedupe are conserved (40.46327ms)\n✔ same-provider distinct models, embedded versions, and provider identity remain distinct (118.074253ms)\n✔ CV23: lifecycle author model is readmitted only for preference shortfall (66.098227ms)\n✔ gate decomposition, track selection, and task-validation off refuse in preference (134.335694ms)\n✔ task validation retains its fixed one-model model-axis floor (64.355016ms)\n✔ CV21: preference shortfalls proceed on both axes and keep machine stdout parseable (102.146793ms)\n✔ CV22: strict shortfalls fail and absent enforcement defaults to preference (60.438918ms)\n✔ CV23: author readmission is shortfall-only; empty panels and gate modes still refuse (183.621989ms)\n✔ CV24/CV25: retired input and manifest/version/roster halts are distinct (128.442779ms)\n✔ CV26: folded pair-A strict output and exit match real pre-T1 v1 goldens (126.483375ms)\n✔ CV28: watched config schema changes require the PR release signal (299.0108ms)\n✔ CV28: inner breaking commits are ignored in favour of the squash title (65.192616ms)\n✔ CV28: only the named schemas and CONFIG_SCHEMA_VERSION line are watched (196.046693ms)\n✔ CV19: committed migrated v2 config without a models file is ready in text and JSON (85.955221ms)\n✔ CV17: recognised v1 is not-ready with canonical migration remedy and unrelated checks still report (47.13518ms)\n✔ CV18: schemaVersion 3 is an error with the canonical newer remedy (56.903011ms)\n✔ CV19: a panels-less v2 config is valid but not-ready (57.678256ms)\n✔ CV20: malformed JSON and invalid schemaVersion remain config errors (110.017536ms)\n✔ current v2 structural validation errors remain config.valid errors (93.478341ms)\n✔ filesystem-only manifests are not committed adoption (134.591644ms)\n✔ argument, root, and git errors retain exit 2 (175.342007ms)\n✔ workflow readability remains an independent readiness check (78.486937ms)\n✔ unrelated dirty files do not affect readiness (57.567141ms)\n✔ status completes with a PATH exposing only git (57.858906ms)\n✔ fresh bundle provisions requested assets and idempotent rerun retains them (94.018314ms)\n✔ CI marker directories are not mistaken for CI files (39.751798ms)\n✔ existing CI suppresses workflow creation and reports refusal (45.336084ms)\n✔ template info strings must be exactly sdlc (43.806801ms)\n✔ consumer template with the wrong companion is refused byte-identically (45.515062ms)\n✔ consumer template with multiple declarations is refused (33.229185ms)\n✔ consumer template without the declaration is refused byte-identically (30.813598ms)\n✔ invalid assembled configuration fails before any bundle write (27.782507ms)\n✔ target parent conflicts fail before any bundle write (33.835688ms)\n✔ unreadable package sources fail before any bundle write (31.336268ms)\n✔ invalid existing config and models are refused without overwrite (85.626174ms)\n✔ workflow from another repository is refused (48.931357ms)\n✔ malformed CI marker fails before any bundle write (38.747071ms)\n✔ operational JSON errors preserve the resolved consumer root (29.232367ms)\n✔ existing target directories fail before any bundle write (24.447691ms)\n✔ bundle reports resolved package references before writing (27.292166ms)\n✔ OLA14: --profile standard writes the exact fully-expanded standard block (34.595416ms)\n✔ OLA14/NF-3: repeated preset runs produce identical lifecycle bytes (57.60894ms)\n✔ OLA15: the interactive profile question is first and defaults to standard (1118.724967ms)\n✔ custom interview rejects invalid Boolean and gate answers immediately with text (916.202782ms)\n✔ OLA16/NF-1(c): non-interactive setup without lifecycle flags remains v1-shaped (34.948257ms)\n✔ OLA16: applying a profile to an existing config refuses with the OL-B pointer (70.705616ms)\n✔ OLA17: custom profile requires lifecycle JSON and injects profile exactly (68.977354ms)\n✔ OLA17: custom payload usage and validation failures are pinned (105.617255ms)\n✔ OH4: --yes writes a schema-valid config; bundle re-run refuses config changes; --force overwrites (98.776595ms)\n✔ OH5: --hook-use fields 3-4 = use, do = remainder after 4th colon (colons in do preserved) (41.114993ms)\n✔ OH5: --hook-run command = remainder after 2nd colon (colons preserved); trust warning on stderr (29.867495ms)\n✔ OH5: mixed repeated hook flags preserve argv order in the written list (46.800482ms)\n✔ OH5: malformed hook flags exit 2 (201.645167ms)\n✔ PR-fix: value-taking flags accept values that begin with '-' (e.g. --announce '--foo') (36.289611ms)\n✔ OH5: partial tracker flags exit 2 (all-or-none) (30.841717ms)\n✔ OH5: no config flags and no TTY exits 2 (interview needs a TTY) (24.419108ms)\n✔ OH6: package.json pi.prompts includes ./templates and the template has a description (0.35518ms)\n✔ PV1: a valid JavaScript manifest runs only declared checks and passes (68.117411ms)\n✔ PV2: only declared argv run; an undeclared tool command never executes (167.523402ms)\n✔ PV3: schema and inspectManifest reject the mutation matrix before any command runs (49.267026ms)\n✔ PV4: command outcomes are complete and deterministic; runner continues after failures (37.881922ms)\n✔ PV4: a timeout is reported as FAIL with timedOut (1077.152299ms)\n✔ PV5: category applicability is exact; injected n/a shapes are rejected (61.61056ms)\n✔ PV6: scenario mapping gates the verdict (71.500796ms)\n✔ PV7: standards and banned patterns are commands, not judgement (99.226885ms)\n✔ PV8: evidence is bounded and secrets are redacted (72.69781ms)\n✔ PV8 unit: boundStream and redaction name-matching are precise (230.955685ms)\n✔ PV9: JSON/text/exit agree and JSON mode is order-independent (338.197741ms)\n✔ PV9: --report writes the exact JSON bytes atomically (99.819344ms)\n✔ PV9: --report outside the repo root is refused and clobbers nothing (107.859697ms)\n✔ PV10: generic validator law and generated agent are portable (0.625808ms)\n✔ PV11: receipt hash verification detects mutation of any stored file (5.816711ms)\n✔ PV11: a FAIL runner-report cannot ride under runnerVerdict PASS (0.70562ms)\n✔ parseArgs: recognises JSON anywhere and rejects bad flags (0.399011ms)\n✔ PV13: renderText is a faithful projection of the report (76.216124ms)\nℹ tests 205\nℹ suites 0\nℹ pass 205\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 4238.871246\n",
+      "stderrTail": ""
+    },
+    {
+      "id": "static.release-guard",
+      "argv": [
+        "node",
+        "--check",
+        "skills/sdlc/scripts/check-schema-break.mjs"
+      ],
+      "evidence": [
+        "Release-channel schema-shape guard syntax"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 21,
+      "stdoutTail": "",
+      "stderrTail": ""
+    },
+    {
+      "id": "static.lint",
+      "argv": [
+        "npm",
+        "run",
+        "lint"
+      ],
+      "evidence": [
+        "Repository formatting and lint rules"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 175,
+      "stdoutTail": "\n> pi-sdlc@0.1.1 lint\n> biome check .\n\nChecked 82 files in 53ms. No fixes applied.\n",
+      "stderrTail": ""
+    },
+    {
+      "id": "standards.references",
+      "argv": [
+        "node",
+        "skills/sdlc/scripts/check-references.mjs",
+        "--package-root",
+        "."
+      ],
+      "evidence": [
+        "Normative-reference inventory remains valid after merged-surface rebinding"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 24,
+      "stdoutTail": "reference-check: pass\ncheck: inventory.self pass — package source assertion and target are present\ncheck: inventory.schema pass — package source assertion and target are present\ncheck: checker.source pass — package source assertion and target are present\ncheck: checker.wrapper pass — package source assertion and target are present\ncheck: skill.source pass — package source assertion and target are present\ncheck: skill.lifecycle-checker pass — package source assertion and target are present\ncheck: skill.pr-template pass — package source assertion and target are present\ncheck: skill.ci-workflow pass — package source assertion and target are present\ncheck: consumer.panels pass — readiness verification assertion is present\ncheck: readme.source pass — package source assertion and target are present\ncheck: setup-template.source pass — package source assertion and target are present\ncheck: tracker.asset pass — package source assertion and target are present\ncheck: agent-brief.asset pass — package source assertion and target are present\ncheck: prompt.plan pass — package source assertion and target are present\ncheck: prompt.validator pass — package source assertion and target are present\ncheck: prompt.spec pass — package source assertion and target are present\ncheck: prompt.review pass — package source assertion and target are present\ncheck: script.status pass — package source assertion and target are present\ncheck: script.panel-resolver pass — package source assertion and target are present\ncheck: script.panel-agent pass — package source assertion and target are present\ncheck: script.validator pass — package source assertion and target are present\ncheck: script.receipt-verifier pass — package source assertion and target are present\ncheck: schema.task-validation pass — package source assertion and target are present\ncheck: consumer.workflow unverified-consumer — consumer-owned target is not package-certified: .pi/sdlc/workflow.md\ncheck: external.gh external — external facility: github.com/issues-projects\n",
+      "stderrTail": ""
+    },
+    {
+      "id": "patterns.diff",
+      "argv": [
+        "git",
+        "diff",
+        "--check",
+        "HEAD"
+      ],
+      "evidence": [
+        "No whitespace-error banned patterns in task diff"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 4,
+      "stdoutTail": "",
+      "stderrTail": ""
+    }
+  ],
+  "categories": [
+    {
+      "category": "tests",
+      "status": "PASS",
+      "checkIds": [
+        "tests.integration",
+        "tests.full"
+      ]
+    },
+    {
+      "category": "static",
+      "status": "PASS",
+      "checkIds": [
+        "static.release-guard",
+        "static.lint"
+      ]
+    },
+    {
+      "category": "scenarios",
+      "status": "PASS"
+    },
+    {
+      "category": "standards",
+      "status": "PASS",
+      "checkIds": [
+        "standards.references"
+      ]
+    },
+    {
+      "category": "bannedPatterns",
+      "status": "PASS",
+      "checkIds": [
+        "patterns.diff"
+      ]
+    }
+  ],
+  "scenarios": [
+    {
+      "scenarioId": "CV28",
+      "status": "PASS",
+      "checkIds": [
+        "tests.integration",
+        "static.release-guard"
+      ]
+    },
+    {
+      "scenarioId": "CV29",
+      "status": "PASS",
+      "checkIds": [
+        "tests.integration",
+        "standards.references"
+      ]
+    },
+    {
+      "scenarioId": "CV30",
+      "status": "PASS",
+      "checkIds": [
+        "tests.integration",
+        "tests.full"
+      ]
+    },
+    {
+      "scenarioId": "CV31",
+      "status": "PASS",
+      "checkIds": [
+        "tests.integration"
+      ]
+    },
+    {
+      "scenarioId": "CV32",
+      "status": "PASS",
+      "checkIds": [
+        "tests.integration"
+      ]
+    }
+  ]
+}

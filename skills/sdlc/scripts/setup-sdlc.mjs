@@ -3,12 +3,13 @@
 // Bundle mode is deterministic, offline, and refuses consumer-authored assets.
 
 import { execFileSync } from "node:child_process";
-import { existsSync, lstatSync, mkdirSync, readdirSync, readFileSync, realpathSync, writeFileSync } from "node:fs";
+import { existsSync, lstatSync, mkdirSync, readdirSync, readFileSync, realpathSync, unlinkSync, writeFileSync } from "node:fs";
 import { dirname, join, relative, resolve, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 import { createInterface } from "node:readline/promises";
-import { stdin, stdout } from "node:process";
-import { CONFIG_DEFAULTS, HOOK_PHASES, USE_RE, inspectConfig, inspectModels, resolveRoot } from "./lib.mjs";
+import { stderr, stdin, stdout } from "node:process";
+import { CONFIG_DEFAULTS, CONFIG_SCHEMA_VERSION, HOOK_PHASES, REMEDY_SCHEMA_NEWER, REMEDY_SCHEMA_OLDER, USE_RE, classifyConfigVersion, inspectConfig, readConfigRawForMigration, resolveRoot } from "./lib.mjs";
+import { applyMigration, planMigration } from "./migrate.mjs";
 
 const SCRIPT_DIR = dirname(fileURLToPath(import.meta.url));
 const PACKAGE_DIR = resolve(SCRIPT_DIR, "..");
@@ -29,7 +30,9 @@ function packageRepository() {
 const RUN_HOOK_WARNING = "sdlc: WARNING — 'run' hooks execute arbitrary shell commands with the agent's\nprivileges from the committed config. Only commit hooks you trust, exactly as\nyou would for .pi/prompts or project settings.";
 const PROMPT_BASES = ["adversary-plan", "adversary-spec", "adversary-review", "validator-task"];
 const USAGE =
-	"usage: setup-sdlc.sh [--profile solo|standard|full|custom] [--lifecycle-json path|-] [--prefix V] [--label-prefix V] [--announce V] [--tracker-repo o/n --tracker-board-number N --tracker-board-url U] [--hook-run S] [--hook-use S] [--with-models] [--with-ci-workflow] [--copy-prompts] [--format text|json] [--force] [--yes] [--config DIR|--repo-root DIR]";
+	"usage: setup-sdlc.sh [--profile solo|standard|full|custom] [--lifecycle-json path|-] [--prefix V] [--label-prefix V] [--announce V] [--tracker-repo o/n --tracker-board-number N --tracker-board-url U] [--hook-run S] [--hook-use S] [--seed-panels] [--enforcement strict|preference] [--with-ci-workflow] [--copy-prompts] [--format text|json] [--force] [--yes] [--config DIR|--repo-root DIR]";
+const MIGRATE_FIRST = "setup-sdlc: migrate first — re-run with no config flags to fold the v1 config, then apply changes";
+const RETIRED_WITH_MODELS = "setup-sdlc: --with-models is retired — the panel roster now lives in .pi/sdlc/sdlc.config.json (schemaVersion 2); use --seed-panels";
 
 export const LIFECYCLE_PRESETS = Object.freeze({
 	solo: {
@@ -106,7 +109,13 @@ function buildHooks(specs) {
 	return { hooks, hasRun };
 }
 function assembleConfig(opts, tracker, hooks) {
-	const config = { schemaVersion: 1, prefix: opts.prefix ?? CONFIG_DEFAULTS.prefix, labelPrefix: opts.labelPrefix ?? CONFIG_DEFAULTS.labelPrefix, announce: opts.announce ?? CONFIG_DEFAULTS.announce };
+	const config = {
+		schemaVersion: CONFIG_SCHEMA_VERSION,
+		prefix: opts.prefix ?? CONFIG_DEFAULTS.prefix,
+		labelPrefix: opts.labelPrefix ?? CONFIG_DEFAULTS.labelPrefix,
+		announce: opts.announce ?? CONFIG_DEFAULTS.announce,
+		enforcement: opts.enforcement ?? "preference",
+	};
 	if (tracker) config.tracker = tracker;
 	if (Object.keys(hooks).length) config.hooks = hooks;
 	const lifecycle = lifecycleFromOptions(opts, config);
@@ -141,7 +150,7 @@ function trackerFromFlags(opts) {
 	return { repo: opts.trackerRepo, board: { number, url: opts.trackerBoardUrl } };
 }
 function parseArgs(argv) {
-	const opts = { hookSpecs: [], format: "text", force: false, yes: false, withModels: false, withCiWorkflow: false, copyPrompts: false, runFlag: false, rootFlagOnly: true };
+	const opts = { hookSpecs: [], format: "text", force: false, yes: false, seedPanels: false, withCiWorkflow: false, copyPrompts: false, runFlag: false, rootFlagOnly: true };
 	for (let i = 0; i < argv.length; i++) {
 		const a = argv[i];
 		const value = (name = a) => needValue(argv, ++i, name);
@@ -197,7 +206,14 @@ function parseArgs(argv) {
 				opts.rootFlagOnly = false;
 				break;
 			case "--with-models":
-				opts.withModels = true;
+				throw new SetupError(RETIRED_WITH_MODELS);
+			case "--seed-panels":
+				opts.seedPanels = true;
+				opts.runFlag = true;
+				opts.rootFlagOnly = false;
+				break;
+			case "--enforcement":
+				opts.enforcement = value();
 				opts.runFlag = true;
 				opts.rootFlagOnly = false;
 				break;
@@ -244,6 +260,7 @@ function parseArgs(argv) {
 	if (opts.config !== undefined && opts.repoRoot !== undefined) throw new SetupError("setup-sdlc: --config and --repo-root are mutually exclusive");
 	if (opts.help) return opts;
 	if (opts.profile !== undefined && !new Set(["solo", "standard", "full", "custom"]).has(opts.profile)) throw new SetupError("setup-sdlc: --profile must be solo, standard, full, or custom");
+	if (opts.enforcement !== undefined && opts.enforcement !== "strict" && opts.enforcement !== "preference") throw new SetupError("setup-sdlc: --enforcement must be strict or preference");
 	if (opts.lifecycleJson !== undefined && opts.profile !== "custom") throw new SetupError("setup-sdlc: --lifecycle-json requires --profile custom");
 	if (opts.profile === "custom" && opts.lifecycleJson === undefined) throw new SetupError("setup-sdlc: --profile custom requires --lifecycle-json for non-interactive setup", 1);
 	return opts;
@@ -384,8 +401,8 @@ function targetParentConflict(root, target) {
 	return null;
 }
 function renderReport(report) {
-	if (report.format === "json") return `${JSON.stringify({ schemaVersion: 1, root: report.root, exitCode: report.exitCode, ...(report.error ? { error: report.error } : {}), references: report.references, assets: report.assets }, null, 2)}\n`;
-	const lines = [`root: ${report.root}`, `exit-code: ${report.exitCode}`];
+	if (report.format === "json") return `${JSON.stringify({ schemaVersion: 2, root: report.root, exitCode: report.exitCode, ...(report.error ? { error: report.error } : {}), references: report.references, assets: report.assets }, null, 2)}\n`;
+	const lines = [`schema-version: 2`, `root: ${report.root}`, `exit-code: ${report.exitCode}`];
 	for (const ref of report.references) lines.push(`reference: ${ref.id} ${ref.status} — ${ref.message}`);
 	for (const item of report.assets) {
 		lines.push(`asset: ${item.id} ${item.action} — ${item.message}`);
@@ -393,20 +410,111 @@ function renderReport(report) {
 	}
 	return `${lines.join("\n")}\n`;
 }
-function writeBundle(root, opts, cfg, hooks, tracker) {
-	const report = { root, format: opts.format, exitCode: 0, references: [], assets: [] };
+async function askConfirmation(question) {
+	if (!stdin.isTTY) return false;
+	const rl = createInterface({ input: stdin, output: stderr });
+	try {
+		const answer = await rl.question(`${question} (y/N) `);
+		return answer.trim().toLowerCase().startsWith("y");
+	} finally {
+		rl.close();
+	}
+}
+
+function rawFileUnchanged(before, after) {
+	if (before.status !== after.status) return false;
+	if (before.status === "absent") return true;
+	return before.text === after.text;
+}
+
+function migrationFlagsPresent(opts) {
+	return (
+		opts.profile !== undefined ||
+		opts.lifecycleJson !== undefined ||
+		opts.prefix !== undefined ||
+		opts.labelPrefix !== undefined ||
+		opts.announce !== undefined ||
+		opts.trackerRepo !== undefined ||
+		opts.trackerBoardNumber !== undefined ||
+		opts.trackerBoardUrl !== undefined ||
+		opts.hookSpecs.length > 0 ||
+		opts.seedPanels ||
+		opts.enforcement !== undefined ||
+		opts.withCiWorkflow ||
+		opts.copyPrompts ||
+		opts.force
+	);
+}
+
+async function migrateConfig(root, opts) {
+	const files = readConfigRawForMigration(root);
+	if (files.config.status === "malformed") {
+		const report = {
+			root,
+			format: opts.format,
+			exitCode: 1,
+			references: [],
+			assets: [{ id: "config", action: "refused", message: `existing config is malformed: ${files.config.error}` }],
+		};
+		process.stdout.write(renderReport(report));
+		return report;
+	}
+	if (files.config.status !== "parsed") return null;
+	const classification = classifyConfigVersion(files.config.value);
+	if (classification.kind === "newer") throw new SetupError(`setup-sdlc: ${REMEDY_SCHEMA_NEWER(classification.version)}`, 1);
+	if (classification.kind !== "older") return null;
+	if (migrationFlagsPresent(opts)) throw new SetupError(MIGRATE_FIRST, 1);
+	if (!stdin.isTTY) throw new SetupError(`setup-sdlc: ${REMEDY_SCHEMA_OLDER(classification.version)}`, 1);
+	console.error(`setup-sdlc: migration will fold .pi/sdlc/sdlc.models.json into .pi/sdlc/sdlc.config.json (schemaVersion ${CONFIG_SCHEMA_VERSION}).`);
+	console.error("setup-sdlc: single-writer boundary — after answering yes, do not modify either config file or run another setup/migration until this command finishes.");
+	if (!(await askConfirmation("migrate .pi/sdlc/sdlc.config.json to schemaVersion 2 now?"))) throw new SetupError(`setup-sdlc: ${REMEDY_SCHEMA_OLDER(classification.version)}`, 1);
+	const confirmedFiles = readConfigRawForMigration(root);
+	if (!rawFileUnchanged(files.config, confirmedFiles.config) || !rawFileUnchanged(files.models, confirmedFiles.models)) {
+		throw new SetupError("setup-sdlc: migration refused; config inputs changed while confirmation was pending; no files were written — review the edits and re-run setup-sdlc", 1);
+	}
+	let plan;
+	if (confirmedFiles.models.status === "malformed") plan = { ok: false, unmappable: [{ path: ".pi/sdlc/sdlc.models.json", message: confirmedFiles.models.error }] };
+	else plan = planMigration({ config: confirmedFiles.config.value, models: confirmedFiles.models.status === "parsed" ? confirmedFiles.models.value : undefined });
+	if (!plan.ok) {
+		const details = plan.unmappable.map(({ path, message }) => `cannot map ${path}: ${message}`).join("\n");
+		throw new SetupError(`setup-sdlc: migration refused; no files were written.\n${details}`, 1);
+	}
+	const result = applyMigration(root, plan);
+	const report = { root, format: opts.format, exitCode: 0, references: [], assets: [{ id: "config", action: "migrated", message: `migrated ${result.configPath}` }, ...(result.modelsRemoved ? [{ id: "models", action: "removed", message: `removed ${result.modelsPath}` }] : [])] };
+	process.stdout.write(renderReport(report));
+	return report;
+}
+
+async function cleanupResidue(root) {
+	const dir = join(root, ".pi", "sdlc");
+	const assets = [];
+	for (const [name, id, question] of [
+		["sdlc.models.json", "models", "remove leftover .pi/sdlc/sdlc.models.json (folded into sdlc.config.json)?"],
+		[".sdlc.config.json.migrate-tmp", "staging", "remove leftover migration staging file .sdlc.config.json.migrate-tmp?"],
+	]) {
+		const path = join(dir, name);
+		if (!existsSync(path)) continue;
+		if (await askConfirmation(question)) {
+			unlinkSync(path);
+			assets.push({ id, action: "removed", message: `removed ${path}` });
+		} else assets.push({ id, action: "retained", message: `retained residue ${path}`, remediation: `re-run setup-sdlc interactively to remove ${path}` });
+	}
+	return assets;
+}
+
+function writeBundle(root, opts, cfg, hooks, tracker, residueAssets = []) {
+	const report = { root, format: opts.format, exitCode: 0, references: [], assets: [...residueAssets] };
 	const configTarget = join(root, ".pi", "sdlc", "sdlc.config.json");
-	const modelTarget = join(root, ".pi", "sdlc", "sdlc.models.json");
 	const templateSource = join(PACKAGE_DIR, "assets", "pull_request_template.md");
 	const workflowSource = join(PACKAGE_DIR, "assets", "sdlc-lifecycle.yml");
 	let workflowContent;
 	const checkerSource = join(SCRIPT_DIR, "check-lifecycle.mjs");
-	const modelSource = join(PACKAGE_DIR, "schema", "sdlc.models.example.json");
+	const configExampleSource = join(PACKAGE_DIR, "schema", "sdlc.config.example.json");
 	checkReference("reference.pr-template", templateSource, report);
 	if (opts.withCiWorkflow) checkReference("reference.ci-workflow", workflowSource, report);
 	const promptSources = opts.copyPrompts ? PROMPT_BASES.map((base) => join(PACKAGE_DIR, "prompts", `${base}.prompt.md`)) : [];
 	if (opts.copyPrompts) checkPromptReferences(promptSources, report);
-	if (opts.withModels) checkReference("reference.models-example", modelSource, report);
+	if (opts.seedPanels) checkReference("reference.panels-example", configExampleSource, report);
 	checkReference("reference.checker", checkerSource, report);
 	if (report.references.some((ref) => ref.status === "broken")) {
 		report.exitCode = 2;
@@ -419,7 +527,15 @@ function writeBundle(root, opts, cfg, hooks, tracker) {
 	const templateContent = source(templateSource);
 	source(checkerSource);
 	const promptContents = Object.fromEntries(promptSources.map((path) => [path, source(path)]));
-	const modelContent = opts.withModels ? source(modelSource) : undefined;
+	let configExample;
+	if (opts.seedPanels) {
+		try {
+			configExample = JSON.parse(source(configExampleSource));
+		} catch (error) {
+			throw new SetupError(`setup-sdlc: cannot parse packaged config example: ${error.message}`);
+		}
+		cfg.panels = structuredClone(configExample.panels);
+	}
 	if (opts.withCiWorkflow) workflowContent = source(workflowSource).replace("__PI_SDLC_REF__", packageRef());
 	const configIssues = inspectConfig(cfg);
 	if (configIssues.length > 0) {
@@ -427,13 +543,7 @@ function writeBundle(root, opts, cfg, hooks, tracker) {
 		report.error = `assembled configuration is invalid: ${configIssues[0].message}`;
 		return report;
 	}
-	const targets = [
-		configTarget,
-		...(opts.withModels ? [modelTarget] : []),
-		join(root, ".github", "pull_request_template.md"),
-		...(opts.withCiWorkflow ? [join(root, ".github", "workflows", "sdlc-lifecycle.yml")] : []),
-		...(opts.copyPrompts ? PROMPT_BASES.map((base) => join(root, ".pi", "sdlc", "prompts", `${base}.prompt.md`)) : []),
-	];
+	const targets = [configTarget, join(root, ".github", "pull_request_template.md"), ...(opts.withCiWorkflow ? [join(root, ".github", "workflows", "sdlc-lifecycle.yml")] : []), ...(opts.copyPrompts ? PROMPT_BASES.map((base) => join(root, ".pi", "sdlc", "prompts", `${base}.prompt.md`)) : [])];
 	for (const target of targets) {
 		const conflict = targetParentConflict(root, target);
 		if (conflict) {
@@ -445,8 +555,7 @@ function writeBundle(root, opts, cfg, hooks, tracker) {
 	const ciDetected = opts.withCiWorkflow ? existsCi(root, "sdlc-lifecycle.yml") : false;
 	const configExists = existsSync(configTarget);
 	const configIssue = existingAssetIssue(configTarget, inspectConfig, "config");
-	const modelIssue = opts.withModels ? existingAssetIssue(modelTarget, inspectModels, "models") : null;
-	const configMutating = opts.profile !== undefined || opts.prefix !== undefined || opts.labelPrefix !== undefined || opts.announce !== undefined || tracker !== undefined || (hooks && Object.keys(hooks).length > 0);
+	const configMutating = opts.profile !== undefined || opts.prefix !== undefined || opts.labelPrefix !== undefined || opts.announce !== undefined || opts.enforcement !== undefined || opts.seedPanels || tracker !== undefined || (hooks && Object.keys(hooks).length > 0);
 	if (!configExists) {
 		mkdirSync(dirname(configTarget), { recursive: true });
 		writeFileSync(configTarget, `${JSON.stringify(cfg, null, 2)}\n`);
@@ -464,14 +573,6 @@ function writeBundle(root, opts, cfg, hooks, tracker) {
 		report.assets.push({ id: "config", action: "upgraded", message: `upgraded ${configTarget}` });
 	} else if (configMutating && !opts.force) report.assets.push({ id: "config", action: "refused", message: `refused config replacement without --force: ${configTarget}`, remediation: `re-run with --force to replace the configuration` });
 	else report.assets.push({ id: "config", action: "retained", message: `retained ${configTarget}` });
-	if (opts.withModels) {
-		if (!existsSync(modelTarget)) {
-			mkdirSync(dirname(modelTarget), { recursive: true });
-			writeFileSync(modelTarget, `${modelContent.trimEnd()}\n`);
-			report.assets.push({ id: "models", action: "created", message: `created ${modelTarget}` });
-		} else if (modelIssue) report.assets.push({ id: "models", action: "refused", message: `refused invalid existing models ${modelTarget}: ${modelIssue}`, remediation: `repair or delete ${modelTarget} and re-run setup` });
-		else report.assets.push({ id: "models", action: "retained", message: `retained ${modelTarget}` });
-	}
 	asset("pr-template", join(root, ".github", "pull_request_template.md"), "pr-template", templateContent, report);
 	if (opts.withCiWorkflow) {
 		const target = join(root, ".github", "workflows", "sdlc-lifecycle.yml");
@@ -551,6 +652,8 @@ async function interview(root) {
 		const announce = await ask("announce", CONFIG_DEFAULTS.announce);
 		const workflowAnswer = await ask("offer a GitHub workflow when no CI exists? (y/N)", "n");
 		const promptsAnswer = await ask("copy package prompts for local overrides? (y/N)", "n");
+		const enforcement = await ask("panel enforcement — preference: proceed best-effort and surface shortfalls; strict: hard-fail below configured floors (preference/strict)", "preference");
+		if (enforcement !== "strict" && enforcement !== "preference") throw new SetupError("setup-sdlc: panel enforcement must be strict or preference", 1);
 		const opts = {
 			hookSpecs: [],
 			format: "text",
@@ -562,7 +665,8 @@ async function interview(root) {
 			prefix,
 			labelPrefix,
 			announce,
-			withModels: false,
+			enforcement,
+			seedPanels: (await ask("seed the example panel roster (model ids drift; review after)? (y/N)", "n")).toLowerCase().startsWith("y"),
 			withCiWorkflow: workflowAnswer.toLowerCase().startsWith("y"),
 			copyPrompts: promptsAnswer.toLowerCase().startsWith("y"),
 		};
@@ -592,11 +696,16 @@ try {
 	}
 	const root = resolveRoot({ config: opts.config, repoRoot: opts.repoRoot });
 	resolvedRoot = root;
-	if (!opts.runFlag) process.exitCode = await interview(root);
+	const migrationResult = await migrateConfig(root, opts);
+	if (migrationResult) process.exitCode = migrationResult.exitCode;
+	else if (!opts.runFlag) process.exitCode = await interview(root);
 	else {
 		const tracker = trackerFromFlags(opts);
 		const { hooks, hasRun } = buildHooks(opts.hookSpecs);
-		const report = writeBundle(root, opts, assembleConfig(opts, tracker, hooks), hooks, tracker);
+		const raw = readConfigRawForMigration(root);
+		const classification = raw.config.status === "parsed" ? classifyConfigVersion(raw.config.value) : null;
+		const residueAssets = classification?.kind === "current" || existsSync(join(root, ".pi", "sdlc", ".sdlc.config.json.migrate-tmp")) ? await cleanupResidue(root) : [];
+		const report = writeBundle(root, opts, assembleConfig(opts, tracker, hooks), hooks, tracker, residueAssets);
 		if (hasRun && opts.format !== "json") console.error(RUN_HOOK_WARNING);
 		if (hasRun && opts.format === "json") {
 			const configReport = report.assets.find((item) => item.id === "config");
@@ -608,7 +717,7 @@ try {
 } catch (error) {
 	const code = error instanceof SetupError ? error.code : 2;
 	if (isJson) {
-		process.stdout.write(`${JSON.stringify({ schemaVersion: 1, root: resolvedRoot ?? process.cwd(), exitCode: code, error: String(error.message), references: [], assets: [] }, null, 2)}\n`);
+		process.stdout.write(`${JSON.stringify({ schemaVersion: 2, root: resolvedRoot ?? process.cwd(), exitCode: code, error: String(error.message), references: [], assets: [] }, null, 2)}\n`);
 	} else console.error(error.message);
 	process.exitCode = code;
 }

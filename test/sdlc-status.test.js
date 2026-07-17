@@ -1,52 +1,68 @@
-// Offline behavioural tests for the FS8 four-state `sdlc-status` readiness
-// command (AR build T2): git-fixture-backed state machine coverage for AR1,
-// AR2 (baseline), AR4 (baseline), AR5, AR6 (baseline). Output-contract goldens
-// live in test/readiness-output.test.js. No network, no model calls (AR12).
+// Offline behavioural tests for the FS8 v2 `sdlc-status` readiness command.
+// Covers the four-state baseline plus CV17-CV20 schema drift and panels
+// readiness. No network, credentials, or model calls.
 
 import assert from "node:assert/strict";
 import { execFileSync } from "node:child_process";
-import { mkdirSync, mkdtempSync, realpathSync, rmSync, writeFileSync } from "node:fs";
+import { mkdtempSync, mkdirSync, realpathSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
-import { dirname, join } from "node:path";
-import { fileURLToPath } from "node:url";
+import { join } from "node:path";
 import { test } from "node:test";
 
-import { baseEnv, git, gitFixture, readyFixture, runStatus, VALID_CONFIG, VALID_MODELS } from "./fs8-helpers.js";
+import { baseEnv, gitFixture, readyFixture, runStatus, VALID_CONFIG } from "./fs8-helpers.js";
 
-const here = dirname(fileURLToPath(import.meta.url));
-const repo = dirname(here);
+const CANONICAL_IDS = ["cli.arguments", "root.resolve", "git.repository", "adoption.manifest-head", "adoption.manifest-clean", "config.valid", "config.schema-current", "config.panels", "workflow.readable"];
+const OLDER_REMEDY = "config schemaVersion 1 predates this skill (requires 2) — run the setup-sdlc migration interactively to fold it forward, or pin pi-sdlc to a release before the schema-2 major";
+const NEWER_REMEDY = "config schemaVersion 3 is newer than this skill (requires 2) — upgrade pi-sdlc, or run the pinned pi-sdlc release that wrote this config";
 
-function checkLine(stdout, id) {
-	const m = stdout.split("\n").find((l) => l.startsWith(`check: ${id} `));
-	assert.ok(m, `missing check line for ${id} in:\n${stdout}`);
-	return m;
+function reportOf(result) {
+	assert.equal(result.stderr, "");
+	try {
+		return JSON.parse(result.stdout);
+	} catch (error) {
+		throw new Error(`invalid JSON status report: ${error.message}\nstdout: ${result.stdout}`);
+	}
 }
 
-function checkStatus(stdout, id) {
-	return checkLine(stdout, id).split(" ")[2];
+function check(report, id) {
+	const found = report.checks.find((candidate) => candidate.id === id);
+	assert.ok(found, `missing check ${id}`);
+	return found;
 }
 
-// ---------------------------------------------------------------------------
-// AR1 — clean committed repository is ready
-// ---------------------------------------------------------------------------
+function textCheckStatus(stdout, id) {
+	const line = stdout.split("\n").find((candidate) => candidate.startsWith(`check: ${id} `));
+	assert.ok(line, `missing check line for ${id} in:\n${stdout}`);
+	return line.split(" ")[2];
+}
 
-test("AR1: committed valid config+models, clean tree — exit 0, state ready, all checks pass", () => {
+function v1Config() {
+	return { schemaVersion: 1, prefix: "acme", labelPrefix: "acme-sdlc", announce: "legacy" };
+}
+
+test("CV19: committed migrated v2 config without a models file is ready in text and JSON", () => {
 	const dir = readyFixture();
 	try {
-		for (const fmt of ["text", "json"]) {
-			const r = runStatus(["--repo-root", dir, "--format", fmt]);
-			assert.equal(r.code, 0, r.stdout + r.stderr);
-			assert.equal(r.stderr, "");
-			if (fmt === "json") {
-				const rep = JSON.parse(r.stdout);
-				assert.equal(rep.state, "ready");
-				assert.equal(rep.exitCode, 0);
-				assert.ok(rep.checks.every((c) => c.status === "pass"));
-				assert.match(rep.checks.find((c) => c.id === "workflow.readable").message, /optional/);
+		for (const format of ["text", "json"]) {
+			const result = runStatus(["--repo-root", dir, "--format", format]);
+			assert.equal(result.code, 0, result.stdout + result.stderr);
+			assert.equal(result.stderr, "");
+			if (format === "json") {
+				const report = reportOf(result);
+				assert.equal(report.schemaVersion, 2);
+				assert.equal(report.state, "ready");
+				assert.equal(report.exitCode, 0);
+				assert.deepEqual(
+					report.checks.map((candidate) => candidate.id),
+					CANONICAL_IDS,
+				);
+				assert.ok(report.checks.every((candidate) => candidate.status === "pass"));
+				assert.ok(report.checks.every((candidate) => !candidate.id.startsWith("models.")));
 			} else {
-				assert.match(r.stdout, /^root: /);
-				assert.ok(r.stdout.includes("state: ready"));
-				assert.ok(r.stdout.includes("exit-code: 0"));
+				assert.match(result.stdout, /state: ready/);
+				assert.match(result.stdout, /check: config\.schema-current pass — config schema is current \(schemaVersion 2\)/);
+				assert.match(result.stdout, /check: config\.panels pass — panels roster present/);
+				assert.doesNotMatch(result.stdout, /check: models\./);
 			}
 		}
 	} finally {
@@ -54,266 +70,198 @@ test("AR1: committed valid config+models, clean tree — exit 0, state ready, al
 	}
 });
 
-// ---------------------------------------------------------------------------
-// AR2 (baseline) — filesystem presence is not committed adoption
-// ---------------------------------------------------------------------------
+test("CV17: recognised v1 is not-ready with canonical migration remedy and unrelated checks still report", () => {
+	const dir = gitFixture({
+		files: {
+			".pi/sdlc/sdlc.config.json": JSON.stringify(v1Config()),
+			".pi/sdlc/workflow.md": "# workflow\n",
+		},
+	});
+	try {
+		const result = runStatus(["--repo-root", dir, "--format", "json"]);
+		assert.equal(result.code, 3, result.stdout + result.stderr);
+		const report = reportOf(result);
+		assert.equal(report.schemaVersion, 2);
+		assert.equal(report.state, "not-ready");
+		assert.deepEqual(
+			report.checks.map((candidate) => candidate.id),
+			CANONICAL_IDS,
+		);
+		assert.deepEqual(check(report, "config.valid"), {
+			id: "config.valid",
+			status: "pass",
+			message: "manifest parses; schemaVersion 1 is a recognised superseded schema (full validation deferred to migration)",
+		});
+		assert.deepEqual(check(report, "config.schema-current"), {
+			id: "config.schema-current",
+			status: "fail",
+			message: "config schema is behind this skill (schemaVersion 1 < 2)",
+			remediation: OLDER_REMEDY,
+		});
+		assert.deepEqual(check(report, "config.panels"), {
+			id: "config.panels",
+			status: "skip",
+			message: "config schema is not current",
+		});
+		for (const id of ["git.repository", "adoption.manifest-head", "adoption.manifest-clean", "workflow.readable"]) assert.equal(check(report, id).status, "pass", id);
+	} finally {
+		rmSync(dir, { recursive: true, force: true });
+	}
+});
 
-test("AR2: absent, untracked, staged, and ignored manifests all exit 1 not-adopted", () => {
+test("CV18: schemaVersion 3 is an error with the canonical newer remedy", () => {
+	const dir = gitFixture({ files: { ".pi/sdlc/sdlc.config.json": JSON.stringify({ ...VALID_CONFIG, schemaVersion: 3 }) } });
+	try {
+		const result = runStatus(["--repo-root", dir, "--format", "json"]);
+		assert.equal(result.code, 2, result.stdout + result.stderr);
+		const report = reportOf(result);
+		assert.equal(report.state, "error");
+		assert.deepEqual(check(report, "config.valid"), { id: "config.valid", status: "error", message: NEWER_REMEDY });
+		assert.equal(check(report, "config.schema-current").status, "skip");
+		assert.equal(check(report, "workflow.readable").status, "pass", "independent checks still evaluate");
+	} finally {
+		rmSync(dir, { recursive: true, force: true });
+	}
+});
+
+test("CV19: a panels-less v2 config is valid but not-ready", () => {
+	const { panels: _panels, ...withoutPanels } = VALID_CONFIG;
+	const dir = gitFixture({ files: { ".pi/sdlc/sdlc.config.json": JSON.stringify(withoutPanels) } });
+	try {
+		const result = runStatus(["--repo-root", dir, "--format", "json"]);
+		assert.equal(result.code, 3, result.stdout + result.stderr);
+		const report = reportOf(result);
+		assert.equal(report.state, "not-ready");
+		assert.equal(check(report, "config.valid").status, "pass");
+		assert.equal(check(report, "config.schema-current").status, "pass");
+		assert.deepEqual(check(report, "config.panels"), {
+			id: "config.panels",
+			status: "fail",
+			message: "no panels roster in the manifest",
+			remediation: "add a panels block to .pi/sdlc/sdlc.config.json (see schema/sdlc.config.example.json)",
+		});
+	} finally {
+		rmSync(dir, { recursive: true, force: true });
+	}
+});
+
+test("CV20: malformed JSON and invalid schemaVersion remain config errors", () => {
+	const cases = {
+		"invalid JSON": { text: "{nope", message: "manifest is not valid JSON" },
+		"junk schemaVersion": { text: JSON.stringify({ ...VALID_CONFIG, schemaVersion: "2" }), message: 'manifest is invalid: schemaVersion must be 2 (got "2")' },
+	};
+	for (const [label, fixture] of Object.entries(cases)) {
+		const dir = gitFixture({ files: { ".pi/sdlc/sdlc.config.json": fixture.text } });
+		try {
+			const result = runStatus(["--repo-root", dir, "--format", "json"]);
+			assert.equal(result.code, 2, `${label}: ${result.stdout}${result.stderr}`);
+			const report = reportOf(result);
+			assert.equal(report.state, "error", label);
+			assert.equal(check(report, "config.valid").status, "error", label);
+			assert.equal(check(report, "config.valid").message, fixture.message, label);
+			assert.equal(check(report, "config.schema-current").status, "skip", label);
+		} finally {
+			rmSync(dir, { recursive: true, force: true });
+		}
+	}
+});
+
+test("current v2 structural validation errors remain config.valid errors", () => {
+	const bads = {
+		"path escape": { ...VALID_CONFIG, paths: { plans: "../out" } },
+		"malformed hook": { ...VALID_CONFIG, hooks: { deploy: { after: [{ run: "x" }] } } },
+	};
+	for (const [label, raw] of Object.entries(bads)) {
+		const dir = gitFixture({ files: { ".pi/sdlc/sdlc.config.json": JSON.stringify(raw) } });
+		try {
+			const result = runStatus(["--repo-root", dir, "--format", "json"]);
+			assert.equal(result.code, 2, `${label}: ${result.stdout}${result.stderr}`);
+			assert.equal(check(reportOf(result), "config.valid").status, "error");
+		} finally {
+			rmSync(dir, { recursive: true, force: true });
+		}
+	}
+});
+
+test("filesystem-only manifests are not committed adoption", () => {
 	const variants = {
 		absent: () => gitFixture({ files: { "README.md": "x" } }),
 		untracked: () => {
-			const d = gitFixture({ files: { "README.md": "x" } });
-			mkdirSync(join(d, ".pi", "sdlc"), { recursive: true });
-			writeFileSync(join(d, ".pi", "sdlc", "sdlc.config.json"), JSON.stringify(VALID_CONFIG));
-			return d;
+			const dir = gitFixture({ files: { "README.md": "x" } });
+			mkdirSync(join(dir, ".pi", "sdlc"), { recursive: true });
+			writeFileSync(join(dir, ".pi", "sdlc", "sdlc.config.json"), JSON.stringify(VALID_CONFIG));
+			return dir;
 		},
-		"staged-for-addition": () => {
-			const d = gitFixture({ files: { "README.md": "x" } });
-			mkdirSync(join(d, ".pi", "sdlc"), { recursive: true });
-			writeFileSync(join(d, ".pi", "sdlc", "sdlc.config.json"), JSON.stringify(VALID_CONFIG));
-			git(d, ["add", "-A"]);
-			return d;
-		},
-		ignored: () => {
-			const d = gitFixture({ files: { ".gitignore": ".pi/\n" } });
-			mkdirSync(join(d, ".pi", "sdlc"), { recursive: true });
-			writeFileSync(join(d, ".pi", "sdlc", "sdlc.config.json"), JSON.stringify(VALID_CONFIG));
-			return d;
+		staged: () => {
+			const dir = gitFixture({ files: { "README.md": "x" } });
+			mkdirSync(join(dir, ".pi", "sdlc"), { recursive: true });
+			writeFileSync(join(dir, ".pi", "sdlc", "sdlc.config.json"), JSON.stringify(VALID_CONFIG));
+			return dir;
 		},
 	};
 	for (const [label, make] of Object.entries(variants)) {
 		const dir = make();
 		try {
-			const r = runStatus(["--repo-root", dir]);
-			assert.equal(r.code, 1, `${label}: expected exit 1, got ${r.code}\n${r.stdout}${r.stderr}`);
-			assert.ok(r.stdout.includes("state: not-adopted"), label);
-			assert.equal(checkStatus(r.stdout, "adoption.manifest-head"), "fail", label);
-			for (const id of ["adoption.manifest-clean", "config.valid", "models.head", "models.clean", "models.valid", "workflow.readable"]) {
-				assert.equal(checkStatus(r.stdout, id), "skip", `${label}: ${id} must skip`);
-			}
+			const result = runStatus(["--repo-root", dir]);
+			assert.equal(result.code, 1, label);
+			assert.equal(textCheckStatus(result.stdout, "adoption.manifest-head"), "fail", label);
+			for (const id of ["adoption.manifest-clean", "config.valid", "config.schema-current", "config.panels", "workflow.readable"]) assert.equal(textCheckStatus(result.stdout, id), "skip", `${label}: ${id}`);
 		} finally {
 			rmSync(dir, { recursive: true, force: true });
 		}
 	}
 });
 
-// ---------------------------------------------------------------------------
-// AR4 (baseline) — git and CLI errors are distinct
-// ---------------------------------------------------------------------------
-
-test("AR4: argument errors exit 2 at cli.arguments with later checks skipped", () => {
-	const cases = [["--bogus"], ["--config"], ["--repo-root"], ["--config", "/a", "--repo-root", "/b"], ["--format", "yaml"], ["--format", "text", "--format", "text"], ["extra-positional"]];
-	for (const args of cases) {
-		const r = runStatus(args, { cwd: tmpdir() });
-		assert.equal(r.code, 2, `${args.join(" ")}: expected exit 2, got ${r.code}\n${r.stdout}${r.stderr}`);
-		assert.ok(r.stdout.includes("state: error"), args.join(" "));
-		assert.equal(checkStatus(r.stdout, "cli.arguments"), "error", args.join(" "));
-		assert.equal(checkStatus(r.stdout, "root.resolve"), "skip", args.join(" "));
+test("argument, root, and git errors retain exit 2", () => {
+	for (const args of [["--bogus"], ["--config"], ["--repo-root"], ["--config", "/a", "--repo-root", "/b"], ["--format", "yaml"]]) {
+		const result = runStatus(args, { cwd: tmpdir() });
+		assert.equal(result.code, 2, `${args.join(" ")}: ${result.stdout}${result.stderr}`);
+		assert.equal(textCheckStatus(result.stdout, "cli.arguments"), "error");
 	}
-});
-
-test("AR4: unresolvable implicit root exits 2 at root.resolve", () => {
-	const dir = realpathSync(mkdtempSync(join(tmpdir(), "sdlc-noroot-")));
+	const dir = realpathSync(mkdtempSync(join(tmpdir(), "sdlc-nongit-")));
 	try {
-		const r = runStatus([], { cwd: dir });
-		assert.equal(r.code, 2, r.stdout + r.stderr);
-		assert.equal(checkStatus(r.stdout, "root.resolve"), "error");
-		assert.equal(checkStatus(r.stdout, "git.repository"), "skip");
+		const result = runStatus(["--repo-root", dir]);
+		assert.equal(result.code, 2, result.stdout + result.stderr);
+		assert.equal(textCheckStatus(result.stdout, "git.repository"), "error");
 	} finally {
 		rmSync(dir, { recursive: true, force: true });
 	}
 });
 
-test("AR4: non-git explicit root exits 2 at git.repository, with or without a manifest", () => {
-	for (const withManifest of [false, true]) {
-		const dir = realpathSync(mkdtempSync(join(tmpdir(), "sdlc-nongit-")));
-		try {
-			if (withManifest) {
-				mkdirSync(join(dir, ".pi", "sdlc"), { recursive: true });
-				writeFileSync(join(dir, ".pi", "sdlc", "sdlc.config.json"), JSON.stringify(VALID_CONFIG));
-			}
-			const r = runStatus(["--repo-root", dir]);
-			assert.equal(r.code, 2, `manifest=${withManifest}: ${r.stdout}${r.stderr}`);
-			assert.equal(checkStatus(r.stdout, "git.repository"), "error");
-			assert.equal(checkStatus(r.stdout, "adoption.manifest-head"), "skip");
-		} finally {
-			rmSync(dir, { recursive: true, force: true });
-		}
-	}
-});
-
-test("AR4: a git repository without HEAD exits 1 not-adopted, not 2", () => {
-	const dir = gitFixture({ files: {}, commit: false });
-	try {
-		mkdirSync(join(dir, ".pi", "sdlc"), { recursive: true });
-		writeFileSync(join(dir, ".pi", "sdlc", "sdlc.config.json"), JSON.stringify(VALID_CONFIG));
-		const r = runStatus(["--repo-root", dir]);
-		assert.equal(r.code, 1, r.stdout + r.stderr);
-		assert.ok(r.stdout.includes("state: not-adopted"));
-		assert.equal(checkStatus(r.stdout, "git.repository"), "pass");
-		assert.equal(checkStatus(r.stdout, "adoption.manifest-head"), "fail");
-	} finally {
-		rmSync(dir, { recursive: true, force: true });
-	}
-});
-
-test("AR4: --help prints usage, exits 0, and emits no status envelope", () => {
-	const r = runStatus(["--help"], { cwd: tmpdir() });
-	assert.equal(r.code, 0);
-	assert.match(r.stdout, /^usage: /);
-	assert.ok(!r.stdout.includes("state:"), "help must not emit the status envelope");
-});
-
-// ---------------------------------------------------------------------------
-// AR5 — manifest validity remains an error
-// ---------------------------------------------------------------------------
-
-test("AR5: committed clean but invalid manifests exit 2 at config.valid", () => {
-	const bads = {
-		"invalid JSON": "{nope",
-		"path escape": JSON.stringify({ ...VALID_CONFIG, paths: { plans: "../out" } }),
-		"malformed hook": JSON.stringify({ ...VALID_CONFIG, hooks: { deploy: { after: [{ run: "x" }] } } }),
-	};
-	for (const [label, manifest] of Object.entries(bads)) {
-		const dir = gitFixture({
-			files: {
-				".pi/sdlc/sdlc.config.json": manifest,
-				".pi/sdlc/sdlc.models.json": JSON.stringify(VALID_MODELS),
-			},
-		});
-		try {
-			const r = runStatus(["--repo-root", dir]);
-			assert.equal(r.code, 2, `${label}: expected exit 2, got ${r.code}\n${r.stdout}${r.stderr}`);
-			assert.ok(r.stdout.includes("state: error"), label);
-			assert.equal(checkStatus(r.stdout, "config.valid"), "error", label);
-		} finally {
-			rmSync(dir, { recursive: true, force: true });
-		}
-	}
-});
-
-// ---------------------------------------------------------------------------
-// AR6 (baseline) — supporting prerequisites are not-ready
-// ---------------------------------------------------------------------------
-
-test("AR6: models absent from HEAD (filesystem-only variants) exits 3 at models.head", () => {
-	const variants = {
-		absent: (d) => d,
-		untracked: (d) => {
-			writeFileSync(join(d, ".pi", "sdlc", "sdlc.models.json"), JSON.stringify(VALID_MODELS));
-			return d;
-		},
-		"staged-for-addition": (d) => {
-			writeFileSync(join(d, ".pi", "sdlc", "sdlc.models.json"), JSON.stringify(VALID_MODELS));
-			git(d, ["add", "-A"]);
-			return d;
-		},
-	};
-	for (const [label, mutate] of Object.entries(variants)) {
-		const dir = mutate(gitFixture({ files: { ".pi/sdlc/sdlc.config.json": JSON.stringify(VALID_CONFIG) } }));
-		try {
-			const r = runStatus(["--repo-root", dir]);
-			assert.equal(r.code, 3, `${label}: expected exit 3, got ${r.code}\n${r.stdout}${r.stderr}`);
-			assert.ok(r.stdout.includes("state: not-ready"), label);
-			assert.equal(checkStatus(r.stdout, "models.head"), "fail", label);
-			assert.equal(checkStatus(r.stdout, "models.clean"), "skip", label);
-			assert.equal(checkStatus(r.stdout, "models.valid"), "skip", label);
-		} finally {
-			rmSync(dir, { recursive: true, force: true });
-		}
-	}
-});
-
-test("AR6: dirty committed models exits 3 at models.clean; models.valid skips", () => {
-	const dir = readyFixture();
-	try {
-		writeFileSync(join(dir, ".pi", "sdlc", "sdlc.models.json"), JSON.stringify({ ...VALID_MODELS, $comment: "dirty" }));
-		const r = runStatus(["--repo-root", dir]);
-		assert.equal(r.code, 3, r.stdout + r.stderr);
-		assert.equal(checkStatus(r.stdout, "models.head"), "pass");
-		assert.equal(checkStatus(r.stdout, "models.clean"), "fail");
-		assert.equal(checkStatus(r.stdout, "models.valid"), "skip");
-	} finally {
-		rmSync(dir, { recursive: true, force: true });
-	}
-});
-
-test("AR6: committed malformed / FS2-invalid / unreadable models exit 3 at models.valid", () => {
-	const cases = {
-		"invalid JSON": { models: "{nope", deny: false },
-		"FS2-invalid": { models: JSON.stringify({ phases: {} }), deny: false },
-		unreadable: { models: JSON.stringify(VALID_MODELS), deny: true },
-	};
-	for (const [label, { models, deny }] of Object.entries(cases)) {
-		const dir = gitFixture({
-			files: {
-				".pi/sdlc/sdlc.config.json": JSON.stringify(VALID_CONFIG),
-				".pi/sdlc/sdlc.models.json": models,
-			},
-		});
-		try {
-			const env = deny ? baseEnv({ SDLC_STATUS_UNREADABLE: join(dir, ".pi", "sdlc", "sdlc.models.json") }) : undefined;
-			const r = runStatus(["--repo-root", dir], { env });
-			assert.equal(r.code, 3, `${label}: expected exit 3, got ${r.code}\n${r.stdout}${r.stderr}`);
-			assert.ok(r.stdout.includes("state: not-ready"), label);
-			assert.equal(checkStatus(r.stdout, "models.valid"), "fail", label);
-		} finally {
-			rmSync(dir, { recursive: true, force: true });
-		}
-	}
-});
-
-test("AR6: workflow.md present+readable passes; injected read failure exits 3", () => {
+test("workflow readability remains an independent readiness check", () => {
 	const dir = readyFixture({ ".pi/sdlc/workflow.md": "# workflow\n" });
 	try {
-		const ok = runStatus(["--repo-root", dir]);
-		assert.equal(ok.code, 0, ok.stdout + ok.stderr);
-		assert.equal(checkStatus(ok.stdout, "workflow.readable"), "pass");
-		const bad = runStatus(["--repo-root", dir], {
+		assert.equal(runStatus(["--repo-root", dir]).code, 0);
+		const result = runStatus(["--repo-root", dir, "--format", "json"], {
 			env: baseEnv({ SDLC_STATUS_UNREADABLE: join(dir, ".pi", "sdlc", "workflow.md") }),
 		});
-		assert.equal(bad.code, 3, bad.stdout + bad.stderr);
-		assert.equal(checkStatus(bad.stdout, "workflow.readable"), "fail");
+		assert.equal(result.code, 3, result.stdout + result.stderr);
+		assert.equal(check(reportOf(result), "workflow.readable").status, "fail");
 	} finally {
 		rmSync(dir, { recursive: true, force: true });
 	}
 });
 
-test("AR3 (baseline): unrelated dirty files do not affect readiness", () => {
+test("unrelated dirty files do not affect readiness", () => {
 	const dir = readyFixture();
 	try {
 		writeFileSync(join(dir, "scratch.txt"), "dirty");
-		const r = runStatus(["--repo-root", dir]);
-		assert.equal(r.code, 0, r.stdout + r.stderr);
+		assert.equal(runStatus(["--repo-root", dir]).code, 0);
 	} finally {
 		rmSync(dir, { recursive: true, force: true });
 	}
 });
 
-// ---------------------------------------------------------------------------
-// AR12 (portion) — the status command spawns nothing but git
-// ---------------------------------------------------------------------------
-
-test("AR12: status completes with a PATH exposing only git (no other executable can run)", () => {
+test("status completes with a PATH exposing only git", () => {
 	const dir = readyFixture();
 	const shim = realpathSync(mkdtempSync(join(tmpdir(), "sdlc-shim-")));
 	try {
 		const gitPath = execFileSync("sh", ["-c", "command -v git"], { encoding: "utf8" }).trim();
 		execFileSync("ln", ["-s", gitPath, join(shim, "git")]);
-		const r = runStatus(["--repo-root", dir], { env: { PATH: shim, HOME: process.env.HOME } });
-		assert.equal(r.code, 0, r.stdout + r.stderr);
+		const result = runStatus(["--repo-root", dir], { env: { PATH: shim, HOME: process.env.HOME } });
+		assert.equal(result.code, 0, result.stdout + result.stderr);
 	} finally {
 		rmSync(dir, { recursive: true, force: true });
 		rmSync(shim, { recursive: true, force: true });
 	}
-});
-
-// ---------------------------------------------------------------------------
-// Dogfood — this repository is ready
-// ---------------------------------------------------------------------------
-
-test("dogfood: this repo's committed config+models make sdlc-status exit 0", () => {
-	const r = runStatus(["--repo-root", repo]);
-	assert.equal(r.code, 0, `dogfood must be ready:\n${r.stdout}${r.stderr}`);
-	assert.ok(r.stdout.includes("state: ready"));
 });

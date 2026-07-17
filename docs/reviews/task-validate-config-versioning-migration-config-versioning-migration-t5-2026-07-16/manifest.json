@@ -1,0 +1,59 @@
+{
+  "schemaVersion": 1,
+  "taskId": "config-versioning-migration-t5",
+  "buildPlan": "docs/plans/2026-07-16-config-versioning-migration-build.md",
+  "repoRoot": ".",
+  "ownedScenarios": ["CV28", "CV29", "CV30", "CV31", "CV32"],
+  "checks": [
+    {
+      "id": "tests.integration",
+      "argv": ["node", "--test", "test/schema-break.test.js", "test/docs.test.js", "test/reference-contract.test.js"],
+      "timeoutMs": 180000,
+      "evidence": ["CV28 release guard, CV29 bindings/CI, CV30 dogfood, CV31 prose, CV32 ADR cross-references"]
+    },
+    {
+      "id": "tests.full",
+      "argv": ["node", "--test"],
+      "timeoutMs": 300000,
+      "evidence": ["Integrated CV1-CV32 regression corpus"]
+    },
+    {
+      "id": "static.release-guard",
+      "argv": ["node", "--check", "skills/sdlc/scripts/check-schema-break.mjs"],
+      "evidence": ["Release-channel schema-shape guard syntax"]
+    },
+    {
+      "id": "static.lint",
+      "argv": ["npm", "run", "lint"],
+      "timeoutMs": 120000,
+      "evidence": ["Repository formatting and lint rules"]
+    },
+    {
+      "id": "standards.references",
+      "argv": ["node", "skills/sdlc/scripts/check-references.mjs", "--package-root", "."],
+      "timeoutMs": 120000,
+      "evidence": ["Normative-reference inventory remains valid after merged-surface rebinding"]
+    },
+    {
+      "id": "patterns.diff",
+      "argv": ["git", "diff", "--check", "HEAD"],
+      "evidence": ["No whitespace-error banned patterns in task diff"]
+    }
+  ],
+  "categories": {
+    "tests": { "applicability": "required", "checkIds": ["tests.integration", "tests.full"] },
+    "static": { "applicability": "required", "checkIds": ["static.release-guard", "static.lint"] },
+    "scenarios": {
+      "applicability": "required",
+      "evidence": {
+        "CV28": ["tests.integration", "static.release-guard"],
+        "CV29": ["tests.integration", "standards.references"],
+        "CV30": ["tests.integration", "tests.full"],
+        "CV31": ["tests.integration"],
+        "CV32": ["tests.integration"]
+      }
+    },
+    "standards": { "applicability": "required", "checkIds": ["standards.references"] },
+    "bannedPatterns": { "applicability": "required", "checkIds": ["patterns.diff"] }
+  }
+}

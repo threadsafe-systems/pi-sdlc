@@ -9,21 +9,29 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { test } from "node:test";
 
-import { baseEnv, gitFixture, readyFixture, runStatus, statusSh, VALID_CONFIG, VALID_MODELS } from "./fs8-helpers.js";
+import { baseEnv, gitFixture, readyFixture, runStatus, statusSh, VALID_CONFIG } from "./fs8-helpers.js";
 
-const CANONICAL_IDS = ["cli.arguments", "root.resolve", "git.repository", "adoption.manifest-head", "adoption.manifest-clean", "config.valid", "models.head", "models.clean", "models.valid", "workflow.readable"];
+const CANONICAL_IDS = ["cli.arguments", "root.resolve", "git.repository", "adoption.manifest-head", "adoption.manifest-clean", "config.valid", "config.schema-current", "config.panels", "workflow.readable"];
 
 const SENTINELS = {
 	SECRET_TOKEN: "sentinel-secret-token-XYZZY",
 	API_KEY: "sentinel-api-key-PLUGH",
 };
 
+function parseReport(stdoutJson) {
+	try {
+		return JSON.parse(stdoutJson);
+	} catch (error) {
+		throw new Error(`invalid JSON status report: ${error.message}\nstdout: ${stdoutJson}`);
+	}
+}
+
 function idsOf(stdoutJson) {
-	return JSON.parse(stdoutJson).checks.map((c) => c.id);
+	return parseReport(stdoutJson).checks.map((c) => c.id);
 }
 
 function statusesOf(stdoutJson) {
-	return Object.fromEntries(JSON.parse(stdoutJson).checks.map((c) => [c.id, c.status]));
+	return Object.fromEntries(parseReport(stdoutJson).checks.map((c) => [c.id, c.status]));
 }
 
 // ---------------------------------------------------------------------------
@@ -46,9 +54,8 @@ test("AR8: ready fixture — exact text golden", () => {
 			"check: adoption.manifest-head pass — current HEAD contains .pi/sdlc/sdlc.config.json",
 			"check: adoption.manifest-clean pass — manifest matches HEAD in index and working tree",
 			"check: config.valid pass — committed manifest is valid",
-			"check: models.head pass — current HEAD contains .pi/sdlc/sdlc.models.json",
-			"check: models.clean pass — models file matches HEAD in index and working tree",
-			"check: models.valid pass — committed models file is valid",
+			"check: config.schema-current pass — config schema is current (schemaVersion 2)",
+			"check: config.panels pass — panels roster present",
 			"check: workflow.readable pass — optional workflow.md is absent",
 			"",
 		].join("\n");
@@ -66,7 +73,7 @@ test("AR8: ready fixture — exact JSON golden (deterministic serialization)", (
 		assert.equal(r.stderr, "");
 		const expected = `${JSON.stringify(
 			{
-				schemaVersion: 1,
+				schemaVersion: 2,
 				root: dir,
 				state: "ready",
 				exitCode: 0,
@@ -77,9 +84,8 @@ test("AR8: ready fixture — exact JSON golden (deterministic serialization)", (
 					{ id: "adoption.manifest-head", status: "pass", message: "current HEAD contains .pi/sdlc/sdlc.config.json" },
 					{ id: "adoption.manifest-clean", status: "pass", message: "manifest matches HEAD in index and working tree" },
 					{ id: "config.valid", status: "pass", message: "committed manifest is valid" },
-					{ id: "models.head", status: "pass", message: "current HEAD contains .pi/sdlc/sdlc.models.json" },
-					{ id: "models.clean", status: "pass", message: "models file matches HEAD in index and working tree" },
-					{ id: "models.valid", status: "pass", message: "committed models file is valid" },
+					{ id: "config.schema-current", status: "pass", message: "config schema is current (schemaVersion 2)" },
+					{ id: "config.panels", status: "pass", message: "panels roster present" },
 					{ id: "workflow.readable", status: "pass", message: "optional workflow.md is absent" },
 				],
 			},
@@ -117,10 +123,10 @@ test("AR8: JSON on every state 0-3 is a single valid envelope with only FS8 fiel
 	const fixtures = {
 		0: readyFixture(),
 		1: gitFixture({ files: { "README.md": "x" } }),
-		2: gitFixture({ files: { ".pi/sdlc/sdlc.config.json": "{nope", ".pi/sdlc/sdlc.models.json": JSON.stringify(VALID_MODELS) } }),
+		2: gitFixture({ files: { ".pi/sdlc/sdlc.config.json": "{nope" } }),
 		3: (() => {
-			const d = gitFixture({ files: { ".pi/sdlc/sdlc.config.json": JSON.stringify(VALID_CONFIG) } });
-			return d;
+			const { panels: _panels, ...withoutPanels } = VALID_CONFIG;
+			return gitFixture({ files: { ".pi/sdlc/sdlc.config.json": JSON.stringify(withoutPanels) } });
 		})(),
 	};
 	try {
@@ -128,9 +134,9 @@ test("AR8: JSON on every state 0-3 is a single valid envelope with only FS8 fiel
 			const r = runStatus(["--repo-root", dir, "--format", "json"]);
 			assert.equal(r.code, Number(exit), `${exit}: ${r.stdout}${r.stderr}`);
 			assert.equal(r.stderr, "", `${exit}: stderr must be empty in JSON mode`);
-			const rep = JSON.parse(r.stdout);
+			const rep = parseReport(r.stdout);
 			assert.deepEqual(Object.keys(rep), ["schemaVersion", "root", "state", "exitCode", "checks"]);
-			assert.equal(rep.schemaVersion, 1);
+			assert.equal(rep.schemaVersion, 2);
 			assert.ok(rep.root.startsWith("/"), "root must be absolute");
 			assert.equal(rep.exitCode, Number(exit));
 			assert.deepEqual({ 0: "ready", 1: "not-adopted", 2: "error", 3: "not-ready" }[exit], rep.state);
@@ -177,7 +183,7 @@ test("AR8: --format json anywhere in argv forces the envelope for argument error
 		const r = runStatus(args, { cwd: tmpdir() });
 		assert.equal(r.code, 2, args.join(" "));
 		assert.equal(r.stderr, "", `${args.join(" ")}: no stderr once JSON mode is recognised`);
-		const rep = JSON.parse(r.stdout);
+		const rep = parseReport(r.stdout);
 		assert.equal(rep.state, "error");
 		assert.equal(rep.checks[0].id, "cli.arguments");
 		assert.equal(rep.checks[0].status, "error");
@@ -190,7 +196,7 @@ test("AR8: JSON envelope root falls back to absolute cwd on root-resolution fail
 	try {
 		const r = runStatus(["--format", "json"], { cwd: dir });
 		assert.equal(r.code, 2, r.stdout + r.stderr);
-		const rep = JSON.parse(r.stdout);
+		const rep = parseReport(r.stdout);
 		assert.equal(rep.root, dir);
 		assert.equal(statusesOf(r.stdout)["root.resolve"], "error");
 	} finally {
@@ -203,7 +209,7 @@ test("AR8: cli.arguments error envelope uses the single unambiguous explicit roo
 	try {
 		const r = runStatus(["--repo-root", dir, "--bogus", "--format", "json"], { cwd: tmpdir() });
 		assert.equal(r.code, 2);
-		assert.equal(JSON.parse(r.stdout).root, dir);
+		assert.equal(parseReport(r.stdout).root, dir);
 	} finally {
 		rmSync(dir, { recursive: true, force: true });
 	}
@@ -213,21 +219,21 @@ test("AR8/PR-panel: argument values after '=' are elided from diagnostics", () =
 	const r = runStatus(["--api-key=sentinel-secret-value-XYZZY", "--format", "json"], { cwd: tmpdir() });
 	assert.equal(r.code, 2);
 	assert.ok(!r.stdout.includes("sentinel-secret-value-XYZZY"), "argv value leaked into diagnostics");
-	assert.match(JSON.parse(r.stdout).checks[0].message, /unexpected argument: --api-key=/);
+	assert.match(parseReport(r.stdout).checks[0].message, /unexpected argument: --api-key=/);
 });
 
 test("AR4/PR-panel: a root flag never consumes a following option as its value", () => {
 	const cwd = tmpdir();
 	const r = runStatus(["--repo-root", "--format", "json"], { cwd });
 	assert.equal(r.code, 2, r.stdout + r.stderr);
-	const rep = JSON.parse(r.stdout);
+	const rep = parseReport(r.stdout);
 	assert.match(rep.checks[0].message, /--repo-root requires a value/);
 	assert.ok(!rep.root.includes("--format"), `root must not be fabricated from a flag: ${rep.root}`);
 });
 
 test("PR-panel: skips blocked by an errored check propagate that check's own message", () => {
 	const r = runStatus(["--bogus", "--format", "json"], { cwd: tmpdir() });
-	const rep = JSON.parse(r.stdout);
+	const rep = parseReport(r.stdout);
 	assert.equal(rep.checks[0].status, "error");
 	assert.equal(rep.checks[1].id, "root.resolve");
 	assert.equal(rep.checks[1].status, "skip");
@@ -238,10 +244,11 @@ test("PR-panel: skips blocked by an errored check propagate that check's own mes
 // AR7 — independent blockers aggregate; precedence pins
 // ---------------------------------------------------------------------------
 
-test("AR7: missing committed models + workflow read failure both surface, exit 3", () => {
+test("AR7: missing panels + workflow read failure both surface, exit 3", () => {
+	const { panels: _panels, ...withoutPanels } = VALID_CONFIG;
 	const dir = gitFixture({
 		files: {
-			".pi/sdlc/sdlc.config.json": JSON.stringify(VALID_CONFIG),
+			".pi/sdlc/sdlc.config.json": JSON.stringify(withoutPanels),
 			".pi/sdlc/workflow.md": "# wf\n",
 		},
 	});
@@ -251,22 +258,22 @@ test("AR7: missing committed models + workflow read failure both surface, exit 3
 		});
 		assert.equal(r.code, 3, r.stdout + r.stderr);
 		const st = statusesOf(r.stdout);
-		assert.equal(st["models.head"], "fail");
+		assert.equal(st["config.panels"], "fail");
 		assert.equal(st["workflow.readable"], "fail");
 	} finally {
 		rmSync(dir, { recursive: true, force: true });
 	}
 });
 
-test("AR7: malformed config + missing committed models both report; error precedence wins (exit 2)", () => {
+test("AR7: malformed config still evaluates independent workflow check; error precedence wins", () => {
 	const dir = gitFixture({ files: { ".pi/sdlc/sdlc.config.json": "{nope" } });
 	try {
 		const r = runStatus(["--repo-root", dir, "--format", "json"]);
 		assert.equal(r.code, 2, r.stdout + r.stderr);
 		const st = statusesOf(r.stdout);
 		assert.equal(st["config.valid"], "error");
-		assert.equal(st["models.head"], "fail", "independent models check still evaluated");
-		assert.equal(JSON.parse(r.stdout).state, "error");
+		assert.equal(st["workflow.readable"], "pass");
+		assert.equal(parseReport(r.stdout).state, "error");
 	} finally {
 		rmSync(dir, { recursive: true, force: true });
 	}
@@ -283,9 +290,8 @@ test("AR7: skip pins — not-adopted repo", () => {
 			"adoption.manifest-head": "fail",
 			"adoption.manifest-clean": "skip",
 			"config.valid": "skip",
-			"models.head": "skip",
-			"models.clean": "skip",
-			"models.valid": "skip",
+			"config.schema-current": "skip",
+			"config.panels": "skip",
 			"workflow.readable": "skip",
 		});
 	} finally {
@@ -293,7 +299,7 @@ test("AR7: skip pins — not-adopted repo", () => {
 	}
 });
 
-test("AR7: skip pins — dirty manifest still evaluates independent models/workflow checks", () => {
+test("AR7: skip pins — dirty manifest still evaluates independent workflow checks", () => {
 	const dir = readyFixture();
 	try {
 		writeFileSync(join(dir, ".pi", "sdlc", "sdlc.config.json"), JSON.stringify({ ...VALID_CONFIG, announce: "changed" }));
@@ -307,12 +313,11 @@ test("AR7: skip pins — dirty manifest still evaluates independent models/workf
 			"adoption.manifest-head": "pass",
 			"adoption.manifest-clean": "fail",
 			"config.valid": "skip",
-			"models.head": "pass",
-			"models.clean": "pass",
-			"models.valid": "pass",
+			"config.schema-current": "skip",
+			"config.panels": "skip",
 			"workflow.readable": "pass",
 		});
-		const skipMsg = JSON.parse(r.stdout).checks.find((c) => c.id === "config.valid").message;
+		const skipMsg = parseReport(r.stdout).checks.find((c) => c.id === "config.valid").message;
 		assert.equal(skipMsg, "manifest has uncommitted changes");
 	} finally {
 		rmSync(dir, { recursive: true, force: true });

@@ -19,10 +19,9 @@ The sdlc is a framework a repo *adopts*, not a global default. A repo has
 adopted the sdlc when its **current `HEAD` commit** contains
 `.pi/sdlc/sdlc.config.json` — a manifest merely present on disk (untracked,
 staged, or ignored) is not adoption. Being **ready** to run under law needs
-more: the active manifest must also be clean and valid, the models roster
-(`.pi/sdlc/sdlc.models.json`) committed, clean, and valid, and any
-`.pi/sdlc/workflow.md` readable. `sdlc-status` (FS8, ADR 0016) proves all of
-this mechanically with four states.
+more: the active manifest must also be clean and valid, its merged `panels`
+roster must be present and valid, and any `.pi/sdlc/workflow.md` readable.
+`sdlc-status` (FS8, ADR 0016) proves all of this mechanically with four states.
 
 At the start of every session, run the mechanical gate and branch on its exit
 code (prefer `--format json` when parsing):
@@ -40,8 +39,11 @@ code (prefer `--format json` when parsing):
    advisory is not a bypass.
 5. **Exit 3 (`not-ready`)**: do NOT announce. State that the repo is adopted
    but incomplete (for example uncommitted manifest changes or a missing
-   committed models file), list the report's remediations, and stop the SDLC.
-   Do not offer advisory mode as a bypass.
+   `panels` block), list the report's remediations, and stop the SDLC. When
+   `config.schema-current` is the failing check, the one sanctioned action
+   besides pinning the older skill release is to run the `setup-sdlc` migration
+   interactively. Never hand-edit `schemaVersion` or the config shape. Do not
+   offer advisory mode as a bypass.
 
 Before `sdlc-status` exits 0 the agent MUST NOT enter any lifecycle phase, MUST
 NOT fire configured hooks, MUST NOT stamp panel agents, MUST NOT create or
@@ -244,19 +246,25 @@ per model.
    scripts/resolve-panel.sh <plan_review|spec_review|pr_review|task_validate> --author <author-vendor>
    ```
 
-   It reads `sdlc.models.json`, keeps models with credentials, enforces at least
-   two distinct vendors (one for task_validate), and excludes the author's
-   vendor. Add `--pong` for a live smoke test when you want it (costs a call per
-   candidate; off by default for cost).
+   It reads the merged config's `panels` block, keeps models with credentials,
+   and applies the configured phase floor and author-exclusion rule under the
+   config's `strict` or `preference` enforcement posture. Add `--pong` for a
+   live smoke test when you want it (costs a call per candidate; off by default
+   for cost). When `resolve-panel` prints a preference-mode shortfall advisory,
+   carry it into that phase's consolidated writeup and, at PR phase, into the PR
+   itself as a comment or adjudication note. Do not commit a standalone
+   decision log for the shortfall.
 2. **Dispatch** the phase template across the resolved models. Two paths:
    - in-harness (default in a live pi session): stamp the phase's project prompt
      into ONE model-agnostic, project-scoped agent, then dispatch it once per
      resolved model via the `subagent` tool's per-task `model` override (one
      agent reused across the panel, not one file per model):
+
      ```bash
      scripts/ensure-panel-agent.sh pr_review   # writes .pi/agents/<prefix>-pr-review.md
      scripts/resolve-panel.sh pr_review --author <vendor> --emit-tasks <prefix>-pr-review
      ```
+
      `--emit-tasks` prints a ready-to-paste `subagent` `tasks: [...]` array. Replace
      its task value with the exact review task: name the artifact paths, commit,
      governing documents, grounding rule, and required findings-only output; then
@@ -334,7 +342,7 @@ verifiable with `scripts/verify-task-receipt.mjs`. Judgement review happens late
 at the PR panel. Model preference: `deepseek/deepseek-v4-flash`, then
 `anthropic/claude-haiku-4-5` — a `:low` (or `:off`) thinking suffix on either
 fits this role well, since a checklist executor doesn't need deep reasoning (see
-`sdlc.models.schema.json` for the full `provider/model[:thinking]` syntax).
+`sdlc.config.schema.json` for the full `provider/model[:thinking]` syntax).
 
 ## PR and review cycle
 

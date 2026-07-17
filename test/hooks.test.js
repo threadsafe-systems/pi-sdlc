@@ -20,7 +20,7 @@ const schema = JSON.parse(readFileSync(join(skill, "schema", "sdlc.config.schema
 const ajv = new Ajv({ allErrors: true, strict: false });
 const validateSchema = ajv.compile(schema);
 
-const BASE = { schemaVersion: 1, prefix: "acme", labelPrefix: "acme-sdlc", announce: "a" };
+const BASE = { schemaVersion: 2, prefix: "acme", labelPrefix: "acme-sdlc", announce: "a" };
 const GOOD_HOOKS = {
 	implement: { before: [{ use: "tool:my_worktree_tool", do: "enter the worktree" }] },
 	"*": { after: [{ run: "scripts/notify.sh done" }] },

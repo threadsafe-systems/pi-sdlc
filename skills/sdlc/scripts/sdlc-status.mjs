@@ -1,6 +1,6 @@
 #!/usr/bin/env node
-// sdlc-status.mjs — FS8 four-state readiness inspection (spec
-// docs/specs/2026-07-12-sdlc-adoption-readiness.md §1-§2). Read-only: bounded
+// sdlc-status.mjs — FS8 v2 four-state readiness inspection (spec
+// docs/specs/2026-07-16-config-versioning-migration.md §6). Read-only: bounded
 // git/filesystem checks, no hooks, no model calls, no network, no mutation.
 //
 // Usage: sdlc-status.mjs [--config DIR | --repo-root DIR] [--format text|json]
@@ -10,9 +10,9 @@
 import { spawnSync } from "node:child_process";
 import { existsSync, readFileSync, realpathSync } from "node:fs";
 import { delimiter, isAbsolute, join, relative, resolve, sep } from "node:path";
-import { inspectConfig, inspectModels, inspectRoot } from "./lib.mjs";
+import { classifyConfigVersion, CONFIG_SCHEMA_VERSION, inspectConfig, inspectRoot, REMEDY_SCHEMA_NEWER, REMEDY_SCHEMA_OLDER } from "./lib.mjs";
 
-const CHECK_IDS = ["cli.arguments", "root.resolve", "git.repository", "adoption.manifest-head", "adoption.manifest-clean", "config.valid", "models.head", "models.clean", "models.valid", "workflow.readable"];
+const CHECK_IDS = ["cli.arguments", "root.resolve", "git.repository", "adoption.manifest-head", "adoption.manifest-clean", "config.valid", "config.schema-current", "config.panels", "workflow.readable"];
 
 // Dependency matrix (spec §2.8): checkId -> prerequisite checkId (must be pass).
 const PREREQ = {
@@ -22,9 +22,8 @@ const PREREQ = {
 	"adoption.manifest-head": "git.repository",
 	"adoption.manifest-clean": "adoption.manifest-head",
 	"config.valid": "adoption.manifest-clean",
-	"models.head": "adoption.manifest-head",
-	"models.clean": "models.head",
-	"models.valid": "models.clean",
+	"config.schema-current": "config.valid",
+	"config.panels": "config.schema-current",
 	"workflow.readable": "adoption.manifest-head",
 };
 
@@ -35,8 +34,8 @@ const SKIP_REASON = {
 	"git.repository": "root is not within a trusted git worktree",
 	"adoption.manifest-head": "manifest is not committed in current HEAD",
 	"adoption.manifest-clean": "manifest has uncommitted changes",
-	"models.head": "models file is not committed in current HEAD",
-	"models.clean": "models file has uncommitted changes",
+	"config.valid": "manifest is not a valid recognised schema",
+	"config.schema-current": "config schema is not current",
 };
 
 const USAGE = "usage: sdlc-status.sh [--config DIR | --repo-root DIR] [--format text|json]";
@@ -170,7 +169,6 @@ function buildReport(argv, cwd) {
 
 	const gitPath = (rel) => (prefix ? `${prefix}/${rel}` : rel);
 	const manifestGitPath = gitPath(".pi/sdlc/sdlc.config.json");
-	const modelsGitPath = gitPath(".pi/sdlc/sdlc.models.json");
 
 	// HEAD entry mode: a committed symlink (120000) would make the active file
 	// diverge from the HEAD blob while passing cleanliness — never trust it
@@ -217,59 +215,49 @@ function buildReport(argv, cwd) {
 		else set("adoption.manifest-clean", "error", "git could not compare the manifest against HEAD", "check repository integrity with git status");
 	}
 
-	// config.valid (spec §2.5): parse the clean active manifest under FS1 rules
+	// FS8 v2 version split: recognised older schemas are structurally deferred
+	// to migration, while newer/invalid schemas remain resolution errors.
+	let manifestRaw;
+	let versionClassification;
 	if (statusOf(results, "adoption.manifest-clean") === "pass") {
 		const p = join(root, ".pi", "sdlc", "sdlc.config.json");
-		let raw;
 		let failure = null;
 		if (!headIsRegularFile(manifestGitPath)) failure = "manifest is not a regular file in HEAD";
 		if (!failure)
 			try {
-				raw = JSON.parse(readFileChecked(p));
+				manifestRaw = JSON.parse(readFileChecked(p));
 			} catch (e) {
 				failure = e instanceof SyntaxError ? "manifest is not valid JSON" : "manifest is unreadable";
 			}
 		if (!failure) {
-			const issues = inspectConfig(raw);
-			if (issues.length > 0) failure = `manifest is invalid: ${issues[0].message}`;
+			versionClassification = classifyConfigVersion(manifestRaw);
+			if (versionClassification.kind === "current") {
+				const issues = inspectConfig(manifestRaw);
+				if (issues.length > 0) failure = `manifest is invalid: ${issues[0].message}`;
+			} else if (versionClassification.kind === "older") {
+				set("config.valid", "pass", `manifest parses; schemaVersion ${versionClassification.version} is a recognised superseded schema (full validation deferred to migration)`);
+			} else if (versionClassification.kind === "newer") {
+				set("config.valid", "error", REMEDY_SCHEMA_NEWER(versionClassification.version));
+			} else {
+				const issues = inspectConfig(manifestRaw);
+				failure = `manifest is invalid: ${issues[0]?.message ?? `schemaVersion must be ${CONFIG_SCHEMA_VERSION}`}`;
+			}
 		}
 		if (failure) set("config.valid", "error", failure, `fix ${manifestGitPath} and commit the correction`);
-		else set("config.valid", "pass", "committed manifest is valid");
+		else if (!results.has("config.valid")) set("config.valid", "pass", "committed manifest is valid");
 	}
 
-	// models.head (spec §2.6)
-	if (statusOf(results, "adoption.manifest-head") === "pass") {
-		const blob = git(root, ["cat-file", "-e", `HEAD:${modelsGitPath}`]);
-		if (blob.code === 0) set("models.head", "pass", `current HEAD contains ${modelsGitPath}`);
-		else set("models.head", "fail", `current HEAD has no models blob at ${modelsGitPath}`, `commit ${modelsGitPath}`);
-	}
-
-	// models.clean
-	if (statusOf(results, "models.head") === "pass") {
-		const c = cleanAgainstHead(modelsGitPath, join(root, ".pi", "sdlc", "sdlc.models.json"));
-		if (c === "clean") set("models.clean", "pass", "models file matches HEAD in index and working tree");
-		else if (c === "dirty") set("models.clean", "fail", "models file differs from HEAD in the index or working tree", `commit or restore ${modelsGitPath}`);
-		else set("models.clean", "error", "git could not compare the models file against HEAD", "check repository integrity with git status");
-	}
-
-	// models.valid — via the non-fatal collector; never the exiting readModels path
-	if (statusOf(results, "models.clean") === "pass") {
-		const p = join(root, ".pi", "sdlc", "sdlc.models.json");
-		let raw;
-		let failure = null;
-		if (!headIsRegularFile(modelsGitPath)) failure = "models file is not a regular file in HEAD";
-		if (!failure)
-			try {
-				raw = JSON.parse(readFileChecked(p));
-			} catch (e) {
-				failure = e instanceof SyntaxError ? "models file is not valid JSON" : "models file is unreadable";
-			}
-		if (!failure) {
-			const issues = inspectModels(raw);
-			if (issues.length > 0) failure = `models file is invalid: ${issues[0].message}`;
+	if (statusOf(results, "config.valid") === "pass") {
+		if (versionClassification.kind === "older") {
+			set("config.schema-current", "fail", `config schema is behind this skill (schemaVersion ${versionClassification.version} < ${CONFIG_SCHEMA_VERSION})`, REMEDY_SCHEMA_OLDER(versionClassification.version));
+		} else {
+			set("config.schema-current", "pass", `config schema is current (schemaVersion ${CONFIG_SCHEMA_VERSION})`);
 		}
-		if (failure) set("models.valid", "fail", failure, `fix ${modelsGitPath} and commit the correction`);
-		else set("models.valid", "pass", "committed models file is valid");
+	}
+
+	if (statusOf(results, "config.schema-current") === "pass") {
+		if (manifestRaw.panels !== undefined) set("config.panels", "pass", "panels roster present");
+		else set("config.panels", "fail", "no panels roster in the manifest", "add a panels block to .pi/sdlc/sdlc.config.json (see schema/sdlc.config.example.json)");
 	}
 
 	// workflow.readable (spec §2.7)
@@ -320,7 +308,7 @@ function buildReport(argv, cwd) {
 		exitCode = 0;
 	}
 
-	return { schemaVersion: 1, root, state, exitCode, checks };
+	return { schemaVersion: 2, root, state, exitCode, checks };
 }
 
 function statusOf(results, id) {
@@ -360,7 +348,7 @@ try {
 	const message = String(e?.message ?? e).split("\n")[0] || "internal failure";
 	if (jsonMode) {
 		const checks = CHECK_IDS.map((id) => (id === "cli.arguments" ? { id, status: "error", message: `internal failure: ${message}` } : { id, status: "skip", message: "internal failure" }));
-		process.stdout.write(renderJson({ schemaVersion: 1, root: resolve(process.cwd()), state: "error", exitCode: 2, checks }));
+		process.stdout.write(renderJson({ schemaVersion: 2, root: resolve(process.cwd()), state: "error", exitCode: 2, checks }));
 	} else {
 		console.error(`sdlc-status: internal failure: ${message}`);
 	}

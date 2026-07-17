@@ -1,0 +1,237 @@
+{
+  "schemaVersion": 1,
+  "taskId": "config-versioning-migration-t2",
+  "manifest": "/home/neil/code/threadsafe/pi-sdlc.worktrees/feat-config-versioning-migration/docs/validation/config-versioning-migration/config-versioning-migration-t2.json",
+  "repoRoot": "/home/neil/code/threadsafe/pi-sdlc.worktrees/feat-config-versioning-migration",
+  "verdict": "PASS",
+  "exitCode": 0,
+  "errors": [],
+  "manifestErrors": [],
+  "commands": [
+    {
+      "id": "tests.migration",
+      "argv": [
+        "node",
+        "--test",
+        "test/migration.test.js",
+        "test/setup-sdlc.test.js"
+      ],
+      "evidence": [
+        "CV6-CV15 fold, recovery, residue, interactive migration, and fresh posture tests"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 2576,
+      "stdoutTail": "✔ CV6/CV7: pair-A, pair-B, and config-only folds preserve fields and select strict (2.181553ms)\n✔ CV8: fold is deterministic and carries the roster in preference order (0.350246ms)\n✔ CV9: unknown and malformed inputs refuse without producing a destination (0.312527ms)\n✔ CV9: setup reports malformed models and writes nothing (310.660451ms)\n✔ CV10: write, fsync, rename, and unlink faults expose only allowed recovery states (10.086288ms)\n✔ CV12-CV14: accept, decline, non-TTY, and mixed flags follow migration confirmation rules (1287.407335ms)\n✔ CV11: residue cleanup is independent and non-TTY-safe (775.504994ms)\n✔ CV15/CV16: fresh posture, seeding, retired flag, and FS10 v2 envelope (113.841341ms)\n✔ OH4: --yes writes a schema-valid config; bundle re-run refuses config changes; --force overwrites (99.290576ms)\n✔ OH5: --hook-use fields 3-4 = use, do = remainder after 4th colon (colons in do preserved) (27.258803ms)\n✔ OH5: --hook-run command = remainder after 2nd colon (colons preserved); trust warning on stderr (36.936607ms)\n✔ OH5: mixed repeated hook flags preserve argv order in the written list (28.312251ms)\n✔ OH5: malformed hook flags exit 2 (203.327574ms)\n✔ PR-fix: value-taking flags accept values that begin with '-' (e.g. --announce '--foo') (26.604019ms)\n✔ OH5: partial tracker flags exit 2 (all-or-none) (37.85527ms)\n✔ OH5: no config flags and no TTY exits 2 (interview needs a TTY) (25.98301ms)\n✔ OH6: package.json pi.prompts includes ./templates and the template has a description (0.349987ms)\nℹ tests 17\nℹ suites 0\nℹ pass 17\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 2545.357199\n",
+      "stderrTail": ""
+    },
+    {
+      "id": "static.migration",
+      "argv": [
+        "node",
+        "--check",
+        "skills/sdlc/scripts/migrate.mjs"
+      ],
+      "evidence": [
+        "Migration engine syntax"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 24,
+      "stdoutTail": "",
+      "stderrTail": ""
+    },
+    {
+      "id": "static.setup",
+      "argv": [
+        "node",
+        "--check",
+        "skills/sdlc/scripts/setup-sdlc.mjs"
+      ],
+      "evidence": [
+        "Setup migration and FS10 surface syntax"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 17,
+      "stdoutTail": "",
+      "stderrTail": ""
+    },
+    {
+      "id": "static.tests",
+      "argv": [
+        "node",
+        "--check",
+        "test/migration.test.js"
+      ],
+      "evidence": [
+        "Focused migration test suite exists and parses"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 22,
+      "stdoutTail": "",
+      "stderrTail": ""
+    },
+    {
+      "id": "static.lint",
+      "argv": [
+        "npm",
+        "run",
+        "lint"
+      ],
+      "evidence": [
+        "Repository formatting and lint rules"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 157,
+      "stdoutTail": "\n> pi-sdlc@0.1.1 lint\n> biome check .\n\nChecked 79 files in 44ms. No fixes applied.\n",
+      "stderrTail": ""
+    },
+    {
+      "id": "patterns.diff",
+      "argv": [
+        "git",
+        "diff",
+        "--check",
+        "HEAD"
+      ],
+      "evidence": [
+        "No whitespace-error banned patterns in task diff"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 3,
+      "stdoutTail": "",
+      "stderrTail": ""
+    }
+  ],
+  "categories": [
+    {
+      "category": "tests",
+      "status": "PASS",
+      "checkIds": [
+        "tests.migration"
+      ]
+    },
+    {
+      "category": "static",
+      "status": "PASS",
+      "checkIds": [
+        "static.migration",
+        "static.setup",
+        "static.tests",
+        "static.lint"
+      ]
+    },
+    {
+      "category": "scenarios",
+      "status": "PASS"
+    },
+    {
+      "category": "standards",
+      "status": "N/A",
+      "reason": "Full repository compatibility is owned by T5; T2 has no additional external standard."
+    },
+    {
+      "category": "bannedPatterns",
+      "status": "PASS",
+      "checkIds": [
+        "patterns.diff"
+      ]
+    }
+  ],
+  "scenarios": [
+    {
+      "scenarioId": "CV10",
+      "status": "PASS",
+      "checkIds": [
+        "tests.migration"
+      ]
+    },
+    {
+      "scenarioId": "CV11",
+      "status": "PASS",
+      "checkIds": [
+        "tests.migration"
+      ]
+    },
+    {
+      "scenarioId": "CV12",
+      "status": "PASS",
+      "checkIds": [
+        "tests.migration"
+      ]
+    },
+    {
+      "scenarioId": "CV13",
+      "status": "PASS",
+      "checkIds": [
+        "tests.migration"
+      ]
+    },
+    {
+      "scenarioId": "CV14",
+      "status": "PASS",
+      "checkIds": [
+        "tests.migration"
+      ]
+    },
+    {
+      "scenarioId": "CV15",
+      "status": "PASS",
+      "checkIds": [
+        "tests.migration"
+      ]
+    },
+    {
+      "scenarioId": "CV16",
+      "status": "PASS",
+      "checkIds": [
+        "tests.migration",
+        "static.setup"
+      ]
+    },
+    {
+      "scenarioId": "CV6",
+      "status": "PASS",
+      "checkIds": [
+        "tests.migration"
+      ]
+    },
+    {
+      "scenarioId": "CV7",
+      "status": "PASS",
+      "checkIds": [
+        "tests.migration"
+      ]
+    },
+    {
+      "scenarioId": "CV8",
+      "status": "PASS",
+      "checkIds": [
+        "tests.migration"
+      ]
+    },
+    {
+      "scenarioId": "CV9",
+      "status": "PASS",
+      "checkIds": [
+        "tests.migration"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,198 @@
+{
+  "schemaVersion": 1,
+  "taskId": "config-versioning-migration-t1",
+  "manifest": "/home/neil/code/threadsafe/pi-sdlc.worktrees/feat-config-versioning-migration/docs/validation/config-versioning-migration/config-versioning-migration-t1.json",
+  "repoRoot": "/home/neil/code/threadsafe/pi-sdlc.worktrees/feat-config-versioning-migration",
+  "verdict": "PASS",
+  "exitCode": 0,
+  "errors": [],
+  "manifestErrors": [],
+  "commands": [
+    {
+      "id": "tests.config-versioning",
+      "argv": [
+        "node",
+        "--test",
+        "test/config-versioning.test.js",
+        "test/lib-config.test.js",
+        "test/readiness-lib.test.js",
+        "test/hooks.test.js"
+      ],
+      "evidence": [
+        "CV1-CV4 v2 schema and version seam fixtures",
+        "CV5 loader detection-only and raw-read containment",
+        "Legacy loader and schema compatibility while callers migrate"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 932,
+      "stdoutTail": "✔ CV1: merged full-union config validates and panels vocabulary is closed per path (8.779617ms)\n✔ CV2: enforcement, panel floors, preferences, and exact phase set validate (3.289125ms)\n✔ CV3: config version classification is total and throw-free over the normative matrix (1.372608ms)\n✔ CV4: lifecycle and minVendor coexist without additive schema constraints (0.518526ms)\n✔ CV5: guarded loader and inherited consumer halt on v1 without prompt or write (112.781637ms)\n✔ CV5: raw migration read preserves absent/parsed/malformed states and importer containment (1.331272ms)\nunknown format \"uri\" ignored in schema at path \"#/properties/tracker/properties/board/properties/url\"\nunknown format \"uri\" ignored in schema at path \"#/properties/tracker/properties/board/properties/url\"\n✔ OH1: valid hooks pass both the JSON Schema and validateConfig (36.318777ms)\n✔ OH1: the committed example (with hooks) validates against the schema (1.717743ms)\n✔ OH1: mutations are rejected by BOTH the schema and validateConfig (exit 2) (489.699085ms)\n✔ OH2: readConfig strict mode rejects a missing manifest naming /setup-sdlc (65.602664ms)\n✔ OH2: default readConfig returns defaults for a missing manifest (1.188219ms)\n✔ OH2: strict mode returns the config (incl. hooks) when the manifest is present (3.720355ms)\n✔ readConfig returns current defaults when the manifest is absent (7.130492ms)\n✔ readConfig validates and returns merged v2 fields (2.080326ms)\n✔ readConfig keeps newer and malformed version diagnostics distinct (102.172777ms)\n✔ RL1: inspectRoot explicit precedence — config over repoRoot over sdlcRoot; relative resolves against cwd (3.081523ms)\n✔ RL2: inspectRoot walks ancestors from cwd to a configured project root (4.916636ms)\n✔ RL3: inspectRoot falls back to the git top-level for a manifest-less repo (22.491524ms)\n✔ RL4: inspectRoot returns the error member (never exits) outside any project (6.14509ms)\n✔ RL5: inspectRoot honours $SDLC_ROOT when no explicit option is given (0.882813ms)\n✔ SP4: consumer path seam preserves spelling and rejects slash/backslash escapes (8.97942ms)\n✔ RL6: inspectConfig — valid input yields [], non-objects yield the deterministic issue (1.569995ms)\n✔ RL7: inspectConfig — aggregates every issue in validation-rule order, never throws (0.758188ms)\n✔ RL7b: inspectConfig — malformed nested structures aggregate without throwing (0.577893ms)\n✔ RL8: inspectModels — valid roster yields [], non-objects and aggregates are deterministic (1.389606ms)\n✔ RL8b: inspectModels — non-object phases and phase entries never throw (0.458981ms)\n✔ RL9: validateConfig first diagnostic is byte-identical to the first collector issue (exit 2) (229.920662ms)\n✔ RL10: validateModels first diagnostic is byte-identical to the first collector issue (exit 2) (210.920302ms)\n✔ RL11: validators still accept valid input (exit 0) after delegation (98.432959ms)\nℹ tests 29\nℹ suites 0\nℹ pass 29\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 858.361657\n",
+      "stderrTail": ""
+    },
+    {
+      "id": "static.sources",
+      "argv": [
+        "node",
+        "--check",
+        "skills/sdlc/scripts/lib.mjs"
+      ],
+      "evidence": [
+        "Shared loader and version seam syntax"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 50,
+      "stdoutTail": "",
+      "stderrTail": ""
+    },
+    {
+      "id": "static.tests",
+      "argv": [
+        "node",
+        "--check",
+        "test/config-versioning.test.js"
+      ],
+      "evidence": [
+        "T1 focused test suite exists and parses"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 50,
+      "stdoutTail": "",
+      "stderrTail": ""
+    },
+    {
+      "id": "static.schema",
+      "argv": [
+        "node",
+        "-e",
+        "JSON.parse(require('fs').readFileSync('skills/sdlc/schema/sdlc.config.schema.json','utf8'))"
+      ],
+      "evidence": [
+        "Merged v2 config schema parses"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 48,
+      "stdoutTail": "",
+      "stderrTail": ""
+    },
+    {
+      "id": "static.lint",
+      "argv": [
+        "npm",
+        "run",
+        "lint"
+      ],
+      "evidence": [
+        "Repository formatting and lint rules"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 302,
+      "stdoutTail": "\n> pi-sdlc@0.1.1 lint\n> biome check .\n\nChecked 76 files in 85ms. No fixes applied.\n",
+      "stderrTail": ""
+    },
+    {
+      "id": "patterns.diff",
+      "argv": [
+        "git",
+        "diff",
+        "--check",
+        "HEAD"
+      ],
+      "evidence": [
+        "No whitespace-error banned patterns in task diff"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 7,
+      "stdoutTail": "",
+      "stderrTail": ""
+    }
+  ],
+  "categories": [
+    {
+      "category": "tests",
+      "status": "PASS",
+      "checkIds": [
+        "tests.config-versioning"
+      ]
+    },
+    {
+      "category": "static",
+      "status": "PASS",
+      "checkIds": [
+        "static.sources",
+        "static.tests",
+        "static.schema",
+        "static.lint"
+      ]
+    },
+    {
+      "category": "scenarios",
+      "status": "PASS"
+    },
+    {
+      "category": "standards",
+      "status": "N/A",
+      "reason": "No additional task-specific external standard applies; release bindings and repository-wide hygiene are owned by T5."
+    },
+    {
+      "category": "bannedPatterns",
+      "status": "PASS",
+      "checkIds": [
+        "patterns.diff"
+      ]
+    }
+  ],
+  "scenarios": [
+    {
+      "scenarioId": "CV1",
+      "status": "PASS",
+      "checkIds": [
+        "tests.config-versioning"
+      ]
+    },
+    {
+      "scenarioId": "CV2",
+      "status": "PASS",
+      "checkIds": [
+        "tests.config-versioning"
+      ]
+    },
+    {
+      "scenarioId": "CV3",
+      "status": "PASS",
+      "checkIds": [
+        "tests.config-versioning"
+      ]
+    },
+    {
+      "scenarioId": "CV4",
+      "status": "PASS",
+      "checkIds": [
+        "tests.config-versioning"
+      ]
+    },
+    {
+      "scenarioId": "CV5",
+      "status": "PASS",
+      "checkIds": [
+        "tests.config-versioning"
+      ]
+    }
+  ]
+}

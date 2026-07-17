@@ -6,8 +6,9 @@
 #          [--tracker-repo owner/name --tracker-board-number N --tracker-board-url U]
 #          [--hook-run "<phase>:<before|after>:<command>"]
 #          [--hook-use "<phase>:<before|after>:<kind>:<name>:<do>"]
-#          [--with-models] [--force] [--yes] [--config DIR|--repo-root DIR]
-# Writes <root>/.pi/sdlc/sdlc.config.json (opt-in). Any config flag or --yes runs
-# non-interactive; otherwise an interactive interview (requires a TTY).
+#          [--seed-panels] [--enforcement strict|preference] [--force] [--yes]
+#          [--config DIR|--repo-root DIR]
+# Writes <root>/.pi/sdlc/sdlc.config.json (opt-in). Existing schema-1 configs
+# migrate only after a live-TTY confirmation; otherwise setup refuses safely.
 set -euo pipefail
 exec node "$(dirname "$0")/setup-sdlc.mjs" "$@"

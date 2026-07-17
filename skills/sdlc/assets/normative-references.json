@@ -83,9 +83,9 @@
       "target": "skills/sdlc/assets/sdlc-lifecycle.yml"
     },
     {
-      "id": "consumer.config",
+      "id": "consumer.panels",
       "source": "skills/sdlc/SKILL.md",
-      "assertion": "more: the active manifest must also be clean and valid, the models roster",
+      "assertion": "its merged `panels`",
       "targetKind": "file",
       "ownership": "consumer",
       "required": true,
@@ -93,21 +93,7 @@
       "target": ".pi/sdlc/sdlc.config.json",
       "verification": {
         "source": "skills/sdlc/scripts/sdlc-status.mjs",
-        "assertion": "adoption.manifest-clean\": \"manifest has uncommitted changes"
-      }
-    },
-    {
-      "id": "consumer.models",
-      "source": "skills/sdlc/SKILL.md",
-      "assertion": "the models roster",
-      "targetKind": "file",
-      "ownership": "consumer",
-      "required": true,
-      "resolution": "readiness",
-      "target": ".pi/sdlc/sdlc.models.json",
-      "verification": {
-        "source": "skills/sdlc/scripts/sdlc-status.mjs",
-        "assertion": "set(\"models.clean\", \"pass\", \"models file matches HEAD in index and working tree\");"
+        "assertion": "set(\"config.panels\", \"pass\", \"panels roster present\");"
       }
     },
     {
@@ -239,16 +225,6 @@
       "required": true,
       "resolution": "package",
       "target": "skills/sdlc/scripts/verify-task-receipt.mjs"
-    },
-    {
-      "id": "schema.models",
-      "source": "skills/sdlc/schema/sdlc.models.schema.json",
-      "assertion": "\"title\": \"sdlc.models.json\"",
-      "targetKind": "file",
-      "ownership": "package",
-      "required": true,
-      "resolution": "package",
-      "target": "skills/sdlc/schema/sdlc.models.schema.json"
     },
     {
       "id": "schema.task-validation",

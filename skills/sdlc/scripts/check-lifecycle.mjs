@@ -7,7 +7,7 @@ import { spawnSync } from "node:child_process";
 import { existsSync, readFileSync } from "node:fs";
 import { isAbsolute, join, relative, resolve, sep } from "node:path";
 import { fileURLToPath } from "node:url";
-import { inspectConfig, inspectConsumerPath, inspectRoot } from "./lib.mjs";
+import { classifyConfigVersion, inspectConfig, inspectConsumerPath, inspectRoot, REMEDY_SCHEMA_NEWER, REMEDY_SCHEMA_OLDER } from "./lib.mjs";
 
 const TRACKS = new Set(["irreversible", "reversible", "none"]);
 const SLUG_RE = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
@@ -217,12 +217,15 @@ function main(argv = process.argv.slice(2), cwd = process.cwd()) {
 		try {
 			if (!existsSync(configPath)) throw new Error("manifest is absent");
 			const raw = JSON.parse(readFileSync(configPath, "utf8"));
+			const classification = classifyConfigVersion(raw);
+			if (classification.kind === "older") throw new Error(`manifest is superseded: ${REMEDY_SCHEMA_OLDER(classification.version)}`);
+			if (classification.kind === "newer") throw new Error(REMEDY_SCHEMA_NEWER(classification.version));
 			const issues = inspectConfig(raw);
 			if (issues.length) throw new Error(`manifest is invalid: ${issues[0].message}`);
 			config = { paths: { plans: "docs/plans", specs: "docs/specs", ...(raw.paths ?? {}) } };
 			setResult(results, "config.valid", "pass", "committed configuration is valid");
 		} catch (error) {
-			setResult(results, "config.valid", "error", sanitize(error.message), "fix and commit .pi/sdlc/sdlc.config.json");
+			setResult(results, "config.valid", "error", sanitize(error.message, 500), "fix and commit .pi/sdlc/sdlc.config.json");
 		}
 	}
 	let source;
