@@ -3,7 +3,7 @@
 - Date: 2026-07-17
 - Track: **irreversible**; slug `config-intent-vocabulary`
 - Sources: plan `docs/plans/2026-07-17-config-intent-vocabulary.md` (rev 5);
-  spec `docs/specs/2026-07-17-config-intent-vocabulary-ic-a.md` (rev 3)
+  spec `docs/specs/2026-07-17-config-intent-vocabulary.md` (rev 3)
 - Definition of done: the spec's §10 scenarios ICA1–ICA24 (live ids) green;
   this repo runs on v3 (`sdlc-status` ready on the branch); biome + full
   `node --test` corpus clean; `CONFIG_SCHEMA_VERSION` bump trips the
