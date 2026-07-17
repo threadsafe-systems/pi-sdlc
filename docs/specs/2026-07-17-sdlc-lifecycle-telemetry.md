@@ -6,10 +6,13 @@
 - Track: irreversible (freezes FS13: the run-manifest event contract and the
   `run.json` v1 retro record)
 - Author vendor: anthropic
-- Spec panel: round 1 adjudicated 2026-07-17 (this is revision 2: all 19
-  deduped findings SF1–SF19 incorporated, none dismissed) —
-  `docs/reviews/spec-sdlc-lifecycle-telemetry-2026-07-17/consolidated.md`;
-  round 2 verification pass pending
+- Spec panel: rounds 1–2 adjudicated 2026-07-17 —
+  `docs/reviews/spec-sdlc-lifecycle-telemetry-2026-07-17/consolidated.md`.
+  This is revision 3: rev 2 incorporated SF1–SF19 (round 1, none
+  dismissed); rev 3 incorporated the round-2 findings with one partial
+  dismissal recorded in the consolidated file (schema files are Build
+  deliverables mirroring these normative tables, not spec-time artifacts)
+  for human ratification.
 - Human gate: pending
 
 ## 1. Surfaces and homes
@@ -43,7 +46,7 @@ resolve consumer paths through the skill root.
 ```
 .pi/sdlc/runs/<slug>/
   events.jsonl                          # the manifest (§3); append-only
-  panels/<phase>-round<N>-<YYYY-MM-DD>/ # harvested pi-subagents artifacts (§5)
+  panels/<panelPhase>-round<N>-<YYYY-MM-DD>/ # harvested pi-subagents artifacts (§5)
     status.json
     events.jsonl
     [transcripts/...]                   # optional, --with-transcripts only
@@ -74,7 +77,9 @@ Envelope (all fields required unless noted):
 
 `schemaVersion`, `ts`, `slug`, `event`, and `by` are required; `payload` is
 event-specific and optional only where the table below shows none. `by` MUST
-match `^(script:[a-z][a-z0-9-]*|agent|human:[^\s:]+)$`; auto-emitted events
+match `^(script:[a-z][a-z0-9-]*|agent|human:[a-z0-9][a-z0-9-]*)$` — human
+identities are slug-style (`human:neil-chambers`), never free text with
+spaces; auto-emitted events
 set `by` to `script:<basename>` of the emitting CLI (`script:resolve-panel`,
 `script:ensure-panel-agent`, `script:harvest-panel`,
 `script:validate-task`). Payloads are additive-only. Consumers MUST ignore
@@ -89,20 +94,26 @@ v1 vocabulary:
 | `phase.backward` | prose | `{from, to, reason}` |
 | `gate.approved` | prose | `{phase, artifact, rev, approver}` |
 | `artifact.revised` | prose | `{artifact, rev, reason}` |
-| `panel.resolved` | auto (`resolve-panel`) | `{phase, models[], authorExcluded}` |
-| `panel.agent_stamped` | auto (`ensure-panel-agent`) | `{phase, agent}` |
-| `panel.dispatched` | prose | `{phase, round, models[]}` |
-| `panel.harvested` | auto (`harvest-panel`) | `{phase, round, dir, missed[]}` |
-| `panel.consolidated` | prose | `{phase, round, findings:{high,medium,low}, incorporated, dismissed}` |
+| `panel.resolved` | auto (`resolve-panel`) | `{panelPhase, models[], authorExcluded}` |
+| `panel.agent_stamped` | auto (`ensure-panel-agent`) | `{panelPhase, agent}` |
+| `panel.dispatched` | prose | `{panelPhase, round, models[]}` |
+| `panel.harvested` | auto (`harvest-panel`) | `{panelPhase, round, dir, missed[]}` |
+| `panel.consolidated` | prose | `{panelPhase, round, findings:{high,medium,low}, incorporated, dismissed}` |
 | `task.validated` | auto (`validate-task`) | `{task, verdict, scenarioIds[]}` |
 | `lifecycle.checked` | prose (caller-side; `check-lifecycle` itself is untouched, FS9) | `{verdict}` |
 | `pr.opened` | prose | `{number}` |
 | `pr.fix_wave` | prose | `{number, sha}` |
 
-Payload field types (normative): `phase` is one of the six phase names;
-`models[]`, `missed[]`, `scenarioIds[]` are arrays of non-empty strings;
-`round` and `number` are positive integers; `rev` is a positive integer;
-`findings` is `{high,medium,low}` of non-negative integers;
+Payload field types (normative): `phase` is one of the six **lifecycle**
+phase names (brainstorm/plan/spec/build/implement/pr); `panelPhase` is one
+of the four **panel** phases (`plan_review|spec_review|pr_review|
+task_validate` — the existing FS5 vocabulary, deliberately distinct from
+lifecycle `phase`; the collector attributes panels to lifecycle phases via
+the fixed mapping plan_review→plan, spec_review→spec, pr_review→pr,
+task_validate→implement); `models[]`, `missed[]`, `scenarioIds[]` are arrays
+of non-empty strings; `round` and `number` are positive integers; `rev` is a
+positive integer; `findings` is `{high,medium,low}` of non-negative
+integers; `incorporated` and `dismissed` are non-negative integers;
 `authorExcluded` is a string; every other named field is a non-empty string.
 Every field named in a payload cell is required within that payload. The
 committed schema `skills/sdlc-retro/schema/event.schema.json` mirrors this
@@ -118,6 +129,8 @@ on all fixtures.
 record-run-event.mjs <event> [--slug S] [--by WHO] [--payload JSON]
                      [--config DIR | --repo-root DIR]
 ```
+
+`--by` defaults to `agent` when omitted (prose emissions are agent-driven).
 
 - Exit 0: event appended, or emission **skipped** because run identity is
   unresolvable (skip prints one `sdlc-telemetry:`-prefixed warning line to
@@ -146,9 +159,11 @@ branch mapped to a slug (strip a single `<type>/` prefix, e.g. `feat/`,
 `resolve-panel.mjs` and `ensure-panel-agent.mjs` gain **additive optional**
 `--slug` handling (flag + env, same resolution as §3.2) and emit their §3
 events after successful completion. `validate-task.mjs` emits
-`task.validated` after its report is **computed** — for every verdict
-(PASS, FAIL, and ERROR) and regardless of whether `--report` was passed;
-the runner writes no receipt (receipts are the validator agent's artifact,
+`task.validated` after its report is **computed**, regardless of whether
+`--report` was passed: always for PASS and FAIL, and for ERROR whenever the
+manifest parsed far enough to yield the task id (an unparseable manifest has
+nothing to attribute and skips emission with the standard warning); the
+runner writes no receipt (receipts are the validator agent's artifact,
 ADR 0014). Frozen contracts are untouched:
 existing flags, argument shapes, **stdout bytes, and exit codes are
 byte-identical** with emission active, inactive, skipped, or failed.
@@ -163,8 +178,9 @@ point: run start, every phase entry, every human gate approval, panel
 dispatch/consolidation, caller-side lifecycle-check recording, PR open, and
 fix waves. Contract is **token-level**: each mandated hook step contains the
 token `record-run-event.sh` and its event-type token (e.g. `gate.approved`),
-and the panel-dispatch step additionally contains a skill-relative
-`harvest-panel.sh` invocation token; exact prose wording is not pinned. `skills/sdlc-retro/SKILL.md` documents the
+and the panel-dispatch **and validator-dispatch** steps additionally contain
+a skill-relative `harvest-panel.sh` invocation token (plan R2 covers both);
+exact prose wording is not pinned. `skills/sdlc-retro/SKILL.md` documents the
 store layout, collect/render invocation, coverage semantics, and the
 regenerate-don't-migrate policy, and the sdlc skill points at it for the
 post-mortem step.
@@ -174,14 +190,15 @@ post-mortem step.
 `skills/sdlc/scripts/harvest-panel.{sh,mjs}`:
 
 ```
-harvest-panel.mjs --phase P --round N --from DIR [--slug S]
+harvest-panel.mjs --phase PANEL_PHASE --round N --from DIR [--slug S]
                   [--with-transcripts] [--format text|json]
                   [--config DIR | --repo-root DIR]
 ```
 
 - `--from` names a directory carrying `status.json` and `events.jsonl` at
   its **top level** — the shape of a pi-subagents async run directory
-  (`asyncDir`). Harvest copies both into `panels/<phase>-round<N>-<date>/`;
+  (`asyncDir`). Harvest copies both into `panels/<panelPhase>-round<N>-<date>/`
+  (`--phase` takes the four-value panel vocabulary, §3);
   `--with-transcripts` additionally copies transcript files under
   `transcripts/`. Foreground dispatches that produce no such artifacts
   harvest as `missed[]` — an honest coverage gap; the skill recommends async
@@ -218,7 +235,12 @@ consulted.
 ### 6.1 Source adapters
 
 1. **Manifest**: `.pi/sdlc/runs/<slug>/events.jsonl`; malformed lines are
-   counted and skipped (coverage marker), never fatal.
+   counted and skipped — at least one malformed line records the
+   `manifest.partial` coverage marker — never fatal. `title` and `track` in
+   run.json come from the `run.started` payload and are optional: absent
+   (coverage-marked) when no `run.started` event exists. Absence encoding is
+   uniform everywhere: a value a source cannot supply is **omitted** (never
+   `null`, never a sentinel) and its gap is named by a coverage marker.
 2. **Panel harvests**: `panels/*/status.json|events.jsonl` — per-model
    tokens/cost/duration/turns (pi-subagents `lifecycleArtifactVersion` 1
    fields; unknown fields ignored).
@@ -231,7 +253,9 @@ consulted.
    verbatim).
 4. **Review artifacts**: `docs/reviews/<phase>-<slug>-<date>/` per-model
    files and `consolidated.md`.
-5. **git/GitHub**: branch commits and diff stats via `git`; PR metadata,
+5. **git/GitHub**: branch commits and diff stats via `--git-cmd` (default
+   `git`) — an injectable seam exactly like `--gh-cmd`; a failing
+   `--git-cmd` records `git.error` and collection continues. PR metadata,
    review threads, and timeline via `--gh-cmd` (default `gh`). `--no-github`
    skips with a coverage marker; a **failing** `--gh-cmd` (non-zero exit or
    invalid JSON) records `github.error` and collection continues. Tests
@@ -265,6 +289,16 @@ validation per §7):
   session; `precision`: one review round's per-model findings +
   `consolidated.md` text. One request per phase / per session / per review
   round respectively (call count is therefore fixture-predictable).
+  Per-kind shapes (normative): `narrative` inputs `{phase, events[],
+  turns[]}` (events = the phase's manifest lines verbatim; turns =
+  `{ts, role, model?}`) → output `{summary}` (string, ≤ 500 chars
+  post-redaction); `steering` inputs `{sessionId, userTurns[]}` of
+  `{index, ts, text}` → output `{classifications[]}` of `{index, class}`
+  with class in the five steering classes and length equal to `userTurns`;
+  `precision` inputs `{reviewDir, models[], findingsText,
+  consolidatedText}` → output `{perModel[]}` of `{model, raised,
+  incorporated, dismissed}` (non-negative integers). The committed protocol
+  schema mirrors these shapes field-for-field.
 - response: `{kind, model, provider, output}` with kind-specific `output`
   validated before use; an invalid response, non-zero exit, or timeout
   (default 120 s, PV2 precedent) records an `llm.error:<kind>` coverage
@@ -274,7 +308,8 @@ validation per §7):
 
 Soft outputs: phase narratives, user-turn steering classification
 (`gate-approval|correction|scope-change|unblock|other`), and per-model panel
-precision parsed from prose adjudications. All soft data carries model
+precision parsed from prose adjudications. Committed steering entries store
+only `{index, ts, class}` — never the user text. All soft data carries model
 attribution; unparseable adjudications yield `precision.unparsed:<dir>`
 coverage markers, not numbers. `--no-llm` produces a valid run.json with
 `soft` absent and a `soft.absent` marker.
@@ -285,8 +320,9 @@ Pinned formulas: wall time = last − first manifest event. Phase boundaries:
 a phase spans its `phase.entered.ts` to its explicit `phase.exited.ts` when
 present, else the next `phase.entered.ts`, else the window end; an entry
 (transcript message or event) is attributed to the phase whose span contains
-its ts; entries outside every span and outside the window are excluded from
-per-phase figures and counted in an `unattributed` bucket. Agent time = Σ
+its ts; an entry within the window but outside every span is counted in an
+`unattributed` bucket; an entry outside the window is excluded from
+per-phase figures entirely. Agent time = Σ
 over assistant entries of (assistant ts − ts of the immediately preceding
 entry **in the same session file**, JSONL order; first-entry turns
 contribute 0). Human-wait = Σ over user entries of (user ts − ts of the
@@ -324,7 +360,7 @@ slug, title, track
 coverage:   [ { marker, detail? } ]          # closed v1 marker set:
             # manifest.absent, manifest.partial, panels.missing:<phase>,
             # sessions.none, sessions.dir_unresolved, session.version:<file>,
-            # github.skipped, github.error, llm.error:<kind>,
+            # github.skipped, github.error, git.error, llm.error:<kind>,
             # soft.absent, precision.unparsed:<dir>
 sizeProxies:{ scenarios, tasks, diff{files,insertions,deletions},
               sessions, phases[] }
@@ -351,11 +387,15 @@ schema cannot drift into decoration.
 `skills/sdlc-retro/scripts/render-retro.{mjs,sh}`:
 
 ```
-render-retro.mjs --run FILE [--out FILE]
+render-retro.mjs --run FILE [--out FILE] [--format text|json]
 ```
 
-Exit 0 written; 1 run.json fails schema validation; 2 usage/IO. Default
-`--out`: `index.html` beside the input.
+Exit 0 written; 1 the `--run` input is unreadable, unparseable, or fails
+schema validation; 2 usage error (missing/unknown args) or an unwritable
+`--out`. `--format json` reports `{ok, out, warnings[]}` on stdout (text
+mode renders the same human-readably); diagnostics go to stderr with the
+`sdlc-telemetry:` prefix; output is written atomically (temp + rename).
+Default `--out`: `index.html` beside the input.
 
 - Single self-contained HTML file: no external URL references of any kind
   (no `http(s)://` fetches, no `<script src>`, no `<link href>`); inline
@@ -392,8 +432,10 @@ repeated token like `record-run-event.sh` cannot be an assertion).
 `check-references` passes; removing any new entry's target breaks it. Because
 the FS11 checker cannot detect an *omitted* entry, a structural coverage
 test additionally asserts that every script under
-`skills/sdlc-retro/scripts/` and every hook script named by §4 has an
-inventory entry.
+`skills/sdlc-retro/scripts/`, every hook script named by §4, every committed
+schema file under `skills/sdlc-retro/schema/`, ADR 0021, and every
+run-store/retro path named normatively by either SKILL.md has an inventory
+entry.
 
 ## 10. Scenarios
 
@@ -421,8 +463,10 @@ FS5 side effects (LT6–LT10):
   byte-identical either way.
 - **LT8** — `validate-task` emits `task.validated` with the task id, verdict,
   and scenario ids: on a passing fixture (verdict PASS), on a failing fixture
-  (verdict FAIL), and both with and without `--report`; report/stdout bytes
-  are identical with emission active vs inactive.
+  (verdict FAIL), on an ERROR fixture whose manifest parses (emits with
+  verdict ERROR), and both with and without `--report`; an
+  unparseable-manifest ERROR skips emission; report/stdout bytes are
+  identical with emission active vs inactive.
 - **LT9** — with the run store unwritable, all three commands succeed with
   their normal output plus one prefixed stderr warning.
 - **LT10** — `check-lifecycle.mjs` and `check-lifecycle.sh` are byte-identical
@@ -431,7 +475,7 @@ FS5 side effects (LT6–LT10):
 Harvest (LT11–LT12):
 
 - **LT11** — harvesting a fixture pi-subagents run dir copies `status.json` +
-  `events.jsonl` into `panels/<phase>-round<N>-<date>/` and emits
+  `events.jsonl` into `panels/<panelPhase>-round<N>-<date>/` and emits
   `panel.harvested`; `--with-transcripts` also copies transcripts, default
   does not.
 - **LT12** — a missing source dir and a partially-present one (status without
@@ -457,9 +501,11 @@ Collector (LT13–LT19):
   exactly 30 minutes), rework counts, window bounds.
 - **LT17** — regeneration: after one collect populates `raw/`, the live
   sources are destroyed or mutated (session fixture files deleted, review
-  files edited, fake `--gh-cmd` replaced by one that fails); a second
-  collect with `--from-raw` still reproduces a byte-identical run.json —
-  falsifying any collector that secretly re-reads live sources.
+  files edited, fake `--gh-cmd` replaced by one that fails, fake
+  `--git-cmd` replaced by one that fails after the fixture repo gains a new
+  commit); a second collect with `--from-raw` still reproduces a
+  byte-identical run.json — falsifying any collector that secretly re-reads
+  any live source, git included.
 - **LT18** — soft data appears only under `soft`, carries attribution, and
   the steering classes and precision figures match the fixture LLM's scripted
   responses; an unparseable consolidated fixture yields
@@ -489,8 +535,9 @@ Robustness (LT28–LT29):
 - **LT28** — leakage sentinel: a fixture transcript containing a sentinel
   secret (env-style value) and a sentinel verbatim prompt sentence produces
   a run.json and dashboard in which neither sentinel appears; every
-  committed soft string is ≤ 500 characters and has passed the redaction
-  pass (NF4).
+  committed soft string is ≤ 500 characters, has passed the redaction pass,
+  and contains no ≥ 12-consecutive-word verbatim substring of any correlated
+  user message (NF4).
 - **LT29** — seam failure: a `--gh-cmd` that exits non-zero and an
   `--llm-cmd` that returns invalid JSON (and one that times out) each yield
   a schema-valid run.json carrying `github.error` / `llm.error:<kind>`
@@ -526,8 +573,12 @@ Docs, inventory, dogfood (LT24–LT27):
   and no verbatim user prompt text; raw material stays in the git-ignored
   run store. Mechanism, not aspiration: every committed soft string passes a
   deterministic redaction pass (environment-value redaction per the PV2
-  `buildRedactionValues` precedent) and is capped at 500 characters; LT28 is
-  the gate.
+  `buildRedactionValues` precedent), is capped at 500 characters, and is
+  rejected (replaced by a coverage-marked omission) if it contains a ≥
+  12-consecutive-word verbatim substring of any correlated user message — a
+  deterministic n-gram containment check in `collect`, since redaction alone
+  cannot stop an LLM reproducing prompt text; steering entries carry no user
+  text at all (§6.2). LT28 is the gate.
 
 ## 12. Migration
 

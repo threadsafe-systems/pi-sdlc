@@ -106,9 +106,93 @@ normative, drift-tested.
 **SF19 (LOW, deepseek)** — spec cited a non-existent ADR 0021 as authority.
 **INCORPORATED**: reworded "to be recorded as ADR 0021, a deliverable".
 
-## Outcome
+## Outcome (round 1)
 
-19/19 incorporated, 0 dismissed. Round 2 verification pass over rev 2 to
-follow (finding density at round 1 warrants verification rather than
-declaration). SF2's shape deviation from the plan's wording is flagged for
-the human owner at the spec gate.
+19/19 incorporated, 0 dismissed. Round 2 verification pass run over rev 2
+(finding density at round 1 warranted verification rather than declaration).
+
+---
+
+# Round 2 (verification pass over rev 2 @ 3baf57d)
+
+- Panel: same three models; per-model files `round2-gpt-5.6-luna.md`,
+  `round2-glm-5.2.md`, `round2-deepseek-v4-pro.md`.
+- Verification: glm-5.2 and deepseek-v4-pro independently verify **19/19
+  resolved, zero regressions**; gpt-5.6-luna confirms 12 resolved and rates
+  the rest partial/unresolved chiefly on one recurring premise (schema files
+  absent at the reviewed commit — adjudicated below) plus genuinely new
+  defects, all adjudicated here. Rev 3 incorporates every accepted item.
+
+**R2-A (HIGH, luna) — panel-phase vocabulary collision**: auto emitters
+speak the four-value FS5 panel vocabulary while the payload table typed
+`phase` as the six lifecycle names. **INCORPORATED** (rev 3): panel events
+now carry `panelPhase` (four-value FS5 vocabulary) with a pinned
+panel→lifecycle mapping (task_validate→implement) for collector
+attribution; harvest `--phase` takes the panel vocabulary.
+
+**R2-B (HIGH, luna) — LLM `inputs`/`output` still prose**: **INCORPORATED**
+(rev 3): per-kind request/response shapes pinned normatively in §6.2.
+
+**R2-C (HIGH-part, luna) — run.json `title`/`track` source + absence
+encoding unpinned**: **INCORPORATED** (rev 3): sourced from `run.started`,
+optional with coverage; uniform omitted-never-null absence rule.
+
+**R2-D (MED, luna) — LT17 does not isolate git**: **INCORPORATED** (rev 3):
+`--git-cmd` injectable seam added (with `git.error` marker); LT17 mutates
+the git seam too.
+
+**R2-E (MED, luna) — render CLI envelope incomplete**: **INCORPORATED**
+(rev 3): `--format text|json`, `{ok, out, warnings[]}` envelope, stderr
+prefix, atomic write, exit-1 vs exit-2 mapping pinned.
+
+**R2-F (MED, luna) — NF4 mechanism insufficient for verbatim prompt text**:
+**INCORPORATED** (rev 3): steering entries carry no user text; ≥
+12-consecutive-word n-gram containment check rejects verbatim carryover;
+LT28 extended.
+
+**R2-G (MED, luna) — FS11 omission test narrower than claimed classes**:
+**INCORPORATED** (rev 3): structural test extended to schema files, ADR
+0021, and normative store/retro paths in both SKILL.mds.
+
+**R2-H (MED, luna) — validator-dispatch harvest hook missing (plan R2 says
+panel/validator)**: **INCORPORATED** (rev 3): §4 + LT24 require the harvest
+token at validator dispatch too.
+
+**R2-I (MED, luna) — `phase.exited` deviation needs ratification before
+freeze**: acknowledged; explicitly on the human gate agenda (below).
+
+**N1 (MED, glm) — `incorporated`/`dismissed` mis-typed as strings by the
+catch-all**: **INCORPORATED** (rev 3): typed non-negative integers.
+
+**S1 (LOW, glm) — ERROR-verdict emission untested**: **INCORPORATED**
+(rev 3): emission pinned to task-id-known ERROR cases; LT8 covers
+parse-ok-ERROR and unparseable-skip.
+
+**S2 (LOW, glm) — `--by` default unpinned**: **INCORPORATED** (rev 3):
+defaults to `agent`.
+
+**ND1 (MED, deepseek) — `human:<name>` grammar rejects spaces,
+undocumented**: **INCORPORATED** (rev 3): grammar tightened to slug-style
+`human:[a-z0-9][a-z0-9-]*` and documented (`human:neil-chambers`).
+
+**ND2 (LOW, deepseek) — `manifest.partial` trigger undefined**:
+**INCORPORATED** (rev 3): ≥ 1 malformed line records it.
+
+**glm clarity note — §6.3 unattributed phrasing**: **INCORPORATED** (rev 3).
+
+**PARTIAL DISMISSAL (luna's recurring premise across SF1/SF4 partials) —
+"committed schema files must exist at the spec commit"**: DISMISSED with
+reason: the spec's normative tables (§3 envelope/payload types, §6.2
+protocol shapes, §7 structure + closed marker set) are the frozen contract;
+the schema *files* are Build deliverables required to mirror those tables
+field-for-field and drift-tested against them (§3/§7). Requiring JSON schema
+files inside the spec artifact would move implementation into the spec
+phase; FS9/FS10 precedent likewise pinned contracts in spec prose with
+artifacts landing at Build. Flagged for human ratification at the gate.
+
+## Outcome (round 2)
+
+All accepted round-2 findings incorporated in rev 3; one recorded partial
+dismissal (above) and one recorded plan-wording deviation (`phase.exited`
+optional + derived, SF2/R2-I) await human ratification at the spec gate.
+No other high/medium survives adjudication.
