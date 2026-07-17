@@ -1,30 +1,24 @@
-## [2.0.0](https://github.com/threadsafe-systems/pi-sdlc/compare/v1.0.0...v2.0.0) (2026-07-17)
+## [1.0.1](https://github.com/threadsafe-systems/pi-sdlc/compare/v1.0.0...v1.0.1) (2026-07-17)
 
-### ⚠ BREAKING CHANGES
-
-* **release:** shorthand (verified: 39748ab's feat(config)!: commit produced
-"no release"). conventionalcommits recognises both the ! shorthand and the
-* **release:** footer, so either form now correctly triggers a major
-release. No commit-type vocabulary change; existing conventional commits
-continue to classify the same way (verified via analyzeCommits fixture).
-
-* fix(release): pin conventionalcommits preset to 9.3.1
-
-v10.2.1 (npm latest) ships a function-based template writer that
-@semantic-release/release-notes-generator's Handlebars-based
-conventional-changelog-writer 8.4.0 cannot render: generateNotes()
-silently produced only the version heading, dropping every Features/Bug
-Fixes/BREAKING CHANGES section (reproduced and confirmed). 9.3.1 is the
-version release-notes-generator's own devDependencies test against;
-commit-analyzer (tested against 8.0.0) still classifies major releases
-correctly against 9.3.1 (reproduced). Caret range stays within 9.x so an
-untested major bump can't silently regress this again.
-
-* chore: retrigger CI against the corrected PR body
+> **Provenance note:** this fix was briefly auto-tagged `v2.0.0` by
+> semantic-release. PR #72 (a release-tooling config swap, `track: none`,
+> verified by a three-model PR panel with zero product or consumer-facing
+> impact) was mis-classified as a breaking release because one of its
+> squashed source commits' prose — describing what the new preset now
+> recognises — contained a line that happened to start with the note
+> parser's exact breaking-change keyword, not an actual breaking-change
+> footer. That was caught before anything consumed the tag: `v2.0.0`'s tag
+> and GitHub Release were deleted, and this correct patch release,
+> `v1.0.1`, was cut by hand in their place. No `v2.0.0` was ever published.
 
 ### Bug Fixes
 
-* **release:** switch semantic-release to conventionalcommits preset, pinned 9.3.1 ([#72](https://github.com/threadsafe-systems/pi-sdlc/issues/72)) ([04d6361](https://github.com/threadsafe-systems/pi-sdlc/commit/04d6361a90215fb08a9a43281dddcc7bdc28387e))
+* **release:** switch semantic-release to the `conventionalcommits` preset,
+  pinned to `9.3.1`, so the analyzer correctly parses both the `!`
+  shorthand and a trailing breaking-change footer (the previous `angular`
+  preset recognised neither), and so release notes render correctly (npm's
+  latest `10.2.1` silently produced empty notes against the installed
+  writer) ([#72](https://github.com/threadsafe-systems/pi-sdlc/issues/72)) ([04d6361](https://github.com/threadsafe-systems/pi-sdlc/commit/04d6361a90215fb08a9a43281dddcc7bdc28387e))
 
 # [1.0.0](https://github.com/threadsafe-systems/pi-sdlc/compare/v0.8.0...v1.0.0) (2026-07-17)
 
