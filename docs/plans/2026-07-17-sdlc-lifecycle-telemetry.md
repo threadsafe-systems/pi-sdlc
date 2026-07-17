@@ -10,7 +10,10 @@
 - Author vendor: anthropic
 - Brainstorm gate: design approved by Neil Chambers on 2026-07-17 (dialogue
   mode; decisions recorded under Constraints below).
-- Plan panel: pending.
+- Plan panel: round 1 adjudicated 2026-07-17, zero surviving high/medium —
+  `docs/reviews/plan-sdlc-lifecycle-telemetry-2026-07-17/consolidated.md`
+  (this is revision 2: rev 2 incorporated all 11 findings F1–F11; none
+  dismissed).
 - Human gate: pending.
 
 ## Objective
@@ -37,13 +40,26 @@ Every sdlc-driven feature gets an append-only, schema-versioned event log at
 path; nothing writes the file directly.
 
 - **Auto-emitted** events: panel resolution/dispatch (`resolve-panel` /
-  `ensure-panel-agent` gain emission as a side effect), task validation
-  results (`validate-task`), lifecycle check runs. Scripts that already run at
-  inflection points do the recording — no new agent discipline required for
-  these.
+  `ensure-panel-agent` gain emission as a side effect) and task validation
+  results (`validate-task`). Scripts that already run at inflection points do
+  the recording — no new agent discipline required for these.
+  `check-lifecycle` is **not** touched: it stays read-only per FS9 (ADR
+  0017); its telemetry is caller-emitted (prose-emitted, below).
+- **Run identity contract**: every event needs a `slug`; the emitter resolves
+  it from, in order, an explicit `--slug` flag, the `SDLC_RUN_SLUG`
+  environment variable, then the current feature-branch-name mapping. If none
+  resolves, emission is **skipped** with a prefixed stderr warning — an
+  honest coverage gap, never a guessed attribution. The touched FS5 CLIs gain
+  only **additive optional flags/env**; their existing flags, stdout, and
+  exit contracts are unchanged, and the ADR records the additive change.
+- **Emission channel**: events append only to the run-store file; emitter
+  diagnostics go to stderr with a stable prefix. The primary **stdout of
+  every touched CLI stays byte-identical** to today (FS5 consumers parse
+  it).
 - **Skill-prose-emitted** events: phase enter/exit, human gate approval (who,
   which artifact revision), artifact revision bumps, backward moves, PR
-  opened/fix-wave. SKILL.md's phase and gate steps name the exact emitter
+  opened/fix-wave, lifecycle-check runs (caller-side, preserving FS9
+  read-only). SKILL.md's phase and gate steps name the exact emitter
   invocation so the orchestrating agent runs it as part of the existing
   ceremony.
 - Event grammar is minimal and additive-only: `schemaVersion`, `ts`, `slug`,
@@ -82,19 +98,30 @@ events), the committed review artifacts (`docs/reviews/` findings +
 threads) into **`run.json`**:
 
 - `schemaVersion` from day one; evolution is additive-only; the migration
-  policy is **regenerate from raw archives, never write migrators** (the
-  always-on raw store in R1/R2 is what makes this honest).
+  policy is **regenerate from raw archives, never write migrators**. To make
+  that honest, `collect` **snapshots every external input it reads** into the
+  run store (`raw/` area) before distilling: the correlated session-transcript
+  extracts, GitHub API responses, and raw LLM outputs — because parent
+  sessions get pruned, GitHub threads mutate, and models change.
+  Regeneration is defined **from the snapshot**; the raw store is retained
+  indefinitely (it is small; the Specification pins the layout and what is
+  extract vs verbatim).
 - Size proxies for cross-run comparability from day one: scenario count, task
   count, diff stats, phase set, session count.
 - Derived measures: per-phase wall time / agent time / human-wait (proxy,
   capped and labelled as such), per-model and per-phase token/dollar rollups,
-  per-model panel precision (findings incorporated ÷ raised) and
-  cost-per-incorporated-finding, intervention counts by class, rework
-  indicators (revision bumps, backward moves, PR fix waves).
+  intervention counts by class, rework indicators (revision bumps, backward
+  moves, PR fix waves).
 - **LLM use is confined to collect time** and stored as data with model
-  attribution: narrative phase summaries and user-turn steering
-  classification (gate-approval | correction | scope-change | unblock |
-  other). Everything downstream is deterministic.
+  attribution: narrative phase summaries, user-turn steering classification
+  (gate-approval | correction | scope-change | unblock | other), **and
+  per-model panel precision** (findings incorporated ÷ raised) with
+  cost-per-incorporated-finding — precision is classified from prose
+  adjudications in `consolidated.md`, so it is soft, model-attributed data
+  with coverage markers when unparseable, never presented as hard telemetry.
+  A structured adjudication format that would harden it is recorded as a
+  candidate evolution, not built here. Everything downstream is
+  deterministic.
 - Degrades gracefully: missing manifest events or lost panel harvests produce
   a run.json with explicit gaps (`coverage` markers), never fabricated
   numbers.
@@ -118,6 +145,9 @@ no LLM, no network, deterministic output):
 - **Rework panel**: revision counts, fix waves, validator retries.
 - Text (narratives, adjudication gists) is drill-down polish behind the
   visuals, not the primary surface.
+- The renderer embeds **no generation-time values** (no render timestamps);
+  rendering the same `run.json` twice under one renderer/Node version yields
+  byte-identical output. Cross-version byte stability is not claimed.
 - Committed artifacts: `docs/retros/<slug>/run.json` + the rendered HTML
   beside it. Raw stores stay local.
 
@@ -131,6 +161,10 @@ no LLM, no network, deterministic output):
   pointer to sdlc-retro for the post-mortem — no duplicated mechanics.
 - Docs claim only what ships (normative-reference honesty, FS11 discipline):
   no claim of trend analytics, past-run reconstruction, or CI integration.
+  Concretely: `skills/sdlc/assets/normative-references.json` is extended
+  (additive; no FS11 schema/report-version bump) to cover every package-owned
+  normative reference in `skills/sdlc-retro/*` and the new SKILL.md hook
+  commands, and `check-references` passes with them inventoried.
 - An ADR freezes the manifest event schema and run.json contract (FS
   numbering continues the existing sequence).
 - This repo dogfoods immediately: this feature's own run is instrumented from
@@ -141,10 +175,15 @@ no LLM, no network, deterministic output):
 
 ### In
 
-- The `record-run-event` emitter, v1 event vocabulary, run-store layout, and
+- The `record-run-event` emitter, v1 event vocabulary, run-identity
+  resolution, run-store layout (incl. the `raw/` snapshot area), and
   `.gitignore` entry for `.pi/sdlc/runs/`.
 - Emission side effects in `resolve-panel` / `ensure-panel-agent` /
-  `validate-task`; skill-prose emitter steps in SKILL.md.
+  `validate-task` (additive optional flags/env only; frozen stdout/exit
+  contracts untouched); skill-prose emitter steps in SKILL.md, including the
+  caller-side lifecycle-check event.
+- The additive FS11 normative-reference inventory extension for the new
+  skill and hooks.
 - Panel harvest step (scripted) and its tiered retention rules.
 - `collect` (+ its LLM-assisted summarisation/classification, stored as
   data) and the `run.json` v1 schema with size proxies and coverage markers.
@@ -164,8 +203,21 @@ no LLM, no network, deterministic output):
   transcript-format change.
 - Schema migrators of any kind (regenerate policy instead).
 - CI integration, readiness/`sdlc-status` changes, config schema (FS1/FS2)
-  changes.
+  changes of any kind: **v1 hardcodes `.pi/sdlc/runs/` and `docs/retros/`**.
+  Extending FS1 `paths` (which today is closed — `additionalProperties:
+  false` plus a hardcoded key set in `lib.mjs`) is a possible future
+  additive-looking-but-actually-surface change, explicitly not this round.
+- Changes to `check-lifecycle` (stays read-only per FS9/ADR 0017) and any
+  new structured adjudication format for `consolidated.md` (candidate
+  evolution, recorded not built).
 - Live network or paid-model calls in tests; renderer never calls a model.
+
+### Sizing
+
+Single-spec intent is affirmed: the spec is structured capture → distil →
+render (R1+R2, R3, R4) with R5 cross-cutting. If the spec panel judges the
+result oversized, the sanctioned split seam is R1+R2 (capture) vs R3+R4
+(pipeline); Build owns task boundaries either way.
 
 ## Constraints and locked decisions (brainstorm, 2026-07-17)
 
@@ -218,6 +270,11 @@ no LLM, no network, deterministic output):
 - **Harvest timing.** Temp-root artifacts can vanish before harvest (reboot
   mid-run). Mitigation: harvest is part of the dispatch step itself, not a
   later chore.
+- **Emission side effects touch FS5 frozen CLIs** whose stdout/exit contracts
+  consumers bind to. Mitigation: events write only to the run-store file,
+  diagnostics only to prefixed stderr, new flags/env strictly additive and
+  optional; fixtures assert the primary stdout of each touched CLI is
+  byte-identical with and without emission active.
 
 ## Definition of done
 
@@ -226,9 +283,15 @@ no LLM, no network, deterministic output):
       interleave partial lines (fixture-tested).
 - [ ] `resolve-panel`, `ensure-panel-agent`, and `validate-task` emit their
       events as side effects, fixture-verified offline; emission failure
-      does not fail the primary command.
-- [ ] SKILL.md names emitter invocations at phase enter, gate approval, and
-      PR events; doc-presence tests pin the enumerated hook sentences.
+      does not fail the primary command; each touched CLI's primary stdout is
+      byte-identical with emission active vs inactive; an unresolvable slug
+      skips emission with a prefixed stderr warning.
+- [ ] SKILL.md names emitter invocations at phase enter, gate approval,
+      lifecycle-check, and PR events; a structural doc-presence test asserts
+      each mandated hook step contains the `record-run-event` token and its
+      event-type token (exact prose wording is not pinned).
+- [ ] `check-lifecycle` is byte-identical to main (read-only FS9 surface
+      untouched).
 - [ ] Panel harvest copies the v1 lifecycle artifacts into the run store;
       fixture covers a completed dispatch and a missing/aborted run dir
       (harvest reports, does not throw).
@@ -236,18 +299,37 @@ no LLM, no network, deterministic output):
       from a gappy one (coverage markers present, no fabricated values);
       schema is validated by a committed JSON schema; size proxies and
       per-model rollups present.
-- [ ] Steering classification and narratives appear in run.json as
-      model-attributed data; a fixture run.json without them still renders.
+- [ ] Every R3 source adapter has its own offline fixture and exact
+      assertions: manifest events, harvested panel artifacts, session
+      transcripts (a committed fixture transcript in the verified v3 shape),
+      review artifacts, and git/GitHub via an injected fake seam — no live
+      network in any test.
+- [ ] Every derived-measure family is fixture-asserted against known-answer
+      inputs: phase timing (incl. the capped human-wait proxy), token/dollar
+      rollups, intervention counts, rework indicators, and panel precision.
+- [ ] `collect` snapshots its external inputs into the run store's `raw/`
+      area before distilling; a re-run against the snapshot alone reproduces
+      the same run.json (regeneration fixture).
+- [ ] Steering classification, narratives, and panel-precision figures appear
+      in run.json as model-attributed **soft** data distinct from hard
+      telemetry (the LLM seam is injectable and fixture-driven in tests); a
+      fixture run.json without them still renders.
 - [ ] `render` emits a single self-contained HTML file with the R4 sections
-      from run.json alone, offline and deterministically (same input ⇒
-      byte-identical output); structural assertions cover each section.
+      from run.json alone, offline; rendering the same input twice under one
+      renderer/Node version is byte-identical, and no generation-time value
+      is embedded; structural assertions cover each section's presence and
+      representative content.
 - [ ] `docs/retros/<this-slug>/run.json` + HTML exist, generated by the
       pipeline from this feature's own (partial) run store, and are honest
       about coverage.
 - [ ] `skills/sdlc-retro/SKILL.md` documents store layout, invocation, and
       regenerate policy; sdlc SKILL.md points at it; no doc claims trends,
       past-run reconstruction, or CI enforcement.
-- [ ] ADR freezes the manifest event vocabulary and run.json v1 contract.
+- [ ] ADR freezes the manifest event vocabulary and run.json v1 contract,
+      and records the additive FS5 flag/env extension.
+- [ ] The FS11 inventory covers every package-owned normative reference in
+      `skills/sdlc-retro/*` and the new hooks; `check-references` passes;
+      removing an inventoried new entry fails it.
 - [ ] `.pi/sdlc/runs/` is git-ignored; no test performs network access or
       invokes a model; `npm test` and `npm run lint` pass.
 - [ ] Plan, Spec, and PR panels reach zero surviving high/medium findings
@@ -277,9 +359,12 @@ Observed reality (verified 2026-07-17):
   style), `--format text|json` envelopes (FS8 style). Frozen surfaces run
   FS1–FS12 (ADRs 0016–0020 cover FS8–FS12); this feature continues the
   sequence.
-- Config: `.pi/sdlc/sdlc.config.json` (`schemaVersion` 1, `paths` map —
-  no `retros`/`runs` path key exists yet; adding keys is FS1-additive
-  territory and the spec must say whether v1 hardcodes or extends `paths`).
+- Config: `.pi/sdlc/sdlc.config.json` (`schemaVersion` 1, `paths` map).
+  `paths` is a **closed** set — `additionalProperties: false`
+  (`skills/sdlc/schema/sdlc.config.schema.json`) and a hardcoded key set in
+  `lib.mjs` — so extending it is a surface change, not additive. **Decided at
+  plan level: v1 hardcodes `.pi/sdlc/runs/` and `docs/retros/`; do not extend
+  `paths`.**
 - Precedents: `docs/retros/2026-07-17-config-versioning-lifecycle-retro.html`
   (hand-built slide deck — content precedent only);
   `~/.agents/skills/sdlc-visual-docs/` (deterministic zero-dep HTML render
@@ -293,6 +378,8 @@ layout; the harvest step contract; the session↔slug correlation rule and its
 failure mode; the `run.json` v1 schema (hard telemetry vs model-attributed
 soft data, coverage markers, size proxies) with a committed JSON schema; the
 renderer's input contract and per-section structural requirements; CLI
-envelopes/exits for emitter, collect, and render; the FS1 `paths` question;
-and the exact SKILL.md hook sentences. It must not design the visual styling
+envelopes/exits for emitter, collect, and render; the `raw/` snapshot layout
+and retention; the run-identity resolution order and its failure mode; the
+FS11 inventory additions; and the SKILL.md hook steps (token-level, not
+prose-level). It must not design the visual styling
 (implementation freedom) or choose task boundaries (Build owns those).
