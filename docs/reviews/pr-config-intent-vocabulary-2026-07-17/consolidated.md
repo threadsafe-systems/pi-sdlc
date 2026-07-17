@@ -74,3 +74,44 @@ preset-patch path is the non-destructive alternative.
 ## Stop condition
 No high or medium finding survives adjudication after round 1. Round 2 (below)
 re-runs the panel against the fixed HEAD to confirm convergence.
+
+## Round 2 (HEAD 945db9b) — deepseek clean; gpt-5.6-sol 5 findings (4 med, 1 low)
+
+deepseek/deepseek-v4-pro verified all round-1 fixes correct and found zero
+defects (full branch-ordering + guard trace). gpt-5.6-sol found my SKILL
+re-pointing (P1/P3) was incomplete:
+
+- (med) more hardcoded two-task spots (phase footnote, tracker section, PR
+  no-tracker exemption) — **incorporated**, all defer to `shape.publishToTracker`.
+- (med) validator section ignored `review.tasks` self/off — **incorporated**,
+  section now branches on the dial.
+- (med) the authoritative-dials paragraph I added mislabelled every dial's enum
+  — **incorporated**, corrected per-dial enums.
+- (med) forced override deletion not disclosed before→after — **incorporated**,
+  patch report now prints `was … → now …`.
+- (low) panel command placeholders `<author-vendor>`/`<vendor>` — **incorporated**,
+  now `<provider/model>`.
+
+## Round 3 (HEAD 39a9448) — glm CONVERGED (1 low); gpt-5.6-sol 2 med (residual prose)
+
+glm-5.2 declared CONVERGED (no high/medium; exhaustive re-trace of validator
+kernel, resolve-panel, writeBundle, honesty, test integrity). gpt-5.6-sol found
+two residual prose gaps from the round-2 fixes:
+
+- (med) tracker section still said "(default two)" — false for the standard
+  preset (4) — **incorporated**, parenthetical now "the committed value is
+  authoritative".
+- (med) validator section's manifest/runner/receipt/PASS requirements still read
+  as unconditional under the new `self`/`off` branch — **incorporated**, the
+  PV1/PV2/receipt/PASS requirements are now explicitly scoped to
+  `subagent`/`self`, with `self` running the runner directly and `off` imposing
+  none.
+
+## Outcome
+
+Three panel rounds run (goal cap). Round 3 reached convergence on substance
+(glm CONVERGED; deepseek round-2 clean); the only round-3 findings were
+SKILL prose, incorporated with no code/behaviour change. **No high or medium
+finding survives against the final tree.** 218 tests pass, biome clean,
+`sdlc-status` ready on the branch. No finding required owner adjudication —
+all were either incorporated or dismissed with a recorded reason (L4, L7).

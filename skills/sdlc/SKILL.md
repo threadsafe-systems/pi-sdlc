@@ -214,9 +214,9 @@ The committed build-plan doc (`<configured paths.plans>/<date>-<feat>-build.md`)
 canonical task breakdown — objectives, rationale, check commands, and
 scenario ids per task never live only in the tracker. Whenever that breakdown
 has at least the repo's committed `shape.publishToTracker` count of tasks
-(default **two**; `"never"` disables the publish step), publish it as tracker
-objects too, so the work is visible and resumable across sessions without
-reopening the build-plan doc:
+(the committed value is authoritative; `"never"` disables the publish step),
+publish it as tracker objects too, so the work is visible and resumable across
+sessions without reopening the build-plan doc:
 
 - One **epic issue** (label `<LABEL_PREFIX>:epic`), body linking the plan/spec/
   build-plan docs and restating the definition of done.
@@ -342,7 +342,8 @@ is no unconditional `npx tsc --noEmit` and no assumed `CONTRIBUTORS` file; a
 TypeScript task declares `tsc`, a JavaScript task declares `node --check` and its
 linter, another repo declares its own tools.
 
-Every implementation task carries a committed **PV1 validation manifest**
+Every implementation task **under `review.tasks: subagent` or `self`** carries
+a committed **PV1 validation manifest**
 (`<repository validation home>/<feature>/<task-id>.json`, schema
 `schema/task-validation-manifest.schema.json`) projected from its canonical
 Build task. The manifest names, as exact argv arrays, the task's checks across
@@ -356,13 +357,17 @@ declared argv with no shell, evaluates categories and scenarios, bounds and
 redacts command evidence, and returns `PASS` (exit 0), `FAIL` (exit 1), or
 `ERROR` (exit 2). Build, not the validator, owns which commands run and which
 categories are `n/a`; the validator cannot invent a command, weaken a check, or
-decide applicability. The validator subagent (see
+decide applicability. Under `subagent`, the validator subagent (see
 `prompts/validator-task.prompt.md`) runs the runner, confirms exit and report
-verdict agree, and reports each result. A nonzero runner result blocks task
-completion; a task is not done until the runner returns PASS. Each task stores a
-runtime receipt (manifest copy, runner report, generated-agent copy, hashes,
-model, verdicts) under `docs/reviews/task-validate-<feature>-<task-id>-<date>/`,
-verifiable with `scripts/verify-task-receipt.mjs`. Judgement review happens later
+verdict agree, and reports each result; under `self` the implementer runs the
+runner directly (same runner, no subagent dispatch). A nonzero runner result
+blocks task completion; a task is not done until the runner returns PASS. Each
+task stores a runtime receipt (manifest copy, runner report, hashes, verdicts,
+plus the generated-agent copy and model under `subagent`) under
+`docs/reviews/task-validate-<feature>-<task-id>-<date>/`,
+verifiable with `scripts/verify-task-receipt.mjs`. Under `off` none of this
+section applies: no manifest, runner, receipt, or PASS gate is required.
+Judgement review happens later
 at the PR panel. Model preference: `deepseek/deepseek-v4-flash`, then
 `anthropic/claude-haiku-4-5` — a `:low` (or `:off`) thinking suffix on either
 fits this role well, since a checklist executor doesn't need deep reasoning (see
