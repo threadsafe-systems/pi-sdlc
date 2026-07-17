@@ -188,11 +188,12 @@ the schema *files* are Build deliverables required to mirror those tables
 field-for-field and drift-tested against them (§3/§7). Requiring JSON schema
 files inside the spec artifact would move implementation into the spec
 phase; FS9/FS10 precedent likewise pinned contracts in spec prose with
-artifacts landing at Build. Flagged for human ratification at the gate.
+artifacts landing at Build. **Ratified by Neil Chambers on 2026-07-17.**
 
 ## Outcome (round 2)
 
-All accepted round-2 findings incorporated in rev 3; one recorded partial
-dismissal (above) and one recorded plan-wording deviation (`phase.exited`
-optional + derived, SF2/R2-I) await human ratification at the spec gate.
-No other high/medium survives adjudication.
+All accepted round-2 findings incorporated in rev 3; the partial dismissal
+(above) and the plan-wording deviation (`phase.exited` optional + derived,
+SF2/R2-I) were both **ratified by Neil Chambers on 2026-07-17** at the spec
+gate. No high/medium survives adjudication; the spec gate is closed on
+rev 3.

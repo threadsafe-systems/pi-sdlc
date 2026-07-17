@@ -13,7 +13,10 @@
   dismissal recorded in the consolidated file (schema files are Build
   deliverables mirroring these normative tables, not spec-time artifacts)
   for human ratification.
-- Human gate: pending
+- Human gate: Spec rev 3 approved by Neil Chambers on 2026-07-17, including
+  ratification of (a) the schemas-at-Build partial dismissal and (b) the
+  optional-`phase.exited`-with-pinned-derivation shape (plan wording
+  deviation recorded in §3).
 
 ## 1. Surfaces and homes
 
