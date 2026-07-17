@@ -145,16 +145,17 @@ function fieldIssue(name, type, value) {
 
 // Validate a payload for a known event. Unknown fields are tolerated (payloads
 // are additive-only; consumers ignore unknown fields, §3). Returns issues[].
-// For an unknown event, returns [] — the caller decides whether an unknown
-// event is a hard error (emitter) or a soft skip (collector).
+// For an unknown event, only the generic payload-object constraint is applied;
+// the caller decides whether the unknown event is a hard error (emitter) or a
+// soft skip (collector).
 export function validatePayload(event, payload) {
 	const spec = EVENT_PAYLOADS[event];
-	if (!spec) return [];
 	const issues = [];
 	if (!isPlainObject(payload)) {
 		issues.push("payload must be an object");
 		return issues;
 	}
+	if (!spec) return issues;
 	for (const [name, type] of spec) {
 		if (!(name in payload)) {
 			issues.push(`payload.${name} is required`);
@@ -180,6 +181,7 @@ export function validateEnvelope(obj) {
 	if (typeof obj.event !== "string" || obj.event.length === 0) issues.push("event must be a non-empty string");
 	if (typeof obj.by !== "string" || !BY_RE.test(obj.by)) issues.push("by must match script:<name>|agent|human:<slug>");
 	if (!("payload" in obj)) issues.push("payload is required");
+	else if (!isPlainObject(obj.payload)) issues.push("payload must be an object");
 	return issues;
 }
 
@@ -207,8 +209,8 @@ export function resolveRunSlug({ slug, env = process.env, cwd = process.cwd() } 
 		return SLUG_RE.test(slug) ? { slug } : { skip: `--slug value '${slug}' is not a valid run slug` };
 	}
 	const envSlug = env.SDLC_RUN_SLUG;
-	if (typeof envSlug === "string" && envSlug !== "") {
-		return SLUG_RE.test(envSlug) ? { slug: envSlug } : { skip: `SDLC_RUN_SLUG value '${envSlug}' is not a valid run slug` };
+	if (Object.hasOwn(env, "SDLC_RUN_SLUG")) {
+		return typeof envSlug === "string" && SLUG_RE.test(envSlug) ? { slug: envSlug } : { skip: `SDLC_RUN_SLUG value '${envSlug ?? ""}' is not a valid run slug` };
 	}
 	const branch = currentBranch(cwd);
 	if (!branch) return { skip: "run identity unresolvable: detached HEAD or no git branch" };

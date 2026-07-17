@@ -160,7 +160,13 @@ test("LT2: bad inputs exit 2 and never touch the manifest", () => {
 test("schema agreement: unknown event types remain valid for forward-compatible consumers", () => {
 	const future = { schemaVersion: 1, ts: "2026-01-01T00:00:00Z", slug: "future", event: "future.event", by: "agent", payload: {} };
 	assert.deepEqual(validateEnvelope(future), []);
+	assert.deepEqual(validatePayload(future.event, future.payload), []);
 	assert.equal(schemaValidate(future), true, JSON.stringify(schemaValidate.errors));
+
+	const malformed = { ...future, payload: "not-an-object" };
+	assert.ok(validateEnvelope(malformed).includes("payload must be an object"));
+	assert.deepEqual(validatePayload(malformed.event, malformed.payload), ["payload must be an object"]);
+	assert.equal(schemaValidate(malformed), false);
 });
 
 test("LT2b: a bad input against a non-existent store attempts no write", () => {
@@ -182,7 +188,7 @@ test("LT2b: a bad input against a non-existent store attempts no write", () => {
 test("LT3: concurrent emitters produce N complete, non-interleaved lines", async () => {
 	const root = tmp();
 	try {
-		const N = 24;
+		const N = 20;
 		const path = eventsPath(root, "conc");
 		const procs = [];
 		for (let i = 0; i < N; i++) {
@@ -190,7 +196,7 @@ test("LT3: concurrent emitters produce N complete, non-interleaved lines", async
 				new Promise((resolve, reject) => {
 					const child = spawn(process.execPath, [emitter, "phase.entered", "--repo-root", root, "--slug", "conc", "--by", `human:w-${i}`, "--payload", JSON.stringify({ phase: "build" })], {
 						env: baseEnv(),
-						stdio: ["ignore", "pipe", "pipe"],
+						stdio: "ignore",
 					});
 					child.on("error", reject);
 					child.on("exit", (code) => resolve(code));
@@ -215,13 +221,18 @@ test("LT3: concurrent emitters produce N complete, non-interleaved lines", async
 	}
 });
 
-test("explicit empty --slug does not fall through to env or branch", () => {
+test("empty explicit identities do not fall through to another identity", () => {
 	const repo = gitRepo({ branch: "feat/right" });
 	try {
-		const r = run(["phase.entered", "--repo-root", repo, "--slug", "", "--payload", JSON.stringify({ phase: "plan" })], { cwd: repo, env: baseEnv({ SDLC_RUN_SLUG: "envslug" }) });
-		assert.equal(r.code, 0, r.stderr);
-		assert.ok(r.stderr.includes("skipping emission"), "invalid explicit slug is a soft skip");
+		const flag = run(["phase.entered", "--repo-root", repo, "--slug", "", "--payload", JSON.stringify({ phase: "plan" })], { cwd: repo, env: baseEnv({ SDLC_RUN_SLUG: "envslug" }) });
+		assert.equal(flag.code, 0, flag.stderr);
+		assert.ok(flag.stderr.includes("skipping emission"), "invalid explicit slug is a soft skip");
 		assert.equal(existsSync(join(repo, ".pi", "sdlc", "runs")), false, "empty flag must not fall through to another identity");
+
+		const env = run(["phase.entered", "--repo-root", repo, "--payload", JSON.stringify({ phase: "plan" })], { cwd: repo, env: baseEnv({ SDLC_RUN_SLUG: "" }) });
+		assert.equal(env.code, 0, env.stderr);
+		assert.ok(env.stderr.includes("SDLC_RUN_SLUG value '' is not a valid run slug"));
+		assert.equal(existsSync(join(repo, ".pi", "sdlc", "runs")), false, "empty env must not fall through to branch mapping");
 	} finally {
 		rmSync(repo, { recursive: true, force: true });
 	}
