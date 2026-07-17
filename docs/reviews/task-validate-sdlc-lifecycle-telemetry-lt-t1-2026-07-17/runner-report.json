@@ -1,0 +1,238 @@
+{
+  "schemaVersion": 1,
+  "taskId": "lt-t1",
+  "manifest": "/home/neil/code/threadsafe/pi-sdlc.worktrees/feat-sdlc-lifecycle-telemetry/docs/validation/sdlc-lifecycle-telemetry/lt-t1.json",
+  "repoRoot": "/home/neil/code/threadsafe/pi-sdlc.worktrees/feat-sdlc-lifecycle-telemetry",
+  "verdict": "PASS",
+  "exitCode": 0,
+  "errors": [],
+  "manifestErrors": [],
+  "commands": [
+    {
+      "id": "tests.telemetry-emitter",
+      "argv": [
+        "node",
+        "--test",
+        "test/telemetry-emitter.test.js"
+      ],
+      "evidence": [
+        "LT1-LT5 emitter/run-identity behaviour and LT26 .gitignore coverage"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 634,
+      "stdoutTail": "✔ LT1: valid emit appends one schema-conforming line, creating the store (25.470046ms)\n✔ LT1b: --by defaults to agent when omitted (22.590855ms)\n✔ LT2: bad inputs exit 2 and never touch the manifest (171.691439ms)\n✔ LT2b: a bad input against a non-existent store attempts no write (24.458157ms)\n✔ LT3: concurrent emitters produce N complete, non-interleaved lines (113.454233ms)\n✔ LT4: --slug beats env beats branch mapping (84.488003ms)\n✔ LT5: unresolvable identity skips (exit 0, one warning, no write) (91.616186ms)\n✔ LT26: .gitignore ignores the run store (2.461536ms)\n✔ emitter: .sh wrapper delegates to .mjs identically (25.656599ms)\n✔ vocabulary: every known event has a payload descriptor (0.161117ms)\nℹ tests 10\nℹ suites 0\nℹ pass 10\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 611.926016\n",
+      "stderrTail": ""
+    },
+    {
+      "id": "tests.full",
+      "argv": [
+        "node",
+        "--test"
+      ],
+      "evidence": [
+        "NF3 frozen-CLI regression floor: the existing corpus remains green with the emitter added"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 4554,
+      "stdoutTail": "[...truncated; showing bounded tail...]\n✔ NR7: skill dispatch instructions are concrete and CI claims are bounded (0.637035ms)\n✔ NR7: inventory checker and ADR are shipped and versioned (0.269113ms)\n✔ CV29: normative inventory rebinds readiness to merged panels (0.185422ms)\n✔ NR8: source prompt extraction remains the fixture authority (0.14814ms)\n✔ CV4/CV21: lifecycle floor exclusively supersedes minVendor and reports model shortfall (62.268444ms)\n✔ strict model-axis ordering and recognised effort suffix dedupe are conserved (35.447894ms)\n✔ same-provider distinct models, embedded versions, and provider identity remain distinct (132.5802ms)\n✔ CV23: lifecycle author model is readmitted only for preference shortfall (63.76984ms)\n✔ gate decomposition, track selection, and task-validation off refuse in preference (122.015887ms)\n✔ task validation retains its fixed one-model model-axis floor (74.335186ms)\n✔ CV21: preference shortfalls proceed on both axes and keep machine stdout parseable (98.817378ms)\n✔ Google panel entries recognize Gemini environment credentials (40.816797ms)\n✔ CV22: strict shortfalls fail and absent enforcement defaults to preference (57.701987ms)\n✔ CV23: author readmission is shortfall-only; empty panels and gate modes still refuse (240.589905ms)\n✔ CV24/CV25: retired input and manifest/version/roster halts are distinct (97.443674ms)\n✔ CV26: folded pair-A strict output and exit match real pre-T1 v1 goldens (115.414645ms)\n✔ CV28: watched config schema changes require the PR release signal (295.549391ms)\n✔ CV28: inner breaking commits are ignored in favour of the squash title (58.387698ms)\n✔ CV28: only the named schemas and CONFIG_SCHEMA_VERSION line are watched (170.606858ms)\n✔ CV19: committed migrated v2 config without a models file is ready in text and JSON (90.411006ms)\n✔ CV17: recognised v1 is not-ready with canonical migration remedy and unrelated checks still report (59.715774ms)\n✔ CV18: schemaVersion 3 is an error with the canonical newer remedy (52.062276ms)\n✔ CV19: a panels-less v2 config is valid but not-ready (50.445304ms)\n✔ CV20: malformed JSON and invalid schemaVersion remain config errors (107.237477ms)\n✔ current v2 structural validation errors remain config.valid errors (106.594946ms)\n✔ filesystem-only manifests are not committed adoption (130.432431ms)\n✔ argument, root, and git errors retain exit 2 (158.270948ms)\n✔ workflow readability remains an independent readiness check (92.241155ms)\n✔ unrelated dirty files do not affect readiness (85.248816ms)\n✔ status completes with a PATH exposing only git (78.470722ms)\n✔ fresh bundle provisions requested assets and idempotent rerun retains them (94.543071ms)\n✔ CI marker directories are not mistaken for CI files (46.808117ms)\n✔ existing CI suppresses workflow creation and reports refusal (38.296975ms)\n✔ template info strings must be exactly sdlc (44.847921ms)\n✔ consumer template with the wrong companion is refused byte-identically (27.189417ms)\n✔ consumer template with multiple declarations is refused (31.702186ms)\n✔ consumer template without the declaration is refused byte-identically (46.464158ms)\n✔ invalid assembled configuration fails before any bundle write (27.810508ms)\n✔ target parent conflicts fail before any bundle write (29.423984ms)\n✔ unreadable package sources fail before any bundle write (29.276498ms)\n✔ invalid existing config and models are refused without overwrite (77.010692ms)\n✔ workflow from another repository is refused (36.395873ms)\n✔ malformed CI marker fails before any bundle write (28.798996ms)\n✔ operational JSON errors preserve the resolved consumer root (30.447115ms)\n✔ existing target directories fail before any bundle write (30.998471ms)\n✔ bundle reports resolved package references before writing (34.279724ms)\n✔ OLA14: --profile standard writes the exact fully-expanded standard block (30.733194ms)\n✔ OLA14/NF-3: repeated preset runs produce identical lifecycle bytes (59.314999ms)\n✔ OLA15: the interactive profile question is first and defaults to standard (1122.071532ms)\n✔ custom interview rejects invalid Boolean and gate answers immediately with text (932.150517ms)\n✔ OLA16/NF-1(c): non-interactive setup without lifecycle flags remains v1-shaped (35.020604ms)\n✔ OLA16: applying a profile to an existing config refuses with the OL-B pointer (63.029118ms)\n✔ OLA17: custom profile requires lifecycle JSON and injects profile exactly (49.965391ms)\n✔ OLA17: custom payload usage and validation failures are pinned (108.932364ms)\n✔ OH4: --yes writes a schema-valid config; bundle re-run refuses config changes; --force overwrites (107.823999ms)\n✔ OH5: --hook-use fields 3-4 = use, do = remainder after 4th colon (colons in do preserved) (28.363521ms)\n✔ OH5: --hook-run command = remainder after 2nd colon (colons preserved); trust warning on stderr (30.202ms)\n✔ OH5: mixed repeated hook flags preserve argv order in the written list (38.309238ms)\n✔ OH5: malformed hook flags exit 2 (278.639072ms)\n✔ PR-fix: value-taking flags accept values that begin with '-' (e.g. --announce '--foo') (37.593083ms)\n✔ OH5: partial tracker flags exit 2 (all-or-none) (38.04502ms)\n✔ OH5: no config flags and no TTY exits 2 (interview needs a TTY) (27.007037ms)\n✔ OH6: package.json pi.prompts includes ./templates and the template has a description (0.533824ms)\n✔ LT1: valid emit appends one schema-conforming line, creating the store (26.405343ms)\n✔ LT1b: --by defaults to agent when omitted (22.656064ms)\n✔ LT2: bad inputs exit 2 and never touch the manifest (169.207894ms)\n✔ LT2b: a bad input against a non-existent store attempts no write (24.139583ms)\n✔ LT3: concurrent emitters produce N complete, non-interleaved lines (136.112865ms)\n✔ LT4: --slug beats env beats branch mapping (75.233834ms)\n✔ LT5: unresolvable identity skips (exit 0, one warning, no write) (80.305448ms)\n✔ LT26: .gitignore ignores the run store (1.813139ms)\n✔ emitter: .sh wrapper delegates to .mjs identically (20.000002ms)\n✔ vocabulary: every known event has a payload descriptor (0.237511ms)\n✔ PV1: a valid JavaScript manifest runs only declared checks and passes (100.477067ms)\n✔ PV2: only declared argv run; an undeclared tool command never executes (145.373021ms)\n✔ PV3: schema and inspectManifest reject the mutation matrix before any command runs (59.524404ms)\n✔ PV4: command outcomes are complete and deterministic; runner continues after failures (49.907886ms)\n✔ PV4: a timeout is reported as FAIL with timedOut (1044.386495ms)\n✔ PV5: category applicability is exact; injected n/a shapes are rejected (65.090142ms)\n✔ PV6: scenario mapping gates the verdict (73.424902ms)\n✔ PV7: standards and banned patterns are commands, not judgement (93.407958ms)\n✔ PV8: evidence is bounded and secrets are redacted (77.467593ms)\n✔ PV8 unit: boundStream and redaction name-matching are precise (201.879536ms)\n✔ PV9: JSON/text/exit agree and JSON mode is order-independent (381.079494ms)\n✔ PV9: --report writes the exact JSON bytes atomically (122.560018ms)\n✔ PV9: --report outside the repo root is refused and clobbers nothing (105.648725ms)\n✔ PV10: generic validator law and generated agent are portable (0.567939ms)\n✔ PV11: receipt hash verification detects mutation of any stored file (3.971325ms)\n✔ PV11: a FAIL runner-report cannot ride under runnerVerdict PASS (0.925027ms)\n✔ parseArgs: recognises JSON anywhere and rejects bad flags (0.468409ms)\n✔ PV13: renderText is a faithful projection of the report (63.657369ms)\nℹ tests 216\nℹ suites 0\nℹ pass 216\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 4527.508391\n",
+      "stderrTail": ""
+    },
+    {
+      "id": "static.telemetry-lib",
+      "argv": [
+        "node",
+        "--check",
+        "skills/sdlc/scripts/telemetry.mjs"
+      ],
+      "evidence": [
+        "Shared event contract library parses"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 27,
+      "stdoutTail": "",
+      "stderrTail": ""
+    },
+    {
+      "id": "static.emitter",
+      "argv": [
+        "node",
+        "--check",
+        "skills/sdlc/scripts/record-run-event.mjs"
+      ],
+      "evidence": [
+        "Emitter CLI parses"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 23,
+      "stdoutTail": "",
+      "stderrTail": ""
+    },
+    {
+      "id": "static.tests",
+      "argv": [
+        "node",
+        "--check",
+        "test/telemetry-emitter.test.js"
+      ],
+      "evidence": [
+        "New task suite exists and parses"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 21,
+      "stdoutTail": "",
+      "stderrTail": ""
+    },
+    {
+      "id": "static.schema",
+      "argv": [
+        "node",
+        "-e",
+        "JSON.parse(require('fs').readFileSync('skills/sdlc-retro/schema/event.schema.json','utf8'))"
+      ],
+      "evidence": [
+        "Committed event schema is valid JSON"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 27,
+      "stdoutTail": "",
+      "stderrTail": ""
+    },
+    {
+      "id": "static.lint",
+      "argv": [
+        "npm",
+        "run",
+        "lint"
+      ],
+      "evidence": [
+        "Repository formatting and lint rules"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 168,
+      "stdoutTail": "\n> pi-sdlc@0.1.1 lint\n> biome check .\n\nChecked 87 files in 56ms. No fixes applied.\n",
+      "stderrTail": ""
+    },
+    {
+      "id": "patterns.diff",
+      "argv": [
+        "git",
+        "diff",
+        "--check",
+        "HEAD"
+      ],
+      "evidence": [
+        "No whitespace-error banned patterns in the task diff"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 5,
+      "stdoutTail": "",
+      "stderrTail": ""
+    }
+  ],
+  "categories": [
+    {
+      "category": "tests",
+      "status": "PASS",
+      "checkIds": [
+        "tests.telemetry-emitter",
+        "tests.full"
+      ]
+    },
+    {
+      "category": "static",
+      "status": "PASS",
+      "checkIds": [
+        "static.telemetry-lib",
+        "static.emitter",
+        "static.tests",
+        "static.schema",
+        "static.lint"
+      ]
+    },
+    {
+      "category": "scenarios",
+      "status": "PASS"
+    },
+    {
+      "category": "standards",
+      "status": "N/A",
+      "reason": "No additional task-specific external standard applies; the feature's PR gate verifies the irreversible stream contract."
+    },
+    {
+      "category": "bannedPatterns",
+      "status": "PASS",
+      "checkIds": [
+        "patterns.diff"
+      ]
+    }
+  ],
+  "scenarios": [
+    {
+      "scenarioId": "LT1",
+      "status": "PASS",
+      "checkIds": [
+        "tests.telemetry-emitter",
+        "tests.full"
+      ]
+    },
+    {
+      "scenarioId": "LT2",
+      "status": "PASS",
+      "checkIds": [
+        "tests.telemetry-emitter"
+      ]
+    },
+    {
+      "scenarioId": "LT26",
+      "status": "PASS",
+      "checkIds": [
+        "tests.telemetry-emitter"
+      ]
+    },
+    {
+      "scenarioId": "LT3",
+      "status": "PASS",
+      "checkIds": [
+        "tests.telemetry-emitter"
+      ]
+    },
+    {
+      "scenarioId": "LT4",
+      "status": "PASS",
+      "checkIds": [
+        "tests.telemetry-emitter"
+      ]
+    },
+    {
+      "scenarioId": "LT5",
+      "status": "PASS",
+      "checkIds": [
+        "tests.telemetry-emitter"
+      ]
+    }
+  ]
+}

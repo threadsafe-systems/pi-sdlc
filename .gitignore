@@ -7,3 +7,6 @@ node_modules/
 
 # review scratch diffs
 *.diff
+
+# FS13 lifecycle-telemetry run store (git-ignored; raw material stays local)
+.pi/sdlc/runs/
