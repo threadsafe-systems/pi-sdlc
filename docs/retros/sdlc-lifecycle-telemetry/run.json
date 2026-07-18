@@ -1,0 +1,65 @@
+{
+  "schemaVersion": 1,
+  "slug": "sdlc-lifecycle-telemetry",
+  "coverage": [
+    {
+      "marker": "manifest.partial",
+      "detail": "1 malformed line(s) skipped"
+    },
+    {
+      "marker": "soft.absent"
+    }
+  ],
+  "sizeProxies": {
+    "scenarios": 28,
+    "tasks": 7,
+    "sessions": 1,
+    "phases": [],
+    "diff": {
+      "files": 86,
+      "insertions": 10927,
+      "deletions": 12
+    }
+  },
+  "hard": {
+    "window": {
+      "start": "2026-07-18T16:18:43.404Z",
+      "end": "2026-07-18T17:23:54.809Z"
+    },
+    "phases": [],
+    "sessions": [
+      {
+        "file": "2026-07-18T15-22-29-795Z_019f75d2-6223-73c3-bfba-6d7913b32608.jsonl",
+        "start": "2026-07-18T15:23:11.075Z",
+        "end": "2026-07-18T17:24:04.204Z",
+        "models": ["claude-sonnet-5"]
+      }
+    ],
+    "panels": [],
+    "models": ["claude-sonnet-5"],
+    "rollups": {
+      "byModel": [
+        {
+          "model": "claude-sonnet-5",
+          "tokens": 86920014,
+          "cost": 41.75054179999999
+        }
+      ],
+      "byPhase": []
+    },
+    "rework": {
+      "artifactRevised": 0,
+      "phaseBackward": 0,
+      "fixWave": 0
+    },
+    "totals": {
+      "tokens": 86920014,
+      "cost": 41.75054179999999,
+      "wallMs": 3911405,
+      "agentMs": 3342497,
+      "humanWaitMs": 48301
+    }
+  },
+  "title": "Lifecycle telemetry and post-mortem dashboard (sdlc-retro)",
+  "track": "irreversible"
+}
