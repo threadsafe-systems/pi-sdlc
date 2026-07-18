@@ -99,7 +99,14 @@ export function buildChildEnv(sandbox, extra = {}) {
  */
 async function writeGhShim(sandbox, exitCode) {
 	const stub = join(sandbox.stubBin, "gh");
-	await writeFile(stub, `#!/usr/bin/env node\nimport { appendFileSync } from "node:fs";\nappendFileSync(${JSON.stringify(sandbox.ghLog)}, JSON.stringify(process.argv.slice(2)) + "\\n");\nprocess.exit(${exitCode});\n`, { mode: 0o755 });
+	// CommonJS (require, not import) so the extensionless shim runs on every Node
+	// version regardless of ESM syntax-detection.
+	await writeFile(stub, `#!/usr/bin/env node\nconst { appendFileSync } = require("node:fs");\nappendFileSync(${JSON.stringify(sandbox.ghLog)}, JSON.stringify(process.argv.slice(2)) + "\\n");\nprocess.exit(${exitCode});\n`, { mode: 0o755 });
+}
+
+/** Restore the default `gh` deny-stub (exit nonzero) — call between scenarios that swapped it. */
+export async function resetGhStub(sandbox) {
+	await writeGhShim(sandbox, 1);
 }
 
 // ---------------------------------------------------------------------------
@@ -161,11 +168,14 @@ async function snapshotTree(root) {
 	return snapshot;
 }
 
-/** Compare two snapshots; return the sorted list of added/modified paths. */
+/** Compare two snapshots; return the sorted list of added/modified/removed paths. */
 function diffSnapshots(before, after) {
 	const changed = [];
 	for (const [path, sig] of Object.entries(after)) {
 		if (before[path] !== sig) changed.push(path);
+	}
+	for (const path of Object.keys(before)) {
+		if (!(path in after)) changed.push(`(removed) ${path}`);
 	}
 	return changed.sort();
 }
@@ -282,9 +292,15 @@ export async function commitConsumer(sandbox, cwd, message = "init") {
 	return runProcess(["git", "commit", "-q", "-m", message], { cwd, env });
 }
 
-/** Remove the installed skill from the staged install root (for the skill-absent negative control). */
+/**
+ * Remove the installed skill *definition* (SKILL.md) from the staged install
+ * root for the skill-absent negative control. Only SKILL.md is removed — pi keys
+ * skill discovery on it, so the skill drops out of `<available_skills>` (the
+ * discovery gate locks), while the shipped scripts under skills/sdlc/scripts
+ * remain so scenario setup can still configure the consumer.
+ */
 export async function removeInstalledSkill(sandbox) {
-	await rm(join(sandbox.staged, "skills", "sdlc"), { recursive: true, force: true });
+	await rm(join(sandbox.staged, "skills", "sdlc", "SKILL.md"), { force: true });
 }
 
 /**
@@ -588,7 +604,25 @@ export async function runGuardSelfTest() {
 		}
 		await disposeSandbox(sandbox);
 		await rm(protectedDir, { recursive: true, force: true });
-		results.push({ guard: "teardown no-write scan", ok: caught, detail: "" });
+		results.push({ guard: "teardown no-write scan (addition)", ok: caught, detail: "" });
+	}
+
+	// 6. Teardown scan catches a DELETION in a watched root.
+	{
+		const protectedDir = await mkdtemp(join(tmpdir(), "pi-sdlc-e2e-protected-"));
+		const victim = join(protectedDir, "existing.txt");
+		await writeFile(victim, "before\n");
+		const sandbox = await createSandbox({ env: cleanEnv(), watchedRoots: [protectedDir] });
+		await rm(victim, { force: true });
+		let caught = false;
+		try {
+			await teardownScan(sandbox);
+		} catch {
+			caught = true;
+		}
+		await disposeSandbox(sandbox);
+		await rm(protectedDir, { recursive: true, force: true });
+		results.push({ guard: "teardown no-write scan (deletion)", ok: caught, detail: "" });
 	}
 
 	return results;

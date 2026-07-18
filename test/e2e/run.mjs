@@ -19,7 +19,7 @@ import { writeFile } from "node:fs/promises";
 import { createSandbox, disposeSandbox, installPackage, removeInstalledSkill, serializeManifest, stagePackage, teardownScan } from "./harness.mjs";
 import { runL1 } from "./l1.mjs";
 import { allScenarios } from "./scenarios/index.mjs";
-import { runScenario } from "./scenario-format.mjs";
+import { runNegativeMode, runScenario } from "./scenario-format.mjs";
 
 function arg(name) {
 	const index = process.argv.indexOf(name);
@@ -63,7 +63,7 @@ async function fullRun() {
 	};
 }
 
-/** Run every scenario under one negative-control mode; each must lock/fail to proceed. */
+/** Run every scenario under one negative-control mode; each must lock (strict). */
 async function runNegativeControl(mode) {
 	const sandbox = await createSandbox();
 	const results = [];
@@ -73,13 +73,11 @@ async function runNegativeControl(mode) {
 		if (mode === "skill-removed") await removeInstalledSkill(sandbox);
 		for (const scenario of allScenarios(sandbox)) {
 			if (l2NameFilter && !scenario.name.includes(l2NameFilter)) continue;
-			const twin = { ...scenario, assert: () => {} };
-			if (mode === "mutated-sentinel") twin.sentinel = `MUTATED_${scenario.name}_NEVER_MATCHES`;
 			try {
-				const { record } = await runScenario(sandbox, twin);
-				results.push({ name: scenario.name, ok: record.locked, detail: record.locked ? "" : "emitted steps (not locked)" });
+				await runNegativeMode(sandbox, scenario, mode);
+				results.push({ name: scenario.name, ok: true });
 			} catch (error) {
-				results.push({ name: scenario.name, ok: true, detail: `threw: ${error instanceof Error ? error.message : String(error)}` });
+				results.push({ name: scenario.name, ok: false, detail: error instanceof Error ? error.message : String(error) });
 			}
 		}
 	} finally {
@@ -105,6 +103,12 @@ async function main() {
 	const first = await fullRun();
 	failed += report("L1", first._raw.l1);
 	failed += report("L2", first._raw.l2);
+
+	if (scenarioFilter && first._raw.l1.length === 0 && first._raw.l2.length === 0) {
+		process.stdout.write(`\n[filter] FAIL --scenario '${scenarioFilter}' matched no L1 or L2 checks\n`);
+		process.exitCode = 1;
+		return;
+	}
 
 	if (wantL2) {
 		failed += report("NC:mutated-sentinel", await runNegativeControl("mutated-sentinel"));

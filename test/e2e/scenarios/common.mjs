@@ -2,7 +2,7 @@
 
 import { writeFile } from "node:fs/promises";
 import { join } from "node:path";
-import { buildChildEnv, commitConsumer, installedScript, makeConsumer, runProcess } from "../harness.mjs";
+import { buildChildEnv, commitConsumer, installPackage, installedScript, makeConsumer, runProcess } from "../harness.mjs";
 import { DEFAULT_SENTINEL } from "../scenario-format.mjs";
 
 /** Deterministic consumer path for a named scenario (matches makeConsumer). */
@@ -33,6 +33,11 @@ export async function setCredentialedProviders(sandbox, providers) {
 export async function adopt(sandbox, name, { setupArgs, rawConfig, commit = true } = {}) {
 	const consumer = await makeConsumer(sandbox, name);
 	const env = buildChildEnv(sandbox);
+	// Install the staged package into THIS consumer so pi genuinely discovers the
+	// skill here (the L2 discovery gate depends on the install-root skill location
+	// appearing in this consumer's system prompt — not just the file existing).
+	const install = await installPackage(sandbox, consumer);
+	if (install.code !== 0) throw new Error(`pi install failed for ${name}: ${install.stderr || install.stdout}`);
 	if (rawConfig !== undefined) {
 		await runProcess(["mkdir", "-p", join(consumer, ".pi", "sdlc")], { env });
 		await writeFile(join(consumer, ".pi", "sdlc", "sdlc.config.json"), `${JSON.stringify(rawConfig, null, 2)}\n`);
@@ -80,3 +85,15 @@ export function statusResult(record) {
 
 /** The default announce string a fresh (config-less) repo would use if it wrongly announced. */
 export const DEFAULT_ANNOUNCE = "Using the sdlc skill to drive this change through its lifecycle";
+
+/** Read a consumer's committed sdlc config (throws if absent/invalid). */
+export async function readConsumerConfig(consumer) {
+	const { readFile } = await import("node:fs/promises");
+	return JSON.parse(await readFile(join(consumer, ".pi", "sdlc", "sdlc.config.json"), "utf8"));
+}
+
+/** Assert a `shape.<key>` dial in the committed config equals `expected`. */
+export async function assertShapeDial(consumer, key, expected) {
+	const config = await readConsumerConfig(consumer);
+	if (config.shape?.[key] !== expected) throw new Error(`shape.${key} = ${JSON.stringify(config.shape?.[key])}, expected ${JSON.stringify(expected)}`);
+}

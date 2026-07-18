@@ -4,7 +4,7 @@
 // gh stub records every invocation and always avoids a real network call.
 
 import { assertText } from "../harness.mjs";
-import { adopt, consumerPath, toolResults } from "./common.mjs";
+import { adopt, assertShapeDial, consumerPath, toolResults } from "./common.mjs";
 
 export function build(sandbox) {
 	const publishConsumer = consumerPath(sandbox, "scenario-e-publish");
@@ -20,7 +20,8 @@ export function build(sandbox) {
 				return { consumer: publishConsumer };
 			},
 			steps: [{ content: "publishToTracker is 2 and this build has 3 tasks: creating the epic.", toolCalls: [{ name: "bash", arguments: { command: "gh issue create --title 'Epic: demo' --label sdlc:epic" } }] }, { content: "Tracker epic attempt issued (stubbed)." }],
-			assert: ({ record }) => {
+			assert: async ({ record }) => {
+				await assertShapeDial(publishConsumer, "publishToTracker", 2);
 				if (record.ghLog.length === 0) throw new Error("E-publish: expected a stubbed tracker attempt, gh log empty");
 				assertText(JSON.stringify(record.ghLog), { mustMatch: [/issue.*create|create/], label: "E-publish gh attempt" });
 			},
@@ -35,7 +36,8 @@ export function build(sandbox) {
 				return { consumer: neverConsumer };
 			},
 			steps: [{ content: "publishToTracker is never: keeping the build a plain committed doc; no tracker attempt.", toolCalls: [{ name: "bash", arguments: { command: "echo no-tracker-publish" } }] }, { content: "No tracker attempt made." }],
-			assert: ({ record }) => {
+			assert: async ({ record }) => {
+				await assertShapeDial(neverConsumer, "publishToTracker", "never");
 				if (record.ghLog.length !== 0) throw new Error(`E-never: expected no tracker attempt, gh log has ${record.ghLog.length}`);
 				assertText(toolResults(record), { mustMatch: [/no-tracker-publish/], label: "E-never non-attempt" });
 			},

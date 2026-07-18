@@ -7,7 +7,7 @@
 // for the determinism gate.
 
 import { createSandbox, disposeSandbox, installPackage, removeInstalledSkill, stagePackage } from "../harness.mjs";
-import { runScenario } from "../scenario-format.mjs";
+import { runNegativeMode, runScenario } from "../scenario-format.mjs";
 import { build as buildA } from "./a.mjs";
 import { build as buildB } from "./b.mjs";
 import { build as buildC } from "./c.mjs";
@@ -35,20 +35,17 @@ export async function runPositive(sandbox) {
 }
 
 /**
- * Run every scenario under one negative-control mode (assertions replaced with a
- * lock assertion). `mode` is "mutated-sentinel" or "skill-removed".
+ * Run every scenario under one negative-control mode via the shared strict
+ * runner. Any thrown error is a control failure, never a pass.
  */
-async function runNegativeMode(sandbox, mode) {
+async function runNegativeAll(sandbox, mode) {
 	const results = [];
 	for (const scenario of allScenarios(sandbox)) {
-		const twin = { ...scenario, assert: () => {} };
-		if (mode === "mutated-sentinel") twin.sentinel = `MUTATED_${scenario.name}_NEVER_MATCHES`;
 		try {
-			const { record } = await runScenario(sandbox, twin);
-			results.push({ name: scenario.name, ok: record.locked, detail: record.locked ? "" : "emitted steps (not locked)" });
+			await runNegativeMode(sandbox, scenario, mode);
+			results.push({ name: scenario.name, ok: true });
 		} catch (error) {
-			// A setup/exec failure with the skill removed also counts as a failure to proceed.
-			results.push({ name: scenario.name, ok: true, detail: `threw: ${error instanceof Error ? error.message : String(error)}` });
+			results.push({ name: scenario.name, ok: false, detail: error instanceof Error ? error.message : String(error) });
 		}
 	}
 	return results;
@@ -80,7 +77,7 @@ async function main() {
 	try {
 		await stagePackage(ncMutatedSandbox);
 		await installPackage(ncMutatedSandbox);
-		ncMutated = await runNegativeMode(ncMutatedSandbox, "mutated-sentinel");
+		ncMutated = await runNegativeAll(ncMutatedSandbox, "mutated-sentinel");
 	} finally {
 		await disposeSandbox(ncMutatedSandbox);
 	}
@@ -92,7 +89,7 @@ async function main() {
 		await stagePackage(ncRemovedSandbox);
 		await installPackage(ncRemovedSandbox);
 		await removeInstalledSkill(ncRemovedSandbox);
-		ncRemoved = await runNegativeMode(ncRemovedSandbox, "skill-removed");
+		ncRemoved = await runNegativeAll(ncRemovedSandbox, "skill-removed");
 	} finally {
 		await disposeSandbox(ncRemovedSandbox);
 	}

@@ -18,16 +18,22 @@
 import { appendFileSync, readFileSync, writeFileSync } from "node:fs";
 import { createServer } from "node:http";
 
-const port = Number(process.env.PUPPET_PORT ?? "18800");
+const port = Number(process.env.PUPPET_PORT ?? "0");
 const script = JSON.parse(readFileSync(process.env.PUPPET_SCRIPT, "utf8"));
 const requestsFile = process.env.PUPPET_REQUESTS;
 const emissionsFile = process.env.PUPPET_EMISSIONS;
 const readyFile = process.env.PUPPET_READY;
+// The install-root SKILL.md location pi advertises in <available_skills>. The
+// loader step will not fire until this appears in the request stream, so a
+// scenario cannot advance unless pi actually discovered and surfaced the
+// installed skill from the install root (not the checkout).
+const skillLocation = process.env.PUPPET_SKILL_LOCATION ?? "";
 
 const sentinel = script.sentinel ?? "";
 const steps = script.steps ?? [];
 let stepIndex = 0;
 let sentinelObserved = false;
+let locationObserved = false;
 
 function chunk(delta, finishReason = null) {
 	return `data: ${JSON.stringify({ id: "puppet", object: "chat.completion.chunk", created: 0, model: script.model ?? "puppet-model", choices: [{ index: 0, delta, finish_reason: finishReason }] })}\n\n`;
@@ -67,6 +73,7 @@ const server = createServer((request, response) => {
 		record(requestsFile, parsed);
 		const haystack = JSON.stringify(parsed.messages ?? parsed);
 		if (sentinel && haystack.includes(sentinel)) sentinelObserved = true;
+		if (skillLocation && haystack.includes(skillLocation)) locationObserved = true;
 
 		response.writeHead(200, { "content-type": "text/event-stream" });
 
@@ -78,13 +85,19 @@ const server = createServer((request, response) => {
 			return;
 		}
 
-		// Anti-vacuity gate: a `loader` step (which reads the install-root
-		// SKILL.md) is ungated — it is the mechanism that puts the SKILL body into
-		// the request stream. Every *scenario* step stays locked until the SKILL.md
-		// body sentinel is observed in that read result, so with the skill removed
-		// (or the sentinel mutated) the scenario steps never emit and the scenario
-		// fails.
-		if (!step.loader && sentinel && !sentinelObserved) {
+		// Discovery gate (loader step): the installed skill's install-root location
+		// must have been surfaced by pi before the loader reads it. Scenario gate
+		// (every other step): the SKILL.md body sentinel must have been observed in
+		// the loader's read result. Either miss stays locked, so with the skill
+		// removed / not discovered / sentinel mutated, no scenario step ever emits.
+		if (step.loader) {
+			if (skillLocation && !locationObserved) {
+				record(emissionsFile, { turn: "locked", reason: "skill location not observed (discovery)" });
+				emitText(response, "PUPPET_LOCKED: installed skill not discovered in the request stream");
+				response.end("data: [DONE]\n\n");
+				return;
+			}
+		} else if (sentinel && !sentinelObserved) {
 			record(emissionsFile, { turn: "locked", reason: "sentinel not observed" });
 			emitText(response, "PUPPET_LOCKED: installed skill sentinel not observed in the request stream");
 			response.end("data: [DONE]\n\n");
@@ -112,7 +125,13 @@ const server = createServer((request, response) => {
 	});
 });
 
+server.on("error", (error) => {
+	process.stderr.write(`puppet server error: ${error instanceof Error ? error.message : String(error)}\n`);
+	process.exit(1);
+});
 server.listen(port, "127.0.0.1", () => {
-	if (readyFile) writeFileSync(readyFile, "ready\n");
+	// Report the actually-bound port (port 0 = an OS-assigned free port, so
+	// concurrent runs never collide on a fixed base).
+	if (readyFile) writeFileSync(readyFile, `${server.address().port}\n`);
 });
 process.on("SIGTERM", () => server.close(() => process.exit(0)));
