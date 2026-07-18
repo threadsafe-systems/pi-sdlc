@@ -1,0 +1,235 @@
+{
+  "schemaVersion": 1,
+  "taskId": "t4",
+  "manifest": "/home/neil/code/threadsafe/pi-sdlc.worktrees/feat-e2e-integration-harness/docs/validation/e2e-integration-harness/t4.json",
+  "repoRoot": "/home/neil/code/threadsafe/pi-sdlc.worktrees/feat-e2e-integration-harness",
+  "verdict": "PASS",
+  "exitCode": 0,
+  "errors": [],
+  "manifestErrors": [],
+  "commands": [
+    {
+      "id": "tests.scenarios",
+      "argv": [
+        "node",
+        "test/e2e/scenarios/index.mjs"
+      ],
+      "evidence": [
+        "L2 scenarios A-E, G (positive) + shared negative control (mutated sentinel + skill removed): each passes positively and locks under both negative modes"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 25373,
+      "stdoutTail": "[L2] ok   A-unadopted\n[L2] ok   B-full-design-panel\n[L2] ok   B-solo-design-human\n[L2] ok   C-v2-not-ready\n[L2] ok   D-tasks-subagent\n[L2] ok   D-tasks-self\n[L2] ok   E-publish-threshold-met\n[L2] ok   E-publish-never\n[L2] ok   G-hook-contract\n[L2] ok   G-no-hook-negative-twin\n[NC:mutated-sentinel] ok   A-unadopted\n[NC:mutated-sentinel] ok   B-full-design-panel\n[NC:mutated-sentinel] ok   B-solo-design-human\n[NC:mutated-sentinel] ok   C-v2-not-ready\n[NC:mutated-sentinel] ok   D-tasks-subagent\n[NC:mutated-sentinel] ok   D-tasks-self\n[NC:mutated-sentinel] ok   E-publish-threshold-met\n[NC:mutated-sentinel] ok   E-publish-never\n[NC:mutated-sentinel] ok   G-hook-contract\n[NC:mutated-sentinel] ok   G-no-hook-negative-twin\n[NC:skill-removed] ok   A-unadopted\n[NC:skill-removed] ok   B-full-design-panel\n[NC:skill-removed] ok   B-solo-design-human\n[NC:skill-removed] ok   C-v2-not-ready\n[NC:skill-removed] ok   D-tasks-subagent\n[NC:skill-removed] ok   D-tasks-self\n[NC:skill-removed] ok   E-publish-threshold-met\n[NC:skill-removed] ok   E-publish-never\n[NC:skill-removed] ok   G-hook-contract\n[NC:skill-removed] ok   G-no-hook-negative-twin\n\nall L2 scenarios + negative control passed\n",
+      "stderrTail": ""
+    },
+    {
+      "id": "static.scenarios-index",
+      "argv": [
+        "node",
+        "--check",
+        "test/e2e/scenarios/index.mjs"
+      ],
+      "evidence": [
+        "Scenario aggregator/runner syntax"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 53,
+      "stdoutTail": "",
+      "stderrTail": ""
+    },
+    {
+      "id": "static.scenario-a",
+      "argv": [
+        "node",
+        "--check",
+        "test/e2e/scenarios/a.mjs"
+      ],
+      "evidence": [
+        "Scenario A syntax"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 48,
+      "stdoutTail": "",
+      "stderrTail": ""
+    },
+    {
+      "id": "static.scenario-b",
+      "argv": [
+        "node",
+        "--check",
+        "test/e2e/scenarios/b.mjs"
+      ],
+      "evidence": [
+        "Scenario B syntax"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 54,
+      "stdoutTail": "",
+      "stderrTail": ""
+    },
+    {
+      "id": "static.scenario-c",
+      "argv": [
+        "node",
+        "--check",
+        "test/e2e/scenarios/c.mjs"
+      ],
+      "evidence": [
+        "Scenario C syntax"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 46,
+      "stdoutTail": "",
+      "stderrTail": ""
+    },
+    {
+      "id": "static.scenario-d",
+      "argv": [
+        "node",
+        "--check",
+        "test/e2e/scenarios/d.mjs"
+      ],
+      "evidence": [
+        "Scenario D syntax"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 34,
+      "stdoutTail": "",
+      "stderrTail": ""
+    },
+    {
+      "id": "static.scenario-e",
+      "argv": [
+        "node",
+        "--check",
+        "test/e2e/scenarios/e.mjs"
+      ],
+      "evidence": [
+        "Scenario E syntax"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 38,
+      "stdoutTail": "",
+      "stderrTail": ""
+    },
+    {
+      "id": "static.scenario-g",
+      "argv": [
+        "node",
+        "--check",
+        "test/e2e/scenarios/g.mjs"
+      ],
+      "evidence": [
+        "Scenario G syntax"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 55,
+      "stdoutTail": "",
+      "stderrTail": ""
+    },
+    {
+      "id": "standards.biome",
+      "argv": [
+        "npx",
+        "biome",
+        "check",
+        "test/e2e/"
+      ],
+      "evidence": [
+        "Biome lint + format for the e2e harness sources"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 428,
+      "stdoutTail": "Checked 14 files in 32ms. No fixes applied.\n",
+      "stderrTail": ""
+    },
+    {
+      "id": "patterns.diff",
+      "argv": [
+        "git",
+        "diff",
+        "--check",
+        "HEAD"
+      ],
+      "evidence": [
+        "No whitespace-error banned patterns in the task diff"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 6,
+      "stdoutTail": "",
+      "stderrTail": ""
+    }
+  ],
+  "categories": [
+    {
+      "category": "tests",
+      "status": "PASS",
+      "checkIds": [
+        "tests.scenarios"
+      ]
+    },
+    {
+      "category": "static",
+      "status": "PASS",
+      "checkIds": [
+        "static.scenarios-index",
+        "static.scenario-a",
+        "static.scenario-b",
+        "static.scenario-c",
+        "static.scenario-d",
+        "static.scenario-e",
+        "static.scenario-g"
+      ]
+    },
+    {
+      "category": "scenarios",
+      "status": "N/A",
+      "reason": "Reversible track: no Specification document exists, so there are no spec-scenario ids to map; the A-E/G acceptance is exercised by the tests.scenarios suite."
+    },
+    {
+      "category": "standards",
+      "status": "PASS",
+      "checkIds": [
+        "standards.biome"
+      ]
+    },
+    {
+      "category": "bannedPatterns",
+      "status": "PASS",
+      "checkIds": [
+        "patterns.diff"
+      ]
+    }
+  ],
+  "scenarios": []
+}

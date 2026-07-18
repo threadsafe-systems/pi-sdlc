@@ -1,0 +1,159 @@
+{
+  "schemaVersion": 1,
+  "taskId": "t3",
+  "manifest": "/home/neil/code/threadsafe/pi-sdlc.worktrees/feat-e2e-integration-harness/docs/validation/e2e-integration-harness/t3.json",
+  "repoRoot": "/home/neil/code/threadsafe/pi-sdlc.worktrees/feat-e2e-integration-harness",
+  "verdict": "PASS",
+  "exitCode": 0,
+  "errors": [],
+  "manifestErrors": [],
+  "commands": [
+    {
+      "id": "tests.negative-control",
+      "argv": [
+        "node",
+        "test/e2e/scenario-format.mjs"
+      ],
+      "evidence": [
+        "Negative-control self-test: positive baseline unlocks; mutated-sentinel and skill-removed modes both lock (anti-vacuity gate proven)"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 3808,
+      "stdoutTail": "[nc] ok   positive baseline unlocks\n[nc] ok   negative control locks (mutated + skill-removed)\n\nnegative-control mechanism verified\n",
+      "stderrTail": ""
+    },
+    {
+      "id": "static.scenario-format",
+      "argv": [
+        "node",
+        "--check",
+        "test/e2e/scenario-format.mjs"
+      ],
+      "evidence": [
+        "Scenario format/runner syntax"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 40,
+      "stdoutTail": "",
+      "stderrTail": ""
+    },
+    {
+      "id": "static.server",
+      "argv": [
+        "node",
+        "--check",
+        "test/e2e/puppet/server.mjs"
+      ],
+      "evidence": [
+        "Puppet server syntax"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 48,
+      "stdoutTail": "",
+      "stderrTail": ""
+    },
+    {
+      "id": "static.extension",
+      "argv": [
+        "node",
+        "--check",
+        "test/e2e/puppet/index.mjs"
+      ],
+      "evidence": [
+        "Puppet provider extension syntax"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 53,
+      "stdoutTail": "",
+      "stderrTail": ""
+    },
+    {
+      "id": "standards.biome",
+      "argv": [
+        "npx",
+        "biome",
+        "check",
+        "test/e2e/"
+      ],
+      "evidence": [
+        "Biome lint + format for the e2e harness sources"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 472,
+      "stdoutTail": "Checked 6 files in 23ms. No fixes applied.\n",
+      "stderrTail": ""
+    },
+    {
+      "id": "patterns.diff",
+      "argv": [
+        "git",
+        "diff",
+        "--check",
+        "HEAD"
+      ],
+      "evidence": [
+        "No whitespace-error banned patterns in the task diff"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 6,
+      "stdoutTail": "",
+      "stderrTail": ""
+    }
+  ],
+  "categories": [
+    {
+      "category": "tests",
+      "status": "PASS",
+      "checkIds": [
+        "tests.negative-control"
+      ]
+    },
+    {
+      "category": "static",
+      "status": "PASS",
+      "checkIds": [
+        "static.scenario-format",
+        "static.server",
+        "static.extension"
+      ]
+    },
+    {
+      "category": "scenarios",
+      "status": "N/A",
+      "reason": "T3 delivers the puppet/sentinel/negative-control mechanism; the L2 Specification scenarios A-E/G are authored and owned by T4."
+    },
+    {
+      "category": "standards",
+      "status": "PASS",
+      "checkIds": [
+        "standards.biome"
+      ]
+    },
+    {
+      "category": "bannedPatterns",
+      "status": "PASS",
+      "checkIds": [
+        "patterns.diff"
+      ]
+    }
+  ],
+  "scenarios": []
+}

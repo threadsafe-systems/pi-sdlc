@@ -1,0 +1,38 @@
+{
+  "schemaVersion": 1,
+  "taskId": "t1",
+  "buildPlan": "docs/plans/2026-07-17-e2e-integration-harness-build.md",
+  "repoRoot": ".",
+  "ownedScenarios": [],
+  "checks": [
+    {
+      "id": "tests.guard-self-test",
+      "argv": ["node", "test/e2e/harness.mjs", "--self-test"],
+      "timeoutMs": 120000,
+      "evidence": ["Guard self-test: denial-list classes + glob + escape hatch, refuse-to-start, gh deny-stub, teardown no-write scan all fire"]
+    },
+    {
+      "id": "static.harness",
+      "argv": ["node", "--check", "test/e2e/harness.mjs"],
+      "evidence": ["Harness core syntax"]
+    },
+    {
+      "id": "standards.biome",
+      "argv": ["npx", "biome", "check", "test/e2e/"],
+      "timeoutMs": 120000,
+      "evidence": ["Biome lint + format for the e2e harness sources"]
+    },
+    {
+      "id": "patterns.diff",
+      "argv": ["git", "diff", "--check", "HEAD"],
+      "evidence": ["No whitespace-error banned patterns in the task diff"]
+    }
+  ],
+  "categories": {
+    "tests": { "applicability": "required", "checkIds": ["tests.guard-self-test"] },
+    "static": { "applicability": "required", "checkIds": ["static.harness"] },
+    "scenarios": { "applicability": "n/a", "reason": "T1 is harness infrastructure; the Specification scenarios (A-E, G, L1) are owned by later tasks T2/T4." },
+    "standards": { "applicability": "required", "checkIds": ["standards.biome"] },
+    "bannedPatterns": { "applicability": "required", "checkIds": ["patterns.diff"] }
+  }
+}

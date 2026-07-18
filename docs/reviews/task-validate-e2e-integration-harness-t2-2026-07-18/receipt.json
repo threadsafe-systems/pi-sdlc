@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "taskId": "t2",
+  "manifestPath": "docs/validation/e2e-integration-harness/t2.json",
+  "manifestSha256": "e8869070325fb6e7ae503a3609f7abfb2139b8f4ceccdf6c6e6b30fb4ef65e2b",
+  "runnerReportSha256": "557ac89e12526a4ed410845fdb58cccef2e1dd6f8085f357fe7701e00ca3bf66",
+  "generatedAgentSha256": "2e64d2b7427fb3cac6895979d79f3d6fb8f616c7b1872ffeebe7f855fb1fd722",
+  "model": "openai-codex/gpt-5.6-terra",
+  "runnerVerdict": "PASS",
+  "validatorVerdict": "PASS",
+  "createdAt": "2026-07-18T10:20:00Z"
+}

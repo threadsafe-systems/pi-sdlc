@@ -1,0 +1,122 @@
+{
+  "schemaVersion": 1,
+  "taskId": "t1",
+  "manifest": "/home/neil/code/threadsafe/pi-sdlc.worktrees/feat-e2e-integration-harness/docs/validation/e2e-integration-harness/t1.json",
+  "repoRoot": "/home/neil/code/threadsafe/pi-sdlc.worktrees/feat-e2e-integration-harness",
+  "verdict": "PASS",
+  "exitCode": 0,
+  "errors": [],
+  "manifestErrors": [],
+  "commands": [
+    {
+      "id": "tests.guard-self-test",
+      "argv": [
+        "node",
+        "test/e2e/harness.mjs",
+        "--self-test"
+      ],
+      "evidence": [
+        "Guard self-test: denial-list classes + glob + escape hatch, refuse-to-start, gh deny-stub, teardown no-write scan all fire"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 505,
+      "stdoutTail": "[guard] ok   denylist exact:ANTHROPIC_API_KEY (ANTHROPIC_API_KEY)\n[guard] ok   denylist exact:GITHUB_TOKEN (GITHUB_TOKEN)\n[guard] ok   denylist exact:AWS_SECRET_ACCESS_KEY (AWS_SECRET_ACCESS_KEY)\n[guard] ok   denylist glob:_API_KEY (SOME_VENDOR_API_KEY)\n[guard] ok   denylist glob:_TOKEN (WEIRD_TOKEN)\n[guard] ok   denylist glob:_SECRET (APP_SECRET)\n[guard] ok   denylist escape hatch\n[guard] ok   createSandbox refuse-to-start\n[guard] ok   gh shadowed by deny-stub (/tmp/pi-sdlc-e2e-cZRvuh/stub-bin/gh)\n[guard] ok   teardown no-write scan\n\nall 10 guards fired as expected\n",
+      "stderrTail": ""
+    },
+    {
+      "id": "static.harness",
+      "argv": [
+        "node",
+        "--check",
+        "test/e2e/harness.mjs"
+      ],
+      "evidence": [
+        "Harness core syntax"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 39,
+      "stdoutTail": "",
+      "stderrTail": ""
+    },
+    {
+      "id": "standards.biome",
+      "argv": [
+        "npx",
+        "biome",
+        "check",
+        "test/e2e/"
+      ],
+      "evidence": [
+        "Biome lint + format for the e2e harness sources"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 488,
+      "stdoutTail": "Checked 2 files in 28ms. No fixes applied.\n",
+      "stderrTail": ""
+    },
+    {
+      "id": "patterns.diff",
+      "argv": [
+        "git",
+        "diff",
+        "--check",
+        "HEAD"
+      ],
+      "evidence": [
+        "No whitespace-error banned patterns in the task diff"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 10,
+      "stdoutTail": "",
+      "stderrTail": ""
+    }
+  ],
+  "categories": [
+    {
+      "category": "tests",
+      "status": "PASS",
+      "checkIds": [
+        "tests.guard-self-test"
+      ]
+    },
+    {
+      "category": "static",
+      "status": "PASS",
+      "checkIds": [
+        "static.harness"
+      ]
+    },
+    {
+      "category": "scenarios",
+      "status": "N/A",
+      "reason": "T1 is harness infrastructure; the Specification scenarios (A-E, G, L1) are owned by later tasks T2/T4."
+    },
+    {
+      "category": "standards",
+      "status": "PASS",
+      "checkIds": [
+        "standards.biome"
+      ]
+    },
+    {
+      "category": "bannedPatterns",
+      "status": "PASS",
+      "checkIds": [
+        "patterns.diff"
+      ]
+    }
+  ],
+  "scenarios": []
+}

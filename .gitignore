@@ -4,3 +4,6 @@ node_modules/
 .pi/agents/
 # pi-subagents runtime artifacts
 .pi-subagents/
+
+# review scratch diffs
+*.diff

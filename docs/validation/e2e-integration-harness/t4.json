@@ -1,0 +1,68 @@
+{
+  "schemaVersion": 1,
+  "taskId": "t4",
+  "buildPlan": "docs/plans/2026-07-17-e2e-integration-harness-build.md",
+  "repoRoot": ".",
+  "ownedScenarios": [],
+  "checks": [
+    {
+      "id": "tests.scenarios",
+      "argv": ["node", "test/e2e/scenarios/index.mjs"],
+      "timeoutMs": 500000,
+      "evidence": ["L2 scenarios A-E, G (positive) + shared negative control (mutated sentinel + skill removed): each passes positively and locks under both negative modes"]
+    },
+    {
+      "id": "static.scenarios-index",
+      "argv": ["node", "--check", "test/e2e/scenarios/index.mjs"],
+      "evidence": ["Scenario aggregator/runner syntax"]
+    },
+    {
+      "id": "static.scenario-a",
+      "argv": ["node", "--check", "test/e2e/scenarios/a.mjs"],
+      "evidence": ["Scenario A syntax"]
+    },
+    {
+      "id": "static.scenario-b",
+      "argv": ["node", "--check", "test/e2e/scenarios/b.mjs"],
+      "evidence": ["Scenario B syntax"]
+    },
+    {
+      "id": "static.scenario-c",
+      "argv": ["node", "--check", "test/e2e/scenarios/c.mjs"],
+      "evidence": ["Scenario C syntax"]
+    },
+    {
+      "id": "static.scenario-d",
+      "argv": ["node", "--check", "test/e2e/scenarios/d.mjs"],
+      "evidence": ["Scenario D syntax"]
+    },
+    {
+      "id": "static.scenario-e",
+      "argv": ["node", "--check", "test/e2e/scenarios/e.mjs"],
+      "evidence": ["Scenario E syntax"]
+    },
+    {
+      "id": "static.scenario-g",
+      "argv": ["node", "--check", "test/e2e/scenarios/g.mjs"],
+      "evidence": ["Scenario G syntax"]
+    },
+    {
+      "id": "standards.biome",
+      "argv": ["npx", "biome", "check", "test/e2e/"],
+      "timeoutMs": 120000,
+      "evidence": ["Biome lint + format for the e2e harness sources"]
+    },
+    {
+      "id": "patterns.diff",
+      "argv": ["git", "diff", "--check", "HEAD"],
+      "evidence": ["No whitespace-error banned patterns in the task diff"]
+    }
+  ],
+  "categories": {
+    "tests": { "applicability": "required", "checkIds": ["tests.scenarios"] },
+    "static": { "applicability": "required", "checkIds": ["static.scenarios-index", "static.scenario-a", "static.scenario-b", "static.scenario-c", "static.scenario-d", "static.scenario-e", "static.scenario-g"] },
+    "scenarios": { "applicability": "n/a", "reason": "Reversible track: no Specification document exists, so there are no spec-scenario ids to map; the A-E/G acceptance is exercised by the tests.scenarios suite." },
+    "standards": { "applicability": "required", "checkIds": ["standards.biome"] },
+    "bannedPatterns": { "applicability": "required", "checkIds": ["patterns.diff"] }
+  }
+}
