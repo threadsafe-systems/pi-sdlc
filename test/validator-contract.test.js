@@ -18,7 +18,12 @@ import { sha256, verifyReceipt } from "../skills/sdlc/scripts/verify-task-receip
 const here = dirname(fileURLToPath(import.meta.url));
 const repo = dirname(here);
 const runnerMjs = join(repo, "skills", "sdlc", "scripts", "validate-task.mjs");
-const schema = JSON.parse(readFileSync(join(repo, "skills", "sdlc", "schema", "task-validation-manifest.schema.json"), "utf8"));
+let schema;
+try {
+	schema = JSON.parse(readFileSync(join(repo, "skills", "sdlc", "schema", "task-validation-manifest.schema.json"), "utf8"));
+} catch (error) {
+	assert.fail(`task validation schema is unreadable: ${error.message}`);
+}
 
 const STUBS = {
 	"ok.mjs": "process.stdout.write('ok\\n'); process.exit(0);",
