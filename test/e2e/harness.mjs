@@ -282,6 +282,11 @@ export async function commitConsumer(sandbox, cwd, message = "init") {
 	return runProcess(["git", "commit", "-q", "-m", message], { cwd, env });
 }
 
+/** Remove the installed skill from the staged install root (for the skill-absent negative control). */
+export async function removeInstalledSkill(sandbox) {
+	await rm(join(sandbox.staged, "skills", "sdlc"), { recursive: true, force: true });
+}
+
 /**
  * Swap the sandbox `gh` shim to the exit-0 logging variant and return a child
  * env for scenarios that model a "safely stubbed" tracker attempt (scenario E).
