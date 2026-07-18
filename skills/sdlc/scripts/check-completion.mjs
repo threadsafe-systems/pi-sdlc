@@ -95,7 +95,7 @@ function parseJsonResult(result, errorMessage) {
 	try {
 		return { value: JSON.parse(result.stdout || "null") };
 	} catch {
-		return { error: `${errorMessage}: unparseable output` };
+		return { error: `${errorMessage}: unparsable output` };
 	}
 }
 
@@ -250,8 +250,16 @@ function main(argv = process.argv.slice(2), { cwd = process.cwd(), git = default
 	for (const [id, result] of results) report.checks.push({ id, ...result });
 	const hasError = report.checks.some((check) => check.status === "error");
 	const hasFail = report.checks.some((check) => check.status === "fail");
-	report.state = hasError ? "error" : hasFail ? "fail" : "pass";
-	report.exitCode = hasError ? 2 : hasFail ? 1 : 0;
+	if (hasError) {
+		report.state = "error";
+		report.exitCode = 2;
+	} else if (hasFail) {
+		report.state = "fail";
+		report.exitCode = 1;
+	} else {
+		report.state = "pass";
+		report.exitCode = 0;
+	}
 	return { report, help: false };
 }
 
