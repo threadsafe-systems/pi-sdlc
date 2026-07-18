@@ -407,7 +407,11 @@ test("PV9: JSON/text/exit agree and JSON mode is order-independent", () => {
 	const dir = mkRepo();
 	try {
 		const p = writeManifest(dir, baseManifest());
-		const jsonRun = runCli(dir, ["--manifest", p, "--repo-root", dir, "--format", "json"]);
+		// --slug gives telemetry a resolvable identity (this fixture dir is not a
+		// git repo) so emission succeeds silently, keeping this assertion about the
+		// runner's own stdout/stderr purity meaningful (lt-t2: FS5 emission adds a
+		// stderr warning only on skip/failure, never on success).
+		const jsonRun = runCli(dir, ["--manifest", p, "--repo-root", dir, "--format", "json", "--slug", "pv9-x"]);
 		assert.equal(jsonRun.code, 0);
 		const rep = JSON.parse(jsonRun.stdout);
 		assert.equal(rep.verdict, "PASS");

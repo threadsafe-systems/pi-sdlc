@@ -8,7 +8,10 @@
 // skills/sdlc-retro/schema/event.schema.json mirrors this file field-for-field.
 
 import { execFileSync } from "node:child_process";
-import { join } from "node:path";
+import { closeSync, mkdirSync, openSync, writeSync } from "node:fs";
+import { dirname, join } from "node:path";
+
+const TELEMETRY_PREFIX = "sdlc-telemetry:";
 
 export const EVENT_SCHEMA_VERSION = 1;
 // A serialized line INCLUDING its LF terminator must not exceed 32 KiB (§3).
@@ -231,4 +234,60 @@ export function runStoreDir(root, slug) {
 
 export function runEventsPath(root, slug) {
 	return join(runStoreDir(root, slug), "events.jsonl");
+}
+
+// Shared fail-soft stderr warning, one line, prefixed per §3.1/§3.3.
+export function warnTelemetry(msg) {
+	process.stderr.write(`${TELEMETRY_PREFIX} ${msg}\n`);
+}
+
+// §3.3 FS5 side-effect emission: best-effort emission for the frozen FS5 CLIs
+// (resolve-panel, ensure-panel-agent, validate-task; later harvest-panel,
+// lt-t3). Resolves run identity and appends one manifest line, but NEVER
+// throws and NEVER exits the process — any failure (unresolvable identity,
+// invalid payload, oversized line, I/O error) degrades to a single
+// `sdlc-telemetry:`-prefixed stderr warning while the caller's primary
+// stdout/exit-code contract stays byte-identical (NF3).
+export function emitEvent({ event, slug, by, payload, root, cwd = root }) {
+	try {
+		const resolved = resolveRunSlug({ slug, cwd });
+		if (resolved.skip) {
+			warnTelemetry(`${resolved.skip} — skipping emission`);
+			return;
+		}
+		if (typeof by !== "string" || !BY_RE.test(by)) {
+			warnTelemetry(`--by value '${by}' violates the grammar script:<name>|agent|human:<slug> — skipping emission`);
+			return;
+		}
+		const issues = validatePayload(event, payload);
+		if (issues.length > 0) {
+			warnTelemetry(`invalid payload for '${event}': ${issues.join("; ")} — skipping emission`);
+			return;
+		}
+		const envelope = {
+			schemaVersion: EVENT_SCHEMA_VERSION,
+			ts: new Date().toISOString(),
+			slug: resolved.slug,
+			event,
+			by,
+			payload,
+		};
+		const line = `${JSON.stringify(envelope)}\n`;
+		if (Buffer.byteLength(line, "utf8") > MAX_EVENT_BYTES) {
+			warnTelemetry(`serialized event exceeds the ${MAX_EVENT_BYTES}-byte cap — skipping emission`);
+			return;
+		}
+		const path = runEventsPath(root, resolved.slug);
+		mkdirSync(dirname(path), { recursive: true });
+		const fd = openSync(path, "a");
+		try {
+			const bytes = Buffer.from(line, "utf8");
+			const written = writeSync(fd, bytes);
+			if (written !== bytes.length) throw new Error(`short write: ${written} of ${bytes.length} bytes`);
+		} finally {
+			closeSync(fd);
+		}
+	} catch (err) {
+		warnTelemetry(`I/O failure writing the run store: ${err?.message || err} — skipping emission`);
+	}
 }

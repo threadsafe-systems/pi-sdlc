@@ -13,9 +13,9 @@
     },
     {
       "id": "tests.full",
-      "argv": ["node", "--test"],
+      "argv": ["npm", "test"],
       "timeoutMs": 300000,
-      "evidence": ["NF3 frozen-CLI regression floor: the existing corpus remains green with the emitter added"]
+      "evidence": ["NF3 regression floor: corpus green with emitter added (npm test scopes test/*.test.js, excluding e2e harness merged post-run)"]
     },
     {
       "id": "static.telemetry-lib",

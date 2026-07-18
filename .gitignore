@@ -8,5 +8,8 @@ node_modules/
 # review scratch diffs
 *.diff
 
-# FS13 lifecycle-telemetry run store (git-ignored; raw material stays local)
-.pi/sdlc/runs/
+# FS13 lifecycle-telemetry run store (git-ignored; raw material stays local).
+# **/ anchoring is deliberate: --repo-root can point at a nested fixture dir
+# (e.g. test/fixtures/consumer) that shares this repo's .git, so a run store
+# written there must be ignored too, not just at the true repo root.
+**/.pi/sdlc/runs/
