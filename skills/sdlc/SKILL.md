@@ -27,7 +27,8 @@ code (prefer `--format json` when parsing):
 1. In pi, run `scripts/sdlc-status.sh [--repo-root DIR] [--format text|json]`
    relative to this loaded skill (headless: `node <skill-dir>/scripts/sdlc-status.mjs`),
    with cwd inside the consumer repo or pass `--repo-root`.
-2. **Exit 0 (`ready`)**: announce with the config's `announce` string, then
+2. **Exit 0 (`ready`)**: emit the `run.started` telemetry event (FS13, see the
+   telemetry directive below), announce with the config's `announce` string, then
    enumerate each configured hook (phase, timing, kind) and each top-level rule of
    `.pi/sdlc/workflow.md` if present, then run the startup freshness check below.
    Proceed under full law.
@@ -147,12 +148,16 @@ phase references and `assets/tracker-ops.md`. Standalone entrypoints are the
 package-owned `templates/sdlc-<slug>.md` prompts — one lifecycle skill's shared
 named surfaces, not six discovered skills.
 
-Instrumented runs emit **lifecycle telemetry** (FS13) at each inflection point,
-and PR/epic **completion is machine-checked** (`check-completion.mjs`), not
-narrated — see `references/system-reference.md` ("Lifecycle telemetry",
-"Stall detection and self-resume") and `references/phase-pr-review.md`
-(completion evidence). Implement worker-dispatch discipline (stop-conditions,
-`toolBudget`/`turnBudget`, infra-retry-once) is in `references/phase-implement.md`.
+Instrumented runs emit **lifecycle telemetry** (FS13): at run start (before
+announcing), on each phase entry, at every human gate approval, and at each
+panel dispatch (with harvest-at-dispatch), emit the matching `record-run-event`
+event and harvest panels — **load and follow** `references/system-reference.md`
+("Lifecycle telemetry") for the event map. PR/epic **completion is
+machine-checked** (`check-completion.mjs`), not narrated — see
+`references/phase-pr-review.md` (completion evidence) and
+`references/system-reference.md` ("Stall detection and self-resume"). Implement
+worker-dispatch discipline (stop-conditions, `toolBudget`/`turnBudget`,
+infra-retry-once) is in `references/phase-implement.md`.
 
 ## Gate/process conflict rule
 

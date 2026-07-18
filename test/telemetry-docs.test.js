@@ -99,13 +99,13 @@ test("LT25: deleting a new entry's target file fails check-references", () => {
 		// isolate to a single new entry so the mutation is unambiguous
 		const entry = inv.sources.find((s) => s.id === "retro.script.render-retro");
 		assert.ok(entry);
-		writeFileSync(scratchInventory, JSON.stringify({ schemaVersion: 1, package: "pi-sdlc", discovery: { roots: [], exclude: [] }, sources: [entry] }));
+		writeFileSync(scratchInventory, JSON.stringify({ schemaVersion: 1, package: "pi-sdlc", discovery: { roots: ["nonexistent-discovery-root/*.md"], exclude: [] }, sources: [entry] }));
 		const before = spawnSync(process.execPath, [checkReferences, "--package-root", pkgRoot, "--inventory", scratchInventory, "--format", "json"], { encoding: "utf8" });
 		assert.equal(JSON.parse(before.stdout).state, "pass");
 
 		// mutate: point the entry's target at a file that doesn't exist
 		const mutated = { ...entry, target: "skills/sdlc-retro/scripts/does-not-exist.mjs" };
-		writeFileSync(scratchInventory, JSON.stringify({ schemaVersion: 1, package: "pi-sdlc", discovery: { roots: [], exclude: [] }, sources: [mutated] }));
+		writeFileSync(scratchInventory, JSON.stringify({ schemaVersion: 1, package: "pi-sdlc", discovery: { roots: ["nonexistent-discovery-root/*.md"], exclude: [] }, sources: [mutated] }));
 		const after = spawnSync(process.execPath, [checkReferences, "--package-root", pkgRoot, "--inventory", scratchInventory, "--format", "json"], { encoding: "utf8" });
 		const report = JSON.parse(after.stdout);
 		assert.equal(report.state, "fail");

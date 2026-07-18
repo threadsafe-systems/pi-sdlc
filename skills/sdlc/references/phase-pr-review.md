@@ -141,6 +141,12 @@ child's transcript before treating a "detached" status label as lost output.
    shortfall and continues. Never substitute an unconfigured model or treat an
    infra failure as a reviewer verdict.
 
+   **Harvest-at-dispatch (FS13).** Immediately after dispatching any design or PR
+   panel, record `panel.dispatched` and preserve the panel's artifacts with
+   `scripts/harvest-panel.sh --phase <panelPhase> --round <n> --from <asyncDir>`,
+   then `panel.consolidated` after adjudication — see
+   `references/system-reference.md` ("Lifecycle telemetry") for the event map.
+
 3. **Consolidate**: collapse duplicates into one issue, keep cross-model agreement
    as signal, preserve genuine disagreement.
 4. **Adjudicate**: for every high or medium finding, either incorporate it or

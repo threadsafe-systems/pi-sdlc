@@ -83,8 +83,8 @@ function validateInventory(raw, root) {
 	if (raw.schemaVersion !== 1 || raw.package !== "pi-sdlc" || !Array.isArray(raw.sources) || raw.sources.length === 0) {
 		throw new Error("inventory requires schemaVersion 1, package pi-sdlc, and non-empty sources");
 	}
-	if (!raw.discovery || typeof raw.discovery !== "object" || Array.isArray(raw.discovery) || !Array.isArray(raw.discovery.roots) || !Array.isArray(raw.discovery.exclude)) {
-		throw new Error("inventory requires a discovery block with roots[] and exclude[] (structural discovery must not be silently disabled)");
+	if (!raw.discovery || typeof raw.discovery !== "object" || Array.isArray(raw.discovery) || !Array.isArray(raw.discovery.roots) || raw.discovery.roots.length === 0 || !Array.isArray(raw.discovery.exclude)) {
+		throw new Error("inventory requires a discovery block with non-empty roots[] and exclude[] (structural discovery must not be silently disabled)");
 	}
 	const ids = new Set();
 	return raw.sources.map((entry, index) => {

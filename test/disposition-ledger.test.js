@@ -25,7 +25,7 @@ const readNorm = (rel) => (fileCache[rel] ??= norm(readFileSync(join(repo, rel),
 function rows() {
 	const out = [];
 	for (const line of ledger.split("\n")) {
-		const m = line.match(/^\|\s*(S\d\d|RF\d\d)\s*\|(.*)\|\s*(retained|moved|replaced)\s*\|\s*([^|]+?)\s*\|\s*([^|]+?)\s*\|\s*$/);
+		const m = line.match(/^\|\s*(S\d\d|RF\d\d|M\d\d)\s*\|(.*)\|\s*(retained|moved|replaced)\s*\|\s*([^|]+?)\s*\|\s*([^|]+?)\s*\|\s*$/);
 		if (!m) continue;
 		out.push({ id: m[1], disposition: m[3], destination: m[4].trim(), anchor: m[5].trim() });
 	}

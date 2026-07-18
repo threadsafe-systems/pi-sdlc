@@ -120,10 +120,26 @@ anchor check.
 | RF13 | Above-threshold build skipping the publish step | retained | skills/sdlc/SKILL.md | that skips |
 | RF14 | Treating the tracker as the source of truth | retained | skills/sdlc/SKILL.md | Treating the tracker (map, epic, sub-issues, board) as the source of truth |
 
+## Merge-integration relocations (from main #103/#104, absorbed at merge)
+
+These sections did not exist in this stream's restructure baseline (`d528b97`);
+they landed on `main` after the branch point (retro-fixes-batch1 #103 and
+lifecycle-telemetry #104) and were **moved** into the new reference architecture
+when `main` was integrated, so the ledger records them for completeness. Same
+anchor discipline as above.
+
+| ID | Statement (gist) | Disposition | Destination | Anchor |
+|---|---|---|---|---|
+| M01 | Dispatching implementation workers (stop-conditions, tool/turn budgets, infra-retry-once) | moved | skills/sdlc/references/phase-implement.md | Dispatching implementation workers |
+| M02 | Stall detection and self-resume (2-consecutive-turn threshold) | moved | skills/sdlc/references/system-reference.md | Stall detection and self-resume |
+| M03 | Lifecycle telemetry (FS13) emission map + harvest-at-dispatch | moved | skills/sdlc/references/system-reference.md | Record these prose-emitted inflection points |
+
 ## Intentionally replaced
 
-None. Every pre-change normative statement and red flag is either retained in the
-kernel/router or moved to exactly one reference. New additions in the restructured
-`SKILL.md` (e.g. the startup freshness check and its `CONFIG.md`-prose-vs-JSON red
-flag) are net-new to this stream and are not ledger rows, which map pre-change
-statements only.
+None. Every pre-change (`d528b97` baseline) normative statement and red flag is
+retained in the kernel/router or moved to exactly one reference. New additions in
+the restructured `SKILL.md` (e.g. the startup freshness check and its
+`CONFIG.md`-prose-vs-JSON red flag) are net-new to this stream and are not ledger
+rows, which map pre-change statements only. Content that landed on `main` after
+the branch point (#103/#104) and was relocated at merge is recorded in the
+merge-integration table above.

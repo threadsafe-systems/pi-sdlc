@@ -120,9 +120,9 @@ function trackSummary(config, track) {
 		`- **Phases:** ${phases}.`,
 		`- **Design gate (\`review.design\`): ${r.design}** — ${GATE_MEANING[r.design] ?? "see sdlc.config.json"}${designNote}.`,
 		`- **Code/PR gate (\`review.code\`): ${r.code}** — ${GATE_MEANING[r.code] ?? "see sdlc.config.json"}.`,
-		`- **Brainstorm gate (\`review.brainstorm\`): ${r.brainstorm}**.`,
-		`- **Task validation (\`review.tasks\`): ${r.tasks}** — ${TASKS_MEANING[r.tasks] ?? "see sdlc.config.json"}.`,
-		`- **Panel floor (\`review.panelSize\`): ${r.panelSize}** distinct model(s); shortfall posture \`review.onShortfall\`: ${r.onShortfall}.`,
+		`- **Brainstorm gate (\`review.brainstorm\`): ${r.brainstorm ?? "see sdlc.config.json"}**.`,
+		`- **Task validation (\`review.tasks\`): ${r.tasks ?? "see sdlc.config.json"}** — ${TASKS_MEANING[r.tasks] ?? "see sdlc.config.json"}.`,
+		`- **Panel floor (\`review.panelSize\`): ${r.panelSize ?? "see sdlc.config.json"}** distinct model(s); shortfall posture \`review.onShortfall\`: ${r.onShortfall ?? "see sdlc.config.json"}.`,
 		`- **Separate Specification (\`shape.separateSpec\`): ${config.shape.separateSpec}** — ${track === "reversible" ? "not applicable on the reversible fast path (no Spec phase); it governs the irreversible track's plan/spec split" : config.shape.separateSpec ? "Plan and Spec are distinct gated artifacts" : "Plan and Spec merge into one gated artifact"}.`,
 		"",
 	].join("\n");
@@ -158,6 +158,9 @@ function keyReference(config) {
 // The full expected companion file for a validated config. Deterministic:
 // repeated calls with the same config are byte-identical.
 export function render(config) {
+	if (!config || typeof config !== "object" || !config.shape || !config.review) {
+		throw new Error("config-doc render requires a validated schemaVersion-3 config (review + shape present)");
+	}
 	const fp = fingerprint(config);
 	const parts = [
 		sentinelLine(config),
@@ -285,9 +288,21 @@ function parseArgs(argv) {
 	const opts = { repoRoot: ".", format: "text", force: false };
 	for (let i = 0; i < rest.length; i++) {
 		const a = rest[i];
-		if (a === "--repo-root") opts.repoRoot = rest[++i];
-		else if (a === "--format") opts.format = rest[++i];
-		else if (a === "--force") opts.force = true;
+		const value = (name) => {
+			const next = rest[i + 1];
+			if (next === undefined || next.startsWith("-")) return { missing: name };
+			i += 1;
+			return { value: next };
+		};
+		if (a === "--repo-root") {
+			const r = value("--repo-root");
+			if (r.missing) return { error: `${r.missing} requires a value` };
+			opts.repoRoot = r.value;
+		} else if (a === "--format") {
+			const r = value("--format");
+			if (r.missing) return { error: `${r.missing} requires a value` };
+			opts.format = r.value;
+		} else if (a === "--force") opts.force = true;
 		else return { error: `unknown argument: ${a}` };
 	}
 	if (opts.format !== "text" && opts.format !== "json") return { error: `--format must be text|json (got ${opts.format})` };

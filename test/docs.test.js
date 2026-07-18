@@ -94,7 +94,7 @@ test("FS9 and FS10 ADRs freeze the new surfaces", () => {
 // ---------------------------------------------------------------------------
 
 const STARTUP_FRAGMENTS = {
-	"exit 0 (ready) branch": /\*\*Exit 0 \(`ready`\)\*\*: announce/,
+	"exit 0 (ready) branch": /\*\*Exit 0 \(`ready`\)\*\*:/,
 	"exit 1 (not-adopted) branch": /\*\*Exit 1 \(`not-adopted`\)\*\*: do NOT announce/,
 	"exit 2 (error) branch": /\*\*Exit 2 \(`error`\)\*\*: do NOT announce/,
 	"exit 3 (not-ready) branch": /\*\*Exit 3 \(`not-ready`\)\*\*: do NOT announce/,
