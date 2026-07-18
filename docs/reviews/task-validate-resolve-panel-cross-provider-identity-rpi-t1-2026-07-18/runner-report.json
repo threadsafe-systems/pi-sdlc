@@ -9,24 +9,25 @@
   "manifestErrors": [],
   "commands": [
     {
-      "id": "tests.resolve-panel",
+      "id": "tests.full-suite",
       "argv": [
-        "node",
-        "--test",
-        "test/resolve-panel-v3.test.js"
+        "npm",
+        "test"
       ],
       "evidence": [
         "rpi-t1: Bedrock-hosted Claude collapses to the direct-API identity for author-exclusion",
         "rpi-t1: distinct Bedrock version qualifiers stay distinct identities",
+        "rpi-t1: same model + same version, different Bedrock region, dedupes to one panelist",
         "rpi-t1: Bedrock-native model with no direct-provider equivalent is unaffected",
-        "full ICA12-ICA24 suite, no regressions"
+        "full ICA12-ICA24 suite, no regressions",
+        "full 29-file npm test corpus, no regressions elsewhere (PR-panel finding: prior manifest only ran the one test file)"
       ],
       "status": "PASS",
       "exitCode": 0,
       "signal": null,
       "timedOut": false,
-      "durationMs": 1269,
-      "stdoutTail": "✔ ICA12: pr_review floor 3, author's provider-mate stays, author identity excluded (53.015039ms)\n✔ ICA12: plan_review floor 2 caps at two (56.494079ms)\n✔ ICA12: task_validate floors at 1 (68.766094ms)\n✔ ICA13: --track required when overrides present (61.527569ms)\n✔ ICA13: reversible design override refuses; irreversible resolves (140.283795ms)\n✔ ICA14: review.tasks off refuses task_validate (61.403692ms)\n✔ ICA14: design human refuses plan_review with no-panel message (65.201493ms)\n✔ ICA14: separateSpec false refuses spec_review with no-spec-gate message (73.518303ms)\n✔ ICA15: per-phase panelSize overrides review.panelSize (68.888498ms)\n✔ ICA15: floor 1 does not exclude the author identity (51.598518ms)\n✔ ICA16: onShortfall proceed advises and exits 0 below floor (70.792985ms)\n✔ ICA16: onShortfall fail exits 1 below floor (56.575021ms)\n✔ ICA14: review.tasks self refuses task_validate (only subagent resolves) (57.421463ms)\n✔ ICA24: separateSpec false precedes the human/off refusal for spec_review (48.183356ms)\n✔ rpi-t1: Bedrock-hosted Claude collapses to the direct-API identity for author-exclusion (45.97865ms)\n✔ rpi-t1: distinct Bedrock version qualifiers stay distinct identities (76.879351ms)\n✔ rpi-t1: Bedrock-native model with no direct-provider equivalent is unaffected (68.639471ms)\nℹ tests 17\nℹ suites 0\nℹ pass 17\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 1219.793452\n",
+      "durationMs": 7368,
+      "stdoutTail": "[...truncated; showing bounded tail...]\n✔ LT18: soft data carries attribution and matches the fixture LLM's scripted responses (105.691199ms)\n✔ LT18: an unreadable review directory yields precision.unparsed:<dir> and no precision number (51.365837ms)\n✔ LT19: --no-llm (noLlm:true) output validates and carries soft.absent (5.861965ms)\n✔ LT17: --from-raw reproduces a byte-identical run.json after live sources are destroyed (211.971597ms)\n✔ LT28: neither the sentinel secret nor the verbatim prompt sentence appears in run.json (91.638051ms)\n✔ NF4 unit: sanitizeSoftString redacts, rejects n-gram containment, and caps at 500 chars (0.484698ms)\n✔ LT29: a failing --gh-cmd yields github.error, schema-valid, no fabricated PR data (43.726789ms)\n✔ LT29: an --llm-cmd returning invalid JSON yields llm.error:narrative, schema-valid, no fabricated summary (91.349007ms)\n✔ LT29: an --llm-cmd that times out yields llm.error:<kind>, schema-valid, exit unaffected (610.114291ms)\n✔ llm-protocol schema: request/response fixtures validate (2.837647ms)\n✔ LT13 (hard): complete fixture store -> schema-valid run.json with known-answer rollups (119.369398ms)\n✔ LT14: a gappy store names every gap and derives nothing from missing sources (64.321422ms)\n✔ LT14: --no-github records github.skipped, not github.error (11.776772ms)\n✔ LT15: manifest adapter skips and counts malformed lines (manifest.partial) (3.012475ms)\n✔ LT15: harvest adapter maps per-model fields correctly (3.72263ms)\n✔ LT15: transcript usage/cost sums correctly and a version-4 transcript soft-fails per-file (5.173608ms)\n✔ LT15: review-dir discovery matches <phase>-<slug>-<date> naming (2.72138ms)\n✔ LT15: git/GitHub adapters consume only the injected fakes (93.36424ms)\n✔ LT16: phase attribution, agent time, capped human-wait, rework, window bounds (6.136787ms)\n✔ LT16: a 3-hour gap contributes exactly 30 minutes to human-wait (4.338983ms)\n✔ collect-run: no run store exits 1 (nothing collectable) (60.444654ms)\n✔ collect-run: writes docs/retros/<slug>/run.json by default and validates (63.797905ms)\n✔ resolveSessionDirs: an override list is used verbatim; absence marks sessions.dir_unresolved (0.744884ms)\n✔ LT24: every mandated hook step names record-run-event.sh and its event-type token together (1.88429ms)\n✔ LT24: the panel-dispatch step and the validator-dispatch step each name harvest-panel.sh (0.26776ms)\n✔ LT24: sdlc-retro SKILL.md names collect and render invocations skill-relatively (FS12 forms) (0.137321ms)\n✔ LT25: check-references passes with the new inventory entries (58.864603ms)\n✔ LT25: deleting a new entry's target file fails check-references (89.937092ms)\n✔ structural coverage: every sdlc-retro script has an FS11 inventory entry (0.726967ms)\n✔ structural coverage: every hook script named by §4 has an FS11 inventory entry (0.405287ms)\n✔ structural coverage: every committed sdlc-retro schema file has an FS11 inventory entry (0.397702ms)\n✔ structural coverage: ADR 0028 has an FS11 inventory entry and exists (1.18056ms)\n✔ structural coverage: every run-store/retro path named normatively by either SKILL.md has an inventory entry (0.606906ms)\n✔ LT27: docs/retros/sdlc-lifecycle-telemetry/run.json and index.html exist (0.673088ms)\n✔ LT27: the dogfood run.json validates against the committed schema and hand-rolled validator (3.651469ms)\n✔ LT27: coverage markers honestly record the pre-instrumentation gap (partial coverage by design) (0.201611ms)\n✔ LT27: the committed dashboard renders all seven anchors for the dogfood run (0.20517ms)\n✔ LT1: valid emit appends one schema-conforming line, creating the store (38.993318ms)\n✔ LT1b: --by defaults to agent when omitted (36.189033ms)\n✔ LT2: bad inputs exit 2 and never touch the manifest (229.437813ms)\n✔ schema agreement: unknown event types remain valid for forward-compatible consumers (0.720783ms)\n✔ LT2b: a bad input against a non-existent store attempts no write (34.187324ms)\n✔ LT3: concurrent emitters produce N complete, non-interleaved lines (175.944019ms)\n✔ empty explicit identities do not fall through to another identity (96.378558ms)\n✔ LT4: --slug beats env beats branch mapping (142.634128ms)\n✔ LT5: unresolvable identity skips (exit 0, one warning, no write) (190.126198ms)\n✔ LT26: .gitignore ignores the run store (5.774019ms)\n✔ emitter: .sh wrapper delegates to .mjs identically (38.901563ms)\n✔ vocabulary: every known event has a payload descriptor (0.147546ms)\n✔ LT11: harvest copies status.json + events.jsonl and emits panel.harvested (60.321501ms)\n✔ LT11: --with-transcripts copies the transcripts/ subdirectory (42.898664ms)\n✔ LT12: a missing source directory exits 0 with both files missed (54.225194ms)\n✔ LT12: a partially-present source (status without events) reports one missed (41.096976ms)\n✔ harvest-panel: unknown phase and non-positive round exit 2 (101.323168ms)\n✔ harvest-panel.sh wrapper delegates to .mjs identically (38.356784ms)\n✔ LT20: full fixture renders all seven anchors with known-answer data bindings (2.517541ms)\n✔ LT20: an empty-shell run.json fails to carry any pinned data binding (0.228082ms)\n✔ LT21: render-twice byte-identity and no generation-time values (0.494367ms)\n✔ LT21 (CLI): rendering the same --run input twice via the CLI is byte-identical (103.385118ms)\n✔ LT22: soft-data figures carry data-soft and visible attribution (0.600923ms)\n✔ LT22: a soft-less run.json renders coverage notices, not fabricated numbers (0.366558ms)\n✔ LT23: every coverage marker is rendered under #coverage (0.384271ms)\n✔ render-retro CLI: unreadable/unparseable/schema-invalid --run exits 1; usage errors exit 2 (227.003443ms)\n✔ render-retro CLI: default --out is index.html beside the input; --format json envelope (113.116778ms)\n✔ LT6: resolve-panel emits panel.resolved; stdout/exit byte-identical with/without --slug (209.080442ms)\n✔ LT7: ensure-panel-agent emits panel.agent_stamped; stdout/exit byte-identical (253.912518ms)\n✔ LT8: validate-task emits task.validated on PASS with and without --report (421.614374ms)\n✔ LT8: validate-task emits task.validated on FAIL (113.352845ms)\n✔ LT8: validate-task emits task.validated on an ERROR fixture whose manifest parses (63.7498ms)\n✔ LT8: an unparseable-manifest ERROR skips emission with the standard warning (63.663392ms)\n✔ LT9: unwritable run store degrades to a warning; primary output unaffected (263.716395ms)\n✔ nested --repo-root run stores are git-ignored too (gitignore anchoring) (7.388703ms)\n✔ LT10: check-lifecycle.mjs and .sh are untouched by FS5 side-effect emission (1.60958ms)\n✔ PV1: a valid JavaScript manifest runs only declared checks and passes (137.191603ms)\n✔ PV2: only declared argv run; an undeclared tool command never executes (312.822369ms)\n✔ PV3: schema and inspectManifest reject the mutation matrix before any command runs (118.129967ms)\n✔ PV4: command outcomes are complete and deterministic; runner continues after failures (94.617121ms)\n✔ PV4: a timeout is reported as FAIL with timedOut (1120.106107ms)\n✔ PV5: category applicability is exact; injected n/a shapes are rejected (171.579231ms)\n✔ PV6: scenario mapping gates the verdict (162.982322ms)\n✔ PV7: standards and banned patterns are commands, not judgement (239.82973ms)\n✔ PV8: evidence is bounded and secrets are redacted (162.358558ms)\n✔ PV8 unit: boundStream and redaction name-matching are precise (370.648568ms)\n✔ PV9: JSON/text/exit agree and JSON mode is order-independent (913.762415ms)\n✔ PV9: --report writes the exact JSON bytes atomically (174.468725ms)\n✔ PV9: --report outside the repo root is refused and clobbers nothing (133.16938ms)\n✔ PV10: generic validator law and generated agent are portable (0.961457ms)\n✔ PV11: receipt hash verification detects mutation of any stored file (7.056037ms)\n✔ PV11: a FAIL runner-report cannot ride under runnerVerdict PASS (1.61887ms)\n✔ parseArgs: recognises JSON anywhere and rejects bad flags (0.873949ms)\n✔ PV13: renderText is a faithful projection of the report (151.936649ms)\nℹ tests 316\nℹ suites 0\nℹ pass 316\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 7117.859025\n",
       "stderrTail": ""
     },
     {
@@ -43,7 +44,7 @@
       "exitCode": 0,
       "signal": null,
       "timedOut": false,
-      "durationMs": 48,
+      "durationMs": 52,
       "stdoutTail": "",
       "stderrTail": ""
     },
@@ -61,8 +62,8 @@
       "exitCode": 0,
       "signal": null,
       "timedOut": false,
-      "durationMs": 425,
-      "stdoutTail": "\n> pi-sdlc@0.1.1 lint\n> biome check .\n\nChecked 123 files in 169ms. No fixes applied.\n",
+      "durationMs": 375,
+      "stdoutTail": "\n> pi-sdlc@0.1.1 lint\n> biome check .\n\nChecked 123 files in 164ms. No fixes applied.\n",
       "stderrTail": ""
     },
     {
@@ -82,7 +83,7 @@
       "exitCode": 0,
       "signal": null,
       "timedOut": false,
-      "durationMs": 95,
+      "durationMs": 105,
       "stdoutTail": "{\n  \"schemaVersion\": 2,\n  \"root\": \"/home/neil/code/threadsafe/pi-sdlc.worktrees/fix-resolve-panel-cross-provider-identity\",\n  \"state\": \"ready\",\n  \"exitCode\": 0,\n  \"checks\": [\n    {\n      \"id\": \"cli.arguments\",\n      \"status\": \"pass\",\n      \"message\": \"arguments are valid\"\n    },\n    {\n      \"id\": \"root.resolve\",\n      \"status\": \"pass\",\n      \"message\": \"consumer root resolved\"\n    },\n    {\n      \"id\": \"git.repository\",\n      \"status\": \"pass\",\n      \"message\": \"resolved root is a git worktree\"\n    },\n    {\n      \"id\": \"adoption.manifest-head\",\n      \"status\": \"pass\",\n      \"message\": \"current HEAD contains .pi/sdlc/sdlc.config.json\"\n    },\n    {\n      \"id\": \"adoption.manifest-clean\",\n      \"status\": \"pass\",\n      \"message\": \"manifest matches HEAD in index and working tree\"\n    },\n    {\n      \"id\": \"config.valid\",\n      \"status\": \"pass\",\n      \"message\": \"committed manifest is valid\"\n    },\n    {\n      \"id\": \"config.schema-current\",\n      \"status\": \"pass\",\n      \"message\": \"config schema is current (schemaVersion 3)\"\n    },\n    {\n      \"id\": \"config.panels\",\n      \"status\": \"pass\",\n      \"message\": \"panels roster present\"\n    },\n    {\n      \"id\": \"workflow.readable\",\n      \"status\": \"pass\",\n      \"message\": \"optional workflow.md is absent\"\n    }\n  ]\n}\n",
       "stderrTail": ""
     }
@@ -92,7 +93,7 @@
       "category": "tests",
       "status": "PASS",
       "checkIds": [
-        "tests.resolve-panel"
+        "tests.full-suite"
       ]
     },
     {

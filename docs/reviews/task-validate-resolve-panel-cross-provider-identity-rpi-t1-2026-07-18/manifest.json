@@ -6,10 +6,17 @@
   "ownedScenarios": [],
   "checks": [
     {
-      "id": "tests.resolve-panel",
-      "argv": ["node", "--test", "test/resolve-panel-v3.test.js"],
-      "timeoutMs": 60000,
-      "evidence": ["rpi-t1: Bedrock-hosted Claude collapses to the direct-API identity for author-exclusion", "rpi-t1: distinct Bedrock version qualifiers stay distinct identities", "rpi-t1: Bedrock-native model with no direct-provider equivalent is unaffected", "full ICA12-ICA24 suite, no regressions"]
+      "id": "tests.full-suite",
+      "argv": ["npm", "test"],
+      "timeoutMs": 120000,
+      "evidence": [
+        "rpi-t1: Bedrock-hosted Claude collapses to the direct-API identity for author-exclusion",
+        "rpi-t1: distinct Bedrock version qualifiers stay distinct identities",
+        "rpi-t1: same model + same version, different Bedrock region, dedupes to one panelist",
+        "rpi-t1: Bedrock-native model with no direct-provider equivalent is unaffected",
+        "full ICA12-ICA24 suite, no regressions",
+        "full 29-file npm test corpus, no regressions elsewhere (PR-panel finding: prior manifest only ran the one test file)"
+      ]
     },
     {
       "id": "static.syntax",
@@ -30,7 +37,7 @@
     }
   ],
   "categories": {
-    "tests": { "applicability": "required", "checkIds": ["tests.resolve-panel"] },
+    "tests": { "applicability": "required", "checkIds": ["tests.full-suite"] },
     "static": { "applicability": "required", "checkIds": ["static.syntax", "static.lint"] },
     "scenarios": { "applicability": "n/a", "reason": "No Specification exists on the reversible track (Plan skips Spec); acceptance is the Plan's Definition of Done directly." },
     "standards": { "applicability": "required", "checkIds": ["standards.sdlc-status"] },

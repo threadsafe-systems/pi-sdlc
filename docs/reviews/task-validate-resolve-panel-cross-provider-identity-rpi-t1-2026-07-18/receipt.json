@@ -2,11 +2,11 @@
   "schemaVersion": 1,
   "taskId": "rpi-t1",
   "manifestPath": "docs/validation/resolve-panel-cross-provider-identity/rpi-t1.json",
-  "manifestSha256": "8bd048c74d4d628e5f58a905b207f112fcc376667df32fcd7f9e127a2b816ec2",
-  "runnerReportSha256": "1ba55c6f83204aab9a4232ebad977608453c53d946672ed4ca6746a3079bfc9a",
+  "manifestSha256": "63c49ee84839ad6267be1450bd35b6347f3c4b7acf90666481af2f735ccb764f",
+  "runnerReportSha256": "73cb7f2a3ba0ac7008eb179cd64bd90cebb01338abc6843e04579a04a735ba65",
   "generatedAgentSha256": "2e64d2b7427fb3cac6895979d79f3d6fb8f616c7b1872ffeebe7f855fb1fd722",
   "model": "openai-codex/gpt-5.6-terra",
   "runnerVerdict": "PASS",
   "validatorVerdict": "PASS",
-  "createdAt": "2026-07-18T22:27:33Z"
+  "createdAt": "2026-07-18T22:44:40Z"
 }
