@@ -21,10 +21,10 @@ pi discovers the skill via its git package metadata (`package.json`'s
 Create `.pi/sdlc/` in your repo:
 
 - `sdlc.config.json` — identity (`prefix`, `labelPrefix`, `announce`), optional
-  paths/tracker/hooks/lifecycle settings, and the merged per-phase `panels`
-  roster with its enforcement posture. See
+  paths/tracker/hooks, the `review`/`shape` intent blocks (with optional
+  per-track `overrides`), and the merged per-phase `panels` roster. See
   `skills/sdlc/schema/sdlc.config.example.json` and its JSON Schema. This
-  schemaVersion-2 file is the single frozen consumer configuration surface.
+  schemaVersion-3 file is the single frozen consumer configuration surface.
 - `prompts/<name>.prompt.md` (optional) — override a phase reviewer prompt when
   your project needs a specific grounding the generic prompt does not carry.
 

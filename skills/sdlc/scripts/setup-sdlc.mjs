@@ -3,13 +3,12 @@
 // Bundle mode is deterministic, offline, and refuses consumer-authored assets.
 
 import { execFileSync } from "node:child_process";
-import { existsSync, lstatSync, mkdirSync, readdirSync, readFileSync, realpathSync, unlinkSync, writeFileSync } from "node:fs";
+import { existsSync, lstatSync, mkdirSync, readdirSync, readFileSync, realpathSync, writeFileSync } from "node:fs";
 import { dirname, join, relative, resolve, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 import { createInterface } from "node:readline/promises";
-import { stderr, stdin, stdout } from "node:process";
-import { CONFIG_DEFAULTS, CONFIG_SCHEMA_VERSION, HOOK_PHASES, REMEDY_SCHEMA_NEWER, REMEDY_SCHEMA_OLDER, USE_RE, classifyConfigVersion, inspectConfig, readConfigRawForMigration, resolveRoot } from "./lib.mjs";
-import { applyMigration, planMigration } from "./migrate.mjs";
+import { stdin, stdout } from "node:process";
+import { CONFIG_DEFAULTS, CONFIG_SCHEMA_VERSION, HOOK_PHASES, REMEDY_SCHEMA_NEWER, REMEDY_SCHEMA_OLDER, USE_RE, classifyConfigVersion, inspectConfig, resolveRoot } from "./lib.mjs";
 
 const SCRIPT_DIR = dirname(fileURLToPath(import.meta.url));
 const PACKAGE_DIR = resolve(SCRIPT_DIR, "..");
@@ -30,39 +29,24 @@ function packageRepository() {
 const RUN_HOOK_WARNING = "sdlc: WARNING — 'run' hooks execute arbitrary shell commands with the agent's\nprivileges from the committed config. Only commit hooks you trust, exactly as\nyou would for .pi/prompts or project settings.";
 const PROMPT_BASES = ["adversary-plan", "adversary-spec", "adversary-review", "validator-task"];
 const USAGE =
-	"usage: setup-sdlc.sh [--profile solo|standard|full|custom] [--lifecycle-json path|-] [--prefix V] [--label-prefix V] [--announce V] [--tracker-repo o/n --tracker-board-number N --tracker-board-url U] [--hook-run S] [--hook-use S] [--seed-panels] [--enforcement strict|preference] [--with-ci-workflow] [--copy-prompts] [--format text|json] [--force] [--yes] [--config DIR|--repo-root DIR]";
-const MIGRATE_FIRST = "setup-sdlc: migrate first — re-run with no config flags to fold the v1 config, then apply changes";
-const RETIRED_WITH_MODELS = "setup-sdlc: --with-models is retired — the panel roster now lives in .pi/sdlc/sdlc.config.json (schemaVersion 2); use --seed-panels";
+	"usage: setup-sdlc.sh [--preset solo|standard|full] [--review-brainstorm human|off] [--review-design panel|advisory|human|off] [--review-code panel|advisory|human|off] [--review-tasks subagent|self|off] [--panel-size N] [--on-shortfall proceed|fail] [--separate-spec true|false] [--publish-to-tracker N|never] [--default-track irreversible|reversible] [--override track:dial:value] [--prefix V] [--label-prefix V] [--announce V] [--tracker-repo o/n --tracker-board-number N --tracker-board-url U] [--hook-run S] [--hook-use S] [--seed-panels] [--with-ci-workflow] [--copy-prompts] [--format text|json] [--force] [--yes] [--config DIR|--repo-root DIR]";
+const RETIRED_WITH_MODELS = "setup-sdlc: --with-models is retired — the panel roster lives in .pi/sdlc/sdlc.config.json (schemaVersion 3); use --seed-panels";
 
-export const LIFECYCLE_PRESETS = Object.freeze({
+// v3 answer bundles. Presets are NEVER persisted — they seed the explicit dials
+// that setup writes. Not choosing a preset IS "custom".
+export const PRESETS = Object.freeze({
 	solo: {
-		profile: "solo",
-		gates: { brainstorm: { mode: "off" }, plan_review: { mode: "human", minPanel: 1 }, pr_review: { mode: "advisory", minPanel: 1 } },
-		phases: { mergePlanSpec: true },
-		tracker: { publishThreshold: "never" },
-		taskValidation: { mode: "self" },
-		tracks: { defaultTrack: "irreversible" },
+		review: { brainstorm: "off", design: "human", code: "advisory", tasks: "self", panelSize: 1, onShortfall: "proceed" },
+		shape: { separateSpec: false, publishToTracker: "never", defaultTrack: "irreversible" },
 	},
 	standard: {
-		profile: "standard",
-		gates: { brainstorm: { mode: "human" }, plan_review: { mode: "human", minPanel: 1 }, pr_review: { mode: "panel", minPanel: 2 } },
-		phases: { mergePlanSpec: true },
-		tracker: { publishThreshold: 4 },
-		taskValidation: { mode: "subagent" },
-		tracks: { defaultTrack: "irreversible" },
+		review: { brainstorm: "human", design: "human", code: "panel", tasks: "subagent", panelSize: 2, onShortfall: "proceed" },
+		shape: { separateSpec: false, publishToTracker: 4, defaultTrack: "irreversible" },
 	},
 	full: {
-		profile: "full",
-		gates: {
-			brainstorm: { mode: "human" },
-			plan_review: { mode: { irreversible: "panel", reversible: "human" }, minPanel: 2 },
-			spec_review: { mode: { irreversible: "panel" }, minPanel: 2 },
-			pr_review: { mode: "panel", minPanel: 2 },
-		},
-		phases: { mergePlanSpec: false },
-		tracker: { publishThreshold: 2 },
-		taskValidation: { mode: "subagent" },
-		tracks: { defaultTrack: "irreversible" },
+		review: { brainstorm: "human", design: "panel", code: "panel", tasks: "subagent", panelSize: 2, onShortfall: "proceed" },
+		shape: { separateSpec: true, publishToTracker: 2, defaultTrack: "irreversible" },
+		overrides: { reversible: { review: { design: "human" } } },
 	},
 });
 
@@ -91,6 +75,26 @@ function parseHookUse(raw) {
 	if (!USE_RE.test(use) || parts.slice(4).join(":").length === 0 || /[\r\n]/.test(parts.slice(4).join(":"))) throw new SetupError(`setup-sdlc: --hook-use 'use' or do must be valid`);
 	return { phase: parts[0], timing: parts[1], item: { use, do: parts.slice(4).join(":") } };
 }
+// --override track:dial:value — per-track dials are design|code|tasks|panelSize
+// only (brainstorm/onShortfall carry no per-track meaning).
+function parseOverride(raw) {
+	const parts = raw.split(":");
+	if (parts.length !== 3) throw new SetupError(`setup-sdlc: --override must be "<track>:<dial>:<value>" (got ${JSON.stringify(raw)})`);
+	const [track, dial, value] = parts;
+	if (track !== "irreversible" && track !== "reversible") throw new SetupError(`setup-sdlc: --override track must be irreversible or reversible (got ${JSON.stringify(track)})`);
+	const gateModes = new Set(["panel", "advisory", "human", "off"]);
+	if (dial === "design" || dial === "code") {
+		if (!gateModes.has(value)) throw new SetupError(`setup-sdlc: --override ${dial} value must be panel|advisory|human|off (got ${JSON.stringify(value)})`);
+	} else if (dial === "tasks") {
+		if (!new Set(["subagent", "self", "off"]).has(value)) throw new SetupError(`setup-sdlc: --override tasks value must be subagent|self|off (got ${JSON.stringify(value)})`);
+	} else if (dial === "panelSize") {
+		const n = Number(value);
+		if (!Number.isInteger(n) || n < 1) throw new SetupError(`setup-sdlc: --override panelSize value must be an integer >= 1 (got ${JSON.stringify(value)})`);
+	} else {
+		throw new SetupError(`setup-sdlc: --override dial must be design|code|tasks|panelSize (got ${JSON.stringify(dial)}); brainstorm and onShortfall are not per-track)`);
+	}
+	return { track, dial, value };
+}
 function addHook(hooks, phase, timing, item) {
 	if (!HOOK_PHASES.includes(phase)) throw new SetupError(`setup-sdlc: unknown hook phase '${phase}' (allowed: ${HOOK_PHASES.join(", ")})`);
 	if (timing !== "before" && timing !== "after") throw new SetupError(`setup-sdlc: unknown hook timing '${timing}' (allowed: before, after)`);
@@ -114,32 +118,41 @@ function assembleConfig(opts, tracker, hooks) {
 		prefix: opts.prefix ?? CONFIG_DEFAULTS.prefix,
 		labelPrefix: opts.labelPrefix ?? CONFIG_DEFAULTS.labelPrefix,
 		announce: opts.announce ?? CONFIG_DEFAULTS.announce,
-		enforcement: opts.enforcement ?? "preference",
 	};
 	if (tracker) config.tracker = tracker;
 	if (Object.keys(hooks).length) config.hooks = hooks;
-	const lifecycle = lifecycleFromOptions(opts, config);
-	if (lifecycle) config.lifecycle = lifecycle;
+	const { review, shape, overrides } = reviewShapeFromOptions(opts);
+	config.review = review;
+	config.shape = shape;
+	if (overrides) config.overrides = overrides;
 	return config;
 }
 
-function lifecycleFromOptions(opts, config) {
-	if (opts.lifecycle) return structuredClone(opts.lifecycle);
-	if (opts.profile === undefined) return undefined;
-	if (opts.profile !== "custom") return structuredClone(LIFECYCLE_PRESETS[opts.profile]);
-	let payload;
-	try {
-		const text = opts.lifecycleJson === "-" ? readFileSync(0, "utf8") : readFileSync(opts.lifecycleJson, "utf8");
-		payload = JSON.parse(text);
-	} catch (error) {
-		throw new SetupError(`setup-sdlc: cannot read --lifecycle-json ${opts.lifecycleJson}: ${error.message}`);
+// Build the explicit v3 review/shape/overrides from a seed + per-dial flag
+// overrides + repeatable --override entries. The seed is the chosen preset
+// (or standard) for a fresh write, or an existing config's intent blocks when
+// patching a single dial. Presets are never persisted.
+function reviewShapeFromOptions(opts, base) {
+	const seed = base ?? structuredClone(PRESETS[opts.preset ?? "standard"]);
+	const review = { ...seed.review };
+	const shape = { ...seed.shape };
+	let overrides = seed.overrides ? structuredClone(seed.overrides) : undefined;
+	if (opts.reviewBrainstorm !== undefined) review.brainstorm = opts.reviewBrainstorm;
+	if (opts.reviewDesign !== undefined) review.design = opts.reviewDesign;
+	if (opts.reviewCode !== undefined) review.code = opts.reviewCode;
+	if (opts.reviewTasks !== undefined) review.tasks = opts.reviewTasks;
+	if (opts.panelSize !== undefined) review.panelSize = opts.panelSize;
+	if (opts.onShortfall !== undefined) review.onShortfall = opts.onShortfall;
+	if (opts.separateSpec !== undefined) shape.separateSpec = opts.separateSpec;
+	if (opts.publishToTracker !== undefined) shape.publishToTracker = opts.publishToTracker;
+	if (opts.defaultTrack !== undefined) shape.defaultTrack = opts.defaultTrack;
+	for (const { track, dial, value } of opts.overrides ?? []) {
+		overrides ??= {};
+		overrides[track] ??= { review: {} };
+		overrides[track].review ??= {};
+		overrides[track].review[dial] = dial === "panelSize" ? Number(value) : value;
 	}
-	if (payload === null || typeof payload !== "object" || Array.isArray(payload)) throw new SetupError("setup-sdlc: --lifecycle-json must contain a JSON object");
-	if (Object.hasOwn(payload, "profile")) throw new SetupError("setup-sdlc: --lifecycle-json payload must not contain a profile key");
-	const lifecycle = { ...payload, profile: "custom" };
-	const issue = inspectConfig({ ...config, lifecycle }).find(({ path }) => path === "lifecycle" || path.startsWith("lifecycle."));
-	if (issue) throw new SetupError(`setup-sdlc: invalid --lifecycle-json at ${issue.path}: ${issue.message}`, 1);
-	return lifecycle;
+	return { review, shape, overrides };
 }
 function trackerFromFlags(opts) {
 	const values = [opts.trackerRepo, opts.trackerBoardNumber, opts.trackerBoardUrl];
@@ -150,21 +163,88 @@ function trackerFromFlags(opts) {
 	return { repo: opts.trackerRepo, board: { number, url: opts.trackerBoardUrl } };
 }
 function parseArgs(argv) {
-	const opts = { hookSpecs: [], format: "text", force: false, yes: false, seedPanels: false, withCiWorkflow: false, copyPrompts: false, runFlag: false, rootFlagOnly: true };
+	const opts = { hookSpecs: [], overrides: [], format: "text", force: false, yes: false, seedPanels: false, withCiWorkflow: false, copyPrompts: false, runFlag: false, rootFlagOnly: true };
 	for (let i = 0; i < argv.length; i++) {
 		const a = argv[i];
 		const value = (name = a) => needValue(argv, ++i, name);
 		switch (a) {
+			case "--preset":
+				opts.preset = value();
+				opts.runFlag = true;
+				opts.rootFlagOnly = false;
+				break;
+			case "--review-brainstorm":
+				opts.reviewBrainstorm = value();
+				opts.runFlag = true;
+				opts.rootFlagOnly = false;
+				break;
+			case "--review-design":
+				opts.reviewDesign = value();
+				opts.runFlag = true;
+				opts.rootFlagOnly = false;
+				break;
+			case "--review-code":
+				opts.reviewCode = value();
+				opts.runFlag = true;
+				opts.rootFlagOnly = false;
+				break;
+			case "--review-tasks":
+				opts.reviewTasks = value();
+				opts.runFlag = true;
+				opts.rootFlagOnly = false;
+				break;
+			case "--panel-size": {
+				const n = Number(value());
+				if (!Number.isInteger(n) || n < 1) throw new SetupError("setup-sdlc: --panel-size must be an integer >= 1");
+				opts.panelSize = n;
+				opts.runFlag = true;
+				opts.rootFlagOnly = false;
+				break;
+			}
+			case "--on-shortfall":
+				opts.onShortfall = value();
+				if (opts.onShortfall !== "proceed" && opts.onShortfall !== "fail") throw new SetupError("setup-sdlc: --on-shortfall must be proceed or fail");
+				opts.runFlag = true;
+				opts.rootFlagOnly = false;
+				break;
+			case "--separate-spec": {
+				const v = value();
+				if (v !== "true" && v !== "false") throw new SetupError("setup-sdlc: --separate-spec must be true or false");
+				opts.separateSpec = v === "true";
+				opts.runFlag = true;
+				opts.rootFlagOnly = false;
+				break;
+			}
+			case "--publish-to-tracker": {
+				const v = value();
+				if (v === "never") opts.publishToTracker = "never";
+				else {
+					const n = Number(v);
+					if (!Number.isInteger(n) || n < 1) throw new SetupError("setup-sdlc: --publish-to-tracker must be an integer >= 1 or never");
+					opts.publishToTracker = n;
+				}
+				opts.runFlag = true;
+				opts.rootFlagOnly = false;
+				break;
+			}
+			case "--default-track":
+				opts.defaultTrack = value();
+				if (opts.defaultTrack !== "irreversible" && opts.defaultTrack !== "reversible") throw new SetupError("setup-sdlc: --default-track must be irreversible or reversible");
+				opts.runFlag = true;
+				opts.rootFlagOnly = false;
+				break;
+			case "--override": {
+				opts.overrides.push(parseOverride(value()));
+				opts.runFlag = true;
+				opts.rootFlagOnly = false;
+				break;
+			}
 			case "--profile":
-				opts.profile = value();
-				opts.runFlag = true;
-				opts.rootFlagOnly = false;
-				break;
+				throw new SetupError("setup-sdlc: --profile is retired — use --preset solo|standard|full (and per-dial flags); there is no persisted profile in schemaVersion 3");
 			case "--lifecycle-json":
-				opts.lifecycleJson = value();
-				opts.runFlag = true;
-				opts.rootFlagOnly = false;
-				break;
+				throw new SetupError("setup-sdlc: --lifecycle-json is retired — set dials via --review-*/--panel-size/--on-shortfall/--separate-spec/--publish-to-tracker/--default-track/--override");
+			case "--enforcement":
+				throw new SetupError("setup-sdlc: --enforcement is retired — use --on-shortfall proceed|fail");
 			case "--prefix":
 				opts.prefix = value();
 				opts.runFlag = true;
@@ -212,11 +292,6 @@ function parseArgs(argv) {
 				opts.runFlag = true;
 				opts.rootFlagOnly = false;
 				break;
-			case "--enforcement":
-				opts.enforcement = value();
-				opts.runFlag = true;
-				opts.rootFlagOnly = false;
-				break;
 			case "--with-ci-workflow":
 				opts.withCiWorkflow = true;
 				opts.runFlag = true;
@@ -259,10 +334,8 @@ function parseArgs(argv) {
 	}
 	if (opts.config !== undefined && opts.repoRoot !== undefined) throw new SetupError("setup-sdlc: --config and --repo-root are mutually exclusive");
 	if (opts.help) return opts;
-	if (opts.profile !== undefined && !new Set(["solo", "standard", "full", "custom"]).has(opts.profile)) throw new SetupError("setup-sdlc: --profile must be solo, standard, full, or custom");
-	if (opts.enforcement !== undefined && opts.enforcement !== "strict" && opts.enforcement !== "preference") throw new SetupError("setup-sdlc: --enforcement must be strict or preference");
-	if (opts.lifecycleJson !== undefined && opts.profile !== "custom") throw new SetupError("setup-sdlc: --lifecycle-json requires --profile custom");
-	if (opts.profile === "custom" && opts.lifecycleJson === undefined) throw new SetupError("setup-sdlc: --profile custom requires --lifecycle-json for non-interactive setup", 1);
+	if (opts.preset === "custom") throw new SetupError("setup-sdlc: --preset custom is retired — omit --preset and set dials via flags (not choosing a preset IS custom)");
+	if (opts.preset !== undefined && !new Set(["solo", "standard", "full"]).has(opts.preset)) throw new SetupError("setup-sdlc: --preset must be solo, standard, or full");
 	return opts;
 }
 function jsonMode(argv) {
@@ -353,16 +426,6 @@ function checkPromptReferences(paths, report) {
 	if (missing.length === 0) report.references.push({ id: "reference.prompts", status: "ok", message: `resolved ${paths.length} package prompt sources` });
 	else report.references.push({ id: "reference.prompts", status: "broken", message: `package prompt sources unavailable: ${missing.join(", ")}` });
 }
-function existingAssetIssue(target, inspect, label) {
-	if (!existsSync(target)) return null;
-	try {
-		const raw = JSON.parse(readFileSync(target, "utf8"));
-		const issues = inspect(raw);
-		return issues.length > 0 ? `${label} ${issues[0].path || "root"}: ${issues[0].message}` : null;
-	} catch (error) {
-		return `${label} cannot be read or parsed (${error.message})`;
-	}
-}
 function targetParentConflict(root, target) {
 	const rootResolved = resolve(root);
 	let parent = dirname(target);
@@ -410,96 +473,14 @@ function renderReport(report) {
 	}
 	return `${lines.join("\n")}\n`;
 }
-async function askConfirmation(question) {
-	if (!stdin.isTTY) return false;
-	const rl = createInterface({ input: stdin, output: stderr });
+// Classify an existing config file for the clean-break refusal (no migration).
+function existingConfigVersion(configTarget) {
+	if (!existsSync(configTarget)) return null;
 	try {
-		const answer = await rl.question(`${question} (y/N) `);
-		return answer.trim().toLowerCase().startsWith("y");
-	} finally {
-		rl.close();
+		return classifyConfigVersion(JSON.parse(readFileSync(configTarget, "utf8")));
+	} catch {
+		return { kind: "malformed" };
 	}
-}
-
-function rawFileUnchanged(before, after) {
-	if (before.status !== after.status) return false;
-	if (before.status === "absent") return true;
-	return before.text === after.text;
-}
-
-function migrationFlagsPresent(opts) {
-	return (
-		opts.profile !== undefined ||
-		opts.lifecycleJson !== undefined ||
-		opts.prefix !== undefined ||
-		opts.labelPrefix !== undefined ||
-		opts.announce !== undefined ||
-		opts.trackerRepo !== undefined ||
-		opts.trackerBoardNumber !== undefined ||
-		opts.trackerBoardUrl !== undefined ||
-		opts.hookSpecs.length > 0 ||
-		opts.seedPanels ||
-		opts.enforcement !== undefined ||
-		opts.withCiWorkflow ||
-		opts.copyPrompts ||
-		opts.force
-	);
-}
-
-async function migrateConfig(root, opts) {
-	const files = readConfigRawForMigration(root);
-	if (files.config.status === "malformed") {
-		const report = {
-			root,
-			format: opts.format,
-			exitCode: 1,
-			references: [],
-			assets: [{ id: "config", action: "refused", message: `existing config is malformed: ${files.config.error}` }],
-		};
-		process.stdout.write(renderReport(report));
-		return report;
-	}
-	if (files.config.status !== "parsed") return null;
-	const classification = classifyConfigVersion(files.config.value);
-	if (classification.kind === "newer") throw new SetupError(`setup-sdlc: ${REMEDY_SCHEMA_NEWER(classification.version)}`, 1);
-	if (classification.kind !== "older") return null;
-	if (migrationFlagsPresent(opts)) throw new SetupError(MIGRATE_FIRST, 1);
-	if (!stdin.isTTY) throw new SetupError(`setup-sdlc: ${REMEDY_SCHEMA_OLDER(classification.version)}`, 1);
-	console.error(`setup-sdlc: migration will fold .pi/sdlc/sdlc.models.json into .pi/sdlc/sdlc.config.json (schemaVersion ${CONFIG_SCHEMA_VERSION}).`);
-	console.error("setup-sdlc: single-writer boundary — after answering yes, do not modify either config file or run another setup/migration until this command finishes.");
-	if (!(await askConfirmation("migrate .pi/sdlc/sdlc.config.json to schemaVersion 2 now?"))) throw new SetupError(`setup-sdlc: ${REMEDY_SCHEMA_OLDER(classification.version)}`, 1);
-	const confirmedFiles = readConfigRawForMigration(root);
-	if (!rawFileUnchanged(files.config, confirmedFiles.config) || !rawFileUnchanged(files.models, confirmedFiles.models)) {
-		throw new SetupError("setup-sdlc: migration refused; config inputs changed while confirmation was pending; no files were written — review the edits and re-run setup-sdlc", 1);
-	}
-	let plan;
-	if (confirmedFiles.models.status === "malformed") plan = { ok: false, unmappable: [{ path: ".pi/sdlc/sdlc.models.json", message: confirmedFiles.models.error }] };
-	else plan = planMigration({ config: confirmedFiles.config.value, models: confirmedFiles.models.status === "parsed" ? confirmedFiles.models.value : undefined });
-	if (!plan.ok) {
-		const details = plan.unmappable.map(({ path, message }) => `cannot map ${path}: ${message}`).join("\n");
-		throw new SetupError(`setup-sdlc: migration refused; no files were written.\n${details}`, 1);
-	}
-	const result = applyMigration(root, plan);
-	const report = { root, format: opts.format, exitCode: 0, references: [], assets: [{ id: "config", action: "migrated", message: `migrated ${result.configPath}` }, ...(result.modelsRemoved ? [{ id: "models", action: "removed", message: `removed ${result.modelsPath}` }] : [])] };
-	process.stdout.write(renderReport(report));
-	return report;
-}
-
-async function cleanupResidue(root) {
-	const dir = join(root, ".pi", "sdlc");
-	const assets = [];
-	for (const [name, id, question] of [
-		["sdlc.models.json", "models", "remove leftover .pi/sdlc/sdlc.models.json (folded into sdlc.config.json)?"],
-		[".sdlc.config.json.migrate-tmp", "staging", "remove leftover migration staging file .sdlc.config.json.migrate-tmp?"],
-	]) {
-		const path = join(dir, name);
-		if (!existsSync(path)) continue;
-		if (await askConfirmation(question)) {
-			unlinkSync(path);
-			assets.push({ id, action: "removed", message: `removed ${path}` });
-		} else assets.push({ id, action: "retained", message: `retained residue ${path}`, remediation: `re-run setup-sdlc interactively to remove ${path}` });
-	}
-	return assets;
 }
 
 function writeBundle(root, opts, cfg, hooks, tracker, residueAssets = []) {
@@ -554,21 +535,67 @@ function writeBundle(root, opts, cfg, hooks, tracker, residueAssets = []) {
 	}
 	const ciDetected = opts.withCiWorkflow ? existsCi(root, "sdlc-lifecycle.yml") : false;
 	const configExists = existsSync(configTarget);
-	const configIssue = existingAssetIssue(configTarget, inspectConfig, "config");
-	const configMutating = opts.profile !== undefined || opts.prefix !== undefined || opts.labelPrefix !== undefined || opts.announce !== undefined || opts.enforcement !== undefined || opts.seedPanels || tracker !== undefined || (hooks && Object.keys(hooks).length > 0);
+	const existingVersion = existingConfigVersion(configTarget);
+	const intentFlags =
+		opts.preset !== undefined ||
+		opts.reviewBrainstorm !== undefined ||
+		opts.reviewDesign !== undefined ||
+		opts.reviewCode !== undefined ||
+		opts.reviewTasks !== undefined ||
+		opts.panelSize !== undefined ||
+		opts.onShortfall !== undefined ||
+		opts.separateSpec !== undefined ||
+		opts.publishToTracker !== undefined ||
+		opts.defaultTrack !== undefined ||
+		opts.overrides.length > 0;
+	const identityFlags = opts.prefix !== undefined || opts.labelPrefix !== undefined || opts.announce !== undefined || opts.seedPanels || tracker !== undefined || (hooks && Object.keys(hooks).length > 0);
+	const configMutating = intentFlags || identityFlags;
 	if (!configExists) {
 		mkdirSync(dirname(configTarget), { recursive: true });
 		writeFileSync(configTarget, `${JSON.stringify(cfg, null, 2)}\n`);
 		report.assets.push({ id: "config", action: "created", message: `created ${configTarget}` });
-	} else if (configIssue) report.assets.push({ id: "config", action: "refused", message: `refused invalid existing config ${configTarget}: ${configIssue}`, remediation: `repair or delete ${configTarget} and re-run setup` });
-	else if (opts.profile !== undefined)
-		report.assets.push({
-			id: "config",
-			action: "refused",
-			message: `refused profile application to existing config ${configTarget}: existing-adopter profile application is deferred to OL-B`,
-			remediation: "use the OL-B profile-application path after its FS10 v2 migration (docs/plans/2026-07-14-opt-in-lifecycle.md)",
-		});
-	else if (configMutating && opts.force) {
+	} else if (existingVersion && (existingVersion.kind === "malformed" || existingVersion.kind === "invalid")) {
+		// Never overwrite a config we cannot understand — even with --force. Delete it by hand.
+		// Hard-stop the whole bundle so no half-scaffold is written alongside a broken config.
+		report.assets.push({ id: "config", action: "refused", message: `refused ${existingVersion.kind} existing config ${configTarget}`, remediation: `repair or delete ${configTarget} and re-run setup` });
+		report.exitCode = 1;
+		return report;
+	} else if (existingVersion && existingVersion.kind === "newer" && !opts.force) {
+		report.assets.push({ id: "config", action: "refused", message: `refused ${configTarget}: ${REMEDY_SCHEMA_NEWER(existingVersion.version)}`, remediation: "upgrade pi-sdlc or run the pinned release; --force to overwrite" });
+	} else if (existingVersion && existingVersion.kind === "older" && !opts.force) {
+		report.assets.push({ id: "config", action: "refused", message: `refused ${configTarget}: ${REMEDY_SCHEMA_OLDER(existingVersion.version)}`, remediation: "re-run with --force to write a fresh v3 config, or pin the prior release" });
+	} else if (existingVersion && existingVersion.kind !== "current" && opts.force) {
+		// Older/newer schema + --force: honest clean-break replacement.
+		writeFileSync(configTarget, `${JSON.stringify(cfg, null, 2)}\n`);
+		report.assets.push({ id: "config", action: "upgraded", message: `upgraded ${configTarget}` });
+	} else if (intentFlags && !identityFlags && existingVersion && existingVersion.kind === "current") {
+		const existing = JSON.parse(readFileSync(configTarget, "utf8"));
+		// A preset is a whole intent statement; per-dial-only flags patch the
+		// existing blocks so unrelated dials are preserved (not reset to standard).
+		const patched = opts.preset === undefined ? reviewShapeFromOptions(opts, { review: existing.review, shape: existing.shape, overrides: existing.overrides }) : { review: cfg.review, shape: cfg.shape, overrides: cfg.overrides };
+		// Data-loss guard: refuse (without --force) when the new intent blocks
+		// would delete or alter an existing overrides track they do not carry.
+		const existingTracks = Object.keys(existing.overrides ?? {});
+		const clobbered = existingTracks.filter((t) => JSON.stringify(existing.overrides[t]) !== JSON.stringify(patched.overrides?.[t]));
+		if (clobbered.length > 0 && !opts.force) {
+			report.assets.push({ id: "config", action: "refused", message: `refused patch that would delete or alter consumer-authored overrides (${clobbered.join(", ")}) in ${configTarget}`, remediation: "re-run with --force to change the existing overrides block" });
+		} else {
+			const before = { review: existing.review, shape: existing.shape, overrides: existing.overrides };
+			existing.review = patched.review;
+			existing.shape = patched.shape;
+			if (patched.overrides === undefined) delete existing.overrides;
+			else existing.overrides = patched.overrides;
+			const patchIssues = inspectConfig(existing);
+			if (patchIssues.length > 0) {
+				report.exitCode = 2;
+				report.error = `patched configuration is invalid: ${patchIssues[0].message}`;
+				return report;
+			}
+			writeFileSync(configTarget, `${JSON.stringify(existing, null, 2)}\n`);
+			const fmt = (b) => JSON.stringify({ review: b.review, shape: b.shape, ...(b.overrides === undefined ? {} : { overrides: b.overrides }) });
+			report.assets.push({ id: "config", action: "patched", message: `patched review/shape/overrides in ${configTarget} (was ${fmt(before)} → now ${fmt({ review: existing.review, shape: existing.shape, overrides: existing.overrides })})` });
+		}
+	} else if (configMutating && opts.force) {
 		writeFileSync(configTarget, `${JSON.stringify(cfg, null, 2)}\n`);
 		report.assets.push({ id: "config", action: "upgraded", message: `upgraded ${configTarget}` });
 	} else if (configMutating && !opts.force) report.assets.push({ id: "config", action: "refused", message: `refused config replacement without --force: ${configTarget}`, remediation: `re-run with --force to replace the configuration` });
@@ -589,10 +616,10 @@ function writeBundle(root, opts, cfg, hooks, tracker, residueAssets = []) {
 	report.exitCode = report.assets.some((item) => item.action === "refused") ? 1 : 0;
 	return report;
 }
-async function interviewLifecycle(ask) {
-	const profile = await ask("lifecycle profile — solo: light, advisory PR (needs >=1 live model credential); standard: merged plan/spec + PR panel; full: separate design panels + PR panel; custom: choose every dial (solo/standard/full/custom)", "standard");
-	if (Object.hasOwn(LIFECYCLE_PRESETS, profile)) return structuredClone(LIFECYCLE_PRESETS[profile]);
-	if (profile !== "custom") throw new SetupError("setup-sdlc: profile must be solo, standard, full, or custom", 1);
+async function interviewReview(ask) {
+	const preset = await ask("preset — solo: light, advisory PR (needs >=1 live model credential); standard: merged plan/spec + PR panel; full: separate design panels + PR panel; or 'custom' to choose each dial (solo/standard/full/custom)", "standard");
+	if (Object.hasOwn(PRESETS, preset)) return structuredClone(PRESETS[preset]);
+	if (preset !== "custom") throw new SetupError("setup-sdlc: preset must be solo, standard, full, or custom", 1);
 	const choice = async (question, values, fallback) => {
 		const answer = await ask(question, fallback);
 		if (!values.includes(answer)) throw new SetupError(`setup-sdlc: ${question} must be one of ${values.join(", ")}`, 1);
@@ -604,37 +631,27 @@ async function interviewLifecycle(ask) {
 		return value;
 	};
 	const gateModes = ["panel", "advisory", "human", "off"];
-	const mergeAnswer = await choice("merge plan and spec? (true/false)", ["true", "false"], "false");
-	const mergePlanSpec = mergeAnswer === "true";
-	const planMode = {
-		irreversible: await choice("irreversible plan review mode (panel/advisory/human/off)", gateModes, "panel"),
-		reversible: await choice("reversible plan review mode (panel/advisory/human/off)", gateModes, "human"),
+	const review = {
+		brainstorm: await choice("brainstorm gate — human: you approve the design; off: no gate (human/off)", ["human", "off"], "human"),
+		design: await choice("who reviews DESIGNS (plan+spec) — panel: cross-model panel; advisory: panel, non-blocking; human: you; off: no gate (panel/advisory/human/off)", gateModes, "panel"),
+		code: await choice("who reviews CODE (the PR) — panel/advisory/human/off", gateModes, "panel"),
+		tasks: await choice("per-task validation — subagent: a validator subagent; self: you run the checks; off: none (subagent/self/off)", ["subagent", "self", "off"], "subagent"),
+		panelSize: await positiveInt("panel size — the distinct-model floor for review panels", 2),
+		onShortfall: await choice("on panel shortfall — proceed: best-effort and surface it; fail: hard-fail below the floor (proceed/fail)", ["proceed", "fail"], "proceed"),
 	};
-	let specReview;
-	if (!mergePlanSpec) {
-		specReview = {
-			mode: { irreversible: await choice("irreversible spec review mode (panel/advisory/human/off)", gateModes, "panel") },
-			minPanel: await positiveInt("spec review minPanel", 2),
-		};
-	}
-	const gates = {
-		brainstorm: { mode: await choice("brainstorm mode (human/off)", ["human", "off"], "human") },
-		plan_review: { mode: planMode, minPanel: await positiveInt("plan review minPanel", 2) },
-		...(specReview ? { spec_review: specReview } : {}),
-		pr_review: { mode: await choice("PR review mode (panel/advisory/human/off)", gateModes, "panel"), minPanel: await positiveInt("PR review minPanel", 2) },
-	};
-	const thresholdAnswer = await ask("tracker publishThreshold (integer >=1 or never)", "2");
+	const separateAnswer = await choice("separate Spec phase? true: distinct Spec gate; false: merge plan+spec (true/false)", ["true", "false"], "false");
+	const thresholdAnswer = await ask("publish to tracker at how many build tasks? (integer >=1 or never)", "2");
 	const numericThreshold = Number(thresholdAnswer);
 	if (thresholdAnswer !== "never" && (!Number.isInteger(numericThreshold) || numericThreshold < 1)) {
-		throw new SetupError("setup-sdlc: tracker publishThreshold must be an integer >= 1 or never", 1);
+		throw new SetupError("setup-sdlc: publishToTracker must be an integer >= 1 or never", 1);
 	}
 	return {
-		profile: "custom",
-		gates,
-		phases: { mergePlanSpec },
-		tracker: { publishThreshold: thresholdAnswer === "never" ? "never" : numericThreshold },
-		taskValidation: { mode: await choice("task validation mode (subagent/self/off)", ["subagent", "self", "off"], "subagent") },
-		tracks: { defaultTrack: await choice("default track (irreversible/reversible)", ["irreversible", "reversible"], "irreversible") },
+		review,
+		shape: {
+			separateSpec: separateAnswer === "true",
+			publishToTracker: thresholdAnswer === "never" ? "never" : numericThreshold,
+			defaultTrack: await choice("default track when in doubt (irreversible/reversible)", ["irreversible", "reversible"], "irreversible"),
+		},
 	};
 }
 
@@ -646,26 +663,22 @@ async function interview(root) {
 			const answer = await rl.question(fallback ? `${question} [${fallback}]: ` : `${question}: `);
 			return answer.trim() || fallback || "";
 		};
-		const lifecycle = await interviewLifecycle(ask);
+		const rs = await interviewReview(ask);
 		const prefix = await ask("prefix", CONFIG_DEFAULTS.prefix);
 		const labelPrefix = await ask("labelPrefix", CONFIG_DEFAULTS.labelPrefix);
 		const announce = await ask("announce", CONFIG_DEFAULTS.announce);
 		const workflowAnswer = await ask("offer a GitHub workflow when no CI exists? (y/N)", "n");
 		const promptsAnswer = await ask("copy package prompts for local overrides? (y/N)", "n");
-		const enforcement = await ask("panel enforcement — preference: proceed best-effort and surface shortfalls; strict: hard-fail below configured floors (preference/strict)", "preference");
-		if (enforcement !== "strict" && enforcement !== "preference") throw new SetupError("setup-sdlc: panel enforcement must be strict or preference", 1);
 		const opts = {
 			hookSpecs: [],
+			overrides: [],
 			format: "text",
 			yes: true,
 			runFlag: true,
 			rootFlagOnly: false,
-			profile: lifecycle.profile,
-			lifecycle,
 			prefix,
 			labelPrefix,
 			announce,
-			enforcement,
 			seedPanels: (await ask("seed the example panel roster (model ids drift; review after)? (y/N)", "n")).toLowerCase().startsWith("y"),
 			withCiWorkflow: workflowAnswer.toLowerCase().startsWith("y"),
 			copyPrompts: promptsAnswer.toLowerCase().startsWith("y"),
@@ -677,7 +690,17 @@ async function interview(root) {
 			console.error("setup-sdlc: aborted at your request; nothing written.");
 			return 1;
 		}
-		const report = writeBundle(root, opts, assembleConfig(opts, tracker, hooks), hooks, tracker);
+		// Assemble directly from the interview's explicit review/shape/overrides.
+		const cfg = {
+			schemaVersion: CONFIG_SCHEMA_VERSION,
+			prefix,
+			labelPrefix,
+			announce,
+			review: rs.review,
+			shape: rs.shape,
+			...(rs.overrides ? { overrides: rs.overrides } : {}),
+		};
+		const report = writeBundle(root, opts, cfg, hooks, tracker);
 		process.stdout.write(renderReport(report));
 		return report.exitCode;
 	} finally {
@@ -696,16 +719,11 @@ try {
 	}
 	const root = resolveRoot({ config: opts.config, repoRoot: opts.repoRoot });
 	resolvedRoot = root;
-	const migrationResult = await migrateConfig(root, opts);
-	if (migrationResult) process.exitCode = migrationResult.exitCode;
-	else if (!opts.runFlag) process.exitCode = await interview(root);
+	if (!opts.runFlag) process.exitCode = await interview(root);
 	else {
 		const tracker = trackerFromFlags(opts);
 		const { hooks, hasRun } = buildHooks(opts.hookSpecs);
-		const raw = readConfigRawForMigration(root);
-		const classification = raw.config.status === "parsed" ? classifyConfigVersion(raw.config.value) : null;
-		const residueAssets = classification?.kind === "current" || existsSync(join(root, ".pi", "sdlc", ".sdlc.config.json.migrate-tmp")) ? await cleanupResidue(root) : [];
-		const report = writeBundle(root, opts, assembleConfig(opts, tracker, hooks), hooks, tracker, residueAssets);
+		const report = writeBundle(root, opts, assembleConfig(opts, tracker, hooks), hooks, tracker);
 		if (hasRun && opts.format !== "json") console.error(RUN_HOOK_WARNING);
 		if (hasRun && opts.format === "json") {
 			const configReport = report.assets.find((item) => item.id === "config");

@@ -3,22 +3,17 @@
     {
       "agent": "loom-pr-review",
       "task": "FILL_IN_TASK_BLOCK",
+      "model": "amazon-bedrock/global.anthropic.claude-opus-4-8"
+    },
+    {
+      "agent": "loom-pr-review",
+      "task": "FILL_IN_TASK_BLOCK",
       "model": "openai-codex/gpt-5.5"
     },
     {
       "agent": "loom-pr-review",
       "task": "FILL_IN_TASK_BLOCK",
       "model": "deepseek/deepseek-v4-pro"
-    },
-    {
-      "agent": "loom-pr-review",
-      "task": "FILL_IN_TASK_BLOCK",
-      "model": "zai-coding-cn/glm-5.2"
-    },
-    {
-      "agent": "loom-pr-review",
-      "task": "FILL_IN_TASK_BLOCK",
-      "model": "moonshotai/kimi-k2.7-code"
     }
   ]
 }

@@ -124,12 +124,14 @@ test("RL5: inspectRoot honours $SDLC_ROOT when no explicit option is given", () 
 // ---------------------------------------------------------------------------
 
 const GOOD_CONFIG = {
-	schemaVersion: 2,
+	schemaVersion: 3,
 	prefix: "acme",
 	labelPrefix: "acme-sdlc",
 	announce: "hi",
 	paths: { plans: "docs/plans" },
 	hooks: { implement: { before: [{ use: "tool:worktree_session", do: "enter the worktree" }] } },
+	review: { brainstorm: "human", design: "panel", code: "panel", tasks: "subagent", panelSize: 2, onShortfall: "proceed" },
+	shape: { separateSpec: true, publishToTracker: 2, defaultTrack: "irreversible" },
 };
 
 test("SP4: consumer path seam preserves spelling and rejects slash/backslash escapes", () => {
@@ -159,13 +161,15 @@ test("RL6: inspectConfig — valid input yields [], non-objects yield the determ
 test("RL7: inspectConfig — aggregates every issue in validation-rule order, never throws", () => {
 	const raw = {
 		bogus: 1,
-		schemaVersion: 3,
+		schemaVersion: 2,
 		prefix: "BAD CAPS",
 		labelPrefix: "ok",
 		announce: "",
 		paths: { plans: "", nope: "x" },
 		tracker: "not-an-object",
 		hooks: { deploy: { before: [{ run: "x" }] } },
+		review: { brainstorm: "human", design: "panel", code: "panel", tasks: "subagent", panelSize: 2, onShortfall: "proceed" },
+		shape: { separateSpec: true, publishToTracker: 2, defaultTrack: "irreversible" },
 	};
 	const issues = inspectConfig(raw);
 	assert.ok(issues.length >= 7, `expected multiple aggregated issues, got ${JSON.stringify(issues)}`);
@@ -173,7 +177,7 @@ test("RL7: inspectConfig — aggregates every issue in validation-rule order, ne
 	assert.deepEqual(inspectConfig(raw), issues);
 	// validation-rule order: unknown key first, then schemaVersion, then prefix...
 	assert.equal(issues[0].message, "unknown key 'bogus'");
-	assert.equal(issues[1].message, "schemaVersion must be 2 (got 3)");
+	assert.equal(issues[1].message, "schemaVersion must be 3 (got 2)");
 	assert.match(issues[2].message, /^prefix must match /);
 	const messages = issues.map((i) => i.message);
 	assert.ok(messages.includes("announce must be a non-empty string"));

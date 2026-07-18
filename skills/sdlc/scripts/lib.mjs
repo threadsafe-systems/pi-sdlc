@@ -23,9 +23,9 @@ export const USE_RE = /^(skill|tool):[a-z][a-z0-9_-]*$/;
 const SINGLE_LINE_RE = /^[^\r\n]+$/; // non-empty, single-line (run/do)
 const GATE_MODES = new Set(["panel", "advisory", "human", "off"]);
 
-export const CONFIG_SCHEMA_VERSION = 2;
-export const KNOWN_PAST_VERSIONS = new Set([1]);
-export const REMEDY_SCHEMA_OLDER = (found) => `config schemaVersion ${found} predates this skill (requires ${CONFIG_SCHEMA_VERSION}) — run the setup-sdlc migration interactively to fold it forward, or pin pi-sdlc to a release before the schema-2 major`;
+export const CONFIG_SCHEMA_VERSION = 3;
+export const KNOWN_PAST_VERSIONS = new Set([1, 2]);
+export const REMEDY_SCHEMA_OLDER = (found) => `config schemaVersion ${found} predates this skill (requires ${CONFIG_SCHEMA_VERSION}) — re-run setup-sdlc to write a fresh v3 config (--force to replace an existing one), or pin pi-sdlc to the release that wrote it; there is no pre-adoption fold-forward path`;
 export const REMEDY_SCHEMA_NEWER = (found) => `config schemaVersion ${found} is newer than this skill (requires ${CONFIG_SCHEMA_VERSION}) — upgrade pi-sdlc, or run the pinned pi-sdlc release that wrote this config`;
 
 // Hook phase vocabulary: the six lifecycle phases + '*' (every phase). This is
@@ -182,29 +182,10 @@ export function readConfig(root, { requireManifest = false } = {}) {
 		paths: { ...CONFIG_DEFAULTS.paths, ...(raw.paths ?? {}) },
 		tracker: raw.tracker,
 		hooks: raw.hooks,
-		...(raw.lifecycle === undefined ? {} : { lifecycle: raw.lifecycle }),
-		...(raw.enforcement === undefined ? {} : { enforcement: raw.enforcement }),
+		...(raw.review === undefined ? {} : { review: raw.review }),
+		...(raw.shape === undefined ? {} : { shape: raw.shape }),
+		...(raw.overrides === undefined ? {} : { overrides: raw.overrides }),
 		...(raw.panels === undefined ? {} : { panels: raw.panels }),
-	};
-}
-
-// Setup/migration-only bypass. Absence and malformation remain distinct so a
-// malformed consumer file can never be mistaken for an absent roster.
-export function readConfigRawForMigration(root) {
-	const readRaw = (p) => {
-		if (!existsSync(p)) return { status: "absent" };
-		let text = "";
-		try {
-			text = readFileSync(p, "utf8");
-			return { status: "parsed", value: JSON.parse(text), text };
-		} catch (error) {
-			return { status: "malformed", error: String(error?.message ?? error), text };
-		}
-	};
-	const dir = join(root, ".pi", "sdlc");
-	return {
-		config: readRaw(join(dir, "sdlc.config.json")),
-		models: readRaw(join(dir, "sdlc.models.json")),
 	};
 }
 
@@ -218,7 +199,7 @@ export function inspectConfig(raw) {
 		add("", "must be a JSON object");
 		return issues;
 	}
-	const allowed = new Set(["schemaVersion", "prefix", "labelPrefix", "announce", "paths", "tracker", "hooks", "lifecycle", "enforcement", "panels"]);
+	const allowed = new Set(["schemaVersion", "prefix", "labelPrefix", "announce", "paths", "tracker", "hooks", "review", "shape", "overrides", "panels"]);
 	for (const k of Object.keys(raw)) {
 		if (!allowed.has(k)) add(k, `unknown key '${k}'`);
 	}
@@ -266,10 +247,11 @@ export function inspectConfig(raw) {
 		}
 	}
 	if (raw.hooks !== undefined) issues.push(...collectHookIssues(raw.hooks));
-	if (raw.lifecycle !== undefined) issues.push(...collectLifecycleIssues(raw.lifecycle));
-	if (raw.enforcement !== undefined && raw.enforcement !== "strict" && raw.enforcement !== "preference") {
-		add("enforcement", "enforcement must be one of strict, preference");
-	}
+	if (raw.review === undefined) add("review", "review is required");
+	else issues.push(...collectReviewIssues(raw.review));
+	if (raw.shape === undefined) add("shape", "shape is required");
+	else issues.push(...collectShapeIssues(raw.shape));
+	if (raw.overrides !== undefined) issues.push(...collectOverridesIssues(raw.overrides));
 	if (raw.panels !== undefined) issues.push(...collectPanelIssues(raw.panels));
 	return issues;
 }
@@ -281,25 +263,13 @@ function collectPanelIssues(panels) {
 		add("panels", "panels must be an object");
 		return issues;
 	}
-	const allowed = new Set(["$comment", "authorDefault", "rules", "phases"]);
+	const allowed = new Set(["$comment", "authorDefault", "phases"]);
 	for (const key of Object.keys(panels)) {
 		if (!allowed.has(key)) add(`panels.${key}`, `unknown panels key '${key}'`);
 	}
 	if (panels.$comment !== undefined && typeof panels.$comment !== "string") add("panels.$comment", "panels.$comment must be a string");
 	if (panels.authorDefault !== undefined && (typeof panels.authorDefault !== "string" || !PM_RE.test(panels.authorDefault))) {
 		add("panels.authorDefault", "panels.authorDefault must be provider/model");
-	}
-	if (panels.rules !== undefined) {
-		if (!isPlainObject(panels.rules)) {
-			add("panels.rules", "panels.rules must be an object");
-		} else {
-			for (const key of Object.keys(panels.rules)) {
-				if (key !== "excludeAuthorVendor") add(`panels.rules.${key}`, `unknown panels.rules key '${key}'`);
-			}
-			if (panels.rules.excludeAuthorVendor !== undefined && typeof panels.rules.excludeAuthorVendor !== "boolean") {
-				add("panels.rules.excludeAuthorVendor", "panels.rules.excludeAuthorVendor must be boolean");
-			}
-		}
 	}
 	if (!isPlainObject(panels.phases)) {
 		add("panels.phases", "panels.phases must be an object");
@@ -320,10 +290,10 @@ function collectPanelIssues(panels) {
 			continue;
 		}
 		for (const key of Object.keys(value)) {
-			if (key !== "minVendor" && key !== "prefer") add(`${at}.${key}`, `unknown key ${at}.${key}`);
+			if (key !== "panelSize" && key !== "prefer") add(`${at}.${key}`, `unknown key ${at}.${key}`);
 		}
-		if (value.minVendor !== undefined && (!Number.isInteger(value.minVendor) || value.minVendor < 1)) {
-			add(`${at}.minVendor`, `${at}.minVendor must be an integer >= 1`);
+		if (value.panelSize !== undefined && (!Number.isInteger(value.panelSize) || value.panelSize < 1)) {
+			add(`${at}.panelSize`, `${at}.panelSize must be an integer >= 1`);
 		}
 		if (!Array.isArray(value.prefer) || value.prefer.length === 0) {
 			add(`${at}.prefer`, `${at}.prefer must be a non-empty array`);
@@ -336,105 +306,117 @@ function collectPanelIssues(panels) {
 	return issues;
 }
 
-function collectLifecycleIssues(lifecycle) {
+// v3 intent vocabulary (schemaVersion 3). Closed enums; the merge gate has no
+// key; overrides keys are exactly the two lifecycle tracks (never `none`).
+const TASKS_MODES = new Set(["subagent", "self", "off"]);
+const TRACK_KEYS = new Set(["irreversible", "reversible"]);
+const REVIEW_DIAL_KEYS = new Set(["brainstorm", "design", "code", "tasks", "panelSize", "onShortfall"]);
+
+// One dial validator shared by review.* and overrides.<track>.review.*.
+function validateReviewDial(at, key, value, add) {
+	switch (key) {
+		case "brainstorm":
+			if (!new Set(["human", "off"]).has(value)) add(`${at}.brainstorm`, `${at}.brainstorm must be one of human, off`);
+			break;
+		case "design":
+			if (!GATE_MODES.has(value)) add(`${at}.design`, `${at}.design must be one of panel, advisory, human, off`);
+			break;
+		case "code":
+			if (!GATE_MODES.has(value)) add(`${at}.code`, `${at}.code must be one of panel, advisory, human, off`);
+			break;
+		case "tasks":
+			if (!TASKS_MODES.has(value)) add(`${at}.tasks`, `${at}.tasks must be one of subagent, self, off`);
+			break;
+		case "panelSize":
+			if (!Number.isInteger(value) || value < 1) add(`${at}.panelSize`, `${at}.panelSize must be an integer >= 1`);
+			break;
+		case "onShortfall":
+			if (!new Set(["proceed", "fail"]).has(value)) add(`${at}.onShortfall`, `${at}.onShortfall must be one of proceed, fail`);
+			break;
+		default:
+			add(`${at}.${key}`, `unknown key ${at}.${key}`);
+	}
+}
+
+function collectReviewIssues(review) {
 	const issues = [];
 	const add = (path, message) => issues.push({ path, message });
-	if (!isPlainObject(lifecycle)) {
-		add("lifecycle", "lifecycle must be an object");
+	if (!isPlainObject(review)) {
+		add("review", "review must be an object");
 		return issues;
 	}
-	const allowed = new Set(["profile", "gates", "phases", "tracker", "taskValidation", "tracks"]);
-	for (const k of Object.keys(lifecycle)) {
-		if (!allowed.has(k)) add("lifecycle", `unknown key '${k}'`);
+	for (const key of Object.keys(review)) {
+		if (!REVIEW_DIAL_KEYS.has(key)) add(`review.${key}`, `unknown key review.${key}`);
 	}
-	if (!new Set(["solo", "standard", "full", "custom"]).has(lifecycle.profile)) {
-		add("lifecycle.profile", "lifecycle.profile must be one of solo, standard, full, custom");
-	}
-	if (lifecycle.gates !== undefined) collectLifecycleGates(lifecycle.gates, add);
-	collectLifecycleSection(lifecycle.phases, "phases", new Set(["mergePlanSpec"]), add, (key, value) => {
-		if (key === "mergePlanSpec" && typeof value !== "boolean") add("lifecycle.phases.mergePlanSpec", "lifecycle.phases.mergePlanSpec must be a boolean");
-	});
-	collectLifecycleSection(lifecycle.tracker, "tracker", new Set(["publishThreshold"]), add, (key, value) => {
-		if (key === "publishThreshold" && value !== "never" && (!Number.isInteger(value) || value < 1)) {
-			add("lifecycle.tracker.publishThreshold", "lifecycle.tracker.publishThreshold must be an integer >= 1 or 'never'");
-		}
-	});
-	collectLifecycleSection(lifecycle.taskValidation, "taskValidation", new Set(["mode"]), add, (key, value) => {
-		if (key === "mode" && !new Set(["subagent", "self", "off"]).has(value)) add("lifecycle.taskValidation.mode", "lifecycle.taskValidation.mode must be one of subagent, self, off");
-	});
-	collectLifecycleSection(lifecycle.tracks, "tracks", new Set(["defaultTrack"]), add, (key, value) => {
-		if (key === "defaultTrack" && !new Set(["irreversible", "reversible"]).has(value)) add("lifecycle.tracks.defaultTrack", "lifecycle.tracks.defaultTrack must be one of irreversible, reversible");
-	});
-	if (lifecycle.phases?.mergePlanSpec === true && isPlainObject(lifecycle.gates) && lifecycle.gates.spec_review !== undefined) {
-		add("lifecycle.gates.spec_review", "lifecycle.gates.spec_review must be absent when lifecycle.phases.mergePlanSpec is true");
+	// All six dials are required — v3 is always explicit.
+	for (const key of REVIEW_DIAL_KEYS) {
+		if (!(key in review)) add(`review.${key}`, `review.${key} is required`);
+		else validateReviewDial("review", key, review[key], add);
 	}
 	return issues;
 }
 
-function collectLifecycleSection(value, name, allowed, add, validateEntry) {
-	if (value === undefined) return;
-	const at = `lifecycle.${name}`;
-	if (!isPlainObject(value)) {
-		add(at, `${at} must be an object`);
-		return;
+function collectShapeIssues(shape) {
+	const issues = [];
+	const add = (path, message) => issues.push({ path, message });
+	if (!isPlainObject(shape)) {
+		add("shape", "shape must be an object");
+		return issues;
 	}
-	for (const [key, entry] of Object.entries(value)) {
-		if (!allowed.has(key)) add(at, `unknown key '${key}'`);
-		else validateEntry(key, entry);
+	const allowed = new Set(["separateSpec", "publishToTracker", "defaultTrack"]);
+	for (const key of Object.keys(shape)) {
+		if (!allowed.has(key)) add(`shape.${key}`, `unknown key shape.${key}`);
 	}
+	if (!("separateSpec" in shape)) add("shape.separateSpec", "shape.separateSpec is required");
+	else if (typeof shape.separateSpec !== "boolean") add("shape.separateSpec", "shape.separateSpec must be a boolean");
+	if (!("publishToTracker" in shape)) add("shape.publishToTracker", "shape.publishToTracker is required");
+	else if (shape.publishToTracker !== "never" && (!Number.isInteger(shape.publishToTracker) || shape.publishToTracker < 1)) {
+		add("shape.publishToTracker", "shape.publishToTracker must be an integer >= 1 or 'never'");
+	}
+	if (!("defaultTrack" in shape)) add("shape.defaultTrack", "shape.defaultTrack is required");
+	else if (!TRACK_KEYS.has(shape.defaultTrack)) add("shape.defaultTrack", "shape.defaultTrack must be one of irreversible, reversible");
+	return issues;
 }
 
-function collectLifecycleGates(gates, add) {
-	if (!isPlainObject(gates)) {
-		add("lifecycle.gates", "lifecycle.gates must be an object");
-		return;
-	}
-	const allowed = new Set(["brainstorm", "plan_review", "spec_review", "pr_review"]);
-	for (const key of Object.keys(gates)) {
-		if (!allowed.has(key)) add("lifecycle.gates", `unknown key '${key}'`);
-	}
-	for (const gate of ["brainstorm", "plan_review", "spec_review", "pr_review"]) {
-		if (gates[gate] !== undefined) collectLifecycleGate(gate, gates[gate], add);
-	}
-}
+// Per-track overrides. Only design/code/tasks/panelSize are per-track;
+// brainstorm and onShortfall are not (they carry no per-track meaning).
+const OVERRIDE_DIAL_KEYS = new Set(["design", "code", "tasks", "panelSize"]);
 
-function collectLifecycleGate(gate, value, add) {
-	const at = `lifecycle.gates.${gate}`;
-	if (!isPlainObject(value)) {
-		add(at, `${at} must be an object`);
-		return;
+function collectOverridesIssues(overrides) {
+	const issues = [];
+	const add = (path, message) => issues.push({ path, message });
+	if (!isPlainObject(overrides)) {
+		add("overrides", "overrides must be an object");
+		return issues;
 	}
-	const allowed = gate === "brainstorm" ? new Set(["mode"]) : new Set(["mode", "minPanel"]);
-	for (const key of Object.keys(value)) {
-		if (!allowed.has(key)) add(at, `unknown key '${key}'`);
+	const keys = Object.keys(overrides);
+	if (keys.length === 0) add("overrides", "overrides must contain at least one track");
+	for (const track of keys) {
+		const at = `overrides.${track}`;
+		if (!TRACK_KEYS.has(track)) {
+			add(at, `unknown track '${track}' (overrides keys are exactly irreversible, reversible)`);
+			continue;
+		}
+		const block = overrides[track];
+		if (!isPlainObject(block)) {
+			add(at, `${at} must be an object`);
+			continue;
+		}
+		for (const key of Object.keys(block)) {
+			if (key !== "review") add(`${at}.${key}`, `unknown key ${at}.${key}`);
+		}
+		if (!isPlainObject(block.review)) {
+			add(`${at}.review`, `${at}.review must be an object`);
+			continue;
+		}
+		const reviewKeys = Object.keys(block.review);
+		if (reviewKeys.length === 0) add(`${at}.review`, `${at}.review must contain at least one dial`);
+		for (const key of reviewKeys) {
+			if (!OVERRIDE_DIAL_KEYS.has(key)) add(`${at}.review.${key}`, `unknown key ${at}.review.${key} (per-track dials are design, code, tasks, panelSize)`);
+			else validateReviewDial(`${at}.review`, key, block.review[key], add);
+		}
 	}
-	if (!("mode" in value)) add(`${at}.mode`, `${at}.mode is required`);
-	else validateLifecycleGateMode(gate, value.mode, add);
-	if (gate !== "brainstorm" && value.minPanel !== undefined && (!Number.isInteger(value.minPanel) || value.minPanel < 1)) {
-		add(`${at}.minPanel`, `${at}.minPanel must be an integer >= 1`);
-	}
-}
-
-function validateLifecycleGateMode(gate, mode, add) {
-	const at = `lifecycle.gates.${gate}.mode`;
-	if (gate === "brainstorm") {
-		if (!new Set(["human", "off"]).has(mode)) add(at, `${at} must be one of human, off`);
-		return;
-	}
-	if (typeof mode === "string") {
-		if (!GATE_MODES.has(mode)) add(at, `${at} must be one of panel, advisory, human, off`);
-		return;
-	}
-	if (gate === "pr_review" || !isPlainObject(mode)) {
-		add(at, `${at} must be a gate mode${gate === "pr_review" ? "" : " or per-track object"}`);
-		return;
-	}
-	const allowedTracks = gate === "spec_review" ? new Set(["irreversible"]) : new Set(["irreversible", "reversible"]);
-	if (Object.keys(mode).length === 0) add(at, `${at} must contain at least one track`);
-	for (const [track, trackMode] of Object.entries(mode)) {
-		if (!allowedTracks.has(track)) add(at, `unknown track '${track}'`);
-		else if (!GATE_MODES.has(trackMode)) add(`${at}.${track}`, `${at}.${track} must be one of panel, advisory, human, off`);
-	}
+	return issues;
 }
 
 export function validateConfig(raw, p) {

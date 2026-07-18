@@ -40,10 +40,11 @@ code (prefer `--format json` when parsing):
 5. **Exit 3 (`not-ready`)**: do NOT announce. State that the repo is adopted
    but incomplete (for example uncommitted manifest changes or a missing
    `panels` block), list the report's remediations, and stop the SDLC. When
-   `config.schema-current` is the failing check, the one sanctioned action
-   besides pinning the older skill release is to run the `setup-sdlc` migration
-   interactively. Never hand-edit `schemaVersion` or the config shape. Do not
-   offer advisory mode as a bypass.
+   `config.schema-current` is the failing check, the sanctioned actions are to
+   pin the older skill release, or (accepting the clean break) re-run `setup-sdlc`
+   to write a fresh current-schema config (`--force` to replace an existing one) —
+   there is no pre-adoption config fold-forward.
+   Never hand-edit `schemaVersion` or the config shape. Do not offer advisory mode as a bypass.
 
 Before `sdlc-status` exits 0 the agent MUST NOT enter any lifecycle phase, MUST
 NOT fire configured hooks, MUST NOT stamp panel agents, MUST NOT create or
@@ -71,7 +72,19 @@ A change is **irreversible** if it freezes a shape other code, data, or
 extensions bind to: public interfaces, contracts, persisted schemas, wire
 formats, stored-record shapes, anything a consumer or stored record commits to.
 Everything else is **reversible** (internal refactors, docs, tests, tooling).
-When in doubt, it is irreversible.
+When in doubt, use the repo's committed `shape.defaultTrack` (default
+`irreversible`).
+
+The phase/gate table below states the **maximal** shape. Which gates actually
+run, and at what strength, is the repo's committed config: `review.design`
+(`panel` | `advisory` | `human` | `off`) gates plan+spec, `review.code`
+(same four) gates the PR, `review.tasks` (`subagent` | `self` | `off`) sets
+per-task validation, and `review.brainstorm` (`human` | `off`) sets the
+brainstorm gate; per-track `overrides` (keys `irreversible`/`reversible`) may
+adjust `design`/`code`/`tasks`/`panelSize`. `shape.separateSpec: false` merges
+Plan and Spec into one gated artifact. Read the committed
+`.pi/sdlc/sdlc.config.json` (and its `CONFIG.md` companion when present) for
+the authoritative dials.
 
 | Track | Phases required | Design panels |
 |---|---|---|
@@ -101,8 +114,9 @@ present declaration always dominates.
 ¹ Both have a second mode for scale, backed by GitHub's native sub-issue and
 blocking relationships (see `assets/tracker-ops.md`) — see the two sections
 below. Brainstorm can run as a **map** for oversized/foggy efforts; Build can
-publish as an **epic + sub-issues + board** once a build plan has two or more
-tasks. Each mode has its own canonical source (map mode: the map issue itself;
+publish as an **epic + sub-issues + board** once a build plan meets the
+committed `shape.publishToTracker` threshold. Each mode has its own canonical
+source (map mode: the map issue itself;
 tracker-backed build: the committed build-plan doc) — see each section for
 which.
 
@@ -199,8 +213,10 @@ brainstorm dialogue instead.
 The committed build-plan doc (`<configured paths.plans>/<date>-<feat>-build.md`) stays the
 canonical task breakdown — objectives, rationale, check commands, and
 scenario ids per task never live only in the tracker. Whenever that breakdown
-has **two or more tasks**, publish it as tracker objects too, so the work is
-visible and resumable across sessions without reopening the build-plan doc:
+has at least the repo's committed `shape.publishToTracker` count of tasks
+(the committed value is authoritative; `"never"` disables the publish step),
+publish it as tracker objects too, so the work is visible and resumable across
+sessions without reopening the build-plan doc:
 
 - One **epic issue** (label `<LABEL_PREFIX>:epic`), body linking the plan/spec/
   build-plan docs and restating the definition of done.
@@ -217,8 +233,9 @@ visible and resumable across sessions without reopening the build-plan doc:
   `→ Done` on merge/close, `→ Blocked` on an external stall. The epic itself
   moves to `Done` only once every sub-issue is closed.
 
-A single-task build stays a plain committed build-plan doc — the tracker
-overhead isn't proportionate for one task. **Implement** then works the
+A build below the committed `shape.publishToTracker` threshold (or any build
+when it is `"never"`) stays a plain committed build-plan doc — the tracker
+overhead isn't proportionate. **Implement** then works the
 board's frontier one sub-issue at a time, same discipline as working a map:
 claim before starting, close and update the board on completion, and let a
 PR's `Closes #<sub-issue>` list do the bookkeeping it already does today.
@@ -243,14 +260,16 @@ per model.
 1. **Resolve the panel** for the phase (live, deduped, author-excluded):
 
    ```bash
-   scripts/resolve-panel.sh <plan_review|spec_review|pr_review|task_validate> --author <author-vendor>
+   scripts/resolve-panel.sh <plan_review|spec_review|pr_review|task_validate> --author <provider/model>
    ```
 
    It reads the merged config's `panels` block, keeps models with credentials,
-   and applies the configured phase floor and author-exclusion rule under the
-   config's `strict` or `preference` enforcement posture. Add `--pong` for a
+   and applies the configured phase floor (`review.panelSize`, or a per-phase
+   `panels.phases.<phase>.panelSize` override) and author-exclusion rule under
+   the config's `review.onShortfall` posture (`fail` = hard-fail below the
+   floor; `proceed` = best-effort and surface it). Add `--pong` for a
    live smoke test when you want it (costs a call per candidate; off by default
-   for cost). When `resolve-panel` prints a preference-mode shortfall advisory,
+   for cost). When `resolve-panel` prints a `proceed`-mode shortfall advisory,
    carry it into that phase's consolidated writeup and, at PR phase, into the PR
    itself as a comment or adjudication note. Do not commit a standalone
    decision log for the shortfall.
@@ -262,7 +281,7 @@ per model.
 
      ```bash
      scripts/ensure-panel-agent.sh pr_review   # writes .pi/agents/<prefix>-pr-review.md
-     scripts/resolve-panel.sh pr_review --author <vendor> --emit-tasks <prefix>-pr-review
+     scripts/resolve-panel.sh pr_review --author <provider/model> --emit-tasks <prefix>-pr-review
      ```
 
      `--emit-tasks` prints a ready-to-paste `subagent` `tasks: [...]` array. Replace
@@ -311,14 +330,20 @@ and the orchestrating model.
 
 ## Per-task validator (implementation)
 
-Each task ends with one validator subagent, a checklist executor, not a judge.
+The committed `review.tasks` dial selects how each task is validated:
+`subagent` (the default described here) ends each task with one validator
+subagent; `self` has the implementer run the same declared checks directly (no
+subagent dispatch — `resolve-panel task_validate` refuses); `off` skips
+per-task validation entirely. Under `subagent`, each task ends with one
+validator subagent, a checklist executor, not a judge.
 Validation is **portable and deterministic**: the task's checks are whatever its
 approved Build task declared, never a language or tool the skill imposes. There
 is no unconditional `npx tsc --noEmit` and no assumed `CONTRIBUTORS` file; a
 TypeScript task declares `tsc`, a JavaScript task declares `node --check` and its
 linter, another repo declares its own tools.
 
-Every implementation task carries a committed **PV1 validation manifest**
+Every implementation task **under `review.tasks: subagent` or `self`** carries
+a committed **PV1 validation manifest**
 (`<repository validation home>/<feature>/<task-id>.json`, schema
 `schema/task-validation-manifest.schema.json`) projected from its canonical
 Build task. The manifest names, as exact argv arrays, the task's checks across
@@ -332,13 +357,17 @@ declared argv with no shell, evaluates categories and scenarios, bounds and
 redacts command evidence, and returns `PASS` (exit 0), `FAIL` (exit 1), or
 `ERROR` (exit 2). Build, not the validator, owns which commands run and which
 categories are `n/a`; the validator cannot invent a command, weaken a check, or
-decide applicability. The validator subagent (see
+decide applicability. Under `subagent`, the validator subagent (see
 `prompts/validator-task.prompt.md`) runs the runner, confirms exit and report
-verdict agree, and reports each result. A nonzero runner result blocks task
-completion; a task is not done until the runner returns PASS. Each task stores a
-runtime receipt (manifest copy, runner report, generated-agent copy, hashes,
-model, verdicts) under `docs/reviews/task-validate-<feature>-<task-id>-<date>/`,
-verifiable with `scripts/verify-task-receipt.mjs`. Judgement review happens later
+verdict agree, and reports each result; under `self` the implementer runs the
+runner directly (same runner, no subagent dispatch). A nonzero runner result
+blocks task completion; a task is not done until the runner returns PASS. Each
+task stores a runtime receipt (manifest copy, runner report, hashes, verdicts,
+plus the generated-agent copy and model under `subagent`) under
+`docs/reviews/task-validate-<feature>-<task-id>-<date>/`,
+verifiable with `scripts/verify-task-receipt.mjs`. Under `off` none of this
+section applies: no manifest, runner, receipt, or PASS gate is required.
+Judgement review happens later
 at the PR panel. Model preference: `deepseek/deepseek-v4-flash`, then
 `anthropic/claude-haiku-4-5` — a `:low` (or `:off`) thinking suffix on either
 fits this role well, since a checklist executor doesn't need deep reasoning (see
@@ -352,7 +381,8 @@ Specification, Build plan; reversible: plan and Build plan, never a
 Specification; none: a reason — and, for a tracker-backed Build, list the
 epic, every task sub-issue, and the shared board. Add `Closes #<task-issue>`
 for each task completed by merging the PR; use the explicit no-tracker
-exemption for single-task or `track: none` changes. The PR body describes the
+exemption for a below-threshold (per `shape.publishToTracker`) or `track: none`
+change. The PR body describes the
 change for its audience; it does not carry the local panel's development
 findings.
 
@@ -514,7 +544,8 @@ governing docs are historical record and are not migrated.
   implementation without a Build correction and renewed approval.
 - A stale whole-file validator prompt override claiming portable validation
   without adopting the PV1 manifest / PV2 runner contract.
-- A build plan with two or more tasks that skips the epic/sub-issue/board
+- A build plan meeting the committed `shape.publishToTracker` threshold that
+  skips the epic/sub-issue/board
   publish step.
 - Treating the tracker (map, epic, sub-issues, board) as the source of truth
   instead of the committed doc it projects.

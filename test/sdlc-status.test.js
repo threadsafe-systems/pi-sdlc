@@ -12,8 +12,8 @@ import { test } from "node:test";
 import { baseEnv, gitFixture, readyFixture, runStatus, VALID_CONFIG } from "./fs8-helpers.js";
 
 const CANONICAL_IDS = ["cli.arguments", "root.resolve", "git.repository", "adoption.manifest-head", "adoption.manifest-clean", "config.valid", "config.schema-current", "config.panels", "workflow.readable"];
-const OLDER_REMEDY = "config schemaVersion 1 predates this skill (requires 2) — run the setup-sdlc migration interactively to fold it forward, or pin pi-sdlc to a release before the schema-2 major";
-const NEWER_REMEDY = "config schemaVersion 3 is newer than this skill (requires 2) — upgrade pi-sdlc, or run the pinned pi-sdlc release that wrote this config";
+const OLDER_REMEDY = "config schemaVersion 1 predates this skill (requires 3) — re-run setup-sdlc to write a fresh v3 config (--force to replace an existing one), or pin pi-sdlc to the release that wrote it; there is no pre-adoption fold-forward path";
+const NEWER_REMEDY = "config schemaVersion 4 is newer than this skill (requires 3) — upgrade pi-sdlc, or run the pinned pi-sdlc release that wrote this config";
 
 function reportOf(result) {
 	assert.equal(result.stderr, "");
@@ -60,7 +60,7 @@ test("CV19: committed migrated v2 config without a models file is ready in text 
 				assert.ok(report.checks.every((candidate) => !candidate.id.startsWith("models.")));
 			} else {
 				assert.match(result.stdout, /state: ready/);
-				assert.match(result.stdout, /check: config\.schema-current pass — config schema is current \(schemaVersion 2\)/);
+				assert.match(result.stdout, /check: config\.schema-current pass — config schema is current \(schemaVersion 3\)/);
 				assert.match(result.stdout, /check: config\.panels pass — panels roster present/);
 				assert.doesNotMatch(result.stdout, /check: models\./);
 			}
@@ -90,12 +90,12 @@ test("CV17: recognised v1 is not-ready with canonical migration remedy and unrel
 		assert.deepEqual(check(report, "config.valid"), {
 			id: "config.valid",
 			status: "pass",
-			message: "manifest parses; schemaVersion 1 is a recognised superseded schema (full validation deferred to migration)",
+			message: "manifest parses; schemaVersion 1 is a recognised superseded schema (full validation deferred until re-adoption on the current schema)",
 		});
 		assert.deepEqual(check(report, "config.schema-current"), {
 			id: "config.schema-current",
 			status: "fail",
-			message: "config schema is behind this skill (schemaVersion 1 < 2)",
+			message: "config schema is behind this skill (schemaVersion 1 < 3)",
 			remediation: OLDER_REMEDY,
 		});
 		assert.deepEqual(check(report, "config.panels"), {
@@ -109,8 +109,8 @@ test("CV17: recognised v1 is not-ready with canonical migration remedy and unrel
 	}
 });
 
-test("CV18: schemaVersion 3 is an error with the canonical newer remedy", () => {
-	const dir = gitFixture({ files: { ".pi/sdlc/sdlc.config.json": JSON.stringify({ ...VALID_CONFIG, schemaVersion: 3 }) } });
+test("CV18: schemaVersion 4 is an error with the canonical newer remedy", () => {
+	const dir = gitFixture({ files: { ".pi/sdlc/sdlc.config.json": JSON.stringify({ ...VALID_CONFIG, schemaVersion: 4 }) } });
 	try {
 		const result = runStatus(["--repo-root", dir, "--format", "json"]);
 		assert.equal(result.code, 2, result.stdout + result.stderr);
@@ -148,7 +148,7 @@ test("CV19: a panels-less v2 config is valid but not-ready", () => {
 test("CV20: malformed JSON and invalid schemaVersion remain config errors", () => {
 	const cases = {
 		"invalid JSON": { text: "{nope", message: "manifest is not valid JSON" },
-		"junk schemaVersion": { text: JSON.stringify({ ...VALID_CONFIG, schemaVersion: "2" }), message: 'manifest is invalid: schemaVersion must be 2 (got "2")' },
+		"junk schemaVersion": { text: JSON.stringify({ ...VALID_CONFIG, schemaVersion: "2" }), message: 'manifest is invalid: schemaVersion must be 3 (got "2")' },
 	};
 	for (const [label, fixture] of Object.entries(cases)) {
 		const dir = gitFixture({ files: { ".pi/sdlc/sdlc.config.json": fixture.text } });

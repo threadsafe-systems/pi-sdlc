@@ -200,7 +200,7 @@ test("CV29: CI and shipped bindings point at the merged config surface", () => {
 	assert.doesNotMatch(skillMd, /sdlc\.models\.schema\.json/);
 });
 
-test("CV30: repository and consumer dogfood fixtures use one schemaVersion-2 config", () => {
+test("CV30: repository and consumer dogfood fixtures use one schemaVersion-3 config", () => {
 	for (const root of [repo, join(repo, "test", "fixtures", "consumer")]) {
 		const dir = join(root, ".pi", "sdlc");
 		let config;
@@ -209,17 +209,19 @@ test("CV30: repository and consumer dogfood fixtures use one schemaVersion-2 con
 		} catch (error) {
 			assert.fail(`invalid dogfood config at ${root}: ${error.message}`);
 		}
-		assert.equal(config.schemaVersion, 2);
+		assert.equal(config.schemaVersion, 3);
+		assert.ok(config.review && config.shape, `${root} lacks v3 review/shape`);
 		assert.ok(config.panels && typeof config.panels === "object", `${root} lacks merged panels`);
 		assert.equal(existsSync(join(dir, "sdlc.models.json")), false, `${root} retains the retired models file`);
 	}
 });
 
-test("CV31: startup migration and preference-shortfall carry instructions are explicit", () => {
-	assert.match(skillMd, /`config\.schema-current`[\s\S]*one sanctioned action[\s\S]*`setup-sdlc` migration[\s\S]*interactively/);
+test("CV31: startup clean-break and shortfall carry instructions are explicit", () => {
+	assert.match(skillMd, /`config\.schema-current`[\s\S]*sanctioned actions[\s\S]*re-run `setup-sdlc`/);
+	assert.match(skillMd, /there is no pre-adoption config fold-forward/);
 	assert.match(skillMd, /Never hand-edit `schemaVersion` or the config shape/);
 	assert.match(skillMd, /merged config's `panels` block/);
-	assert.match(skillMd, /preference-mode shortfall advisory[\s\S]*consolidated writeup[\s\S]*PR\s+itself/);
+	assert.match(skillMd, /`proceed`-mode shortfall advisory[\s\S]*consolidated writeup[\s\S]*PR\s+itself/);
 	assert.match(skillMd, /Do not\s+commit a standalone\s+decision log/);
 });
 

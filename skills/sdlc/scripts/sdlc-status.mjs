@@ -1,7 +1,8 @@
 #!/usr/bin/env node
-// sdlc-status.mjs — FS8 v2 four-state readiness inspection (spec
-// docs/specs/2026-07-16-config-versioning-migration.md §6). Read-only: bounded
-// git/filesystem checks, no hooks, no model calls, no network, no mutation.
+// sdlc-status.mjs — FS8 four-state readiness inspection (config-versioning
+// spec §6; version classification updated for schemaVersion 3 per ADR 0026).
+// Read-only: bounded git/filesystem checks, no hooks, no model calls, no
+// network, no mutation.
 //
 // Usage: sdlc-status.mjs [--config DIR | --repo-root DIR] [--format text|json]
 // Exit: 0 ready; 1 not-adopted (HEAD has no manifest blob); 2 error
@@ -215,8 +216,8 @@ function buildReport(argv, cwd) {
 		else set("adoption.manifest-clean", "error", "git could not compare the manifest against HEAD", "check repository integrity with git status");
 	}
 
-	// FS8 v2 version split: recognised older schemas are structurally deferred
-	// to migration, while newer/invalid schemas remain resolution errors.
+	// Version split: recognised older schemas defer full validation (there is no
+	// pre-adoption fold-forward), while newer/invalid schemas remain resolution errors.
 	let manifestRaw;
 	let versionClassification;
 	if (statusOf(results, "adoption.manifest-clean") === "pass") {
@@ -235,7 +236,7 @@ function buildReport(argv, cwd) {
 				const issues = inspectConfig(manifestRaw);
 				if (issues.length > 0) failure = `manifest is invalid: ${issues[0].message}`;
 			} else if (versionClassification.kind === "older") {
-				set("config.valid", "pass", `manifest parses; schemaVersion ${versionClassification.version} is a recognised superseded schema (full validation deferred to migration)`);
+				set("config.valid", "pass", `manifest parses; schemaVersion ${versionClassification.version} is a recognised superseded schema (full validation deferred until re-adoption on the current schema)`);
 			} else if (versionClassification.kind === "newer") {
 				set("config.valid", "error", REMEDY_SCHEMA_NEWER(versionClassification.version));
 			} else {

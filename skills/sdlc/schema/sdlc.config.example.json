@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 2,
+  "schemaVersion": 3,
   "prefix": "acme",
   "labelPrefix": "acme-sdlc",
   "announce": "Using the sdlc skill to drive this change through its lifecycle.",
@@ -24,76 +24,32 @@
           "do": "Create AND enter a worktree for the feature branch so the session's working root moves into it; target all subsequent writes there."
         }
       ]
-    },
-    "*": {
-      "after": [
-        {
-          "run": "scripts/notify.sh sdlc-phase-done"
-        }
-      ]
     }
   },
-  "lifecycle": {
-    "profile": "full",
-    "gates": {
-      "brainstorm": {
-        "mode": "human"
-      },
-      "plan_review": {
-        "mode": {
-          "irreversible": "panel",
-          "reversible": "human"
-        },
-        "minPanel": 2
-      },
-      "spec_review": {
-        "mode": {
-          "irreversible": "panel"
-        },
-        "minPanel": 2
-      },
-      "pr_review": {
-        "mode": "panel",
-        "minPanel": 2
-      }
-    },
-    "phases": {
-      "mergePlanSpec": false
-    },
-    "tracker": {
-      "publishThreshold": 2
-    },
-    "taskValidation": {
-      "mode": "subagent"
-    },
-    "tracks": {
-      "defaultTrack": "irreversible"
-    }
+  "review": {
+    "brainstorm": "human",
+    "design": "panel",
+    "code": "panel",
+    "tasks": "subagent",
+    "panelSize": 2,
+    "onShortfall": "proceed"
   },
-  "enforcement": "preference",
+  "shape": {
+    "separateSpec": true,
+    "publishToTracker": 2,
+    "defaultTrack": "irreversible"
+  },
+  "overrides": {
+    "reversible": { "review": { "design": "human" } }
+  },
   "panels": {
-    "$comment": "Example panel preferences; model ids drift and should be reviewed after seeding.",
+    "$comment": "Panel roster. Model ids drift; re-check with `pi --list-models`. Entries may carry pi's ':<thinking>' suffix. panelSize is an optional per-phase floor override of review.panelSize (distinct-model axis).",
     "authorDefault": "anthropic/claude-sonnet-4",
-    "rules": {
-      "excludeAuthorVendor": true
-    },
     "phases": {
-      "plan_review": {
-        "minVendor": 2,
-        "prefer": ["openai/gpt-5:high", "deepseek/deepseek-v3", "anthropic/claude-opus-4:high"]
-      },
-      "spec_review": {
-        "minVendor": 2,
-        "prefer": ["anthropic/claude-opus-4", "openai/gpt-5", "deepseek/deepseek-v3"]
-      },
-      "pr_review": {
-        "minVendor": 2,
-        "prefer": ["anthropic/claude-opus-4", "openai/gpt-5", "deepseek/deepseek-v3", "zai/glm-4"]
-      },
-      "task_validate": {
-        "minVendor": 1,
-        "prefer": ["deepseek/deepseek-v3", "anthropic/claude-haiku-4"]
-      }
+      "plan_review": { "prefer": ["openai/gpt-5:high", "deepseek/deepseek-v3", "anthropic/claude-opus-4:high"] },
+      "spec_review": { "prefer": ["anthropic/claude-opus-4", "openai/gpt-5", "deepseek/deepseek-v3"] },
+      "pr_review": { "panelSize": 3, "prefer": ["anthropic/claude-opus-4", "openai/gpt-5", "deepseek/deepseek-v3", "zai/glm-4"] },
+      "task_validate": { "panelSize": 1, "prefer": ["deepseek/deepseek-v3", "anthropic/claude-haiku-4"] }
     }
   }
 }

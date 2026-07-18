@@ -31,36 +31,39 @@ test("readConfig returns current defaults when the manifest is absent", () => {
 	assert.deepEqual(readConfig(root), { ...CONFIG_DEFAULTS, paths: { ...CONFIG_DEFAULTS.paths }, tracker: undefined });
 });
 
-test("readConfig validates and returns merged v2 fields", () => {
+test("readConfig validates and returns merged v3 fields", () => {
 	const root = tempRoot();
 	const panels = {
 		phases: Object.fromEntries(["plan_review", "spec_review", "pr_review", "task_validate"].map((phase) => [phase, { prefer: ["p/m"] }])),
 	};
-	writeConfig(root, { schemaVersion: 2, prefix: "x", labelPrefix: "x", announce: "x", paths: { plans: "plans" }, enforcement: "strict", panels });
+	const review = { brainstorm: "human", design: "panel", code: "panel", tasks: "subagent", panelSize: 2, onShortfall: "fail" };
+	const shape = { separateSpec: true, publishToTracker: 2, defaultTrack: "irreversible" };
+	writeConfig(root, { schemaVersion: 3, prefix: "x", labelPrefix: "x", announce: "x", paths: { plans: "plans" }, review, shape, panels });
 	assert.deepEqual(readConfig(root), {
-		schemaVersion: 2,
+		schemaVersion: 3,
 		prefix: "x",
 		labelPrefix: "x",
 		announce: "x",
 		paths: { ...CONFIG_DEFAULTS.paths, plans: "plans" },
 		tracker: undefined,
 		hooks: undefined,
-		enforcement: "strict",
+		review,
+		shape,
 		panels,
 	});
 });
 
 test("readConfig keeps newer and malformed version diagnostics distinct", () => {
 	const newerRoot = tempRoot();
-	writeConfig(newerRoot, { schemaVersion: 3 });
+	writeConfig(newerRoot, { schemaVersion: 4 });
 	const newer = childRead(newerRoot);
 	assert.equal(newer.status, 2);
-	assert.equal(newer.stderr, `sdlc: ${REMEDY_SCHEMA_NEWER(3)}\n`);
+	assert.equal(newer.stderr, `sdlc: ${REMEDY_SCHEMA_NEWER(4)}\n`);
 
 	const invalidRoot = tempRoot();
-	writeConfig(invalidRoot, { schemaVersion: "2", prefix: "x", labelPrefix: "x", announce: "x" });
+	writeConfig(invalidRoot, { schemaVersion: "3", prefix: "x", labelPrefix: "x", announce: "x" });
 	const invalid = childRead(invalidRoot);
 	assert.equal(invalid.status, 2);
-	assert.match(invalid.stderr, /schemaVersion must be 2/);
+	assert.match(invalid.stderr, /schemaVersion must be 3/);
 	assert.doesNotMatch(invalid.stderr, /newer than this skill|predates this skill/);
 });

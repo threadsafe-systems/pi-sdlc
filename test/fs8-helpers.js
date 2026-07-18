@@ -13,27 +13,19 @@ export const statusMjs = join(repoRootDir, "skills", "sdlc", "scripts", "sdlc-st
 export const statusSh = join(repoRootDir, "skills", "sdlc", "scripts", "sdlc-status.sh");
 
 export const VALID_CONFIG = {
-	schemaVersion: 2,
+	schemaVersion: 3,
 	prefix: "acme",
 	labelPrefix: "acme-sdlc",
 	announce: "a",
-	enforcement: "preference",
+	review: { brainstorm: "human", design: "panel", code: "panel", tasks: "subagent", panelSize: 1, onShortfall: "proceed" },
+	shape: { separateSpec: true, publishToTracker: 2, defaultTrack: "irreversible" },
 	panels: {
 		phases: {
-			plan_review: { minVendor: 1, prefer: ["prov/model"] },
-			spec_review: { minVendor: 1, prefer: ["prov/model"] },
-			pr_review: { minVendor: 1, prefer: ["prov/model"] },
-			task_validate: { minVendor: 1, prefer: ["prov/model"] },
+			plan_review: { prefer: ["prov/model"] },
+			spec_review: { prefer: ["prov/model"] },
+			pr_review: { prefer: ["prov/model"] },
+			task_validate: { prefer: ["prov/model"] },
 		},
-	},
-};
-// Retained only for pre-v2 migration/status fixtures outside the T4 focused set.
-export const VALID_MODELS = {
-	phases: {
-		plan_review: { min_panel: 1, prefer: ["prov/model"] },
-		spec_review: { min_panel: 1, prefer: ["prov/model"] },
-		pr_review: { min_panel: 1, prefer: ["prov/model"] },
-		task_validate: { min_panel: 1, prefer: ["prov/model"] },
 	},
 };
 
