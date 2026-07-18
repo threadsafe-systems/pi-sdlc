@@ -1,0 +1,100 @@
+{
+  "schemaVersion": 1,
+  "taskId": "t0",
+  "manifest": "/home/neil/code/threadsafe/pi-sdlc.worktrees/feat-e2e-integration-harness/docs/validation/e2e-integration-harness/t0.json",
+  "repoRoot": "/home/neil/code/threadsafe/pi-sdlc.worktrees/feat-e2e-integration-harness",
+  "verdict": "PASS",
+  "exitCode": 0,
+  "errors": [],
+  "manifestErrors": [],
+  "commands": [
+    {
+      "id": "tests.spike",
+      "argv": [
+        "node",
+        "test/e2e/spike.mjs"
+      ],
+      "evidence": [
+        "T0 staged install, trust, puppet provider, tool-loop, and baseline checks"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 5412,
+      "stdoutTail": "{\n  \"verdict\": \"PASS\",\n  \"piVersion\": \"0.80.10\",\n  \"stagedInstallRoot\": \"/tmp/pi-sdlc-e2e-spike-aGwWlN/install-root/pi-sdlc\",\n  \"results\": [\n    {\n      \"operation\": \"L1 install + pi list\",\n      \"elapsedMs\": 1291\n    },\n    {\n      \"operation\": \"headless project trust\",\n      \"elapsedMs\": 1361\n    },\n    {\n      \"operation\": \"puppet provider registration\",\n      \"elapsedMs\": 670\n    },\n    {\n      \"operation\": \"L2 skeleton tool loop\",\n      \"elapsedMs\": 819\n    },\n    {\n      \"operation\": \"baseline L2 skeleton turn\",\n      \"elapsedMs\": 912\n    }\n  ],\n  \"artifacts\": {\n    \"requests\": \"/tmp/pi-sdlc-e2e-spike-aGwWlN/requests.jsonl\"\n  }\n}\n",
+      "stderrTail": ""
+    },
+    {
+      "id": "static.spike",
+      "argv": [
+        "node",
+        "--check",
+        "test/e2e/spike.mjs"
+      ],
+      "evidence": [
+        "T0 spike syntax"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 44,
+      "stdoutTail": "",
+      "stderrTail": ""
+    },
+    {
+      "id": "patterns.diff",
+      "argv": [
+        "git",
+        "diff",
+        "--check",
+        "HEAD"
+      ],
+      "evidence": [
+        "No whitespace-error banned patterns in the task diff"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 12,
+      "stdoutTail": "",
+      "stderrTail": ""
+    }
+  ],
+  "categories": [
+    {
+      "category": "tests",
+      "status": "PASS",
+      "checkIds": [
+        "tests.spike"
+      ]
+    },
+    {
+      "category": "static",
+      "status": "PASS",
+      "checkIds": [
+        "static.spike"
+      ]
+    },
+    {
+      "category": "scenarios",
+      "status": "N/A",
+      "reason": "T0 is a gating verification spike; no Specification scenarios are owned by this reversible task."
+    },
+    {
+      "category": "standards",
+      "status": "N/A",
+      "reason": "Repository-wide standards and final e2e linting are owned by later harness tasks."
+    },
+    {
+      "category": "bannedPatterns",
+      "status": "PASS",
+      "checkIds": [
+        "patterns.diff"
+      ]
+    }
+  ],
+  "scenarios": []
+}
