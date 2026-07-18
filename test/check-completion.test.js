@@ -179,6 +179,23 @@ test("epic-done: uses the resolved repo-root for every gh call", () => {
 	rmSync(root, { recursive: true, force: true });
 });
 
+test("epic-done: errors (not vacuous pass) when the epic has zero sub-issues", () => {
+	const root = fixtureRoot();
+	const { report } = main(["--claim", "epic-done", "--epic", "999", "--pr", "99", "--repo-root", root, "--format", "json"], { git: fakeGit(), gh: fakeGhEpic({ subIssues: [] }) });
+	assert.equal(report.state, "error");
+	assert.equal(checkOf(report, "gh.subissues").status, "error");
+	rmSync(root, { recursive: true, force: true });
+});
+
+test("pr-open: records a visible note when --closes is omitted", () => {
+	const root = fixtureRoot();
+	const { report } = main(["--claim", "pr-open", "--slug", "x", "--repo-root", root, "--format", "json"], { git: fakeGit(), gh: fakeGhPrOpen() });
+	assert.equal(report.state, "pass");
+	assert.equal(checkOf(report, "closes.linkage").status, "pass");
+	assert.match(checkOf(report, "closes.linkage").message, /not verified/);
+	rmSync(root, { recursive: true, force: true });
+});
+
 test("cli: rejects an unknown --claim value", () => {
 	const { report } = main(["--claim", "bogus"], {});
 	assert.equal(report.state, "error");

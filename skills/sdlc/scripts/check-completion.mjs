@@ -109,8 +109,8 @@ function checkDeclaration(body, slug) {
 	const { track, slug: declaredSlug } = parsed.values;
 	if (!TRACKS.has(track)) return { error: "declaration track must be irreversible, reversible, or none" };
 	if (!LIFECYCLE_TRACKS.has(track)) return { error: "pr-open requires a lifecycle track, not track: none" };
-	if (declaredSlug !== slug) return { error: `declaration slug '${declaredSlug ?? ""}' does not match claimed slug '${slug}'` };
 	if (!declaredSlug || !SLUG_RE.test(declaredSlug)) return { error: "declaration slug must be lowercase hyphenated text" };
+	if (declaredSlug !== slug) return { error: `declaration slug '${declaredSlug}' does not match claimed slug '${slug}'` };
 	return { ok: true };
 }
 
@@ -163,6 +163,7 @@ function checkPrOpen({ root, slug, closes, git, gh }, results) {
 	else setResult(results, "declaration.block", "pass", "exactly one valid sdlc declaration block found");
 
 	const references = closingNumbers(pr);
+	if (closes.length === 0) setResult(results, "closes.linkage", "pass", "no --closes supplied; GitHub sub-issue linkage was not verified");
 	for (const n of closes) {
 		const id = `closes:${n}`;
 		if (references.has(String(n))) setResult(results, id, "pass", `GitHub records PR #${pr.number} as closing #${n}`);
@@ -199,6 +200,10 @@ function checkEpicDone({ root, epic, pr, gh }, results) {
 	}
 	if (connection.pageInfo?.hasNextPage) {
 		setResult(results, "gh.subissues", "error", "epic has more than 100 sub-issues; refusing an incomplete completion check");
+		return;
+	}
+	if (nodes.length === 0) {
+		setResult(results, "gh.subissues", "error", `epic #${epic} has no native sub-issues; refusing a vacuous epic-done pass (check the epic number)`);
 		return;
 	}
 	const open = nodes.filter((issue) => issue.state !== "CLOSED");
