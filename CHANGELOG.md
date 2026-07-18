@@ -1,3 +1,9 @@
+## [2.2.1](https://github.com/threadsafe-systems/pi-sdlc/compare/v2.2.0...v2.2.1) (2026-07-18)
+
+### Bug Fixes
+
+* **sdlc:** stamp panel reviewer agents with no extensions by default ([#112](https://github.com/threadsafe-systems/pi-sdlc/issues/112)) ([77609aa](https://github.com/threadsafe-systems/pi-sdlc/commit/77609aabb24afbc044712edf7692f47ebe7e484c))
+
 ## [2.2.0](https://github.com/threadsafe-systems/pi-sdlc/compare/v2.1.0...v2.2.0) (2026-07-18)
 
 ### Features
