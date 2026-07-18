@@ -124,8 +124,22 @@ hand-copy a prompt per model.
    or a claim that you are outside pi. For a read-only research fan-out inside a
    worktree, dispatch the project `researcher-readonly` agent (no `write` tool,
    returns the brief inline) so children never block on a forbidden write. Prefer
-   `wait({ all: true })` over status-polling for read-only fan-out, and read a
-   child's transcript before treating a "detached" status label as lost output.
+`wait({ all: true })` over status-polling for read-only fan-out, and read a
+child's transcript before treating a "detached" status label as lost output.
+
+   **Reviewer dispatch recovery.** The resolved `prefer` list is an ordered
+   candidate pool, not merely documentation. A reviewer that returns a model
+   verdict (findings, `PASS`, or `REVISE`) has completed its assignment and is
+   never silently replaced. A reviewer that fails before producing a verdict —
+   including crash, OOM, overload/billing exhaustion, timeout, transport/tool
+   failure, or empty output — is an infra failure: retry that model once when the
+   failure may be transient, then replace it with the next untried, credentialed
+   model in that phase's configured `prefer` list. Do not count a failed model
+   against the configured panel floor. Continue through the ordered candidate
+   pool until the panel floor is met or the pool is exhausted. Only then apply
+   `review.onShortfall`: `fail` stops and asks the human; `proceed` records the
+   shortfall and continues. Never substitute an unconfigured model or treat an
+   infra failure as a reviewer verdict.
 
 3. **Consolidate**: collapse duplicates into one issue, keep cross-model agreement
    as signal, preserve genuine disagreement.
@@ -169,11 +183,30 @@ then `*`. A failed `after` hook **warns** (recorded, never blocking).
 ## 8. Completion evidence and next transition
 
 Completion evidence is a clean panel (no surviving high/medium), a passing
-`check-lifecycle`, and the opened PR with its clean body. If a GitHub reviewer
+`check-lifecycle`, and the opened PR with its clean body. **Completion is
+machine-checked, not narrated.** After the PR exists, do not state that the
+Implement/PR phase is "complete" or "PASS" without first running:
+
+```bash
+node <skill-dir>/scripts/check-completion.mjs --claim pr-open --slug <slug> --closes <n> [--closes <n> ...]
+```
+
+This checks the pushed branch, open PR, matching valid declaration, and GitHub's
+native closing-issue references. After merge, do not state that the tracked
+effort is finished without running:
+
+```bash
+node <skill-dir>/scripts/check-completion.mjs --claim epic-done --epic <epic-number> --pr <pr-number>
+```
+
+This checks every native epic sub-issue is closed and that the named merged PR
+closes all of them. Either check failing means the claim is false; state what's
+missing instead of declaring done. If a GitHub reviewer
 raises a new concern after opening, focus it with an inline comment, address it
-with a commit, reply with that commit's short SHA, and rerun the panel before
-updating the PR. The post-PR review is for new reviewer concerns, not a transcript
-of the local sense check. The lifecycle completes on merge.
+with a commit, reply with that commit's short SHA, and rerun the panel and the
+`pr-open` check before updating the PR. The post-PR review is for new reviewer
+concerns, not a transcript of the local sense check. The lifecycle completes on
+merge.
 
 ## 9. Advanced-mode pointers
 

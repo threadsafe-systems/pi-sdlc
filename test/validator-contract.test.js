@@ -18,7 +18,12 @@ import { sha256, verifyReceipt } from "../skills/sdlc/scripts/verify-task-receip
 const here = dirname(fileURLToPath(import.meta.url));
 const repo = dirname(here);
 const runnerMjs = join(repo, "skills", "sdlc", "scripts", "validate-task.mjs");
-const schema = JSON.parse(readFileSync(join(repo, "skills", "sdlc", "schema", "task-validation-manifest.schema.json"), "utf8"));
+let schema;
+try {
+	schema = JSON.parse(readFileSync(join(repo, "skills", "sdlc", "schema", "task-validation-manifest.schema.json"), "utf8"));
+} catch (error) {
+	assert.fail(`task validation schema is unreadable: ${error.message}`);
+}
 
 const STUBS = {
 	"ok.mjs": "process.stdout.write('ok\\n'); process.exit(0);",
@@ -407,7 +412,11 @@ test("PV9: JSON/text/exit agree and JSON mode is order-independent", () => {
 	const dir = mkRepo();
 	try {
 		const p = writeManifest(dir, baseManifest());
-		const jsonRun = runCli(dir, ["--manifest", p, "--repo-root", dir, "--format", "json"]);
+		// --slug gives telemetry a resolvable identity (this fixture dir is not a
+		// git repo) so emission succeeds silently, keeping this assertion about the
+		// runner's own stdout/stderr purity meaningful (lt-t2: FS5 emission adds a
+		// stderr warning only on skip/failure, never on success).
+		const jsonRun = runCli(dir, ["--manifest", p, "--repo-root", dir, "--format", "json", "--slug", "pv9-x"]);
 		assert.equal(jsonRun.code, 0);
 		const rep = JSON.parse(jsonRun.stdout);
 		assert.equal(rep.verdict, "PASS");

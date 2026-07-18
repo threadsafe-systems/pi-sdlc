@@ -4,10 +4,15 @@
 // argv checks with shell:false, evaluates categories/scenarios, bounds and
 // redacts evidence, and reports PASS/FAIL/ERROR. No network, model, or
 // credential-file access. No runtime dependencies.
+//
+// --slug is additive (FS13 lt-t2): after the report is computed (regardless
+// of --report), emits task.validated to the resolved run's manifest
+// (fail-soft; never alters stdout bytes or the exit code, NF3).
 
 import { spawnSync } from "node:child_process";
 import { closeSync, existsSync, fsyncSync, mkdtempSync, openSync, readFileSync, realpathSync, renameSync, rmSync, statSync, writeSync } from "node:fs";
 import { basename, dirname, isAbsolute, join, resolve } from "node:path";
+import { emitEvent, warnTelemetry } from "./telemetry.mjs";
 
 export const CATEGORY_ORDER = ["tests", "static", "scenarios", "standards", "bannedPatterns"];
 const COMMAND_CATEGORIES = ["tests", "static", "standards", "bannedPatterns"];
@@ -440,6 +445,7 @@ export function parseArgs(argv) {
 		if (a === "--manifest") opts.manifest = val();
 		else if (a === "--repo-root") opts.repoRoot = val();
 		else if (a === "--report") opts.report = val();
+		else if (a === "--slug") opts.slug = val();
 		else if (a === "--format") {
 			const f = val();
 			if (f !== "text" && f !== "json") throw new Error(`--format must be text or json`);
@@ -459,7 +465,7 @@ function main() {
 		return emitError(String(e.message || e), detectJsonMode(argv));
 	}
 	if (opts.help) {
-		console.log("usage: validate-task.sh --manifest PATH [--repo-root DIR] [--format text|json] [--report PATH]");
+		console.log("usage: validate-task.sh --manifest PATH [--repo-root DIR] [--format text|json] [--report PATH] [--slug S]");
 		process.exit(0);
 	}
 	if (!opts.manifest) return emitError("--manifest is required", opts.jsonMode);
@@ -474,6 +480,23 @@ function main() {
 
 	const report = runManifest({ manifestPath: opts.manifest, repoRoot: canonicalRoot });
 	const json = `${JSON.stringify(report, null, 2)}\n`;
+
+	// §3.3 FS5 side-effect emission: always for PASS/FAIL, for ERROR only when
+	// the manifest parsed far enough to yield a task id; an unparseable
+	// manifest has nothing to attribute and skips with the standard warning.
+	// Emitted after the report is computed, regardless of --report; fail-soft
+	// and never alters stdout bytes or the exit code (NF3).
+	if (typeof report.taskId === "string") {
+		emitEvent({
+			event: "task.validated",
+			slug: opts.slug,
+			by: "script:validate-task",
+			payload: { task: report.taskId, verdict: report.verdict, scenarioIds: report.scenarios.map((s) => s.scenarioId) },
+			root: canonicalRoot,
+		});
+	} else {
+		warnTelemetry("unparseable manifest has no task id to attribute — skipping emission");
+	}
 
 	if (opts.report) {
 		try {

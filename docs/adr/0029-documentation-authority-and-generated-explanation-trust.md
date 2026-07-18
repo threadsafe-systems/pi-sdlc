@@ -1,4 +1,4 @@
-# ADR 0028: documentation authority hierarchy and generated-explanation trust
+# ADR 0029: documentation authority hierarchy and generated-explanation trust
 
 - Status: accepted
 - Date: 2026-07-18

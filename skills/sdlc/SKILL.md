@@ -147,6 +147,13 @@ phase references and `assets/tracker-ops.md`. Standalone entrypoints are the
 package-owned `templates/sdlc-<slug>.md` prompts — one lifecycle skill's shared
 named surfaces, not six discovered skills.
 
+Instrumented runs emit **lifecycle telemetry** (FS13) at each inflection point,
+and PR/epic **completion is machine-checked** (`check-completion.mjs`), not
+narrated — see `references/system-reference.md` ("Lifecycle telemetry",
+"Stall detection and self-resume") and `references/phase-pr-review.md`
+(completion evidence). Implement worker-dispatch discipline (stop-conditions,
+`toolBudget`/`turnBudget`, infra-retry-once) is in `references/phase-implement.md`.
+
 ## Gate/process conflict rule
 
 For `.pi/sdlc/workflow.md` and any local rule: *gates* — each phase's invariant
@@ -192,3 +199,5 @@ load-bearing contracts (before=block, after=warn), not optional enhancements; se
 - Treating the tracker (map, epic, sub-issues, board) as the source of truth
   instead of the committed doc it projects.
 - Treating generated `CONFIG.md` prose as authority over `sdlc.config.json`.
+- Claiming a phase, PR, or tracked effort "complete"/"PASS" without running the
+  matching `check-completion.mjs` claim and it passing (a false summit).

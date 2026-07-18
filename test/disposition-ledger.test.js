@@ -44,14 +44,26 @@ test("ASD5 (non-vacuous): every pre-change SKILL.md red flag is covered by a ret
 	// Ground against the committed pre-change SKILL.md (the review baseline), not a
 	// self-declared count: deleting RF rows leaves a baseline red flag uncovered.
 	let baseline;
-	let base = "main";
+	// Pin the pre-restructure SKILL.md (this stream's disposition baseline). A
+	// bare merge-base would drift onto main's tip after integrating main, so the
+	// baseline commit is pinned; fall back to merge-base/main only if unavailable.
+	const refs = ["d528b9799ed38f8c03708cbd27047543932017d3:skills/sdlc/SKILL.md"];
 	try {
-		base = execFileSync("git", ["-C", repo, "merge-base", "HEAD", "main"], { encoding: "utf8" }).trim();
+		const mb = execFileSync("git", ["-C", repo, "merge-base", "HEAD", "main"], { encoding: "utf8" }).trim();
+		refs.push(`${mb}:skills/sdlc/SKILL.md`, "main:skills/sdlc/SKILL.md");
 	} catch {}
-	for (const ref of [`${base}:skills/sdlc/SKILL.md`, "main:skills/sdlc/SKILL.md", "origin/main:skills/sdlc/SKILL.md"]) {
+	for (const ref of refs) {
 		try {
-			baseline = execFileSync("git", ["-C", repo, "show", ref], { encoding: "utf8" });
-			break;
+			const text = execFileSync("git", ["-C", repo, "show", ref], { encoding: "utf8" });
+			const n = text
+				.slice(text.indexOf("## Red flags"))
+				.split("\n")
+				.filter((l) => l.startsWith("- ")).length;
+			if (n === 14) {
+				baseline = text;
+				break;
+			}
+			baseline ??= text;
 		} catch {}
 	}
 	assert.ok(baseline, "could not read the pre-change SKILL.md baseline from git");

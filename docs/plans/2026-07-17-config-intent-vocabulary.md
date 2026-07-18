@@ -368,6 +368,6 @@ fallback) is **fully absorbed** by the agent self-documentation stream
 scenarios ASD1–ASD20). IC-B does **not** ship as a separate stream; that stream
 is the canonical owner of the `config-doc` render/write/check module, the
 `.pi/sdlc/CONFIG.md` contract, and the setup interview. Prior IC-B disposition
-work is preserved here as review input, not copied verbatim. See **ADR 0028** for
+work is preserved here as review input, not copied verbatim. See **ADR 0029** for
 the documentation-authority hierarchy and generated-explanation trust model.
 Issues **#91/#101/#102** remain independent and out of scope.

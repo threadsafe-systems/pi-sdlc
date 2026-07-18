@@ -23,6 +23,7 @@ const prTemplate = readFileSync(join(repo, ".github", "pull_request_template.md"
 const ciWorkflow = readFileSync(join(repo, ".github", "workflows", "ci.yml"), "utf8");
 const sysRef = readFileSync(join(repo, "skills", "sdlc", "references", "system-reference.md"), "utf8");
 const prReviewRef = readFileSync(join(repo, "skills", "sdlc", "references", "phase-pr-review.md"), "utf8");
+const implementRef = readFileSync(join(repo, "skills", "sdlc", "references", "phase-implement.md"), "utf8");
 
 test("OH7: readiness/hooks law lives in the system reference; SKILL keeps the red flags", () => {
 	assert.match(sysRef, /^## 3\. Adoption & readiness$/m);
@@ -248,4 +249,37 @@ test("CV32: five migration ADRs exist and amended decisions link forward", () =>
 		"0018-adoption-bundle-fs10.md": "ADR 0025",
 	};
 	for (const [file, marker] of Object.entries(forwards)) assert.match(readFileSync(join(adrDir, file), "utf8"), new RegExp(marker), `${file} lacks ${marker}`);
+});
+
+test("RB1 (BT1): the PR reference requires check-completion.mjs before a complete/PASS claim", () => {
+	assert.match(skillMd, /check-completion\.mjs/);
+	assert.match(skillMd, /a false summit/);
+	assert.match(prReviewRef, /--claim pr-open/);
+	assert.match(prReviewRef, /--claim epic-done/);
+	assert.match(prReviewRef, /Completion is\s+machine-checked, not narrated/);
+});
+
+test("RB2 (BT2): the Implement reference states the worker task-prompt shape and infra-retry-once rule", () => {
+	assert.match(implementRef, /## 10\. Dispatching implementation workers/);
+	assert.match(implementRef, /toolBudget/);
+	assert.match(implementRef, /turnBudget/);
+	assert.match(implementRef, /finalize now/i);
+	assert.match(implementRef, /infra-class failure/);
+	assert.match(implementRef, /Retry that exact dispatch once, automatically/);
+});
+
+test("RB3 (BT3): the system reference states the stall-detection threshold and self-resume action", () => {
+	assert.match(sysRef, /## 13\. Stall detection and self-resume/);
+	assert.match(sysRef, /2 consecutive\s*\n?\s*turns/);
+	assert.match(sysRef, /self-issue a continuation\/retry/);
+	assert.match(sysRef, /interim, prose-level mitigation/);
+	assert.match(sysRef, /this\s+project does not own or ship/);
+});
+
+test("RB4 (panel recovery): the PR reference advances failed reviewers through the configured prefer list", () => {
+	assert.match(prReviewRef, /Reviewer dispatch recovery/);
+	assert.match(prReviewRef, /next untried, credentialed\s*\n?\s*model/);
+	assert.match(prReviewRef, /Do not count a failed model\s*\n?\s*against the configured panel floor/);
+	assert.match(prReviewRef, /review\.onShortfall/);
+	assert.match(prReviewRef, /Never substitute an unconfigured model/);
 });

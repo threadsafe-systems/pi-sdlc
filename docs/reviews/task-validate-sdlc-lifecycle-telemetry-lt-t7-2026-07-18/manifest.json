@@ -1,0 +1,78 @@
+{
+  "schemaVersion": 1,
+  "taskId": "lt-t7",
+  "buildPlan": "docs/plans/2026-07-17-sdlc-lifecycle-telemetry-build.md",
+  "repoRoot": ".",
+  "ownedScenarios": ["LT24", "LT25"],
+  "checks": [
+    {
+      "id": "tests.telemetry-docs",
+      "argv": ["node", "--test", "test/telemetry-docs.test.js"],
+      "timeoutMs": 120000,
+      "evidence": ["LT24-LT25 hook-token contract, FS12 invocation forms, FS11 inventory, structural coverage"]
+    },
+    {
+      "id": "tests.check-references",
+      "argv": ["node", "--test", "test/check-references.test.js"],
+      "timeoutMs": 60000,
+      "evidence": ["Pre-existing FS11 checker contract remains green with the expanded inventory"]
+    },
+    {
+      "id": "tests.full",
+      "argv": ["npm", "test"],
+      "timeoutMs": 300000,
+      "evidence": ["NF3 frozen-CLI regression floor: corpus remains green with the docs/inventory/ADR additions"]
+    },
+    {
+      "id": "static.tests",
+      "argv": ["node", "--check", "test/telemetry-docs.test.js"],
+      "evidence": ["New task suite exists and parses"]
+    },
+    {
+      "id": "static.inventory",
+      "argv": ["node", "-e", "JSON.parse(require('fs').readFileSync('skills/sdlc/assets/normative-references.json','utf8'))"],
+      "evidence": ["Expanded FS11 inventory is valid JSON"]
+    },
+    {
+      "id": "check-references",
+      "argv": ["node", "skills/sdlc/scripts/check-references.mjs", "--format", "json"],
+      "evidence": ["FS11 checker passes with the new package-owned entries"]
+    },
+    {
+      "id": "static.lint",
+      "argv": ["npm", "run", "lint"],
+      "timeoutMs": 120000,
+      "evidence": ["Repository formatting and lint rules"]
+    },
+    {
+      "id": "patterns.diff",
+      "argv": ["git", "diff", "--check", "HEAD"],
+      "evidence": ["No whitespace-error banned patterns in the task diff"]
+    }
+  ],
+  "categories": {
+    "tests": {
+      "applicability": "required",
+      "checkIds": ["tests.telemetry-docs", "tests.check-references", "tests.full"]
+    },
+    "static": {
+      "applicability": "required",
+      "checkIds": ["static.tests", "static.inventory", "check-references", "static.lint"]
+    },
+    "scenarios": {
+      "applicability": "required",
+      "evidence": {
+        "LT24": ["tests.telemetry-docs"],
+        "LT25": ["tests.telemetry-docs", "tests.check-references"]
+      }
+    },
+    "standards": {
+      "applicability": "n/a",
+      "reason": "No additional task-specific external standard applies; the feature's PR gate verifies the irreversible stream contract."
+    },
+    "bannedPatterns": {
+      "applicability": "required",
+      "checkIds": ["patterns.diff"]
+    }
+  }
+}

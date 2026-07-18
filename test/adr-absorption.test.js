@@ -15,8 +15,8 @@ const read = (rel) => readFileSync(join(repo, rel), "utf8");
 
 test("ASD17: ADR 0028 exists and states the authority hierarchy + trust model", () => {
 	const adrDir = join(repo, "docs", "adr");
-	const file = readdirSync(adrDir).find((f) => /^0028-/.test(f));
-	assert.ok(file, "ADR 0028 must exist");
+	const file = readdirSync(adrDir).find((f) => /^0029-/.test(f));
+	assert.ok(file, "ADR 0029 must exist");
 	const adr = readFileSync(join(adrDir, file), "utf8");
 	assert.match(adr, /## Context/);
 	assert.match(adr, /## Decision/);

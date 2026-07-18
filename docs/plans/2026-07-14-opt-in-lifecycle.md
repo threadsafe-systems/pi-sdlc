@@ -361,5 +361,5 @@ absorbed** by the agent self-documentation stream
 scenarios ASD1–ASD20). OL-C does **not** ship as a separate stream; that stream
 carries forward #38's exact entrypoint table, stamp text, adopted-config detection
 rule, and `adversarial-review` relationship rather than re-deciding them. See
-**ADR 0028** for the documentation-authority hierarchy. Issues **#91/#101/#102**
+**ADR 0029** for the documentation-authority hierarchy. Issues **#91/#101/#102**
 remain independent and out of scope.

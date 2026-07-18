@@ -269,7 +269,7 @@ surprising without context, and the result of a real trade-off — all three —
 it to `docs/adr/` immediately (see `docs/adr/README.md`). Existing flat
 locked-decisions lists in a project's governing docs are historical record and are
 not migrated. The documentation-authority hierarchy and the generated-explanation
-trust model are recorded in ADR 0028.
+trust model are recorded in ADR 0029.
 
 ## 11. Next-read routing (authority map)
 
@@ -282,3 +282,66 @@ trust model are recorded in ADR 0028.
 | What do those values mean here? | Current `.pi/sdlc/CONFIG.md`; validated JSON fallback when absent/stale |
 | What public surfaces comprise pi-sdlc? | `references/system-reference.md` + FS11 inventory |
 | What implementation realizes a surface? | Source, only when implementation work requires it |
+
+## 12. Lifecycle telemetry (FS13)
+
+Every instrumented run keeps a durable manifest of its own lifecycle at
+`.pi/sdlc/runs/<slug>/events.jsonl` (git-ignored; the sibling `sdlc-retro`
+skill distills it into a committed post-mortem — see that skill's SKILL.md
+for the collect/render pipeline once the run store has anything to distill).
+Emission is fail-soft everywhere (an unresolvable run identity or an
+unwritable store degrades to one stderr warning, never a behavioural change)
+and additive-only to every frozen FS5 contract (ADR 0028).
+
+Record these prose-emitted inflection points with
+`scripts/record-run-event.sh <event>` (relative to this loaded skill;
+headless: `node <skill-dir>/scripts/record-run-event.mjs <event>`) and its
+event-type payload:
+
+- **Run start**: once, right after the readiness gate confirms this repo is
+  ready and before announcing —
+  `record-run-event.sh run.started --payload '{"title":"<feature title>","track":"<irreversible|reversible>"}'`.
+- **Every phase entry**: on entering brainstorm/plan/spec/build/implement/pr —
+  `record-run-event.sh phase.entered --payload '{"phase":"<phase>"}'`.
+- **Every human gate approval**: when the human approves a phase's gate —
+  `record-run-event.sh gate.approved --payload '{"phase":"<phase>","artifact":"<path>","rev":<n>,"approver":"human:<slug>"}'`.
+- **Panel dispatch**: immediately after dispatching a design or PR panel —
+  `record-run-event.sh panel.dispatched --payload '{"panelPhase":"<panelPhase>","round":<n>,"models":[...]}'`
+  — and, harvest-at-dispatch, immediately preserve its artifacts with
+  `scripts/harvest-panel.sh --phase <panelPhase> --round <n> --from <asyncDir>`
+  (skill-relative; headless: `node <skill-dir>/scripts/harvest-panel.mjs`).
+- **Panel consolidation**: after adjudicating a round's findings —
+  `record-run-event.sh panel.consolidated --payload '{"panelPhase":"<panelPhase>","round":<n>,"findings":{"high":<n>,"medium":<n>,"low":<n>},"incorporated":<n>,"dismissed":<n>}'`.
+- **Caller-side lifecycle-check recording**: right after running
+  `check-lifecycle` (itself untouched, FS9) —
+  `record-run-event.sh lifecycle.checked --payload '{"verdict":"<verdict>"}'`.
+- **PR open**: right after opening the PR —
+  `record-run-event.sh pr.opened --payload '{"number":<n>}'`.
+- **Fix wave**: after addressing a post-PR reviewer concern with a commit —
+  `record-run-event.sh pr.fix_wave --payload '{"number":<n>,"sha":"<short-sha>"}'`.
+
+`resolve-panel.sh`, `ensure-panel-agent.sh`, and `validate-task.sh` emit their
+own events automatically (`panel.resolved`, `panel.agent_stamped`,
+`task.validated`) after successful completion — nothing to do beyond passing
+`--slug` when it isn't resolvable from the current git branch. Per-task
+validator dispatch also harvests: immediately after a `task_validate`
+subagent completes, run `scripts/harvest-panel.sh --phase task_validate
+--round <n> --from <asyncDir>` the same way as a design/PR panel dispatch.
+
+## 13. Stall detection and self-resume
+
+This applies in any phase, live or dispatched, not only Spec. A provider or
+transport failure can exhaust its own retries and go quiet — empty assistant
+turns, a `stopReason: error`, no further output — leaving the human as the
+only thing watching for it. Don't wait for that: after **2 consecutive
+turns** end this way (an error-terminated turn with no assistant content),
+treat it as a stall, not a stop, and self-issue a continuation/retry before
+reporting anything as blocked. Only report a stall to the human if the
+self-issued retry also fails.
+
+This is an interim, prose-level mitigation, not a substitute for a genuine
+fix: the real fix is a harness-level visible "stalled — retryable" signal and
+true auto-resume, which is `pi`/`pi-coding-agent` runtime behaviour this
+project does not own or ship. Treat this section as covering the gap until
+that exists upstream, not as the final word.
+

@@ -350,7 +350,7 @@ drift check, agent-led setup interview, reduced TTY fallback) and **OL-C**
 kernel-first `SKILL.md`, supporting references, six standalone `sdlc:<slug>`
 entrypoints, adopted-config-dominates). Neither ships as a separate stream. The
 documentation-authority hierarchy and generated-explanation trust model are
-recorded in **ADR 0028**.
+recorded in **ADR 0029**.
 
 Independent and **not** re-opened by this stream: **#91** (phase-specific agent
 definitions / author-model preferences), **#101** (phases as independently
