@@ -79,7 +79,7 @@ export function toolResults(record) {
  */
 export function statusResult(record) {
 	return toolResultBlocks(record)
-		.filter((block) => /"state"\s*:/.test(block))
+		.filter((block) => !block.includes(DEFAULT_SENTINEL) && /"state"\s*:/.test(block))
 		.join("\n");
 }
 

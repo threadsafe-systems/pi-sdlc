@@ -51,6 +51,14 @@ async function checkDiscovery(sandbox) {
 	const trustedProbe = parseJson(await readFile(probeOut, "utf8"), "trusted probe");
 	assert(trustedProbe.trusted === true, "--approve did not trust the project");
 	assert(JSON.stringify(trustedProbe.skills).includes("SKILL.md"), "trusted -p run did not load the installed skill");
+	// Install-root fidelity at the discovery surface: every discovered skill file
+	// path must resolve under the staged install root, never the repo checkout.
+	const skillPaths = (trustedProbe.skills ?? []).map((s) => (typeof s === "string" ? s : (s.filePath ?? s.path ?? JSON.stringify(s)))).filter((p) => p.includes("SKILL.md"));
+	assert(skillPaths.length > 0, "trusted -p run exposed no skill file path to assert");
+	assert(
+		skillPaths.every((p) => p.startsWith(sandbox.staged)),
+		`discovered skill path(s) not under the install root ${sandbox.staged}: ${skillPaths.join(", ")}`,
+	);
 
 	const untrusted = await runPi(sandbox, ["-e", probe, "-p", "--no-session", "--no-approve", "/probe"], { env: buildChildEnv(sandbox, { PI_E2E_PROBE_OUT: probeOut }) });
 	assert(untrusted.code === 0, `untrusted probe exited ${untrusted.code}: ${untrusted.stderr}`);

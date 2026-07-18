@@ -56,6 +56,7 @@ async function startPuppet(sandbox, { steps, sentinel }) {
 	await writeFile(scriptPath, JSON.stringify({ sentinel, steps: [...loader, ...steps] }, null, 2));
 
 	let stderr = "";
+	let exited = false;
 	const child = spawn(process.execPath, [SERVER], {
 		env: { PATH: process.env.PATH ?? "", PUPPET_PORT: "0", PUPPET_SCRIPT: scriptPath, PUPPET_REQUESTS: requestsPath, PUPPET_EMISSIONS: emissionsPath, PUPPET_READY: readyPath, PUPPET_SKILL_LOCATION: skillPath },
 		stdio: ["ignore", "ignore", "pipe"],
@@ -64,15 +65,22 @@ async function startPuppet(sandbox, { steps, sentinel }) {
 		stderr += chunk;
 		if (process.env.PI_E2E_DEBUG) process.stderr.write(chunk);
 	});
+	child.once("exit", () => {
+		exited = true;
+	});
+	let boundPort = "";
 	for (let attempt = 0; attempt < 500; attempt += 1) {
-		if (await fileExists(readyPath)) break;
+		if (await fileExists(readyPath)) {
+			boundPort = (await readFile(readyPath, "utf8").catch(() => "")).trim();
+			if (boundPort) break;
+		}
+		if (exited) break;
 		await new Promise((r) => setTimeout(r, 10));
 	}
-	if (!(await fileExists(readyPath))) {
+	if (!boundPort) {
 		child.kill("SIGTERM");
-		throw new Error(`puppet server did not become ready${stderr ? `: ${stderr.trim()}` : ""}`);
+		throw new Error(`puppet server did not become ready${stderr ? `: ${stderr.trim()}` : exited ? " (server exited early)" : ""}`);
 	}
-	const boundPort = (await readFile(readyPath, "utf8")).trim();
 
 	return {
 		url: `http://127.0.0.1:${boundPort}/v1`,
@@ -160,10 +168,10 @@ class AssertionErrorLite extends Error {
 	}
 }
 
-/** Extract the SKILL's mechanically-mandated marker lines from stdout, in order. */
-export function extractMarkers(stdout) {
+/** Extract the SKILL's mechanically-mandated marker lines from the assistant transcript, in order. */
+export function extractMarkers(transcript) {
 	const markers = [];
-	for (const line of stdout.split("\n")) {
+	for (const line of transcript.split("\n")) {
 		const trimmed = line.trim();
 		if (trimmed.startsWith("[sdlc hook]")) markers.push(trimmed);
 	}
@@ -187,7 +195,23 @@ export async function runNegativeMode(sandbox, scenario, mode) {
 	if (mode === "mutated-sentinel") twin.sentinel = `MUTATED_${scenario.name}_NEVER_MATCHES`;
 	const { record } = await runScenario(sandbox, twin);
 	if (!record.locked) throw new Error(`negative control (${mode}) failed: scenario '${scenario.name}' emitted steps instead of locking`);
+	// A locked run is still a clean pi session (locked text + stop); a nonzero
+	// exit or timeout means the control was satisfied by an infra failure, not the
+	// gate — reject it so the anti-vacuity checker is not itself vacuous.
+	if (record.exitCode !== 0 || record.timedOut) throw new Error(`negative control (${mode}) failed: scenario '${scenario.name}' pi exited ${record.exitCode}${record.timedOut ? " (timed out)" : ""}`);
 	return { mode, locked: true };
+}
+
+/** Create a fresh sandbox, stage + install the package, run `fn(sandbox)`, dispose. */
+export async function withInstalledSandbox(fn) {
+	const sandbox = await createSandbox();
+	try {
+		await stagePackage(sandbox);
+		await installPackage(sandbox);
+		return await fn(sandbox);
+	} finally {
+		await disposeSandbox(sandbox);
+	}
 }
 
 async function runNegativeControlSelfTest() {

@@ -16,10 +16,10 @@
 //   env -i PATH="$PATH" HOME="$HOME" node test/e2e/run.mjs --determinism
 
 import { writeFile } from "node:fs/promises";
-import { createSandbox, disposeSandbox, installPackage, removeInstalledSkill, serializeManifest, stagePackage, teardownScan } from "./harness.mjs";
+import { removeInstalledSkill, serializeManifest, teardownScan } from "./harness.mjs";
 import { runL1 } from "./l1.mjs";
 import { allScenarios } from "./scenarios/index.mjs";
-import { runNegativeMode, runScenario } from "./scenario-format.mjs";
+import { runNegativeMode, runScenario, withInstalledSandbox } from "./scenario-format.mjs";
 
 function arg(name) {
 	const index = process.argv.indexOf(name);
@@ -31,48 +31,32 @@ const wantL1 = !scenarioFilter || scenarioFilter === "l1";
 const wantL2 = !scenarioFilter || scenarioFilter !== "l1";
 const l2NameFilter = scenarioFilter && scenarioFilter !== "l1" ? scenarioFilter : null;
 
+function selected(sandbox) {
+	return allScenarios(sandbox).filter((scenario) => !l2NameFilter || scenario.name.includes(l2NameFilter));
+}
+
 /** Run the positive L2 scenarios in one fresh sandbox; return their normalized manifests. */
 async function runL2Positive() {
-	const sandbox = await createSandbox();
-	const out = [];
-	try {
-		await stagePackage(sandbox);
-		await installPackage(sandbox);
-		for (const scenario of allScenarios(sandbox)) {
-			if (l2NameFilter && !scenario.name.includes(l2NameFilter)) continue;
+	return withInstalledSandbox(async (sandbox) => {
+		const out = [];
+		for (const scenario of selected(sandbox)) {
 			const { manifest } = await runScenario(sandbox, scenario);
 			out.push({ name: scenario.name, ok: true, manifest });
 		}
 		await teardownScan(sandbox);
-	} catch (error) {
-		out.push({ name: "L2", ok: false, detail: error instanceof Error ? error.message : String(error) });
-	} finally {
-		await disposeSandbox(sandbox);
-	}
-	return out;
+		return out;
+	}).catch((error) => [{ name: "L2", ok: false, detail: error instanceof Error ? error.message : String(error) }]);
 }
 
-/** One full positive run (L1 + L2), returning an aggregated manifest object. */
-async function fullRun() {
-	const l1 = wantL1 ? await runL1() : [];
-	const l2 = wantL2 ? await runL2Positive() : [];
-	return {
-		l1: l1.map((r) => ({ name: r.name, ok: r.ok })),
-		scenarios: l2.filter((r) => r.manifest).map((r) => r.manifest),
-		_raw: { l1, l2 },
-	};
-}
-
-/** Run every scenario under one negative-control mode; each must lock (strict). */
+/**
+ * Run every selected scenario under one negative-control mode in a fresh
+ * sandbox; each must lock (strict). Teardown-scanned like the positive run.
+ */
 async function runNegativeControl(mode) {
-	const sandbox = await createSandbox();
-	const results = [];
-	try {
-		await stagePackage(sandbox);
-		await installPackage(sandbox);
+	return withInstalledSandbox(async (sandbox) => {
 		if (mode === "skill-removed") await removeInstalledSkill(sandbox);
-		for (const scenario of allScenarios(sandbox)) {
-			if (l2NameFilter && !scenario.name.includes(l2NameFilter)) continue;
+		const results = [];
+		for (const scenario of selected(sandbox)) {
 			try {
 				await runNegativeMode(sandbox, scenario, mode);
 				results.push({ name: scenario.name, ok: true });
@@ -80,10 +64,32 @@ async function runNegativeControl(mode) {
 				results.push({ name: scenario.name, ok: false, detail: error instanceof Error ? error.message : String(error) });
 			}
 		}
-	} finally {
-		await disposeSandbox(sandbox);
-	}
-	return results;
+		// The negative-control sandboxes are held to the same no-write guarantee.
+		await teardownScan(sandbox);
+		return results;
+	});
+}
+
+/**
+ * One full run: L1, positive L2, and both negative-control modes. Returns the
+ * raw results (for reporting) and the aggregated, normalized manifest (for the
+ * determinism byte-compare — includes NC lock statuses so anti-vacuity behaviour
+ * is compared across runs too).
+ */
+async function fullRun() {
+	const l1 = wantL1 ? await runL1() : [];
+	const l2 = wantL2 ? await runL2Positive() : [];
+	const ncMutated = wantL2 ? await runNegativeControl("mutated-sentinel") : [];
+	const ncRemoved = wantL2 ? await runNegativeControl("skill-removed") : [];
+	const manifest = {
+		l1: l1.map((r) => ({ name: r.name, ok: r.ok })),
+		scenarios: l2.filter((r) => r.manifest).map((r) => r.manifest),
+		nc: {
+			mutatedSentinel: ncMutated.map((r) => ({ name: r.name, ok: r.ok })),
+			skillRemoved: ncRemoved.map((r) => ({ name: r.name, ok: r.ok })),
+		},
+	};
+	return { manifest, raw: { l1, l2, ncMutated, ncRemoved } };
 }
 
 function report(label, results) {
@@ -101,29 +107,28 @@ async function main() {
 	let failed = 0;
 
 	const first = await fullRun();
-	failed += report("L1", first._raw.l1);
-	failed += report("L2", first._raw.l2);
+	failed += report("L1", first.raw.l1);
+	failed += report("L2", first.raw.l2);
 
-	if (scenarioFilter && first._raw.l1.length === 0 && first._raw.l2.length === 0) {
+	if (scenarioFilter && first.raw.l1.length === 0 && first.raw.l2.length === 0) {
 		process.stdout.write(`\n[filter] FAIL --scenario '${scenarioFilter}' matched no L1 or L2 checks\n`);
 		process.exitCode = 1;
 		return;
 	}
 
-	if (wantL2) {
-		failed += report("NC:mutated-sentinel", await runNegativeControl("mutated-sentinel"));
-		failed += report("NC:skill-removed", await runNegativeControl("skill-removed"));
-	}
+	failed += report("NC:mutated-sentinel", first.raw.ncMutated);
+	failed += report("NC:skill-removed", first.raw.ncRemoved);
 
-	const firstSerialized = serializeManifest({ l1: first.l1, scenarios: first.scenarios });
+	const firstSerialized = serializeManifest(first.manifest);
 	if (manifestOut) await writeFile(manifestOut, firstSerialized);
 
 	if (determinism) {
 		const second = await fullRun();
-		failed += report("L1(run2)", second._raw.l1);
-		failed += report("L2(run2)", second._raw.l2);
-		const secondSerialized = serializeManifest({ l1: second.l1, scenarios: second.scenarios });
-		if (firstSerialized === secondSerialized) {
+		failed += report("L1(run2)", second.raw.l1);
+		failed += report("L2(run2)", second.raw.l2);
+		failed += report("NC:mutated-sentinel(run2)", second.raw.ncMutated);
+		failed += report("NC:skill-removed(run2)", second.raw.ncRemoved);
+		if (firstSerialized === serializeManifest(second.manifest)) {
 			process.stdout.write("\n[determinism] ok   two fresh-sandbox runs produced byte-identical manifests\n");
 		} else {
 			process.stdout.write("\n[determinism] FAIL manifests differ between runs\n");

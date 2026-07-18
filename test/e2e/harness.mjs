@@ -19,7 +19,7 @@
 
 import { spawn } from "node:child_process";
 import { createHash } from "node:crypto";
-import { access, cp, mkdir, mkdtemp, readFile, readdir, rm, stat, writeFile } from "node:fs/promises";
+import { access, cp, mkdir, mkdtemp, readFile, readdir, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { dirname, join, relative, resolve, sep } from "node:path";
 import { performance } from "node:perf_hooks";
@@ -156,8 +156,9 @@ async function snapshotTree(root) {
 				await walk(abs);
 			} else if (entry.isFile()) {
 				try {
-					const info = await stat(abs);
-					snapshot[abs] = `${info.size}:${Math.round(info.mtimeMs)}`;
+					// Content hash (not size:mtime) so a same-size, same-mtime
+					// replacement can't slip past the teardown scan.
+					snapshot[abs] = sha256(await readFile(abs));
 				} catch {
 					// vanished between readdir and stat — ignore
 				}
@@ -196,6 +197,7 @@ export async function createSandbox(options = {}) {
 	if (denied.length > 0) {
 		throw new Error(`refusing to start: ambient credentials detected (${denied.join(", ")}); unset them or set PI_E2E_ALLOW_<VAR>=1 per variable`);
 	}
+	await assertPinnedPi();
 
 	const dir = await mkdtemp(join(tmpdir(), "pi-sdlc-e2e-"));
 	const home = join(dir, "home");
@@ -346,6 +348,23 @@ export async function disposeSandbox(sandbox) {
 	await rm(sandbox.dir, { recursive: true, force: true });
 }
 
+let pinnedPiChecked = false;
+
+/**
+ * Assert the pinned pi binary reports {@link PINNED_PI_VERSION} (once per
+ * process). Guards against a PI_BIN override or lockfile drift silently running
+ * the suite against an unpinned pi whose headless/SSE behaviour differs.
+ */
+export async function assertPinnedPi() {
+	if (pinnedPiChecked) return;
+	if (!(await fileExists(piBin))) throw new Error(`pinned pi binary is missing: ${piBin}; run npm ci first`);
+	const result = await runProcess([piBin, "--version"], { env: { PATH: process.env.PATH ?? "" }, timeoutMs: 30000 });
+	if (!result.stdout.includes(PINNED_PI_VERSION) && !result.stderr.includes(PINNED_PI_VERSION)) {
+		throw new Error(`pinned pi version mismatch: expected ${PINNED_PI_VERSION}, got ${(result.stdout || result.stderr).trim()}`);
+	}
+	pinnedPiChecked = true;
+}
+
 // ---------------------------------------------------------------------------
 // Process helpers
 // ---------------------------------------------------------------------------
@@ -377,6 +396,9 @@ export function runProcess(argv, options = {}) {
 		const timer = setTimeout(() => {
 			timedOut = true;
 			child.kill("SIGTERM");
+			// Escalate if the child ignores SIGTERM, so one hung run fails fast
+			// instead of wedging the whole suite until the CI job timeout.
+			setTimeout(() => child.kill("SIGKILL"), 5000).unref();
 		}, timeoutMs);
 		child.on("error", (error) => {
 			clearTimeout(timer);

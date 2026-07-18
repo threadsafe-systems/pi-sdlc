@@ -140,10 +140,11 @@ and mandated markers, never free prose.
 
 ## Determinism
 
-`run.mjs --determinism` runs the full positive suite twice, each from a fresh
-sandbox, and byte-compares the normalized run manifests (volatile fields —
-absolute scratch paths, UUIDs, timestamps, durations — stripped; tool calls in
-assistant **source order**). CI enforces the comparison.
+`run.mjs --determinism` runs the full suite (L1 + positive L2 + both
+negative-control modes) twice, each from a fresh sandbox, and byte-compares the
+normalized run manifests (volatile fields — absolute scratch paths, UUIDs,
+timestamps, durations — stripped; tool calls in assistant **source order**; NC
+lock statuses included). CI enforces the comparison.
 
 ## Pinned pi and the bump procedure
 

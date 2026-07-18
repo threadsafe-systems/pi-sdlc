@@ -15,7 +15,7 @@
 //   PUPPET_EMISSIONS  - append what the server emitted per turn (JSON lines)
 //   PUPPET_READY      - a file written once the server is listening
 
-import { appendFileSync, readFileSync, writeFileSync } from "node:fs";
+import { appendFileSync, readFileSync, renameSync, writeFileSync } from "node:fs";
 import { createServer } from "node:http";
 
 const port = Number(process.env.PUPPET_PORT ?? "0");
@@ -131,7 +131,11 @@ server.on("error", (error) => {
 });
 server.listen(port, "127.0.0.1", () => {
 	// Report the actually-bound port (port 0 = an OS-assigned free port, so
-	// concurrent runs never collide on a fixed base).
-	if (readyFile) writeFileSync(readyFile, `${server.address().port}\n`);
+	// concurrent runs never collide on a fixed base). Write to a temp file and
+	// rename into place so the reader never observes a half-written/empty file.
+	if (readyFile) {
+		writeFileSync(`${readyFile}.tmp`, `${server.address().port}\n`);
+		renameSync(`${readyFile}.tmp`, readyFile);
+	}
 });
 process.on("SIGTERM", () => server.close(() => process.exit(0)));

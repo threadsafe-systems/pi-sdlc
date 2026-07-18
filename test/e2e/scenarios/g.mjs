@@ -5,7 +5,7 @@
 // write. Negative twin: no hook configured ⇒ no `[sdlc hook]` lines at all.
 
 import { assertOrdered, assertText } from "../harness.mjs";
-import { adopt, consumerPath, readConsumerConfig } from "./common.mjs";
+import { adopt, consumerPath, readConsumerConfig, toolResults } from "./common.mjs";
 
 const USE_LINE = "[sdlc hook] implement:before use=tool:bash do=create the working file";
 const RESULT_LINE = "[sdlc hook] implement:before result: ok";
@@ -23,8 +23,9 @@ export function build(sandbox) {
 				return { consumer: hookConsumer };
 			},
 			steps: [
-				// Announce-on-fire + the hook's tool call, then the result line, then the first write.
-				{ content: USE_LINE, toolCalls: [{ name: "bash", arguments: { command: "echo hook-fired" } }] },
+				// Announce-on-fire + the hook's tool call (triggered on the implement
+				// prompt), then the result line, then the first write.
+				{ content: USE_LINE, trigger: "implement", toolCalls: [{ name: "bash", arguments: { command: "echo hook-fired" } }] },
 				{ content: RESULT_LINE, toolCalls: [{ name: "write", arguments: { path: `${hookConsumer}/implement-output.txt`, content: "work" } }] },
 			],
 			assert: async ({ record }) => {
@@ -44,6 +45,9 @@ export function build(sandbox) {
 					throw new Error(`G tool-call order wrong: ${names.join(",")}`);
 				}
 				if (!record.files["implement-output.txt"]) throw new Error("G first write did not land (implement-output.txt missing)");
+				// The announced `result: ok` must reflect a REAL successful hook: the
+				// bash hook's tool result carried its output and no nonzero exit.
+				assertText(toolResults(record), { mustMatch: [/hook-fired/], mustNotMatch: [/exit(ed)? (code )?[1-9]/i], label: "G hook tool result" });
 			},
 		},
 		{

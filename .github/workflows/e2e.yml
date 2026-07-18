@@ -19,10 +19,10 @@ jobs:
   e2e:
     name: e2e integration harness
     runs-on: ubuntu-latest
-    # Timeout headroom: the two-run determinism workload measures ~46s of
-    # wall-clock locally (T1/T5 spike). Formula: ceil(4 x measured) + npm ci and
-    # cold-cache overhead => a 15-minute ceiling, comfortably above the measured
-    # bound while still failing a genuinely hung run.
+    # Timeout headroom: the two-run determinism workload (L1 + positive L2 + both
+    # negative-control modes, run twice) measures ~115s of wall-clock locally.
+    # Formula: ceil(4 x measured) + npm ci / cold-cache overhead => a 15-minute
+    # ceiling, comfortably above the measured bound while still failing a hung run.
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
