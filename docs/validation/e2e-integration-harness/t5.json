@@ -1,0 +1,38 @@
+{
+  "schemaVersion": 1,
+  "taskId": "t5",
+  "buildPlan": "docs/plans/2026-07-17-e2e-integration-harness-build.md",
+  "repoRoot": ".",
+  "ownedScenarios": [],
+  "checks": [
+    {
+      "id": "tests.determinism",
+      "argv": ["node", "test/e2e/run.mjs", "--determinism"],
+      "timeoutMs": 550000,
+      "evidence": ["Full suite (L1 + L2 + negative control) twice from fresh sandboxes; byte-identical normalized manifests"]
+    },
+    {
+      "id": "static.run",
+      "argv": ["node", "--check", "test/e2e/run.mjs"],
+      "evidence": ["Top-level runner syntax"]
+    },
+    {
+      "id": "standards.biome",
+      "argv": ["npx", "biome", "check", "."],
+      "timeoutMs": 120000,
+      "evidence": ["Repo-wide biome lint + format (matches the CI lint job)"]
+    },
+    {
+      "id": "patterns.diff",
+      "argv": ["git", "diff", "--check", "HEAD"],
+      "evidence": ["No whitespace-error banned patterns in the task diff"]
+    }
+  ],
+  "categories": {
+    "tests": { "applicability": "required", "checkIds": ["tests.determinism"] },
+    "static": { "applicability": "required", "checkIds": ["static.run"] },
+    "scenarios": { "applicability": "n/a", "reason": "T5 wires CI, the determinism gate, and the README; it owns no Specification scenarios (the L2 acceptance runs under tests.determinism)." },
+    "standards": { "applicability": "required", "checkIds": ["standards.biome"] },
+    "bannedPatterns": { "applicability": "required", "checkIds": ["patterns.diff"] }
+  }
+}

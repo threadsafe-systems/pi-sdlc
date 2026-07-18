@@ -1,0 +1,42 @@
+name: e2e
+
+# The sandboxed end-to-end integration harness (L1 install/discovery + CLI
+# conformance, L2 puppet-model scenarios, the shared negative control, and the
+# two-run determinism gate). Runs on PRs and on pushes to main, like the unit
+# job. Making this check merge-blocking is a repo-admin branch-protection action
+# (see test/e2e/README.md), not a code deliverable.
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  e2e:
+    name: e2e integration harness
+    runs-on: ubuntu-latest
+    # Timeout headroom: the two-run determinism workload measures ~46s of
+    # wall-clock locally (T1/T5 spike). Formula: ceil(4 x measured) + npm ci and
+    # cold-cache overhead => a 15-minute ceiling, comfortably above the measured
+    # bound while still failing a genuinely hung run.
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: e2e (L1 + L2 + negative control + determinism)
+        # Clean environment: the harness refuses to start when ambient
+        # credential env vars are present (a ratified isolation guard, and CI
+        # runners can inject *_TOKEN vars). `env -i` strips everything; PATH and
+        # HOME are preserved so node/git/npx resolve. The suite constructs its
+        # own allowlisted child environment regardless.
+        run: env -i PATH="$PATH" HOME="$HOME" node test/e2e/run.mjs --determinism
