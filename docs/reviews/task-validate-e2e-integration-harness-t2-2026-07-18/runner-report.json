@@ -1,0 +1,121 @@
+{
+  "schemaVersion": 1,
+  "taskId": "t2",
+  "manifest": "/home/neil/code/threadsafe/pi-sdlc.worktrees/feat-e2e-integration-harness/docs/validation/e2e-integration-harness/t2.json",
+  "repoRoot": "/home/neil/code/threadsafe/pi-sdlc.worktrees/feat-e2e-integration-harness",
+  "verdict": "PASS",
+  "exitCode": 0,
+  "errors": [],
+  "manifestErrors": [],
+  "commands": [
+    {
+      "id": "tests.l1",
+      "argv": [
+        "node",
+        "test/e2e/l1.mjs"
+      ],
+      "evidence": [
+        "L1 suite through install-root paths: discovery, setup presets, override guard, four sdlc-status states, v2 refusal, check-lifecycle body, onShortfall"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 4898,
+      "stdoutTail": "[L1] ok   discovery\n[L1] ok   setup-presets\n[L1] ok   preset-patch + override guard\n[L1] ok   sdlc-status four states\n[L1] ok   v2 honest refusal (no migration)\n[L1] ok   check-lifecycle body mode\n[L1] ok   onShortfall proceed/fail\n\nall 7 L1 checks passed\n",
+      "stderrTail": ""
+    },
+    {
+      "id": "static.l1",
+      "argv": [
+        "node",
+        "--check",
+        "test/e2e/l1.mjs"
+      ],
+      "evidence": [
+        "L1 suite syntax"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 22,
+      "stdoutTail": "",
+      "stderrTail": ""
+    },
+    {
+      "id": "standards.biome",
+      "argv": [
+        "npx",
+        "biome",
+        "check",
+        "test/e2e/"
+      ],
+      "evidence": [
+        "Biome lint + format for the e2e harness sources"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 345,
+      "stdoutTail": "Checked 3 files in 16ms. No fixes applied.\n",
+      "stderrTail": ""
+    },
+    {
+      "id": "patterns.diff",
+      "argv": [
+        "git",
+        "diff",
+        "--check",
+        "HEAD"
+      ],
+      "evidence": [
+        "No whitespace-error banned patterns in the task diff"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 9,
+      "stdoutTail": "",
+      "stderrTail": ""
+    }
+  ],
+  "categories": [
+    {
+      "category": "tests",
+      "status": "PASS",
+      "checkIds": [
+        "tests.l1"
+      ]
+    },
+    {
+      "category": "static",
+      "status": "PASS",
+      "checkIds": [
+        "static.l1"
+      ]
+    },
+    {
+      "category": "scenarios",
+      "status": "N/A",
+      "reason": "T2 exercises L1 CLI conformance (not the L2 Specification scenarios A-E/G, which are owned by T4); its L1 assertions are the tests.l1 suite."
+    },
+    {
+      "category": "standards",
+      "status": "PASS",
+      "checkIds": [
+        "standards.biome"
+      ]
+    },
+    {
+      "category": "bannedPatterns",
+      "status": "PASS",
+      "checkIds": [
+        "patterns.diff"
+      ]
+    }
+  ],
+  "scenarios": []
+}

@@ -201,8 +201,14 @@ export async function createSandbox(options = {}) {
 	await writeFile(join(home, ".pi", "agent", "settings.json"), `${JSON.stringify({ defaultProjectTrust: "always", enableInstallTelemetry: false, enableAnalytics: false }, null, 2)}\n`);
 	await writeFile(join(home, ".pi", "agent", "auth.json"), `${JSON.stringify({ providers: {} }, null, 2)}\n`);
 
-	// Protected roots the run must never write to. Bounded by SNAPSHOT_IGNORE.
-	const watchedRoots = options.watchedRoots ?? [repoRoot, join(process.env.HOME ?? "/nonexistent", ".pi")];
+	// Protected roots the run must never write to. The sandbox redirects HOME and
+	// runs from a scratch consumer, so pi's own state writes are structurally
+	// confined to the sandbox; the meaningful leak surface is the repository
+	// checkout (a checkout-relative-path bug would corrupt it). We therefore watch
+	// repoRoot by default rather than the live ~/.pi, which unrelated concurrent
+	// pi processes write to (a false-positive source). Overridable for stricter
+	// local runs. Bounded by SNAPSHOT_IGNORE.
+	const watchedRoots = options.watchedRoots ?? [repoRoot];
 	const watchedBefore = {};
 	for (const root of watchedRoots) {
 		Object.assign(watchedBefore, await snapshotTree(root));
@@ -239,9 +245,41 @@ export async function stagePackage(sandbox) {
 	return sandbox.staged;
 }
 
-/** Install the staged copy into the consumer repo by reference (`pi install <staged> -l`). */
-export async function installPackage(sandbox) {
-	return runPi(sandbox, ["install", sandbox.staged, "-l"]);
+/** Install the staged copy into a consumer repo by reference (`pi install <staged> -l`). */
+export async function installPackage(sandbox, cwd = sandbox.consumer) {
+	return runPi(sandbox, ["install", sandbox.staged, "-l"], { cwd });
+}
+
+/** Absolute path to a shipped script *under the staged install root* (install-root fidelity). */
+export function installedScript(sandbox, name) {
+	return join(sandbox.staged, "skills", "sdlc", "scripts", name);
+}
+
+/** Absolute path to any resource under the staged install root. */
+export function installedResource(sandbox, ...segments) {
+	return join(sandbox.staged, ...segments);
+}
+
+/**
+ * Create and git-init a fresh scratch consumer repo under the sandbox, returning
+ * its absolute path. Lets an L1 check exercise multiple independent repo states
+ * (fresh, adopted, v2-config) without cross-contamination.
+ */
+export async function makeConsumer(sandbox, name) {
+	const dir = join(sandbox.dir, "consumers", name);
+	await mkdir(dir, { recursive: true });
+	const env = buildChildEnv(sandbox);
+	await runProcess(["git", "init", "-q", "-b", "main", dir], { cwd: sandbox.dir, env });
+	await runProcess(["git", "config", "user.email", "e2e@example.invalid"], { cwd: dir, env });
+	await runProcess(["git", "config", "user.name", "e2e"], { cwd: dir, env });
+	return dir;
+}
+
+/** Stage all files under a consumer and commit them (so adoption/manifest checks see HEAD). */
+export async function commitConsumer(sandbox, cwd, message = "init") {
+	const env = buildChildEnv(sandbox);
+	await runProcess(["git", "add", "-A"], { cwd, env });
+	return runProcess(["git", "commit", "-q", "-m", message], { cwd, env });
 }
 
 /**
