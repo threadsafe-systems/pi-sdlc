@@ -1,0 +1,135 @@
+{
+  "schemaVersion": 1,
+  "taskId": "sdlc-agent-self-documentation-a2",
+  "manifest": "/home/neil/code/threadsafe/pi-sdlc.worktrees/feat-sdlc-agent-self-documentation/docs/validation/sdlc-agent-self-documentation/sdlc-agent-self-documentation-a2.json",
+  "repoRoot": "/home/neil/code/threadsafe/pi-sdlc.worktrees/feat-sdlc-agent-self-documentation",
+  "verdict": "PASS",
+  "exitCode": 0,
+  "errors": [],
+  "manifestErrors": [],
+  "commands": [
+    {
+      "id": "tests.a2",
+      "argv": [
+        "node",
+        "--test",
+        "test/standalone-entrypoints.test.js"
+      ],
+      "evidence": [
+        "ASD12 entrypoint table/stamp/adoption-predicate, ASD13 tasks/implement refuse-with-redirect + no fabrication"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 168,
+      "stdoutTail": "✔ ASD12: all six sdlc:<slug> entrypoint templates exist (1.563301ms)\n✔ ASD12: every entrypoint drives adopted-config on the FS8 adoption.manifest-head predicate and stops on error (3.578151ms)\n✔ ASD12: the sdlc:spec stamp is structurally valid and only spec emits one (1.063523ms)\n✔ ASD12: sdlc:pr-review discloses grounded-vs-diff-only and never runs below committed floors (0.418224ms)\n✔ ASD12: brainstorm/plan run without upstream (unadopted) and as configured gate (adopted) (0.435763ms)\n✔ ASD13: sdlc:tasks and sdlc:implement refuse-with-redirect in BOTH adoption states and fabricate nothing (0.420527ms)\nℹ tests 6\nℹ suites 0\nℹ pass 6\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 107.095966\n",
+      "stderrTail": ""
+    },
+    {
+      "id": "tests.full",
+      "argv": [
+        "npm",
+        "test"
+      ],
+      "evidence": [
+        "Full corpus regression stays green with the six entrypoint templates"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 6902,
+      "stdoutTail": "[...truncated; showing bounded tail...]\n✔ ICA24: separateSpec false precedes the human/off refusal for spec_review (55.346871ms)\n✔ CV28: watched config schema changes require the PR release signal (462.159917ms)\n✔ CV28: inner breaking commits are ignored in favour of the squash title (87.308218ms)\n✔ CV28: only the named schemas and CONFIG_SCHEMA_VERSION line are watched (262.191499ms)\n✔ CV19: committed migrated v2 config without a models file is ready in text and JSON (119.756649ms)\n✔ CV17: recognised v1 is not-ready with canonical migration remedy and unrelated checks still report (66.991111ms)\n✔ CV18: schemaVersion 4 is an error with the canonical newer remedy (98.698948ms)\n✔ CV19: a panels-less v2 config is valid but not-ready (100.809744ms)\n✔ CV20: malformed JSON and invalid schemaVersion remain config errors (136.882258ms)\n✔ current v2 structural validation errors remain config.valid errors (156.948029ms)\n✔ filesystem-only manifests are not committed adoption (210.541987ms)\n✔ argument, root, and git errors retain exit 2 (282.121789ms)\n✔ workflow readability remains an independent readiness check (161.804825ms)\n✔ unrelated dirty files do not affect readiness (84.162783ms)\n✔ status completes with a PATH exposing only git (108.455956ms)\n✔ fresh bundle provisions requested assets and idempotent rerun retains them (130.12566ms)\n✔ CI marker directories are not mistaken for CI files (84.376186ms)\n✔ existing CI suppresses workflow creation and reports refusal (68.126806ms)\n✔ template info strings must be exactly sdlc (72.768437ms)\n✔ consumer template with the wrong companion is refused byte-identically (64.897755ms)\n✔ consumer template with multiple declarations is refused (58.588043ms)\n✔ consumer template without the declaration is refused byte-identically (43.599176ms)\n✔ invalid assembled configuration fails before any bundle write (38.015675ms)\n✔ target parent conflicts fail before any bundle write (60.959425ms)\n✔ unreadable package sources fail before any bundle write (59.35001ms)\n✔ invalid existing config and models are refused without overwrite (101.971654ms)\n✔ workflow from another repository is refused (51.70385ms)\n✔ malformed CI marker fails before any bundle write (71.510341ms)\n✔ operational JSON errors preserve the resolved consumer root (81.305243ms)\n✔ existing target directories fail before any bundle write (46.734411ms)\n✔ bundle reports resolved package references before writing (43.48921ms)\n✔ OH4: --yes writes a schema-valid config; bundle re-run refuses config changes; --force overwrites (151.243263ms)\n✔ OH5: --hook-use fields 3-4 = use, do = remainder after 4th colon (colons in do preserved) (44.403598ms)\n✔ OH5: --hook-run command = remainder after 2nd colon (colons preserved); trust warning on stderr (64.303393ms)\n✔ OH5: mixed repeated hook flags preserve argv order in the written list (72.276092ms)\n✔ OH5: malformed hook flags exit 2 (304.447335ms)\n✔ PR-fix: value-taking flags accept values that begin with '-' (e.g. --announce '--foo') (46.459533ms)\n✔ OH5: partial tracker flags exit 2 (all-or-none) (44.488166ms)\n✔ OH5: no config flags and no TTY exits 2 (interview needs a TTY) (43.270917ms)\n✔ OH6: package.json pi.prompts includes ./templates and the template has a description (1.288745ms)\n✔ ICA17: --profile is retired (39.51698ms)\n✔ ICA17: --lifecycle-json is retired (42.741372ms)\n✔ ICA17: --enforcement is retired (34.823234ms)\n✔ ICA17: --preset custom is retired (35.87948ms)\n✔ ICA18: --preset standard writes the explicit standard bundle (40.227467ms)\n✔ ICA18: per-dial flags override the preset; --override lands in overrides (54.987231ms)\n✔ ICA18: --preset full carries the reversible design override (48.810332ms)\n✔ ICA19: --preset patches review/shape/overrides and preserves other keys (108.238148ms)\n✔ ICA19: patch that would delete consumer overrides refuses without --force (141.928177ms)\n✔ ICA23: --override reversible:brainstorm:off is rejected exit 2 (42.980956ms)\n✔ ICA23: --override reversible:onShortfall:fail is rejected exit 2 (38.049408ms)\n✔ ICA23: --override frozen:design:panel is rejected exit 2 (60.94279ms)\n✔ ICA23: --override reversible:design:banana is rejected exit 2 (53.849078ms)\n✔ ICA23: --override reversible:panelSize:zero is rejected exit 2 (44.349277ms)\n✔ ICA23: --override reversible:design is rejected exit 2 (43.377746ms)\n✔ ICA6: older-schema config + --force replaces with a fresh v3 config (127.026447ms)\n✔ ICA19: a single-dial patch preserves the other committed dials (106.322567ms)\n✔ ICA19: preset patch refuses when it would drop a consumer override track (192.017322ms)\n✔ ASD4: SKILL.md is within the 220-line / 16384-byte ceiling (0.71118ms)\n✔ ASD4: SKILL.md retains all seven kernel responsibilities (0.520012ms)\n✔ ASD4: SKILL.md contains no duplicated detailed phase-mechanics block (0.214445ms)\n✔ ASD16: every §5 checklist answer is derivable from docs alone (2.924975ms)\n✔ ASD16: docs state the source-inspection boundary (source only when changing implementation) (0.77838ms)\n✔ ASD16 (non-vacuous): no doc claims implementation work can avoid source inspection (0.665424ms)\n✔ ASD12: all six sdlc:<slug> entrypoint templates exist (1.512243ms)\n✔ ASD12: every entrypoint drives adopted-config on the FS8 adoption.manifest-head predicate and stops on error (2.416979ms)\n✔ ASD12: the sdlc:spec stamp is structurally valid and only spec emits one (0.793506ms)\n✔ ASD12: sdlc:pr-review discloses grounded-vs-diff-only and never runs below committed floors (0.344485ms)\n✔ ASD12: brainstorm/plan run without upstream (unadopted) and as configured gate (adopted) (0.509952ms)\n✔ ASD13: sdlc:tasks and sdlc:implement refuse-with-redirect in BOTH adoption states and fabricate nothing (0.447528ms)\n✔ ASD2: system reference contains every §5 checklist section (1.000356ms)\n✔ ASD2 (non-vacuous): deleting any one section is detected (1.383587ms)\n✔ ASD2: §5 public-composition inventory narrates the six-class taxonomy (0.277321ms)\n✔ PV1: a valid JavaScript manifest runs only declared checks and passes (97.987408ms)\n✔ PV2: only declared argv run; an undeclared tool command never executes (209.538856ms)\n✔ PV3: schema and inspectManifest reject the mutation matrix before any command runs (136.980361ms)\n✔ PV4: command outcomes are complete and deterministic; runner continues after failures (69.599557ms)\n✔ PV4: a timeout is reported as FAIL with timedOut (1098.476055ms)\n✔ PV5: category applicability is exact; injected n/a shapes are rejected (172.490866ms)\n✔ PV6: scenario mapping gates the verdict (178.632217ms)\n✔ PV7: standards and banned patterns are commands, not judgement (219.480048ms)\n✔ PV8: evidence is bounded and secrets are redacted (159.808387ms)\n✔ PV8 unit: boundStream and redaction name-matching are precise (394.673752ms)\n✔ PV9: JSON/text/exit agree and JSON mode is order-independent (1000.456453ms)\n✔ PV9: --report writes the exact JSON bytes atomically (244.846574ms)\n✔ PV9: --report outside the repo root is refused and clobbers nothing (248.996175ms)\n✔ PV10: generic validator law and generated agent are portable (1.153526ms)\n✔ PV11: receipt hash verification detects mutation of any stored file (8.657108ms)\n✔ PV11: a FAIL runner-report cannot ride under runnerVerdict PASS (2.058911ms)\n✔ parseArgs: recognises JSON anywhere and rejects bad flags (1.154212ms)\n✔ PV13: renderText is a faithful projection of the report (169.241981ms)\nℹ tests 271\nℹ suites 0\nℹ pass 271\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 6695.250699\n",
+      "stderrTail": ""
+    },
+    {
+      "id": "static.lint",
+      "argv": [
+        "npm",
+        "run",
+        "lint"
+      ],
+      "evidence": [
+        "Formatting and lint over the six templates/sdlc-*.md and the test"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 298,
+      "stdoutTail": "\n> pi-sdlc@0.1.1 lint\n> biome check .\n\nChecked 106 files in 102ms. No fixes applied.\n",
+      "stderrTail": ""
+    },
+    {
+      "id": "patterns.diff",
+      "argv": [
+        "git",
+        "diff",
+        "--check",
+        "HEAD"
+      ],
+      "evidence": [
+        "No whitespace-error banned patterns in the task diff"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 6,
+      "stdoutTail": "",
+      "stderrTail": ""
+    }
+  ],
+  "categories": [
+    {
+      "category": "tests",
+      "status": "PASS",
+      "checkIds": [
+        "tests.a2",
+        "tests.full"
+      ]
+    },
+    {
+      "category": "static",
+      "status": "PASS",
+      "checkIds": [
+        "static.lint"
+      ]
+    },
+    {
+      "category": "scenarios",
+      "status": "PASS"
+    },
+    {
+      "category": "standards",
+      "status": "N/A",
+      "reason": "A2 adds no new normative-reference inventory rows; FS11 classification/discovery for the new entrypoints is task C1."
+    },
+    {
+      "category": "bannedPatterns",
+      "status": "PASS",
+      "checkIds": [
+        "patterns.diff"
+      ]
+    }
+  ],
+  "scenarios": [
+    {
+      "scenarioId": "ASD12",
+      "status": "PASS",
+      "checkIds": [
+        "tests.a2",
+        "tests.full"
+      ]
+    },
+    {
+      "scenarioId": "ASD13",
+      "status": "PASS",
+      "checkIds": [
+        "tests.a2",
+        "tests.full"
+      ]
+    }
+  ]
+}
