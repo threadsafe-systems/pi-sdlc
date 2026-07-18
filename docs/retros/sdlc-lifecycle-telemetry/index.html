@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>sdlc-retro: Lifecycle telemetry and post-mortem dashboard (sdlc-retro)</title>
+<style>
+body { font-family: system-ui, sans-serif; margin: 0; padding: 2rem; background: #0b0e14; color: #d6dbe5; line-height: 1.5; }
+h1 { margin-top: 0; }
+section { margin-bottom: 2.5rem; padding: 1.25rem; background: #131722; border-radius: 8px; }
+.strip { display: flex; flex-wrap: wrap; gap: 1.5rem; }
+.metric { display: flex; flex-direction: column; gap: 0.25rem; }
+.metric .label { font-size: 0.8rem; color: #8892a6; text-transform: uppercase; letter-spacing: 0.05em; }
+.metric .value { font-size: 1.5rem; font-weight: 600; }
+.phase-row, .rollup-row, .panel-model-row, .panel-finding-row, .steering-mark, .rework-row, .coverage-row { display: flex; gap: 1rem; padding: 0.4rem 0; border-bottom: 1px solid #232838; }
+[data-soft="true"] { background: rgba(255, 196, 0, 0.08); }
+.soft-attribution { font-size: 0.75rem; color: #ffc400; }
+.coverage-notice { color: #8892a6; font-style: italic; }
+.panel-round { margin-bottom: 1.5rem; }
+</style>
+</head>
+<body>
+<h1>Lifecycle telemetry and post-mortem dashboard (sdlc-retro) <small>(irreversible)</small></h1>
+<nav><a href="#exec-strip">Summary</a> · <a href="#phase-swimlane">Phases</a> · <a href="#cost-breakdown">Cost</a> · <a href="#panel-deepdive">Panels</a> · <a href="#steering-map">Steering</a> · <a href="#rework-panel">Rework</a> · <a href="#coverage">Coverage</a></nav>
+<section id="exec-strip">
+<h2>Executive strip</h2>
+<div class="strip">
+<div class="metric" data-metric="tokens"><span class="label">Tokens</span><span class="value">86920014</span></div>
+<div class="metric" data-metric="cost"><span class="label">Cost</span><span class="value">$41.7505</span></div>
+<div class="metric" data-metric="wallMs"><span class="label">Wall time</span><span class="value">1.09h</span></div>
+<div class="metric" data-metric="agentMs"><span class="label">Agent time</span><span class="value">55.7m</span></div>
+<div class="metric" data-metric="humanWaitMs"><span class="label">Human wait (proxy)</span><span class="value">48.3s</span></div>
+</div>
+</section>
+<section id="phase-swimlane"><h2>Phase swimlane</h2><p class="coverage-notice">no phase spans recorded in this run's manifest</p></section>
+<section id="cost-breakdown">
+<h2>Cost breakdown</h2>
+<h3>By model</h3>
+<div class="rollup-row" data-model="claude-sonnet-5"><span class="rollup-key">claude-sonnet-5</span><span class="rollup-tokens">86920014</span><span class="rollup-cost">$41.7505</span></div>
+<h3>By phase</h3>
+<p class="coverage-notice">no by-phase rollups</p>
+</section>
+<section id="panel-deepdive"><h2>Panel deep-dive</h2><p class="coverage-notice">no harvested panel rounds</p></section>
+<section id="steering-map"><h2>Steering map</h2><p class="coverage-notice">no steering data (soft data absent or no user turns correlated)</p></section>
+<section id="rework-panel">
+<h2>Rework</h2>
+<div class="rework-row"><span>Artifact revisions</span><span>0</span></div>
+<div class="rework-row"><span>Phase backward moves</span><span>0</span></div>
+<div class="rework-row"><span>PR fix waves</span><span>0</span></div>
+</section>
+<section id="coverage">
+<h2>Coverage</h2>
+<div class="coverage-row" data-marker="manifest.partial"><span class="coverage-marker">manifest.partial</span><span class="coverage-detail">1 malformed line(s) skipped</span></div>
+<div class="coverage-row" data-marker="soft.absent"><span class="coverage-marker">soft.absent</span></div>
+</section>
+</body>
+</html>

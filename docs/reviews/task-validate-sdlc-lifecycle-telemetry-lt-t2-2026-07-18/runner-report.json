@@ -1,0 +1,268 @@
+{
+  "schemaVersion": 1,
+  "taskId": "lt-t2",
+  "manifest": "/home/neil/code/threadsafe/pi-sdlc.worktrees/feat-sdlc-lifecycle-telemetry/docs/validation/sdlc-lifecycle-telemetry/lt-t2.json",
+  "repoRoot": "/home/neil/code/threadsafe/pi-sdlc.worktrees/feat-sdlc-lifecycle-telemetry",
+  "verdict": "PASS",
+  "exitCode": 0,
+  "errors": [],
+  "manifestErrors": [],
+  "commands": [
+    {
+      "id": "tests.telemetry-side-effects",
+      "argv": [
+        "node",
+        "--test",
+        "test/telemetry-side-effects.test.js"
+      ],
+      "evidence": [
+        "LT6-LT10 FS5 side-effect emission and check-lifecycle non-modification"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 839,
+      "stdoutTail": "✔ LT6: resolve-panel emits panel.resolved; stdout/exit byte-identical with/without --slug (153.109559ms)\n✔ LT7: ensure-panel-agent emits panel.agent_stamped; stdout/exit byte-identical (128.293526ms)\n✔ LT8: validate-task emits task.validated on PASS with and without --report (214.507775ms)\n✔ LT8: validate-task emits task.validated on FAIL (71.910796ms)\n✔ LT8: validate-task emits task.validated on an ERROR fixture whose manifest parses (36.377008ms)\n✔ LT8: an unparseable-manifest ERROR skips emission with the standard warning (28.126084ms)\n✔ LT9: unwritable run store degrades to a warning; primary output unaffected (117.197048ms)\n✔ nested --repo-root run stores are git-ignored too (gitignore anchoring) (2.81781ms)\n✔ LT10: check-lifecycle.mjs and .sh are untouched by FS5 side-effect emission (0.845639ms)\nℹ tests 9\nℹ suites 0\nℹ pass 9\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 809.247167\n",
+      "stderrTail": ""
+    },
+    {
+      "id": "tests.validator-contract",
+      "argv": [
+        "node",
+        "--test",
+        "test/validator-contract.test.js"
+      ],
+      "evidence": [
+        "PV1-PV13 validate-task contract remains green with --slug added"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 2814,
+      "stdoutTail": "✔ PV1: a valid JavaScript manifest runs only declared checks and passes (66.293497ms)\n✔ PV2: only declared argv run; an undeclared tool command never executes (132.898859ms)\n✔ PV3: schema and inspectManifest reject the mutation matrix before any command runs (61.061511ms)\n✔ PV4: command outcomes are complete and deterministic; runner continues after failures (52.75906ms)\n✔ PV4: a timeout is reported as FAIL with timedOut (1069.353912ms)\n✔ PV5: category applicability is exact; injected n/a shapes are rejected (72.126109ms)\n✔ PV6: scenario mapping gates the verdict (71.8307ms)\n✔ PV7: standards and banned patterns are commands, not judgement (78.687908ms)\n✔ PV8: evidence is bounded and secrets are redacted (77.747536ms)\n✔ PV8 unit: boundStream and redaction name-matching are precise (232.253306ms)\n✔ PV9: JSON/text/exit agree and JSON mode is order-independent (462.414482ms)\n✔ PV9: --report writes the exact JSON bytes atomically (115.621951ms)\n✔ PV9: --report outside the repo root is refused and clobbers nothing (113.503046ms)\n✔ PV10: generic validator law and generated agent are portable (0.565806ms)\n✔ PV11: receipt hash verification detects mutation of any stored file (5.802279ms)\n✔ PV11: a FAIL runner-report cannot ride under runnerVerdict PASS (1.032442ms)\n✔ parseArgs: recognises JSON anywhere and rejects bad flags (0.623985ms)\n✔ PV13: renderText is a faithful projection of the report (68.241605ms)\nℹ tests 18\nℹ suites 0\nℹ pass 18\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 2782.40877\n",
+      "stderrTail": ""
+    },
+    {
+      "id": "tests.full",
+      "argv": [
+        "npm",
+        "test"
+      ],
+      "evidence": [
+        "NF3 frozen-CLI regression floor: corpus green with FS5 emission added (npm test scopes to test/*.test.js, excluding the e2e harness scripts)"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 4659,
+      "stdoutTail": "[...truncated; showing bounded tail...]\n✔ CV18: schemaVersion 4 is an error with the canonical newer remedy (55.247323ms)\n✔ CV19: a panels-less v2 config is valid but not-ready (67.943119ms)\n✔ CV20: malformed JSON and invalid schemaVersion remain config errors (129.140915ms)\n✔ current v2 structural validation errors remain config.valid errors (138.771609ms)\n✔ filesystem-only manifests are not committed adoption (170.730464ms)\n✔ argument, root, and git errors retain exit 2 (214.674908ms)\n✔ workflow readability remains an independent readiness check (146.776381ms)\n✔ unrelated dirty files do not affect readiness (104.837276ms)\n✔ status completes with a PATH exposing only git (62.832496ms)\n✔ fresh bundle provisions requested assets and idempotent rerun retains them (84.958242ms)\n✔ CI marker directories are not mistaken for CI files (50.791794ms)\n✔ existing CI suppresses workflow creation and reports refusal (54.316419ms)\n✔ template info strings must be exactly sdlc (46.056529ms)\n✔ consumer template with the wrong companion is refused byte-identically (47.375773ms)\n✔ consumer template with multiple declarations is refused (48.28859ms)\n✔ consumer template without the declaration is refused byte-identically (41.795263ms)\n✔ invalid assembled configuration fails before any bundle write (33.133243ms)\n✔ target parent conflicts fail before any bundle write (34.277072ms)\n✔ unreadable package sources fail before any bundle write (43.409952ms)\n✔ invalid existing config and models are refused without overwrite (86.183898ms)\n✔ workflow from another repository is refused (55.296251ms)\n✔ malformed CI marker fails before any bundle write (50.69794ms)\n✔ operational JSON errors preserve the resolved consumer root (43.519755ms)\n✔ existing target directories fail before any bundle write (47.358201ms)\n✔ bundle reports resolved package references before writing (46.777243ms)\n✔ OH4: --yes writes a schema-valid config; bundle re-run refuses config changes; --force overwrites (130.02501ms)\n✔ OH5: --hook-use fields 3-4 = use, do = remainder after 4th colon (colons in do preserved) (39.477702ms)\n✔ OH5: --hook-run command = remainder after 2nd colon (colons preserved); trust warning on stderr (32.77077ms)\n✔ OH5: mixed repeated hook flags preserve argv order in the written list (37.001851ms)\n✔ OH5: malformed hook flags exit 2 (274.791931ms)\n✔ PR-fix: value-taking flags accept values that begin with '-' (e.g. --announce '--foo') (42.663186ms)\n✔ OH5: partial tracker flags exit 2 (all-or-none) (48.765146ms)\n✔ OH5: no config flags and no TTY exits 2 (interview needs a TTY) (46.263242ms)\n✔ OH6: package.json pi.prompts includes ./templates and the template has a description (0.417965ms)\n✔ ICA17: --profile is retired (34.787839ms)\n✔ ICA17: --lifecycle-json is retired (35.876603ms)\n✔ ICA17: --enforcement is retired (47.010031ms)\n✔ ICA17: --preset custom is retired (48.25899ms)\n✔ ICA18: --preset standard writes the explicit standard bundle (32.072548ms)\n✔ ICA18: per-dial flags override the preset; --override lands in overrides (35.521284ms)\n✔ ICA18: --preset full carries the reversible design override (34.131236ms)\n✔ ICA19: --preset patches review/shape/overrides and preserves other keys (98.538377ms)\n✔ ICA19: patch that would delete consumer overrides refuses without --force (120.290919ms)\n✔ ICA23: --override reversible:brainstorm:off is rejected exit 2 (37.273891ms)\n✔ ICA23: --override reversible:onShortfall:fail is rejected exit 2 (48.175424ms)\n✔ ICA23: --override frozen:design:panel is rejected exit 2 (107.915833ms)\n✔ ICA23: --override reversible:design:banana is rejected exit 2 (37.381084ms)\n✔ ICA23: --override reversible:panelSize:zero is rejected exit 2 (30.001085ms)\n✔ ICA23: --override reversible:design is rejected exit 2 (32.455206ms)\n✔ ICA6: older-schema config + --force replaces with a fresh v3 config (76.852891ms)\n✔ ICA19: a single-dial patch preserves the other committed dials (85.877897ms)\n✔ ICA19: preset patch refuses when it would drop a consumer override track (103.797475ms)\n✔ LT1: valid emit appends one schema-conforming line, creating the store (38.579523ms)\n✔ LT1b: --by defaults to agent when omitted (35.291529ms)\n✔ LT2: bad inputs exit 2 and never touch the manifest (223.65125ms)\n✔ schema agreement: unknown event types remain valid for forward-compatible consumers (0.384117ms)\n✔ LT2b: a bad input against a non-existent store attempts no write (35.189847ms)\n✔ LT3: concurrent emitters produce N complete, non-interleaved lines (159.422693ms)\n✔ empty explicit identities do not fall through to another identity (80.701892ms)\n✔ LT4: --slug beats env beats branch mapping (116.405578ms)\n✔ LT5: unresolvable identity skips (exit 0, one warning, no write) (105.359526ms)\n✔ LT26: .gitignore ignores the run store (3.156622ms)\n✔ emitter: .sh wrapper delegates to .mjs identically (36.471431ms)\n✔ vocabulary: every known event has a payload descriptor (0.133104ms)\n✔ LT6: resolve-panel emits panel.resolved; stdout/exit byte-identical with/without --slug (181.241274ms)\n✔ LT7: ensure-panel-agent emits panel.agent_stamped; stdout/exit byte-identical (227.466074ms)\n✔ LT8: validate-task emits task.validated on PASS with and without --report (219.234313ms)\n✔ LT8: validate-task emits task.validated on FAIL (52.705522ms)\n✔ LT8: validate-task emits task.validated on an ERROR fixture whose manifest parses (25.234882ms)\n✔ LT8: an unparseable-manifest ERROR skips emission with the standard warning (25.085545ms)\n✔ LT9: unwritable run store degrades to a warning; primary output unaffected (118.766836ms)\n✔ nested --repo-root run stores are git-ignored too (gitignore anchoring) (3.336375ms)\n✔ LT10: check-lifecycle.mjs and .sh are untouched by FS5 side-effect emission (0.626075ms)\n✔ PV1: a valid JavaScript manifest runs only declared checks and passes (98.514804ms)\n✔ PV2: only declared argv run; an undeclared tool command never executes (241.333522ms)\n✔ PV3: schema and inspectManifest reject the mutation matrix before any command runs (66.876676ms)\n✔ PV4: command outcomes are complete and deterministic; runner continues after failures (43.610471ms)\n✔ PV4: a timeout is reported as FAIL with timedOut (1050.836952ms)\n✔ PV5: category applicability is exact; injected n/a shapes are rejected (74.53259ms)\n✔ PV6: scenario mapping gates the verdict (75.894423ms)\n✔ PV7: standards and banned patterns are commands, not judgement (97.599641ms)\n✔ PV8: evidence is bounded and secrets are redacted (68.005068ms)\n✔ PV8 unit: boundStream and redaction name-matching are precise (219.292206ms)\n✔ PV9: JSON/text/exit agree and JSON mode is order-independent (433.685015ms)\n✔ PV9: --report writes the exact JSON bytes atomically (121.240731ms)\n✔ PV9: --report outside the repo root is refused and clobbers nothing (108.536127ms)\n✔ PV10: generic validator law and generated agent are portable (0.557734ms)\n✔ PV11: receipt hash verification detects mutation of any stored file (5.823621ms)\n✔ PV11: a FAIL runner-report cannot ride under runnerVerdict PASS (0.746272ms)\n✔ parseArgs: recognises JSON anywhere and rejects bad flags (0.459692ms)\n✔ PV13: renderText is a faithful projection of the report (87.277072ms)\nℹ tests 238\nℹ suites 0\nℹ pass 238\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 4569.262974\n",
+      "stderrTail": ""
+    },
+    {
+      "id": "static.telemetry-lib",
+      "argv": [
+        "node",
+        "--check",
+        "skills/sdlc/scripts/telemetry.mjs"
+      ],
+      "evidence": [
+        "Shared event contract library (with emitEvent/warnTelemetry) parses"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 22,
+      "stdoutTail": "",
+      "stderrTail": ""
+    },
+    {
+      "id": "static.resolve-panel",
+      "argv": [
+        "node",
+        "--check",
+        "skills/sdlc/scripts/resolve-panel.mjs"
+      ],
+      "evidence": [
+        "resolve-panel.mjs parses"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 26,
+      "stdoutTail": "",
+      "stderrTail": ""
+    },
+    {
+      "id": "static.ensure-panel-agent",
+      "argv": [
+        "node",
+        "--check",
+        "skills/sdlc/scripts/ensure-panel-agent.mjs"
+      ],
+      "evidence": [
+        "ensure-panel-agent.mjs parses"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 22,
+      "stdoutTail": "",
+      "stderrTail": ""
+    },
+    {
+      "id": "static.validate-task",
+      "argv": [
+        "node",
+        "--check",
+        "skills/sdlc/scripts/validate-task.mjs"
+      ],
+      "evidence": [
+        "validate-task.mjs parses"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 21,
+      "stdoutTail": "",
+      "stderrTail": ""
+    },
+    {
+      "id": "static.tests",
+      "argv": [
+        "node",
+        "--check",
+        "test/telemetry-side-effects.test.js"
+      ],
+      "evidence": [
+        "New task suite exists and parses"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 22,
+      "stdoutTail": "",
+      "stderrTail": ""
+    },
+    {
+      "id": "static.lint",
+      "argv": [
+        "npm",
+        "run",
+        "lint"
+      ],
+      "evidence": [
+        "Repository formatting and lint rules"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 191,
+      "stdoutTail": "\n> pi-sdlc@0.1.1 lint\n> biome check .\n\nChecked 101 files in 75ms. No fixes applied.\n",
+      "stderrTail": ""
+    },
+    {
+      "id": "patterns.diff",
+      "argv": [
+        "git",
+        "diff",
+        "--check",
+        "HEAD"
+      ],
+      "evidence": [
+        "No whitespace-error banned patterns in the task diff"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 11,
+      "stdoutTail": "",
+      "stderrTail": ""
+    }
+  ],
+  "categories": [
+    {
+      "category": "tests",
+      "status": "PASS",
+      "checkIds": [
+        "tests.telemetry-side-effects",
+        "tests.validator-contract",
+        "tests.full"
+      ]
+    },
+    {
+      "category": "static",
+      "status": "PASS",
+      "checkIds": [
+        "static.telemetry-lib",
+        "static.resolve-panel",
+        "static.ensure-panel-agent",
+        "static.validate-task",
+        "static.tests",
+        "static.lint"
+      ]
+    },
+    {
+      "category": "scenarios",
+      "status": "PASS"
+    },
+    {
+      "category": "standards",
+      "status": "N/A",
+      "reason": "No additional task-specific external standard applies; the feature's PR gate verifies the irreversible stream contract."
+    },
+    {
+      "category": "bannedPatterns",
+      "status": "PASS",
+      "checkIds": [
+        "patterns.diff"
+      ]
+    }
+  ],
+  "scenarios": [
+    {
+      "scenarioId": "LT10",
+      "status": "PASS",
+      "checkIds": [
+        "tests.telemetry-side-effects"
+      ]
+    },
+    {
+      "scenarioId": "LT6",
+      "status": "PASS",
+      "checkIds": [
+        "tests.telemetry-side-effects"
+      ]
+    },
+    {
+      "scenarioId": "LT7",
+      "status": "PASS",
+      "checkIds": [
+        "tests.telemetry-side-effects"
+      ]
+    },
+    {
+      "scenarioId": "LT8",
+      "status": "PASS",
+      "checkIds": [
+        "tests.telemetry-side-effects"
+      ]
+    },
+    {
+      "scenarioId": "LT9",
+      "status": "PASS",
+      "checkIds": [
+        "tests.telemetry-side-effects"
+      ]
+    }
+  ]
+}

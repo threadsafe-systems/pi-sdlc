@@ -1,0 +1,126 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://github.com/threadsafe-systems/pi-sdlc/skills/sdlc-retro/schema/llm-protocol.schema.json",
+  "title": "sdlc-retro-llm-protocol",
+  "description": "The --llm-cmd request/response protocol (spec §6.2): one JSON request on stdin, one JSON response on stdout, execFile-no-shell, one call per phase/session/review-round respectively. Mirrors §6.2 field-for-field.",
+  "definitions": {
+    "kind": { "type": "string", "enum": ["narrative", "steering", "precision"] },
+    "request": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "slug", "inputs"],
+      "properties": {
+        "kind": { "$ref": "#/definitions/kind" },
+        "slug": { "type": "string", "minLength": 1 },
+        "model": { "type": "string", "minLength": 1 },
+        "inputs": { "type": "object" }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "kind": { "const": "narrative" } } },
+          "then": {
+            "properties": {
+              "inputs": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["phase", "events", "turns"],
+                "properties": {
+                  "phase": { "type": "string", "enum": ["brainstorm", "plan", "spec", "build", "implement", "pr"] },
+                  "events": { "type": "array" },
+                  "turns": { "type": "array", "items": { "type": "object", "required": ["ts", "role"], "properties": { "ts": { "type": "string" }, "role": { "type": "string" }, "model": { "type": "string" } } } }
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": { "properties": { "kind": { "const": "steering" } } },
+          "then": {
+            "properties": {
+              "inputs": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["sessionId", "userTurns"],
+                "properties": {
+                  "sessionId": { "type": "string" },
+                  "userTurns": { "type": "array", "items": { "type": "object", "required": ["index", "ts", "text"], "properties": { "index": { "type": "integer", "minimum": 0 }, "ts": { "type": "string" }, "text": { "type": "string" } } } }
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": { "properties": { "kind": { "const": "precision" } } },
+          "then": {
+            "properties": {
+              "inputs": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["reviewDir", "models", "findingsText", "consolidatedText"],
+                "properties": {
+                  "reviewDir": { "type": "string" },
+                  "models": { "type": "array", "items": { "type": "string" } },
+                  "findingsText": { "type": "string" },
+                  "consolidatedText": { "type": "string" }
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "response": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "model", "provider", "output"],
+      "properties": {
+        "kind": { "$ref": "#/definitions/kind" },
+        "model": { "type": "string", "minLength": 1 },
+        "provider": { "type": "string", "minLength": 1 },
+        "output": { "type": "object" }
+      },
+      "allOf": [
+        { "if": { "properties": { "kind": { "const": "narrative" } } }, "then": { "properties": { "output": { "type": "object", "required": ["summary"], "properties": { "summary": { "type": "string", "maxLength": 500 } } } } } },
+        {
+          "if": { "properties": { "kind": { "const": "steering" } } },
+          "then": {
+            "properties": {
+              "output": {
+                "type": "object",
+                "required": ["classifications"],
+                "properties": {
+                  "classifications": {
+                    "type": "array",
+                    "items": { "type": "object", "required": ["index", "class"], "properties": { "index": { "type": "integer", "minimum": 0 }, "class": { "type": "string", "enum": ["gate-approval", "correction", "scope-change", "unblock", "other"] } } }
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": { "properties": { "kind": { "const": "precision" } } },
+          "then": {
+            "properties": {
+              "output": {
+                "type": "object",
+                "required": ["perModel"],
+                "properties": {
+                  "perModel": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "required": ["model", "raised", "incorporated", "dismissed"],
+                      "properties": { "model": { "type": "string" }, "raised": { "type": "integer", "minimum": 0 }, "incorporated": { "type": "integer", "minimum": 0 }, "dismissed": { "type": "integer", "minimum": 0 } }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  },
+  "oneOf": [{ "$ref": "#/definitions/request" }, { "$ref": "#/definitions/response" }]
+}

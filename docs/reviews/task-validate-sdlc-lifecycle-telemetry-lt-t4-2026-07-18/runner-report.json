@@ -1,0 +1,204 @@
+{
+  "schemaVersion": 1,
+  "taskId": "lt-t4",
+  "manifest": "/home/neil/code/threadsafe/pi-sdlc.worktrees/feat-sdlc-lifecycle-telemetry/docs/validation/sdlc-lifecycle-telemetry/lt-t4.json",
+  "repoRoot": "/home/neil/code/threadsafe/pi-sdlc.worktrees/feat-sdlc-lifecycle-telemetry",
+  "verdict": "PASS",
+  "exitCode": 0,
+  "errors": [],
+  "manifestErrors": [],
+  "commands": [
+    {
+      "id": "tests.telemetry-collect",
+      "argv": [
+        "node",
+        "--test",
+        "test/telemetry-collect.test.js"
+      ],
+      "evidence": [
+        "LT13 (hard portion), LT14-LT16 collector adapters and derived hard measures"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 383,
+      "stdoutTail": "✔ LT13 (hard): complete fixture store -> schema-valid run.json with known-answer rollups (77.29883ms)\n✔ LT14: a gappy store names every gap and derives nothing from missing sources (46.233677ms)\n✔ LT14: --no-github records github.skipped, not github.error (3.077676ms)\n✔ LT15: manifest adapter skips and counts malformed lines (manifest.partial) (0.696475ms)\n✔ LT15: harvest adapter maps per-model fields correctly (0.841885ms)\n✔ LT15: transcript usage/cost sums correctly and a version-4 transcript soft-fails per-file (0.839177ms)\n✔ LT15: review-dir discovery matches <phase>-<slug>-<date> naming (0.451967ms)\n✔ LT15: git/GitHub adapters consume only the injected fakes (65.746832ms)\n✔ LT16: phase attribution, agent time, capped human-wait, rework, window bounds (1.509556ms)\n✔ LT16: a 3-hour gap contributes exactly 30 minutes to human-wait (2.689118ms)\n✔ collect-run: no run store exits 1 (nothing collectable) (32.291757ms)\n✔ collect-run: writes docs/retros/<slug>/run.json by default and validates (32.827817ms)\n✔ resolveSessionDirs: an override list is used verbatim; absence marks sessions.dir_unresolved (0.26913ms)\nℹ tests 13\nℹ suites 0\nℹ pass 13\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 350.198198\n",
+      "stderrTail": ""
+    },
+    {
+      "id": "tests.full",
+      "argv": [
+        "npm",
+        "test"
+      ],
+      "evidence": [
+        "NF3 frozen-CLI regression floor: corpus remains green with collect-run added"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 4813,
+      "stdoutTail": "[...truncated; showing bounded tail...]\n✔ invalid existing config and models are refused without overwrite (67.877081ms)\n✔ workflow from another repository is refused (61.966392ms)\n✔ malformed CI marker fails before any bundle write (51.570986ms)\n✔ operational JSON errors preserve the resolved consumer root (37.774331ms)\n✔ existing target directories fail before any bundle write (46.165235ms)\n✔ bundle reports resolved package references before writing (36.45504ms)\n✔ OH4: --yes writes a schema-valid config; bundle re-run refuses config changes; --force overwrites (101.701155ms)\n✔ OH5: --hook-use fields 3-4 = use, do = remainder after 4th colon (colons in do preserved) (31.738178ms)\n✔ OH5: --hook-run command = remainder after 2nd colon (colons preserved); trust warning on stderr (36.424413ms)\n✔ OH5: mixed repeated hook flags preserve argv order in the written list (49.455877ms)\n✔ OH5: malformed hook flags exit 2 (233.859018ms)\n✔ PR-fix: value-taking flags accept values that begin with '-' (e.g. --announce '--foo') (34.322153ms)\n✔ OH5: partial tracker flags exit 2 (all-or-none) (34.380525ms)\n✔ OH5: no config flags and no TTY exits 2 (interview needs a TTY) (45.981762ms)\n✔ OH6: package.json pi.prompts includes ./templates and the template has a description (0.38343ms)\n✔ ICA17: --profile is retired (48.970748ms)\n✔ ICA17: --lifecycle-json is retired (41.646332ms)\n✔ ICA17: --enforcement is retired (30.886336ms)\n✔ ICA17: --preset custom is retired (32.01795ms)\n✔ ICA18: --preset standard writes the explicit standard bundle (46.737866ms)\n✔ ICA18: per-dial flags override the preset; --override lands in overrides (26.051609ms)\n✔ ICA18: --preset full carries the reversible design override (53.967029ms)\n✔ ICA19: --preset patches review/shape/overrides and preserves other keys (92.20388ms)\n✔ ICA19: patch that would delete consumer overrides refuses without --force (119.53592ms)\n✔ ICA23: --override reversible:brainstorm:off is rejected exit 2 (28.102575ms)\n✔ ICA23: --override reversible:onShortfall:fail is rejected exit 2 (46.569609ms)\n✔ ICA23: --override frozen:design:panel is rejected exit 2 (43.142941ms)\n✔ ICA23: --override reversible:design:banana is rejected exit 2 (33.755615ms)\n✔ ICA23: --override reversible:panelSize:zero is rejected exit 2 (30.428453ms)\n✔ ICA23: --override reversible:design is rejected exit 2 (39.452932ms)\n✔ ICA6: older-schema config + --force replaces with a fresh v3 config (139.045921ms)\n✔ ICA19: a single-dial patch preserves the other committed dials (60.387119ms)\n✔ ICA19: preset patch refuses when it would drop a consumer override track (100.377988ms)\n✔ LT13 (hard): complete fixture store -> schema-valid run.json with known-answer rollups (106.749947ms)\n✔ LT14: a gappy store names every gap and derives nothing from missing sources (49.414572ms)\n✔ LT14: --no-github records github.skipped, not github.error (3.643624ms)\n✔ LT15: manifest adapter skips and counts malformed lines (manifest.partial) (0.848663ms)\n✔ LT15: harvest adapter maps per-model fields correctly (0.948067ms)\n✔ LT15: transcript usage/cost sums correctly and a version-4 transcript soft-fails per-file (1.018343ms)\n✔ LT15: review-dir discovery matches <phase>-<slug>-<date> naming (0.698668ms)\n✔ LT15: git/GitHub adapters consume only the injected fakes (92.589317ms)\n✔ LT16: phase attribution, agent time, capped human-wait, rework, window bounds (2.280748ms)\n✔ LT16: a 3-hour gap contributes exactly 30 minutes to human-wait (3.391843ms)\n✔ collect-run: no run store exits 1 (nothing collectable) (30.414088ms)\n✔ collect-run: writes docs/retros/<slug>/run.json by default and validates (57.589135ms)\n✔ resolveSessionDirs: an override list is used verbatim; absence marks sessions.dir_unresolved (0.636189ms)\n✔ LT1: valid emit appends one schema-conforming line, creating the store (31.811619ms)\n✔ LT1b: --by defaults to agent when omitted (31.111679ms)\n✔ LT2: bad inputs exit 2 and never touch the manifest (234.062679ms)\n✔ schema agreement: unknown event types remain valid for forward-compatible consumers (0.365492ms)\n✔ LT2b: a bad input against a non-existent store attempts no write (38.166213ms)\n✔ LT3: concurrent emitters produce N complete, non-interleaved lines (130.320752ms)\n✔ empty explicit identities do not fall through to another identity (81.776319ms)\n✔ LT4: --slug beats env beats branch mapping (106.970923ms)\n✔ LT5: unresolvable identity skips (exit 0, one warning, no write) (92.147394ms)\n✔ LT26: .gitignore ignores the run store (3.334725ms)\n✔ emitter: .sh wrapper delegates to .mjs identically (34.961752ms)\n✔ vocabulary: every known event has a payload descriptor (1.338807ms)\n✔ LT11: harvest copies status.json + events.jsonl and emits panel.harvested (52.831602ms)\n✔ LT11: --with-transcripts copies the transcripts/ subdirectory (47.337172ms)\n✔ LT12: a missing source directory exits 0 with both files missed (31.298081ms)\n✔ LT12: a partially-present source (status without events) reports one missed (33.147414ms)\n✔ harvest-panel: unknown phase and non-positive round exit 2 (97.196896ms)\n✔ harvest-panel.sh wrapper delegates to .mjs identically (52.348587ms)\n✔ LT6: resolve-panel emits panel.resolved; stdout/exit byte-identical with/without --slug (168.383718ms)\n✔ LT7: ensure-panel-agent emits panel.agent_stamped; stdout/exit byte-identical (196.557721ms)\n✔ LT8: validate-task emits task.validated on PASS with and without --report (208.955545ms)\n✔ LT8: validate-task emits task.validated on FAIL (53.914418ms)\n✔ LT8: validate-task emits task.validated on an ERROR fixture whose manifest parses (21.975032ms)\n✔ LT8: an unparseable-manifest ERROR skips emission with the standard warning (20.987144ms)\n✔ LT9: unwritable run store degrades to a warning; primary output unaffected (113.93193ms)\n✔ nested --repo-root run stores are git-ignored too (gitignore anchoring) (2.858811ms)\n✔ LT10: check-lifecycle.mjs and .sh are untouched by FS5 side-effect emission (0.948866ms)\n✔ PV1: a valid JavaScript manifest runs only declared checks and passes (85.351884ms)\n✔ PV2: only declared argv run; an undeclared tool command never executes (216.631306ms)\n✔ PV3: schema and inspectManifest reject the mutation matrix before any command runs (76.980771ms)\n✔ PV4: command outcomes are complete and deterministic; runner continues after failures (51.691479ms)\n✔ PV4: a timeout is reported as FAIL with timedOut (1039.900727ms)\n✔ PV5: category applicability is exact; injected n/a shapes are rejected (75.582967ms)\n✔ PV6: scenario mapping gates the verdict (79.642945ms)\n✔ PV7: standards and banned patterns are commands, not judgement (93.478164ms)\n✔ PV8: evidence is bounded and secrets are redacted (68.603321ms)\n✔ PV8 unit: boundStream and redaction name-matching are precise (233.599552ms)\n✔ PV9: JSON/text/exit agree and JSON mode is order-independent (461.957894ms)\n✔ PV9: --report writes the exact JSON bytes atomically (108.800303ms)\n✔ PV9: --report outside the repo root is refused and clobbers nothing (118.29453ms)\n✔ PV10: generic validator law and generated agent are portable (0.559778ms)\n✔ PV11: receipt hash verification detects mutation of any stored file (6.12734ms)\n✔ PV11: a FAIL runner-report cannot ride under runnerVerdict PASS (0.884694ms)\n✔ parseArgs: recognises JSON anywhere and rejects bad flags (0.548156ms)\n✔ PV13: renderText is a faithful projection of the report (72.339684ms)\nℹ tests 257\nℹ suites 0\nℹ pass 257\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 4704.601211\n",
+      "stderrTail": ""
+    },
+    {
+      "id": "static.collect-run",
+      "argv": [
+        "node",
+        "--check",
+        "skills/sdlc-retro/scripts/collect-run.mjs"
+      ],
+      "evidence": [
+        "collect-run.mjs parses"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 27,
+      "stdoutTail": "",
+      "stderrTail": ""
+    },
+    {
+      "id": "static.tests",
+      "argv": [
+        "node",
+        "--check",
+        "test/telemetry-collect.test.js"
+      ],
+      "evidence": [
+        "New task suite exists and parses"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 22,
+      "stdoutTail": "",
+      "stderrTail": ""
+    },
+    {
+      "id": "static.schema",
+      "argv": [
+        "node",
+        "-e",
+        "JSON.parse(require('fs').readFileSync('skills/sdlc-retro/schema/run.schema.json','utf8'))"
+      ],
+      "evidence": [
+        "Committed run.json schema is valid JSON"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 16,
+      "stdoutTail": "",
+      "stderrTail": ""
+    },
+    {
+      "id": "static.lint",
+      "argv": [
+        "npm",
+        "run",
+        "lint"
+      ],
+      "evidence": [
+        "Repository formatting and lint rules"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 185,
+      "stdoutTail": "\n> pi-sdlc@0.1.1 lint\n> biome check .\n\nChecked 108 files in 67ms. No fixes applied.\n",
+      "stderrTail": ""
+    },
+    {
+      "id": "patterns.diff",
+      "argv": [
+        "git",
+        "diff",
+        "--check",
+        "HEAD"
+      ],
+      "evidence": [
+        "No whitespace-error banned patterns in the task diff"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 5,
+      "stdoutTail": "",
+      "stderrTail": ""
+    }
+  ],
+  "categories": [
+    {
+      "category": "tests",
+      "status": "PASS",
+      "checkIds": [
+        "tests.telemetry-collect",
+        "tests.full"
+      ]
+    },
+    {
+      "category": "static",
+      "status": "PASS",
+      "checkIds": [
+        "static.collect-run",
+        "static.tests",
+        "static.schema",
+        "static.lint"
+      ]
+    },
+    {
+      "category": "scenarios",
+      "status": "PASS"
+    },
+    {
+      "category": "standards",
+      "status": "N/A",
+      "reason": "No additional task-specific external standard applies; the feature's PR gate verifies the irreversible stream contract."
+    },
+    {
+      "category": "bannedPatterns",
+      "status": "PASS",
+      "checkIds": [
+        "patterns.diff"
+      ]
+    }
+  ],
+  "scenarios": [
+    {
+      "scenarioId": "LT13",
+      "status": "PASS",
+      "checkIds": [
+        "tests.telemetry-collect"
+      ]
+    },
+    {
+      "scenarioId": "LT14",
+      "status": "PASS",
+      "checkIds": [
+        "tests.telemetry-collect"
+      ]
+    },
+    {
+      "scenarioId": "LT15",
+      "status": "PASS",
+      "checkIds": [
+        "tests.telemetry-collect"
+      ]
+    },
+    {
+      "scenarioId": "LT16",
+      "status": "PASS",
+      "checkIds": [
+        "tests.telemetry-collect"
+      ]
+    }
+  ]
+}
