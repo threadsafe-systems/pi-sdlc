@@ -1,0 +1,229 @@
+{
+  "schemaVersion": 1,
+  "taskId": "sdlc-agent-self-documentation-c1",
+  "manifest": "/home/neil/code/threadsafe/pi-sdlc.worktrees/feat-sdlc-agent-self-documentation/docs/validation/sdlc-agent-self-documentation/sdlc-agent-self-documentation-c1.json",
+  "repoRoot": "/home/neil/code/threadsafe/pi-sdlc.worktrees/feat-sdlc-agent-self-documentation",
+  "verdict": "PASS",
+  "exitCode": 0,
+  "errors": [],
+  "manifestErrors": [],
+  "commands": [
+    {
+      "id": "tests.c1",
+      "argv": [
+        "node",
+        "--test",
+        "test/startup-freshness.test.js",
+        "test/installed-consumer.test.js",
+        "test/fs11-classification.test.js",
+        "test/frozen-surfaces.test.js",
+        "test/check-references.test.js"
+      ],
+      "evidence": [
+        "ASD1 installed-consumer resolution, ASD10 startup freshness wiring, ASD14/ASD15 FS11 classification+discovery, ASD19 frozen surfaces"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 754,
+      "stdoutTail": "✔ live inventory passes with explicit non-package classifications (57.327411ms)\n✔ missing target and assertion mutations are contract failures (68.257094ms)\n✔ consumer and external entries are classified without probing (53.855936ms)\n✔ readiness requires the verifier assertion and path containment (194.954325ms)\n✔ invalid inventory and JSON argument errors emit one envelope (120.330694ms)\n✔ shell wrapper resolves beside itself from a consumer cwd (82.218334ms)\n✔ ASD19: frozen surfaces are byte-identical to the branch base (15.822514ms)\n✔ ASD19: FS8/FS9 check ids remain present in their frozen scripts (6.798208ms)\n✔ ASD14: every inventory row carries a valid class (1.484923ms)\n✔ ASD14: all six taxonomy values are represented across the inventory (0.358609ms)\n✔ ASD14: the live inventory passes structural discovery with a row for every public artifact (71.390109ms)\n✔ ASD15: a valid fixture passes; an undocumented artifact under a discovery root fails (103.2914ms)\n✔ ASD15: removing a row for a still-present public artifact fails discovery (41.187385ms)\n✔ ASD1: the system reference and all six phase references resolve skill-relative (2.241771ms)\n✔ ASD1: the six advertised sdlc:<slug> invocations map to existing templates (3.759563ms)\n✔ ASD1: every package-relative skill link inside the references resolves (2.845108ms)\n✔ ASD1: .pi/sdlc/CONFIG.md resolves consumer-relative (never package-relative) (66.903558ms)\n✔ ASD10: startup invokes config-doc check outside FS8 readiness and FS9 completion (2.288582ms)\n✔ ASD10: current reads CONFIG.md; missing/stale emit the fixed warning and fall back to JSON (0.515933ms)\n✔ ASD10: the error branch splits collision (warn+fallback) from invalid-config (surface + stop) (0.420384ms)\n✔ ASD10: prose is never authority over JSON, and readiness/lifecycle contracts are unchanged (5.014622ms)\nℹ tests 21\nℹ suites 0\nℹ pass 21\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 696.023297\n",
+      "stderrTail": ""
+    },
+    {
+      "id": "tests.full",
+      "argv": [
+        "npm",
+        "test"
+      ],
+      "evidence": [
+        "ASD18: the full node --test corpus is green"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 6815,
+      "stdoutTail": "[...truncated; showing bounded tail...]\n✔ template info strings must be exactly sdlc (47.908524ms)\n✔ consumer template with the wrong companion is refused byte-identically (60.474896ms)\n✔ consumer template with multiple declarations is refused (48.81509ms)\n✔ consumer template without the declaration is refused byte-identically (50.474681ms)\n✔ invalid assembled configuration fails before any bundle write (52.831039ms)\n✔ target parent conflicts fail before any bundle write (72.676778ms)\n✔ unreadable package sources fail before any bundle write (50.657548ms)\n✔ invalid existing config and models are refused without overwrite (127.083456ms)\n✔ workflow from another repository is refused (67.691829ms)\n✔ malformed CI marker fails before any bundle write (68.717905ms)\n✔ operational JSON errors preserve the resolved consumer root (73.295923ms)\n✔ existing target directories fail before any bundle write (70.394214ms)\n✔ bundle reports resolved package references before writing (66.995587ms)\nschema-version: 2\nroot: /tmp/setup-interview-9ZMBQZ\nexit-code: 0\nreference: reference.pr-template ok — resolved /home/neil/code/threadsafe/pi-sdlc.worktrees/feat-sdlc-agent-self-documentation/skills/sdlc/assets/pull_request_template.md\nreference: reference.checker ok — resolved /home/neil/code/threadsafe/pi-sdlc.worktrees/feat-sdlc-agent-self-documentation/skills/sdlc/scripts/check-lifecycle.mjs\nasset: config created — created /tmp/setup-interview-9ZMBQZ/.pi/sdlc/sdlc.config.json\nasset: config-doc created — created .pi/sdlc/CONFIG.md: created new companion\nasset: pr-template created — created /tmp/setup-interview-9ZMBQZ/.github/pull_request_template.md\n✔ ASD11: setup template names the kernel, tracks, gate modes, consequences, and two core decisions (1.274199ms)\n✔ ASD11: the interactive fallback asks at most 3 prompts (two decisions + confirmation) (3.385377ms)\n✔ ASD11: collectInterview asks exactly the two core decisions (0.211934ms)\n✔ ASD11: every dial remains reachable non-interactively by flag (0.140359ms)\n✔ ASD20: setup-sdlc.mjs carries the config-doc write call site (0.141403ms)\n✔ ASD20 (landing-order conditional): any already-landed telemetry call sites are preserved (0.103394ms)\n✔ OH4: --yes writes a schema-valid config; bundle re-run refuses config changes; --force overwrites (165.618436ms)\n✔ OH5: --hook-use fields 3-4 = use, do = remainder after 4th colon (colons in do preserved) (54.018741ms)\n✔ OH5: --hook-run command = remainder after 2nd colon (colons preserved); trust warning on stderr (67.056379ms)\n✔ OH5: mixed repeated hook flags preserve argv order in the written list (78.523944ms)\n✔ OH5: malformed hook flags exit 2 (383.737437ms)\n✔ PR-fix: value-taking flags accept values that begin with '-' (e.g. --announce '--foo') (53.305588ms)\n✔ OH5: partial tracker flags exit 2 (all-or-none) (44.238302ms)\n✔ OH5: no config flags and no TTY exits 2 (interview needs a TTY) (68.423982ms)\n✔ OH6: package.json pi.prompts includes ./templates and the template has a description (1.262614ms)\n✔ ICA17: --profile is retired (50.560651ms)\n✔ ICA17: --lifecycle-json is retired (44.993875ms)\n✔ ICA17: --enforcement is retired (44.132798ms)\n✔ ICA17: --preset custom is retired (50.806474ms)\n✔ ICA18: --preset standard writes the explicit standard bundle (44.444245ms)\n✔ ICA18: per-dial flags override the preset; --override lands in overrides (47.943595ms)\n✔ ICA18: --preset full carries the reversible design override (71.552954ms)\n✔ ICA19: --preset patches review/shape/overrides and preserves other keys (98.732098ms)\n✔ ICA19: patch that would delete consumer overrides refuses without --force (174.039817ms)\n✔ ICA23: --override reversible:brainstorm:off is rejected exit 2 (68.085266ms)\n✔ ICA23: --override reversible:onShortfall:fail is rejected exit 2 (50.616366ms)\n✔ ICA23: --override frozen:design:panel is rejected exit 2 (63.425189ms)\n✔ ICA23: --override reversible:design:banana is rejected exit 2 (63.282028ms)\n✔ ICA23: --override reversible:panelSize:zero is rejected exit 2 (40.758884ms)\n✔ ICA23: --override reversible:design is rejected exit 2 (42.904484ms)\n✔ ICA6: older-schema config + --force replaces with a fresh v3 config (125.530722ms)\n✔ ICA19: a single-dial patch preserves the other committed dials (170.179115ms)\n✔ ICA19: preset patch refuses when it would drop a consumer override track (210.594696ms)\n✔ ASD4: SKILL.md is within the 220-line / 16384-byte ceiling (0.711406ms)\n✔ ASD4: SKILL.md retains all seven kernel responsibilities (0.424371ms)\n✔ ASD4: SKILL.md contains no duplicated detailed phase-mechanics block (0.196175ms)\n✔ ASD16: every §5 checklist answer is derivable from docs alone (1.590195ms)\n✔ ASD16: docs state the source-inspection boundary (source only when changing implementation) (0.378554ms)\n✔ ASD16 (non-vacuous): no doc claims implementation work can avoid source inspection (0.397178ms)\n✔ ASD12: all six sdlc:<slug> entrypoint templates exist (0.940523ms)\n✔ ASD12: every entrypoint drives adopted-config on the FS8 adoption.manifest-head predicate and stops on error (1.779479ms)\n✔ ASD12: the sdlc:spec stamp is structurally valid and only spec emits one (0.418021ms)\n✔ ASD12: sdlc:pr-review discloses grounded-vs-diff-only and never runs below committed floors (0.204833ms)\n✔ ASD12: brainstorm/plan run without upstream (unadopted) and as configured gate (adopted) (0.23139ms)\n✔ ASD13: sdlc:tasks and sdlc:implement refuse-with-redirect in BOTH adoption states and fabricate nothing (0.229113ms)\n✔ ASD10: startup invokes config-doc check outside FS8 readiness and FS9 completion (1.014356ms)\n✔ ASD10: current reads CONFIG.md; missing/stale emit the fixed warning and fall back to JSON (0.173056ms)\n✔ ASD10: the error branch splits collision (warn+fallback) from invalid-config (surface + stop) (0.149212ms)\n✔ ASD10: prose is never authority over JSON, and readiness/lifecycle contracts are unchanged (1.217249ms)\n✔ ASD2: system reference contains every §5 checklist section (2.195416ms)\n✔ ASD2 (non-vacuous): deleting any one section is detected (2.264319ms)\n✔ ASD2: §5 public-composition inventory narrates the six-class taxonomy (0.546772ms)\n✔ PV1: a valid JavaScript manifest runs only declared checks and passes (104.64901ms)\n✔ PV2: only declared argv run; an undeclared tool command never executes (236.690548ms)\n✔ PV3: schema and inspectManifest reject the mutation matrix before any command runs (132.253881ms)\n✔ PV4: command outcomes are complete and deterministic; runner continues after failures (87.329501ms)\n✔ PV4: a timeout is reported as FAIL with timedOut (1105.413219ms)\n✔ PV5: category applicability is exact; injected n/a shapes are rejected (162.521275ms)\n✔ PV6: scenario mapping gates the verdict (149.67223ms)\n✔ PV7: standards and banned patterns are commands, not judgement (221.842204ms)\n✔ PV8: evidence is bounded and secrets are redacted (108.810525ms)\n✔ PV8 unit: boundStream and redaction name-matching are precise (360.525449ms)\n✔ PV9: JSON/text/exit agree and JSON mode is order-independent (967.710264ms)\n✔ PV9: --report writes the exact JSON bytes atomically (193.63401ms)\n✔ PV9: --report outside the repo root is refused and clobbers nothing (206.459384ms)\n✔ PV10: generic validator law and generated agent are portable (0.526348ms)\n✔ PV11: receipt hash verification detects mutation of any stored file (6.260457ms)\n✔ PV11: a FAIL runner-report cannot ride under runnerVerdict PASS (0.834508ms)\n✔ parseArgs: recognises JSON anywhere and rejects bad flags (0.547803ms)\n✔ PV13: renderText is a faithful projection of the report (175.586949ms)\nℹ tests 292\nℹ suites 0\nℹ pass 292\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 6581.461346\n",
+      "stderrTail": ""
+    },
+    {
+      "id": "static.syntax",
+      "argv": [
+        "node",
+        "--check",
+        "skills/sdlc/scripts/check-references.mjs"
+      ],
+      "evidence": [
+        "check-references.mjs parses after the class + discovery extension"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 50,
+      "stdoutTail": "",
+      "stderrTail": ""
+    },
+    {
+      "id": "standards.references",
+      "argv": [
+        "node",
+        "skills/sdlc/scripts/check-references.mjs",
+        "--package-root",
+        "."
+      ],
+      "evidence": [
+        "ASD14/ASD15: FS11 classification + structural discovery green; every discovered public artifact has a row"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 81,
+      "stdoutTail": "reference-check: pass\ncheck: inventory.self pass — package source assertion and target are present\ncheck: inventory.schema pass — package source assertion and target are present\ncheck: checker.source pass — package source assertion and target are present\ncheck: checker.wrapper pass — package source assertion and target are present\ncheck: skill.source pass — package source assertion and target are present\ncheck: skill.lifecycle-checker pass — package source assertion and target are present\ncheck: skill.pr-template pass — package source assertion and target are present\ncheck: skill.ci-workflow pass — package source assertion and target are present\ncheck: consumer.panels pass — readiness verification assertion is present\ncheck: readme.source pass — package source assertion and target are present\ncheck: setup-template.source pass — package source assertion and target are present\ncheck: tracker.asset pass — package source assertion and target are present\ncheck: agent-brief.asset pass — package source assertion and target are present\ncheck: prompt.plan pass — package source assertion and target are present\ncheck: prompt.validator pass — package source assertion and target are present\ncheck: prompt.spec pass — package source assertion and target are present\ncheck: prompt.review pass — package source assertion and target are present\ncheck: script.status pass — package source assertion and target are present\ncheck: script.panel-resolver pass — package source assertion and target are present\ncheck: script.panel-agent pass — package source assertion and target are present\ncheck: script.validator pass — package source assertion and target are present\ncheck: script.receipt-verifier pass — package source assertion and target are present\ncheck: schema.task-validation pass — package source assertion and target are present\ncheck: consumer.workflow unverified-consumer — consumer-owned target is not package-certified: .pi/sdlc/workflow.md\ncheck: external.gh external — external facility: github.com/issues-projects\ncheck: reference.system pass — package source assertion and target are present\ncheck: reference.phase-brainstorm pass — package source assertion and target are present\ncheck: reference.phase-plan pass — package source assertion and target are present\ncheck: reference.phase-spec pass — package source assertion and target are present\ncheck: reference.phase-tasks pass — package source assertion and target are present\ncheck: reference.phase-implement pass — package source assertion and target are present\ncheck: reference.phase-pr-review pass — package source assertion and target are present\ncheck: entrypoint.brainstorm pass — package source assertion and target are present\ncheck: entrypoint.plan pass — package source assertion and target are present\ncheck: entrypoint.spec pass — package source assertion and target are present\ncheck: entrypoint.tasks pass — package source assertion and target are present\ncheck: entrypoint.implement pass — package source assertion and target are present\ncheck: entrypoint.pr-review pass — package source assertion and target are present\ncheck: script.config-doc pass — package source assertion and target are present\ncheck: config-doc.impl pass — package source assertion and target are present\ncheck: script.lifecycle-checker-wrapper pass — package source assertion and target are present\ncheck: script.setup-wrapper pass — package source assertion and target are present\ncheck: schema.config pass — package source assertion and target are present\ncheck: schema.config-example pass — package source assertion and target are present\ncheck: delegated.adversarial-review external — external facility: skill:adversarial-review\ncheck: optional-enhancement.visual-docs external — external facility: skill:sdlc-visual-docs\ncheck: discovery.skills/sdlc/references/phase-brainstorm.md pass — discovered public artifact has an inventory row\ncheck: discovery.skills/sdlc/references/phase-implement.md pass — discovered public artifact has an inventory row\ncheck: discovery.skills/sdlc/references/phase-plan.md pass — discovered public artifact has an inventory row\ncheck: discovery.skills/sdlc/references/phase-pr-review.md pass — discovered public artifact has an inventory row\ncheck: discovery.skills/sdlc/references/phase-spec.md pass — discovered public artifact has an inventory row\ncheck: discovery.skills/sdlc/references/phase-tasks.md pass — discovered public artifact has an inventory row\ncheck: discovery.skills/sdlc/references/system-reference.md pass — discovered public artifact has an inventory row\ncheck: discovery.templates/sdlc-brainstorm.md pass — discovered public artifact has an inventory row\ncheck: discovery.templates/sdlc-implement.md pass — discovered public artifact has an inventory row\ncheck: discovery.templates/sdlc-plan.md pass — discovered public artifact has an inventory row\ncheck: discovery.templates/sdlc-pr-review.md pass — discovered public artifact has an inventory row\ncheck: discovery.templates/sdlc-spec.md pass — discovered public artifact has an inventory row\ncheck: discovery.templates/sdlc-tasks.md pass — discovered public artifact has an inventory row\ncheck: discovery.templates/setup-sdlc.md pass — discovered public artifact has an inventory row\ncheck: discovery.skills/sdlc/scripts/check-lifecycle.sh pass — discovered public artifact has an inventory row\ncheck: discovery.skills/sdlc/scripts/check-references.sh pass — discovered public artifact has an inventory row\ncheck: discovery.skills/sdlc/scripts/config-doc.sh pass — discovered public artifact has an inventory row\ncheck: discovery.skills/sdlc/scripts/ensure-panel-agent.sh pass — discovered public artifact has an inventory row\ncheck: discovery.skills/sdlc/scripts/resolve-panel.sh pass — discovered public artifact has an inventory row\ncheck: discovery.skills/sdlc/scripts/sdlc-status.sh pass — discovered public artifact has an inventory row\ncheck: discovery.skills/sdlc/scripts/setup-sdlc.sh pass — discovered public artifact has an inventory row\ncheck: discovery.skills/sdlc/scripts/validate-task.sh pass — discovered public artifact has an inventory row\ncheck: discovery.skills/sdlc/prompts/adversary-plan.prompt.md pass — discovered public artifact has an inventory row\ncheck: discovery.skills/sdlc/prompts/adversary-review.prompt.md pass — discovered public artifact has an inventory row\ncheck: discovery.skills/sdlc/prompts/adversary-spec.prompt.md pass — discovered public artifact has an inventory row\ncheck: discovery.skills/sdlc/prompts/validator-task.prompt.md pass — discovered public artifact has an inventory row\ncheck: discovery.skills/sdlc/schema/sdlc.config.example.json pass — discovered public artifact has an inventory row\ncheck: discovery.skills/sdlc/schema/sdlc.config.schema.json pass — discovered public artifact has an inventory row\ncheck: discovery.skills/sdlc/schema/task-validation-manifest.schema.json pass — discovered public artifact has an inventory row\n",
+      "stderrTail": ""
+    },
+    {
+      "id": "static.readiness",
+      "argv": [
+        "node",
+        "skills/sdlc/scripts/sdlc-status.mjs",
+        "--repo-root",
+        "."
+      ],
+      "evidence": [
+        "ASD19: frozen FS8 sdlc-status ids/exits unchanged; repo ready on the branch"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 107,
+      "stdoutTail": "root: /home/neil/code/threadsafe/pi-sdlc.worktrees/feat-sdlc-agent-self-documentation\nstate: ready\nexit-code: 0\ncheck: cli.arguments pass — arguments are valid\ncheck: root.resolve pass — consumer root resolved\ncheck: git.repository pass — resolved root is a git worktree\ncheck: adoption.manifest-head pass — current HEAD contains .pi/sdlc/sdlc.config.json\ncheck: adoption.manifest-clean pass — manifest matches HEAD in index and working tree\ncheck: config.valid pass — committed manifest is valid\ncheck: config.schema-current pass — config schema is current (schemaVersion 3)\ncheck: config.panels pass — panels roster present\ncheck: workflow.readable pass — optional workflow.md is absent\n",
+      "stderrTail": ""
+    },
+    {
+      "id": "static.lint",
+      "argv": [
+        "npm",
+        "run",
+        "lint"
+      ],
+      "evidence": [
+        "ASD18: biome clean over the FS11 changes, tests, and inventory"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 338,
+      "stdoutTail": "\n> pi-sdlc@0.1.1 lint\n> biome check .\n\nChecked 113 files in 124ms. No fixes applied.\n",
+      "stderrTail": ""
+    },
+    {
+      "id": "patterns.diff",
+      "argv": [
+        "git",
+        "diff",
+        "--check",
+        "HEAD"
+      ],
+      "evidence": [
+        "No whitespace-error banned patterns in the task diff"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 11,
+      "stdoutTail": "",
+      "stderrTail": ""
+    }
+  ],
+  "categories": [
+    {
+      "category": "tests",
+      "status": "PASS",
+      "checkIds": [
+        "tests.c1",
+        "tests.full"
+      ]
+    },
+    {
+      "category": "static",
+      "status": "PASS",
+      "checkIds": [
+        "static.syntax",
+        "static.readiness",
+        "static.lint"
+      ]
+    },
+    {
+      "category": "scenarios",
+      "status": "PASS"
+    },
+    {
+      "category": "standards",
+      "status": "PASS",
+      "checkIds": [
+        "standards.references"
+      ]
+    },
+    {
+      "category": "bannedPatterns",
+      "status": "PASS",
+      "checkIds": [
+        "patterns.diff"
+      ]
+    }
+  ],
+  "scenarios": [
+    {
+      "scenarioId": "ASD1",
+      "status": "PASS",
+      "checkIds": [
+        "tests.c1"
+      ]
+    },
+    {
+      "scenarioId": "ASD10",
+      "status": "PASS",
+      "checkIds": [
+        "tests.c1"
+      ]
+    },
+    {
+      "scenarioId": "ASD14",
+      "status": "PASS",
+      "checkIds": [
+        "tests.c1",
+        "standards.references"
+      ]
+    },
+    {
+      "scenarioId": "ASD15",
+      "status": "PASS",
+      "checkIds": [
+        "tests.c1",
+        "standards.references"
+      ]
+    },
+    {
+      "scenarioId": "ASD18",
+      "status": "PASS",
+      "checkIds": [
+        "tests.full",
+        "static.lint"
+      ]
+    },
+    {
+      "scenarioId": "ASD19",
+      "status": "PASS",
+      "checkIds": [
+        "tests.c1",
+        "static.readiness"
+      ]
+    }
+  ]
+}

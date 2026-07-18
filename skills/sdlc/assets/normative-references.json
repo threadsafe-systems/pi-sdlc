@@ -10,7 +10,8 @@
       "ownership": "package",
       "required": true,
       "resolution": "package",
-      "target": "skills/sdlc/assets/normative-references.json"
+      "target": "skills/sdlc/assets/normative-references.json",
+      "class": "internal"
     },
     {
       "id": "inventory.schema",
@@ -20,7 +21,8 @@
       "ownership": "package",
       "required": true,
       "resolution": "package",
-      "target": "skills/sdlc/assets/normative-references.schema.json"
+      "target": "skills/sdlc/assets/normative-references.schema.json",
+      "class": "internal"
     },
     {
       "id": "checker.source",
@@ -30,7 +32,8 @@
       "ownership": "package",
       "required": true,
       "resolution": "package",
-      "target": "skills/sdlc/scripts/check-references.mjs"
+      "target": "skills/sdlc/scripts/check-references.mjs",
+      "class": "internal"
     },
     {
       "id": "checker.wrapper",
@@ -40,7 +43,8 @@
       "ownership": "package",
       "required": true,
       "resolution": "package",
-      "target": "skills/sdlc/scripts/check-references.sh"
+      "target": "skills/sdlc/scripts/check-references.sh",
+      "class": "package-public"
     },
     {
       "id": "skill.source",
@@ -50,7 +54,8 @@
       "ownership": "package",
       "required": true,
       "resolution": "package",
-      "target": "skills/sdlc/SKILL.md"
+      "target": "skills/sdlc/SKILL.md",
+      "class": "package-public"
     },
     {
       "id": "skill.lifecycle-checker",
@@ -60,7 +65,8 @@
       "ownership": "package",
       "required": true,
       "resolution": "package",
-      "target": "skills/sdlc/scripts/check-lifecycle.mjs"
+      "target": "skills/sdlc/scripts/check-lifecycle.mjs",
+      "class": "package-public"
     },
     {
       "id": "skill.pr-template",
@@ -70,7 +76,8 @@
       "ownership": "package",
       "required": true,
       "resolution": "package",
-      "target": "skills/sdlc/assets/pull_request_template.md"
+      "target": "skills/sdlc/assets/pull_request_template.md",
+      "class": "package-public"
     },
     {
       "id": "skill.ci-workflow",
@@ -80,7 +87,8 @@
       "ownership": "package",
       "required": true,
       "resolution": "package",
-      "target": "skills/sdlc/assets/sdlc-lifecycle.yml"
+      "target": "skills/sdlc/assets/sdlc-lifecycle.yml",
+      "class": "consumer-integration"
     },
     {
       "id": "consumer.panels",
@@ -94,7 +102,8 @@
       "verification": {
         "source": "skills/sdlc/scripts/sdlc-status.mjs",
         "assertion": "set(\"config.panels\", \"pass\", \"panels roster present\");"
-      }
+      },
+      "class": "consumer-integration"
     },
     {
       "id": "readme.source",
@@ -104,7 +113,8 @@
       "ownership": "package",
       "required": true,
       "resolution": "package",
-      "target": "README.md"
+      "target": "README.md",
+      "class": "package-public"
     },
     {
       "id": "setup-template.source",
@@ -114,7 +124,8 @@
       "ownership": "package",
       "required": true,
       "resolution": "package",
-      "target": "templates/setup-sdlc.md"
+      "target": "templates/setup-sdlc.md",
+      "class": "package-public"
     },
     {
       "id": "tracker.asset",
@@ -124,7 +135,8 @@
       "ownership": "package",
       "required": true,
       "resolution": "package",
-      "target": "skills/sdlc/assets/tracker-ops.md"
+      "target": "skills/sdlc/assets/tracker-ops.md",
+      "class": "package-public"
     },
     {
       "id": "agent-brief.asset",
@@ -134,7 +146,8 @@
       "ownership": "package",
       "required": true,
       "resolution": "package",
-      "target": "skills/sdlc/assets/agent-brief.md"
+      "target": "skills/sdlc/assets/agent-brief.md",
+      "class": "package-public"
     },
     {
       "id": "prompt.plan",
@@ -144,7 +157,8 @@
       "ownership": "package",
       "required": true,
       "resolution": "package",
-      "target": "skills/sdlc/prompts/adversary-plan.prompt.md"
+      "target": "skills/sdlc/prompts/adversary-plan.prompt.md",
+      "class": "package-public"
     },
     {
       "id": "prompt.validator",
@@ -154,7 +168,8 @@
       "ownership": "package",
       "required": true,
       "resolution": "package",
-      "target": "skills/sdlc/prompts/validator-task.prompt.md"
+      "target": "skills/sdlc/prompts/validator-task.prompt.md",
+      "class": "package-public"
     },
     {
       "id": "prompt.spec",
@@ -164,7 +179,8 @@
       "ownership": "package",
       "required": true,
       "resolution": "package",
-      "target": "skills/sdlc/prompts/adversary-spec.prompt.md"
+      "target": "skills/sdlc/prompts/adversary-spec.prompt.md",
+      "class": "package-public"
     },
     {
       "id": "prompt.review",
@@ -174,57 +190,63 @@
       "ownership": "package",
       "required": true,
       "resolution": "package",
-      "target": "skills/sdlc/prompts/adversary-review.prompt.md"
+      "target": "skills/sdlc/prompts/adversary-review.prompt.md",
+      "class": "package-public"
     },
     {
       "id": "script.status",
       "source": "skills/sdlc/scripts/sdlc-status.sh",
-      "assertion": "sdlc-status.sh — thin entry point for the FS8 four-state readiness gate.",
+      "assertion": "sdlc-status.sh \u2014 thin entry point for the FS8 four-state readiness gate.",
       "targetKind": "command",
       "ownership": "package",
       "required": true,
       "resolution": "package",
-      "target": "skills/sdlc/scripts/sdlc-status.sh"
+      "target": "skills/sdlc/scripts/sdlc-status.sh",
+      "class": "package-public"
     },
     {
       "id": "script.panel-resolver",
       "source": "skills/sdlc/scripts/resolve-panel.sh",
-      "assertion": "resolve-panel.sh — thin entry point for the sdlc panel resolver.",
+      "assertion": "resolve-panel.sh \u2014 thin entry point for the sdlc panel resolver.",
       "targetKind": "command",
       "ownership": "package",
       "required": true,
       "resolution": "package",
-      "target": "skills/sdlc/scripts/resolve-panel.sh"
+      "target": "skills/sdlc/scripts/resolve-panel.sh",
+      "class": "package-public"
     },
     {
       "id": "script.panel-agent",
       "source": "skills/sdlc/scripts/ensure-panel-agent.sh",
-      "assertion": "ensure-panel-agent.sh — thin entry point for the sdlc panel-agent stamper.",
+      "assertion": "ensure-panel-agent.sh \u2014 thin entry point for the sdlc panel-agent stamper.",
       "targetKind": "command",
       "ownership": "package",
       "required": true,
       "resolution": "package",
-      "target": "skills/sdlc/scripts/ensure-panel-agent.sh"
+      "target": "skills/sdlc/scripts/ensure-panel-agent.sh",
+      "class": "package-public"
     },
     {
       "id": "script.validator",
       "source": "skills/sdlc/scripts/validate-task.sh",
-      "assertion": "validate-task.sh — thin entry point for the deterministic per-task validation",
+      "assertion": "validate-task.sh \u2014 thin entry point for the deterministic per-task validation",
       "targetKind": "command",
       "ownership": "package",
       "required": true,
       "resolution": "package",
-      "target": "skills/sdlc/scripts/validate-task.sh"
+      "target": "skills/sdlc/scripts/validate-task.sh",
+      "class": "package-public"
     },
     {
       "id": "script.receipt-verifier",
       "source": "skills/sdlc/scripts/verify-task-receipt.mjs",
-      "assertion": "verify-task-receipt.mjs — verify a stored portable-validator runtime receipt.",
+      "assertion": "verify-task-receipt.mjs \u2014 verify a stored portable-validator runtime receipt.",
       "targetKind": "command",
       "ownership": "package",
       "required": true,
       "resolution": "package",
-      "target": "skills/sdlc/scripts/verify-task-receipt.mjs"
+      "target": "skills/sdlc/scripts/verify-task-receipt.mjs",
+      "class": "internal"
     },
     {
       "id": "schema.task-validation",
@@ -234,7 +256,8 @@
       "ownership": "package",
       "required": true,
       "resolution": "package",
-      "target": "skills/sdlc/schema/task-validation-manifest.schema.json"
+      "target": "skills/sdlc/schema/task-validation-manifest.schema.json",
+      "class": "package-public"
     },
     {
       "id": "consumer.workflow",
@@ -244,7 +267,8 @@
       "ownership": "consumer",
       "required": false,
       "resolution": "consumer",
-      "target": ".pi/sdlc/workflow.md"
+      "target": ".pi/sdlc/workflow.md",
+      "class": "consumer-integration"
     },
     {
       "id": "external.gh",
@@ -254,7 +278,254 @@
       "ownership": "external",
       "required": false,
       "resolution": "external",
-      "target": "github.com/issues-projects"
+      "target": "github.com/issues-projects",
+      "class": "runtime-tool"
+    },
+    {
+      "id": "reference.system",
+      "source": "skills/sdlc/references/system-reference.md",
+      "assertion": "# pi-sdlc system reference",
+      "targetKind": "file",
+      "ownership": "package",
+      "required": true,
+      "resolution": "package",
+      "target": "skills/sdlc/references/system-reference.md",
+      "class": "package-public"
+    },
+    {
+      "id": "reference.phase-brainstorm",
+      "source": "skills/sdlc/references/phase-brainstorm.md",
+      "assertion": "# Phase reference: Brainstorm",
+      "targetKind": "file",
+      "ownership": "package",
+      "required": true,
+      "resolution": "package",
+      "target": "skills/sdlc/references/phase-brainstorm.md",
+      "class": "package-public"
+    },
+    {
+      "id": "reference.phase-plan",
+      "source": "skills/sdlc/references/phase-plan.md",
+      "assertion": "# Phase reference: Plan",
+      "targetKind": "file",
+      "ownership": "package",
+      "required": true,
+      "resolution": "package",
+      "target": "skills/sdlc/references/phase-plan.md",
+      "class": "package-public"
+    },
+    {
+      "id": "reference.phase-spec",
+      "source": "skills/sdlc/references/phase-spec.md",
+      "assertion": "# Phase reference: Specification",
+      "targetKind": "file",
+      "ownership": "package",
+      "required": true,
+      "resolution": "package",
+      "target": "skills/sdlc/references/phase-spec.md",
+      "class": "package-public"
+    },
+    {
+      "id": "reference.phase-tasks",
+      "source": "skills/sdlc/references/phase-tasks.md",
+      "assertion": "# Phase reference: Build / Tasks",
+      "targetKind": "file",
+      "ownership": "package",
+      "required": true,
+      "resolution": "package",
+      "target": "skills/sdlc/references/phase-tasks.md",
+      "class": "package-public"
+    },
+    {
+      "id": "reference.phase-implement",
+      "source": "skills/sdlc/references/phase-implement.md",
+      "assertion": "# Phase reference: Implement",
+      "targetKind": "file",
+      "ownership": "package",
+      "required": true,
+      "resolution": "package",
+      "target": "skills/sdlc/references/phase-implement.md",
+      "class": "package-public"
+    },
+    {
+      "id": "reference.phase-pr-review",
+      "source": "skills/sdlc/references/phase-pr-review.md",
+      "assertion": "# Phase reference: PR review",
+      "targetKind": "file",
+      "ownership": "package",
+      "required": true,
+      "resolution": "package",
+      "target": "skills/sdlc/references/phase-pr-review.md",
+      "class": "package-public"
+    },
+    {
+      "id": "entrypoint.brainstorm",
+      "source": "templates/sdlc-brainstorm.md",
+      "assertion": "standalone sdlc:brainstorm",
+      "targetKind": "file",
+      "ownership": "package",
+      "required": true,
+      "resolution": "package",
+      "target": "templates/sdlc-brainstorm.md",
+      "class": "package-public"
+    },
+    {
+      "id": "entrypoint.plan",
+      "source": "templates/sdlc-plan.md",
+      "assertion": "standalone sdlc:plan",
+      "targetKind": "file",
+      "ownership": "package",
+      "required": true,
+      "resolution": "package",
+      "target": "templates/sdlc-plan.md",
+      "class": "package-public"
+    },
+    {
+      "id": "entrypoint.spec",
+      "source": "templates/sdlc-spec.md",
+      "assertion": "standalone sdlc:spec",
+      "targetKind": "file",
+      "ownership": "package",
+      "required": true,
+      "resolution": "package",
+      "target": "templates/sdlc-spec.md",
+      "class": "package-public"
+    },
+    {
+      "id": "entrypoint.tasks",
+      "source": "templates/sdlc-tasks.md",
+      "assertion": "standalone sdlc:tasks",
+      "targetKind": "file",
+      "ownership": "package",
+      "required": true,
+      "resolution": "package",
+      "target": "templates/sdlc-tasks.md",
+      "class": "package-public"
+    },
+    {
+      "id": "entrypoint.implement",
+      "source": "templates/sdlc-implement.md",
+      "assertion": "standalone sdlc:implement",
+      "targetKind": "file",
+      "ownership": "package",
+      "required": true,
+      "resolution": "package",
+      "target": "templates/sdlc-implement.md",
+      "class": "package-public"
+    },
+    {
+      "id": "entrypoint.pr-review",
+      "source": "templates/sdlc-pr-review.md",
+      "assertion": "standalone sdlc:pr-review",
+      "targetKind": "file",
+      "ownership": "package",
+      "required": true,
+      "resolution": "package",
+      "target": "templates/sdlc-pr-review.md",
+      "class": "package-public"
+    },
+    {
+      "id": "script.config-doc",
+      "source": "skills/sdlc/scripts/config-doc.sh",
+      "assertion": "CONFIG-DOC-WRAPPER",
+      "targetKind": "file",
+      "ownership": "package",
+      "required": true,
+      "resolution": "package",
+      "target": "skills/sdlc/scripts/config-doc.sh",
+      "class": "package-public"
+    },
+    {
+      "id": "config-doc.impl",
+      "source": "skills/sdlc/scripts/config-doc.mjs",
+      "assertion": "config-doc.mjs \u2014 deterministic render/write/check",
+      "targetKind": "file",
+      "ownership": "package",
+      "required": true,
+      "resolution": "package",
+      "target": "skills/sdlc/scripts/config-doc.mjs",
+      "class": "internal"
+    },
+    {
+      "id": "script.lifecycle-checker-wrapper",
+      "source": "skills/sdlc/scripts/check-lifecycle.sh",
+      "assertion": "check-lifecycle.mjs",
+      "targetKind": "file",
+      "ownership": "package",
+      "required": true,
+      "resolution": "package",
+      "target": "skills/sdlc/scripts/check-lifecycle.sh",
+      "class": "package-public"
+    },
+    {
+      "id": "script.setup-wrapper",
+      "source": "skills/sdlc/scripts/setup-sdlc.sh",
+      "assertion": "setup-sdlc.sh \u2014 thin entry point",
+      "targetKind": "file",
+      "ownership": "package",
+      "required": true,
+      "resolution": "package",
+      "target": "skills/sdlc/scripts/setup-sdlc.sh",
+      "class": "package-public"
+    },
+    {
+      "id": "schema.config",
+      "source": "skills/sdlc/schema/sdlc.config.schema.json",
+      "assertion": "skills/sdlc/schema/sdlc.config.schema.json",
+      "targetKind": "file",
+      "ownership": "package",
+      "required": true,
+      "resolution": "package",
+      "target": "skills/sdlc/schema/sdlc.config.schema.json",
+      "class": "package-public"
+    },
+    {
+      "id": "schema.config-example",
+      "source": "skills/sdlc/schema/sdlc.config.example.json",
+      "assertion": "\"prefix\": \"acme\"",
+      "targetKind": "file",
+      "ownership": "package",
+      "required": true,
+      "resolution": "package",
+      "target": "skills/sdlc/schema/sdlc.config.example.json",
+      "class": "package-public"
+    },
+    {
+      "id": "delegated.adversarial-review",
+      "source": "skills/sdlc/SKILL.md",
+      "assertion": "`adversarial-review` (global)",
+      "targetKind": "external",
+      "ownership": "external",
+      "required": false,
+      "resolution": "external",
+      "target": "skill:adversarial-review",
+      "class": "delegated"
+    },
+    {
+      "id": "optional-enhancement.visual-docs",
+      "source": "skills/sdlc/references/system-reference.md",
+      "assertion": "sdlc-visual-docs",
+      "targetKind": "external",
+      "ownership": "external",
+      "required": false,
+      "resolution": "external",
+      "target": "skill:sdlc-visual-docs",
+      "class": "optional-enhancement"
     }
-  ]
+  ],
+  "discovery": {
+    "roots": ["skills/sdlc/references/*.md", "templates/sdlc-*.md", "templates/setup-sdlc.md", "skills/sdlc/scripts/*.sh", "skills/sdlc/prompts/*.prompt.md", "skills/sdlc/schema/*.json"],
+    "exclude": [
+      "skills/sdlc/scripts/lib.mjs",
+      "skills/sdlc/scripts/check-lifecycle.mjs",
+      "skills/sdlc/scripts/check-references.mjs",
+      "skills/sdlc/scripts/config-doc.mjs",
+      "skills/sdlc/scripts/ensure-panel-agent.mjs",
+      "skills/sdlc/scripts/resolve-panel.mjs",
+      "skills/sdlc/scripts/sdlc-status.mjs",
+      "skills/sdlc/scripts/setup-sdlc.mjs",
+      "skills/sdlc/scripts/validate-task.mjs",
+      "skills/sdlc/scripts/verify-task-receipt.mjs"
+    ]
+  }
 }
