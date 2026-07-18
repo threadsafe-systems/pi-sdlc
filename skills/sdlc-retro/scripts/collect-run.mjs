@@ -1,16 +1,16 @@
 #!/usr/bin/env node
-// collect-run.mjs — the sdlc-retro post-mortem collector (spec §6, lt-t4:
-// collector core — the hard, deterministic pipeline only). Joins the FS13 run
+// collect-run.mjs — the sdlc-retro post-mortem collector (spec §6). lt-t4
+// built the hard, deterministic pipeline; lt-t5 (this revision) adds the LLM
+// seam, soft data (narratives/steering/panelPrecision), the NF4 redaction/
+// n-gram-containment pipeline, raw/ snapshotting of every non-manifest input,
+// and --from-raw exclusive replay (spec §6.2/§6.4). Joins the FS13 run
 // manifest, harvested panel artifacts, correlated pi session transcripts,
-// discovered review directories, and injectable git/gh seams into a
+// discovered review directories, and injectable git/gh/llm seams into a
 // schema-valid run.json (spec §7) with pinned derived-measure formulas
 // (§6.3), uniform absence encoding, and the closed v1 coverage-marker set.
 //
-// The LLM seam, soft data, raw/ snapshotting, and --from-raw replay are
-// lt-t5's additive extension (spec §6.2/§6.4) and are deliberately absent
-// here: this file's CLI accepts no --llm-cmd/--no-llm/--from-raw yet.
-//
 // Usage: collect-run.mjs --slug S [--out FILE] [--format text|json]
+//                        [--from-raw] [--llm-cmd CMD | --no-llm]
 //                        [--git-cmd CMD] [--base-ref BRANCH]
 //                        [--gh-cmd CMD] [--no-github]
 //                        [--sessions-dir DIR]... [--config DIR|--repo-root DIR]
@@ -23,11 +23,20 @@
 // resolves consumer paths through the skill root (spec §1).
 
 import { execFileSync } from "node:child_process";
-import { closeSync, existsSync, fsyncSync, mkdirSync, mkdtempSync, openSync, readdirSync, readFileSync, renameSync, rmSync, statSync, writeSync } from "node:fs";
+import { closeSync, existsSync, fsyncSync, mkdirSync, mkdtempSync, openSync, readdirSync, readFileSync, renameSync, rmSync, statSync, writeFileSync, writeSync } from "node:fs";
 import { homedir } from "node:os";
 import { basename, dirname, isAbsolute, join, resolve } from "node:path";
 import { inspectRoot, readConfig } from "../../sdlc/scripts/lib.mjs";
 import { LIFECYCLE_PHASES, PANEL_PHASES, PANEL_TO_LIFECYCLE, runStoreDir, SLUG_RE, validateEnvelope, validatePayload } from "../../sdlc/scripts/telemetry.mjs";
+import { buildRedactionValues, redact } from "../../sdlc/scripts/validate-task.mjs";
+
+// NF4: committed soft strings are capped at 500 chars and rejected outright
+// (never truncated) if they contain a >=12-consecutive-word verbatim
+// substring of any correlated user message.
+const SOFT_STRING_CAP = 500;
+const NGRAM_LEN = 12;
+const LLM_TIMEOUT_MS = 120000;
+const STEERING_CLASSES = ["gate-approval", "correction", "scope-change", "unblock", "other"];
 
 const PREFIX = "sdlc-telemetry:";
 export const RUN_SCHEMA_VERSION = 1;
@@ -36,6 +45,26 @@ const SESSION_CORRELATION_BUFFER_MS = 60 * 60 * 1000;
 
 function warn(msg) {
 	process.stderr.write(`${PREFIX} ${msg}\n`);
+}
+
+// ---- raw/ snapshotting + --from-raw replay (spec §6.4) ---------------------
+
+function rawDir(root, slug) {
+	return join(runStoreDir(root, slug), "raw");
+}
+
+function snapshotRaw(root, slug, relPath, content) {
+	const dest = join(rawDir(root, slug), relPath);
+	mkdirSync(dirname(dest), { recursive: true });
+	writeFileSync(dest, content);
+}
+
+function readRaw(root, slug, relPath) {
+	return readFileSync(join(rawDir(root, slug), relPath), "utf8");
+}
+
+function rawExists(root, slug, relPath) {
+	return existsSync(join(rawDir(root, slug), relPath));
 }
 
 function isPlainObject(v) {
@@ -237,16 +266,18 @@ export function resolveSessionDirs(root, { sessionsDirOverrides = [], home = hom
 
 // Sniff + parse one top-level session JSONL file. Returns null (with a
 // session.version:<file> marker pushed to `markers`) for a non-v3 header or
-// an unreadable/empty file.
+// an unreadable/empty file. `raw` is the verbatim file text, kept for §6.4
+// snapshotting (never re-derived from the parsed entries).
 function parseSessionFile(path, markers) {
 	const name = basename(path);
-	let lines;
+	let raw;
 	try {
-		lines = readFileSync(path, "utf8").split("\n").filter(Boolean);
+		raw = readFileSync(path, "utf8");
 	} catch {
 		markers.push({ marker: `session.version:${name}` });
 		return null;
 	}
+	const lines = raw.split("\n").filter(Boolean);
 	if (lines.length === 0) {
 		markers.push({ marker: `session.version:${name}` });
 		return null;
@@ -270,7 +301,25 @@ function parseSessionFile(path, markers) {
 			// a torn/malformed line within an otherwise-v3 file is skipped, not fatal
 		}
 	}
-	return { file: name, entries };
+	return { file: name, entries, raw };
+}
+
+// --from-raw replay: every previously-snapshotted session file is trusted
+// as already-correlated (it was only snapshotted because it correlated at
+// original collect time); no live directory resolution or re-correlation.
+function loadSessionsFromRaw(root, slug) {
+	const dir = join(rawDir(root, slug), "sessions");
+	if (!existsSync(dir)) return { sessions: [], markers: [{ marker: "sessions.none" }] };
+	const markers = [];
+	const sessions = [];
+	for (const f of readdirSync(dir)
+		.filter((f) => f.endsWith(".jsonl"))
+		.sort()) {
+		const parsed = parseSessionFile(join(dir, f), markers);
+		if (parsed) sessions.push(parsed);
+	}
+	if (sessions.length === 0) markers.push({ marker: "sessions.none" });
+	return { sessions, markers };
 }
 
 // A session is correlated iff at least one message entry's ts falls within
@@ -283,7 +332,8 @@ function isCorrelated(session, windowStart, windowEnd) {
 	return false;
 }
 
-export function discoverSessions(root, events, { sessionsDirOverrides = [], home } = {}) {
+export function discoverSessions(root, events, { sessionsDirOverrides = [], home, slug, fromRaw = false } = {}) {
+	if (fromRaw) return loadSessionsFromRaw(root, slug);
 	if (events.length === 0) return { sessions: [], markers: [{ marker: "sessions.none" }] };
 	const first = events[0].ts;
 	const last = events[events.length - 1].ts;
@@ -304,6 +354,7 @@ export function discoverSessions(root, events, { sessionsDirOverrides = [], home
 			const parsed = parseSessionFile(join(dir, f), markers);
 			if (!parsed) continue;
 			if (!isCorrelated(parsed, windowStart, windowEnd)) continue;
+			if (slug) snapshotRaw(root, slug, join("sessions", parsed.file), parsed.raw);
 			sessions.push(parsed);
 		}
 	}
@@ -380,12 +431,123 @@ export function githubCheck(ghCmd, root, branch, noGithub) {
 	}
 }
 
+// Raw-snapshotting/replay wrapper around gitDiffStats (spec §6.4): a live
+// collect snapshots the raw command outputs into raw/git/diff.json;
+// --from-raw reads that snapshot exclusively and never invokes --git-cmd.
+function gitDiffStatsSeam(root, slug, gitCmd, baseRef, fromRaw) {
+	const relPath = "git/diff.json";
+	if (fromRaw) {
+		if (!rawExists(root, slug, relPath)) return { diff: undefined, markers: [{ marker: "git.error", detail: "no raw/git/diff.json snapshot to replay" }] };
+		try {
+			return { diff: JSON.parse(readRaw(root, slug, relPath)), markers: [] };
+		} catch (err) {
+			return { diff: undefined, markers: [{ marker: "git.error", detail: `corrupt raw/git/diff.json snapshot: ${err?.message || err}` }] };
+		}
+	}
+	const result = gitDiffStats(gitCmd, root, baseRef);
+	if (result.diff) snapshotRaw(root, slug, relPath, JSON.stringify(result.diff));
+	return result;
+}
+
+// Same pattern for the github seam (spec §6.4): a live collect snapshots the
+// raw response into raw/github/pr-list.json; --from-raw replays it and never
+// invokes --gh-cmd. --no-github always short-circuits to github.skipped,
+// live or replayed.
+function githubCheckSeam(root, slug, ghCmd, branch, noGithub, fromRaw) {
+	if (noGithub) return { markers: [{ marker: "github.skipped" }] };
+	const relPath = "github/pr-list.json";
+	if (fromRaw) {
+		if (!rawExists(root, slug, relPath)) return { markers: [{ marker: "github.error", detail: "no raw/github/pr-list.json snapshot to replay" }] };
+		return { markers: [] };
+	}
+	try {
+		const out = execFileSync(ghCmd, ["pr", "list", "--head", branch, "--json", "number"], { cwd: root, encoding: "utf8", stdio: ["ignore", "pipe", "pipe"] });
+		JSON.parse(out);
+		snapshotRaw(root, slug, relPath, out);
+		return { markers: [] };
+	} catch (err) {
+		return { markers: [{ marker: "github.error", detail: String(err?.message || err).slice(0, 200) }] };
+	}
+}
+
+// ---- LLM seam (spec §6.2) --------------------------------------------------
+
+// One request per call, execFile-no-shell, one JSON request on stdin, one
+// JSON response on stdout, default 120s timeout. Never throws; returns
+// { ok:false, reason } on any failure (non-zero exit, timeout, invalid JSON,
+// invalid response shape) so the caller can record the right marker.
+export function callLlm(llmCmd, request, { timeoutMs = LLM_TIMEOUT_MS } = {}) {
+	let out;
+	try {
+		out = execFileSync(llmCmd, [], { input: JSON.stringify(request), timeout: timeoutMs, encoding: "utf8", stdio: ["pipe", "pipe", "pipe"] });
+	} catch (err) {
+		return { ok: false, reason: err?.signal === "SIGTERM" || /ETIMEDOUT/.test(String(err?.message)) ? "timeout" : String(err?.message || err) };
+	}
+	let response;
+	try {
+		response = JSON.parse(out);
+	} catch {
+		return { ok: false, reason: "invalid JSON response" };
+	}
+	if (!isPlainObject(response) || typeof response.kind !== "string" || typeof response.model !== "string" || typeof response.provider !== "string" || !("output" in response)) {
+		return { ok: false, reason: "response missing kind/model/provider/output" };
+	}
+	return { ok: true, response };
+}
+
+function validateNarrativeOutput(output) {
+	return isPlainObject(output) && typeof output.summary === "string";
+}
+
+function validateSteeringOutput(output, expectedLength) {
+	if (!isPlainObject(output) || !Array.isArray(output.classifications)) return false;
+	if (output.classifications.length !== expectedLength) return false;
+	return output.classifications.every((c) => isPlainObject(c) && Number.isInteger(c.index) && STEERING_CLASSES.includes(c.class));
+}
+
+function validatePrecisionOutput(output) {
+	if (!isPlainObject(output) || !Array.isArray(output.perModel)) return false;
+	return output.perModel.every((p) => isPlainObject(p) && typeof p.model === "string" && Number.isInteger(p.raised) && Number.isInteger(p.incorporated) && Number.isInteger(p.dismissed));
+}
+
+// ---- NF4: redaction + n-gram containment + 500-char cap ---------------------
+
+// A committed soft string passes redaction, is rejected outright (not
+// truncated) if it contains a >=12-consecutive-word verbatim substring of any
+// correlated user message, then is capped at 500 chars. Returns the safe
+// string or null (reject).
+export function sanitizeSoftString(text, { redactionValues, userMessages }) {
+	if (typeof text !== "string") return null;
+	const afterRedaction = redact(text, redactionValues);
+	if (containsUserNgram(afterRedaction, userMessages)) return null;
+	return afterRedaction.length > SOFT_STRING_CAP ? afterRedaction.slice(0, SOFT_STRING_CAP) : afterRedaction;
+}
+
+function wordsOf(text) {
+	return text.split(/\s+/).filter(Boolean);
+}
+
+// True iff `text` contains an NGRAM_LEN-consecutive-word verbatim substring of
+// any string in `userMessages` (case-sensitive, whitespace-normalized).
+export function containsUserNgram(text, userMessages) {
+	for (const msg of userMessages) {
+		if (typeof msg !== "string") continue;
+		const msgWords = wordsOf(msg);
+		for (let i = 0; i + NGRAM_LEN <= msgWords.length; i++) {
+			const gram = msgWords.slice(i, i + NGRAM_LEN).join(" ");
+			if (gram.length > 0 && text.includes(gram)) return true;
+		}
+	}
+	return false;
+}
+
 // ---- run.json assembly ----------------------------------------------------
 
-export function buildRunJson({ slug, title, track, coverage, sizeProxies, hard }) {
+export function buildRunJson({ slug, title, track, coverage, sizeProxies, hard, soft }) {
 	const out = { schemaVersion: RUN_SCHEMA_VERSION, slug, coverage, sizeProxies, hard };
 	if (title !== undefined) out.title = title;
 	if (track !== undefined) out.track = track;
+	if (soft !== undefined) out.soft = soft;
 	return out;
 }
 
@@ -437,20 +599,152 @@ export function validateRunJson(raw) {
 	if (!isPlainObject(h.rework) || !isNonNegInt(h.rework.artifactRevised) || !isNonNegInt(h.rework.phaseBackward) || !isNonNegInt(h.rework.fixWave)) add("/hard/rework", "must be {artifactRevised, phaseBackward, fixWave}");
 	const t = h.totals;
 	if (!isPlainObject(t) || !isNonNegInt(t.tokens) || typeof t.cost !== "number" || t.cost < 0 || !isNonNegInt(t.wallMs) || !isNonNegInt(t.agentMs) || !isNonNegInt(t.humanWaitMs)) add("/hard/totals", "must be {tokens, cost, wallMs, agentMs, humanWaitMs}");
+
+	if (raw.soft !== undefined) {
+		const sf = raw.soft;
+		if (!isPlainObject(sf)) add("/soft", "must be an object when present");
+		else {
+			if (!isPlainObject(sf.attribution) || typeof sf.attribution.model !== "string" || typeof sf.attribution.provider !== "string") add("/soft/attribution", "must be {model, provider}");
+			if (!Array.isArray(sf.narratives) || !sf.narratives.every((n) => isPlainObject(n) && LIFECYCLE_PHASES.includes(n.phase) && typeof n.summary === "string" && n.summary.length <= 500)) add("/soft/narratives", "must be an array of {phase, summary<=500}");
+			const steeringClasses = new Set(["gate-approval", "correction", "scope-change", "unblock", "other"]);
+			if (!Array.isArray(sf.steering) || !sf.steering.every((s) => isPlainObject(s) && isNonNegInt(s.index) && isTs(s.ts) && steeringClasses.has(s.class))) add("/soft/steering", "must be an array of {index, ts, class}");
+			if (!Array.isArray(sf.panelPrecision) || !sf.panelPrecision.every((p) => isPlainObject(p) && PANEL_PHASES.includes(p.panelPhase) && isPosInt(p.round) && typeof p.model === "string" && isNonNegInt(p.raised) && isNonNegInt(p.incorporated) && isNonNegInt(p.dismissed)))
+				add("/soft/panelPrecision", "must be an array of {panelPhase, round, model, raised, incorporated, dismissed}");
+		}
+	}
 	return issues;
+}
+
+// ---- soft data assembly (spec §6.2) -----------------------------------------
+
+function userText(entry) {
+	if (entry?.type !== "message" || entry.message?.role !== "user") return "";
+	const content = entry.message.content;
+	if (!Array.isArray(content)) return "";
+	return content
+		.filter((b) => b?.type === "text" && typeof b.text === "string")
+		.map((b) => b.text)
+		.join("\n");
+}
+
+function turnsFor(session, spans, phase, windowStart, windowEnd) {
+	return session.entries.filter((e) => e.type === "message" && typeof e.timestamp === "string" && attributePhase(spans, e.timestamp, windowStart, windowEnd) === phase).map((e) => ({ ts: e.timestamp, role: e.message.role, ...(e.message.model ? { model: e.message.model } : {}) }));
+}
+
+function eventsFor(events, phase, spans) {
+	const span = spans.find((s) => s.phase === phase);
+	if (!span) return [];
+	return events.filter((e) => e.ts >= span.start && e.ts <= span.end);
+}
+
+// One LLM call per phase/session/review-round respectively (call count is
+// fixture-predictable, spec §6.2). fromRaw replays raw/llm/<name>.json pairs
+// exclusively and never invokes llmCmd.
+function llmCall(root, slug, name, request, llmCmd, fromRaw, timeoutMs) {
+	const relPath = `llm/${name}.json`;
+	if (fromRaw) {
+		if (!rawExists(root, slug, relPath)) return { ok: false, reason: "no raw snapshot to replay" };
+		try {
+			const pair = JSON.parse(readRaw(root, slug, relPath));
+			return { ok: true, response: pair.response };
+		} catch (err) {
+			return { ok: false, reason: `corrupt raw snapshot: ${err?.message || err}` };
+		}
+	}
+	const result = callLlm(llmCmd, request, { timeoutMs });
+	if (result.ok) snapshotRaw(root, slug, relPath, JSON.stringify({ request, response: result.response }, null, 2));
+	return result;
+}
+
+function buildSoftData({ root, slug, llmCmd, noLlm, fromRaw, events, spans, sessions, panels, reviewDirs, windowStart, windowEnd, reviewsPath, llmTimeoutMs = LLM_TIMEOUT_MS }) {
+	if (noLlm || !llmCmd) return { soft: undefined, markers: [{ marker: "soft.absent" }] };
+
+	const redactionValues = buildRedactionValues(process.env);
+	const allUserMessages = sessions.flatMap((s) => s.entries.map(userText).filter(Boolean));
+	const markers = [];
+	let attribution;
+	let narrativeFailed = false;
+	let steeringFailed = false;
+
+	const narratives = [];
+	for (const phase of [...new Set(spans.map((s) => s.phase))]) {
+		const request = { kind: "narrative", slug, inputs: { phase, events: eventsFor(events, phase, spans), turns: sessions.flatMap((s) => turnsFor(s, spans, phase, windowStart, windowEnd)) } };
+		const result = llmCall(root, slug, `narrative-${phase}`, request, llmCmd, fromRaw, llmTimeoutMs);
+		if (!result.ok || !validateNarrativeOutput(result.response.output)) {
+			narrativeFailed = true;
+			continue;
+		}
+		const summary = sanitizeSoftString(result.response.output.summary, { redactionValues, userMessages: allUserMessages });
+		if (summary === null) continue;
+		attribution ??= { model: result.response.model, provider: result.response.provider };
+		narratives.push({ phase, summary });
+	}
+	if (narrativeFailed) markers.push({ marker: "llm.error:narrative" });
+
+	const steering = [];
+	for (const s of sessions) {
+		const userTurns = s.entries.filter((e) => e.type === "message" && e.message?.role === "user" && typeof e.timestamp === "string").map((e, i) => ({ index: i, ts: e.timestamp, text: userText(e) }));
+		if (userTurns.length === 0) continue;
+		const request = { kind: "steering", slug, inputs: { sessionId: s.file, userTurns: userTurns.map(({ index, ts, text }) => ({ index, ts, text })) } };
+		const result = llmCall(root, slug, `steering-${s.file}`, request, llmCmd, fromRaw, llmTimeoutMs);
+		if (!result.ok || !validateSteeringOutput(result.response.output, userTurns.length)) {
+			steeringFailed = true;
+			continue;
+		}
+		attribution ??= { model: result.response.model, provider: result.response.provider };
+		for (const c of result.response.output.classifications) {
+			const turn = userTurns[c.index];
+			if (turn) steering.push({ index: c.index, ts: turn.ts, class: c.class });
+		}
+	}
+	if (steeringFailed) markers.push({ marker: "llm.error:steering" });
+
+	const panelPrecision = [];
+	for (const dir of reviewDirs) {
+		const dirPath = join(root, reviewsPath, dir);
+		let consolidatedText = "";
+		let findingsText = "";
+		const modelFiles = [];
+		try {
+			for (const f of readdirSync(dirPath).sort()) {
+				const text = readFileSync(join(dirPath, f), "utf8");
+				if (!fromRaw) snapshotRaw(root, slug, join("reviews", dir, f), text);
+				if (f === "consolidated.md") consolidatedText = text;
+				else {
+					modelFiles.push(f);
+					findingsText += text;
+				}
+			}
+		} catch {
+			markers.push({ marker: `precision.unparsed:${dir}` });
+			continue;
+		}
+		const request = { kind: "precision", slug, inputs: { reviewDir: dir, models: modelFiles, findingsText, consolidatedText } };
+		const result = llmCall(root, slug, `precision-${dir}`, request, llmCmd, fromRaw, llmTimeoutMs);
+		if (!result.ok || !validatePrecisionOutput(result.response.output)) {
+			markers.push({ marker: `precision.unparsed:${dir}` });
+			continue;
+		}
+		attribution ??= { model: result.response.model, provider: result.response.provider };
+		for (const pm of result.response.output.perModel) {
+			panelPrecision.push({ panelPhase: panels.find((p) => p.dir.includes(dir))?.panelPhase ?? "pr_review", round: panels.find((p) => p.dir.includes(dir))?.round ?? 1, model: pm.model, raised: pm.raised, incorporated: pm.incorporated, dismissed: pm.dismissed });
+		}
+	}
+
+	if (!attribution) return { soft: undefined, markers: [...markers, { marker: "soft.absent" }] };
+	return { soft: { attribution, narratives, steering, panelPrecision }, markers };
 }
 
 // ---- collection orchestration ----------------------------------------------
 
-export function collect({ root, slug, gitCmd = "git", baseRef = "main", ghCmd = "gh", noGithub = false, sessionsDirOverrides = [], home, reviewsPath = "docs/reviews" }) {
+export function collect({ root, slug, gitCmd = "git", baseRef = "main", ghCmd = "gh", noGithub = false, sessionsDirOverrides = [], home, reviewsPath = "docs/reviews", llmCmd, noLlm = false, fromRaw = false, llmTimeoutMs = LLM_TIMEOUT_MS }) {
 	const { events, markers: manifestMarkers } = readManifest(root, slug);
 	const { title, track } = extractTitleTrack(events);
 	const { panels, markers: panelMarkers } = discoverPanels(root, slug, events);
-	const { sessions, markers: sessionMarkers } = discoverSessions(root, events, { sessionsDirOverrides, home });
-	// discovery-only for lt-t4 (soft.panelPrecision consumption is lt-t5).
-	discoverReviewDirs(root, slug, reviewsPath);
-	const { diff, markers: gitMarkers } = gitDiffStats(gitCmd, root, baseRef);
-	const { markers: ghMarkers } = githubCheck(ghCmd, root, slug, noGithub);
+	const { sessions, markers: sessionMarkers } = discoverSessions(root, events, { sessionsDirOverrides, home, slug, fromRaw });
+	const reviewDirs = discoverReviewDirs(root, slug, reviewsPath);
+	const { diff, markers: gitMarkers } = gitDiffStatsSeam(root, slug, gitCmd, baseRef, fromRaw);
+	const { markers: ghMarkers } = githubCheckSeam(root, slug, ghCmd, slug, noGithub, fromRaw);
 
 	const windowStart = events.length > 0 ? events[0].ts : new Date(0).toISOString();
 	const windowEnd = events.length > 0 ? events[events.length - 1].ts : new Date(0).toISOString();
@@ -560,8 +854,10 @@ export function collect({ root, slug, gitCmd = "git", baseRef = "main", ghCmd = 
 		totals: { tokens: totalTokens, cost: totalCost, wallMs, agentMs: totalAgentMs, humanWaitMs: totalHumanWaitMs },
 	};
 
-	const coverage = [...manifestMarkers, ...panelMarkers, ...sessionMarkers, ...gitMarkers, ...ghMarkers];
-	const runJson = buildRunJson({ slug, title, track, coverage, sizeProxies, hard });
+	const { soft, markers: softMarkers } = buildSoftData({ root, slug, llmCmd, noLlm, fromRaw, events, spans, sessions, panels, reviewDirs, windowStart, windowEnd, reviewsPath, llmTimeoutMs });
+
+	const coverage = [...manifestMarkers, ...panelMarkers, ...sessionMarkers, ...gitMarkers, ...ghMarkers, ...softMarkers];
+	const runJson = buildRunJson({ slug, title, track, coverage, sizeProxies, hard, soft });
 	return { runJson };
 }
 
@@ -606,16 +902,20 @@ function parseArgs(argv) {
 		else if (a === "--gh-cmd") opts.ghCmd = val();
 		else if (a === "--no-github") opts.noGithub = true;
 		else if (a === "--sessions-dir") opts.sessionsDirOverrides.push(val());
+		else if (a === "--llm-cmd") opts.llmCmd = val();
+		else if (a === "--no-llm") opts.noLlm = true;
+		else if (a === "--from-raw") opts.fromRaw = true;
 		else if (a === "--config") opts.config = val();
 		else if (a === "--repo-root") opts.repoRoot = val();
 		else if (a === "-h" || a === "--help") opts.help = true;
 		else throw new Error(`unexpected argument: ${a}`);
 	}
+	if (opts.llmCmd !== undefined && opts.noLlm) throw new Error("--llm-cmd and --no-llm are mutually exclusive");
 	return opts;
 }
 
 function usage() {
-	return "usage: collect-run.mjs --slug S [--out FILE] [--format text|json] [--git-cmd CMD] [--base-ref BRANCH] [--gh-cmd CMD] [--no-github] [--sessions-dir DIR]... [--config DIR|--repo-root DIR]";
+	return "usage: collect-run.mjs --slug S [--out FILE] [--format text|json] [--from-raw] [--llm-cmd CMD | --no-llm] [--git-cmd CMD] [--base-ref BRANCH] [--gh-cmd CMD] [--no-github] [--sessions-dir DIR]... [--config DIR|--repo-root DIR]";
 }
 
 function main() {
@@ -657,6 +957,9 @@ function main() {
 		noGithub: opts.noGithub,
 		sessionsDirOverrides: opts.sessionsDirOverrides,
 		reviewsPath,
+		llmCmd: opts.llmCmd,
+		noLlm: opts.noLlm ?? false,
+		fromRaw: opts.fromRaw ?? false,
 	});
 
 	const issues = validateRunJson(runJson);

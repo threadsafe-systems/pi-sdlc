@@ -156,7 +156,9 @@ process.exit(1);
 		assert.deepEqual(runJson.hard.rework, { artifactRevised: 1, phaseBackward: 1, fixWave: 1 });
 		assert.equal(runJson.hard.totals.tokens, 170);
 		assert.ok(Math.abs(runJson.hard.totals.cost - 0.65) < 1e-9);
-		assert.equal(runJson.coverage.length, 0, "a complete fixture carries no coverage markers");
+		// no --llm-cmd was passed: lt-t5 default is soft.absent (never invoke an
+		// unconfigured LLM binary), so this is the only marker expected here.
+		assert.deepEqual(runJson.coverage, [{ marker: "soft.absent" }]);
 	} finally {
 		rmSync(root, { recursive: true, force: true });
 		rmSync(home, { recursive: true, force: true });
