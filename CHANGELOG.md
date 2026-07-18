@@ -1,3 +1,56 @@
+## [2.0.0](https://github.com/threadsafe-systems/pi-sdlc/compare/v1.0.2...v2.0.0) (2026-07-18)
+
+### ⚠ BREAKING CHANGES
+
+* **config:** sdlc.config.json schemaVersion 3 replaces the schemaVersion 2
+lifecycle/enforcement vocabulary with review/shape/overrides. There is no
+migration; re-run setup-sdlc or pin the prior release.
+
+* docs(spec): name IC-A spec to match the config-intent-vocabulary slug
+
+check-lifecycle matches <date>-<slug>.md; drop the -ic-a suffix so the
+irreversible-track spec artifact resolves.
+
+* fix(config): address PR panel round 1 (1 high, 6 medium, 6 low)
+
+Preset-patch per-track override guard (delete-or-alter); resolve-panel
+refuses task_validate unless subagent; older-schema+--force replaces;
+single-dial patch preserves unrelated dials; SKILL/README/ADR 0022/wrapper
+scripts re-pointed to v3 vocabulary; delete dead readConfigRawForMigration;
+--default-track parse validation; ICA20/21/24 tests added.
+
+Refs #86.
+
+* docs(reviews): archive PR panel round-1 per-model findings
+
+* fix(docs): address PR panel round 2 (SKILL dial enums, validator/tracker prose, patch disclosure)
+
+Complete the P1/P3 re-pointing the round-1 pass missed: correct per-dial
+enum list, branch the validator section on review.tasks, express every
+tracker-publish spot via shape.publishToTracker, fix author placeholders to
+provider/model, and disclose before->after (incl. forced override drops) in
+the setup patch report. Round 2: deepseek clean, gpt-5.6-sol 5 findings.
+
+Refs #86.
+
+* fix(docs): address PR panel round 3 (tracker default wording, validator dial scoping)
+
+Round 3: glm-5.2 CONVERGED; gpt-5.6-sol 2 residual prose findings incorporated
+(drop the false 'default two'; scope PV1/runner/receipt/PASS to subagent/self,
+off imposes none). No code/behaviour change. Consolidated review finalised.
+
+Refs #86.
+
+* docs(spec): align §4.3/ICA14 prose with the M1 task_validate refusal
+
+PR panel round 1 (M1) made resolve-panel refuse task_validate for every
+review.tasks mode except subagent; the spec prose still named only 'off'.
+Drift surfaced by the e2e-harness plan review (E4). Docs-only.
+
+### Features
+
+* **config:** intent vocabulary schemaVersion 3 (IC-A) ([#92](https://github.com/threadsafe-systems/pi-sdlc/issues/92)) ([a6b9d80](https://github.com/threadsafe-systems/pi-sdlc/commit/a6b9d8006a674c5b1a096c2c0c690d38705ad5e5)), closes [#87](https://github.com/threadsafe-systems/pi-sdlc/issues/87) [#88](https://github.com/threadsafe-systems/pi-sdlc/issues/88) [#89](https://github.com/threadsafe-systems/pi-sdlc/issues/89) [#90](https://github.com/threadsafe-systems/pi-sdlc/issues/90)
+
 ## [1.0.2](https://github.com/threadsafe-systems/pi-sdlc/compare/v1.0.1...v1.0.2) (2026-07-17)
 
 ### Bug Fixes
