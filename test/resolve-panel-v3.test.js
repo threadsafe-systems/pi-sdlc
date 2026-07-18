@@ -39,11 +39,13 @@ const ROSTER = {
 	task_validate: { prefer: ["deepseek/deepseek-v3", "anthropic/claude-haiku-4"] },
 };
 
-function fixture({ review = {}, shape = {}, overrides, authorDefault = "anthropic/claude-opus-4", providers } = {}) {
+function fixture({ review = {}, shape = {}, overrides, authorDefault = "anthropic/claude-opus-4", providers, phases = {} } = {}) {
 	const root = mkdtempSync(join(tmpdir(), "sdlc-rp-v3-"));
 	const home = join(root, "home");
 	mkdirSync(join(root, ".pi", "sdlc"), { recursive: true });
 	mkdirSync(join(home, ".pi", "agent"), { recursive: true });
+	const rosterPhases = structuredClone(ROSTER);
+	for (const [phase, override] of Object.entries(phases)) rosterPhases[phase] = { ...rosterPhases[phase], ...override };
 	const config = {
 		schemaVersion: 3,
 		prefix: "sdlc",
@@ -52,7 +54,7 @@ function fixture({ review = {}, shape = {}, overrides, authorDefault = "anthropi
 		review: { brainstorm: "human", design: "panel", code: "panel", tasks: "subagent", panelSize: 2, onShortfall: "proceed", ...review },
 		shape: { separateSpec: true, publishToTracker: 2, defaultTrack: "irreversible", ...shape },
 		...(overrides ? { overrides } : {}),
-		panels: { authorDefault, phases: structuredClone(ROSTER) },
+		panels: { authorDefault, phases: rosterPhases },
 	};
 	writeFileSync(join(root, ".pi", "sdlc", "sdlc.config.json"), `${JSON.stringify(config, null, 2)}\n`);
 	const authProviders = providers ?? ["openai", "zai", "deepseek", "anthropic", "google"];
@@ -60,9 +62,10 @@ function fixture({ review = {}, shape = {}, overrides, authorDefault = "anthropi
 	return { root, home };
 }
 
-function run({ root, home }, phase, args = []) {
+function run({ root, home }, phase, args = [], extraEnv = {}) {
 	const env = { ...process.env, HOME: home };
 	for (const key of credentialVars) delete env[key];
+	Object.assign(env, extraEnv);
 	const r = spawnSync(process.execPath, [resolver, phase, "--config", root, ...args], { encoding: "utf8", env });
 	return { status: r.status, stdout: r.stdout.trim(), stderr: r.stderr };
 }
@@ -171,4 +174,66 @@ test("ICA24: separateSpec false precedes the human/off refusal for spec_review",
 	const { status, stderr } = run(fixture({ review: { design: "human" }, shape: { separateSpec: false } }), "spec_review");
 	assert.equal(status, 1);
 	assert.match(stderr, /no spec gate \(shape.separateSpec is false\)/);
+});
+
+// rpi-t1: cross-provider model identity collapsing (issue #80 gap 2).
+const AWS_ENV = { AWS_ACCESS_KEY_ID: "stub", AWS_SECRET_ACCESS_KEY: "stub" };
+
+test("rpi-t1: Bedrock-hosted Claude collapses to the direct-API identity for author-exclusion", () => {
+	const f = fixture({
+		phases: { pr_review: { panelSize: 2, prefer: ["amazon-bedrock/global.anthropic.claude-opus-4-8", "openai/gpt-5", "zai/glm-5"] } },
+	});
+	const { status, stdout, stderr } = run(f, "pr_review", ["--author", "anthropic/claude-opus-4-8"], AWS_ENV);
+	assert.equal(status, 0);
+	// the Bedrock entry is the same underlying model as the author (anthropic/claude-opus-4-8) — excluded.
+	assert.deepEqual(lines(stdout), ["openai/gpt-5", "zai/glm-5"]);
+	assert.match(stderr, /dropped amazon-bedrock\/global\.anthropic\.claude-opus-4-8: author model/);
+});
+
+test("rpi-t1: distinct Bedrock version qualifiers stay distinct identities", () => {
+	const f = fixture({
+		phases: {
+			pr_review: {
+				panelSize: 2,
+				prefer: ["amazon-bedrock/global.anthropic.claude-opus-4-8-v1:0", "amazon-bedrock/us.anthropic.claude-opus-4-8-v1:1", "openai/gpt-5"],
+			},
+		},
+	});
+	const { status, stdout } = run(f, "pr_review", ["--author", "anthropic/claude-opus-4-8"], AWS_ENV);
+	assert.equal(status, 0);
+	// both collapse to a canonical anthropic/claude-opus-4-8-v1:N identity (region stripped, vendor remapped),
+	// but the two differ from EACH OTHER by version qualifier (:0 vs :1) so neither dedupes the other out —
+	// both are kept, floor 2 reached before openai.
+	assert.deepEqual(lines(stdout), ["amazon-bedrock/global.anthropic.claude-opus-4-8-v1:0", "amazon-bedrock/us.anthropic.claude-opus-4-8-v1:1"]);
+});
+
+test("rpi-t1: same model + same version, different Bedrock region, dedupes to one panelist", () => {
+	const f = fixture({
+		phases: {
+			pr_review: {
+				panelSize: 2,
+				prefer: ["amazon-bedrock/global.anthropic.claude-opus-4-8-v1:0", "amazon-bedrock/us.anthropic.claude-opus-4-8-v1:0", "openai/gpt-5"],
+			},
+		},
+	});
+	const { status, stdout, stderr } = run(f, "pr_review", ["--author", "anthropic/claude-opus-4-8"], AWS_ENV);
+	assert.equal(status, 0);
+	// same underlying model + version, only the region differs — the second entry dedupes out, openai fills the floor.
+	assert.deepEqual(lines(stdout), ["amazon-bedrock/global.anthropic.claude-opus-4-8-v1:0", "openai/gpt-5"]);
+	assert.match(stderr, /dropped amazon-bedrock\/us\.anthropic\.claude-opus-4-8-v1:0: model anthropic\/claude-opus-4-8-v1:0 already in panel/);
+});
+
+test("rpi-t1: Bedrock-native model with no direct-provider equivalent is unaffected", () => {
+	const f = fixture({
+		phases: {
+			pr_review: {
+				panelSize: 2,
+				prefer: ["amazon-bedrock/amazon.nova-pro-v1:0", "amazon-bedrock/us.amazon.nova-pro-v1:0", "openai/gpt-5"],
+			},
+		},
+	});
+	const { status, stdout } = run(f, "pr_review", ["--author", "anthropic/claude-opus-4-8"], AWS_ENV);
+	assert.equal(status, 0);
+	// no vendor-alias mapping for "amazon" — each literal id is its own identity, un-mangled, un-collapsed.
+	assert.deepEqual(lines(stdout), ["amazon-bedrock/amazon.nova-pro-v1:0", "amazon-bedrock/us.amazon.nova-pro-v1:0"]);
 });

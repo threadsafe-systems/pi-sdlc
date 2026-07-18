@@ -43,7 +43,7 @@
     "reversible": { "review": { "design": "human" } }
   },
   "panels": {
-    "$comment": "Panel roster for pi-sdlc itself. Preference reconciled against live credentials by resolve-panel; model ids drift, re-check with `pi --list-models`. Entries may carry pi's ':<thinking>' suffix (off/minimal/low/medium/high/xhigh/max). panelSize is the per-phase distinct-model floor (model-identity axis). See docs/plans/2026-07-11-model-thinking-levels.md for the reasoning levels.",
+    "$comment": "Panel roster for pi-sdlc itself. Preference reconciled against live credentials by resolve-panel; model ids drift, re-check with `pi --list-models`. Entries may carry pi's ':<thinking>' suffix (off/minimal/low/medium/high/xhigh/max). panelSize is the per-phase distinct-model floor (model-identity axis). See docs/plans/2026-07-11-model-thinking-levels.md for the reasoning levels. pr_review's amazon-bedrock/global.anthropic.claude-opus-4-8 fallback (added 2026-07-18, issue #80) collapses to the same identity as authorDefault (anthropic/claude-opus-4-8) — it is always excluded, and contributes nothing, whenever the author is the default identity; it only helps when a non-opus-4-8 author needs a 5th distinct-identity candidate.",
     "authorDefault": "anthropic/claude-opus-4-8:high",
     "phases": {
       "plan_review": {
@@ -56,7 +56,7 @@
       },
       "pr_review": {
         "panelSize": 3,
-        "prefer": ["anthropic/claude-fable-5:high", "openai-codex/gpt-5.6-sol:high", "google/gemini-3.1-pro-preview:high", "deepseek/deepseek-v4-pro:high"]
+        "prefer": ["anthropic/claude-fable-5:high", "openai-codex/gpt-5.6-sol:high", "google/gemini-3.1-pro-preview:high", "deepseek/deepseek-v4-pro:high", "amazon-bedrock/global.anthropic.claude-opus-4-8:high"]
       },
       "task_validate": {
         "panelSize": 1,

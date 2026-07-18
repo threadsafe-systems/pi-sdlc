@@ -135,10 +135,28 @@ function hasCreds(pm) {
 }
 
 const THINKING_LEVELS = new Set(["off", "minimal", "low", "medium", "high", "xhigh", "max"]);
+// Vendors hosted on amazon-bedrock that also exist as a direct provider under the
+// same identity — collapsing these lets author-exclusion see through the routing.
+// Scanned as a dot-segment anywhere in the model id (not just after a hardcoded
+// region-prefix whitelist): AWS Bedrock ids nest strictly as
+// `[routing-prefix.]vendor.model[-version][:qualifier]`, so a recognized vendor
+// segment always marks the true start of the model id regardless of what routing
+// prefix (region, cross-region, or a future one) precedes it. A prefix whitelist
+// approach fails open in the dangerous direction here: an *unrecognized* prefix
+// would leave the id un-collapsed and able to sail past author-exclusion
+// undetected (self-review risk), rather than merely under-deduping.
+const BEDROCK_ALIAS_VENDORS = new Set(["anthropic", "deepseek"]);
+
 function modelIdentity(pm) {
 	const split = pm.lastIndexOf(":");
-	if (split < 0 || !THINKING_LEVELS.has(pm.slice(split + 1))) return pm;
-	return pm.slice(0, split);
+	const stripped = split >= 0 && THINKING_LEVELS.has(pm.slice(split + 1)) ? pm.slice(0, split) : pm;
+	const slash = stripped.indexOf("/");
+	if (slash < 0 || stripped.slice(0, slash) !== "amazon-bedrock") return stripped;
+	const segments = stripped.slice(slash + 1).split(".");
+	for (let i = 0; i < segments.length - 1; i++) {
+		if (BEDROCK_ALIAS_VENDORS.has(segments[i])) return `${segments[i]}/${segments.slice(i + 1).join(".")}`;
+	}
+	return stripped; // no recognized vendor segment; native/unrecognized Bedrock model, left untouched.
 }
 
 function pongOk(pm) {
