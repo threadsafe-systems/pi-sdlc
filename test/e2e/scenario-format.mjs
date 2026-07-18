@@ -140,6 +140,7 @@ export async function runScenario(sandbox, scenario) {
 			files: await collectFileEffects(consumer),
 			ghLog: await readGhLog(sandbox),
 			locked: run.stdout.includes("PUPPET_LOCKED"),
+			lockReason: emissions.find((turn) => turn.turn === "locked")?.reason ?? null,
 		};
 	} finally {
 		await puppet.close();
@@ -199,7 +200,13 @@ export async function runNegativeMode(sandbox, scenario, mode) {
 	// exit or timeout means the control was satisfied by an infra failure, not the
 	// gate — reject it so the anti-vacuity checker is not itself vacuous.
 	if (record.exitCode !== 0 || record.timedOut) throw new Error(`negative control (${mode}) failed: scenario '${scenario.name}' pi exited ${record.exitCode}${record.timedOut ? " (timed out)" : ""}`);
-	return { mode, locked: true };
+	// Assert the lock fired via the mode's OWN gate, not incidentally: the mutated
+	// sentinel must lock at the sentinel gate (skill present + read), the removed
+	// skill at the discovery gate.
+	const reason = record.lockReason ?? "";
+	const expected = mode === "mutated-sentinel" ? /sentinel not observed/ : /skill location not observed|discovery/;
+	if (!expected.test(reason)) throw new Error(`negative control (${mode}) failed: scenario '${scenario.name}' locked for the wrong reason: ${JSON.stringify(reason)}`);
+	return { mode, locked: true, reason };
 }
 
 /** Create a fresh sandbox, stage + install the package, run `fn(sandbox)`, dispose. */

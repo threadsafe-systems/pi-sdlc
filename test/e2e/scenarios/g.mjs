@@ -46,8 +46,10 @@ export function build(sandbox) {
 				}
 				if (!record.files["implement-output.txt"]) throw new Error("G first write did not land (implement-output.txt missing)");
 				// The announced `result: ok` must reflect a REAL successful hook: the
-				// bash hook's tool result carried its output and no nonzero exit.
-				assertText(toolResults(record), { mustMatch: [/hook-fired/], mustNotMatch: [/exit(ed)? (code )?[1-9]/i], label: "G hook tool result" });
+				// bash hook's tool result carried its output and no failure status
+				// (pi renders failures as "Command exited with code N" / timed out /
+				// aborted — see pi bash tool).
+				assertText(toolResults(record), { mustMatch: [/hook-fired/], mustNotMatch: [/Command exited with code \d+/, /Command timed out/, /Command aborted/], label: "G hook tool result" });
 			},
 		},
 		{

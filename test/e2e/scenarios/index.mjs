@@ -6,7 +6,7 @@
 // fails under both modes. T5's top-level runner reuses allScenarios/runPositive
 // for the determinism gate.
 
-import { removeInstalledSkill } from "../harness.mjs";
+import { removeInstalledSkill, teardownScan } from "../harness.mjs";
 import { runNegativeMode, runScenario, withInstalledSandbox } from "../scenario-format.mjs";
 import { build as buildA } from "./a.mjs";
 import { build as buildB } from "./b.mjs";
@@ -56,7 +56,11 @@ async function main() {
 	let failed = 0;
 
 	// Positive pass.
-	const positive = await withInstalledSandbox((sandbox) => runPositive(sandbox));
+	const positive = await withInstalledSandbox(async (sandbox) => {
+		const results = await runPositive(sandbox);
+		await teardownScan(sandbox);
+		return results;
+	});
 	for (const result of positive) {
 		if (filter && !result.name.includes(filter)) continue;
 		process.stdout.write(`[L2] ${result.ok ? "ok  " : "FAIL"} ${result.name}${result.ok ? "" : `\n     ${result.detail}`}\n`);
@@ -64,12 +68,18 @@ async function main() {
 	}
 
 	// Negative control: mutated sentinel (skill present) — every scenario must lock.
-	const ncMutated = await withInstalledSandbox((sandbox) => runNegativeAll(sandbox, "mutated-sentinel"));
+	const ncMutated = await withInstalledSandbox(async (sandbox) => {
+		const results = await runNegativeAll(sandbox, "mutated-sentinel");
+		await teardownScan(sandbox);
+		return results;
+	});
 
 	// Negative control: skill removed — every scenario must lock/fail to proceed.
 	const ncRemoved = await withInstalledSandbox(async (sandbox) => {
 		await removeInstalledSkill(sandbox);
-		return runNegativeAll(sandbox, "skill-removed");
+		const results = await runNegativeAll(sandbox, "skill-removed");
+		await teardownScan(sandbox);
+		return results;
 	});
 
 	for (const [mode, results] of [

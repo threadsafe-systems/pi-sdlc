@@ -7,7 +7,7 @@
 // class stays closed. No model is involved here — that is L2.
 
 import { readFile, writeFile } from "node:fs/promises";
-import { join } from "node:path";
+import { join, sep } from "node:path";
 import { assertText, buildChildEnv, commitConsumer, createSandbox, disposeSandbox, fileExists, installPackage, installedResource, installedScript, makeConsumer, runPi, runProcess, stagePackage, teardownScan } from "./harness.mjs";
 
 /** Run an installed script under the sandbox env; returns the process result. */
@@ -56,7 +56,7 @@ async function checkDiscovery(sandbox) {
 	const skillPaths = (trustedProbe.skills ?? []).map((s) => (typeof s === "string" ? s : (s.filePath ?? s.path ?? JSON.stringify(s)))).filter((p) => p.includes("SKILL.md"));
 	assert(skillPaths.length > 0, "trusted -p run exposed no skill file path to assert");
 	assert(
-		skillPaths.every((p) => p.startsWith(sandbox.staged)),
+		skillPaths.every((p) => p.startsWith(sandbox.staged + sep)),
 		`discovered skill path(s) not under the install root ${sandbox.staged}: ${skillPaths.join(", ")}`,
 	);
 

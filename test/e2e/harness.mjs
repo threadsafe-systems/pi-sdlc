@@ -134,10 +134,14 @@ function sha256(buffer) {
 	return createHash("sha256").update(buffer).digest("hex");
 }
 
+// Dirs excluded from the teardown snapshot: tool-managed / VCS-internal trees
+// that are huge and are not a plausible checkout-relative-path leak target. The
+// no-write scan therefore covers the checkout's *source tree* (the surface a
+// checkout-relative-path bug would corrupt), not git internals or installed deps.
 const SNAPSHOT_IGNORE = new Set(["node_modules", ".git", ".ruff_cache"]);
 
 /**
- * Recursively snapshot a directory to a `{ relpath: "size:mtimeMs" }` map,
+ * Recursively snapshot a directory to a `{ absPath: sha256(content) }` map,
  * bounded by an ignore set. Used by the teardown no-write scan.
  */
 async function snapshotTree(root) {
@@ -159,8 +163,10 @@ async function snapshotTree(root) {
 					// Content hash (not size:mtime) so a same-size, same-mtime
 					// replacement can't slip past the teardown scan.
 					snapshot[abs] = sha256(await readFile(abs));
-				} catch {
-					// vanished between readdir and stat — ignore
+				} catch (error) {
+					// A file that vanished between readdir and read is fine to skip;
+					// anything else (e.g. an unreadable planted file) fails loudly.
+					if (error?.code !== "ENOENT") throw error;
 				}
 			}
 		}
@@ -336,7 +342,10 @@ export async function teardownScan(sandbox) {
 	for (const root of sandbox.watchedRoots) {
 		Object.assign(after, await snapshotTree(root));
 	}
-	const changed = diffSnapshots(sandbox.watchedBefore, after).filter((path) => !path.startsWith(sandbox.dir + sep));
+	// Strip the "(removed) " prefix before the sandbox-path exclusion so a
+	// legitimate deletion inside the sandbox (when a watched root encloses it in a
+	// stricter local run) is not misreported.
+	const changed = diffSnapshots(sandbox.watchedBefore, after).filter((entry) => !entry.replace(/^\(removed\) /, "").startsWith(sandbox.dir + sep));
 	if (changed.length > 0) {
 		throw new Error(`teardown scan failed: writes outside the scratch roots detected:\n${changed.join("\n")}`);
 	}
@@ -359,8 +368,10 @@ export async function assertPinnedPi() {
 	if (pinnedPiChecked) return;
 	if (!(await fileExists(piBin))) throw new Error(`pinned pi binary is missing: ${piBin}; run npm ci first`);
 	const result = await runProcess([piBin, "--version"], { env: { PATH: process.env.PATH ?? "" }, timeoutMs: 30000 });
-	if (!result.stdout.includes(PINNED_PI_VERSION) && !result.stderr.includes(PINNED_PI_VERSION)) {
-		throw new Error(`pinned pi version mismatch: expected ${PINNED_PI_VERSION}, got ${(result.stdout || result.stderr).trim()}`);
+	// Exact version-token match (a substring match would accept e.g. 0.80.100).
+	const token = (`${result.stdout}\n${result.stderr}`.match(/\b\d+\.\d+\.\d+\b/) ?? [])[0];
+	if (token !== PINNED_PI_VERSION) {
+		throw new Error(`pinned pi version mismatch: expected ${PINNED_PI_VERSION}, got ${token ?? (result.stdout || result.stderr).trim()}`);
 	}
 	pinnedPiChecked = true;
 }

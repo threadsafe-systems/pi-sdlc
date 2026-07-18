@@ -40,8 +40,12 @@ async function runL2Positive() {
 	return withInstalledSandbox(async (sandbox) => {
 		const out = [];
 		for (const scenario of selected(sandbox)) {
-			const { manifest } = await runScenario(sandbox, scenario);
-			out.push({ name: scenario.name, ok: true, manifest });
+			try {
+				const { manifest } = await runScenario(sandbox, scenario);
+				out.push({ name: scenario.name, ok: true, manifest });
+			} catch (error) {
+				out.push({ name: scenario.name, ok: false, detail: error instanceof Error ? error.message : String(error) });
+			}
 		}
 		await teardownScan(sandbox);
 		return out;
@@ -58,8 +62,8 @@ async function runNegativeControl(mode) {
 		const results = [];
 		for (const scenario of selected(sandbox)) {
 			try {
-				await runNegativeMode(sandbox, scenario, mode);
-				results.push({ name: scenario.name, ok: true });
+				const { reason } = await runNegativeMode(sandbox, scenario, mode);
+				results.push({ name: scenario.name, ok: true, reason });
 			} catch (error) {
 				results.push({ name: scenario.name, ok: false, detail: error instanceof Error ? error.message : String(error) });
 			}
@@ -67,7 +71,7 @@ async function runNegativeControl(mode) {
 		// The negative-control sandboxes are held to the same no-write guarantee.
 		await teardownScan(sandbox);
 		return results;
-	});
+	}).catch((error) => [{ name: "NC", ok: false, detail: error instanceof Error ? error.message : String(error) }]);
 }
 
 /**
@@ -85,8 +89,8 @@ async function fullRun() {
 		l1: l1.map((r) => ({ name: r.name, ok: r.ok })),
 		scenarios: l2.filter((r) => r.manifest).map((r) => r.manifest),
 		nc: {
-			mutatedSentinel: ncMutated.map((r) => ({ name: r.name, ok: r.ok })),
-			skillRemoved: ncRemoved.map((r) => ({ name: r.name, ok: r.ok })),
+			mutatedSentinel: ncMutated.map((r) => ({ name: r.name, ok: r.ok, reason: r.reason ?? null })),
+			skillRemoved: ncRemoved.map((r) => ({ name: r.name, ok: r.ok, reason: r.reason ?? null })),
 		},
 	};
 	return { manifest, raw: { l1, l2, ncMutated, ncRemoved } };
