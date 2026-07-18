@@ -143,7 +143,7 @@ export function derivePhaseSpans(events, windowEnd) {
 		const nextEnter = entries.slice(i + 1).find((x) => x.event === "phase.entered");
 		let end;
 		let exitExplicit = false;
-		if (explicitExit && (!nextEnter || explicitExit.ts <= nextEnter.ts)) {
+		if (explicitExit && (!nextEnter || toMs(explicitExit.ts) <= toMs(nextEnter.ts))) {
 			end = explicitExit.ts;
 			exitExplicit = true;
 		} else if (nextEnter) {
@@ -160,9 +160,10 @@ export function derivePhaseSpans(events, windowEnd) {
 // inside the window but outside every span; null when outside the window
 // entirely (caller excludes it from per-phase figures).
 export function attributePhase(spans, ts, windowStart, windowEnd) {
-	if (ts < windowStart || ts > windowEnd) return null;
+	const time = toMs(ts);
+	if (time < toMs(windowStart) || time > toMs(windowEnd)) return null;
 	for (const s of spans) {
-		if (ts >= s.start && ts <= s.end) return s.phase;
+		if (time >= toMs(s.start) && time <= toMs(s.end)) return s.phase;
 	}
 	return "unattributed";
 }
@@ -201,6 +202,7 @@ export function discoverPanels(root, slug, events) {
 	const panelsDir = join(runStoreDir(root, slug), "panels");
 	const panels = [];
 	const foundPhases = new Set();
+	const partialPhases = new Set();
 	const byPhaseRound = new Map();
 	if (existsSync(panelsDir)) {
 		for (const name of readdirSync(panelsDir).sort()) {
@@ -211,18 +213,22 @@ export function discoverPanels(root, slug, events) {
 			if (!statSync(dir).isDirectory()) continue;
 			const statusPath = join(dir, "status.json");
 			const eventsPath = join(dir, "events.jsonl");
-			// A harvest that missed BOTH files leaves nothing to distill; the round
-			// stays honestly uncovered rather than marking its phase "found".
-			if (!existsSync(statusPath) && !existsSync(eventsPath)) continue;
-			foundPhases.add(panelPhase);
+			if (!existsSync(statusPath) && !existsSync(eventsPath)) {
+				partialPhases.add(panelPhase);
+				continue;
+			}
 			let models = [];
+			let statusValid = false;
 			if (existsSync(statusPath)) {
 				try {
 					models = extractPanelModels(JSON.parse(readFileSync(statusPath, "utf8")));
+					statusValid = true;
 				} catch {
-					// unparseable status.json: no per-model metrics for this round, still listed
+					// unparseable status.json: no per-model metrics for this round
 				}
 			}
+			if (statusValid && existsSync(eventsPath)) foundPhases.add(panelPhase);
+			else partialPhases.add(panelPhase);
 			const round = Number(roundStr);
 			const entry = { panelPhase, round, dir: `.pi/sdlc/runs/${slug}/panels/${name}`, models, date };
 			// Dedupe by (panelPhase, round): a re-harvest of the same round across a
@@ -239,7 +245,7 @@ export function discoverPanels(root, slug, events) {
 		if (e.event === "panel.dispatched" || e.event === "panel.harvested" || e.event === "panel.consolidated") expectedPhases.add(e.payload.panelPhase);
 	}
 	const markers = [];
-	for (const phase of [...expectedPhases].sort()) {
+	for (const phase of [...new Set([...expectedPhases, ...partialPhases])].sort()) {
 		if (!foundPhases.has(phase)) markers.push({ marker: `panels.missing:${phase}` });
 	}
 	return { panels, markers };
@@ -254,21 +260,24 @@ export function discoverPanels(root, slug, events) {
 // touches the live reviews path.
 export function discoverReviewDirs(root, slug, reviewsPath = "docs/reviews", { fromRaw = false } = {}) {
 	const rawListPath = join("reviews", "_dirs.json");
+	const re = new RegExp(`^(${LIFECYCLE_PHASES.join("|")})-${slug}-\\d{4}-\\d{2}-\\d{2}$`);
 	if (fromRaw) {
 		if (!rawExists(root, slug, rawListPath)) return [];
 		try {
-			return JSON.parse(readRaw(root, slug, rawListPath));
+			const dirs = JSON.parse(readRaw(root, slug, rawListPath));
+			return Array.isArray(dirs) ? dirs.filter((name) => typeof name === "string" && re.test(name)).sort() : [];
 		} catch {
 			return [];
 		}
 	}
 	const base = join(root, reviewsPath);
-	const re = new RegExp(`^(${LIFECYCLE_PHASES.join("|")})-${slug}-\\d{4}-\\d{2}-\\d{2}$`);
-	const dirs = existsSync(base)
-		? readdirSync(base)
-				.filter((name) => re.test(name) && statSync(join(base, name)).isDirectory())
-				.sort()
-		: [];
+	if (!existsSync(base)) {
+		snapshotRaw(root, slug, rawListPath, "[]");
+		return [];
+	}
+	const dirs = readdirSync(base)
+		.filter((name) => re.test(name) && statSync(join(base, name)).isDirectory())
+		.sort();
 	snapshotRaw(root, slug, rawListPath, JSON.stringify(dirs));
 	return dirs;
 }
@@ -365,7 +374,8 @@ function loadSessionsFromRaw(root, slug) {
 function isCorrelated(session, windowStart, windowEnd) {
 	for (const e of session.entries) {
 		if (e.type !== "message" || typeof e.timestamp !== "string") continue;
-		if (e.timestamp >= windowStart && e.timestamp <= windowEnd) return true;
+		const time = toMs(e.timestamp);
+		if (time >= toMs(windowStart) && time <= toMs(windowEnd)) return true;
 	}
 	return false;
 }
@@ -510,6 +520,17 @@ function githubCheckSeam(root, slug, ghCmd, branch, noGithub, fromRaw) {
 
 // ---- LLM seam (spec §6.2) --------------------------------------------------
 
+function validLlmResponse(response, request) {
+	return isPlainObject(response) && response.kind === request.kind && typeof response.model === "string" && response.model.length > 0 && typeof response.provider === "string" && response.provider.length > 0 && isPlainObject(response.output);
+}
+
+function redactLlmValue(value, redactionValues) {
+	if (typeof value === "string") return redact(value, redactionValues);
+	if (Array.isArray(value)) return value.map((item) => redactLlmValue(item, redactionValues));
+	if (isPlainObject(value)) return Object.fromEntries(Object.entries(value).map(([key, item]) => [key, redactLlmValue(item, redactionValues)]));
+	return value;
+}
+
 // One request per call, execFile-no-shell, one JSON request on stdin, one
 // JSON response on stdout, default 120s timeout. Never throws; returns
 // { ok:false, reason } on any failure (non-zero exit, timeout, invalid JSON,
@@ -527,7 +548,7 @@ export function callLlm(llmCmd, request, { timeoutMs = LLM_TIMEOUT_MS } = {}) {
 	} catch {
 		return { ok: false, reason: "invalid JSON response" };
 	}
-	if (!isPlainObject(response) || response.kind !== request.kind || typeof response.model !== "string" || response.model.length === 0 || typeof response.provider !== "string" || response.provider.length === 0 || !isPlainObject(response.output)) {
+	if (!validLlmResponse(response, request)) {
 		return { ok: false, reason: "response missing/mismatched kind, model, provider, or object output" };
 	}
 	return { ok: true, response };
@@ -586,10 +607,10 @@ export function containsUserNgram(text, userMessages) {
 }
 
 // Lighter NF4 pass for short LLM-controlled identifiers (attribution model/
-// provider, per-model precision labels): redact + cap, no n-gram check (these
-// are identifiers, not prose, so verbatim-prompt containment doesn't apply,
-// but an adversarial or misbehaving --llm-cmd must still not be able to smuggle
-// a secret into a committed identifier field).
+// provider, per-model precision labels): redact + cap and prompt containment (these
+// are still capped and checked for prompt containment, and an adversarial or
+// misbehaving --llm-cmd must not be able to smuggle a secret into a committed
+// identifier field).
 const ATTRIBUTION_STRING_CAP = 200;
 export function sanitizeAttributionString(value, redactionValues, userMessages = []) {
 	if (typeof value !== "string") return null;
@@ -767,30 +788,34 @@ function turnsFor(session, spans, phase, windowStart, windowEnd) {
 function eventsFor(events, phase, spans) {
 	const span = spans.find((s) => s.phase === phase);
 	if (!span) return [];
-	return events.filter((e) => e.ts >= span.start && e.ts <= span.end);
+	return events.filter((e) => toMs(e.ts) >= toMs(span.start) && toMs(e.ts) <= toMs(span.end));
 }
 
 // One LLM call per phase/session/review-round respectively (call count is
 // fixture-predictable, spec §6.2). fromRaw replays raw/llm/<name>.json pairs
 // exclusively and never invokes llmCmd.
-function llmCall(root, slug, name, request, llmCmd, fromRaw, timeoutMs) {
+function llmCall(root, slug, name, request, llmCmd, fromRaw, timeoutMs, redactionValues) {
 	const relPath = `llm/${name}.json`;
 	if (fromRaw) {
 		if (!rawExists(root, slug, relPath)) return { ok: false, reason: "no raw snapshot to replay" };
 		try {
 			const pair = JSON.parse(readRaw(root, slug, relPath));
+			if (!isPlainObject(pair) || !validLlmResponse(pair.response, request)) return { ok: false, reason: "corrupt raw snapshot: invalid response" };
 			return { ok: true, response: pair.response };
 		} catch (err) {
 			return { ok: false, reason: `corrupt raw snapshot: ${err?.message || err}` };
 		}
 	}
 	const result = callLlm(llmCmd, request, { timeoutMs });
-	if (result.ok) snapshotRaw(root, slug, relPath, JSON.stringify({ request, response: result.response }, null, 2));
+	if (result.ok) {
+		const response = redactLlmValue(result.response, redactionValues);
+		snapshotRaw(root, slug, relPath, JSON.stringify({ request, response }, null, 2));
+	}
 	return result;
 }
 
 function buildSoftData({ root, slug, llmCmd, noLlm, fromRaw, events, spans, sessions, panels, reviewDirs, windowStart, windowEnd, reviewsPath, llmTimeoutMs = LLM_TIMEOUT_MS }) {
-	if (noLlm || !llmCmd) return { soft: undefined, markers: [{ marker: "soft.absent" }] };
+	if (noLlm || (!llmCmd && !fromRaw)) return { soft: undefined, markers: [{ marker: "soft.absent" }] };
 
 	const redactionValues = buildRedactionValues(process.env);
 	const allUserMessages = sessions.flatMap((s) => s.entries.map(userText).filter(Boolean));
@@ -802,7 +827,7 @@ function buildSoftData({ root, slug, llmCmd, noLlm, fromRaw, events, spans, sess
 	const narratives = [];
 	for (const phase of [...new Set(spans.map((s) => s.phase))]) {
 		const request = { kind: "narrative", slug, inputs: { phase, events: eventsFor(events, phase, spans), turns: sessions.flatMap((s) => turnsFor(s, spans, phase, windowStart, windowEnd)) } };
-		const result = llmCall(root, slug, `narrative-${phase}`, request, llmCmd, fromRaw, llmTimeoutMs);
+		const result = llmCall(root, slug, `narrative-${phase}`, request, llmCmd, fromRaw, llmTimeoutMs, redactionValues);
 		if (!result.ok || !validateNarrativeOutput(result.response.output)) {
 			narrativeFailed = true;
 			continue;
@@ -810,7 +835,7 @@ function buildSoftData({ root, slug, llmCmd, noLlm, fromRaw, events, spans, sess
 		const summary = sanitizeSoftString(result.response.output.summary, { redactionValues, userMessages: allUserMessages });
 		const responseAttribution = safeAttribution(result.response, redactionValues, allUserMessages);
 		if (summary === null || !responseAttribution) {
-			markers.push({ marker: `soft.omitted:narrative:${phase}` });
+			narrativeFailed = true;
 			continue;
 		}
 		attribution ??= responseAttribution;
@@ -823,14 +848,14 @@ function buildSoftData({ root, slug, llmCmd, noLlm, fromRaw, events, spans, sess
 		const userTurns = s.entries.filter((e) => e.type === "message" && e.message?.role === "user" && typeof e.timestamp === "string").map((e, i) => ({ index: i, ts: e.timestamp, text: userText(e) }));
 		if (userTurns.length === 0) continue;
 		const request = { kind: "steering", slug, inputs: { sessionId: s.file, userTurns: userTurns.map(({ index, ts, text }) => ({ index, ts, text })) } };
-		const result = llmCall(root, slug, `steering-${s.file}`, request, llmCmd, fromRaw, llmTimeoutMs);
+		const result = llmCall(root, slug, `steering-${s.file}`, request, llmCmd, fromRaw, llmTimeoutMs, redactionValues);
 		if (!result.ok || !validateSteeringOutput(result.response.output, userTurns.length)) {
 			steeringFailed = true;
 			continue;
 		}
 		const responseAttribution = safeAttribution(result.response, redactionValues, allUserMessages);
 		if (!responseAttribution) {
-			markers.push({ marker: `soft.omitted:steering:${s.file}` });
+			steeringFailed = true;
 			continue;
 		}
 		attribution ??= responseAttribution;
@@ -849,7 +874,7 @@ function buildSoftData({ root, slug, llmCmd, noLlm, fromRaw, events, spans, sess
 		const matchingPanels = panelPhase ? panels.filter((p) => p.panelPhase === panelPhase) : [];
 		const datedPanels = reviewDate ? matchingPanels.filter((p) => p.dir.endsWith(`-${reviewDate}`)) : matchingPanels;
 		const candidates = datedPanels.length > 0 ? datedPanels : matchingPanels.length === 1 ? matchingPanels : [];
-		const panel = candidates.sort((a, b) => b.round - a.round)[0];
+		const panel = candidates.length === 1 ? candidates[0] : undefined;
 		if (!panel) {
 			markers.push({ marker: `precision.unparsed:${dir}` });
 			continue;
@@ -876,21 +901,22 @@ function buildSoftData({ root, slug, llmCmd, noLlm, fromRaw, events, spans, sess
 			continue;
 		}
 		const request = { kind: "precision", slug, inputs: { reviewDir: dir, models: modelFiles, findingsText, consolidatedText } };
-		const result = llmCall(root, slug, `precision-${dir}`, request, llmCmd, fromRaw, llmTimeoutMs);
+		const result = llmCall(root, slug, `precision-${dir}`, request, llmCmd, fromRaw, llmTimeoutMs, redactionValues);
 		if (!result.ok || !validatePrecisionOutput(result.response.output)) {
 			markers.push({ marker: `precision.unparsed:${dir}` });
 			continue;
 		}
 		const responseAttribution = safeAttribution(result.response, redactionValues, allUserMessages);
 		if (!responseAttribution) {
-			markers.push({ marker: `soft.omitted:precision:${dir}` });
+			markers.push({ marker: `precision.unparsed:${dir}` });
 			continue;
 		}
 		attribution ??= responseAttribution;
+		let precisionModelRejected = false;
 		for (const pm of result.response.output.perModel) {
 			const model = sanitizeAttributionString(pm.model, redactionValues, allUserMessages);
 			if (!model) {
-				markers.push({ marker: `soft.omitted:precision-model:${dir}` });
+				precisionModelRejected = true;
 				continue;
 			}
 			panelPrecision.push({
@@ -902,6 +928,7 @@ function buildSoftData({ root, slug, llmCmd, noLlm, fromRaw, events, spans, sess
 				dismissed: pm.dismissed,
 			});
 		}
+		if (precisionModelRejected) markers.push({ marker: `precision.unparsed:${dir}` });
 	}
 
 	if (!attribution) return { soft: undefined, markers: [...markers, { marker: "soft.absent" }] };
@@ -960,8 +987,8 @@ export function collect({ root, slug, gitCmd = "git", baseRef = "main", ghCmd = 
 		for (const e of aEntries) {
 			const ts = e.timestamp;
 			if (typeof ts !== "string") continue;
-			if (!sessStart || ts < sessStart) sessStart = ts;
-			if (!sessEnd || ts > sessEnd) sessEnd = ts;
+			if (!sessStart || toMs(ts) < toMs(sessStart)) sessStart = ts;
+			if (!sessEnd || toMs(ts) > toMs(sessEnd)) sessEnd = ts;
 			const model = e.message?.model;
 			const tokens = Number.isInteger(e.message?.usage?.totalTokens) ? e.message.usage.totalTokens : 0;
 			const rawCost = e.message?.usage?.cost?.total;
