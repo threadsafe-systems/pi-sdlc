@@ -54,7 +54,7 @@
     },
     {
       "id": "skill.lifecycle-checker",
-      "source": "skills/sdlc/SKILL.md",
+      "source": "skills/sdlc/references/phase-pr-review.md",
       "assertion": "The `check-lifecycle` script verifies the declared",
       "targetKind": "command",
       "ownership": "package",
@@ -238,7 +238,7 @@
     },
     {
       "id": "consumer.workflow",
-      "source": "skills/sdlc/SKILL.md",
+      "source": "skills/sdlc/references/system-reference.md",
       "assertion": "An optional `.pi/sdlc/workflow.md`",
       "targetKind": "file",
       "ownership": "consumer",

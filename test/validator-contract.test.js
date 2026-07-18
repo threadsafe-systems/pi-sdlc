@@ -480,9 +480,10 @@ test("PV10: generic validator law and generated agent are portable", () => {
 	// The old unconditional mandate is gone from generic law.
 	assert.doesNotMatch(skillMd, /`npx tsc --noEmit` exits zero/);
 	assert.doesNotMatch(skillMd, /greppable CONTRIBUTORS rules hold/);
-	// The portable law markers are present (mutation of any fails this).
+	// The portable law markers moved to the Implement phase reference (mutation of any fails this).
+	const implementRef = readFileSync(join(repo, "skills", "sdlc", "references", "phase-implement.md"), "utf8");
 	for (const marker of ["PV1 validation manifest", "deterministic runner", "validate-task.sh", "verify-task-receipt.mjs", "portable and deterministic"]) {
-		assert.ok(skillMd.includes(marker), `SKILL.md must document: ${marker}`);
+		assert.ok(implementRef.includes(marker), `phase-implement.md must document: ${marker}`);
 	}
 	assert.match(skillMd, /Bypassing the deterministic validation runner/);
 

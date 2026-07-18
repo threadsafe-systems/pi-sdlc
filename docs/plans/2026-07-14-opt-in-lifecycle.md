@@ -350,3 +350,16 @@ tasks publish per the tracker threshold as usual.
 - The scenario-id convention for this stream's specs: `OLA<n>`/`OLB<n>`/
   `OLC<n>` per sub-change — falsifiable, stable, and each spec must satisfy
   kernel invariant 2 about itself.
+
+## Absorption note — OL-C absorbed by agent self-documentation (2026-07-18)
+
+OL-C (scope items 4/7 of this plan plus issue #38's ratified entrypoint contract:
+the kernel-first `SKILL.md` surface, the supporting package references, the six
+standalone `sdlc:<slug>` entrypoints, and adopted-config-dominates) is **fully
+absorbed** by the agent self-documentation stream
+(`docs/plans/2026-07-18-sdlc-agent-self-documentation.md`, rev 2; spec rev 2,
+scenarios ASD1–ASD20). OL-C does **not** ship as a separate stream; that stream
+carries forward #38's exact entrypoint table, stamp text, adopted-config detection
+rule, and `adversarial-review` relationship rather than re-deciding them. See
+**ADR 0028** for the documentation-authority hierarchy. Issues **#91/#101/#102**
+remain independent and out of scope.

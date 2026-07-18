@@ -1,0 +1,193 @@
+{
+  "schemaVersion": 1,
+  "taskId": "sdlc-agent-self-documentation-a1",
+  "manifest": "/home/neil/code/threadsafe/pi-sdlc.worktrees/feat-sdlc-agent-self-documentation/docs/validation/sdlc-agent-self-documentation/sdlc-agent-self-documentation-a1.json",
+  "repoRoot": "/home/neil/code/threadsafe/pi-sdlc.worktrees/feat-sdlc-agent-self-documentation",
+  "verdict": "PASS",
+  "exitCode": 0,
+  "errors": [],
+  "manifestErrors": [],
+  "commands": [
+    {
+      "id": "tests.a1",
+      "argv": [
+        "node",
+        "--test",
+        "test/system-reference.test.js",
+        "test/phase-references.test.js",
+        "test/skill-kernel.test.js",
+        "test/disposition-ledger.test.js",
+        "test/adr-absorption.test.js",
+        "test/source-free-comprehension.test.js"
+      ],
+      "evidence": [
+        "ASD2 sections, ASD3 headings/callouts, ASD4 SKILL ceiling, ASD5 ledger, ASD16 source-free, ASD17 ADR+notes"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 216,
+      "stdoutTail": "✔ ASD17: ADR 0028 exists and states the authority hierarchy + trust model (1.949445ms)\n✔ ASD17: programme + IC-B + OL-C plans carry absorption notes (2.712314ms)\n✔ ASD17: docs assert #91/#101/#102 remain independent and out of scope (0.571855ms)\n✔ ASD17: ADR 0028 is registered in the ADR directory (no orphan) (0.23151ms)\n✔ ASD5: the ledger parses and covers both statements and red flags (5.235621ms)\n✔ ASD5: every retained/moved row's destination exists and contains its anchor (6.636374ms)\n✔ ASD5: anchors are unique (no rule owned twice) (0.764532ms)\n✔ ASD5: every pre-change red flag is retained in SKILL.md (1.08774ms)\n✔ ASD5 (non-vacuous): removing a moved statement from its destination is detected (0.849142ms)\n✔ ASD3: phase-brainstorm.md carries all nine §6 headings (2.76956ms)\n✔ ASD3: phase-brainstorm.md has at least one 'under your configuration' callout to CONFIG.md/JSON (0.525651ms)\n✔ ASD3 (non-vacuous): removing the config callout from phase-brainstorm.md is detected (0.422057ms)\n✔ ASD3: phase-plan.md carries all nine §6 headings (0.307062ms)\n✔ ASD3: phase-plan.md has at least one 'under your configuration' callout to CONFIG.md/JSON (0.221084ms)\n✔ ASD3 (non-vacuous): removing the config callout from phase-plan.md is detected (0.20016ms)\n✔ ASD3: phase-spec.md carries all nine §6 headings (0.315289ms)\n✔ ASD3: phase-spec.md has at least one 'under your configuration' callout to CONFIG.md/JSON (0.201923ms)\n✔ ASD3 (non-vacuous): removing the config callout from phase-spec.md is detected (0.238644ms)\n✔ ASD3: phase-tasks.md carries all nine §6 headings (0.472229ms)\n✔ ASD3: phase-tasks.md has at least one 'under your configuration' callout to CONFIG.md/JSON (0.244363ms)\n✔ ASD3 (non-vacuous): removing the config callout from phase-tasks.md is detected (0.246829ms)\n✔ ASD3: phase-implement.md carries all nine §6 headings (1.841113ms)\n✔ ASD3: phase-implement.md has at least one 'under your configuration' callout to CONFIG.md/JSON (0.180626ms)\n✔ ASD3 (non-vacuous): removing the config callout from phase-implement.md is detected (0.175306ms)\n✔ ASD3: phase-pr-review.md carries all nine §6 headings (0.285396ms)\n✔ ASD3: phase-pr-review.md has at least one 'under your configuration' callout to CONFIG.md/JSON (0.140368ms)\n✔ ASD3 (non-vacuous): removing the config callout from phase-pr-review.md is detected (0.148043ms)\n✔ ASD4: SKILL.md is within the 220-line / 16384-byte ceiling (1.322498ms)\n✔ ASD4: SKILL.md retains all seven kernel responsibilities (0.958539ms)\n✔ ASD4: SKILL.md contains no duplicated detailed phase-mechanics block (0.390484ms)\n✔ ASD16: every §5 checklist answer is derivable from docs alone (2.821979ms)\n✔ ASD16: docs state the source-inspection boundary (source only when changing implementation) (0.716458ms)\n✔ ASD16 (non-vacuous): no doc claims implementation work can avoid source inspection (0.762102ms)\n✔ ASD2: system reference contains every §5 checklist section (1.793995ms)\n✔ ASD2 (non-vacuous): deleting any one section is detected (2.492496ms)\n✔ ASD2: §5 public-composition inventory narrates the six-class taxonomy (0.523202ms)\nℹ tests 36\nℹ suites 0\nℹ pass 36\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 148.891394\n",
+      "stderrTail": ""
+    },
+    {
+      "id": "tests.full",
+      "argv": [
+        "npm",
+        "test"
+      ],
+      "evidence": [
+        "Full corpus regression: SKILL restructure + retargeted docs/reference/config-intent/validator tests stay green"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 6592,
+      "stdoutTail": "[...truncated; showing bounded tail...]\n✔ ICA14: separateSpec false refuses spec_review with no-spec-gate message (32.559243ms)\n✔ ICA15: per-phase panelSize overrides review.panelSize (53.312527ms)\n✔ ICA15: floor 1 does not exclude the author identity (50.705292ms)\n✔ ICA16: onShortfall proceed advises and exits 0 below floor (43.538992ms)\n✔ ICA16: onShortfall fail exits 1 below floor (35.778273ms)\n✔ ICA14: review.tasks self refuses task_validate (only subagent resolves) (32.849978ms)\n✔ ICA24: separateSpec false precedes the human/off refusal for spec_review (33.109824ms)\n✔ CV28: watched config schema changes require the PR release signal (377.235671ms)\n✔ CV28: inner breaking commits are ignored in favour of the squash title (82.592416ms)\n✔ CV28: only the named schemas and CONFIG_SCHEMA_VERSION line are watched (256.21024ms)\n✔ CV19: committed migrated v2 config without a models file is ready in text and JSON (151.193099ms)\n✔ CV17: recognised v1 is not-ready with canonical migration remedy and unrelated checks still report (89.647958ms)\n✔ CV18: schemaVersion 4 is an error with the canonical newer remedy (85.596818ms)\n✔ CV19: a panels-less v2 config is valid but not-ready (80.66792ms)\n✔ CV20: malformed JSON and invalid schemaVersion remain config errors (159.450145ms)\n✔ current v2 structural validation errors remain config.valid errors (127.893855ms)\n✔ filesystem-only manifests are not committed adoption (185.466502ms)\n✔ argument, root, and git errors retain exit 2 (236.263449ms)\n✔ workflow readability remains an independent readiness check (144.557836ms)\n✔ unrelated dirty files do not affect readiness (65.848704ms)\n✔ status completes with a PATH exposing only git (89.594182ms)\n✔ fresh bundle provisions requested assets and idempotent rerun retains them (131.36622ms)\n✔ CI marker directories are not mistaken for CI files (68.022787ms)\n✔ existing CI suppresses workflow creation and reports refusal (70.611059ms)\n✔ template info strings must be exactly sdlc (43.033334ms)\n✔ consumer template with the wrong companion is refused byte-identically (52.006911ms)\n✔ consumer template with multiple declarations is refused (43.797035ms)\n✔ consumer template without the declaration is refused byte-identically (60.515765ms)\n✔ invalid assembled configuration fails before any bundle write (45.640913ms)\n✔ target parent conflicts fail before any bundle write (59.433318ms)\n✔ unreadable package sources fail before any bundle write (44.332992ms)\n✔ invalid existing config and models are refused without overwrite (124.657114ms)\n✔ workflow from another repository is refused (72.520327ms)\n✔ malformed CI marker fails before any bundle write (40.22375ms)\n✔ operational JSON errors preserve the resolved consumer root (45.616768ms)\n✔ existing target directories fail before any bundle write (46.705849ms)\n✔ bundle reports resolved package references before writing (59.680855ms)\n✔ OH4: --yes writes a schema-valid config; bundle re-run refuses config changes; --force overwrites (171.550976ms)\n✔ OH5: --hook-use fields 3-4 = use, do = remainder after 4th colon (colons in do preserved) (65.719984ms)\n✔ OH5: --hook-run command = remainder after 2nd colon (colons preserved); trust warning on stderr (61.60704ms)\n✔ OH5: mixed repeated hook flags preserve argv order in the written list (63.768971ms)\n✔ OH5: malformed hook flags exit 2 (324.945219ms)\n✔ PR-fix: value-taking flags accept values that begin with '-' (e.g. --announce '--foo') (38.938443ms)\n✔ OH5: partial tracker flags exit 2 (all-or-none) (41.214904ms)\n✔ OH5: no config flags and no TTY exits 2 (interview needs a TTY) (55.074846ms)\n✔ OH6: package.json pi.prompts includes ./templates and the template has a description (0.766263ms)\n✔ ICA17: --profile is retired (58.788486ms)\n✔ ICA17: --lifecycle-json is retired (58.309841ms)\n✔ ICA17: --enforcement is retired (59.618747ms)\n✔ ICA17: --preset custom is retired (58.132344ms)\n✔ ICA18: --preset standard writes the explicit standard bundle (60.753539ms)\n✔ ICA18: per-dial flags override the preset; --override lands in overrides (63.538885ms)\n✔ ICA18: --preset full carries the reversible design override (40.139577ms)\n✔ ICA19: --preset patches review/shape/overrides and preserves other keys (92.091574ms)\n✔ ICA19: patch that would delete consumer overrides refuses without --force (168.815236ms)\n✔ ICA23: --override reversible:brainstorm:off is rejected exit 2 (41.279206ms)\n✔ ICA23: --override reversible:onShortfall:fail is rejected exit 2 (52.695428ms)\n✔ ICA23: --override frozen:design:panel is rejected exit 2 (37.339075ms)\n✔ ICA23: --override reversible:design:banana is rejected exit 2 (33.294807ms)\n✔ ICA23: --override reversible:panelSize:zero is rejected exit 2 (36.361276ms)\n✔ ICA23: --override reversible:design is rejected exit 2 (52.714353ms)\n✔ ICA6: older-schema config + --force replaces with a fresh v3 config (122.243073ms)\n✔ ICA19: a single-dial patch preserves the other committed dials (136.025915ms)\n✔ ICA19: preset patch refuses when it would drop a consumer override track (225.355092ms)\n✔ ASD4: SKILL.md is within the 220-line / 16384-byte ceiling (0.674803ms)\n✔ ASD4: SKILL.md retains all seven kernel responsibilities (0.449063ms)\n✔ ASD4: SKILL.md contains no duplicated detailed phase-mechanics block (0.196639ms)\n✔ ASD16: every §5 checklist answer is derivable from docs alone (1.460965ms)\n✔ ASD16: docs state the source-inspection boundary (source only when changing implementation) (0.37393ms)\n✔ ASD16 (non-vacuous): no doc claims implementation work can avoid source inspection (0.386158ms)\n✔ ASD2: system reference contains every §5 checklist section (1.016539ms)\n✔ ASD2 (non-vacuous): deleting any one section is detected (4.170278ms)\n✔ ASD2: §5 public-composition inventory narrates the six-class taxonomy (0.324693ms)\n✔ PV1: a valid JavaScript manifest runs only declared checks and passes (104.711874ms)\n✔ PV2: only declared argv run; an undeclared tool command never executes (244.847363ms)\n✔ PV3: schema and inspectManifest reject the mutation matrix before any command runs (102.873593ms)\n✔ PV4: command outcomes are complete and deterministic; runner continues after failures (72.022868ms)\n✔ PV4: a timeout is reported as FAIL with timedOut (1089.350705ms)\n✔ PV5: category applicability is exact; injected n/a shapes are rejected (172.457748ms)\n✔ PV6: scenario mapping gates the verdict (172.834462ms)\n✔ PV7: standards and banned patterns are commands, not judgement (240.823581ms)\n✔ PV8: evidence is bounded and secrets are redacted (168.769214ms)\n✔ PV8 unit: boundStream and redaction name-matching are precise (372.06081ms)\n✔ PV9: JSON/text/exit agree and JSON mode is order-independent (949.608087ms)\n✔ PV9: --report writes the exact JSON bytes atomically (245.30913ms)\n✔ PV9: --report outside the repo root is refused and clobbers nothing (243.213667ms)\n✔ PV10: generic validator law and generated agent are portable (0.865675ms)\n✔ PV11: receipt hash verification detects mutation of any stored file (7.306433ms)\n✔ PV11: a FAIL runner-report cannot ride under runnerVerdict PASS (1.064334ms)\n✔ parseArgs: recognises JSON anywhere and rejects bad flags (1.058912ms)\n✔ PV13: renderText is a faithful projection of the report (165.285638ms)\nℹ tests 253\nℹ suites 0\nℹ pass 253\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 6356.335173\n",
+      "stderrTail": ""
+    },
+    {
+      "id": "static.lint",
+      "argv": [
+        "npm",
+        "run",
+        "lint"
+      ],
+      "evidence": [
+        "Lint over the new references, ADR, ledger, and tests"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 364,
+      "stdoutTail": "\n> pi-sdlc@0.1.1 lint\n> biome check .\n\nChecked 101 files in 102ms. No fixes applied.\n",
+      "stderrTail": ""
+    },
+    {
+      "id": "standards.references",
+      "argv": [
+        "node",
+        "skills/sdlc/scripts/check-references.mjs",
+        "--package-root",
+        "."
+      ],
+      "evidence": [
+        "FS11 inventory valid after retargeting skill.lifecycle-checker and consumer.workflow rows"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 64,
+      "stdoutTail": "reference-check: pass\ncheck: inventory.self pass — package source assertion and target are present\ncheck: inventory.schema pass — package source assertion and target are present\ncheck: checker.source pass — package source assertion and target are present\ncheck: checker.wrapper pass — package source assertion and target are present\ncheck: skill.source pass — package source assertion and target are present\ncheck: skill.lifecycle-checker pass — package source assertion and target are present\ncheck: skill.pr-template pass — package source assertion and target are present\ncheck: skill.ci-workflow pass — package source assertion and target are present\ncheck: consumer.panels pass — readiness verification assertion is present\ncheck: readme.source pass — package source assertion and target are present\ncheck: setup-template.source pass — package source assertion and target are present\ncheck: tracker.asset pass — package source assertion and target are present\ncheck: agent-brief.asset pass — package source assertion and target are present\ncheck: prompt.plan pass — package source assertion and target are present\ncheck: prompt.validator pass — package source assertion and target are present\ncheck: prompt.spec pass — package source assertion and target are present\ncheck: prompt.review pass — package source assertion and target are present\ncheck: script.status pass — package source assertion and target are present\ncheck: script.panel-resolver pass — package source assertion and target are present\ncheck: script.panel-agent pass — package source assertion and target are present\ncheck: script.validator pass — package source assertion and target are present\ncheck: script.receipt-verifier pass — package source assertion and target are present\ncheck: schema.task-validation pass — package source assertion and target are present\ncheck: consumer.workflow unverified-consumer — consumer-owned target is not package-certified: .pi/sdlc/workflow.md\ncheck: external.gh external — external facility: github.com/issues-projects\n",
+      "stderrTail": ""
+    },
+    {
+      "id": "patterns.diff",
+      "argv": [
+        "git",
+        "diff",
+        "--check",
+        "HEAD"
+      ],
+      "evidence": [
+        "No whitespace-error banned patterns in the task diff"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 19,
+      "stdoutTail": "",
+      "stderrTail": ""
+    }
+  ],
+  "categories": [
+    {
+      "category": "tests",
+      "status": "PASS",
+      "checkIds": [
+        "tests.a1",
+        "tests.full"
+      ]
+    },
+    {
+      "category": "static",
+      "status": "PASS",
+      "checkIds": [
+        "static.lint"
+      ]
+    },
+    {
+      "category": "scenarios",
+      "status": "PASS"
+    },
+    {
+      "category": "standards",
+      "status": "PASS",
+      "checkIds": [
+        "standards.references"
+      ]
+    },
+    {
+      "category": "bannedPatterns",
+      "status": "PASS",
+      "checkIds": [
+        "patterns.diff"
+      ]
+    }
+  ],
+  "scenarios": [
+    {
+      "scenarioId": "ASD16",
+      "status": "PASS",
+      "checkIds": [
+        "tests.a1",
+        "tests.full"
+      ]
+    },
+    {
+      "scenarioId": "ASD17",
+      "status": "PASS",
+      "checkIds": [
+        "tests.a1",
+        "tests.full"
+      ]
+    },
+    {
+      "scenarioId": "ASD2",
+      "status": "PASS",
+      "checkIds": [
+        "tests.a1",
+        "tests.full"
+      ]
+    },
+    {
+      "scenarioId": "ASD3",
+      "status": "PASS",
+      "checkIds": [
+        "tests.a1",
+        "tests.full"
+      ]
+    },
+    {
+      "scenarioId": "ASD4",
+      "status": "PASS",
+      "checkIds": [
+        "tests.a1",
+        "tests.full"
+      ]
+    },
+    {
+      "scenarioId": "ASD5",
+      "status": "PASS",
+      "checkIds": [
+        "tests.a1",
+        "tests.full"
+      ]
+    }
+  ]
+}

@@ -21,15 +21,16 @@ const statusMjs = readFileSync(join(repo, "skills", "sdlc", "scripts", "sdlc-sta
 const reviewPrompt = readFileSync(join(repo, "skills", "sdlc", "prompts", "adversary-review.prompt.md"), "utf8");
 const prTemplate = readFileSync(join(repo, ".github", "pull_request_template.md"), "utf8");
 const ciWorkflow = readFileSync(join(repo, ".github", "workflows", "ci.yml"), "utf8");
+const sysRef = readFileSync(join(repo, "skills", "sdlc", "references", "system-reference.md"), "utf8");
+const prReviewRef = readFileSync(join(repo, "skills", "sdlc", "references", "phase-pr-review.md"), "utf8");
 
-test("OH7: SKILL.md carries the opt-in, advisory, hooks headings + red flags", () => {
-	assert.match(skillMd, /^## Opt-in and advisory mode$/m);
-	assert.match(skillMd, /^### Advisory mode$/m);
-	assert.match(skillMd, /^## Hooks \(local workflow\)$/m);
-	assert.match(skillMd, /\[sdlc hook\]/);
+test("OH7: readiness/hooks law lives in the system reference; SKILL keeps the red flags", () => {
+	assert.match(sysRef, /^## 3\. Adoption & readiness$/m);
+	assert.match(sysRef, /### Hooks \(local workflow\)$/m);
+	assert.match(sysRef, /\[sdlc hook\]/);
+	assert.match(sysRef, /creating one is not enough/);
 	assert.match(skillMd, /Skipping or silently reordering a configured phase hook\./);
 	assert.match(skillMd, /Writing to the main checkout after creating a worktree\./);
-	assert.match(skillMd, /creating one is not enough/);
 });
 
 test("OH7: the Implement table row no longer prescribes 'in a worktree'", () => {
@@ -38,10 +39,10 @@ test("OH7: the Implement table row no longer prescribes 'in a worktree'", () => 
 	assert.ok(!implementRow.includes("in a worktree"), `Implement row still prescribes a worktree: ${implementRow}`);
 });
 
-test("OH8: SKILL.md contains the announce-on-fire block and the workflow.md rule", () => {
-	assert.match(skillMd, /\[sdlc hook\] <phase>:<before\|after> run\$ <command>/);
-	assert.match(skillMd, /\[sdlc hook\] <phase>:<before\|after> result: ok/);
-	assert.match(skillMd, /enumerate each top-level bullet/);
+test("OH8: announce-on-fire + workflow.md enumeration in system reference; conflict rule in SKILL", () => {
+	assert.match(sysRef, /\[sdlc hook\] <phase>:<before\|after> run\$ <command>/);
+	assert.match(sysRef, /\[sdlc hook\] <phase>:<before\|after> result: ok/);
+	assert.match(sysRef, /enumerate\s+each top-level bullet/);
 	assert.match(skillMd, /local rules may ADD gates, never remove or weaken/);
 });
 
@@ -74,9 +75,9 @@ test("FS9 documentation carries declaration rules and reversible grounding", () 
 	assert.match(reviewPrompt, /<TRACK>/);
 	assert.match(reviewPrompt, /<GOVERNING_DOCS>/);
 	assert.match(reviewPrompt, /When `<TRACK>` is `reversible`/);
-	assert.match(skillMd, /populate the prompt's `<TRACK>` from the PR declaration/);
-	assert.match(skillMd, /`<GOVERNING_DOCS>` from the linked documents/);
-	assert.match(skillMd, /never send\s+literal placeholders/);
+	assert.match(prReviewRef, /populate the prompt's `<TRACK>` from the PR\s+declaration/);
+	assert.match(prReviewRef, /`<GOVERNING_DOCS>`\s+from the linked documents/);
+	assert.match(prReviewRef, /never send\s+literal\s+placeholders/);
 	assert.doesNotMatch(skillMd, /CI checks\\s+the declared track's artifacts are committed/);
 });
 
@@ -107,9 +108,9 @@ const STARTUP_FRAGMENTS = {
 
 test("AR10: all four startup branches and every prohibition are present and mutation-detectable", () => {
 	// scope to the startup block: the advisory section repeats some prohibitions
-	const start = skillMd.indexOf("## Opt-in and advisory mode");
-	const end = skillMd.indexOf("### Advisory mode");
-	assert.ok(start >= 0 && end > start, "startup section must exist before the advisory section");
+	const start = skillMd.indexOf("## Readiness gate and announcement");
+	const end = skillMd.indexOf("## The iron law");
+	assert.ok(start >= 0 && end > start, "startup section must exist before the iron-law section");
 	const startupSection = skillMd.slice(start, end);
 	for (const [label, re] of Object.entries(STARTUP_FRAGMENTS)) {
 		assert.match(startupSection, re, `SKILL.md startup section missing: ${label}`);
@@ -220,9 +221,9 @@ test("CV31: startup clean-break and shortfall carry instructions are explicit", 
 	assert.match(skillMd, /`config\.schema-current`[\s\S]*sanctioned actions[\s\S]*re-run `setup-sdlc`/);
 	assert.match(skillMd, /there is no pre-adoption config fold-forward/);
 	assert.match(skillMd, /Never hand-edit `schemaVersion` or the config shape/);
-	assert.match(skillMd, /merged config's `panels` block/);
-	assert.match(skillMd, /`proceed`-mode shortfall advisory[\s\S]*consolidated writeup[\s\S]*PR\s+itself/);
-	assert.match(skillMd, /Do not\s+commit a standalone\s+decision log/);
+	assert.match(prReviewRef, /merged config's\s+`panels` block/);
+	assert.match(prReviewRef, /`proceed`-mode\s+shortfall advisory[\s\S]*consolidated writeup[\s\S]*PR\s+itself/);
+	assert.match(prReviewRef, /Do not\s+commit a\s+standalone\s+decision log/);
 });
 
 test("CV32: five migration ADRs exist and amended decisions link forward", () => {

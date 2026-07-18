@@ -1,0 +1,55 @@
+{
+  "schemaVersion": 1,
+  "taskId": "sdlc-agent-self-documentation-a1",
+  "buildPlan": "docs/plans/2026-07-18-sdlc-agent-self-documentation-build.md",
+  "repoRoot": ".",
+  "ownedScenarios": ["ASD2", "ASD3", "ASD4", "ASD5", "ASD16", "ASD17"],
+  "checks": [
+    {
+      "id": "tests.a1",
+      "argv": ["node", "--test", "test/system-reference.test.js", "test/phase-references.test.js", "test/skill-kernel.test.js", "test/disposition-ledger.test.js", "test/adr-absorption.test.js", "test/source-free-comprehension.test.js"],
+      "timeoutMs": 180000,
+      "evidence": ["ASD2 sections, ASD3 headings/callouts, ASD4 SKILL ceiling, ASD5 ledger, ASD16 source-free, ASD17 ADR+notes"]
+    },
+    {
+      "id": "tests.full",
+      "argv": ["npm", "test"],
+      "timeoutMs": 300000,
+      "evidence": ["Full corpus regression: SKILL restructure + retargeted docs/reference/config-intent/validator tests stay green"]
+    },
+    {
+      "id": "static.lint",
+      "argv": ["npm", "run", "lint"],
+      "timeoutMs": 120000,
+      "evidence": ["Lint over the new references, ADR, ledger, and tests"]
+    },
+    {
+      "id": "standards.references",
+      "argv": ["node", "skills/sdlc/scripts/check-references.mjs", "--package-root", "."],
+      "timeoutMs": 120000,
+      "evidence": ["FS11 inventory valid after retargeting skill.lifecycle-checker and consumer.workflow rows"]
+    },
+    {
+      "id": "patterns.diff",
+      "argv": ["git", "diff", "--check", "HEAD"],
+      "evidence": ["No whitespace-error banned patterns in the task diff"]
+    }
+  ],
+  "categories": {
+    "tests": { "applicability": "required", "checkIds": ["tests.a1", "tests.full"] },
+    "static": { "applicability": "required", "checkIds": ["static.lint"] },
+    "scenarios": {
+      "applicability": "required",
+      "evidence": {
+        "ASD2": ["tests.a1", "tests.full"],
+        "ASD3": ["tests.a1", "tests.full"],
+        "ASD4": ["tests.a1", "tests.full"],
+        "ASD5": ["tests.a1", "tests.full"],
+        "ASD16": ["tests.a1", "tests.full"],
+        "ASD17": ["tests.a1", "tests.full"]
+      }
+    },
+    "standards": { "applicability": "required", "checkIds": ["standards.references"] },
+    "bannedPatterns": { "applicability": "required", "checkIds": ["patterns.diff"] }
+  }
+}
