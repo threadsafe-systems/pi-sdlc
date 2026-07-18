@@ -13,6 +13,11 @@
   then plan+build."
 - Human gate: **Approved** by Neil Chambers, 2026-07-18 (reviewed in VS Code,
   "accepted"). Build's tracker projection is final; Implement may proceed.
+- Fix-wave amendment: the PR panel found completion-gate inconsistencies;
+  this batch also hardens native GitHub relationship checks and teaches panel
+  dispatch to advance through the configured `prefer` candidates after
+  reviewer infrastructure failure. These are in-scope correctness fixes to
+  the same retro outcome, not a new tracker task.
 
 ## Objective
 

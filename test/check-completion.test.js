@@ -38,7 +38,7 @@ function fakeGit({ branch = "feat/x", hasUpstream = true, unpushed = 0 } = {}) {
 	};
 }
 
-function fakeGhPrOpen({ prs = [{ number: 1, url: "https://example/1", body: "```sdlc\ntrack: reversible\nslug: x\n```\nCloses #77" }] } = {}) {
+function fakeGhPrOpen({ prs = [{ number: 1, url: "https://example/1", body: "```sdlc\ntrack: reversible\nslug: x\n```\nCloses #77", closingIssuesReferences: [{ number: 77 }] }] } = {}) {
 	return (_cwd, args) => {
 		if (args[0] === "pr" && args[1] === "list") return { code: 0, stdout: JSON.stringify(prs), stderr: "" };
 		throw new Error(`unexpected gh args: ${args.join(" ")}`);
@@ -88,7 +88,10 @@ test("pr-open: fails when the PR body has a duplicate declaration block", () => 
 
 test("pr-open: fails when a required Closes reference is missing", () => {
 	const root = fixtureRoot();
-	const { report } = main(["--claim", "pr-open", "--slug", "x", "--closes", "77", "--closes", "78", "--repo-root", root, "--format", "json"], { git: fakeGit(), gh: fakeGhPrOpen({ prs: [{ number: 1, url: "u", body: "```sdlc\ntrack: reversible\nslug: x\n```\nCloses #77" }] }) });
+	const { report } = main(["--claim", "pr-open", "--slug", "x", "--closes", "77", "--closes", "78", "--repo-root", root, "--format", "json"], {
+		git: fakeGit(),
+		gh: fakeGhPrOpen({ prs: [{ number: 1, url: "u", body: "```sdlc\ntrack: reversible\nslug: x\n```\nCloses #77", closingIssuesReferences: [{ number: 77 }] }] }),
+	});
 	assert.equal(report.state, "fail");
 	assert.equal(checkOf(report, "closes:77").status, "pass");
 	assert.equal(checkOf(report, "closes:78").status, "fail");
@@ -103,11 +106,20 @@ test("pr-open: passes when branch is pushed, one open PR, one valid declaration,
 	rmSync(root, { recursive: true, force: true });
 });
 
-function fakeGhEpic({ subIssues = [{ number: 77, state: "CLOSED" }], prState = "MERGED" } = {}) {
+test("pr-open: fails when declaration track or slug does not match the claim", () => {
+	const root = fixtureRoot();
+	const prs = [{ number: 1, url: "u", body: "```sdlc\ntrack: bogus\nslug: other\n```", closingIssuesReferences: [{ number: 77 }] }];
+	const { report } = main(["--claim", "pr-open", "--slug", "x", "--repo-root", root], { git: fakeGit(), gh: fakeGhPrOpen({ prs }) });
+	assert.equal(report.state, "fail");
+	assert.equal(checkOf(report, "declaration.block").status, "fail");
+	rmSync(root, { recursive: true, force: true });
+});
+
+function fakeGhEpic({ subIssues = [{ number: 77, state: "CLOSED" }], prState = "MERGED", closingIssuesReferences = [{ number: 77 }] } = {}) {
 	return (_cwd, args) => {
 		if (args[0] === "repo" && args[1] === "view") return { code: 0, stdout: JSON.stringify({ owner: { login: "threadsafe-systems" }, name: "pi-sdlc" }), stderr: "" };
-		if (args[0] === "api" && args[1] === "graphql") return { code: 0, stdout: JSON.stringify({ data: { repository: { issue: { subIssues: { nodes: subIssues } } } } }), stderr: "" };
-		if (args[0] === "pr" && args[1] === "view") return { code: 0, stdout: JSON.stringify({ state: prState, number: Number(args[2]) }), stderr: "" };
+		if (args[0] === "api" && args[1] === "graphql") return { code: 0, stdout: JSON.stringify({ data: { repository: { issue: { subIssues: { nodes: subIssues, pageInfo: { hasNextPage: false } } } } } }), stderr: "" };
+		if (args[0] === "pr" && args[1] === "view") return { code: 0, stdout: JSON.stringify({ state: prState, number: Number(args[2]), closingIssuesReferences }), stderr: "" };
 		throw new Error(`unexpected gh args: ${args.join(" ")}`);
 	};
 }
@@ -136,7 +148,44 @@ test("epic-done: passes when all sub-issues are closed and the PR is merged", ()
 	rmSync(root, { recursive: true, force: true });
 });
 
+test("epic-done: fails when the merged PR does not close every epic sub-issue", () => {
+	const root = fixtureRoot();
+	const { report } = main(["--claim", "epic-done", "--epic", "76", "--pr", "99", "--repo-root", root, "--format", "json"], {
+		git: fakeGit(),
+		gh: fakeGhEpic({
+			subIssues: [
+				{ number: 77, state: "CLOSED" },
+				{ number: 78, state: "CLOSED" },
+			],
+			closingIssuesReferences: [{ number: 77 }],
+		}),
+	});
+	assert.equal(report.state, "fail");
+	assert.equal(checkOf(report, "gh.pr-merged").status, "fail");
+	rmSync(root, { recursive: true, force: true });
+});
+
+test("epic-done: uses the resolved repo-root for every gh call", () => {
+	const root = fixtureRoot();
+	const seen = [];
+	const gh = (cwd, args) => {
+		seen.push(cwd);
+		return fakeGhEpic()(cwd, args);
+	};
+	const { report } = main(["--claim", "epic-done", "--epic", "76", "--pr", "99", "--repo-root", root], { cwd: "/tmp", git: fakeGit(), gh });
+	assert.equal(report.state, "pass");
+	assert.ok(seen.length > 0);
+	assert.ok(seen.every((cwd) => cwd === root));
+	rmSync(root, { recursive: true, force: true });
+});
+
 test("cli: rejects an unknown --claim value", () => {
 	const { report } = main(["--claim", "bogus"], {});
 	assert.equal(report.state, "error");
+});
+
+test("cli: rejects invalid issue numbers without throwing", () => {
+	const { report } = main(["--claim", "pr-open", "--slug", "x", "--closes", "77)"]);
+	assert.equal(report.state, "error");
+	assert.match(checkOf(report, "cli.arguments").message, /positive issue numbers/);
 });

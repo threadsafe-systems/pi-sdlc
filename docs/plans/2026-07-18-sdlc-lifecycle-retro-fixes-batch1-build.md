@@ -50,15 +50,16 @@ directory), exposing two modes:
   (reuse `lib.mjs`'s existing block-parsing, do not re-derive it); the PR
   body references every issue number passed via `--closes <n> [--closes <n>
   ...]`.
-- `--claim epic-done --epic <n> [--repo-root DIR] [--format text|json]` —
+- `--claim epic-done --epic <n> --pr <n> [--repo-root DIR] [--format text|json]` —
   fails unless every native sub-issue of `--epic <n>` is `CLOSED` (GraphQL
-  `subIssues` query, same shape as `tracker-ops.md`'s frontier query) and the
-  linked PR is `MERGED`.
+  `subIssues` query, refusing an incomplete page) and the named PR is
+  `MERGED` and has GitHub-native closing references for every sub-issue.
 
 This script **calls `gh`** (network) — a deliberate, explicitly documented
 divergence from `check-lifecycle.mjs`'s offline-only contract (state this in
-the script's header comment). Do not extend or repurpose `check-lifecycle.mjs`
-for this.
+the script's header comment). It uses GitHub's native `closingIssuesReferences`
+relationship rather than regex-scanning PR prose. Do not extend or repurpose
+`check-lifecycle.mjs` for this.
 
 `SKILL.md`'s Implement/PR phase section gets a new normative line: the agent
 MUST NOT state a "complete" or "PASS" claim of either kind without having run
@@ -84,11 +85,14 @@ npm test
 ### Test coverage (minimum)
 
 Not-pushed branch → `pr-open` fails. No open PR found → fails. Zero or
-duplicate `sdlc` declaration blocks → fails. Missing `Closes #N` for a
-required issue → fails. Valid pushed branch + single open PR + valid
-declaration + all closes present → `pr-open` passes. Open sub-issue among
-`--epic`'s children → `epic-done` fails. Unmerged linked PR → fails. All
-sub-issues closed + PR merged → `epic-done` passes.
+duplicate `sdlc` declaration blocks, an invalid track, or a declaration slug
+that differs from `--slug` → fails. A required issue absent from GitHub's
+native `closingIssuesReferences` → fails. Valid pushed branch + single open PR
++ matching declaration + all native closing references present → `pr-open`
+passes. Open sub-issue among `--epic`'s children → `epic-done` fails. An
+unmerged PR, or a merged PR that does not close every epic sub-issue → fails.
+All sub-issues closed + the named PR merged with complete native closing
+references → `epic-done` passes.
 
 ## BT2 — worker dispatch prompt + infra-retry-once rule (closes #78)
 
@@ -130,7 +134,8 @@ npm test
 `test/docs.test.js` gains assertions that `SKILL.md` contains: the
 stop-conditions/toolBudget worker-prompt wording; the explicit "infra-class
 failure" definition (crash/OOM/timeout/transport error) as distinct from a
-verdict; and the auto-retry-once statement.
+verdict; the auto-retry-once statement; and the panel fallback rule that
+advances through the ordered configured `prefer` list after reviewer failure.
 
 ## BT3 — stall-detection guidance (closes #79)
 

@@ -303,6 +303,20 @@ per model.
    literal placeholders. On the reversible track, provide the plan and Build
    plan only and explicitly state that a Specification must not be demanded.
 
+**Reviewer dispatch recovery.** The resolved `prefer` list is an ordered
+candidate pool, not merely documentation. A reviewer that returns a model
+verdict (findings, `PASS`, or `REVISE`) has completed its assignment and is
+never silently replaced. A reviewer that fails before producing a verdict —
+including crash, OOM, overload/billing exhaustion, timeout, transport/tool
+failure, or empty output — is an infra failure: retry that model once when the
+failure may be transient, then replace it with the next untried, credentialed
+model in that phase's configured `prefer` list. Do not count a failed model
+against the configured panel floor. Continue through the ordered candidate
+pool until the panel floor is met or the pool is exhausted. Only then apply
+`review.onShortfall`: `fail` stops and asks the human; `proceed` records the
+shortfall and continues. Never substitute an unconfigured model or treat an
+infra failure as a reviewer verdict.
+
 **Before you fan out** (either path): confirm the `subagent` tool is actually in
 your toolset. If it is missing in a live pi session, the fix is a session reload
 (the plugin registers tools at session start, so a package added mid-session is
@@ -419,28 +433,6 @@ skill path:
 node <skill-dir>/scripts/check-lifecycle.mjs --body pr-body.md --repo-root .
 ```
 
-**Completion is machine-checked, not narrated.** Do not state that
-implementation, the PR review cycle, or the tracked effort is "complete" or
-"PASS" without first running the matching `check-completion.mjs` claim and
-getting a pass — a confident summary is not evidence that a branch actually
-pushed, a PR actually opened, or a tracker item actually closed.
-
-- Before claiming the PR/Implement phase itself is ready (branch pushed, PR
-  open, exactly one valid declaration, every in-scope sub-issue referenced):
-
-  ```bash
-  node <skill-dir>/scripts/check-completion.mjs --claim pr-open --slug <slug> --closes <n> [--closes <n> ...]
-  ```
-
-- Before claiming the tracked effort (epic) itself is finished, after merge:
-
-  ```bash
-  node <skill-dir>/scripts/check-completion.mjs --claim epic-done --epic <epic-number>
-  ```
-
-Either check failing means the claim is false; state what's missing instead
-of declaring done.
-
 Then run the local PR panel (`prompts/adversary-review.prompt.md`) against the
 final committed branch, consolidate and adjudicate its findings in the durable
 internal review artifact under `docs/reviews/`, and repeat after each fix wave
@@ -449,11 +441,29 @@ branch is a finished artefact; retain the artifact for future analysis, but do
 not add development findings to the PR body or post them as GitHub review
 comments.
 
-Only after the panel is clean, open the PR with the clean body. If a GitHub
-reviewer raises a new concern after opening, focus it with an inline comment,
-address it with a commit, reply with that commit's short SHA, and rerun the
-panel before updating the PR. The post-PR review is for new reviewer concerns,
-not a transcript of the local sense check.
+Only after the panel is clean, open the PR with the clean body. **Completion is
+machine-checked, not narrated.** After the PR exists, do not state that the
+Implement/PR phase is "complete" or "PASS" without first running:
+
+```bash
+node <skill-dir>/scripts/check-completion.mjs --claim pr-open --slug <slug> --closes <n> [--closes <n> ...]
+```
+
+This checks the pushed branch, open PR, matching valid declaration, and
+GitHub's native closing-issue references. After merge, do not state that the
+tracked effort is finished without running:
+
+```bash
+node <skill-dir>/scripts/check-completion.mjs --claim epic-done --epic <epic-number> --pr <pr-number>
+```
+
+This checks every native epic sub-issue is closed and that the named merged PR
+closes all of them. Either check failing means the claim is false; state what's
+missing instead of declaring done. If a GitHub reviewer raises a new concern
+after opening, focus it with an inline comment, address it with a commit, reply
+with that commit's short SHA, and rerun the panel and the `pr-open` check before
+updating the PR. The post-PR review is for new reviewer concerns, not a
+transcript of the local sense check.
 
 `track: none` is an exemption declaration, not a third lifecycle track; it
 requires a reason and its honesty remains PR-panel prose law. CI enforcement

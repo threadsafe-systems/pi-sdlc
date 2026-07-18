@@ -253,7 +253,7 @@ test("RB1 (BT1): SKILL.md requires check-completion.mjs before a complete/PASS c
 	assert.match(skillMd, /check-completion\.mjs/);
 	assert.match(skillMd, /--claim pr-open/);
 	assert.match(skillMd, /--claim epic-done/);
-	assert.match(skillMd, /Completion is machine-checked, not narrated/);
+	assert.match(skillMd, /Completion is\s+machine-checked, not narrated/);
 	assert.match(skillMd, /a false summit/);
 });
 
@@ -272,4 +272,12 @@ test("RB3 (BT3): SKILL.md states the stall-detection threshold and self-resume a
 	assert.match(skillMd, /self-issue a continuation\/retry/);
 	assert.match(skillMd, /interim, prose-level mitigation/);
 	assert.match(skillMd, /this\s+project does not own or ship/);
+});
+
+test("RB4 (panel recovery): SKILL.md advances failed reviewers through the configured prefer list", () => {
+	assert.match(skillMd, /Reviewer dispatch recovery/);
+	assert.match(skillMd, /next untried, credentialed\s*\n?\s*model/);
+	assert.match(skillMd, /Do not count a failed model\s*\n?\s*against the configured panel floor/);
+	assert.match(skillMd, /review\.onShortfall/);
+	assert.match(skillMd, /Never substitute an unconfigured model/);
 });
