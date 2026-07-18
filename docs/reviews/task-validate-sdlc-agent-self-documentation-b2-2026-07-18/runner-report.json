@@ -1,0 +1,196 @@
+{
+  "schemaVersion": 1,
+  "taskId": "sdlc-agent-self-documentation-b2",
+  "manifest": "/home/neil/code/threadsafe/pi-sdlc.worktrees/feat-sdlc-agent-self-documentation/docs/validation/sdlc-agent-self-documentation/sdlc-agent-self-documentation-b2.json",
+  "repoRoot": "/home/neil/code/threadsafe/pi-sdlc.worktrees/feat-sdlc-agent-self-documentation",
+  "verdict": "PASS",
+  "exitCode": 0,
+  "errors": [],
+  "manifestErrors": [],
+  "commands": [
+    {
+      "id": "tests.b2",
+      "argv": [
+        "node",
+        "--test",
+        "test/setup-config-doc.test.js"
+      ],
+      "evidence": [
+        "ASD11 template concepts + <=3-prompt fallback + flag reachability, ASD20 config-doc write call site + telemetry preservation"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 213,
+      "stdoutTail": "schema-version: 2\nroot: /tmp/setup-interview-KBmKqM\nexit-code: 0\nreference: reference.pr-template ok — resolved /home/neil/code/threadsafe/pi-sdlc.worktrees/feat-sdlc-agent-self-documentation/skills/sdlc/assets/pull_request_template.md\nreference: reference.checker ok — resolved /home/neil/code/threadsafe/pi-sdlc.worktrees/feat-sdlc-agent-self-documentation/skills/sdlc/scripts/check-lifecycle.mjs\nasset: config created — created /tmp/setup-interview-KBmKqM/.pi/sdlc/sdlc.config.json\nasset: config-doc created — created .pi/sdlc/CONFIG.md: created new companion\nasset: pr-template created — created /tmp/setup-interview-KBmKqM/.github/pull_request_template.md\n✔ ASD11: setup template names the kernel, tracks, gate modes, consequences, and two core decisions (2.980509ms)\n✔ ASD11: the interactive fallback asks at most 3 prompts (two decisions + confirmation) (8.036315ms)\n✔ ASD11: collectInterview asks exactly the two core decisions (0.42307ms)\n✔ ASD11: every dial remains reachable non-interactively by flag (0.262143ms)\n✔ ASD20: setup-sdlc.mjs carries the config-doc write call site (0.267621ms)\n✔ ASD20 (landing-order conditional): any already-landed telemetry call sites are preserved (0.196109ms)\nℹ tests 6\nℹ suites 0\nℹ pass 6\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 141.000707\n",
+      "stderrTail": ""
+    },
+    {
+      "id": "tests.setup",
+      "argv": [
+        "node",
+        "--test",
+        "test/setup-sdlc.test.js",
+        "test/setup-v3.test.js",
+        "test/setup-bundle.test.js",
+        "test/setup-lifecycle.test.js"
+      ],
+      "evidence": [
+        "The reduced interview and config-doc call site do not regress the flag-driven setup contract"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 1618,
+      "stdoutTail": "✔ fresh bundle provisions requested assets and idempotent rerun retains them (150.909518ms)\n✔ CI marker directories are not mistaken for CI files (97.802824ms)\n✔ existing CI suppresses workflow creation and reports refusal (64.58202ms)\n✔ template info strings must be exactly sdlc (75.190525ms)\n✔ consumer template with the wrong companion is refused byte-identically (72.35853ms)\n✔ consumer template with multiple declarations is refused (68.551979ms)\n✔ consumer template without the declaration is refused byte-identically (55.093819ms)\n✔ invalid assembled configuration fails before any bundle write (44.881789ms)\n✔ target parent conflicts fail before any bundle write (51.589998ms)\n✔ unreadable package sources fail before any bundle write (66.508283ms)\n✔ invalid existing config and models are refused without overwrite (147.889539ms)\n✔ workflow from another repository is refused (85.393266ms)\n✔ malformed CI marker fails before any bundle write (73.217697ms)\n✔ operational JSON errors preserve the resolved consumer root (52.397659ms)\n✔ existing target directories fail before any bundle write (80.244014ms)\n✔ bundle reports resolved package references before writing (70.132979ms)\n✔ OH4: --yes writes a schema-valid config; bundle re-run refuses config changes; --force overwrites (164.499005ms)\n✔ OH5: --hook-use fields 3-4 = use, do = remainder after 4th colon (colons in do preserved) (72.490985ms)\n✔ OH5: --hook-run command = remainder after 2nd colon (colons preserved); trust warning on stderr (76.12807ms)\n✔ OH5: mixed repeated hook flags preserve argv order in the written list (53.133875ms)\n✔ OH5: malformed hook flags exit 2 (351.777678ms)\n✔ PR-fix: value-taking flags accept values that begin with '-' (e.g. --announce '--foo') (46.791039ms)\n✔ OH5: partial tracker flags exit 2 (all-or-none) (62.242647ms)\n✔ OH5: no config flags and no TTY exits 2 (interview needs a TTY) (85.831917ms)\n✔ OH6: package.json pi.prompts includes ./templates and the template has a description (0.917449ms)\n✔ ICA17: --profile is retired (66.979508ms)\n✔ ICA17: --lifecycle-json is retired (55.565639ms)\n✔ ICA17: --enforcement is retired (51.87557ms)\n✔ ICA17: --preset custom is retired (82.983421ms)\n✔ ICA18: --preset standard writes the explicit standard bundle (72.665079ms)\n✔ ICA18: per-dial flags override the preset; --override lands in overrides (53.731135ms)\n✔ ICA18: --preset full carries the reversible design override (71.981203ms)\n✔ ICA19: --preset patches review/shape/overrides and preserves other keys (109.808838ms)\n✔ ICA19: patch that would delete consumer overrides refuses without --force (175.012597ms)\n✔ ICA23: --override reversible:brainstorm:off is rejected exit 2 (50.334218ms)\n✔ ICA23: --override reversible:onShortfall:fail is rejected exit 2 (49.7462ms)\n✔ ICA23: --override frozen:design:panel is rejected exit 2 (74.640241ms)\n✔ ICA23: --override reversible:design:banana is rejected exit 2 (43.063894ms)\n✔ ICA23: --override reversible:panelSize:zero is rejected exit 2 (43.729693ms)\n✔ ICA23: --override reversible:design is rejected exit 2 (44.073094ms)\n✔ ICA6: older-schema config + --force replaces with a fresh v3 config (110.713458ms)\n✔ ICA19: a single-dial patch preserves the other committed dials (85.464777ms)\n✔ ICA19: preset patch refuses when it would drop a consumer override track (187.78584ms)\nℹ tests 43\nℹ suites 0\nℹ pass 43\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 1551.206764\n",
+      "stderrTail": ""
+    },
+    {
+      "id": "tests.full",
+      "argv": [
+        "npm",
+        "test"
+      ],
+      "evidence": [
+        "Full corpus regression stays green"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 6752,
+      "stdoutTail": "[...truncated; showing bounded tail...]\n✔ status completes with a PATH exposing only git (82.585743ms)\n✔ fresh bundle provisions requested assets and idempotent rerun retains them (137.778961ms)\n✔ CI marker directories are not mistaken for CI files (89.869924ms)\n✔ existing CI suppresses workflow creation and reports refusal (66.181952ms)\n✔ template info strings must be exactly sdlc (74.825978ms)\n✔ consumer template with the wrong companion is refused byte-identically (72.524332ms)\n✔ consumer template with multiple declarations is refused (58.380773ms)\n✔ consumer template without the declaration is refused byte-identically (56.109224ms)\n✔ invalid assembled configuration fails before any bundle write (41.189686ms)\n✔ target parent conflicts fail before any bundle write (68.736498ms)\n✔ unreadable package sources fail before any bundle write (52.390702ms)\n✔ invalid existing config and models are refused without overwrite (112.312357ms)\n✔ workflow from another repository is refused (95.135221ms)\n✔ malformed CI marker fails before any bundle write (52.579877ms)\n✔ operational JSON errors preserve the resolved consumer root (63.236179ms)\n✔ existing target directories fail before any bundle write (63.383508ms)\n✔ bundle reports resolved package references before writing (47.375875ms)\nschema-version: 2\nroot: /tmp/setup-interview-U04ilK\nexit-code: 0\nreference: reference.pr-template ok — resolved /home/neil/code/threadsafe/pi-sdlc.worktrees/feat-sdlc-agent-self-documentation/skills/sdlc/assets/pull_request_template.md\nreference: reference.checker ok — resolved /home/neil/code/threadsafe/pi-sdlc.worktrees/feat-sdlc-agent-self-documentation/skills/sdlc/scripts/check-lifecycle.mjs\nasset: config created — created /tmp/setup-interview-U04ilK/.pi/sdlc/sdlc.config.json\nasset: config-doc created — created .pi/sdlc/CONFIG.md: created new companion\nasset: pr-template created — created /tmp/setup-interview-U04ilK/.github/pull_request_template.md\n✔ ASD11: setup template names the kernel, tracks, gate modes, consequences, and two core decisions (2.031301ms)\n✔ ASD11: the interactive fallback asks at most 3 prompts (two decisions + confirmation) (6.592801ms)\n✔ ASD11: collectInterview asks exactly the two core decisions (0.408876ms)\n✔ ASD11: every dial remains reachable non-interactively by flag (0.245291ms)\n✔ ASD20: setup-sdlc.mjs carries the config-doc write call site (0.254464ms)\n✔ ASD20 (landing-order conditional): any already-landed telemetry call sites are preserved (0.187581ms)\n✔ OH4: --yes writes a schema-valid config; bundle re-run refuses config changes; --force overwrites (193.747884ms)\n✔ OH5: --hook-use fields 3-4 = use, do = remainder after 4th colon (colons in do preserved) (70.813472ms)\n✔ OH5: --hook-run command = remainder after 2nd colon (colons preserved); trust warning on stderr (69.490685ms)\n✔ OH5: mixed repeated hook flags preserve argv order in the written list (60.341493ms)\n✔ OH5: malformed hook flags exit 2 (346.75662ms)\n✔ PR-fix: value-taking flags accept values that begin with '-' (e.g. --announce '--foo') (65.950006ms)\n✔ OH5: partial tracker flags exit 2 (all-or-none) (42.031691ms)\n✔ OH5: no config flags and no TTY exits 2 (interview needs a TTY) (58.373678ms)\n✔ OH6: package.json pi.prompts includes ./templates and the template has a description (0.74099ms)\n✔ ICA17: --profile is retired (56.633363ms)\n✔ ICA17: --lifecycle-json is retired (45.947575ms)\n✔ ICA17: --enforcement is retired (66.34369ms)\n✔ ICA17: --preset custom is retired (69.070155ms)\n✔ ICA18: --preset standard writes the explicit standard bundle (53.670061ms)\n✔ ICA18: per-dial flags override the preset; --override lands in overrides (47.309935ms)\n✔ ICA18: --preset full carries the reversible design override (43.410267ms)\n✔ ICA19: --preset patches review/shape/overrides and preserves other keys (104.92894ms)\n✔ ICA19: patch that would delete consumer overrides refuses without --force (150.033084ms)\n✔ ICA23: --override reversible:brainstorm:off is rejected exit 2 (44.806517ms)\n✔ ICA23: --override reversible:onShortfall:fail is rejected exit 2 (56.307778ms)\n✔ ICA23: --override frozen:design:panel is rejected exit 2 (49.555927ms)\n✔ ICA23: --override reversible:design:banana is rejected exit 2 (67.917071ms)\n✔ ICA23: --override reversible:panelSize:zero is rejected exit 2 (68.300511ms)\n✔ ICA23: --override reversible:design is rejected exit 2 (54.053081ms)\n✔ ICA6: older-schema config + --force replaces with a fresh v3 config (159.688169ms)\n✔ ICA19: a single-dial patch preserves the other committed dials (166.60351ms)\n✔ ICA19: preset patch refuses when it would drop a consumer override track (236.384439ms)\n✔ ASD4: SKILL.md is within the 220-line / 16384-byte ceiling (0.689516ms)\n✔ ASD4: SKILL.md retains all seven kernel responsibilities (0.45437ms)\n✔ ASD4: SKILL.md contains no duplicated detailed phase-mechanics block (0.198142ms)\n✔ ASD16: every §5 checklist answer is derivable from docs alone (3.010356ms)\n✔ ASD16: docs state the source-inspection boundary (source only when changing implementation) (0.790982ms)\n✔ ASD16 (non-vacuous): no doc claims implementation work can avoid source inspection (0.809169ms)\n✔ ASD12: all six sdlc:<slug> entrypoint templates exist (1.544387ms)\n✔ ASD12: every entrypoint drives adopted-config on the FS8 adoption.manifest-head predicate and stops on error (5.73372ms)\n✔ ASD12: the sdlc:spec stamp is structurally valid and only spec emits one (1.048443ms)\n✔ ASD12: sdlc:pr-review discloses grounded-vs-diff-only and never runs below committed floors (0.461174ms)\n✔ ASD12: brainstorm/plan run without upstream (unadopted) and as configured gate (adopted) (0.783574ms)\n✔ ASD13: sdlc:tasks and sdlc:implement refuse-with-redirect in BOTH adoption states and fabricate nothing (0.622371ms)\n✔ ASD2: system reference contains every §5 checklist section (1.948029ms)\n✔ ASD2 (non-vacuous): deleting any one section is detected (1.898924ms)\n✔ ASD2: §5 public-composition inventory narrates the six-class taxonomy (0.527694ms)\n✔ PV1: a valid JavaScript manifest runs only declared checks and passes (105.67501ms)\n✔ PV2: only declared argv run; an undeclared tool command never executes (195.240287ms)\n✔ PV3: schema and inspectManifest reject the mutation matrix before any command runs (92.681558ms)\n✔ PV4: command outcomes are complete and deterministic; runner continues after failures (85.89996ms)\n✔ PV4: a timeout is reported as FAIL with timedOut (1109.511289ms)\n✔ PV5: category applicability is exact; injected n/a shapes are rejected (172.656944ms)\n✔ PV6: scenario mapping gates the verdict (174.440482ms)\n✔ PV7: standards and banned patterns are commands, not judgement (225.52502ms)\n✔ PV8: evidence is bounded and secrets are redacted (180.415914ms)\n✔ PV8 unit: boundStream and redaction name-matching are precise (370.866068ms)\n✔ PV9: JSON/text/exit agree and JSON mode is order-independent (1005.355187ms)\n✔ PV9: --report writes the exact JSON bytes atomically (254.827061ms)\n✔ PV9: --report outside the repo root is refused and clobbers nothing (216.431828ms)\n✔ PV10: generic validator law and generated agent are portable (0.46808ms)\n✔ PV11: receipt hash verification detects mutation of any stored file (5.575877ms)\n✔ PV11: a FAIL runner-report cannot ride under runnerVerdict PASS (0.586469ms)\n✔ parseArgs: recognises JSON anywhere and rejects bad flags (0.398275ms)\n✔ PV13: renderText is a faithful projection of the report (146.322646ms)\nℹ tests 277\nℹ suites 0\nℹ pass 277\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 6541.136618\n",
+      "stderrTail": ""
+    },
+    {
+      "id": "static.syntax",
+      "argv": [
+        "node",
+        "--check",
+        "skills/sdlc/scripts/setup-sdlc.mjs"
+      ],
+      "evidence": [
+        "setup-sdlc.mjs parses after the interview refactor + guard"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 51,
+      "stdoutTail": "",
+      "stderrTail": ""
+    },
+    {
+      "id": "static.companion-current",
+      "argv": [
+        "node",
+        "skills/sdlc/scripts/config-doc.mjs",
+        "check",
+        "--repo-root",
+        "."
+      ],
+      "evidence": [
+        "This repo's committed .pi/sdlc/CONFIG.md is current against its committed config"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 70,
+      "stdoutTail": "current: companion matches the current expected render\nschemaVersion: 1\npath: .pi/sdlc/CONFIG.md\nstate: current\nexitCode: 0\nsentinel: {\"present\":true,\"wellFormed\":true,\"version\":\"v1\",\"recognized\":true,\"fingerprint\":\"c4c956f1cbd562c96fc26fbafdc624178f3562ce0f4311b16199c676233f9865\"}\nexpectedFingerprint: c4c956f1cbd562c96fc26fbafdc624178f3562ce0f4311b16199c676233f9865\n",
+      "stderrTail": ""
+    },
+    {
+      "id": "static.lint",
+      "argv": [
+        "npm",
+        "run",
+        "lint"
+      ],
+      "evidence": [
+        "Formatting and lint over setup-sdlc.mjs, the template, CONFIG.md, and the test"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 321,
+      "stdoutTail": "\n> pi-sdlc@0.1.1 lint\n> biome check .\n\nChecked 108 files in 120ms. No fixes applied.\n",
+      "stderrTail": ""
+    },
+    {
+      "id": "patterns.diff",
+      "argv": [
+        "git",
+        "diff",
+        "--check",
+        "HEAD"
+      ],
+      "evidence": [
+        "No whitespace-error banned patterns in the task diff"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 11,
+      "stdoutTail": "",
+      "stderrTail": ""
+    }
+  ],
+  "categories": [
+    {
+      "category": "tests",
+      "status": "PASS",
+      "checkIds": [
+        "tests.b2",
+        "tests.setup",
+        "tests.full"
+      ]
+    },
+    {
+      "category": "static",
+      "status": "PASS",
+      "checkIds": [
+        "static.syntax",
+        "static.companion-current",
+        "static.lint"
+      ]
+    },
+    {
+      "category": "scenarios",
+      "status": "PASS"
+    },
+    {
+      "category": "standards",
+      "status": "N/A",
+      "reason": "B2 adds no new normative-reference inventory rows; FS11 classification/discovery is task C1."
+    },
+    {
+      "category": "bannedPatterns",
+      "status": "PASS",
+      "checkIds": [
+        "patterns.diff"
+      ]
+    }
+  ],
+  "scenarios": [
+    {
+      "scenarioId": "ASD11",
+      "status": "PASS",
+      "checkIds": [
+        "tests.b2",
+        "tests.setup"
+      ]
+    },
+    {
+      "scenarioId": "ASD20",
+      "status": "PASS",
+      "checkIds": [
+        "tests.b2"
+      ]
+    }
+  ]
+}
