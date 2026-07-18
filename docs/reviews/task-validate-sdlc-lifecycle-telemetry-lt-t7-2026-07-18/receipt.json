@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "taskId": "lt-t7",
+  "manifestPath": "docs/validation/sdlc-lifecycle-telemetry/lt-t7.json",
+  "manifestSha256": "672c0b9bf619c75ab8ceb2da405cc0d20e04ca79f841828f2e626c4544a2f43d",
+  "runnerReportSha256": "c9dbf478749714df04551ef09d82997a73862ccffa7d6ef0b86c034cb41c404b",
+  "generatedAgentSha256": "2e64d2b7427fb3cac6895979d79f3d6fb8f616c7b1872ffeebe7f855fb1fd722",
+  "model": "openai-codex/gpt-5.6-terra",
+  "runnerVerdict": "PASS",
+  "validatorVerdict": "PASS",
+  "createdAt": "2026-07-18T17:22:22Z"
+}

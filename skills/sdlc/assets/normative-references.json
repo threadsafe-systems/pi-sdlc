@@ -179,7 +179,7 @@
     {
       "id": "script.status",
       "source": "skills/sdlc/scripts/sdlc-status.sh",
-      "assertion": "sdlc-status.sh — thin entry point for the FS8 four-state readiness gate.",
+      "assertion": "sdlc-status.sh \u2014 thin entry point for the FS8 four-state readiness gate.",
       "targetKind": "command",
       "ownership": "package",
       "required": true,
@@ -189,7 +189,7 @@
     {
       "id": "script.panel-resolver",
       "source": "skills/sdlc/scripts/resolve-panel.sh",
-      "assertion": "resolve-panel.sh — thin entry point for the sdlc panel resolver.",
+      "assertion": "resolve-panel.sh \u2014 thin entry point for the sdlc panel resolver.",
       "targetKind": "command",
       "ownership": "package",
       "required": true,
@@ -199,7 +199,7 @@
     {
       "id": "script.panel-agent",
       "source": "skills/sdlc/scripts/ensure-panel-agent.sh",
-      "assertion": "ensure-panel-agent.sh — thin entry point for the sdlc panel-agent stamper.",
+      "assertion": "ensure-panel-agent.sh \u2014 thin entry point for the sdlc panel-agent stamper.",
       "targetKind": "command",
       "ownership": "package",
       "required": true,
@@ -209,7 +209,7 @@
     {
       "id": "script.validator",
       "source": "skills/sdlc/scripts/validate-task.sh",
-      "assertion": "validate-task.sh — thin entry point for the deterministic per-task validation",
+      "assertion": "validate-task.sh \u2014 thin entry point for the deterministic per-task validation",
       "targetKind": "command",
       "ownership": "package",
       "required": true,
@@ -219,7 +219,7 @@
     {
       "id": "script.receipt-verifier",
       "source": "skills/sdlc/scripts/verify-task-receipt.mjs",
-      "assertion": "verify-task-receipt.mjs — verify a stored portable-validator runtime receipt.",
+      "assertion": "verify-task-receipt.mjs \u2014 verify a stored portable-validator runtime receipt.",
       "targetKind": "command",
       "ownership": "package",
       "required": true,
@@ -255,6 +255,236 @@
       "required": false,
       "resolution": "external",
       "target": "github.com/issues-projects"
+    },
+    {
+      "id": "script.record-run-event",
+      "source": "skills/sdlc/scripts/record-run-event.mjs",
+      "assertion": "record-run-event.mjs \u2014 FS13 emitter. Appends one run-manifest event to the",
+      "targetKind": "command",
+      "ownership": "package",
+      "required": true,
+      "resolution": "package",
+      "target": "skills/sdlc/scripts/record-run-event.mjs"
+    },
+    {
+      "id": "script.record-run-event-wrapper",
+      "source": "skills/sdlc/scripts/record-run-event.sh",
+      "assertion": "FS13 emitter wrapper \u2014 delegates to record-run-event.mjs.",
+      "targetKind": "command",
+      "ownership": "package",
+      "required": true,
+      "resolution": "package",
+      "target": "skills/sdlc/scripts/record-run-event.sh"
+    },
+    {
+      "id": "script.harvest-panel",
+      "source": "skills/sdlc/scripts/harvest-panel.mjs",
+      "assertion": "harvest-panel.mjs \u2014 FS13 \u00a75 harvest CLI: preserves pi-subagents lifecycle",
+      "targetKind": "command",
+      "ownership": "package",
+      "required": true,
+      "resolution": "package",
+      "target": "skills/sdlc/scripts/harvest-panel.mjs"
+    },
+    {
+      "id": "script.harvest-panel-wrapper",
+      "source": "skills/sdlc/scripts/harvest-panel.sh",
+      "assertion": "harvest-panel.sh \u2014 thin entry point for the FS13 panel-telemetry harvest CLI.",
+      "targetKind": "command",
+      "ownership": "package",
+      "required": true,
+      "resolution": "package",
+      "target": "skills/sdlc/scripts/harvest-panel.sh"
+    },
+    {
+      "id": "retro.script.collect-run",
+      "source": "skills/sdlc-retro/scripts/collect-run.mjs",
+      "assertion": "collect-run.mjs \u2014 the sdlc-retro post-mortem collector (spec \u00a76).",
+      "targetKind": "command",
+      "ownership": "package",
+      "required": true,
+      "resolution": "package",
+      "target": "skills/sdlc-retro/scripts/collect-run.mjs"
+    },
+    {
+      "id": "retro.script.collect-run-wrapper",
+      "source": "skills/sdlc-retro/scripts/collect-run.sh",
+      "assertion": "collect-run.sh \u2014 thin entry point for the sdlc-retro post-mortem collector.",
+      "targetKind": "command",
+      "ownership": "package",
+      "required": true,
+      "resolution": "package",
+      "target": "skills/sdlc-retro/scripts/collect-run.sh"
+    },
+    {
+      "id": "retro.script.render-retro",
+      "source": "skills/sdlc-retro/scripts/render-retro.mjs",
+      "assertion": "render-retro.mjs \u2014 the sdlc-retro dashboard renderer (spec \u00a78, lt-t6).",
+      "targetKind": "command",
+      "ownership": "package",
+      "required": true,
+      "resolution": "package",
+      "target": "skills/sdlc-retro/scripts/render-retro.mjs"
+    },
+    {
+      "id": "retro.script.render-retro-wrapper",
+      "source": "skills/sdlc-retro/scripts/render-retro.sh",
+      "assertion": "render-retro.sh \u2014 thin entry point for the sdlc-retro dashboard renderer.",
+      "targetKind": "command",
+      "ownership": "package",
+      "required": true,
+      "resolution": "package",
+      "target": "skills/sdlc-retro/scripts/render-retro.sh"
+    },
+    {
+      "id": "retro.schema.event",
+      "source": "skills/sdlc-retro/schema/event.schema.json",
+      "assertion": "\"title\": \"sdlc-run-manifest-event\"",
+      "targetKind": "file",
+      "ownership": "package",
+      "required": true,
+      "resolution": "package",
+      "target": "skills/sdlc-retro/schema/event.schema.json"
+    },
+    {
+      "id": "retro.schema.run",
+      "source": "skills/sdlc-retro/schema/run.schema.json",
+      "assertion": "\"title\": \"sdlc-retro-run-record\"",
+      "targetKind": "file",
+      "ownership": "package",
+      "required": true,
+      "resolution": "package",
+      "target": "skills/sdlc-retro/schema/run.schema.json"
+    },
+    {
+      "id": "retro.schema.llm-protocol",
+      "source": "skills/sdlc-retro/schema/llm-protocol.schema.json",
+      "assertion": "\"title\": \"sdlc-retro-llm-protocol\"",
+      "targetKind": "file",
+      "ownership": "package",
+      "required": true,
+      "resolution": "package",
+      "target": "skills/sdlc-retro/schema/llm-protocol.schema.json"
+    },
+    {
+      "id": "retro.skill.source",
+      "source": "skills/sdlc-retro/SKILL.md",
+      "assertion": "# sdlc-retro",
+      "targetKind": "file",
+      "ownership": "package",
+      "required": true,
+      "resolution": "package",
+      "target": "skills/sdlc-retro/SKILL.md"
+    },
+    {
+      "id": "retro.skill.store-layout",
+      "source": "skills/sdlc-retro/SKILL.md",
+      "assertion": ".pi/sdlc/runs/<slug>/` (git-ignored; raw",
+      "targetKind": "file",
+      "ownership": "package",
+      "required": true,
+      "resolution": "package",
+      "target": "skills/sdlc-retro/SKILL.md"
+    },
+    {
+      "id": "retro.skill.retro-output",
+      "source": "skills/sdlc-retro/SKILL.md",
+      "assertion": "docs/retros/<slug>/run.json` (schema",
+      "targetKind": "file",
+      "ownership": "package",
+      "required": true,
+      "resolution": "package",
+      "target": "skills/sdlc-retro/SKILL.md"
+    },
+    {
+      "id": "retro.skill.collect-invocation",
+      "source": "skills/sdlc-retro/SKILL.md",
+      "assertion": "scripts/collect-run.sh --slug <slug>` relative to this loaded",
+      "targetKind": "command",
+      "ownership": "package",
+      "required": true,
+      "resolution": "package",
+      "target": "skills/sdlc-retro/scripts/collect-run.mjs"
+    },
+    {
+      "id": "retro.skill.render-invocation",
+      "source": "skills/sdlc-retro/SKILL.md",
+      "assertion": "scripts/render-retro.sh --run docs/retros/<slug>/run.json`",
+      "targetKind": "command",
+      "ownership": "package",
+      "required": true,
+      "resolution": "package",
+      "target": "skills/sdlc-retro/scripts/render-retro.mjs"
+    },
+    {
+      "id": "retro.skill.event-schema-pointer",
+      "source": "skills/sdlc-retro/SKILL.md",
+      "assertion": "skills/sdlc-retro/schema/event.schema.json`; the `--llm-cmd`",
+      "targetKind": "file",
+      "ownership": "package",
+      "required": true,
+      "resolution": "package",
+      "target": "skills/sdlc-retro/schema/event.schema.json"
+    },
+    {
+      "id": "retro.skill.llm-schema-pointer",
+      "source": "skills/sdlc-retro/SKILL.md",
+      "assertion": "skills/sdlc-retro/schema/llm-protocol.schema.json`. All three schemas are",
+      "targetKind": "file",
+      "ownership": "package",
+      "required": true,
+      "resolution": "package",
+      "target": "skills/sdlc-retro/schema/llm-protocol.schema.json"
+    },
+    {
+      "id": "telemetry.adr-0028",
+      "source": "skills/sdlc-retro/SKILL.md",
+      "assertion": "0028-lifecycle-telemetry-fs13.md` (FS13).",
+      "targetKind": "file",
+      "ownership": "package",
+      "required": true,
+      "resolution": "package",
+      "target": "docs/adr/0028-lifecycle-telemetry-fs13.md"
+    },
+    {
+      "id": "sdlc.skill.telemetry-section",
+      "source": "skills/sdlc/SKILL.md",
+      "assertion": "## Lifecycle telemetry (FS13)",
+      "targetKind": "file",
+      "ownership": "package",
+      "required": true,
+      "resolution": "package",
+      "target": "skills/sdlc/SKILL.md"
+    },
+    {
+      "id": "sdlc.skill.retro-pointer",
+      "source": "skills/sdlc/SKILL.md",
+      "assertion": "the sibling `sdlc-retro`\nskill distills it",
+      "targetKind": "file",
+      "ownership": "package",
+      "required": true,
+      "resolution": "package",
+      "target": "skills/sdlc-retro/SKILL.md"
+    },
+    {
+      "id": "sdlc.skill.record-run-event-pointer",
+      "source": "skills/sdlc/SKILL.md",
+      "assertion": "Record these prose-emitted inflection points with",
+      "targetKind": "command",
+      "ownership": "package",
+      "required": true,
+      "resolution": "package",
+      "target": "skills/sdlc/scripts/record-run-event.mjs"
+    },
+    {
+      "id": "sdlc.skill.harvest-panel-pointer",
+      "source": "skills/sdlc/SKILL.md",
+      "assertion": "scripts/harvest-panel.sh --phase <panelPhase> --round <n> --from <asyncDir>`\n  (skill-relative; headless: `node <skill-dir>/scripts/harvest-panel.mjs`).",
+      "targetKind": "command",
+      "ownership": "package",
+      "required": true,
+      "resolution": "package",
+      "target": "skills/sdlc/scripts/harvest-panel.mjs"
     }
   ]
 }

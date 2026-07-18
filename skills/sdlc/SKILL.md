@@ -517,6 +517,51 @@ on a configured hook is a hook failure, per Hooks, full stop.
 - `assets/agent-brief.md` (project-local): the durability rules and template
   for any ticket, sub-issue, or hand-written follow-up issue body.
 
+## Lifecycle telemetry (FS13)
+
+Every instrumented run keeps a durable manifest of its own lifecycle at
+`.pi/sdlc/runs/<slug>/events.jsonl` (git-ignored; the sibling `sdlc-retro`
+skill distills it into a committed post-mortem — see that skill's SKILL.md
+for the collect/render pipeline once the run store has anything to distill).
+Emission is fail-soft everywhere (an unresolvable run identity or an
+unwritable store degrades to one stderr warning, never a behavioural change)
+and additive-only to every frozen FS5 contract (ADR 0028).
+
+Record these prose-emitted inflection points with
+`scripts/record-run-event.sh <event>` (relative to this loaded skill;
+headless: `node <skill-dir>/scripts/record-run-event.mjs <event>`) and its
+event-type payload:
+
+- **Run start**: once, right after the readiness gate confirms this repo is
+  ready and before announcing —
+  `record-run-event.sh run.started --payload '{"title":"<feature title>","track":"<irreversible|reversible>"}'`.
+- **Every phase entry**: on entering brainstorm/plan/spec/build/implement/pr —
+  `record-run-event.sh phase.entered --payload '{"phase":"<phase>"}'`.
+- **Every human gate approval**: when the human approves a phase's gate —
+  `record-run-event.sh gate.approved --payload '{"phase":"<phase>","artifact":"<path>","rev":<n>,"approver":"human:<slug>"}'`.
+- **Panel dispatch**: immediately after dispatching a design or PR panel —
+  `record-run-event.sh panel.dispatched --payload '{"panelPhase":"<panelPhase>","round":<n>,"models":[...]}'`
+  — and, harvest-at-dispatch, immediately preserve its artifacts with
+  `scripts/harvest-panel.sh --phase <panelPhase> --round <n> --from <asyncDir>`
+  (skill-relative; headless: `node <skill-dir>/scripts/harvest-panel.mjs`).
+- **Panel consolidation**: after adjudicating a round's findings —
+  `record-run-event.sh panel.consolidated --payload '{"panelPhase":"<panelPhase>","round":<n>,"findings":{"high":<n>,"medium":<n>,"low":<n>},"incorporated":<n>,"dismissed":<n>}'`.
+- **Caller-side lifecycle-check recording**: right after running
+  `check-lifecycle` (itself untouched, FS9) —
+  `record-run-event.sh lifecycle.checked --payload '{"verdict":"<verdict>"}'`.
+- **PR open**: right after opening the PR —
+  `record-run-event.sh pr.opened --payload '{"number":<n>}'`.
+- **Fix wave**: after addressing a post-PR reviewer concern with a commit —
+  `record-run-event.sh pr.fix_wave --payload '{"number":<n>,"sha":"<short-sha>"}'`.
+
+`resolve-panel.sh`, `ensure-panel-agent.sh`, and `validate-task.sh` emit their
+own events automatically (`panel.resolved`, `panel.agent_stamped`,
+`task.validated`) after successful completion — nothing to do beyond passing
+`--slug` when it isn't resolvable from the current git branch. Per-task
+validator dispatch also harvests: immediately after a `task_validate`
+subagent completes, run `scripts/harvest-panel.sh --phase task_validate
+--round <n> --from <asyncDir>` the same way as a design/PR panel dispatch.
+
 ## ADRs
 
 When a decision made anywhere in the lifecycle (a map ticket, a plan, a spec)
