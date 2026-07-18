@@ -97,7 +97,7 @@ export function readManifest(root, slug) {
 			continue;
 		}
 		const envIssues = validateEnvelope(obj);
-		if (envIssues.length > 0) {
+		if (envIssues.length > 0 || !Number.isFinite(toMs(obj.ts))) {
 			malformed++;
 			continue;
 		}
@@ -227,18 +227,19 @@ export function discoverPanels(root, slug, events) {
 					// unparseable status.json: no per-model metrics for this round
 				}
 			}
-			if (statusValid && existsSync(eventsPath)) foundPhases.add(panelPhase);
+			const complete = statusValid && existsSync(eventsPath);
+			if (complete) foundPhases.add(panelPhase);
 			else partialPhases.add(panelPhase);
 			const round = Number(roundStr);
-			const entry = { panelPhase, round, dir: `.pi/sdlc/runs/${slug}/panels/${name}`, models, date };
+			const entry = { panelPhase, round, dir: `.pi/sdlc/runs/${slug}/panels/${name}`, models, date, complete };
 			// Dedupe by (panelPhase, round): a re-harvest of the same round across a
 			// date boundary must not double-count hard totals. Keep the latest date.
 			const key = `${panelPhase}#${round}`;
 			const existing = byPhaseRound.get(key);
-			if (!existing || date > existing.date) byPhaseRound.set(key, entry);
+			if (!existing || (entry.complete && !existing.complete) || (entry.complete === existing.complete && date > existing.date)) byPhaseRound.set(key, entry);
 		}
 	}
-	for (const { date, ...entry } of byPhaseRound.values()) panels.push(entry);
+	for (const { date, complete, ...entry } of byPhaseRound.values()) panels.push(entry);
 	panels.sort((a, b) => (a.panelPhase < b.panelPhase ? -1 : a.panelPhase > b.panelPhase ? 1 : a.round - b.round));
 	const expectedPhases = new Set();
 	for (const e of events) {
@@ -246,7 +247,7 @@ export function discoverPanels(root, slug, events) {
 	}
 	const markers = [];
 	for (const phase of [...new Set([...expectedPhases, ...partialPhases])].sort()) {
-		if (!foundPhases.has(phase)) markers.push({ marker: `panels.missing:${phase}` });
+		if (!foundPhases.has(phase) || partialPhases.has(phase)) markers.push({ marker: `panels.missing:${phase}` });
 	}
 	return { panels, markers };
 }
@@ -425,7 +426,10 @@ function agentTimeMs(session) {
 		if (e.type !== "message" || e.message?.role !== "assistant" || typeof e.timestamp !== "string") continue;
 		const prev = session.entries[i - 1];
 		if (typeof prev.timestamp !== "string") continue;
-		total += Math.max(0, toMs(e.timestamp) - toMs(prev.timestamp));
+		const end = toMs(e.timestamp);
+		const start = toMs(prev.timestamp);
+		if (!Number.isFinite(end) || !Number.isFinite(start)) continue;
+		total += Math.max(0, end - start);
 	}
 	return total;
 }
@@ -440,7 +444,10 @@ function humanWaitMs(session) {
 		if (e.type !== "message" || e.message?.role !== "user" || typeof e.timestamp !== "string") continue;
 		const prev = session.entries[i - 1];
 		if (prev.type !== "message" || prev.message?.role !== "assistant" || typeof prev.timestamp !== "string") continue;
-		const gap = Math.max(0, toMs(e.timestamp) - toMs(prev.timestamp));
+		const end = toMs(e.timestamp);
+		const start = toMs(prev.timestamp);
+		if (!Number.isFinite(end) || !Number.isFinite(start)) continue;
+		const gap = Math.max(0, end - start);
 		total += Math.min(gap, HUMAN_WAIT_CAP_MS);
 	}
 	return total;
@@ -487,7 +494,9 @@ function gitDiffStatsSeam(root, slug, gitCmd, baseRef, fromRaw) {
 	if (fromRaw) {
 		if (!rawExists(root, slug, relPath)) return { diff: undefined, markers: [{ marker: "git.error", detail: "no raw/git/diff.json snapshot to replay" }] };
 		try {
-			return { diff: JSON.parse(readRaw(root, slug, relPath)), markers: [] };
+			const diff = JSON.parse(readRaw(root, slug, relPath));
+			if (!isPlainObject(diff) || !isNonNegInt(diff.files) || !isNonNegInt(diff.insertions) || !isNonNegInt(diff.deletions) || Object.keys(diff).some((key) => !["files", "insertions", "deletions"].includes(key))) throw new Error("invalid diff shape");
+			return { diff, markers: [] };
 		} catch (err) {
 			return { diff: undefined, markers: [{ marker: "git.error", detail: `corrupt raw/git/diff.json snapshot: ${err?.message || err}` }] };
 		}
@@ -786,9 +795,9 @@ function turnsFor(session, spans, phase, windowStart, windowEnd) {
 }
 
 function eventsFor(events, phase, spans) {
-	const span = spans.find((s) => s.phase === phase);
-	if (!span) return [];
-	return events.filter((e) => toMs(e.ts) >= toMs(span.start) && toMs(e.ts) <= toMs(span.end));
+	const phaseSpans = spans.filter((s) => s.phase === phase);
+	if (phaseSpans.length === 0) return [];
+	return events.filter((e) => phaseSpans.some((span) => toMs(e.ts) >= toMs(span.start) && toMs(e.ts) <= toMs(span.end)));
 }
 
 // One LLM call per phase/session/review-round respectively (call count is
@@ -817,7 +826,10 @@ function llmCall(root, slug, name, request, llmCmd, fromRaw, timeoutMs, redactio
 function buildSoftData({ root, slug, llmCmd, noLlm, fromRaw, events, spans, sessions, panels, reviewDirs, windowStart, windowEnd, reviewsPath, llmTimeoutMs = LLM_TIMEOUT_MS }) {
 	if (noLlm || (!llmCmd && !fromRaw)) return { soft: undefined, markers: [{ marker: "soft.absent" }] };
 
-	const redactionValues = buildRedactionValues(process.env);
+	// Live collection captures already-redacted LLM responses into raw/. Replay
+	// must not consult a different process environment and redact benign words
+	// differently, or byte-identical regeneration would be impossible.
+	const redactionValues = fromRaw ? [] : buildRedactionValues(process.env);
 	const allUserMessages = sessions.flatMap((s) => s.entries.map(userText).filter(Boolean));
 	const markers = [];
 	let attribution;
@@ -944,7 +956,7 @@ export function collect({ root, slug, gitCmd = "git", baseRef = "main", ghCmd = 
 	const { sessions, markers: sessionMarkers } = discoverSessions(root, events, { sessionsDirOverrides, home, slug, fromRaw });
 	const reviewDirs = discoverReviewDirs(root, slug, reviewsPath, { fromRaw });
 	const { diff, markers: gitMarkers } = gitDiffStatsSeam(root, slug, gitCmd, baseRef, fromRaw);
-	const branch = currentBranch(root) || slug;
+	const branch = fromRaw || noGithub ? slug : currentBranch(root) || slug;
 	const { markers: ghMarkers } = githubCheckSeam(root, slug, ghCmd, branch, noGithub, fromRaw);
 
 	const windowStart = events.length > 0 ? events[0].ts : new Date(0).toISOString();
@@ -986,7 +998,7 @@ export function collect({ root, slug, gitCmd = "git", baseRef = "main", ghCmd = 
 		const sessModels = new Set();
 		for (const e of aEntries) {
 			const ts = e.timestamp;
-			if (typeof ts !== "string") continue;
+			if (typeof ts !== "string" || !Number.isFinite(toMs(ts))) continue;
 			if (!sessStart || toMs(ts) < toMs(sessStart)) sessStart = ts;
 			if (!sessEnd || toMs(ts) > toMs(sessEnd)) sessEnd = ts;
 			const model = e.message?.model;
