@@ -201,8 +201,26 @@ test("rpi-t1: distinct Bedrock version qualifiers stay distinct identities", () 
 	});
 	const { status, stdout } = run(f, "pr_review", ["--author", "anthropic/claude-opus-4-8"], AWS_ENV);
 	assert.equal(status, 0);
-	// different Bedrock version qualifiers are not collapsed into one identity — both are kept, floor 2 reached before openai.
+	// both collapse to a canonical anthropic/claude-opus-4-8-v1:N identity (region stripped, vendor remapped),
+	// but the two differ from EACH OTHER by version qualifier (:0 vs :1) so neither dedupes the other out —
+	// both are kept, floor 2 reached before openai.
 	assert.deepEqual(lines(stdout), ["amazon-bedrock/global.anthropic.claude-opus-4-8-v1:0", "amazon-bedrock/us.anthropic.claude-opus-4-8-v1:1"]);
+});
+
+test("rpi-t1: same model + same version, different Bedrock region, dedupes to one panelist", () => {
+	const f = fixture({
+		phases: {
+			pr_review: {
+				panelSize: 2,
+				prefer: ["amazon-bedrock/global.anthropic.claude-opus-4-8-v1:0", "amazon-bedrock/us.anthropic.claude-opus-4-8-v1:0", "openai/gpt-5"],
+			},
+		},
+	});
+	const { status, stdout, stderr } = run(f, "pr_review", ["--author", "anthropic/claude-opus-4-8"], AWS_ENV);
+	assert.equal(status, 0);
+	// same underlying model + version, only the region differs — the second entry dedupes out, openai fills the floor.
+	assert.deepEqual(lines(stdout), ["amazon-bedrock/global.anthropic.claude-opus-4-8-v1:0", "openai/gpt-5"]);
+	assert.match(stderr, /dropped amazon-bedrock\/us\.anthropic\.claude-opus-4-8-v1:0: model anthropic\/claude-opus-4-8-v1:0 already in panel/);
 });
 
 test("rpi-t1: Bedrock-native model with no direct-provider equivalent is unaffected", () => {

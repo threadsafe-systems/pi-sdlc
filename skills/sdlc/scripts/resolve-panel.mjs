@@ -135,12 +135,16 @@ function hasCreds(pm) {
 }
 
 const THINKING_LEVELS = new Set(["off", "minimal", "low", "medium", "high", "xhigh", "max"]);
-// Bedrock cross-region routing prefixes seen live via `pi --list-models`
-// (amazon-bedrock rows) as of 2026-07-18 — not a documented AWS guarantee, a live
-// snapshot; re-verify if a new region shows up unrecognized.
-const BEDROCK_REGION_PREFIXES = ["us.", "eu.", "au.", "jp.", "global."];
 // Vendors hosted on amazon-bedrock that also exist as a direct provider under the
 // same identity — collapsing these lets author-exclusion see through the routing.
+// Scanned as a dot-segment anywhere in the model id (not just after a hardcoded
+// region-prefix whitelist): AWS Bedrock ids nest strictly as
+// `[routing-prefix.]vendor.model[-version][:qualifier]`, so a recognized vendor
+// segment always marks the true start of the model id regardless of what routing
+// prefix (region, cross-region, or a future one) precedes it. A prefix whitelist
+// approach fails open in the dangerous direction here: an *unrecognized* prefix
+// would leave the id un-collapsed and able to sail past author-exclusion
+// undetected (self-review risk), rather than merely under-deduping.
 const BEDROCK_ALIAS_VENDORS = new Set(["anthropic", "deepseek"]);
 
 function modelIdentity(pm) {
@@ -148,18 +152,11 @@ function modelIdentity(pm) {
 	const stripped = split >= 0 && THINKING_LEVELS.has(pm.slice(split + 1)) ? pm.slice(0, split) : pm;
 	const slash = stripped.indexOf("/");
 	if (slash < 0 || stripped.slice(0, slash) !== "amazon-bedrock") return stripped;
-	let model = stripped.slice(slash + 1);
-	for (const prefix of BEDROCK_REGION_PREFIXES) {
-		if (model.startsWith(prefix)) {
-			model = model.slice(prefix.length);
-			break;
-		}
+	const segments = stripped.slice(slash + 1).split(".");
+	for (let i = 0; i < segments.length - 1; i++) {
+		if (BEDROCK_ALIAS_VENDORS.has(segments[i])) return `${segments[i]}/${segments.slice(i + 1).join(".")}`;
 	}
-	const dot = model.indexOf(".");
-	if (dot < 0) return stripped; // no vendor-dot form; leave untouched.
-	const vendor = model.slice(0, dot);
-	if (!BEDROCK_ALIAS_VENDORS.has(vendor)) return stripped; // native Bedrock model (e.g. amazon.nova-*); leave untouched.
-	return `${vendor}/${model.slice(dot + 1)}`;
+	return stripped; // no recognized vendor segment; native/unrecognized Bedrock model, left untouched.
 }
 
 function pongOk(pm) {
