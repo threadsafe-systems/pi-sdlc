@@ -88,6 +88,8 @@ async function startPuppet(sandbox, { steps, sentinel, skipLoader }) {
 export async function runScenario(sandbox, scenario) {
 	const { consumer } = await scenario.setup(sandbox);
 	const sentinel = scenario.sentinel ?? DEFAULT_SENTINEL;
+	// Reset the shared gh-stub log so ghLog reflects only this scenario.
+	await writeFile(sandbox.ghLog, "");
 	const puppet = await startPuppet(sandbox, { steps: scenario.steps, sentinel, skipLoader: scenario.skipLoader });
 	let record;
 	try {
@@ -99,15 +101,25 @@ export async function runScenario(sandbox, scenario) {
 
 		const emissions = await puppet.emissions();
 		const scenarioTurns = emissions.filter((turn) => Array.isArray(turn.toolCalls) && turn.loader !== true);
+		// The assistant's emitted text stream (content per turn, in order). pi does
+		// not print assistant text that accompanies a tool call to -p stdout, so the
+		// mandated markers are asserted here — interleaved with the REAL tool
+		// execution loop that pi drives between turns.
+		const transcript = emissions
+			.filter((turn) => turn.loader !== true && turn.turn !== "locked")
+			.map((turn) => turn.content ?? "")
+			.filter(Boolean)
+			.join("\n");
 		record = {
 			scenario: scenario.name,
 			exitCode: run.code,
 			stdout: run.stdout,
 			stderr: run.stderr,
+			transcript,
 			requests: await puppet.requests(),
 			emissions,
 			toolCalls: toolCallsInSourceOrder(scenarioTurns),
-			markers: extractMarkers(run.stdout),
+			markers: extractMarkers(transcript),
 			files: await collectFileEffects(consumer),
 			ghLog: await readGhLog(sandbox),
 			locked: run.stdout.includes("PUPPET_LOCKED"),
