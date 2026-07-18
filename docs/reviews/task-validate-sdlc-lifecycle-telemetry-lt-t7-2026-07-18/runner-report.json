@@ -1,0 +1,211 @@
+{
+  "schemaVersion": 1,
+  "taskId": "lt-t7",
+  "manifest": "/home/neil/code/threadsafe/pi-sdlc.worktrees/feat-sdlc-lifecycle-telemetry/docs/validation/sdlc-lifecycle-telemetry/lt-t7.json",
+  "repoRoot": "/home/neil/code/threadsafe/pi-sdlc.worktrees/feat-sdlc-lifecycle-telemetry",
+  "verdict": "PASS",
+  "exitCode": 0,
+  "errors": [],
+  "manifestErrors": [],
+  "commands": [
+    {
+      "id": "tests.telemetry-docs",
+      "argv": [
+        "node",
+        "--test",
+        "test/telemetry-docs.test.js"
+      ],
+      "evidence": [
+        "LT24-LT25 hook-token contract, FS12 invocation forms, FS11 inventory, structural coverage"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 160,
+      "stdoutTail": "✔ LT24: every mandated hook step names record-run-event.sh and its event-type token together (0.949026ms)\n✔ LT24: the panel-dispatch step and the validator-dispatch step each name harvest-panel.sh (0.321849ms)\n✔ LT24: sdlc-retro SKILL.md names collect and render invocations skill-relatively (FS12 forms) (0.101368ms)\n✔ LT25: check-references passes with the new inventory entries (25.762509ms)\n✔ LT25: deleting a new entry's target file fails check-references (53.544381ms)\n✔ structural coverage: every sdlc-retro script has an FS11 inventory entry (0.475191ms)\n✔ structural coverage: every hook script named by §4 has an FS11 inventory entry (0.184961ms)\n✔ structural coverage: every committed sdlc-retro schema file has an FS11 inventory entry (0.182368ms)\n✔ structural coverage: ADR 0028 has an FS11 inventory entry and exists (0.272163ms)\n✔ structural coverage: every run-store/retro path named normatively by either SKILL.md has an inventory entry (0.365131ms)\nℹ tests 10\nℹ suites 0\nℹ pass 10\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 136.888542\n",
+      "stderrTail": ""
+    },
+    {
+      "id": "tests.check-references",
+      "argv": [
+        "node",
+        "--test",
+        "test/check-references.test.js"
+      ],
+      "evidence": [
+        "Pre-existing FS11 checker contract remains green with the expanded inventory"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 380,
+      "stdoutTail": "✔ live inventory passes with explicit non-package classifications (37.593139ms)\n✔ missing target and assertion mutations are contract failures (53.404905ms)\n✔ consumer and external entries are classified without probing (20.607983ms)\n✔ readiness requires the verifier assertion and path containment (106.942988ms)\n✔ invalid inventory and JSON argument errors emit one envelope (48.637675ms)\n✔ shell wrapper resolves beside itself from a consumer cwd (39.908009ms)\nℹ tests 6\nℹ suites 0\nℹ pass 6\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 349.221263\n",
+      "stderrTail": ""
+    },
+    {
+      "id": "tests.full",
+      "argv": [
+        "npm",
+        "test"
+      ],
+      "evidence": [
+        "NF3 frozen-CLI regression floor: corpus remains green with the docs/inventory/ADR additions"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 4724,
+      "stdoutTail": "[...truncated; showing bounded tail...]\n✔ ICA23: --override reversible:design is rejected exit 2 (35.879023ms)\n✔ ICA6: older-schema config + --force replaces with a fresh v3 config (82.248891ms)\n✔ ICA19: a single-dial patch preserves the other committed dials (74.74833ms)\n✔ ICA19: preset patch refuses when it would drop a consumer override track (169.631856ms)\n✔ LT18: soft data carries attribution and matches the fixture LLM's scripted responses (57.710721ms)\n✔ LT18: an unreadable review directory yields precision.unparsed:<dir> and no precision number (52.057768ms)\n✔ LT19: --no-llm (noLlm:true) output validates and carries soft.absent (4.135533ms)\n✔ LT17: --from-raw reproduces a byte-identical run.json after live sources are destroyed (138.250702ms)\n✔ LT28: neither the sentinel secret nor the verbatim prompt sentence appears in run.json (49.467275ms)\n✔ NF4 unit: sanitizeSoftString redacts, rejects n-gram containment, and caps at 500 chars (0.163568ms)\n✔ LT29: a failing --gh-cmd yields github.error, schema-valid, no fabricated PR data (18.878564ms)\n✔ LT29: an --llm-cmd returning invalid JSON yields llm.error:narrative, schema-valid, no fabricated summary (40.35416ms)\n✔ LT29: an --llm-cmd that times out yields llm.error:<kind>, schema-valid, exit unaffected (604.878584ms)\n✔ llm-protocol schema: request/response fixtures validate (1.055906ms)\n✔ LT13 (hard): complete fixture store -> schema-valid run.json with known-answer rollups (100.468825ms)\n✔ LT14: a gappy store names every gap and derives nothing from missing sources (42.600621ms)\n✔ LT14: --no-github records github.skipped, not github.error (5.925239ms)\n✔ LT15: manifest adapter skips and counts malformed lines (manifest.partial) (0.772151ms)\n✔ LT15: harvest adapter maps per-model fields correctly (1.003893ms)\n✔ LT15: transcript usage/cost sums correctly and a version-4 transcript soft-fails per-file (3.005889ms)\n✔ LT15: review-dir discovery matches <phase>-<slug>-<date> naming (0.641817ms)\n✔ LT15: git/GitHub adapters consume only the injected fakes (81.476667ms)\n✔ LT16: phase attribution, agent time, capped human-wait, rework, window bounds (3.442865ms)\n✔ LT16: a 3-hour gap contributes exactly 30 minutes to human-wait (3.146373ms)\n✔ collect-run: no run store exits 1 (nothing collectable) (27.125556ms)\n✔ collect-run: writes docs/retros/<slug>/run.json by default and validates (42.703225ms)\n✔ resolveSessionDirs: an override list is used verbatim; absence marks sessions.dir_unresolved (0.288152ms)\n✔ LT24: every mandated hook step names record-run-event.sh and its event-type token together (1.802258ms)\n✔ LT24: the panel-dispatch step and the validator-dispatch step each name harvest-panel.sh (0.198708ms)\n✔ LT24: sdlc-retro SKILL.md names collect and render invocations skill-relatively (FS12 forms) (0.083077ms)\n✔ LT25: check-references passes with the new inventory entries (29.766357ms)\n✔ LT25: deleting a new entry's target file fails check-references (55.572134ms)\n✔ structural coverage: every sdlc-retro script has an FS11 inventory entry (0.251736ms)\n✔ structural coverage: every hook script named by §4 has an FS11 inventory entry (0.144381ms)\n✔ structural coverage: every committed sdlc-retro schema file has an FS11 inventory entry (1.20518ms)\n✔ structural coverage: ADR 0028 has an FS11 inventory entry and exists (0.193306ms)\n✔ structural coverage: every run-store/retro path named normatively by either SKILL.md has an inventory entry (0.249998ms)\n✔ LT1: valid emit appends one schema-conforming line, creating the store (39.943701ms)\n✔ LT1b: --by defaults to agent when omitted (23.462653ms)\n✔ LT2: bad inputs exit 2 and never touch the manifest (208.035747ms)\n✔ schema agreement: unknown event types remain valid for forward-compatible consumers (0.33995ms)\n✔ LT2b: a bad input against a non-existent store attempts no write (25.723388ms)\n✔ LT3: concurrent emitters produce N complete, non-interleaved lines (113.531702ms)\n✔ empty explicit identities do not fall through to another identity (76.376774ms)\n✔ LT4: --slug beats env beats branch mapping (85.526759ms)\n✔ LT5: unresolvable identity skips (exit 0, one warning, no write) (64.94783ms)\n✔ LT26: .gitignore ignores the run store (2.095577ms)\n✔ emitter: .sh wrapper delegates to .mjs identically (22.1249ms)\n✔ vocabulary: every known event has a payload descriptor (0.109567ms)\n✔ LT11: harvest copies status.json + events.jsonl and emits panel.harvested (29.394261ms)\n✔ LT11: --with-transcripts copies the transcripts/ subdirectory (34.425114ms)\n✔ LT12: a missing source directory exits 0 with both files missed (35.561673ms)\n✔ LT12: a partially-present source (status without events) reports one missed (30.356017ms)\n✔ harvest-panel: unknown phase and non-positive round exit 2 (109.880148ms)\n✔ harvest-panel.sh wrapper delegates to .mjs identically (29.811607ms)\n✔ LT20: full fixture renders all seven anchors with known-answer data bindings (1.080629ms)\n✔ LT20: an empty-shell run.json fails to carry any pinned data binding (0.155415ms)\n✔ LT21: render-twice byte-identity and no generation-time values (0.357373ms)\n✔ LT21 (CLI): rendering the same --run input twice via the CLI is byte-identical (79.74564ms)\n✔ LT22: soft-data figures carry data-soft and visible attribution (0.254352ms)\n✔ LT22: a soft-less run.json renders coverage notices, not fabricated numbers (0.138263ms)\n✔ LT23: every coverage marker is rendered under #coverage (0.143702ms)\n✔ render-retro CLI: unreadable/unparseable/schema-invalid --run exits 1; usage errors exit 2 (123.796973ms)\n✔ render-retro CLI: default --out is index.html beside the input; --format json envelope (63.611017ms)\n✔ LT6: resolve-panel emits panel.resolved; stdout/exit byte-identical with/without --slug (122.688509ms)\n✔ LT7: ensure-panel-agent emits panel.agent_stamped; stdout/exit byte-identical (164.303244ms)\n✔ LT8: validate-task emits task.validated on PASS with and without --report (220.024943ms)\n✔ LT8: validate-task emits task.validated on FAIL (50.957053ms)\n✔ LT8: validate-task emits task.validated on an ERROR fixture whose manifest parses (31.065443ms)\n✔ LT8: an unparseable-manifest ERROR skips emission with the standard warning (34.744236ms)\n✔ LT9: unwritable run store degrades to a warning; primary output unaffected (117.712097ms)\n✔ nested --repo-root run stores are git-ignored too (gitignore anchoring) (2.629807ms)\n✔ LT10: check-lifecycle.mjs and .sh are untouched by FS5 side-effect emission (0.805398ms)\n✔ PV1: a valid JavaScript manifest runs only declared checks and passes (82.688677ms)\n✔ PV2: only declared argv run; an undeclared tool command never executes (183.737954ms)\n✔ PV3: schema and inspectManifest reject the mutation matrix before any command runs (52.697415ms)\n✔ PV4: command outcomes are complete and deterministic; runner continues after failures (42.76828ms)\n✔ PV4: a timeout is reported as FAIL with timedOut (1058.684182ms)\n✔ PV5: category applicability is exact; injected n/a shapes are rejected (71.489124ms)\n✔ PV6: scenario mapping gates the verdict (68.93287ms)\n✔ PV7: standards and banned patterns are commands, not judgement (85.050857ms)\n✔ PV8: evidence is bounded and secrets are redacted (69.35835ms)\n✔ PV8 unit: boundStream and redaction name-matching are precise (230.081466ms)\n✔ PV9: JSON/text/exit agree and JSON mode is order-independent (418.135676ms)\n✔ PV9: --report writes the exact JSON bytes atomically (134.428962ms)\n✔ PV9: --report outside the repo root is refused and clobbers nothing (90.518946ms)\n✔ PV10: generic validator law and generated agent are portable (0.367417ms)\n✔ PV11: receipt hash verification detects mutation of any stored file (1.712684ms)\n✔ PV11: a FAIL runner-report cannot ride under runnerVerdict PASS (0.347549ms)\n✔ parseArgs: recognises JSON anywhere and rejects bad flags (0.245829ms)\n✔ PV13: renderText is a faithful projection of the report (71.336182ms)\nℹ tests 286\nℹ suites 0\nℹ pass 286\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 4633.252146\n",
+      "stderrTail": ""
+    },
+    {
+      "id": "static.tests",
+      "argv": [
+        "node",
+        "--check",
+        "test/telemetry-docs.test.js"
+      ],
+      "evidence": [
+        "New task suite exists and parses"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 21,
+      "stdoutTail": "",
+      "stderrTail": ""
+    },
+    {
+      "id": "static.inventory",
+      "argv": [
+        "node",
+        "-e",
+        "JSON.parse(require('fs').readFileSync('skills/sdlc/assets/normative-references.json','utf8'))"
+      ],
+      "evidence": [
+        "Expanded FS11 inventory is valid JSON"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 15,
+      "stdoutTail": "",
+      "stderrTail": ""
+    },
+    {
+      "id": "check-references",
+      "argv": [
+        "node",
+        "skills/sdlc/scripts/check-references.mjs",
+        "--format",
+        "json"
+      ],
+      "evidence": [
+        "FS11 checker passes with the new package-owned entries"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 25,
+      "stdoutTail": "{\"schemaVersion\":1,\"reportVersion\":1,\"packageRoot\":\"/home/neil/code/threadsafe/pi-sdlc.worktrees/feat-sdlc-lifecycle-telemetry\",\"inventory\":\"/home/neil/code/threadsafe/pi-sdlc.worktrees/feat-sdlc-lifecycle-telemetry/skills/sdlc/assets/normative-references.json\",\"state\":\"pass\",\"exitCode\":0,\"checks\":[{\"id\":\"inventory.self\",\"status\":\"pass\",\"message\":\"package source assertion and target are present\"},{\"id\":\"inventory.schema\",\"status\":\"pass\",\"message\":\"package source assertion and target are present\"},{\"id\":\"checker.source\",\"status\":\"pass\",\"message\":\"package source assertion and target are present\"},{\"id\":\"checker.wrapper\",\"status\":\"pass\",\"message\":\"package source assertion and target are present\"},{\"id\":\"skill.source\",\"status\":\"pass\",\"message\":\"package source assertion and target are present\"},{\"id\":\"skill.lifecycle-checker\",\"status\":\"pass\",\"message\":\"package source assertion and target are present\"},{\"id\":\"skill.pr-template\",\"status\":\"pass\",\"message\":\"package source assertion and target are present\"},{\"id\":\"skill.ci-workflow\",\"status\":\"pass\",\"message\":\"package source assertion and target are present\"},{\"id\":\"consumer.panels\",\"status\":\"pass\",\"message\":\"readiness verification assertion is present\"},{\"id\":\"readme.source\",\"status\":\"pass\",\"message\":\"package source assertion and target are present\"},{\"id\":\"setup-template.source\",\"status\":\"pass\",\"message\":\"package source assertion and target are present\"},{\"id\":\"tracker.asset\",\"status\":\"pass\",\"message\":\"package source assertion and target are present\"},{\"id\":\"agent-brief.asset\",\"status\":\"pass\",\"message\":\"package source assertion and target are present\"},{\"id\":\"prompt.plan\",\"status\":\"pass\",\"message\":\"package source assertion and target are present\"},{\"id\":\"prompt.validator\",\"status\":\"pass\",\"message\":\"package source assertion and target are present\"},{\"id\":\"prompt.spec\",\"status\":\"pass\",\"message\":\"package source assertion and target are present\"},{\"id\":\"prompt.review\",\"status\":\"pass\",\"message\":\"package source assertion and target are present\"},{\"id\":\"script.status\",\"status\":\"pass\",\"message\":\"package source assertion and target are present\"},{\"id\":\"script.panel-resolver\",\"status\":\"pass\",\"message\":\"package source assertion and target are present\"},{\"id\":\"script.panel-agent\",\"status\":\"pass\",\"message\":\"package source assertion and target are present\"},{\"id\":\"script.validator\",\"status\":\"pass\",\"message\":\"package source assertion and target are present\"},{\"id\":\"script.receipt-verifier\",\"status\":\"pass\",\"message\":\"package source assertion and target are present\"},{\"id\":\"schema.task-validation\",\"status\":\"pass\",\"message\":\"package source assertion and target are present\"},{\"id\":\"consumer.workflow\",\"status\":\"unverified-consumer\",\"message\":\"consumer-owned target is not package-certified: .pi/sdlc/workflow.md\"},{\"id\":\"external.gh\",\"status\":\"external\",\"message\":\"external facility: github.com/issues-projects\"},{\"id\":\"script.record-run-event\",\"status\":\"pass\",\"message\":\"package source assertion and target are present\"},{\"id\":\"script.record-run-event-wrapper\",\"status\":\"pass\",\"message\":\"package source assertion and target are present\"},{\"id\":\"script.harvest-panel\",\"status\":\"pass\",\"message\":\"package source assertion and target are present\"},{\"id\":\"script.harvest-panel-wrapper\",\"status\":\"pass\",\"message\":\"package source assertion and target are present\"},{\"id\":\"retro.script.collect-run\",\"status\":\"pass\",\"message\":\"package source assertion and target are present\"},{\"id\":\"retro.script.collect-run-wrapper\",\"status\":\"pass\",\"message\":\"package source assertion and target are present\"},{\"id\":\"retro.script.render-retro\",\"status\":\"pass\",\"message\":\"package source assertion and target are present\"},{\"id\":\"retro.script.render-retro-wrapper\",\"status\":\"pass\",\"message\":\"package source assertion and target are present\"},{\"id\":\"retro.schema.event\",\"status\":\"pass\",\"message\":\"package source assertion and target are present\"},{\"id\":\"retro.schema.run\",\"status\":\"pass\",\"message\":\"package source assertion and target are present\"},{\"id\":\"retro.schema.llm-protocol\",\"status\":\"pass\",\"message\":\"package source assertion and target are present\"},{\"id\":\"retro.skill.source\",\"status\":\"pass\",\"message\":\"package source assertion and target are present\"},{\"id\":\"retro.skill.store-layout\",\"status\":\"pass\",\"message\":\"package source assertion and target are present\"},{\"id\":\"retro.skill.retro-output\",\"status\":\"pass\",\"message\":\"package source assertion and target are present\"},{\"id\":\"retro.skill.collect-invocation\",\"status\":\"pass\",\"message\":\"package source assertion and target are present\"},{\"id\":\"retro.skill.render-invocation\",\"status\":\"pass\",\"message\":\"package source assertion and target are present\"},{\"id\":\"retro.skill.event-schema-pointer\",\"status\":\"pass\",\"message\":\"package source assertion and target are present\"},{\"id\":\"retro.skill.llm-schema-pointer\",\"status\":\"pass\",\"message\":\"package source assertion and target are present\"},{\"id\":\"telemetry.adr-0028\",\"status\":\"pass\",\"message\":\"package source assertion and target are present\"},{\"id\":\"sdlc.skill.telemetry-section\",\"status\":\"pass\",\"message\":\"package source assertion and target are present\"},{\"id\":\"sdlc.skill.retro-pointer\",\"status\":\"pass\",\"message\":\"package source assertion and target are present\"},{\"id\":\"sdlc.skill.record-run-event-pointer\",\"status\":\"pass\",\"message\":\"package source assertion and target are present\"},{\"id\":\"sdlc.skill.harvest-panel-pointer\",\"status\":\"pass\",\"message\":\"package source assertion and target are present\"}]}\n",
+      "stderrTail": ""
+    },
+    {
+      "id": "static.lint",
+      "argv": [
+        "npm",
+        "run",
+        "lint"
+      ],
+      "evidence": [
+        "Repository formatting and lint rules"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 178,
+      "stdoutTail": "\n> pi-sdlc@0.1.1 lint\n> biome check .\n\nChecked 116 files in 80ms. No fixes applied.\n",
+      "stderrTail": ""
+    },
+    {
+      "id": "patterns.diff",
+      "argv": [
+        "git",
+        "diff",
+        "--check",
+        "HEAD"
+      ],
+      "evidence": [
+        "No whitespace-error banned patterns in the task diff"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 3,
+      "stdoutTail": "",
+      "stderrTail": ""
+    }
+  ],
+  "categories": [
+    {
+      "category": "tests",
+      "status": "PASS",
+      "checkIds": [
+        "tests.telemetry-docs",
+        "tests.check-references",
+        "tests.full"
+      ]
+    },
+    {
+      "category": "static",
+      "status": "PASS",
+      "checkIds": [
+        "static.tests",
+        "static.inventory",
+        "check-references",
+        "static.lint"
+      ]
+    },
+    {
+      "category": "scenarios",
+      "status": "PASS"
+    },
+    {
+      "category": "standards",
+      "status": "N/A",
+      "reason": "No additional task-specific external standard applies; the feature's PR gate verifies the irreversible stream contract."
+    },
+    {
+      "category": "bannedPatterns",
+      "status": "PASS",
+      "checkIds": [
+        "patterns.diff"
+      ]
+    }
+  ],
+  "scenarios": [
+    {
+      "scenarioId": "LT24",
+      "status": "PASS",
+      "checkIds": [
+        "tests.telemetry-docs"
+      ]
+    },
+    {
+      "scenarioId": "LT25",
+      "status": "PASS",
+      "checkIds": [
+        "tests.telemetry-docs",
+        "tests.check-references"
+      ]
+    }
+  ]
+}

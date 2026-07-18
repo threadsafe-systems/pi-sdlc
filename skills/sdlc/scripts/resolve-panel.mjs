@@ -4,13 +4,17 @@
 //
 // Usage: resolve-panel.mjs <phase> [--author <provider/model>] [--pong]
 //          [--track irreversible|reversible] [--emit-tasks <agent>]
-//          [--config DIR|--repo-root DIR]
+//          [--slug S] [--config DIR|--repo-root DIR]
+//
+// --slug is additive (FS13 lt-t2): on success, emits panel.resolved to the
+// resolved run's manifest (fail-soft; never alters stdout or exit code).
 
 import { execFileSync } from "node:child_process";
 import { existsSync, readFileSync } from "node:fs";
 import { homedir } from "node:os";
 import { join } from "node:path";
 import { decomposeGateMode, fail, inspectRoot, PHASES, readConfig } from "./lib.mjs";
+import { emitEvent } from "./telemetry.mjs";
 
 const argv = process.argv.slice(2);
 let phase = "";
@@ -23,6 +27,7 @@ let emitTasksAgent = "";
 let config = "";
 let repoRoot = "";
 let deferredError = "";
+let slug;
 
 for (let i = 0; i < argv.length; i++) {
 	const a = argv[i];
@@ -46,6 +51,7 @@ for (let i = 0; i < argv.length; i++) {
 		if (candidate === undefined || candidate.startsWith("-")) trackMissing = true;
 		else track = argv[++i];
 	} else if (a === "--emit-tasks") emitTasksAgent = needVal("--emit-tasks");
+	else if (a === "--slug") slug = needVal("--slug");
 	else if (a === "--models-file") fail("resolve-panel: --models-file is retired — the panel roster lives in .pi/sdlc/sdlc.config.json (schemaVersion 3)");
 	else if (a === "--config") config = needVal("--config");
 	else if (a === "--repo-root") repoRoot = needVal("--repo-root");
@@ -53,7 +59,7 @@ for (let i = 0; i < argv.length; i++) {
 	else if (!phase) phase = a;
 	else reportParseError(`resolve-panel: unexpected argument: ${a}`);
 }
-if (!phase) fail("usage: resolve-panel <phase> [--author <provider/model>] [--pong] [--track irreversible|reversible] [--emit-tasks <agent>] [--config DIR|--repo-root DIR]");
+if (!phase) fail("usage: resolve-panel <phase> [--author <provider/model>] [--pong] [--track irreversible|reversible] [--emit-tasks <agent>] [--slug S] [--config DIR|--repo-root DIR]");
 if (!PHASES.includes(phase)) fail(`resolve-panel: unknown phase '${phase}'. Known: ${PHASES.join(", ")}`);
 
 const rootResult = inspectRoot({ config, repoRoot });
@@ -230,3 +236,12 @@ if (panel.length < floor) {
 		process.exit(1);
 	}
 }
+
+// §3.3 FS5 side-effect emission: additive, best-effort, never touches stdout/exit.
+emitEvent({
+	event: "panel.resolved",
+	slug,
+	by: "script:resolve-panel",
+	payload: { panelPhase: phase, models: panel, authorExcluded: excludeAuthor && authorIdentity ? authorIdentity : "" },
+	root,
+});

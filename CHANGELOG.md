@@ -1,3 +1,9 @@
+## [2.1.0](https://github.com/threadsafe-systems/pi-sdlc/compare/v2.0.0...v2.1.0) (2026-07-18)
+
+### Features
+
+* add lifecycle telemetry and retro dashboard ([#104](https://github.com/threadsafe-systems/pi-sdlc/issues/104)) ([cdfd1d1](https://github.com/threadsafe-systems/pi-sdlc/commit/cdfd1d1bc11d6e10118d13a97065bdb805e00b7e)), closes [#65](https://github.com/threadsafe-systems/pi-sdlc/issues/65) [#66](https://github.com/threadsafe-systems/pi-sdlc/issues/66) [#67](https://github.com/threadsafe-systems/pi-sdlc/issues/67) [#68](https://github.com/threadsafe-systems/pi-sdlc/issues/68) [#exec-strip](https://github.com/threadsafe-systems/pi-sdlc/issues/exec-strip) [#phase-swimlane](https://github.com/threadsafe-systems/pi-sdlc/issues/phase-swimlane) [#cost-breakdown](https://github.com/threadsafe-systems/pi-sdlc/issues/cost-breakdown) [#panel-deepdive](https://github.com/threadsafe-systems/pi-sdlc/issues/panel-deepdive) [#steering-map](https://github.com/threadsafe-systems/pi-sdlc/issues/steering-map) [#rework-panel](https://github.com/threadsafe-systems/pi-sdlc/issues/rework-panel) [#coverage](https://github.com/threadsafe-systems/pi-sdlc/issues/coverage) [#exec-strip](https://github.com/threadsafe-systems/pi-sdlc/issues/exec-strip) [#69](https://github.com/threadsafe-systems/pi-sdlc/issues/69) [#70](https://github.com/threadsafe-systems/pi-sdlc/issues/70) [#71](https://github.com/threadsafe-systems/pi-sdlc/issues/71)
+
 ## [2.0.0](https://github.com/threadsafe-systems/pi-sdlc/compare/v1.0.2...v2.0.0) (2026-07-18)
 
 ### ⚠ BREAKING CHANGES

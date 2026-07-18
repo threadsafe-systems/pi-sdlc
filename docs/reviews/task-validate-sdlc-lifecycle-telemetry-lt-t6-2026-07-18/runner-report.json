@@ -1,0 +1,185 @@
+{
+  "schemaVersion": 1,
+  "taskId": "lt-t6",
+  "manifest": "/home/neil/code/threadsafe/pi-sdlc.worktrees/feat-sdlc-lifecycle-telemetry/docs/validation/sdlc-lifecycle-telemetry/lt-t6.json",
+  "repoRoot": "/home/neil/code/threadsafe/pi-sdlc.worktrees/feat-sdlc-lifecycle-telemetry",
+  "verdict": "PASS",
+  "exitCode": 0,
+  "errors": [],
+  "manifestErrors": [],
+  "commands": [
+    {
+      "id": "tests.telemetry-render",
+      "argv": [
+        "node",
+        "--test",
+        "test/telemetry-render.test.js"
+      ],
+      "evidence": [
+        "LT20-LT23 dashboard anchors, data bindings, byte-identity, soft flagging, coverage"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 315,
+      "stdoutTail": "✔ LT20: full fixture renders all seven anchors with known-answer data bindings (2.307106ms)\n✔ LT20: an empty-shell run.json fails to carry any pinned data binding (0.217618ms)\n✔ LT21: render-twice byte-identity and no generation-time values (0.565742ms)\n✔ LT21 (CLI): rendering the same --run input twice via the CLI is byte-identical (78.462644ms)\n✔ LT22: soft-data figures carry data-soft and visible attribution (0.369759ms)\n✔ LT22: a soft-less run.json renders coverage notices, not fabricated numbers (0.163198ms)\n✔ LT23: every coverage marker is rendered under #coverage (0.184561ms)\n✔ render-retro CLI: unreadable/unparseable/schema-invalid --run exits 1; usage errors exit 2 (109.768695ms)\n✔ render-retro CLI: default --out is index.html beside the input; --format json envelope (34.748576ms)\nℹ tests 9\nℹ suites 0\nℹ pass 9\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 285.445315\n",
+      "stderrTail": ""
+    },
+    {
+      "id": "tests.full",
+      "argv": [
+        "npm",
+        "test"
+      ],
+      "evidence": [
+        "NF3 frozen-CLI regression floor: corpus remains green with render-retro added"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 4652,
+      "stdoutTail": "[...truncated; showing bounded tail...]\n✔ ICA18: --preset standard writes the explicit standard bundle (44.87918ms)\n✔ ICA18: per-dial flags override the preset; --override lands in overrides (25.546955ms)\n✔ ICA18: --preset full carries the reversible design override (30.786938ms)\n✔ ICA19: --preset patches review/shape/overrides and preserves other keys (70.598807ms)\n✔ ICA19: patch that would delete consumer overrides refuses without --force (133.658748ms)\n✔ ICA23: --override reversible:brainstorm:off is rejected exit 2 (29.550633ms)\n✔ ICA23: --override reversible:onShortfall:fail is rejected exit 2 (40.041119ms)\n✔ ICA23: --override frozen:design:panel is rejected exit 2 (23.773337ms)\n✔ ICA23: --override reversible:design:banana is rejected exit 2 (37.7316ms)\n✔ ICA23: --override reversible:panelSize:zero is rejected exit 2 (25.359852ms)\n✔ ICA23: --override reversible:design is rejected exit 2 (23.766179ms)\n✔ ICA6: older-schema config + --force replaces with a fresh v3 config (132.686216ms)\n✔ ICA19: a single-dial patch preserves the other committed dials (58.186476ms)\n✔ ICA19: preset patch refuses when it would drop a consumer override track (85.267319ms)\n✔ LT18: soft data carries attribution and matches the fixture LLM's scripted responses (58.570969ms)\n✔ LT18: an unreadable review directory yields precision.unparsed:<dir> and no precision number (64.826845ms)\n✔ LT19: --no-llm (noLlm:true) output validates and carries soft.absent (3.407915ms)\n✔ LT17: --from-raw reproduces a byte-identical run.json after live sources are destroyed (121.890937ms)\n✔ LT28: neither the sentinel secret nor the verbatim prompt sentence appears in run.json (42.504141ms)\n✔ NF4 unit: sanitizeSoftString redacts, rejects n-gram containment, and caps at 500 chars (0.168983ms)\n✔ LT29: a failing --gh-cmd yields github.error, schema-valid, no fabricated PR data (19.998605ms)\n✔ LT29: an --llm-cmd returning invalid JSON yields llm.error:narrative, schema-valid, no fabricated summary (48.745264ms)\n✔ LT29: an --llm-cmd that times out yields llm.error:<kind>, schema-valid, exit unaffected (605.924496ms)\n✔ llm-protocol schema: request/response fixtures validate (1.022015ms)\n✔ LT13 (hard): complete fixture store -> schema-valid run.json with known-answer rollups (83.953734ms)\n✔ LT14: a gappy store names every gap and derives nothing from missing sources (50.092025ms)\n✔ LT14: --no-github records github.skipped, not github.error (3.233973ms)\n✔ LT15: manifest adapter skips and counts malformed lines (manifest.partial) (2.675722ms)\n✔ LT15: harvest adapter maps per-model fields correctly (1.162177ms)\n✔ LT15: transcript usage/cost sums correctly and a version-4 transcript soft-fails per-file (3.574175ms)\n✔ LT15: review-dir discovery matches <phase>-<slug>-<date> naming (0.849037ms)\n✔ LT15: git/GitHub adapters consume only the injected fakes (76.31341ms)\n✔ LT16: phase attribution, agent time, capped human-wait, rework, window bounds (2.40485ms)\n✔ LT16: a 3-hour gap contributes exactly 30 minutes to human-wait (3.214971ms)\n✔ collect-run: no run store exits 1 (nothing collectable) (25.91007ms)\n✔ collect-run: writes docs/retros/<slug>/run.json by default and validates (50.493453ms)\n✔ resolveSessionDirs: an override list is used verbatim; absence marks sessions.dir_unresolved (0.281305ms)\n✔ LT1: valid emit appends one schema-conforming line, creating the store (27.419988ms)\n✔ LT1b: --by defaults to agent when omitted (25.441388ms)\n✔ LT2: bad inputs exit 2 and never touch the manifest (198.437923ms)\n✔ schema agreement: unknown event types remain valid for forward-compatible consumers (0.317663ms)\n✔ LT2b: a bad input against a non-existent store attempts no write (19.942091ms)\n✔ LT3: concurrent emitters produce N complete, non-interleaved lines (121.812839ms)\n✔ empty explicit identities do not fall through to another identity (59.994009ms)\n✔ LT4: --slug beats env beats branch mapping (86.808ms)\n✔ LT5: unresolvable identity skips (exit 0, one warning, no write) (71.136828ms)\n✔ LT26: .gitignore ignores the run store (2.691952ms)\n✔ emitter: .sh wrapper delegates to .mjs identically (33.400639ms)\n✔ vocabulary: every known event has a payload descriptor (0.184601ms)\n✔ LT11: harvest copies status.json + events.jsonl and emits panel.harvested (36.658362ms)\n✔ LT11: --with-transcripts copies the transcripts/ subdirectory (28.606654ms)\n✔ LT12: a missing source directory exits 0 with both files missed (36.367253ms)\n✔ LT12: a partially-present source (status without events) reports one missed (37.498661ms)\n✔ harvest-panel: unknown phase and non-positive round exit 2 (158.091691ms)\n✔ harvest-panel.sh wrapper delegates to .mjs identically (34.682189ms)\n✔ LT20: full fixture renders all seven anchors with known-answer data bindings (1.994814ms)\n✔ LT20: an empty-shell run.json fails to carry any pinned data binding (1.003529ms)\n✔ LT21: render-twice byte-identity and no generation-time values (0.677818ms)\n✔ LT21 (CLI): rendering the same --run input twice via the CLI is byte-identical (106.462655ms)\n✔ LT22: soft-data figures carry data-soft and visible attribution (3.542779ms)\n✔ LT22: a soft-less run.json renders coverage notices, not fabricated numbers (0.32631ms)\n✔ LT23: every coverage marker is rendered under #coverage (0.282906ms)\n✔ render-retro CLI: unreadable/unparseable/schema-invalid --run exits 1; usage errors exit 2 (158.469653ms)\n✔ render-retro CLI: default --out is index.html beside the input; --format json envelope (38.550208ms)\n✔ LT6: resolve-panel emits panel.resolved; stdout/exit byte-identical with/without --slug (180.464938ms)\n✔ LT7: ensure-panel-agent emits panel.agent_stamped; stdout/exit byte-identical (138.679531ms)\n✔ LT8: validate-task emits task.validated on PASS with and without --report (209.122261ms)\n✔ LT8: validate-task emits task.validated on FAIL (52.98221ms)\n✔ LT8: validate-task emits task.validated on an ERROR fixture whose manifest parses (31.4604ms)\n✔ LT8: an unparseable-manifest ERROR skips emission with the standard warning (23.779344ms)\n✔ LT9: unwritable run store degrades to a warning; primary output unaffected (112.475106ms)\n✔ nested --repo-root run stores are git-ignored too (gitignore anchoring) (2.393647ms)\n✔ LT10: check-lifecycle.mjs and .sh are untouched by FS5 side-effect emission (0.489722ms)\n✔ PV1: a valid JavaScript manifest runs only declared checks and passes (102.814909ms)\n✔ PV2: only declared argv run; an undeclared tool command never executes (149.04204ms)\n✔ PV3: schema and inspectManifest reject the mutation matrix before any command runs (68.115936ms)\n✔ PV4: command outcomes are complete and deterministic; runner continues after failures (40.994196ms)\n✔ PV4: a timeout is reported as FAIL with timedOut (1051.460313ms)\n✔ PV5: category applicability is exact; injected n/a shapes are rejected (66.75776ms)\n✔ PV6: scenario mapping gates the verdict (69.214298ms)\n✔ PV7: standards and banned patterns are commands, not judgement (90.70714ms)\n✔ PV8: evidence is bounded and secrets are redacted (70.5958ms)\n✔ PV8 unit: boundStream and redaction name-matching are precise (239.778608ms)\n✔ PV9: JSON/text/exit agree and JSON mode is order-independent (442.972125ms)\n✔ PV9: --report writes the exact JSON bytes atomically (108.373686ms)\n✔ PV9: --report outside the repo root is refused and clobbers nothing (99.595514ms)\n✔ PV10: generic validator law and generated agent are portable (0.307787ms)\n✔ PV11: receipt hash verification detects mutation of any stored file (1.729447ms)\n✔ PV11: a FAIL runner-report cannot ride under runnerVerdict PASS (0.328628ms)\n✔ parseArgs: recognises JSON anywhere and rejects bad flags (0.27076ms)\n✔ PV13: renderText is a faithful projection of the report (72.13182ms)\nℹ tests 276\nℹ suites 0\nℹ pass 276\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 4568.282936\n",
+      "stderrTail": ""
+    },
+    {
+      "id": "static.render-retro",
+      "argv": [
+        "node",
+        "--check",
+        "skills/sdlc-retro/scripts/render-retro.mjs"
+      ],
+      "evidence": [
+        "render-retro.mjs parses"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 22,
+      "stdoutTail": "",
+      "stderrTail": ""
+    },
+    {
+      "id": "static.tests",
+      "argv": [
+        "node",
+        "--check",
+        "test/telemetry-render.test.js"
+      ],
+      "evidence": [
+        "New task suite exists and parses"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 20,
+      "stdoutTail": "",
+      "stderrTail": ""
+    },
+    {
+      "id": "static.lint",
+      "argv": [
+        "npm",
+        "run",
+        "lint"
+      ],
+      "evidence": [
+        "Repository formatting and lint rules"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 163,
+      "stdoutTail": "\n> pi-sdlc@0.1.1 lint\n> biome check .\n\nChecked 114 files in 57ms. No fixes applied.\n",
+      "stderrTail": ""
+    },
+    {
+      "id": "patterns.diff",
+      "argv": [
+        "git",
+        "diff",
+        "--check",
+        "HEAD"
+      ],
+      "evidence": [
+        "No whitespace-error banned patterns in the task diff"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 3,
+      "stdoutTail": "",
+      "stderrTail": ""
+    }
+  ],
+  "categories": [
+    {
+      "category": "tests",
+      "status": "PASS",
+      "checkIds": [
+        "tests.telemetry-render",
+        "tests.full"
+      ]
+    },
+    {
+      "category": "static",
+      "status": "PASS",
+      "checkIds": [
+        "static.render-retro",
+        "static.tests",
+        "static.lint"
+      ]
+    },
+    {
+      "category": "scenarios",
+      "status": "PASS"
+    },
+    {
+      "category": "standards",
+      "status": "N/A",
+      "reason": "No additional task-specific external standard applies; the feature's PR gate verifies the irreversible stream contract."
+    },
+    {
+      "category": "bannedPatterns",
+      "status": "PASS",
+      "checkIds": [
+        "patterns.diff"
+      ]
+    }
+  ],
+  "scenarios": [
+    {
+      "scenarioId": "LT20",
+      "status": "PASS",
+      "checkIds": [
+        "tests.telemetry-render"
+      ]
+    },
+    {
+      "scenarioId": "LT21",
+      "status": "PASS",
+      "checkIds": [
+        "tests.telemetry-render"
+      ]
+    },
+    {
+      "scenarioId": "LT22",
+      "status": "PASS",
+      "checkIds": [
+        "tests.telemetry-render"
+      ]
+    },
+    {
+      "scenarioId": "LT23",
+      "status": "PASS",
+      "checkIds": [
+        "tests.telemetry-render"
+      ]
+    }
+  ]
+}

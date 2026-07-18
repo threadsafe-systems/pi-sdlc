@@ -1,0 +1,81 @@
+{
+  "schemaVersion": 1,
+  "taskId": "lt-t5",
+  "buildPlan": "docs/plans/2026-07-17-sdlc-lifecycle-telemetry-build.md",
+  "repoRoot": ".",
+  "ownedScenarios": ["LT17", "LT18", "LT19", "LT28", "LT29"],
+  "checks": [
+    {
+      "id": "tests.telemetry-collect-soft",
+      "argv": ["node", "--test", "test/telemetry-collect-soft.test.js"],
+      "timeoutMs": 120000,
+      "evidence": ["LT17-LT19, LT28-LT29 LLM seam, NF4 redaction/n-gram/cap, raw snapshot + replay"]
+    },
+    {
+      "id": "tests.telemetry-collect",
+      "argv": ["node", "--test", "test/telemetry-collect.test.js"],
+      "timeoutMs": 120000,
+      "evidence": ["lt-t4's hard-pipeline scenarios remain green after the additive soft/raw extension"]
+    },
+    {
+      "id": "tests.full",
+      "argv": ["npm", "test"],
+      "timeoutMs": 300000,
+      "evidence": ["NF3 frozen-CLI regression floor: corpus remains green with the LLM seam/raw snapshotting added"]
+    },
+    {
+      "id": "static.collect-run",
+      "argv": ["node", "--check", "skills/sdlc-retro/scripts/collect-run.mjs"],
+      "evidence": ["collect-run.mjs parses"]
+    },
+    {
+      "id": "static.tests",
+      "argv": ["node", "--check", "test/telemetry-collect-soft.test.js"],
+      "evidence": ["New task suite exists and parses"]
+    },
+    {
+      "id": "static.schema",
+      "argv": ["node", "-e", "JSON.parse(require('fs').readFileSync('skills/sdlc-retro/schema/llm-protocol.schema.json','utf8'))"],
+      "evidence": ["Committed LLM protocol schema is valid JSON"]
+    },
+    {
+      "id": "static.lint",
+      "argv": ["npm", "run", "lint"],
+      "timeoutMs": 120000,
+      "evidence": ["Repository formatting and lint rules"]
+    },
+    {
+      "id": "patterns.diff",
+      "argv": ["git", "diff", "--check", "HEAD"],
+      "evidence": ["No whitespace-error banned patterns in the task diff"]
+    }
+  ],
+  "categories": {
+    "tests": {
+      "applicability": "required",
+      "checkIds": ["tests.telemetry-collect-soft", "tests.telemetry-collect", "tests.full"]
+    },
+    "static": {
+      "applicability": "required",
+      "checkIds": ["static.collect-run", "static.tests", "static.schema", "static.lint"]
+    },
+    "scenarios": {
+      "applicability": "required",
+      "evidence": {
+        "LT17": ["tests.telemetry-collect-soft"],
+        "LT18": ["tests.telemetry-collect-soft"],
+        "LT19": ["tests.telemetry-collect-soft"],
+        "LT28": ["tests.telemetry-collect-soft"],
+        "LT29": ["tests.telemetry-collect-soft"]
+      }
+    },
+    "standards": {
+      "applicability": "n/a",
+      "reason": "No additional task-specific external standard applies; the feature's PR gate verifies the irreversible stream contract."
+    },
+    "bannedPatterns": {
+      "applicability": "required",
+      "checkIds": ["patterns.diff"]
+    }
+  }
+}

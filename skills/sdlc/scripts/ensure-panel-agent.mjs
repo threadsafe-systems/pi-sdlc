@@ -9,12 +9,16 @@
 // .pi/agents where the pi session resolves project agents.
 //
 // Usage: ensure-panel-agent.mjs <phase> [--dir DIR] [--tools CSV] [--force]
-//          [--config DIR | --repo-root DIR]
+//          [--slug S] [--config DIR | --repo-root DIR]
+//
+// --slug is additive (FS13 lt-t2): on success, emits panel.agent_stamped to
+// the resolved run's manifest (fail-soft; never alters stdout or exit code).
 
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, isAbsolute, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { agentDescription, agentName, fail, PHASE_TEMPLATE, PHASES, readConfig, resolveConsumerPath, resolveRoot } from "./lib.mjs";
+import { emitEvent } from "./telemetry.mjs";
 
 const REVIEWER_TAG_REPLACEMENT = "one of several independent reviewers in a multi-model panel";
 const DEFAULT_TOOLS = "read,grep,find,ls,bash";
@@ -26,6 +30,7 @@ let tools = DEFAULT_TOOLS;
 let force = false;
 let config = "";
 let repoRoot = "";
+let slug;
 
 for (let i = 0; i < argv.length; i++) {
 	const a = argv[i];
@@ -37,17 +42,18 @@ for (let i = 0; i < argv.length; i++) {
 	if (a === "--dir") dir = needVal("--dir");
 	else if (a === "--tools") tools = needVal("--tools");
 	else if (a === "--force") force = true;
+	else if (a === "--slug") slug = needVal("--slug");
 	else if (a === "--config") config = needVal("--config");
 	else if (a === "--repo-root") repoRoot = needVal("--repo-root");
 	else if (a === "-h" || a === "--help") {
-		console.log("usage: ensure-panel-agent.mjs <plan_review|spec_review|pr_review|task_validate> [--dir DIR] [--tools CSV] [--force] [--config DIR|--repo-root DIR]");
+		console.log("usage: ensure-panel-agent.mjs <plan_review|spec_review|pr_review|task_validate> [--dir DIR] [--tools CSV] [--force] [--slug S] [--config DIR|--repo-root DIR]");
 		process.exit(0);
 	} else if (a.startsWith("-")) fail(`ensure-panel-agent: unknown flag ${a}`);
 	else if (!phase) phase = a;
 	else fail(`ensure-panel-agent: unexpected arg '${a}'`);
 }
 
-if (!phase) fail("usage: ensure-panel-agent.mjs <plan_review|spec_review|pr_review|task_validate> [--dir DIR] [--tools CSV] [--force] [--config DIR|--repo-root DIR]");
+if (!phase) fail("usage: ensure-panel-agent.mjs <plan_review|spec_review|pr_review|task_validate> [--dir DIR] [--tools CSV] [--force] [--slug S] [--config DIR|--repo-root DIR]");
 if (!PHASES.includes(phase)) fail(`ensure-panel-agent: unknown phase '${phase}' (known: ${PHASES.join(" ")})`);
 
 const skillDir = dirname(dirname(fileURLToPath(import.meta.url))); // skills/sdlc
@@ -77,6 +83,7 @@ if (existsSync(out) && !force) {
 	if (readFileSync(out, "utf8") === content) {
 		console.log(`up to date: ${out}`);
 		console.log(`agent: ${name}`);
+		emitEvent({ event: "panel.agent_stamped", slug, by: "script:ensure-panel-agent", payload: { panelPhase: phase, agent: name }, root });
 		process.exit(0);
 	}
 	fail(`ensure-panel-agent: ${out} exists with different content — rerun with --force to overwrite`, 1);
@@ -86,3 +93,4 @@ mkdirSync(agentsDir, { recursive: true });
 writeFileSync(out, content);
 console.log(`wrote ${out}`);
 console.log(`agent: ${name}`);
+emitEvent({ event: "panel.agent_stamped", slug, by: "script:ensure-panel-agent", payload: { panelPhase: phase, agent: name }, root });
