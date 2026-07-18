@@ -1,3 +1,9 @@
+## [2.4.0](https://github.com/threadsafe-systems/pi-sdlc/compare/v2.3.0...v2.4.0) (2026-07-18)
+
+### Features
+
+* **sdlc:** agent self-documentation — kernel-first SKILL, references, entrypoints, config-doc ([#114](https://github.com/threadsafe-systems/pi-sdlc/issues/114)) ([8b8e82e](https://github.com/threadsafe-systems/pi-sdlc/commit/8b8e82e4bcde731ac48970406958939ba14e5f71)), closes [#105](https://github.com/threadsafe-systems/pi-sdlc/issues/105) [106-#110](https://github.com/threadsafe-systems/106-/issues/110) [#106](https://github.com/threadsafe-systems/pi-sdlc/issues/106) [#108](https://github.com/threadsafe-systems/pi-sdlc/issues/108) [#38](https://github.com/threadsafe-systems/pi-sdlc/issues/38) [#107](https://github.com/threadsafe-systems/pi-sdlc/issues/107) [#109](https://github.com/threadsafe-systems/pi-sdlc/issues/109) [#110](https://github.com/threadsafe-systems/pi-sdlc/issues/110) [#107](https://github.com/threadsafe-systems/pi-sdlc/issues/107) [#108](https://github.com/threadsafe-systems/pi-sdlc/issues/108) [#109](https://github.com/threadsafe-systems/pi-sdlc/issues/109) [#110](https://github.com/threadsafe-systems/pi-sdlc/issues/110) [103/#104](https://github.com/103/pi-sdlc/issues/104) [112/#113](https://github.com/112/pi-sdlc/issues/113) [#112](https://github.com/threadsafe-systems/pi-sdlc/issues/112) [#113](https://github.com/threadsafe-systems/pi-sdlc/issues/113)
+
 ## [2.3.0](https://github.com/threadsafe-systems/pi-sdlc/compare/v2.2.1...v2.3.0) (2026-07-18)
 
 ### Features
