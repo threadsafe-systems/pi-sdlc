@@ -786,6 +786,83 @@
       "resolution": "package",
       "target": "skills/sdlc/scripts/check-completion.mjs",
       "class": "internal"
+    },
+    {
+      "id": "consumer.config-doc-companion",
+      "source": "skills/sdlc/references/system-reference.md",
+      "assertion": "generated consumer companion",
+      "targetKind": "file",
+      "ownership": "consumer",
+      "required": false,
+      "resolution": "consumer",
+      "target": ".pi/sdlc/CONFIG.md",
+      "class": "consumer-integration"
+    },
+    {
+      "id": "delegated.dispatch-subagents",
+      "source": "skills/sdlc/SKILL.md",
+      "assertion": "`dispatch-subagents` (global)",
+      "targetKind": "external",
+      "ownership": "external",
+      "required": false,
+      "resolution": "external",
+      "target": "skill:dispatch-subagents",
+      "class": "delegated"
+    },
+    {
+      "id": "delegated.gh-pr-review-comments",
+      "source": "skills/sdlc/SKILL.md",
+      "assertion": "`gh-pr-review-comments` (global)",
+      "targetKind": "external",
+      "ownership": "external",
+      "required": false,
+      "resolution": "external",
+      "target": "skill:gh-pr-review-comments",
+      "class": "delegated"
+    },
+    {
+      "id": "runtime-tool.git",
+      "source": "skills/sdlc/references/system-reference.md",
+      "assertion": "required runtime tools",
+      "targetKind": "external",
+      "ownership": "external",
+      "required": true,
+      "resolution": "external",
+      "target": "tool:git",
+      "class": "runtime-tool"
+    },
+    {
+      "id": "runtime-tool.node",
+      "source": "skills/sdlc/references/system-reference.md",
+      "assertion": "required runtime tools (e.g. `git`, `gh`, `node`)",
+      "targetKind": "external",
+      "ownership": "external",
+      "required": true,
+      "resolution": "external",
+      "target": "tool:node",
+      "class": "runtime-tool"
+    },
+    {
+      "id": "consumer.hooks",
+      "source": "skills/sdlc/references/system-reference.md",
+      "assertion": "the `hooks`",
+      "targetKind": "file",
+      "ownership": "consumer",
+      "required": false,
+      "resolution": "consumer",
+      "target": ".pi/sdlc/sdlc.config.json",
+      "class": "consumer-integration"
+    },
+    {
+      "id": "consumer.tracker",
+      "source": "skills/sdlc/references/system-reference.md",
+      "assertion": "### Tracker",
+      "targetKind": "file",
+      "ownership": "consumer",
+      "required": false,
+      "resolution": "consumer",
+      "target": ".pi/sdlc/sdlc.config.json",
+      "class": "consumer-integration"
     }
   ],
   "discovery": {

@@ -43,3 +43,11 @@ test("ASD10: prose is never authority over JSON, and readiness/lifecycle contrac
 	assert.match(skillMd, /No\s*\n?\s*readiness state, FS8 check id\/exit, or FS9 lifecycle-check id changes/);
 	assert.match(skillMd, /`CONFIG\.md` is never part of readiness, lifecycle completion, or mandatory CI/);
 });
+
+test("FS13 telemetry load trigger is present in the kernel (regression guard)", () => {
+	// The relocated telemetry section (system-reference §12) needs a mandatory
+	// kernel trigger; lock run.started at startup + the load-and-follow directive.
+	assert.match(skillMd, /emit the `run\.started` telemetry event/);
+	assert.match(skillMd, /\*\*load and follow\*\* `references\/system-reference\.md`/);
+	assert.match(skillMd, /lifecycle telemetry\*\* \(FS13\)/i);
+});

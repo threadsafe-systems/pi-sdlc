@@ -133,6 +133,7 @@ anchor discipline as above.
 | M01 | Dispatching implementation workers (stop-conditions, tool/turn budgets, infra-retry-once) | moved | skills/sdlc/references/phase-implement.md | Dispatching implementation workers |
 | M02 | Stall detection and self-resume (2-consecutive-turn threshold) | moved | skills/sdlc/references/system-reference.md | Stall detection and self-resume |
 | M03 | Lifecycle telemetry (FS13) emission map + harvest-at-dispatch | moved | skills/sdlc/references/system-reference.md | Record these prose-emitted inflection points |
+| M04 | Completion gate (check-completion.mjs pr-open/epic-done claims) | moved | skills/sdlc/references/phase-pr-review.md | Completion is machine-checked, not narrated |
 
 ## Intentionally replaced
 

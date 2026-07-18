@@ -14,7 +14,7 @@
 // 3 refused (unrecognized collision without --force).
 
 import { createHash } from "node:crypto";
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { existsSync, lstatSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { inspectConfig } from "./lib.mjs";
@@ -155,6 +155,22 @@ function keyReference(config) {
 	return lines.join("\n");
 }
 
+// Resolved panel floors: resolve-panel uses a per-phase
+// `panels.phases.<phase>.panelSize` override when present, else `review.panelSize`.
+// §14 requires the generated summary to explain the resolved floors/overrides.
+function panelFloors(config) {
+	const base = config.review?.panelSize;
+	const phases = config.panels?.phases ?? {};
+	const lines = ["## Resolved panel floors", "", `- Default floor \`review.panelSize\`: ${base ?? "see sdlc.config.json"}.`];
+	for (const phase of ["plan_review", "spec_review", "pr_review", "task_validate"]) {
+		const override = phases[phase]?.panelSize;
+		const effective = override ?? base;
+		lines.push(`- \`${phase}\`: ${effective ?? "see sdlc.config.json"}${override === undefined ? " (default)" : ` (panels.phases.${phase}.panelSize override)`}.`);
+	}
+	lines.push("");
+	return lines.join("\n");
+}
+
 // The full expected companion file for a validated config. Deterministic:
 // repeated calls with the same config are byte-identical.
 export function render(config) {
@@ -180,6 +196,7 @@ export function render(config) {
 		"",
 		trackSummary(config, "irreversible"),
 		trackSummary(config, "reversible"),
+		panelFloors(config),
 		keyReference(config),
 		"## Fingerprint & generator format",
 		"",
@@ -217,6 +234,9 @@ export function check(repoRoot) {
 	if (!existsSync(companionPath)) {
 		return { ...base, state: "missing", exitCode: 1, sentinel: { present: false, wellFormed: false, version: null, recognized: false, fingerprint: null }, expectedFingerprint, reason: "companion file absent — run config-doc.sh write" };
 	}
+	if (isSymlink(companionPath)) {
+		return { ...base, state: "error", exitCode: 2, sentinel: { present: true, wellFormed: false, version: null, recognized: false, fingerprint: null }, expectedFingerprint, reason: "collision: companion is a symlink; not followed (resolve by hand)" };
+	}
 	const onDisk = readCompanion(companionPath);
 	if (onDisk === null) {
 		return { ...base, state: "error", exitCode: 2, sentinel: { present: true, wellFormed: false, version: null, recognized: false, fingerprint: null }, expectedFingerprint, reason: "collision: companion is present but unreadable (not a regular file?)" };
@@ -234,7 +254,9 @@ export function check(repoRoot) {
 function parseSentinelSafe(repoRoot) {
 	const companionPath = join(repoRoot, COMPANION_REL);
 	if (!existsSync(companionPath)) return { present: false, wellFormed: false, version: null, recognized: false, fingerprint: null };
-	return parseSentinel(readFileSync(companionPath, "utf8"));
+	const text = readCompanion(companionPath);
+	if (text === null) return { present: true, wellFormed: false, version: null, recognized: false, fingerprint: null };
+	return parseSentinel(text);
 }
 
 // ---- write (Spec §13 matrix) ----------------------------------------------
@@ -249,6 +271,9 @@ export function write(repoRoot, { force = false } = {}) {
 	if (!existsSync(companionPath)) {
 		writeCompanion(companionPath, expected);
 		return { schemaVersion: 1, action: "created", exitCode: 0, path: COMPANION_REL, reason: "created new companion" };
+	}
+	if (isSymlink(companionPath)) {
+		return { schemaVersion: 1, action: "refused", exitCode: 3, path: COMPANION_REL, reason: "companion is a symlink; not overwritten (resolve by hand, even with --force)" };
 	}
 	const onDisk = readCompanion(companionPath);
 	if (onDisk === null) return { schemaVersion: 1, action: "refused", exitCode: 3, path: COMPANION_REL, reason: "companion is present but unreadable (not a regular file?) — resolve by hand" };
@@ -278,6 +303,16 @@ function readCompanion(companionPath) {
 		return readFileSync(companionPath, "utf8");
 	} catch {
 		return null;
+	}
+}
+
+// A companion that is a symlink is never followed (a consumer collision could
+// otherwise clobber a file outside the repo); callers treat it as a collision.
+function isSymlink(p) {
+	try {
+		return lstatSync(p).isSymbolicLink();
+	} catch {
+		return false;
 	}
 }
 

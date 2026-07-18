@@ -5,7 +5,7 @@
 
 import assert from "node:assert/strict";
 import { execFileSync } from "node:child_process";
-import { existsSync, mkdirSync, mkdtempSync, readFileSync, statSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, statSync, symlinkSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -220,4 +220,30 @@ test("ASD6/sentinel: sentinelLine round-trips through parseSentinel as recognize
 	assert.equal(parsed.recognized, true);
 	assert.equal(parsed.version, CURRENT_SENTINEL_VERSION);
 	assert.equal(parsed.fingerprint, fingerprint(VALID_CONFIG));
+});
+
+test("panel floors: render surfaces per-phase panels.phases.*.panelSize overrides (§14)", () => {
+	const body = render(VALID_CONFIG);
+	assert.match(body, /## Resolved panel floors/);
+	assert.match(body, /`pr_review`: 3 \(panels\.phases\.pr_review\.panelSize override\)/);
+	assert.match(body, /`task_validate`: 1 \(panels\.phases\.task_validate\.panelSize override\)/);
+	assert.match(body, /Default floor `review\.panelSize`: 2/);
+});
+
+test("symlink safety: a symlinked companion is never followed (check error / write refused)", () => {
+	const root = fixture();
+	const outside = mkdtempSync(join(tmpdir(), "config-doc-outside-"));
+	const victim = join(outside, "victim.txt");
+	writeFileSync(victim, "do not clobber\n");
+	symlinkSync(victim, companion(root));
+	// check: error/exit 2, does not read through the link as authoritative
+	const c = check(root);
+	assert.equal(c.state, "error");
+	assert.equal(c.exitCode, 2);
+	assert.match(c.reason, /symlink/);
+	// write: refused/exit 3 even with --force; the victim is untouched
+	const forced = write(root, { force: true });
+	assert.equal(forced.action, "refused");
+	assert.equal(forced.exitCode, 3);
+	assert.equal(readFileSync(victim, "utf8"), "do not clobber\n");
 });

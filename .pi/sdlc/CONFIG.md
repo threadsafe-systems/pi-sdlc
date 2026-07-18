@@ -33,6 +33,14 @@ values, resolved per track. The default track is
 - **Panel floor (`review.panelSize`): 2** distinct model(s); shortfall posture `review.onShortfall`: fail.
 - **Separate Specification (`shape.separateSpec`): true** — not applicable on the reversible fast path (no Spec phase); it governs the irreversible track's plan/spec split.
 
+## Resolved panel floors
+
+- Default floor `review.panelSize`: 2.
+- `plan_review`: 2 (panels.phases.plan_review.panelSize override).
+- `spec_review`: 2 (panels.phases.spec_review.panelSize override).
+- `pr_review`: 3 (panels.phases.pr_review.panelSize override).
+- `task_validate`: 1 (panels.phases.task_validate.panelSize override).
+
 ## Configuration keys (JSON order)
 
 - **`schemaVersion`** = `3`
