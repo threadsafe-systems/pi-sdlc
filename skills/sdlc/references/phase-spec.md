@@ -64,7 +64,7 @@ repository at a named commit.
 
 When a panel runs it follows the shared panel run-shape owned by
 `references/phase-pr-review.md`, "Panels", via the `spec_review` phase; the
-reviewer prompt is `prompts/adversary-review.prompt.md`. Reviewers are grounded
+reviewer prompt is `prompts/adversary-spec.prompt.md`. Reviewers are grounded
 in the code and must cite `file:line` for any framework claim.
 
 ## 6. Refusal and backward-transition behaviour

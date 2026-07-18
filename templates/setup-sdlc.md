@@ -82,7 +82,9 @@ Setup writes both `.pi/sdlc/sdlc.config.json` (the authoritative manifest) **and
 JSON stays authoritative). Explain the generated `sdlc.config.json` back to the
 user and point them at `CONFIG.md` for the behavioural summary. Then have them
 **commit `.pi/sdlc/`** — adoption is the manifest blob in the current git `HEAD`,
-and readiness also needs the committed `panels` roster and a current `CONFIG.md`.
+and readiness also needs the committed `panels` roster. `CONFIG.md` is **not**
+part of readiness — it is a generated explanation; startup warns and falls back to
+authoritative JSON when it is missing or stale, and `sdlc-status` never checks it.
 Verify with `<skill-dir>/scripts/sdlc-status.sh` in pi, or headlessly with
 `node <skill-dir>/scripts/sdlc-status.mjs` (exit 0 = ready; exit 3 = adopted but
 incomplete, for example uncommitted `.pi/sdlc/` files). Regenerate `CONFIG.md`

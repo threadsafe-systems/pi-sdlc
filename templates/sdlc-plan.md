@@ -18,6 +18,8 @@ run the readiness gate:
 `error` (exit 2) **stop** and surface the diagnostic; never treat an errored
 `sdlc-status` as adopted.
 
+**Readiness gate still applies.** Adoption detection is separate from readiness: only proceed when `sdlc-status` is `ready` (exit 0 — adopted, run under committed configuration) or `not-adopted` (exit 1 — unadopted, sampling path). On `not-ready` (exit 3) or `error` (exit 2) **stop** and surface the remediations/diagnostics, matching the `SKILL.md` startup table, before entering any phase or firing any hook.
+
 ## 2. Load the phase reference
 
 Load `references/phase-plan.md` and run under it; do not duplicate its mechanics.

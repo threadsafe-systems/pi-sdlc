@@ -6,6 +6,7 @@
 // removing a moved statement from its destination fails non-vacuously.
 
 import assert from "node:assert/strict";
+import { execFileSync } from "node:child_process";
 import { existsSync, readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -35,8 +36,40 @@ test("ASD5: the ledger parses and covers both statements and red flags", () => {
 	const parsed = rows();
 	const statements = parsed.filter((r) => r.id.startsWith("S"));
 	const redFlags = parsed.filter((r) => r.id.startsWith("RF"));
-	assert.ok(statements.length >= 60, `expected the full pre-change statement set, got ${statements.length}`);
+	assert.ok(statements.length >= 70, `expected the full pre-change statement set, got ${statements.length}`);
 	assert.ok(redFlags.length >= 14, `expected the full pre-change red-flags list, got ${redFlags.length}`);
+});
+
+test("ASD5 (non-vacuous): every pre-change SKILL.md red flag is covered by a retained RF row", () => {
+	// Ground against the committed pre-change SKILL.md (the review baseline), not a
+	// self-declared count: deleting RF rows leaves a baseline red flag uncovered.
+	let baseline;
+	let base = "main";
+	try {
+		base = execFileSync("git", ["-C", repo, "merge-base", "HEAD", "main"], { encoding: "utf8" }).trim();
+	} catch {}
+	for (const ref of [`${base}:skills/sdlc/SKILL.md`, "main:skills/sdlc/SKILL.md", "origin/main:skills/sdlc/SKILL.md"]) {
+		try {
+			baseline = execFileSync("git", ["-C", repo, "show", ref], { encoding: "utf8" });
+			break;
+		} catch {}
+	}
+	assert.ok(baseline, "could not read the pre-change SKILL.md baseline from git");
+	const rfStart = baseline.indexOf("## Red flags");
+	assert.ok(rfStart >= 0, "baseline must have a Red flags section");
+	const rfSectionRaw = baseline.slice(rfStart);
+	const bulletCount = rfSectionRaw.split("\n").filter((l) => l.startsWith("- ")).length;
+	assert.ok(bulletCount >= 14, `expected >=14 pre-change red flags, got ${bulletCount}`);
+	const rfRows = rows().filter((r) => r.id.startsWith("RF"));
+	// Every pre-change red flag has exactly one retained RF row (deleting a row trips this).
+	assert.equal(rfRows.length, bulletCount, `RF rows (${rfRows.length}) must equal pre-change red flags (${bulletCount})`);
+	const baselineRf = norm(rfSectionRaw);
+	const skill = readNorm("skills/sdlc/SKILL.md");
+	for (const r of rfRows) {
+		const a = norm(r.anchor);
+		assert.ok(baselineRf.includes(a), `${r.id}: anchor not found in the pre-change red flags: "${r.anchor}"`);
+		assert.ok(skill.includes(a), `${r.id}: anchor not retained in current SKILL.md: "${r.anchor}"`);
+	}
 });
 
 test("ASD5: every retained/moved row's destination exists and contains its anchor", () => {

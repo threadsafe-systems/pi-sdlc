@@ -149,9 +149,10 @@ named surfaces, not six discovered skills.
 
 ## Gate/process conflict rule
 
-For `.pi/sdlc/workflow.md` and any local rule: *gates* — the Gate column of the
-phase table plus the iron law's forward-skip prohibitions — always resolve to the
-global rule (local rules may ADD gates, never remove or weaken them); *process* —
+For `.pi/sdlc/workflow.md` and any local rule: *gates* — each phase's invariant
+gate seam (defined in its `references/phase-*.md`) plus the iron law's
+forward-skip prohibitions — always resolve to the global rule
+(local rules may ADD gates, never remove or weaken them); *process* —
 everything else — resolves to the local rule. Hooks a repo has configured are
 load-bearing contracts (before=block, after=warn), not optional enhancements; see
 `references/system-reference.md`, "Hooks".
@@ -160,7 +161,8 @@ load-bearing contracts (before=block, after=warn), not optional enhancements; se
 
 - `adversarial-review` (global): generic reviewer template mechanics; sdlc keeps
   its own phase-specific prompts, so use `scripts/ensure-panel-agent.sh`.
-- `dispatch-subagents` (global): detached fan-out, model discovery, monitoring.
+- `dispatch-subagents` (global): detached fan-out, model discovery, the
+  0-byte-log rule, monitoring.
 - `gh-pr-review-comments` (global): atomic inline posting and thread replies.
 - `assets/tracker-ops.md` (project-local): GitHub sub-issue/blocking mutations and
   board mechanics shared by map mode and tracker-backed build.

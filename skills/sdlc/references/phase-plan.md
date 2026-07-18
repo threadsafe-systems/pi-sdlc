@@ -55,7 +55,7 @@ The invariant seam is a **design gate plus human approval**. The design gate is
 
 When a panel runs, it follows the shared panel run-shape (resolve → dispatch →
 consolidate → adjudicate → stop) owned by `references/phase-pr-review.md`,
-"Panels". The reviewer prompt is `prompts/adversary-review.prompt.md` via the
+"Panels". The reviewer prompt is `prompts/adversary-plan.prompt.md` via the
 `plan_review` phase; never hand-copy a prompt per model.
 
 ## 6. Refusal and backward-transition behaviour

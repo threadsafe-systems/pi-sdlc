@@ -83,6 +83,9 @@ function validateInventory(raw, root) {
 	if (raw.schemaVersion !== 1 || raw.package !== "pi-sdlc" || !Array.isArray(raw.sources) || raw.sources.length === 0) {
 		throw new Error("inventory requires schemaVersion 1, package pi-sdlc, and non-empty sources");
 	}
+	if (!raw.discovery || typeof raw.discovery !== "object" || Array.isArray(raw.discovery) || !Array.isArray(raw.discovery.roots) || !Array.isArray(raw.discovery.exclude)) {
+		throw new Error("inventory requires a discovery block with roots[] and exclude[] (structural discovery must not be silently disabled)");
+	}
 	const ids = new Set();
 	return raw.sources.map((entry, index) => {
 		if (!entry || typeof entry !== "object" || Array.isArray(entry)) throw new Error(`sources[${index}] must be an object`);
@@ -204,10 +207,10 @@ function run(args) {
 		if (!existsSync(resolve(args.packageRoot, target))) add(entry.id, "fail", `package target is missing: ${target}`);
 		else add(entry.id, "pass", "package source assertion and target are present");
 	}
-	// Inverse-completeness: every discovered public artifact must have a row.
+	// Inverse-completeness: every discovered public artifact must have an inventory
+	// row whose target is that artifact (a mere `source` reference does not count).
 	const covered = new Set();
 	for (const entry of entries) {
-		covered.add(entry.source.split("\\").join("/"));
 		if (entry.resolution !== "external") covered.add(entry.target.split("\\").join("/"));
 	}
 	discover(args.packageRoot, raw.discovery, covered, add);

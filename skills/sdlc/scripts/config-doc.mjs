@@ -16,6 +16,7 @@
 import { createHash } from "node:crypto";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
 import { inspectConfig } from "./lib.mjs";
 
 export const CURRENT_SENTINEL_VERSION = "v1";
@@ -53,15 +54,18 @@ export function fingerprint(config) {
 
 // ---- sentinel grammar (Spec §13) ------------------------------------------
 
-const SENTINEL_RE = /^<!-- pi-sdlc:config-doc (v[0-9]+) fingerprint=([0-9a-f]{64}) -->$/;
+const SENTINEL_RE = /^<!-- pi-sdlc:config-doc (v[0-9]+) fingerprint=([0-9a-f]{64}) -->\r?$/;
 
 export function sentinelLine(config) {
 	return `<!-- pi-sdlc:config-doc ${CURRENT_SENTINEL_VERSION} fingerprint=${fingerprint(config)} -->`;
 }
 
-// Parse the first physical line of an on-disk companion.
+// Parse the first physical line of an on-disk companion. Tolerant of a leading
+// BOM and a trailing CR so a line-ending/BOM rewrite of pi-sdlc's own generated
+// output stays *recognized* (and is regenerated), never mistaken for a foreign
+// consumer collision.
 export function parseSentinel(text) {
-	const firstLine = text.split("\n", 1)[0] ?? "";
+	const firstLine = (text.split("\n", 1)[0] ?? "").replace(/^\uFEFF/, "");
 	const m = SENTINEL_RE.exec(firstLine);
 	if (!m) return { present: firstLine.startsWith("<!-- pi-sdlc:config-doc"), wellFormed: false, version: null, recognized: false, fingerprint: null };
 	const version = m[1];
@@ -119,7 +123,7 @@ function trackSummary(config, track) {
 		`- **Brainstorm gate (\`review.brainstorm\`): ${r.brainstorm}**.`,
 		`- **Task validation (\`review.tasks\`): ${r.tasks}** — ${TASKS_MEANING[r.tasks] ?? "see sdlc.config.json"}.`,
 		`- **Panel floor (\`review.panelSize\`): ${r.panelSize}** distinct model(s); shortfall posture \`review.onShortfall\`: ${r.onShortfall}.`,
-		`- **Separate Specification (\`shape.separateSpec\`): ${config.shape.separateSpec}** — ${config.shape.separateSpec ? "Plan and Spec are distinct gated artifacts" : "Plan and Spec merge into one gated artifact"}.`,
+		`- **Separate Specification (\`shape.separateSpec\`): ${config.shape.separateSpec}** — ${track === "reversible" ? "not applicable on the reversible fast path (no Spec phase); it governs the irreversible track's plan/spec split" : config.shape.separateSpec ? "Plan and Spec are distinct gated artifacts" : "Plan and Spec merge into one gated artifact"}.`,
 		"",
 	].join("\n");
 }
@@ -141,9 +145,10 @@ const KEY_REFERENCE = {
 function keyReference(config) {
 	const lines = ["## Configuration keys (JSON order)", ""];
 	for (const key of Object.keys(config)) {
+		// Full current value (no truncation): Spec §14 requires each persisted key's
+		// complete current value in the generated reference.
 		const value = JSON.stringify(config[key]);
-		const bounded = value.length > 200 ? `${value.slice(0, 197)}...` : value;
-		lines.push(`- **\`${key}\`** = \`${bounded}\``);
+		lines.push(`- **\`${key}\`** = \`${value}\``);
 		lines.push(`  - ${KEY_REFERENCE[key] ?? "Persisted config key; see sdlc.config.json and the schema."}`);
 	}
 	lines.push("");
@@ -209,7 +214,10 @@ export function check(repoRoot) {
 	if (!existsSync(companionPath)) {
 		return { ...base, state: "missing", exitCode: 1, sentinel: { present: false, wellFormed: false, version: null, recognized: false, fingerprint: null }, expectedFingerprint, reason: "companion file absent — run config-doc.sh write" };
 	}
-	const onDisk = readFileSync(companionPath, "utf8");
+	const onDisk = readCompanion(companionPath);
+	if (onDisk === null) {
+		return { ...base, state: "error", exitCode: 2, sentinel: { present: true, wellFormed: false, version: null, recognized: false, fingerprint: null }, expectedFingerprint, reason: "collision: companion is present but unreadable (not a regular file?)" };
+	}
 	const sentinel = parseSentinel(onDisk);
 	if (!sentinel.recognized) {
 		return { ...base, state: "error", exitCode: 2, sentinel, expectedFingerprint, reason: "collision: unrecognized companion (absent/malformed/unsupported sentinel); not overwritten without --force" };
@@ -239,7 +247,8 @@ export function write(repoRoot, { force = false } = {}) {
 		writeCompanion(companionPath, expected);
 		return { schemaVersion: 1, action: "created", exitCode: 0, path: COMPANION_REL, reason: "created new companion" };
 	}
-	const onDisk = readFileSync(companionPath, "utf8");
+	const onDisk = readCompanion(companionPath);
+	if (onDisk === null) return { schemaVersion: 1, action: "refused", exitCode: 3, path: COMPANION_REL, reason: "companion is present but unreadable (not a regular file?) — resolve by hand" };
 	const sentinel = parseSentinel(onDisk);
 	if (!sentinel.recognized) {
 		if (!force) return { schemaVersion: 1, action: "refused", exitCode: 3, path: COMPANION_REL, reason: "unrecognized consumer collision — pass --force to overwrite" };
@@ -256,6 +265,17 @@ export function write(repoRoot, { force = false } = {}) {
 function writeCompanion(companionPath, text) {
 	mkdirSync(dirname(companionPath), { recursive: true });
 	writeFileSync(companionPath, text);
+}
+
+// Read an on-disk companion, returning null when it exists but cannot be read as
+// text (e.g. a directory) so callers degrade deterministically instead of
+// throwing past the state/exit contract.
+function readCompanion(companionPath) {
+	try {
+		return readFileSync(companionPath, "utf8");
+	} catch {
+		return null;
+	}
 }
 
 // ---- CLI ------------------------------------------------------------------
@@ -316,4 +336,4 @@ function main() {
 	process.exit(2);
 }
 
-if (import.meta.url === `file://${process.argv[1]}`) main();
+if (process.argv[1] === fileURLToPath(import.meta.url)) main();

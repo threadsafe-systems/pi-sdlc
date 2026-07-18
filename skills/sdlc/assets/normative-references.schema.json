@@ -4,7 +4,7 @@
   "title": "pi-sdlc normative reference inventory",
   "type": "object",
   "additionalProperties": false,
-  "required": ["schemaVersion", "package", "sources"],
+  "required": ["schemaVersion", "package", "discovery", "sources"],
   "properties": {
     "schemaVersion": { "type": "integer", "const": 1 },
     "package": { "type": "string", "const": "pi-sdlc" },

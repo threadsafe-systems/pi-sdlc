@@ -31,7 +31,7 @@ values, resolved per track. The default track is
 - **Brainstorm gate (`review.brainstorm`): human**.
 - **Task validation (`review.tasks`): subagent** — each task ends with a validator subagent running the deterministic runner.
 - **Panel floor (`review.panelSize`): 2** distinct model(s); shortfall posture `review.onShortfall`: fail.
-- **Separate Specification (`shape.separateSpec`): true** — Plan and Spec are distinct gated artifacts.
+- **Separate Specification (`shape.separateSpec`): true** — not applicable on the reversible fast path (no Spec phase); it governs the irreversible track's plan/spec split.
 
 ## Configuration keys (JSON order)
 
@@ -47,7 +47,7 @@ values, resolved per track. The default track is
   - Artifact homes (plans/specs/reviews/agents). Alternatives: any repo-relative paths; references route artifacts here.
 - **`tracker`** = `{"repo":"threadsafe-systems/pi-sdlc","board":{"number":5,"url":"https://github.com/orgs/threadsafe-systems/projects/5"}}`
   - GitHub tracker repo + board for map/epic modes. Alternatives: omit to disable tracker-backed modes.
-- **`hooks`** = `{"implement":{"before":[{"use":"tool:worktree_session","do":"Create AND enter a worktree for the feature branch so the session's working root moves into it (create-then-enter); target all subsequen...`
+- **`hooks`** = `{"implement":{"before":[{"use":"tool:worktree_session","do":"Create AND enter a worktree for the feature branch so the session's working root moves into it (create-then-enter); target all subsequent writes there."}]}}`
   - Local before/after workflow hooks per phase. Alternatives: omit, or declare run/use items (see system-reference Hooks).
 - **`review`** = `{"brainstorm":"human","design":"panel","code":"panel","tasks":"subagent","panelSize":2,"onShortfall":"fail"}`
   - The six review dials (brainstorm/design/code/tasks/panelSize/onShortfall). An override under `overrides.<track>.review` changes the effective result per track.
@@ -55,7 +55,7 @@ values, resolved per track. The default track is
   - separateSpec / publishToTracker / defaultTrack. Alternatives per schema; publishToTracker may be an integer or "never".
 - **`overrides`** = `{"reversible":{"review":{"design":"human"}}}`
   - Per-track (irreversible/reversible) dial overrides. Alternatives: omit, or override review dials for one track.
-- **`panels`** = `{"$comment":"Panel roster for pi-sdlc itself. Preference reconciled against live credentials by resolve-panel; model ids drift, re-check with `pi --list-models`. Entries may carry pi's ':<thinking>...`
+- **`panels`** = `{"$comment":"Panel roster for pi-sdlc itself. Preference reconciled against live credentials by resolve-panel; model ids drift, re-check with `pi --list-models`. Entries may carry pi's ':<thinking>' suffix (off/minimal/low/medium/high/xhigh/max). panelSize is the per-phase distinct-model floor (model-identity axis). See docs/plans/2026-07-11-model-thinking-levels.md for the reasoning levels.","authorDefault":"anthropic/claude-opus-4-8:high","phases":{"plan_review":{"panelSize":2,"prefer":["openai-codex/gpt-5.6-sol:high","zai/glm-5.2:high","anthropic/claude-opus-4-8:high","deepseek/deepseek-v4-pro:high"]},"spec_review":{"panelSize":2,"prefer":["anthropic/claude-opus-4-8:high","openai-codex/gpt-5.6-luna:high","zai/glm-5.2:high","deepseek/deepseek-v4-pro:high"]},"pr_review":{"panelSize":3,"prefer":["anthropic/claude-fable-5:high","openai-codex/gpt-5.6-sol:high","google/gemini-3.1-pro-preview:high","deepseek/deepseek-v4-pro:high"]},"task_validate":{"panelSize":1,"prefer":["openai-codex/gpt-5.6-terra","anthropic/claude-haiku-4-5","deepseek/deepseek-v4-flash","zai/glm-5.2:low"]}}}`
   - The panel roster (authorDefault + per-phase prefer/panelSize). Resolved live against credentials by resolve-panel.
 
 ## Fingerprint & generator format

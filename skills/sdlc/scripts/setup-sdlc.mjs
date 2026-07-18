@@ -611,6 +611,13 @@ function writeBundle(root, opts, cfg, hooks, tracker, residueAssets = []) {
 		const docAsset = { id: "config-doc", action: docReport.action, message: `${docReport.action} ${docReport.path}: ${docReport.reason}` };
 		if (docReport.exitCode === 3) docAsset.remediation = "re-run setup with --force to overwrite the consumer-authored .pi/sdlc/CONFIG.md";
 		report.assets.push(docAsset);
+		// A config-doc error (e.g. an on-disk config that is v3 but invalid) must not
+		// be swallowed behind an exit-0 setup; hard-stop the bundle.
+		if (docReport.exitCode === 2) {
+			report.exitCode = 2;
+			report.error = `config companion generation failed: ${docReport.reason}`;
+			return report;
+		}
 	}
 	asset("pr-template", join(root, ".github", "pull_request_template.md"), "pr-template", templateContent, report);
 	if (opts.withCiWorkflow) {
@@ -696,7 +703,7 @@ export async function interview(root, injectedAsk) {
 	}
 }
 
-if (import.meta.url === `file://${process.argv[1]}`) {
+if (process.argv[1] === fileURLToPath(import.meta.url)) {
 	const argv = process.argv.slice(2);
 	const isJson = jsonMode(argv);
 	let resolvedRoot;
