@@ -1,0 +1,39 @@
+{
+  "schemaVersion": 1,
+  "taskId": "rpi-t1",
+  "buildPlan": "docs/plans/2026-07-18-resolve-panel-cross-provider-identity-build.md",
+  "repoRoot": ".",
+  "ownedScenarios": [],
+  "checks": [
+    {
+      "id": "tests.resolve-panel",
+      "argv": ["node", "--test", "test/resolve-panel-v3.test.js"],
+      "timeoutMs": 60000,
+      "evidence": ["rpi-t1: Bedrock-hosted Claude collapses to the direct-API identity for author-exclusion", "rpi-t1: distinct Bedrock version qualifiers stay distinct identities", "rpi-t1: Bedrock-native model with no direct-provider equivalent is unaffected", "full ICA12-ICA24 suite, no regressions"]
+    },
+    {
+      "id": "static.syntax",
+      "argv": ["node", "--check", "skills/sdlc/scripts/resolve-panel.mjs"],
+      "evidence": ["resolve-panel.mjs syntax"]
+    },
+    {
+      "id": "static.lint",
+      "argv": ["npm", "run", "lint"],
+      "timeoutMs": 60000,
+      "evidence": ["biome check ."]
+    },
+    {
+      "id": "standards.sdlc-status",
+      "argv": ["node", "skills/sdlc/scripts/sdlc-status.mjs", "--repo-root", ".", "--format", "json"],
+      "timeoutMs": 30000,
+      "evidence": ["committed .pi/sdlc/sdlc.config.json (roster edit) is still schema-valid; state ready"]
+    }
+  ],
+  "categories": {
+    "tests": { "applicability": "required", "checkIds": ["tests.resolve-panel"] },
+    "static": { "applicability": "required", "checkIds": ["static.syntax", "static.lint"] },
+    "scenarios": { "applicability": "n/a", "reason": "No Specification exists on the reversible track (Plan skips Spec); acceptance is the Plan's Definition of Done directly." },
+    "standards": { "applicability": "required", "checkIds": ["standards.sdlc-status"] },
+    "bannedPatterns": { "applicability": "n/a", "reason": "No project-specific banned-pattern grep applies to this change; git diff --check coverage is redundant with npm run lint's whitespace rules for this repo's biome config." }
+  }
+}

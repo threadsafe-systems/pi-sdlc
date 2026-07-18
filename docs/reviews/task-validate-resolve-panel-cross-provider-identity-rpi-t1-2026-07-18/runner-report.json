@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "taskId": "rpi-t1",
+  "manifest": "/home/neil/code/threadsafe/pi-sdlc.worktrees/fix-resolve-panel-cross-provider-identity/docs/validation/resolve-panel-cross-provider-identity/rpi-t1.json",
+  "repoRoot": "/home/neil/code/threadsafe/pi-sdlc.worktrees/fix-resolve-panel-cross-provider-identity",
+  "verdict": "PASS",
+  "exitCode": 0,
+  "errors": [],
+  "manifestErrors": [],
+  "commands": [
+    {
+      "id": "tests.resolve-panel",
+      "argv": [
+        "node",
+        "--test",
+        "test/resolve-panel-v3.test.js"
+      ],
+      "evidence": [
+        "rpi-t1: Bedrock-hosted Claude collapses to the direct-API identity for author-exclusion",
+        "rpi-t1: distinct Bedrock version qualifiers stay distinct identities",
+        "rpi-t1: Bedrock-native model with no direct-provider equivalent is unaffected",
+        "full ICA12-ICA24 suite, no regressions"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 1269,
+      "stdoutTail": "✔ ICA12: pr_review floor 3, author's provider-mate stays, author identity excluded (53.015039ms)\n✔ ICA12: plan_review floor 2 caps at two (56.494079ms)\n✔ ICA12: task_validate floors at 1 (68.766094ms)\n✔ ICA13: --track required when overrides present (61.527569ms)\n✔ ICA13: reversible design override refuses; irreversible resolves (140.283795ms)\n✔ ICA14: review.tasks off refuses task_validate (61.403692ms)\n✔ ICA14: design human refuses plan_review with no-panel message (65.201493ms)\n✔ ICA14: separateSpec false refuses spec_review with no-spec-gate message (73.518303ms)\n✔ ICA15: per-phase panelSize overrides review.panelSize (68.888498ms)\n✔ ICA15: floor 1 does not exclude the author identity (51.598518ms)\n✔ ICA16: onShortfall proceed advises and exits 0 below floor (70.792985ms)\n✔ ICA16: onShortfall fail exits 1 below floor (56.575021ms)\n✔ ICA14: review.tasks self refuses task_validate (only subagent resolves) (57.421463ms)\n✔ ICA24: separateSpec false precedes the human/off refusal for spec_review (48.183356ms)\n✔ rpi-t1: Bedrock-hosted Claude collapses to the direct-API identity for author-exclusion (45.97865ms)\n✔ rpi-t1: distinct Bedrock version qualifiers stay distinct identities (76.879351ms)\n✔ rpi-t1: Bedrock-native model with no direct-provider equivalent is unaffected (68.639471ms)\nℹ tests 17\nℹ suites 0\nℹ pass 17\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 1219.793452\n",
+      "stderrTail": ""
+    },
+    {
+      "id": "static.syntax",
+      "argv": [
+        "node",
+        "--check",
+        "skills/sdlc/scripts/resolve-panel.mjs"
+      ],
+      "evidence": [
+        "resolve-panel.mjs syntax"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 48,
+      "stdoutTail": "",
+      "stderrTail": ""
+    },
+    {
+      "id": "static.lint",
+      "argv": [
+        "npm",
+        "run",
+        "lint"
+      ],
+      "evidence": [
+        "biome check ."
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 425,
+      "stdoutTail": "\n> pi-sdlc@0.1.1 lint\n> biome check .\n\nChecked 123 files in 169ms. No fixes applied.\n",
+      "stderrTail": ""
+    },
+    {
+      "id": "standards.sdlc-status",
+      "argv": [
+        "node",
+        "skills/sdlc/scripts/sdlc-status.mjs",
+        "--repo-root",
+        ".",
+        "--format",
+        "json"
+      ],
+      "evidence": [
+        "committed .pi/sdlc/sdlc.config.json (roster edit) is still schema-valid; state ready"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 95,
+      "stdoutTail": "{\n  \"schemaVersion\": 2,\n  \"root\": \"/home/neil/code/threadsafe/pi-sdlc.worktrees/fix-resolve-panel-cross-provider-identity\",\n  \"state\": \"ready\",\n  \"exitCode\": 0,\n  \"checks\": [\n    {\n      \"id\": \"cli.arguments\",\n      \"status\": \"pass\",\n      \"message\": \"arguments are valid\"\n    },\n    {\n      \"id\": \"root.resolve\",\n      \"status\": \"pass\",\n      \"message\": \"consumer root resolved\"\n    },\n    {\n      \"id\": \"git.repository\",\n      \"status\": \"pass\",\n      \"message\": \"resolved root is a git worktree\"\n    },\n    {\n      \"id\": \"adoption.manifest-head\",\n      \"status\": \"pass\",\n      \"message\": \"current HEAD contains .pi/sdlc/sdlc.config.json\"\n    },\n    {\n      \"id\": \"adoption.manifest-clean\",\n      \"status\": \"pass\",\n      \"message\": \"manifest matches HEAD in index and working tree\"\n    },\n    {\n      \"id\": \"config.valid\",\n      \"status\": \"pass\",\n      \"message\": \"committed manifest is valid\"\n    },\n    {\n      \"id\": \"config.schema-current\",\n      \"status\": \"pass\",\n      \"message\": \"config schema is current (schemaVersion 3)\"\n    },\n    {\n      \"id\": \"config.panels\",\n      \"status\": \"pass\",\n      \"message\": \"panels roster present\"\n    },\n    {\n      \"id\": \"workflow.readable\",\n      \"status\": \"pass\",\n      \"message\": \"optional workflow.md is absent\"\n    }\n  ]\n}\n",
+      "stderrTail": ""
+    }
+  ],
+  "categories": [
+    {
+      "category": "tests",
+      "status": "PASS",
+      "checkIds": [
+        "tests.resolve-panel"
+      ]
+    },
+    {
+      "category": "static",
+      "status": "PASS",
+      "checkIds": [
+        "static.syntax",
+        "static.lint"
+      ]
+    },
+    {
+      "category": "scenarios",
+      "status": "N/A",
+      "reason": "No Specification exists on the reversible track (Plan skips Spec); acceptance is the Plan's Definition of Done directly."
+    },
+    {
+      "category": "standards",
+      "status": "PASS",
+      "checkIds": [
+        "standards.sdlc-status"
+      ]
+    },
+    {
+      "category": "bannedPatterns",
+      "status": "N/A",
+      "reason": "No project-specific banned-pattern grep applies to this change; git diff --check coverage is redundant with npm run lint's whitespace rules for this repo's biome config."
+    }
+  ],
+  "scenarios": []
+}
