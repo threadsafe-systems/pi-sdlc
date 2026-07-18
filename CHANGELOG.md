@@ -1,3 +1,9 @@
+## [2.3.0](https://github.com/threadsafe-systems/pi-sdlc/compare/v2.2.1...v2.3.0) (2026-07-18)
+
+### Features
+
+* **resolve-panel:** collapse cross-provider Bedrock model identity + roster fallback ([#113](https://github.com/threadsafe-systems/pi-sdlc/issues/113)) ([4d58213](https://github.com/threadsafe-systems/pi-sdlc/commit/4d58213aa3f0a958d2a731f4a5e793e1e83ec113)), closes [#80](https://github.com/threadsafe-systems/pi-sdlc/issues/80)
+
 ## [2.2.1](https://github.com/threadsafe-systems/pi-sdlc/compare/v2.2.0...v2.2.1) (2026-07-18)
 
 ### Bug Fixes
