@@ -27,8 +27,13 @@ import { closeSync, existsSync, fsyncSync, mkdirSync, mkdtempSync, openSync, rea
 import { homedir } from "node:os";
 import { basename, dirname, isAbsolute, join, resolve } from "node:path";
 import { inspectRoot, readConfig } from "../../sdlc/scripts/lib.mjs";
-import { LIFECYCLE_PHASES, PANEL_PHASES, PANEL_TO_LIFECYCLE, runStoreDir, SLUG_RE, validateEnvelope, validatePayload } from "../../sdlc/scripts/telemetry.mjs";
 import { buildRedactionValues, redact } from "../../sdlc/scripts/validate-task.mjs";
+import { currentBranch, KNOWN_EVENTS, LIFECYCLE_PHASES, PANEL_PHASES, PANEL_TO_LIFECYCLE, runStoreDir, SLUG_RE, validateEnvelope, validatePayload } from "../../sdlc/scripts/telemetry.mjs";
+
+// Reverse of PANEL_TO_LIFECYCLE: a review directory's <lifecycle-phase> prefix
+// (spec §6.1 naming, e.g. "pr-<slug>-<date>") maps back to the panel phase
+// whose harvested round it should be attributed to.
+const LIFECYCLE_TO_PANEL = Object.fromEntries(Object.entries(PANEL_TO_LIFECYCLE).map(([panelPhase, lifecyclePhase]) => [lifecyclePhase, panelPhase]));
 
 // NF4: committed soft strings are capped at 500 chars and rejected outright
 // (never truncated) if they contain a >=12-consecutive-word verbatim
@@ -96,8 +101,11 @@ export function readManifest(root, slug) {
 			malformed++;
 			continue;
 		}
-		// Unknown event types are tolerated structurally but only known payloads
-		// are checked against the v1 field tables; unknown events pass through.
+		// Unknown event types are tolerated structurally (not malformed) but
+		// consumers MUST ignore them entirely (spec §3 forward-compat) — an
+		// unrecognized future event type must never influence this collector's
+		// window/measures. Only known-vocabulary payloads are checked and kept.
+		if (!KNOWN_EVENTS.includes(obj.event)) continue;
 		const payloadIssues = validatePayload(obj.event, obj.payload);
 		if (payloadIssues.length > 0) {
 			malformed++;
@@ -105,7 +113,11 @@ export function readManifest(root, slug) {
 		}
 		events.push(obj);
 	}
-	events.sort((a, b) => (a.ts < b.ts ? -1 : a.ts > b.ts ? 1 : 0));
+	// Compare by epoch value, not lexicographically: TS_RE admits both a bare
+	// "...:00Z" and a fractional "...:00.500Z" second, which sort inverted as
+	// strings ("Z" > "."). Real emitters always produce the fractional form,
+	// but a hand-written record-run-event --payload line may not.
+	events.sort((a, b) => new Date(a.ts).getTime() - new Date(b.ts).getTime());
 	const markers = malformed > 0 ? [{ marker: "manifest.partial", detail: `${malformed} malformed line(s) skipped` }] : [];
 	return { events, markers };
 }
@@ -172,10 +184,10 @@ function extractPanelModels(status) {
 		const model = typeof r.model === "string" ? r.model : Array.isArray(r.attemptedModels) && typeof r.attemptedModels[0] === "string" ? r.attemptedModels[0] : undefined;
 		if (!model) continue;
 		const entry = { model };
-		if (Number.isInteger(r.totalTokens)) entry.tokens = r.totalTokens;
-		if (typeof r.totalCost === "number") entry.cost = r.totalCost;
-		if (Number.isInteger(r.durationMs)) entry.durationMs = r.durationMs;
-		if (Number.isInteger(r.turnCount)) entry.turns = r.turnCount;
+		if (Number.isInteger(r.totalTokens) && r.totalTokens >= 0) entry.tokens = r.totalTokens;
+		if (Number.isFinite(r.totalCost) && r.totalCost >= 0) entry.cost = r.totalCost;
+		if (Number.isInteger(r.durationMs) && r.durationMs >= 0) entry.durationMs = r.durationMs;
+		if (Number.isInteger(r.turnCount) && r.turnCount >= 0) entry.turns = r.turnCount;
 		models.push(entry);
 	}
 	return models;
@@ -189,16 +201,21 @@ export function discoverPanels(root, slug, events) {
 	const panelsDir = join(runStoreDir(root, slug), "panels");
 	const panels = [];
 	const foundPhases = new Set();
+	const byPhaseRound = new Map();
 	if (existsSync(panelsDir)) {
 		for (const name of readdirSync(panelsDir).sort()) {
 			const m = PANEL_DIR_RE.exec(name);
 			if (!m) continue;
-			const [, panelPhase, roundStr] = m;
+			const [, panelPhase, roundStr, date] = m;
 			const dir = join(panelsDir, name);
 			if (!statSync(dir).isDirectory()) continue;
+			const statusPath = join(dir, "status.json");
+			const eventsPath = join(dir, "events.jsonl");
+			// A harvest that missed BOTH files leaves nothing to distill; the round
+			// stays honestly uncovered rather than marking its phase "found".
+			if (!existsSync(statusPath) && !existsSync(eventsPath)) continue;
 			foundPhases.add(panelPhase);
 			let models = [];
-			const statusPath = join(dir, "status.json");
 			if (existsSync(statusPath)) {
 				try {
 					models = extractPanelModels(JSON.parse(readFileSync(statusPath, "utf8")));
@@ -206,9 +223,17 @@ export function discoverPanels(root, slug, events) {
 					// unparseable status.json: no per-model metrics for this round, still listed
 				}
 			}
-			panels.push({ panelPhase, round: Number(roundStr), dir: `.pi/sdlc/runs/${slug}/panels/${name}`, models });
+			const round = Number(roundStr);
+			const entry = { panelPhase, round, dir: `.pi/sdlc/runs/${slug}/panels/${name}`, models, date };
+			// Dedupe by (panelPhase, round): a re-harvest of the same round across a
+			// date boundary must not double-count hard totals. Keep the latest date.
+			const key = `${panelPhase}#${round}`;
+			const existing = byPhaseRound.get(key);
+			if (!existing || date > existing.date) byPhaseRound.set(key, entry);
 		}
 	}
+	for (const { date, ...entry } of byPhaseRound.values()) panels.push(entry);
+	panels.sort((a, b) => (a.panelPhase < b.panelPhase ? -1 : a.panelPhase > b.panelPhase ? 1 : a.round - b.round));
 	const expectedPhases = new Set();
 	for (const e of events) {
 		if (e.event === "panel.dispatched" || e.event === "panel.harvested" || e.event === "panel.consolidated") expectedPhases.add(e.payload.panelPhase);
@@ -223,16 +248,29 @@ export function discoverPanels(root, slug, events) {
 // ---- review-directory discovery (spec §6.1.4) -----------------------------
 
 // Discovers panel-round review directories named <lifecycle-phase>-<slug>-<date>
-// under the configured reviews path (default docs/reviews). This is a
-// discovery-only adapter for lt-t4: consumption for soft.panelPrecision
-// narrative parsing is lt-t5's LLM-seam extension.
-export function discoverReviewDirs(root, slug, reviewsPath = "docs/reviews") {
+// under the configured reviews path (default docs/reviews), and snapshots the
+// discovered list into raw/ (spec §6.4: the directory listing itself is
+// non-manifest input). --from-raw reads that snapshot exclusively and never
+// touches the live reviews path.
+export function discoverReviewDirs(root, slug, reviewsPath = "docs/reviews", { fromRaw = false } = {}) {
+	const rawListPath = join("reviews", "_dirs.json");
+	if (fromRaw) {
+		if (!rawExists(root, slug, rawListPath)) return [];
+		try {
+			return JSON.parse(readRaw(root, slug, rawListPath));
+		} catch {
+			return [];
+		}
+	}
 	const base = join(root, reviewsPath);
-	if (!existsSync(base)) return [];
 	const re = new RegExp(`^(${LIFECYCLE_PHASES.join("|")})-${slug}-\\d{4}-\\d{2}-\\d{2}$`);
-	return readdirSync(base)
-		.filter((name) => re.test(name) && statSync(join(base, name)).isDirectory())
-		.sort();
+	const dirs = existsSync(base)
+		? readdirSync(base)
+				.filter((name) => re.test(name) && statSync(join(base, name)).isDirectory())
+				.sort()
+		: [];
+	snapshotRaw(root, slug, rawListPath, JSON.stringify(dirs));
+	return dirs;
 }
 
 // ---- session adapter (spec §6.1.3) -----------------------------------------
@@ -489,8 +527,8 @@ export function callLlm(llmCmd, request, { timeoutMs = LLM_TIMEOUT_MS } = {}) {
 	} catch {
 		return { ok: false, reason: "invalid JSON response" };
 	}
-	if (!isPlainObject(response) || typeof response.kind !== "string" || typeof response.model !== "string" || typeof response.provider !== "string" || !("output" in response)) {
-		return { ok: false, reason: "response missing kind/model/provider/output" };
+	if (!isPlainObject(response) || response.kind !== request.kind || typeof response.model !== "string" || response.model.length === 0 || typeof response.provider !== "string" || response.provider.length === 0 || !isPlainObject(response.output)) {
+		return { ok: false, reason: "response missing/mismatched kind, model, provider, or object output" };
 	}
 	return { ok: true, response };
 }
@@ -507,7 +545,7 @@ function validateSteeringOutput(output, expectedLength) {
 
 function validatePrecisionOutput(output) {
 	if (!isPlainObject(output) || !Array.isArray(output.perModel)) return false;
-	return output.perModel.every((p) => isPlainObject(p) && typeof p.model === "string" && Number.isInteger(p.raised) && Number.isInteger(p.incorporated) && Number.isInteger(p.dismissed));
+	return output.perModel.every((p) => isPlainObject(p) && typeof p.model === "string" && p.model.length > 0 && isNonNegInt(p.raised) && isNonNegInt(p.incorporated) && isNonNegInt(p.dismissed));
 }
 
 // ---- NF4: redaction + n-gram containment + 500-char cap ---------------------
@@ -528,17 +566,42 @@ function wordsOf(text) {
 }
 
 // True iff `text` contains an NGRAM_LEN-consecutive-word verbatim substring of
-// any string in `userMessages` (case-sensitive, whitespace-normalized).
+// any string in `userMessages` (case-sensitive). Both sides are tokenized by
+// the SAME whitespace split before comparison, so a newline or extra space
+// anywhere inside the shared run of words cannot defeat the check (a raw
+// substring match against un-normalized text would miss exactly that case).
 export function containsUserNgram(text, userMessages) {
+	const candidateWords = wordsOf(text);
+	if (candidateWords.length < NGRAM_LEN) return false;
+	const candidateGrams = new Set();
+	for (let i = 0; i + NGRAM_LEN <= candidateWords.length; i++) candidateGrams.add(candidateWords.slice(i, i + NGRAM_LEN).join(" "));
 	for (const msg of userMessages) {
 		if (typeof msg !== "string") continue;
 		const msgWords = wordsOf(msg);
 		for (let i = 0; i + NGRAM_LEN <= msgWords.length; i++) {
-			const gram = msgWords.slice(i, i + NGRAM_LEN).join(" ");
-			if (gram.length > 0 && text.includes(gram)) return true;
+			if (candidateGrams.has(msgWords.slice(i, i + NGRAM_LEN).join(" "))) return true;
 		}
 	}
 	return false;
+}
+
+// Lighter NF4 pass for short LLM-controlled identifiers (attribution model/
+// provider, per-model precision labels): redact + cap, no n-gram check (these
+// are identifiers, not prose, so verbatim-prompt containment doesn't apply,
+// but an adversarial or misbehaving --llm-cmd must still not be able to smuggle
+// a secret into a committed identifier field).
+const ATTRIBUTION_STRING_CAP = 200;
+export function sanitizeAttributionString(value, redactionValues, userMessages = []) {
+	if (typeof value !== "string") return null;
+	const afterRedaction = redact(value, redactionValues);
+	if (containsUserNgram(afterRedaction, userMessages)) return null;
+	return afterRedaction.length > ATTRIBUTION_STRING_CAP ? afterRedaction.slice(0, ATTRIBUTION_STRING_CAP) : afterRedaction;
+}
+
+function safeAttribution(response, redactionValues, userMessages) {
+	const model = sanitizeAttributionString(response.model, redactionValues, userMessages);
+	const provider = sanitizeAttributionString(response.provider, redactionValues, userMessages);
+	return model && provider ? { model, provider } : null;
 }
 
 // ---- run.json assembly ----------------------------------------------------
@@ -563,10 +626,16 @@ function isTs(v) {
 	return typeof v === "string" && /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?Z$/.test(v);
 }
 
+function checkKeys(obj, allowed, path, add) {
+	if (!isPlainObject(obj)) return;
+	for (const key of Object.keys(obj)) if (!allowed.includes(key)) add(path, `unknown property ${key}`);
+}
+
 export function validateRunJson(raw) {
 	const issues = [];
 	const add = (p, m) => issues.push(`${p}: ${m}`);
 	if (!isPlainObject(raw)) return ["root: must be an object"];
+	checkKeys(raw, ["schemaVersion", "slug", "title", "track", "coverage", "sizeProxies", "hard", "soft"], "/", add);
 	if (raw.schemaVersion !== 1) add("/schemaVersion", "must be 1");
 	if (typeof raw.slug !== "string" || !SLUG_RE.test(raw.slug)) add("/slug", "must match the slug grammar");
 	if (raw.title !== undefined && (typeof raw.title !== "string" || raw.title.length === 0)) add("/title", "must be a non-empty string when present");
@@ -574,42 +643,106 @@ export function validateRunJson(raw) {
 	if (!Array.isArray(raw.coverage)) add("/coverage", "must be an array");
 	else
 		raw.coverage.forEach((c, i) => {
-			if (!isPlainObject(c) || typeof c.marker !== "string" || c.marker.length === 0) add(`/coverage/${i}`, "must be {marker, detail?}");
+			if (!isPlainObject(c) || typeof c.marker !== "string" || c.marker.length === 0 || (c.detail !== undefined && typeof c.detail !== "string")) add(`/coverage/${i}`, "must be {marker, detail?}");
+			else checkKeys(c, ["marker", "detail"], `/coverage/${i}`, add);
 		});
 	const sp = raw.sizeProxies;
 	if (!isPlainObject(sp)) add("/sizeProxies", "must be an object");
 	else {
+		checkKeys(sp, ["scenarios", "tasks", "diff", "sessions", "phases"], "/sizeProxies", add);
 		if (!isNonNegInt(sp.scenarios)) add("/sizeProxies/scenarios", "must be a non-negative integer");
 		if (!isNonNegInt(sp.tasks)) add("/sizeProxies/tasks", "must be a non-negative integer");
 		if (!isNonNegInt(sp.sessions)) add("/sizeProxies/sessions", "must be a non-negative integer");
 		if (!Array.isArray(sp.phases) || !sp.phases.every((p) => LIFECYCLE_PHASES.includes(p))) add("/sizeProxies/phases", "must be an array of lifecycle phases");
 		if (sp.diff !== undefined && (!isPlainObject(sp.diff) || !isNonNegInt(sp.diff.files) || !isNonNegInt(sp.diff.insertions) || !isNonNegInt(sp.diff.deletions))) add("/sizeProxies/diff", "must be {files,insertions,deletions} when present");
+		else if (sp.diff !== undefined) checkKeys(sp.diff, ["files", "insertions", "deletions"], "/sizeProxies/diff", add);
 	}
 	const h = raw.hard;
 	if (!isPlainObject(h)) {
 		add("/hard", "must be an object");
 		return issues;
 	}
+	checkKeys(h, ["window", "phases", "sessions", "panels", "models", "rollups", "rework", "totals"], "/hard", add);
 	if (!isPlainObject(h.window) || !isTs(h.window.start) || !isTs(h.window.end)) add("/hard/window", "must be {start, end} ISO timestamps");
-	if (!Array.isArray(h.phases) || !h.phases.every((p) => isPlainObject(p) && LIFECYCLE_PHASES.includes(p.phase) && isTs(p.start) && isTs(p.end))) add("/hard/phases", "must be an array of {phase, start, end}");
-	if (!Array.isArray(h.sessions) || !h.sessions.every((s) => isPlainObject(s) && typeof s.file === "string" && isTs(s.start) && isTs(s.end))) add("/hard/sessions", "must be an array of {file, start, end}");
-	if (!Array.isArray(h.panels) || !h.panels.every((p) => isPlainObject(p) && PANEL_PHASES.includes(p.panelPhase) && isPosInt(p.round) && typeof p.dir === "string" && Array.isArray(p.models))) add("/hard/panels", "must be an array of {panelPhase, round, dir, models[]}");
+	else checkKeys(h.window, ["start", "end"], "/hard/window", add);
+	if (!Array.isArray(h.phases)) add("/hard/phases", "must be an array of {phase, start, end}");
+	else
+		h.phases.forEach((p, i) => {
+			if (!isPlainObject(p) || !LIFECYCLE_PHASES.includes(p.phase) || !isTs(p.start) || !isTs(p.end) || (p.exitExplicit !== undefined && typeof p.exitExplicit !== "boolean")) add(`/hard/phases/${i}`, "must be {phase, start, end, exitExplicit?}");
+			else checkKeys(p, ["phase", "start", "end", "exitExplicit"], `/hard/phases/${i}`, add);
+		});
+	if (!Array.isArray(h.sessions)) add("/hard/sessions", "must be an array of {file, start, end}");
+	else
+		h.sessions.forEach((s, i) => {
+			if (!isPlainObject(s) || typeof s.file !== "string" || s.file.length === 0 || !isTs(s.start) || !isTs(s.end) || (s.models !== undefined && (!Array.isArray(s.models) || !s.models.every((m) => typeof m === "string" && m.length > 0)))) add(`/hard/sessions/${i}`, "must be {file, start, end, models[]?}");
+			else checkKeys(s, ["file", "start", "end", "models"], `/hard/sessions/${i}`, add);
+		});
+	if (!Array.isArray(h.panels)) add("/hard/panels", "must be an array of {panelPhase, round, dir, models[]}");
+	else
+		h.panels.forEach((p, i) => {
+			if (!isPlainObject(p) || !PANEL_PHASES.includes(p.panelPhase) || !isPosInt(p.round) || typeof p.dir !== "string" || p.dir.length === 0 || !Array.isArray(p.models)) add(`/hard/panels/${i}`, "must be {panelPhase, round, dir, models[]}");
+			else {
+				checkKeys(p, ["panelPhase", "round", "dir", "models"], `/hard/panels/${i}`, add);
+				p.models.forEach((m, j) => {
+					if (
+						!isPlainObject(m) ||
+						typeof m.model !== "string" ||
+						m.model.length === 0 ||
+						(m.tokens !== undefined && !isNonNegInt(m.tokens)) ||
+						(m.cost !== undefined && (!Number.isFinite(m.cost) || m.cost < 0)) ||
+						(m.durationMs !== undefined && !isNonNegInt(m.durationMs)) ||
+						(m.turns !== undefined && !isNonNegInt(m.turns))
+					)
+						add(`/hard/panels/${i}/models/${j}`, "must match the panel model schema");
+					else checkKeys(m, ["model", "tokens", "cost", "durationMs", "turns"], `/hard/panels/${i}/models/${j}`, add);
+				});
+			}
+		});
 	if (!Array.isArray(h.models) || !h.models.every((m) => typeof m === "string" && m.length > 0)) add("/hard/models", "must be an array of non-empty strings");
 	if (!isPlainObject(h.rollups) || !Array.isArray(h.rollups.byModel) || !Array.isArray(h.rollups.byPhase)) add("/hard/rollups", "must be {byModel[], byPhase[]}");
-	if (!isPlainObject(h.rework) || !isNonNegInt(h.rework.artifactRevised) || !isNonNegInt(h.rework.phaseBackward) || !isNonNegInt(h.rework.fixWave)) add("/hard/rework", "must be {artifactRevised, phaseBackward, fixWave}");
+	else {
+		checkKeys(h.rollups, ["byModel", "byPhase"], "/hard/rollups", add);
+		h.rollups.byModel.forEach((r, i) => {
+			if (!isPlainObject(r) || typeof r.model !== "string" || r.model.length === 0 || !isNonNegInt(r.tokens) || !Number.isFinite(r.cost) || r.cost < 0) add(`/hard/rollups/byModel/${i}`, "must be {model, tokens, cost}");
+			else checkKeys(r, ["model", "tokens", "cost"], `/hard/rollups/byModel/${i}`, add);
+		});
+		h.rollups.byPhase.forEach((r, i) => {
+			if (!isPlainObject(r) || !LIFECYCLE_PHASES.includes(r.phase) || !isNonNegInt(r.tokens) || !Number.isFinite(r.cost) || r.cost < 0) add(`/hard/rollups/byPhase/${i}`, "must be {phase, tokens, cost}");
+			else checkKeys(r, ["phase", "tokens", "cost"], `/hard/rollups/byPhase/${i}`, add);
+		});
+	}
+	if (!isPlainObject(h.rework) || !isNonNegInt(h.rework.artifactRevised) || !isNonNegInt(h.rework.phaseBackward) || !isNonNegInt(h.rework.fixWave)) add("/hard/rework", "must be {artifactRevised,phaseBackward,fixWave}");
+	else checkKeys(h.rework, ["artifactRevised", "phaseBackward", "fixWave"], "/hard/rework", add);
 	const t = h.totals;
-	if (!isPlainObject(t) || !isNonNegInt(t.tokens) || typeof t.cost !== "number" || t.cost < 0 || !isNonNegInt(t.wallMs) || !isNonNegInt(t.agentMs) || !isNonNegInt(t.humanWaitMs)) add("/hard/totals", "must be {tokens, cost, wallMs, agentMs, humanWaitMs}");
+	if (!isPlainObject(t) || !isNonNegInt(t.tokens) || !Number.isFinite(t.cost) || t.cost < 0 || !isNonNegInt(t.wallMs) || !isNonNegInt(t.agentMs) || !isNonNegInt(t.humanWaitMs)) add("/hard/totals", "must be {tokens, cost, wallMs, agentMs, humanWaitMs}");
+	else checkKeys(t, ["tokens", "cost", "wallMs", "agentMs", "humanWaitMs"], "/hard/totals", add);
 
 	if (raw.soft !== undefined) {
 		const sf = raw.soft;
 		if (!isPlainObject(sf)) add("/soft", "must be an object when present");
 		else {
-			if (!isPlainObject(sf.attribution) || typeof sf.attribution.model !== "string" || typeof sf.attribution.provider !== "string") add("/soft/attribution", "must be {model, provider}");
-			if (!Array.isArray(sf.narratives) || !sf.narratives.every((n) => isPlainObject(n) && LIFECYCLE_PHASES.includes(n.phase) && typeof n.summary === "string" && n.summary.length <= 500)) add("/soft/narratives", "must be an array of {phase, summary<=500}");
+			checkKeys(sf, ["attribution", "narratives", "steering", "panelPrecision"], "/soft", add);
+			if (!isPlainObject(sf.attribution) || typeof sf.attribution.model !== "string" || sf.attribution.model.length === 0 || typeof sf.attribution.provider !== "string" || sf.attribution.provider.length === 0) add("/soft/attribution", "must be {model, provider}");
+			else checkKeys(sf.attribution, ["model", "provider"], "/soft/attribution", add);
+			if (!Array.isArray(sf.narratives)) add("/soft/narratives", "must be an array of {phase, summary<=500}");
+			else
+				sf.narratives.forEach((n, i) => {
+					if (!isPlainObject(n) || !LIFECYCLE_PHASES.includes(n.phase) || typeof n.summary !== "string" || n.summary.length > 500) add(`/soft/narratives/${i}`, "must be {phase, summary<=500}");
+					else checkKeys(n, ["phase", "summary"], `/soft/narratives/${i}`, add);
+				});
 			const steeringClasses = new Set(["gate-approval", "correction", "scope-change", "unblock", "other"]);
-			if (!Array.isArray(sf.steering) || !sf.steering.every((s) => isPlainObject(s) && isNonNegInt(s.index) && isTs(s.ts) && steeringClasses.has(s.class))) add("/soft/steering", "must be an array of {index, ts, class}");
-			if (!Array.isArray(sf.panelPrecision) || !sf.panelPrecision.every((p) => isPlainObject(p) && PANEL_PHASES.includes(p.panelPhase) && isPosInt(p.round) && typeof p.model === "string" && isNonNegInt(p.raised) && isNonNegInt(p.incorporated) && isNonNegInt(p.dismissed)))
-				add("/soft/panelPrecision", "must be an array of {panelPhase, round, model, raised, incorporated, dismissed}");
+			if (!Array.isArray(sf.steering)) add("/soft/steering", "must be an array of {index, ts, class}");
+			else
+				sf.steering.forEach((s, i) => {
+					if (!isPlainObject(s) || !isNonNegInt(s.index) || !isTs(s.ts) || !steeringClasses.has(s.class)) add(`/soft/steering/${i}`, "must be {index, ts, class}");
+					else checkKeys(s, ["index", "ts", "class"], `/soft/steering/${i}`, add);
+				});
+			if (!Array.isArray(sf.panelPrecision)) add("/soft/panelPrecision", "must be an array of {panelPhase, round, model, raised, incorporated, dismissed}");
+			else
+				sf.panelPrecision.forEach((p, i) => {
+					if (!isPlainObject(p) || !PANEL_PHASES.includes(p.panelPhase) || !isPosInt(p.round) || typeof p.model !== "string" || p.model.length === 0 || !isNonNegInt(p.raised) || !isNonNegInt(p.incorporated) || !isNonNegInt(p.dismissed)) add(`/soft/panelPrecision/${i}`, "must match the panelPrecision schema");
+					else checkKeys(p, ["panelPhase", "round", "model", "raised", "incorporated", "dismissed"], `/soft/panelPrecision/${i}`, add);
+				});
 		}
 	}
 	return issues;
@@ -628,7 +761,7 @@ function userText(entry) {
 }
 
 function turnsFor(session, spans, phase, windowStart, windowEnd) {
-	return session.entries.filter((e) => e.type === "message" && typeof e.timestamp === "string" && attributePhase(spans, e.timestamp, windowStart, windowEnd) === phase).map((e) => ({ ts: e.timestamp, role: e.message.role, ...(e.message.model ? { model: e.message.model } : {}) }));
+	return session.entries.filter((e) => e.type === "message" && e.message && typeof e.timestamp === "string" && attributePhase(spans, e.timestamp, windowStart, windowEnd) === phase).map((e) => ({ ts: e.timestamp, role: e.message.role, ...(e.message.model ? { model: e.message.model } : {}) }));
 }
 
 function eventsFor(events, phase, spans) {
@@ -675,8 +808,12 @@ function buildSoftData({ root, slug, llmCmd, noLlm, fromRaw, events, spans, sess
 			continue;
 		}
 		const summary = sanitizeSoftString(result.response.output.summary, { redactionValues, userMessages: allUserMessages });
-		if (summary === null) continue;
-		attribution ??= { model: result.response.model, provider: result.response.provider };
+		const responseAttribution = safeAttribution(result.response, redactionValues, allUserMessages);
+		if (summary === null || !responseAttribution) {
+			markers.push({ marker: `soft.omitted:narrative:${phase}` });
+			continue;
+		}
+		attribution ??= responseAttribution;
 		narratives.push({ phase, summary });
 	}
 	if (narrativeFailed) markers.push({ marker: "llm.error:narrative" });
@@ -691,7 +828,12 @@ function buildSoftData({ root, slug, llmCmd, noLlm, fromRaw, events, spans, sess
 			steeringFailed = true;
 			continue;
 		}
-		attribution ??= { model: result.response.model, provider: result.response.provider };
+		const responseAttribution = safeAttribution(result.response, redactionValues, allUserMessages);
+		if (!responseAttribution) {
+			markers.push({ marker: `soft.omitted:steering:${s.file}` });
+			continue;
+		}
+		attribution ??= responseAttribution;
 		for (const c of result.response.output.classifications) {
 			const turn = userTurns[c.index];
 			if (turn) steering.push({ index: c.index, ts: turn.ts, class: c.class });
@@ -701,7 +843,21 @@ function buildSoftData({ root, slug, llmCmd, noLlm, fromRaw, events, spans, sess
 
 	const panelPrecision = [];
 	for (const dir of reviewDirs) {
-		const dirPath = join(root, reviewsPath, dir);
+		const lifecyclePhase = LIFECYCLE_PHASES.find((phase) => dir.startsWith(`${phase}-${slug}-`));
+		const panelPhase = lifecyclePhase ? LIFECYCLE_TO_PANEL[lifecyclePhase] : undefined;
+		const reviewDate = dir.match(/-(\d{4}-\d{2}-\d{2})$/)?.[1];
+		const matchingPanels = panelPhase ? panels.filter((p) => p.panelPhase === panelPhase) : [];
+		const datedPanels = reviewDate ? matchingPanels.filter((p) => p.dir.endsWith(`-${reviewDate}`)) : matchingPanels;
+		const candidates = datedPanels.length > 0 ? datedPanels : matchingPanels.length === 1 ? matchingPanels : [];
+		const panel = candidates.sort((a, b) => b.round - a.round)[0];
+		if (!panel) {
+			markers.push({ marker: `precision.unparsed:${dir}` });
+			continue;
+		}
+
+		// Replay reads only raw/reviews/<dir>; it must not consult a mutated or
+		// deleted live reviews directory after the original collection.
+		const dirPath = fromRaw ? join(rawDir(root, slug), "reviews", dir) : join(root, reviewsPath, dir);
 		let consolidatedText = "";
 		let findingsText = "";
 		const modelFiles = [];
@@ -725,9 +881,26 @@ function buildSoftData({ root, slug, llmCmd, noLlm, fromRaw, events, spans, sess
 			markers.push({ marker: `precision.unparsed:${dir}` });
 			continue;
 		}
-		attribution ??= { model: result.response.model, provider: result.response.provider };
+		const responseAttribution = safeAttribution(result.response, redactionValues, allUserMessages);
+		if (!responseAttribution) {
+			markers.push({ marker: `soft.omitted:precision:${dir}` });
+			continue;
+		}
+		attribution ??= responseAttribution;
 		for (const pm of result.response.output.perModel) {
-			panelPrecision.push({ panelPhase: panels.find((p) => p.dir.includes(dir))?.panelPhase ?? "pr_review", round: panels.find((p) => p.dir.includes(dir))?.round ?? 1, model: pm.model, raised: pm.raised, incorporated: pm.incorporated, dismissed: pm.dismissed });
+			const model = sanitizeAttributionString(pm.model, redactionValues, allUserMessages);
+			if (!model) {
+				markers.push({ marker: `soft.omitted:precision-model:${dir}` });
+				continue;
+			}
+			panelPrecision.push({
+				panelPhase: panel.panelPhase,
+				round: panel.round,
+				model,
+				raised: pm.raised,
+				incorporated: pm.incorporated,
+				dismissed: pm.dismissed,
+			});
 		}
 	}
 
@@ -742,9 +915,10 @@ export function collect({ root, slug, gitCmd = "git", baseRef = "main", ghCmd = 
 	const { title, track } = extractTitleTrack(events);
 	const { panels, markers: panelMarkers } = discoverPanels(root, slug, events);
 	const { sessions, markers: sessionMarkers } = discoverSessions(root, events, { sessionsDirOverrides, home, slug, fromRaw });
-	const reviewDirs = discoverReviewDirs(root, slug, reviewsPath);
+	const reviewDirs = discoverReviewDirs(root, slug, reviewsPath, { fromRaw });
 	const { diff, markers: gitMarkers } = gitDiffStatsSeam(root, slug, gitCmd, baseRef, fromRaw);
-	const { markers: ghMarkers } = githubCheckSeam(root, slug, ghCmd, slug, noGithub, fromRaw);
+	const branch = currentBranch(root) || slug;
+	const { markers: ghMarkers } = githubCheckSeam(root, slug, ghCmd, branch, noGithub, fromRaw);
 
 	const windowStart = events.length > 0 ? events[0].ts : new Date(0).toISOString();
 	const windowEnd = events.length > 0 ? events[events.length - 1].ts : new Date(0).toISOString();
@@ -790,7 +964,8 @@ export function collect({ root, slug, gitCmd = "git", baseRef = "main", ghCmd = 
 			if (!sessEnd || ts > sessEnd) sessEnd = ts;
 			const model = e.message?.model;
 			const tokens = Number.isInteger(e.message?.usage?.totalTokens) ? e.message.usage.totalTokens : 0;
-			const cost = typeof e.message?.usage?.cost?.total === "number" ? e.message.usage.cost.total : 0;
+			const rawCost = e.message?.usage?.cost?.total;
+			const cost = Number.isFinite(rawCost) && rawCost >= 0 ? rawCost : 0;
 			totalTokens += tokens;
 			totalCost += cost;
 			if (model) {
