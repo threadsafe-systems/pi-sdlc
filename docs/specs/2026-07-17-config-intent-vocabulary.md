@@ -125,8 +125,10 @@ exit 2 in the consuming checkers.
 3. Gate refusals (exit 1, message names the committed dial), checked in
    this **order** (S9): (1) for `spec_review`,
    `shape.separateSpec === false` → refuse: the committed shape has no spec
-   gate; (2) for `task_validate`, `effective(tasks) === "off"` → task
-   validation off; (3) `effective(dialFor(phase), track)` is `human` or
+   gate; (2) for `task_validate`, `effective(tasks) !== "subagent"` → refuse
+   (distinct diagnostics: `off` → task validation off; `self` → only
+   `subagent` resolves a validator panel — adjudicated at PR panel round 1,
+   finding M1); (3) `effective(dialFor(phase), track)` is `human` or
    `off` → "no panel to resolve" (via `decomposeGateMode`, unchanged).
 4. Floors and dedupe per §3; credential checks, `--pong`, `--emit-tasks`,
    stderr report format preserved from the OL-A loop.
@@ -309,7 +311,9 @@ resolve-panel:
   block); accepted and validated otherwise; per-track dial resolution
   follows §3 (`overrides.reversible.review.design: human` refuses a
   reversible `plan_review` panel while irreversible resolves).
-- **ICA14**: `review.tasks: "off"` → `task_validate` refusal exit 1;
+- **ICA14**: `review.tasks: "off"` → `task_validate` refusal exit 1 (off
+  message); `review.tasks: "self"` → `task_validate` refusal exit 1 (only
+  `subagent` resolves — M1);
   `effective` mode `human`/`off` → "no panel to resolve" exit 1;
   `separateSpec: false` → `spec_review` refusal exit 1 with the
   no-spec-gate message.
