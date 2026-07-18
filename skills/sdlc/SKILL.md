@@ -303,6 +303,20 @@ per model.
    literal placeholders. On the reversible track, provide the plan and Build
    plan only and explicitly state that a Specification must not be demanded.
 
+**Reviewer dispatch recovery.** The resolved `prefer` list is an ordered
+candidate pool, not merely documentation. A reviewer that returns a model
+verdict (findings, `PASS`, or `REVISE`) has completed its assignment and is
+never silently replaced. A reviewer that fails before producing a verdict —
+including crash, OOM, overload/billing exhaustion, timeout, transport/tool
+failure, or empty output — is an infra failure: retry that model once when the
+failure may be transient, then replace it with the next untried, credentialed
+model in that phase's configured `prefer` list. Do not count a failed model
+against the configured panel floor. Continue through the ordered candidate
+pool until the panel floor is met or the pool is exhausted. Only then apply
+`review.onShortfall`: `fail` stops and asks the human; `proceed` records the
+shortfall and continues. Never substitute an unconfigured model or treat an
+infra failure as a reviewer verdict.
+
 **Before you fan out** (either path): confirm the `subagent` tool is actually in
 your toolset. If it is missing in a live pi session, the fix is a session reload
 (the plugin registers tools at session start, so a package added mid-session is
@@ -373,6 +387,32 @@ at the PR panel. Model preference: `deepseek/deepseek-v4-flash`, then
 fits this role well, since a checklist executor doesn't need deep reasoning (see
 `sdlc.config.schema.json` for the full `provider/model[:thinking]` syntax).
 
+## Dispatching implementation workers
+
+When Implement delegates a task to a subagent rather than building in the
+surface directly, give it the same shape every time:
+
+- **Scope, stated as a stop-condition.** Name exactly the task's check
+  commands and Definition-of-Done items as the boundary of its work, and say
+  plainly not to explore or fix adjacent things past that boundary.
+- **A `toolBudget`/`turnBudget` by default.** Attach a bounded budget (the
+  `subagent` tool's own `toolBudget: { soft, hard }` / `turnBudget: {
+  maxTurns, graceTurns }` parameters) so a worker drifting past scope is
+  nudged, then finalized, without a human having to notice and intervene.
+- **A canonical "finalize now" resume message** for a worker caught
+  exploring past scope: "You were exploring past this task's stated scope.
+  Stop investigating and finalize your current change against the stated
+  check commands now." Reuse this wording rather than improvising a new one
+  each time.
+- **Infra failure gets one automatic retry; no verdict does.** If a
+  dispatched worker's run ends in an **infra-class failure** — a process
+  crash, an out-of-memory kill, overload or billing exhaustion, a provider
+  timeout, a transport/tool error, or empty output — that is infrastructure
+  noise, not a REVISE/FAIL verdict from the model. Retry that exact dispatch once, automatically, before treating it as
+  needing human attention. A second consecutive infra failure on the same
+  dispatch, or any model-authored verdict, surfaces to the human as normal —
+  never silently retried away.
+
 ## PR and review cycle
 
 Prepare the PR body from `.github/pull_request_template.md`: declare the
@@ -401,11 +441,29 @@ branch is a finished artefact; retain the artifact for future analysis, but do
 not add development findings to the PR body or post them as GitHub review
 comments.
 
-Only after the panel is clean, open the PR with the clean body. If a GitHub
-reviewer raises a new concern after opening, focus it with an inline comment,
-address it with a commit, reply with that commit's short SHA, and rerun the
-panel before updating the PR. The post-PR review is for new reviewer concerns,
-not a transcript of the local sense check.
+Only after the panel is clean, open the PR with the clean body. **Completion is
+machine-checked, not narrated.** After the PR exists, do not state that the
+Implement/PR phase is "complete" or "PASS" without first running:
+
+```bash
+node <skill-dir>/scripts/check-completion.mjs --claim pr-open --slug <slug> --closes <n> [--closes <n> ...]
+```
+
+This checks the pushed branch, open PR, matching valid declaration, and
+GitHub's native closing-issue references. After merge, do not state that the
+tracked effort is finished without running:
+
+```bash
+node <skill-dir>/scripts/check-completion.mjs --claim epic-done --epic <epic-number> --pr <pr-number>
+```
+
+This checks every native epic sub-issue is closed and that the named merged PR
+closes all of them. Either check failing means the claim is false; state what's
+missing instead of declaring done. If a GitHub reviewer raises a new concern
+after opening, focus it with an inline comment, address it with a commit, reply
+with that commit's short SHA, and rerun the panel and the `pr-open` check before
+updating the PR. The post-PR review is for new reviewer concerns, not a
+transcript of the local sense check.
 
 `track: none` is an exemption declaration, not a third lifecycle track; it
 requires a reason and its honesty remains PR-panel prose law. CI enforcement
@@ -501,6 +559,23 @@ an opportunistic enhancement — its failure semantics are defined above
 (before=block, after=warn) and stand as written. A missing `use:` tool/skill
 on a configured hook is a hook failure, per Hooks, full stop.
 
+## Stall detection and self-resume
+
+This applies in any phase, live or dispatched, not only Spec. A provider or
+transport failure can exhaust its own retries and go quiet — empty assistant
+turns, a `stopReason: error`, no further output — leaving the human as the
+only thing watching for it. Don't wait for that: after **2 consecutive
+turns** end this way (an error-terminated turn with no assistant content),
+treat it as a stall, not a stop, and self-issue a continuation/retry before
+reporting anything as blocked. Only report a stall to the human if the
+self-issued retry also fails.
+
+This is an interim, prose-level mitigation, not a substitute for a genuine
+fix: the real fix is a harness-level visible "stalled — retryable" signal and
+true auto-resume, which is `pi`/`pi-coding-agent` runtime behaviour this
+project does not own or ship. Treat this section as covering the gap until
+that exists upstream, not as the final word.
+
 ## Delegation (do not reimplement)
 
 - `adversarial-review` (global): the generic reviewer template mechanics and the
@@ -594,3 +669,5 @@ governing docs are historical record and are not migrated.
   publish step.
 - Treating the tracker (map, epic, sub-issues, board) as the source of truth
   instead of the committed doc it projects.
+- Claiming a phase, PR, or tracked effort "complete"/"PASS" without running
+  the matching `check-completion.mjs` claim and it passing (a false summit).

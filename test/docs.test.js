@@ -248,3 +248,36 @@ test("CV32: five migration ADRs exist and amended decisions link forward", () =>
 	};
 	for (const [file, marker] of Object.entries(forwards)) assert.match(readFileSync(join(adrDir, file), "utf8"), new RegExp(marker), `${file} lacks ${marker}`);
 });
+
+test("RB1 (BT1): SKILL.md requires check-completion.mjs before a complete/PASS claim", () => {
+	assert.match(skillMd, /check-completion\.mjs/);
+	assert.match(skillMd, /--claim pr-open/);
+	assert.match(skillMd, /--claim epic-done/);
+	assert.match(skillMd, /Completion is\s+machine-checked, not narrated/);
+	assert.match(skillMd, /a false summit/);
+});
+
+test("RB2 (BT2): SKILL.md states the worker task-prompt shape and infra-retry-once rule", () => {
+	assert.match(skillMd, /## Dispatching implementation workers/);
+	assert.match(skillMd, /toolBudget/);
+	assert.match(skillMd, /turnBudget/);
+	assert.match(skillMd, /finalize now/i);
+	assert.match(skillMd, /infra-class failure/);
+	assert.match(skillMd, /Retry that exact dispatch once, automatically/);
+});
+
+test("RB3 (BT3): SKILL.md states the stall-detection threshold and self-resume action", () => {
+	assert.match(skillMd, /## Stall detection and self-resume/);
+	assert.match(skillMd, /2 consecutive\s*\n?\s*turns/);
+	assert.match(skillMd, /self-issue a continuation\/retry/);
+	assert.match(skillMd, /interim, prose-level mitigation/);
+	assert.match(skillMd, /this\s+project does not own or ship/);
+});
+
+test("RB4 (panel recovery): SKILL.md advances failed reviewers through the configured prefer list", () => {
+	assert.match(skillMd, /Reviewer dispatch recovery/);
+	assert.match(skillMd, /next untried, credentialed\s*\n?\s*model/);
+	assert.match(skillMd, /Do not count a failed model\s*\n?\s*against the configured panel floor/);
+	assert.match(skillMd, /review\.onShortfall/);
+	assert.match(skillMd, /Never substitute an unconfigured model/);
+});
