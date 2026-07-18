@@ -9,6 +9,7 @@ import { fileURLToPath } from "node:url";
 import { createInterface } from "node:readline/promises";
 import { stdin, stdout } from "node:process";
 import { CONFIG_DEFAULTS, CONFIG_SCHEMA_VERSION, HOOK_PHASES, REMEDY_SCHEMA_NEWER, REMEDY_SCHEMA_OLDER, USE_RE, classifyConfigVersion, inspectConfig, resolveRoot } from "./lib.mjs";
+import { write as writeConfigDoc } from "./config-doc.mjs";
 
 const SCRIPT_DIR = dirname(fileURLToPath(import.meta.url));
 const PACKAGE_DIR = resolve(SCRIPT_DIR, "..");
@@ -600,6 +601,24 @@ function writeBundle(root, opts, cfg, hooks, tracker, residueAssets = []) {
 		report.assets.push({ id: "config", action: "upgraded", message: `upgraded ${configTarget}` });
 	} else if (configMutating && !opts.force) report.assets.push({ id: "config", action: "refused", message: `refused config replacement without --force: ${configTarget}`, remediation: `re-run with --force to replace the configuration` });
 	else report.assets.push({ id: "config", action: "retained", message: `retained ${configTarget}` });
+	// Generate the consumer companion CONFIG.md from the committed config (Spec
+	// group B / §18). The same config-doc renderer setup uses here backs startup's
+	// freshness check, so the two can never disagree. Skipped when the config was
+	// refused (there is no valid committed config to explain).
+	const configAsset = report.assets.find((item) => item.id === "config");
+	if (configAsset && ["created", "upgraded", "patched", "retained", "forced"].includes(configAsset.action)) {
+		const docReport = writeConfigDoc(root, { force: opts.force });
+		const docAsset = { id: "config-doc", action: docReport.action, message: `${docReport.action} ${docReport.path}: ${docReport.reason}` };
+		if (docReport.exitCode === 3) docAsset.remediation = "re-run setup with --force to overwrite the consumer-authored .pi/sdlc/CONFIG.md";
+		report.assets.push(docAsset);
+		// A config-doc error (e.g. an on-disk config that is v3 but invalid) must not
+		// be swallowed behind an exit-0 setup; hard-stop the bundle.
+		if (docReport.exitCode === 2) {
+			report.exitCode = 2;
+			report.error = `config companion generation failed: ${docReport.reason}`;
+			return report;
+		}
+	}
 	asset("pr-template", join(root, ".github", "pull_request_template.md"), "pr-template", templateContent, report);
 	if (opts.withCiWorkflow) {
 		const target = join(root, ".github", "workflows", "sdlc-lifecycle.yml");
@@ -616,59 +635,43 @@ function writeBundle(root, opts, cfg, hooks, tracker, residueAssets = []) {
 	report.exitCode = report.assets.some((item) => item.action === "refused") ? 1 : 0;
 	return report;
 }
-async function interviewReview(ask) {
-	const preset = await ask("preset — solo: light, advisory PR (needs >=1 live model credential); standard: merged plan/spec + PR panel; full: separate design panels + PR panel; or 'custom' to choose each dial (solo/standard/full/custom)", "standard");
-	if (Object.hasOwn(PRESETS, preset)) return structuredClone(PRESETS[preset]);
-	if (preset !== "custom") throw new SetupError("setup-sdlc: preset must be solo, standard, full, or custom", 1);
+// Two-core-decisions interview (Spec §10): who reviews DESIGNS and who reviews
+// CODE. Everything else defaults to the `standard` answer bundle (explained in
+// templates/setup-sdlc.md) rather than being asked as a jargon quiz. Every dial
+// stays reachable non-interactively via flags.
+export async function collectInterview(ask) {
+	const gateModes = ["panel", "advisory", "human", "off"];
 	const choice = async (question, values, fallback) => {
 		const answer = await ask(question, fallback);
 		if (!values.includes(answer)) throw new SetupError(`setup-sdlc: ${question} must be one of ${values.join(", ")}`, 1);
 		return answer;
 	};
-	const positiveInt = async (question, fallback) => {
-		const value = Number(await ask(question, String(fallback)));
-		if (!Number.isInteger(value) || value < 1) throw new SetupError(`setup-sdlc: ${question} must be an integer >= 1`, 1);
-		return value;
-	};
-	const gateModes = ["panel", "advisory", "human", "off"];
-	const review = {
-		brainstorm: await choice("brainstorm gate — human: you approve the design; off: no gate (human/off)", ["human", "off"], "human"),
-		design: await choice("who reviews DESIGNS (plan+spec) — panel: cross-model panel; advisory: panel, non-blocking; human: you; off: no gate (panel/advisory/human/off)", gateModes, "panel"),
-		code: await choice("who reviews CODE (the PR) — panel/advisory/human/off", gateModes, "panel"),
-		tasks: await choice("per-task validation — subagent: a validator subagent; self: you run the checks; off: none (subagent/self/off)", ["subagent", "self", "off"], "subagent"),
-		panelSize: await positiveInt("panel size — the distinct-model floor for review panels", 2),
-		onShortfall: await choice("on panel shortfall — proceed: best-effort and surface it; fail: hard-fail below the floor (proceed/fail)", ["proceed", "fail"], "proceed"),
-	};
-	const separateAnswer = await choice("separate Spec phase? true: distinct Spec gate; false: merge plan+spec (true/false)", ["true", "false"], "false");
-	const thresholdAnswer = await ask("publish to tracker at how many build tasks? (integer >=1 or never)", "2");
-	const numericThreshold = Number(thresholdAnswer);
-	if (thresholdAnswer !== "never" && (!Number.isInteger(numericThreshold) || numericThreshold < 1)) {
-		throw new SetupError("setup-sdlc: publishToTracker must be an integer >= 1 or never", 1);
-	}
-	return {
-		review,
-		shape: {
-			separateSpec: separateAnswer === "true",
-			publishToTracker: thresholdAnswer === "never" ? "never" : numericThreshold,
-			defaultTrack: await choice("default track when in doubt (irreversible/reversible)", ["irreversible", "reversible"], "irreversible"),
-		},
-	};
+	const base = structuredClone(PRESETS.standard);
+	base.review.design = await choice("who reviews DESIGNS (plan+spec) — panel: cross-model panel; advisory: panel, non-blocking; human: you; off: no gate (panel/advisory/human/off)", gateModes, "panel");
+	base.review.code = await choice("who reviews CODE (the PR) — panel/advisory/human/off", gateModes, "panel");
+	return base;
 }
 
-async function interview(root) {
-	if (!stdin.isTTY) throw new SetupError("setup-sdlc: no config flags and no TTY for an interactive interview; pass flags or --yes");
-	const rl = createInterface({ input: stdin, output: stdout });
-	try {
-		const ask = async (question, fallback) => {
+// The interactive TTY fallback asks at most the two core decisions plus a final
+// confirmation (≤ 3 prompts). `injectedAsk` makes the prompt sequence testable.
+export async function interview(root, injectedAsk) {
+	let rl;
+	let ask = injectedAsk;
+	if (!ask) {
+		if (!stdin.isTTY) throw new SetupError("setup-sdlc: no config flags and no TTY for an interactive interview; pass flags or --yes");
+		rl = createInterface({ input: stdin, output: stdout });
+		ask = async (question, fallback) => {
 			const answer = await rl.question(fallback ? `${question} [${fallback}]: ` : `${question}: `);
 			return answer.trim() || fallback || "";
 		};
-		const rs = await interviewReview(ask);
-		const prefix = await ask("prefix", CONFIG_DEFAULTS.prefix);
-		const labelPrefix = await ask("labelPrefix", CONFIG_DEFAULTS.labelPrefix);
-		const announce = await ask("announce", CONFIG_DEFAULTS.announce);
-		const workflowAnswer = await ask("offer a GitHub workflow when no CI exists? (y/N)", "n");
-		const promptsAnswer = await ask("copy package prompts for local overrides? (y/N)", "n");
+	}
+	try {
+		const rs = await collectInterview(ask);
+		const confirmation = await ask("write this config now? (Y/n)", "y");
+		if (confirmation.toLowerCase().startsWith("n")) {
+			console.error("setup-sdlc: aborted at your request; nothing written.");
+			return 1;
+		}
 		const opts = {
 			hookSpecs: [],
 			overrides: [],
@@ -676,66 +679,60 @@ async function interview(root) {
 			yes: true,
 			runFlag: true,
 			rootFlagOnly: false,
-			prefix,
-			labelPrefix,
-			announce,
-			seedPanels: (await ask("seed the example panel roster (model ids drift; review after)? (y/N)", "n")).toLowerCase().startsWith("y"),
-			withCiWorkflow: workflowAnswer.toLowerCase().startsWith("y"),
-			copyPrompts: promptsAnswer.toLowerCase().startsWith("y"),
+			prefix: CONFIG_DEFAULTS.prefix,
+			labelPrefix: CONFIG_DEFAULTS.labelPrefix,
+			announce: CONFIG_DEFAULTS.announce,
+			seedPanels: false,
+			withCiWorkflow: false,
+			copyPrompts: false,
 		};
-		const tracker = undefined;
-		const hooks = {};
-		const confirmation = await ask("write this config now? (Y/n)", "y");
-		if (confirmation.toLowerCase().startsWith("n")) {
-			console.error("setup-sdlc: aborted at your request; nothing written.");
-			return 1;
-		}
-		// Assemble directly from the interview's explicit review/shape/overrides.
 		const cfg = {
 			schemaVersion: CONFIG_SCHEMA_VERSION,
-			prefix,
-			labelPrefix,
-			announce,
+			prefix: CONFIG_DEFAULTS.prefix,
+			labelPrefix: CONFIG_DEFAULTS.labelPrefix,
+			announce: CONFIG_DEFAULTS.announce,
 			review: rs.review,
 			shape: rs.shape,
 			...(rs.overrides ? { overrides: rs.overrides } : {}),
 		};
-		const report = writeBundle(root, opts, cfg, hooks, tracker);
+		const report = writeBundle(root, opts, cfg, {}, undefined);
 		process.stdout.write(renderReport(report));
 		return report.exitCode;
 	} finally {
-		rl.close();
+		if (rl) rl.close();
 	}
 }
 
-const argv = process.argv.slice(2);
-const isJson = jsonMode(argv);
-let resolvedRoot;
-try {
-	const opts = parseArgs(argv);
-	if (opts.help) {
-		console.log(USAGE);
-		process.exit(0);
-	}
-	const root = resolveRoot({ config: opts.config, repoRoot: opts.repoRoot });
-	resolvedRoot = root;
-	if (!opts.runFlag) process.exitCode = await interview(root);
-	else {
-		const tracker = trackerFromFlags(opts);
-		const { hooks, hasRun } = buildHooks(opts.hookSpecs);
-		const report = writeBundle(root, opts, assembleConfig(opts, tracker, hooks), hooks, tracker);
-		if (hasRun && opts.format !== "json") console.error(RUN_HOOK_WARNING);
-		if (hasRun && opts.format === "json") {
-			const configReport = report.assets.find((item) => item.id === "config");
-			if (configReport) configReport.message += ` ${RUN_HOOK_WARNING.replace(/\n/g, " ")}`;
+if (process.argv[1] === fileURLToPath(import.meta.url)) {
+	const argv = process.argv.slice(2);
+	const isJson = jsonMode(argv);
+	let resolvedRoot;
+	try {
+		const opts = parseArgs(argv);
+		if (opts.help) {
+			console.log(USAGE);
+			process.exit(0);
 		}
-		process.stdout.write(renderReport(report));
-		process.exitCode = report.exitCode;
+		const root = resolveRoot({ config: opts.config, repoRoot: opts.repoRoot });
+		resolvedRoot = root;
+		if (!opts.runFlag) process.exitCode = await interview(root);
+		else {
+			const tracker = trackerFromFlags(opts);
+			const { hooks, hasRun } = buildHooks(opts.hookSpecs);
+			const report = writeBundle(root, opts, assembleConfig(opts, tracker, hooks), hooks, tracker);
+			if (hasRun && opts.format !== "json") console.error(RUN_HOOK_WARNING);
+			if (hasRun && opts.format === "json") {
+				const configReport = report.assets.find((item) => item.id === "config");
+				if (configReport) configReport.message += ` ${RUN_HOOK_WARNING.replace(/\n/g, " ")}`;
+			}
+			process.stdout.write(renderReport(report));
+			process.exitCode = report.exitCode;
+		}
+	} catch (error) {
+		const code = error instanceof SetupError ? error.code : 2;
+		if (isJson) {
+			process.stdout.write(`${JSON.stringify({ schemaVersion: 2, root: resolvedRoot ?? process.cwd(), exitCode: code, error: String(error.message), references: [], assets: [] }, null, 2)}\n`);
+		} else console.error(error.message);
+		process.exitCode = code;
 	}
-} catch (error) {
-	const code = error instanceof SetupError ? error.code : 2;
-	if (isJson) {
-		process.stdout.write(`${JSON.stringify({ schemaVersion: 2, root: resolvedRoot ?? process.cwd(), exitCode: code, error: String(error.message), references: [], assets: [] }, null, 2)}\n`);
-	} else console.error(error.message);
-	process.exitCode = code;
 }

@@ -4,17 +4,26 @@
   "title": "pi-sdlc normative reference inventory",
   "type": "object",
   "additionalProperties": false,
-  "required": ["schemaVersion", "package", "sources"],
+  "required": ["schemaVersion", "package", "discovery", "sources"],
   "properties": {
     "schemaVersion": { "type": "integer", "const": 1 },
     "package": { "type": "string", "const": "pi-sdlc" },
+    "discovery": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["roots", "exclude"],
+      "properties": {
+        "roots": { "type": "array", "minItems": 1, "items": { "type": "string", "minLength": 1 } },
+        "exclude": { "type": "array", "items": { "type": "string", "minLength": 1 } }
+      }
+    },
     "sources": {
       "type": "array",
       "minItems": 1,
       "items": {
         "type": "object",
         "additionalProperties": false,
-        "required": ["id", "source", "assertion", "targetKind", "ownership", "required", "resolution", "target"],
+        "required": ["id", "source", "assertion", "targetKind", "ownership", "required", "resolution", "target", "class"],
         "properties": {
           "id": { "type": "string", "pattern": "^[a-z][a-z0-9-]*(\\.[a-z0-9-]+)+$" },
           "source": { "type": "string", "minLength": 1 },
@@ -24,6 +33,7 @@
           "required": { "type": "boolean" },
           "resolution": { "enum": ["package", "consumer", "readiness", "external"] },
           "target": { "type": "string", "minLength": 1 },
+          "class": { "enum": ["package-public", "delegated", "runtime-tool", "consumer-integration", "optional-enhancement", "internal"] },
           "verification": {
             "type": "object",
             "additionalProperties": false,

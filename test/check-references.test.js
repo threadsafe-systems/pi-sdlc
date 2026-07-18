@@ -33,10 +33,10 @@ function fixture() {
 function writeFixture(root, entry, target = "target.txt", sourceText = entry.assertion) {
 	writeFileSync(join(root, "source.txt"), sourceText);
 	if (target) writeFileSync(join(root, target), "target\n");
-	writeFileSync(join(root, "inventory.json"), JSON.stringify({ schemaVersion: 1, package: "pi-sdlc", sources: [{ ...entry, source: "source.txt", target }] }));
+	writeFileSync(join(root, "inventory.json"), JSON.stringify({ schemaVersion: 1, package: "pi-sdlc", discovery: { roots: ["nonexistent-discovery-root/*.md"], exclude: [] }, sources: [{ ...entry, source: "source.txt", target }] }));
 }
 
-const BASE = { id: "fixture.source", assertion: "stable assertion", targetKind: "file", ownership: "package", required: true, resolution: "package" };
+const BASE = { id: "fixture.source", assertion: "stable assertion", targetKind: "file", ownership: "package", required: true, resolution: "package", class: "package-public" };
 
 test("live inventory passes with explicit non-package classifications", () => {
 	const result = jsonRun(["--inventory", INVENTORY]);
@@ -73,9 +73,10 @@ test("consumer and external entries are classified without probing", () => {
 			JSON.stringify({
 				schemaVersion: 1,
 				package: "pi-sdlc",
+				discovery: { roots: ["nonexistent-discovery-root/*.md"], exclude: [] },
 				sources: [
-					{ id: "consumer.optional", source: "source.txt", assertion: "consumer marker", targetKind: "file", ownership: "consumer", required: false, resolution: "consumer", target: ".pi/sdlc/workflow.md" },
-					{ id: "external.facility", source: "source.txt", assertion: "external marker", targetKind: "external", ownership: "external", required: false, resolution: "external", target: "github.com" },
+					{ id: "consumer.optional", source: "source.txt", assertion: "consumer marker", targetKind: "file", ownership: "consumer", required: false, resolution: "consumer", target: ".pi/sdlc/workflow.md", class: "consumer-integration" },
+					{ id: "external.facility", source: "source.txt", assertion: "external marker", targetKind: "external", ownership: "external", required: false, resolution: "external", target: "github.com", class: "runtime-tool" },
 				],
 			}),
 		);
@@ -96,8 +97,19 @@ test("readiness requires the verifier assertion and path containment", () => {
 		writeFileSync(join(root, "source.txt"), "claim\n");
 		writeFileSync(join(root, "verifier.txt"), "verifier marker\n");
 		writeFileSync(join(root, "target.txt"), "target\n");
-		const entry = { id: "readiness.claim", source: "source.txt", assertion: "claim", targetKind: "facility", ownership: "consumer", required: true, resolution: "readiness", target: ".github/pull_request_template.md", verification: { source: "verifier.txt", assertion: "verifier marker" } };
-		writeFileSync(join(root, "inventory.json"), JSON.stringify({ schemaVersion: 1, package: "pi-sdlc", sources: [entry] }));
+		const entry = {
+			id: "readiness.claim",
+			source: "source.txt",
+			assertion: "claim",
+			targetKind: "facility",
+			ownership: "consumer",
+			required: true,
+			resolution: "readiness",
+			target: ".github/pull_request_template.md",
+			verification: { source: "verifier.txt", assertion: "verifier marker" },
+			class: "consumer-integration",
+		};
+		writeFileSync(join(root, "inventory.json"), JSON.stringify({ schemaVersion: 1, package: "pi-sdlc", discovery: { roots: ["nonexistent-discovery-root/*.md"], exclude: [] }, sources: [entry] }));
 		let result = jsonRun(["--package-root", root, "--inventory", join(root, "inventory.json")]);
 		assert.equal(result.status, 0);
 		writeFileSync(join(root, "verifier.txt"), "removed\n");

@@ -13,7 +13,9 @@ import { test } from "node:test";
 
 const here = dirname(fileURLToPath(import.meta.url));
 const repoRoot = dirname(here);
-const sdlcSkillMd = readFileSync(join(repoRoot, "skills", "sdlc", "SKILL.md"), "utf8");
+// The agent self-documentation stream relocated the FS13 telemetry section from
+// SKILL.md into the package system reference (kernel-first SKILL ceiling).
+const telemetryDoc = readFileSync(join(repoRoot, "skills", "sdlc", "references", "system-reference.md"), "utf8");
 const retroSkillMd = readFileSync(join(repoRoot, "skills", "sdlc-retro", "SKILL.md"), "utf8");
 const inventoryPath = join(repoRoot, "skills", "sdlc", "assets", "normative-references.json");
 const checkReferences = join(repoRoot, "skills", "sdlc", "scripts", "check-references.mjs");
@@ -37,27 +39,22 @@ const MANDATED_EVENTS = ["run.started", "phase.entered", "gate.approved", "panel
 
 test("LT24: every mandated hook step names record-run-event.sh and its event-type token together", () => {
 	for (const event of MANDATED_EVENTS) {
-		// "together" = the literal event token appears within 400 chars of a
-		// record-run-event.sh mention somewhere in the doc (prose wording is not
-		// pinned; token co-location is).
-		const idx = sdlcSkillMd.indexOf(event);
-		assert.ok(idx >= 0, `event token '${event}' must appear in SKILL.md`);
-		const window = sdlcSkillMd.slice(Math.max(0, idx - 400), idx + 400);
+		const idx = telemetryDoc.indexOf(event);
+		assert.ok(idx >= 0, `event token '${event}' must appear in the telemetry doc`);
+		const window = telemetryDoc.slice(Math.max(0, idx - 400), idx + 400);
 		assert.ok(window.includes("record-run-event.sh"), `event '${event}' must be co-located with a record-run-event.sh mention`);
 	}
 });
 
 test("LT24: the panel-dispatch step and the validator-dispatch step each name harvest-panel.sh", () => {
-	const dispatchIdx = sdlcSkillMd.indexOf("panel.dispatched");
+	const dispatchIdx = telemetryDoc.indexOf("panel.dispatched");
 	assert.ok(dispatchIdx >= 0);
-	const dispatchWindow = sdlcSkillMd.slice(dispatchIdx, dispatchIdx + 600);
+	const dispatchWindow = telemetryDoc.slice(dispatchIdx, dispatchIdx + 600);
 	assert.ok(dispatchWindow.includes("harvest-panel.sh"), "panel-dispatch step must name harvest-panel.sh");
 
-	const validatorSectionIdx = sdlcSkillMd.indexOf("## Per-task validator");
-	assert.ok(validatorSectionIdx >= 0);
-	const telemetrySectionIdx = sdlcSkillMd.indexOf("## Lifecycle telemetry (FS13)");
+	const telemetrySectionIdx = telemetryDoc.indexOf("Lifecycle telemetry (FS13)");
 	assert.ok(telemetrySectionIdx >= 0);
-	const telemetrySection = sdlcSkillMd.slice(telemetrySectionIdx);
+	const telemetrySection = telemetryDoc.slice(telemetrySectionIdx);
 	assert.ok(/validator dispatch also harvests[\s\S]*harvest-panel\.sh/.test(telemetrySection), "the validator-dispatch step must name harvest-panel.sh");
 });
 
@@ -102,13 +99,13 @@ test("LT25: deleting a new entry's target file fails check-references", () => {
 		// isolate to a single new entry so the mutation is unambiguous
 		const entry = inv.sources.find((s) => s.id === "retro.script.render-retro");
 		assert.ok(entry);
-		writeFileSync(scratchInventory, JSON.stringify({ schemaVersion: 1, package: "pi-sdlc", sources: [entry] }));
+		writeFileSync(scratchInventory, JSON.stringify({ schemaVersion: 1, package: "pi-sdlc", discovery: { roots: ["nonexistent-discovery-root/*.md"], exclude: [] }, sources: [entry] }));
 		const before = spawnSync(process.execPath, [checkReferences, "--package-root", pkgRoot, "--inventory", scratchInventory, "--format", "json"], { encoding: "utf8" });
 		assert.equal(JSON.parse(before.stdout).state, "pass");
 
 		// mutate: point the entry's target at a file that doesn't exist
 		const mutated = { ...entry, target: "skills/sdlc-retro/scripts/does-not-exist.mjs" };
-		writeFileSync(scratchInventory, JSON.stringify({ schemaVersion: 1, package: "pi-sdlc", sources: [mutated] }));
+		writeFileSync(scratchInventory, JSON.stringify({ schemaVersion: 1, package: "pi-sdlc", discovery: { roots: ["nonexistent-discovery-root/*.md"], exclude: [] }, sources: [mutated] }));
 		const after = spawnSync(process.execPath, [checkReferences, "--package-root", pkgRoot, "--inventory", scratchInventory, "--format", "json"], { encoding: "utf8" });
 		const report = JSON.parse(after.stdout);
 		assert.equal(report.state, "fail");

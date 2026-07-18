@@ -196,8 +196,8 @@ test("ICA20: retired config vocabulary has no runtime reader", () => {
 test("ICA21: SKILL reads shape.publishToTracker (no hardcoded task-count law)", () => {
 	const skill = readFileSync(join(repo, "skills", "sdlc", "SKILL.md"), "utf8");
 	assert.match(skill, /shape\.publishToTracker/);
-	// the tracker-backed Build section must not re-assert a fixed "two or more tasks" law
-	const start = skill.indexOf("## Build — tracker-backed");
-	const section = skill.slice(start, start + 2500);
-	assert.doesNotMatch(section, /\btwo or more tasks\b/);
+	// tracker-backed Build law moved to the phase reference; it must read the dial, not a fixed count
+	const tasksRef = readFileSync(join(repo, "skills", "sdlc", "references", "phase-tasks.md"), "utf8");
+	assert.match(tasksRef, /shape\.publishToTracker/);
+	assert.doesNotMatch(tasksRef, /\btwo or more tasks\b/);
 });

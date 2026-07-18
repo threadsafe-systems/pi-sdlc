@@ -2,19 +2,20 @@
 // NORMATIVE-REFERENCE-CHECKER: FS11-v1
 // Offline package-reference inventory checker. It never executes inventory data.
 
-import { existsSync, readFileSync } from "node:fs";
-import { dirname, isAbsolute, join, relative, resolve } from "node:path";
+import { existsSync, readdirSync, readFileSync } from "node:fs";
+import { basename, dirname, isAbsolute, join, relative, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const REPORT_VERSION = 1;
 const scriptPath = fileURLToPath(import.meta.url);
 const defaultRoot = dirname(dirname(dirname(dirname(scriptPath))));
 const defaultInventory = join(defaultRoot, "skills", "sdlc", "assets", "normative-references.json");
-const allowedEntryKeys = new Set(["id", "source", "assertion", "targetKind", "ownership", "required", "resolution", "target", "verification"]);
+const allowedEntryKeys = new Set(["id", "source", "assertion", "targetKind", "ownership", "required", "resolution", "target", "class", "verification"]);
 const enums = {
 	targetKind: new Set(["file", "command", "facility", "external"]),
 	ownership: new Set(["package", "consumer", "external"]),
 	resolution: new Set(["package", "consumer", "readiness", "external"]),
+	class: new Set(["package-public", "delegated", "runtime-tool", "consumer-integration", "optional-enhancement", "internal"]),
 };
 
 function sanitize(value) {
@@ -82,11 +83,14 @@ function validateInventory(raw, root) {
 	if (raw.schemaVersion !== 1 || raw.package !== "pi-sdlc" || !Array.isArray(raw.sources) || raw.sources.length === 0) {
 		throw new Error("inventory requires schemaVersion 1, package pi-sdlc, and non-empty sources");
 	}
+	if (!raw.discovery || typeof raw.discovery !== "object" || Array.isArray(raw.discovery) || !Array.isArray(raw.discovery.roots) || raw.discovery.roots.length === 0 || !Array.isArray(raw.discovery.exclude)) {
+		throw new Error("inventory requires a discovery block with non-empty roots[] and exclude[] (structural discovery must not be silently disabled)");
+	}
 	const ids = new Set();
 	return raw.sources.map((entry, index) => {
 		if (!entry || typeof entry !== "object" || Array.isArray(entry)) throw new Error(`sources[${index}] must be an object`);
 		for (const key of Object.keys(entry)) if (!allowedEntryKeys.has(key)) throw new Error(`sources[${index}] has unknown key '${key}'`);
-		for (const key of ["id", "source", "assertion", "targetKind", "ownership", "resolution", "target"]) {
+		for (const key of ["id", "source", "assertion", "targetKind", "ownership", "resolution", "target", "class"]) {
 			if (typeof entry[key] !== "string" || entry[key].length === 0) throw new Error(`sources[${index}].${key} must be non-empty text`);
 		}
 		if (ids.has(entry.id)) throw new Error(`duplicate inventory id '${entry.id}'`);
@@ -106,6 +110,44 @@ function validateInventory(raw, root) {
 		}
 		return entry;
 	});
+}
+
+function escapeRegExp(value) {
+	return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+// Structural discovery (Spec §16, inverse completeness). Walk the frozen public
+// roots/patterns, subtract the closed internal-helper exclusion list, and assert
+// every discovered public artifact has an inventory row. Single-segment `*`
+// wildcards in filename position only; matched with readdirSync + an anchored
+// RegExp (Node builtins only). Never executes inventory data.
+function discover(root, discovery, covered, add) {
+	if (discovery === undefined) return;
+	if (!discovery || typeof discovery !== "object" || Array.isArray(discovery) || !Array.isArray(discovery.roots) || !Array.isArray(discovery.exclude)) {
+		throw new Error("discovery must be an object with roots[] and exclude[]");
+	}
+	const excluded = new Set(discovery.exclude.map((p) => safeRelative(p, "discovery.exclude")));
+	const consider = (rel) => {
+		if (excluded.has(rel)) return;
+		if (covered.has(rel)) add(`discovery.${rel}`, "pass", "discovered public artifact has an inventory row");
+		else add(`discovery.${rel}`, "fail", `discovered public artifact has no inventory row: ${rel}`);
+	};
+	for (const pattern of discovery.roots) {
+		safeRelative(pattern, "discovery.roots");
+		const dir = dirname(pattern);
+		const base = basename(pattern);
+		if (!base.includes("*")) {
+			if (existsSync(resolve(root, pattern))) consider(pattern.split("\\").join("/"));
+			continue;
+		}
+		if (base.includes("**") || base.split("*").length > 2) throw new Error(`discovery pattern uses an unsupported wildcard: ${pattern}`);
+		const re = new RegExp(`^${base.split("*").map(escapeRegExp).join("[^/]*")}$`);
+		const dirAbs = resolve(root, dir);
+		if (!existsSync(dirAbs)) continue;
+		for (const name of readdirSync(dirAbs).sort()) {
+			if (re.test(name)) consider(join(dir, name).split("\\").join("/"));
+		}
+	}
 }
 
 function makeReport(args, state, exitCode, checks, message = null) {
@@ -165,6 +207,13 @@ function run(args) {
 		if (!existsSync(resolve(args.packageRoot, target))) add(entry.id, "fail", `package target is missing: ${target}`);
 		else add(entry.id, "pass", "package source assertion and target are present");
 	}
+	// Inverse-completeness: every discovered public artifact must have an inventory
+	// row whose target is that artifact (a mere `source` reference does not count).
+	const covered = new Set();
+	for (const entry of entries) {
+		if (entry.resolution !== "external") covered.add(entry.target.split("\\").join("/"));
+	}
+	discover(args.packageRoot, raw.discovery, covered, add);
 	const failed = checks.some((c) => c.status === "fail");
 	return { report: makeReport(args, failed ? "fail" : "pass", failed ? 1 : 0, checks), exitCode: failed ? 1 : 0 };
 }

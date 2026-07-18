@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "taskId": "sdlc-agent-self-documentation-b2",
+  "manifestPath": "docs/validation/sdlc-agent-self-documentation/sdlc-agent-self-documentation-b2.json",
+  "manifestSha256": "8ec60b5cd9b8fb2e06be20ced00bf04fa43a926f1301af00f5c005895f6311af",
+  "runnerReportSha256": "f5d6bd3498e6e5fba73a14247fee5f0db09b90c7d3a16ffc1b44c3774f7a0b23",
+  "generatedAgentSha256": "2e64d2b7427fb3cac6895979d79f3d6fb8f616c7b1872ffeebe7f855fb1fd722",
+  "model": "openai-codex/gpt-5.6-terra",
+  "runnerVerdict": "PASS",
+  "validatorVerdict": "PASS",
+  "createdAt": "2026-07-18T22:20:00Z"
+}

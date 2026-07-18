@@ -21,15 +21,17 @@ const statusMjs = readFileSync(join(repo, "skills", "sdlc", "scripts", "sdlc-sta
 const reviewPrompt = readFileSync(join(repo, "skills", "sdlc", "prompts", "adversary-review.prompt.md"), "utf8");
 const prTemplate = readFileSync(join(repo, ".github", "pull_request_template.md"), "utf8");
 const ciWorkflow = readFileSync(join(repo, ".github", "workflows", "ci.yml"), "utf8");
+const sysRef = readFileSync(join(repo, "skills", "sdlc", "references", "system-reference.md"), "utf8");
+const prReviewRef = readFileSync(join(repo, "skills", "sdlc", "references", "phase-pr-review.md"), "utf8");
+const implementRef = readFileSync(join(repo, "skills", "sdlc", "references", "phase-implement.md"), "utf8");
 
-test("OH7: SKILL.md carries the opt-in, advisory, hooks headings + red flags", () => {
-	assert.match(skillMd, /^## Opt-in and advisory mode$/m);
-	assert.match(skillMd, /^### Advisory mode$/m);
-	assert.match(skillMd, /^## Hooks \(local workflow\)$/m);
-	assert.match(skillMd, /\[sdlc hook\]/);
+test("OH7: readiness/hooks law lives in the system reference; SKILL keeps the red flags", () => {
+	assert.match(sysRef, /^## 3\. Adoption & readiness$/m);
+	assert.match(sysRef, /### Hooks \(local workflow\)$/m);
+	assert.match(sysRef, /\[sdlc hook\]/);
+	assert.match(sysRef, /creating one is not enough/);
 	assert.match(skillMd, /Skipping or silently reordering a configured phase hook\./);
 	assert.match(skillMd, /Writing to the main checkout after creating a worktree\./);
-	assert.match(skillMd, /creating one is not enough/);
 });
 
 test("OH7: the Implement table row no longer prescribes 'in a worktree'", () => {
@@ -38,10 +40,10 @@ test("OH7: the Implement table row no longer prescribes 'in a worktree'", () => 
 	assert.ok(!implementRow.includes("in a worktree"), `Implement row still prescribes a worktree: ${implementRow}`);
 });
 
-test("OH8: SKILL.md contains the announce-on-fire block and the workflow.md rule", () => {
-	assert.match(skillMd, /\[sdlc hook\] <phase>:<before\|after> run\$ <command>/);
-	assert.match(skillMd, /\[sdlc hook\] <phase>:<before\|after> result: ok/);
-	assert.match(skillMd, /enumerate each top-level bullet/);
+test("OH8: announce-on-fire + workflow.md enumeration in system reference; conflict rule in SKILL", () => {
+	assert.match(sysRef, /\[sdlc hook\] <phase>:<before\|after> run\$ <command>/);
+	assert.match(sysRef, /\[sdlc hook\] <phase>:<before\|after> result: ok/);
+	assert.match(sysRef, /enumerate\s+each top-level bullet/);
 	assert.match(skillMd, /local rules may ADD gates, never remove or weaken/);
 });
 
@@ -74,9 +76,9 @@ test("FS9 documentation carries declaration rules and reversible grounding", () 
 	assert.match(reviewPrompt, /<TRACK>/);
 	assert.match(reviewPrompt, /<GOVERNING_DOCS>/);
 	assert.match(reviewPrompt, /When `<TRACK>` is `reversible`/);
-	assert.match(skillMd, /populate the prompt's `<TRACK>` from the PR declaration/);
-	assert.match(skillMd, /`<GOVERNING_DOCS>` from the linked documents/);
-	assert.match(skillMd, /never send\s+literal placeholders/);
+	assert.match(prReviewRef, /populate the prompt's `<TRACK>` from the PR\s+declaration/);
+	assert.match(prReviewRef, /`<GOVERNING_DOCS>`\s+from the linked documents/);
+	assert.match(prReviewRef, /never send\s+literal\s+placeholders/);
 	assert.doesNotMatch(skillMd, /CI checks\\s+the declared track's artifacts are committed/);
 });
 
@@ -92,7 +94,7 @@ test("FS9 and FS10 ADRs freeze the new surfaces", () => {
 // ---------------------------------------------------------------------------
 
 const STARTUP_FRAGMENTS = {
-	"exit 0 (ready) branch": /\*\*Exit 0 \(`ready`\)\*\*: announce/,
+	"exit 0 (ready) branch": /\*\*Exit 0 \(`ready`\)\*\*:/,
 	"exit 1 (not-adopted) branch": /\*\*Exit 1 \(`not-adopted`\)\*\*: do NOT announce/,
 	"exit 2 (error) branch": /\*\*Exit 2 \(`error`\)\*\*: do NOT announce/,
 	"exit 3 (not-ready) branch": /\*\*Exit 3 \(`not-ready`\)\*\*: do NOT announce/,
@@ -107,9 +109,9 @@ const STARTUP_FRAGMENTS = {
 
 test("AR10: all four startup branches and every prohibition are present and mutation-detectable", () => {
 	// scope to the startup block: the advisory section repeats some prohibitions
-	const start = skillMd.indexOf("## Opt-in and advisory mode");
-	const end = skillMd.indexOf("### Advisory mode");
-	assert.ok(start >= 0 && end > start, "startup section must exist before the advisory section");
+	const start = skillMd.indexOf("## Readiness gate and announcement");
+	const end = skillMd.indexOf("## The iron law");
+	assert.ok(start >= 0 && end > start, "startup section must exist before the iron-law section");
 	const startupSection = skillMd.slice(start, end);
 	for (const [label, re] of Object.entries(STARTUP_FRAGMENTS)) {
 		assert.match(startupSection, re, `SKILL.md startup section missing: ${label}`);
@@ -220,9 +222,9 @@ test("CV31: startup clean-break and shortfall carry instructions are explicit", 
 	assert.match(skillMd, /`config\.schema-current`[\s\S]*sanctioned actions[\s\S]*re-run `setup-sdlc`/);
 	assert.match(skillMd, /there is no pre-adoption config fold-forward/);
 	assert.match(skillMd, /Never hand-edit `schemaVersion` or the config shape/);
-	assert.match(skillMd, /merged config's `panels` block/);
-	assert.match(skillMd, /`proceed`-mode shortfall advisory[\s\S]*consolidated writeup[\s\S]*PR\s+itself/);
-	assert.match(skillMd, /Do not\s+commit a standalone\s+decision log/);
+	assert.match(prReviewRef, /merged config's\s+`panels` block/);
+	assert.match(prReviewRef, /`proceed`-mode\s+shortfall advisory[\s\S]*consolidated writeup[\s\S]*PR\s+itself/);
+	assert.match(prReviewRef, /Do not\s+commit a\s+standalone\s+decision log/);
 });
 
 test("CV32: five migration ADRs exist and amended decisions link forward", () => {
@@ -249,35 +251,35 @@ test("CV32: five migration ADRs exist and amended decisions link forward", () =>
 	for (const [file, marker] of Object.entries(forwards)) assert.match(readFileSync(join(adrDir, file), "utf8"), new RegExp(marker), `${file} lacks ${marker}`);
 });
 
-test("RB1 (BT1): SKILL.md requires check-completion.mjs before a complete/PASS claim", () => {
+test("RB1 (BT1): the PR reference requires check-completion.mjs before a complete/PASS claim", () => {
 	assert.match(skillMd, /check-completion\.mjs/);
-	assert.match(skillMd, /--claim pr-open/);
-	assert.match(skillMd, /--claim epic-done/);
-	assert.match(skillMd, /Completion is\s+machine-checked, not narrated/);
 	assert.match(skillMd, /a false summit/);
+	assert.match(prReviewRef, /--claim pr-open/);
+	assert.match(prReviewRef, /--claim epic-done/);
+	assert.match(prReviewRef, /Completion is\s+machine-checked, not narrated/);
 });
 
-test("RB2 (BT2): SKILL.md states the worker task-prompt shape and infra-retry-once rule", () => {
-	assert.match(skillMd, /## Dispatching implementation workers/);
-	assert.match(skillMd, /toolBudget/);
-	assert.match(skillMd, /turnBudget/);
-	assert.match(skillMd, /finalize now/i);
-	assert.match(skillMd, /infra-class failure/);
-	assert.match(skillMd, /Retry that exact dispatch once, automatically/);
+test("RB2 (BT2): the Implement reference states the worker task-prompt shape and infra-retry-once rule", () => {
+	assert.match(implementRef, /## 10\. Dispatching implementation workers/);
+	assert.match(implementRef, /toolBudget/);
+	assert.match(implementRef, /turnBudget/);
+	assert.match(implementRef, /finalize now/i);
+	assert.match(implementRef, /infra-class failure/);
+	assert.match(implementRef, /Retry that exact dispatch once, automatically/);
 });
 
-test("RB3 (BT3): SKILL.md states the stall-detection threshold and self-resume action", () => {
-	assert.match(skillMd, /## Stall detection and self-resume/);
-	assert.match(skillMd, /2 consecutive\s*\n?\s*turns/);
-	assert.match(skillMd, /self-issue a continuation\/retry/);
-	assert.match(skillMd, /interim, prose-level mitigation/);
-	assert.match(skillMd, /this\s+project does not own or ship/);
+test("RB3 (BT3): the system reference states the stall-detection threshold and self-resume action", () => {
+	assert.match(sysRef, /## 13\. Stall detection and self-resume/);
+	assert.match(sysRef, /2 consecutive\s*\n?\s*turns/);
+	assert.match(sysRef, /self-issue a continuation\/retry/);
+	assert.match(sysRef, /interim, prose-level mitigation/);
+	assert.match(sysRef, /this\s+project does not own or ship/);
 });
 
-test("RB4 (panel recovery): SKILL.md advances failed reviewers through the configured prefer list", () => {
-	assert.match(skillMd, /Reviewer dispatch recovery/);
-	assert.match(skillMd, /next untried, credentialed\s*\n?\s*model/);
-	assert.match(skillMd, /Do not count a failed model\s*\n?\s*against the configured panel floor/);
-	assert.match(skillMd, /review\.onShortfall/);
-	assert.match(skillMd, /Never substitute an unconfigured model/);
+test("RB4 (panel recovery): the PR reference advances failed reviewers through the configured prefer list", () => {
+	assert.match(prReviewRef, /Reviewer dispatch recovery/);
+	assert.match(prReviewRef, /next untried, credentialed\s*\n?\s*model/);
+	assert.match(prReviewRef, /Do not count a failed model\s*\n?\s*against the configured panel floor/);
+	assert.match(prReviewRef, /review\.onShortfall/);
+	assert.match(prReviewRef, /Never substitute an unconfigured model/);
 });

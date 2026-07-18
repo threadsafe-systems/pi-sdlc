@@ -337,3 +337,23 @@ defines stable verification scenario ids only for its owned outcome subset and
 names upstream child contracts it consumes. No Specification chooses
 implementation task boundaries or creates tracker tasks; each child Build does
 that after its Specification approval.
+
+## Absorption note — agent self-documentation (2026-07-18)
+
+The **agent self-documentation** stream
+(`docs/plans/2026-07-18-sdlc-agent-self-documentation.md`, rev 2, gate approved;
+spec rev 2, scenarios ASD1–ASD20) is the canonical umbrella where this
+programme's documentation and configuration-explanation outcomes land. It fully
+**absorbs IC-B** (config-intent-vocabulary scope items 5/6: generated `CONFIG.md`,
+drift check, agent-led setup interview, reduced TTY fallback) and **OL-C**
+(opt-in-lifecycle scope items 4/7 plus issue #38's ratified entrypoint contract:
+kernel-first `SKILL.md`, supporting references, six standalone `sdlc:<slug>`
+entrypoints, adopted-config-dominates). Neither ships as a separate stream. The
+documentation-authority hierarchy and generated-explanation trust model are
+recorded in **ADR 0029**.
+
+Independent and **not** re-opened by this stream: **#91** (phase-specific agent
+definitions / author-model preferences), **#101** (phases as independently
+discovered skills), **#102** (YAML/comments/dual configuration format). This
+stream documents the current public composition without choosing any of those
+designs.

@@ -1,0 +1,170 @@
+{
+  "schemaVersion": 1,
+  "taskId": "sdlc-agent-self-documentation-b1",
+  "manifest": "/home/neil/code/threadsafe/pi-sdlc.worktrees/feat-sdlc-agent-self-documentation/docs/validation/sdlc-agent-self-documentation/sdlc-agent-self-documentation-b1.json",
+  "repoRoot": "/home/neil/code/threadsafe/pi-sdlc.worktrees/feat-sdlc-agent-self-documentation",
+  "verdict": "PASS",
+  "exitCode": 0,
+  "errors": [],
+  "manifestErrors": [],
+  "commands": [
+    {
+      "id": "tests.b1",
+      "argv": [
+        "node",
+        "--test",
+        "test/config-doc.test.js"
+      ],
+      "evidence": [
+        "ASD6 deterministic render + §14 content, ASD7 write/collision matrix, ASD8 CONFIG.md contract, ASD9 four check states + mutation-freedom"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 285,
+      "stdoutTail": "✔ ASD6: render is deterministic and byte-identical across runs (4.389475ms)\n✔ ASD6: write twice is byte-identical (retained) (3.632948ms)\n✔ ASD6: rendered CONFIG.md carries all §14 sections and every schemaVersion-3 key in JSON order (0.891622ms)\n✔ ASD8: CONFIG.md declares JSON authority, warning, fingerprint identity, guidance, and pointer (0.504109ms)\n✔ ASD7: byte-matching current file is retained (1.232104ms)\n✔ ASD7: a recognized stale / body-edited companion is regenerated (5.551602ms)\n✔ ASD7: an unrecognized collision is refused (exit 3) without --force and forced (exit 0) with it (1.737828ms)\n✔ ASD7 (CLI): refused write exits 3 (68.481589ms)\n✔ ASD9: check returns current / missing / stale / error for the four inputs (6.047705ms)\n✔ ASD9: check detects a body edit and a render-format mismatch as stale (2.232054ms)\n✔ ASD9: check mutates nothing in any state (3.626072ms)\n✔ ASD6/sentinel: sentinelLine round-trips through parseSentinel as recognized (0.311825ms)\nℹ tests 12\nℹ suites 0\nℹ pass 12\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 212.717463\n",
+      "stderrTail": ""
+    },
+    {
+      "id": "tests.full",
+      "argv": [
+        "npm",
+        "test"
+      ],
+      "evidence": [
+        "Full corpus regression stays green with the new config-doc module"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 6643,
+      "stdoutTail": "[...truncated; showing bounded tail...]\n✔ ICA14: separateSpec false refuses spec_review with no-spec-gate message (51.408496ms)\n✔ ICA15: per-phase panelSize overrides review.panelSize (70.322738ms)\n✔ ICA15: floor 1 does not exclude the author identity (37.466425ms)\n✔ ICA16: onShortfall proceed advises and exits 0 below floor (53.210074ms)\n✔ ICA16: onShortfall fail exits 1 below floor (49.122201ms)\n✔ ICA14: review.tasks self refuses task_validate (only subagent resolves) (50.933629ms)\n✔ ICA24: separateSpec false precedes the human/off refusal for spec_review (37.772622ms)\n✔ CV28: watched config schema changes require the PR release signal (421.758151ms)\n✔ CV28: inner breaking commits are ignored in favour of the squash title (77.379422ms)\n✔ CV28: only the named schemas and CONFIG_SCHEMA_VERSION line are watched (236.918976ms)\n✔ CV19: committed migrated v2 config without a models file is ready in text and JSON (124.273769ms)\n✔ CV17: recognised v1 is not-ready with canonical migration remedy and unrelated checks still report (76.174497ms)\n✔ CV18: schemaVersion 4 is an error with the canonical newer remedy (77.300161ms)\n✔ CV19: a panels-less v2 config is valid but not-ready (87.53895ms)\n✔ CV20: malformed JSON and invalid schemaVersion remain config errors (177.698822ms)\n✔ current v2 structural validation errors remain config.valid errors (169.240777ms)\n✔ filesystem-only manifests are not committed adoption (204.350926ms)\n✔ argument, root, and git errors retain exit 2 (227.40904ms)\n✔ workflow readability remains an independent readiness check (130.049953ms)\n✔ unrelated dirty files do not affect readiness (93.532636ms)\n✔ status completes with a PATH exposing only git (86.670002ms)\n✔ fresh bundle provisions requested assets and idempotent rerun retains them (125.989029ms)\n✔ CI marker directories are not mistaken for CI files (70.410446ms)\n✔ existing CI suppresses workflow creation and reports refusal (52.805618ms)\n✔ template info strings must be exactly sdlc (63.969697ms)\n✔ consumer template with the wrong companion is refused byte-identically (70.552894ms)\n✔ consumer template with multiple declarations is refused (45.205197ms)\n✔ consumer template without the declaration is refused byte-identically (43.153058ms)\n✔ invalid assembled configuration fails before any bundle write (54.467479ms)\n✔ target parent conflicts fail before any bundle write (42.275115ms)\n✔ unreadable package sources fail before any bundle write (49.495912ms)\n✔ invalid existing config and models are refused without overwrite (120.707754ms)\n✔ workflow from another repository is refused (50.773631ms)\n✔ malformed CI marker fails before any bundle write (51.385692ms)\n✔ operational JSON errors preserve the resolved consumer root (65.420816ms)\n✔ existing target directories fail before any bundle write (60.02253ms)\n✔ bundle reports resolved package references before writing (43.501252ms)\n✔ OH4: --yes writes a schema-valid config; bundle re-run refuses config changes; --force overwrites (157.748374ms)\n✔ OH5: --hook-use fields 3-4 = use, do = remainder after 4th colon (colons in do preserved) (38.900376ms)\n✔ OH5: --hook-run command = remainder after 2nd colon (colons preserved); trust warning on stderr (49.956383ms)\n✔ OH5: mixed repeated hook flags preserve argv order in the written list (49.077587ms)\n✔ OH5: malformed hook flags exit 2 (350.85258ms)\n✔ PR-fix: value-taking flags accept values that begin with '-' (e.g. --announce '--foo') (58.046523ms)\n✔ OH5: partial tracker flags exit 2 (all-or-none) (54.432338ms)\n✔ OH5: no config flags and no TTY exits 2 (interview needs a TTY) (41.044664ms)\n✔ OH6: package.json pi.prompts includes ./templates and the template has a description (0.515649ms)\n✔ ICA17: --profile is retired (35.461561ms)\n✔ ICA17: --lifecycle-json is retired (37.10842ms)\n✔ ICA17: --enforcement is retired (38.235427ms)\n✔ ICA17: --preset custom is retired (42.062286ms)\n✔ ICA18: --preset standard writes the explicit standard bundle (36.909206ms)\n✔ ICA18: per-dial flags override the preset; --override lands in overrides (36.000574ms)\n✔ ICA18: --preset full carries the reversible design override (41.625865ms)\n✔ ICA19: --preset patches review/shape/overrides and preserves other keys (104.272725ms)\n✔ ICA19: patch that would delete consumer overrides refuses without --force (167.620209ms)\n✔ ICA23: --override reversible:brainstorm:off is rejected exit 2 (41.032148ms)\n✔ ICA23: --override reversible:onShortfall:fail is rejected exit 2 (35.557128ms)\n✔ ICA23: --override frozen:design:panel is rejected exit 2 (54.280209ms)\n✔ ICA23: --override reversible:design:banana is rejected exit 2 (37.802081ms)\n✔ ICA23: --override reversible:panelSize:zero is rejected exit 2 (41.371378ms)\n✔ ICA23: --override reversible:design is rejected exit 2 (57.029377ms)\n✔ ICA6: older-schema config + --force replaces with a fresh v3 config (106.86123ms)\n✔ ICA19: a single-dial patch preserves the other committed dials (160.744622ms)\n✔ ICA19: preset patch refuses when it would drop a consumer override track (227.581173ms)\n✔ ASD4: SKILL.md is within the 220-line / 16384-byte ceiling (1.683926ms)\n✔ ASD4: SKILL.md retains all seven kernel responsibilities (0.839817ms)\n✔ ASD4: SKILL.md contains no duplicated detailed phase-mechanics block (0.43273ms)\n✔ ASD16: every §5 checklist answer is derivable from docs alone (1.627449ms)\n✔ ASD16: docs state the source-inspection boundary (source only when changing implementation) (0.402136ms)\n✔ ASD16 (non-vacuous): no doc claims implementation work can avoid source inspection (0.394044ms)\n✔ ASD2: system reference contains every §5 checklist section (2.006865ms)\n✔ ASD2 (non-vacuous): deleting any one section is detected (2.429642ms)\n✔ ASD2: §5 public-composition inventory narrates the six-class taxonomy (0.485268ms)\n✔ PV1: a valid JavaScript manifest runs only declared checks and passes (111.418523ms)\n✔ PV2: only declared argv run; an undeclared tool command never executes (211.991612ms)\n✔ PV3: schema and inspectManifest reject the mutation matrix before any command runs (70.488798ms)\n✔ PV4: command outcomes are complete and deterministic; runner continues after failures (82.201047ms)\n✔ PV4: a timeout is reported as FAIL with timedOut (1106.126842ms)\n✔ PV5: category applicability is exact; injected n/a shapes are rejected (174.858756ms)\n✔ PV6: scenario mapping gates the verdict (175.982263ms)\n✔ PV7: standards and banned patterns are commands, not judgement (214.276637ms)\n✔ PV8: evidence is bounded and secrets are redacted (109.570948ms)\n✔ PV8 unit: boundStream and redaction name-matching are precise (371.246586ms)\n✔ PV9: JSON/text/exit agree and JSON mode is order-independent (1019.670146ms)\n✔ PV9: --report writes the exact JSON bytes atomically (225.419219ms)\n✔ PV9: --report outside the repo root is refused and clobbers nothing (242.586166ms)\n✔ PV10: generic validator law and generated agent are portable (0.937076ms)\n✔ PV11: receipt hash verification detects mutation of any stored file (6.889963ms)\n✔ PV11: a FAIL runner-report cannot ride under runnerVerdict PASS (1.044349ms)\n✔ parseArgs: recognises JSON anywhere and rejects bad flags (0.75632ms)\n✔ PV13: renderText is a faithful projection of the report (175.404738ms)\nℹ tests 265\nℹ suites 0\nℹ pass 265\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 6374.413773\n",
+      "stderrTail": ""
+    },
+    {
+      "id": "static.syntax",
+      "argv": [
+        "node",
+        "--check",
+        "skills/sdlc/scripts/config-doc.mjs"
+      ],
+      "evidence": [
+        "config-doc.mjs parses"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 49,
+      "stdoutTail": "",
+      "stderrTail": ""
+    },
+    {
+      "id": "static.lint",
+      "argv": [
+        "npm",
+        "run",
+        "lint"
+      ],
+      "evidence": [
+        "Formatting and lint over config-doc.mjs and its test"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 306,
+      "stdoutTail": "\n> pi-sdlc@0.1.1 lint\n> biome check .\n\nChecked 104 files in 110ms. No fixes applied.\n",
+      "stderrTail": ""
+    },
+    {
+      "id": "patterns.diff",
+      "argv": [
+        "git",
+        "diff",
+        "--check",
+        "HEAD"
+      ],
+      "evidence": [
+        "No whitespace-error banned patterns in the task diff"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 13,
+      "stdoutTail": "",
+      "stderrTail": ""
+    }
+  ],
+  "categories": [
+    {
+      "category": "tests",
+      "status": "PASS",
+      "checkIds": [
+        "tests.b1",
+        "tests.full"
+      ]
+    },
+    {
+      "category": "static",
+      "status": "PASS",
+      "checkIds": [
+        "static.syntax",
+        "static.lint"
+      ]
+    },
+    {
+      "category": "scenarios",
+      "status": "PASS"
+    },
+    {
+      "category": "standards",
+      "status": "N/A",
+      "reason": "B1 adds no new normative-reference inventory rows; FS11 classification/discovery is task C1."
+    },
+    {
+      "category": "bannedPatterns",
+      "status": "PASS",
+      "checkIds": [
+        "patterns.diff"
+      ]
+    }
+  ],
+  "scenarios": [
+    {
+      "scenarioId": "ASD6",
+      "status": "PASS",
+      "checkIds": [
+        "tests.b1",
+        "tests.full"
+      ]
+    },
+    {
+      "scenarioId": "ASD7",
+      "status": "PASS",
+      "checkIds": [
+        "tests.b1",
+        "tests.full"
+      ]
+    },
+    {
+      "scenarioId": "ASD8",
+      "status": "PASS",
+      "checkIds": [
+        "tests.b1",
+        "tests.full"
+      ]
+    },
+    {
+      "scenarioId": "ASD9",
+      "status": "PASS",
+      "checkIds": [
+        "tests.b1",
+        "tests.full"
+      ]
+    }
+  ]
+}

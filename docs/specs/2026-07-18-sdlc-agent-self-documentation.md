@@ -579,7 +579,7 @@ assertion (ASD20) verifies both call sites coexist in the merged `setup-sdlc.mjs
 
 ## 19. Governance and non-functional requirements (normative)
 
-- **ADR 0028** records the documentation authority hierarchy (§3) and the
+- **ADR 0029** records the documentation authority hierarchy (§3) and the
   generated-explanation trust model (JSON authoritative; `CONFIG.md` explains,
   never overrides; safe degradation) — durable, surprising without context, and
   chosen after the monolith-vs-duplication trade-off.
@@ -671,7 +671,7 @@ Each DoD row of the Plan is covered; non-vacuity mutations are explicit.
   comprehension checklist from docs only, reading no implementation file; and
   asserts no reference/doc claims implementation work itself can avoid source
   inspection.
-- **ASD17** (DoD 13): ADR 0028 exists and states the authority hierarchy + trust
+- **ASD17** (DoD 13): ADR 0029 exists and states the authority hierarchy + trust
   model; the programme and IC-B/OL-C plan docs carry absorption notes; the docs
   assert #91/#101/#102 remain independent and out of scope.
 - **ASD18** (DoD 14): the full `node --test` corpus, biome lint, FS11 reference
@@ -694,7 +694,7 @@ Slice at least these task seams (Build owns final decomposition):
 
 1. **A1 — package docs + skill routing + disposition** (Group A §§2–8): create
    `system-reference.md` and six `phase-*.md`; slim `SKILL.md`; produce the
-   disposition ledger; ADR 0028 + programme/plan absorption notes.
+   disposition ledger; ADR 0029 + programme/plan absorption notes.
 2. **A2 — standalone entrypoints** (§9): six `templates/sdlc-<slug>.md` routers
    with the #38 table, stamp, adopted-config-dominates, and pr-review grounding.
 3. **B1 — `config-doc` module** (§§11–14): renderer/write/check, sentinel,

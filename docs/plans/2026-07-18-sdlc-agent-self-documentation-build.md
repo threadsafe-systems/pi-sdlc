@@ -69,7 +69,7 @@ root.
   `name: sdlc` + discovery-sufficient `description`); produce the
   statement-level disposition ledger (§7/§8: every pre-change normative rule +
   red flag → retained / moved-to-one-named-reference / intentionally-replaced,
-  none dropped or owned twice); write ADR 0028 (authority hierarchy §3 +
+  none dropped or owned twice); write ADR 0029 (authority hierarchy §3 +
   generated-explanation trust model); append the IC-B/OL-C/programme absorption
   notes and the #91/#101/#102-remain-independent assertion.
 - **Ceiling escape:** if all seven kernel responsibilities cannot fit ≤ 220

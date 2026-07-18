@@ -1,49 +1,91 @@
 ---
-description: Adopt the pi-sdlc lifecycle in this repo (opt-in scaffolder)
+description: Adopt the pi-sdlc lifecycle in this repo (agent-led opt-in scaffolder)
 ---
 Set this repository up to use the sdlc skill by writing its `.pi/sdlc/` manifest.
+**Lead the conversation and explain before eliciting choices** — adoption
+reduces to two owner decisions; everything else is defaulted and explained, not
+presented as a jargon quiz.
 
 This template can run before the `sdlc` skill has ever been loaded in this
 session — do not assume `scripts/` is already grounded. First, find the `sdlc`
-skill's own directory (the folder containing its `SKILL.md`, from your skills
-listing or by locating the installed `pi-sdlc` package), and resolve
+skill's own directory (the folder containing its `SKILL.md`) and resolve
 `<skill-dir>` to that absolute path. Run every `scripts/...` command below as
 `<skill-dir>/scripts/...`, with the session's working directory kept inside the
-target repo so FS3 root resolution finds it:
+target repo so root resolution finds it.
+
+## Explain first (teach these concepts before asking anything)
+
+1. **The invariant kernel vs configurable scaffolding.** The lifecycle *law* —
+   the phase sequence, the iron law (no skipping forward; backward always
+   allowed), and the gates that must exist — is fixed and not configurable. What
+   a repo configures is the *scaffolding*: which gates run and at what strength.
+   Explain that distinction plainly.
+2. **Tracks — the irreversible/reversible distinction.** An **irreversible**
+   change freezes a shape others bind to (public interfaces, contracts, persisted
+   schemas, wire formats); it runs the full brainstorm→plan→spec→build→implement→PR
+   path with design panels. A **reversible** change (internal refactors, docs,
+   tests, tooling) takes the fast path — no pre-PR design panel, but the PR panel
+   still runs. `shape.defaultTrack` is the when-in-doubt track.
+3. **What `panel` / `advisory` / `human` / `off` mean in practice.** `panel` = an
+   adversarial multi-model review that must reach its stop condition; `advisory`
+   = the same panel but non-blocking; `human` = a human owner approves, no model
+   panel; `off` = no gate at that phase. Explain each in plain terms.
+4. **The consequences of the other dials.** `shape.separateSpec` (a distinct Spec
+   gate vs merging plan+spec into one gated artifact); `shape.publishToTracker`
+   (the build-task count at which the breakdown is projected to an epic/board, or
+   `never`); `review.tasks` (`subagent` = a validator subagent per task; `self` =
+   you run the declared checks; `off` = no per-task validation); and
+   `review.onShortfall` (`proceed` = best-effort when the panel roster falls short
+   of the floor and surface it; `fail` = hard-fail below the floor).
+5. **Adoption reduces to two owner decisions.** Everything above is defaulted;
+   the only two choices the owner must actively make are **who reviews designs
+   (`review.design`)** and **who reviews code (`review.code`)**. Frame the
+   interview around those two, defaulting the rest and explaining what the
+   defaults mean.
+
+## Run the scaffolder
 
 ```bash
 <skill-dir>/scripts/setup-sdlc.sh
 ```
 
-For headless use, resolve `<skill-dir>` the same way and run
-`node <skill-dir>/scripts/setup-sdlc.mjs` (or the `.sh` entry point).
-
-Or non-interactively:
+For headless use, run `node <skill-dir>/scripts/setup-sdlc.mjs` (or the `.sh`
+entry point). The interactive TTY fallback asks **at most the two core decisions
+plus a final confirmation** (≤ 3 prompts); every other dial defaults to the
+`standard` bundle. Every dial is also reachable **non-interactively by flag**, so
+reducing the fallback removes no configurability:
 
 ```bash
 <skill-dir>/scripts/setup-sdlc.sh \
-  --preset standard \
+  --review-design panel --review-code panel \
+  --review-brainstorm human --review-tasks subagent --panel-size 2 \
+  --on-shortfall fail --separate-spec true --publish-to-tracker 2 \
+  --default-track irreversible \
   --prefix myproj --label-prefix myproj-sdlc \
   --announce "Using the sdlc skill to drive this change through its lifecycle."
 ```
 
-The interview covers: a **preset** (`solo` | `standard` | `full`) or each dial
-hand-picked (`review.brainstorm/design/code/tasks`, `review.panelSize`,
-`review.onShortfall`, `shape.separateSpec/publishToTracker/defaultTrack`);
-`prefix`/`labelPrefix`; the announce string; an optional GitHub tracker; an
-optional worktree hook (you supply YOUR worktree tool/skill name — pi-sdlc
-ships none); and an optional after-phase notification `run` hook. Every dial is
-also reachable non-interactively by flag (`--preset`, `--review-*`,
-`--panel-size`, `--on-shortfall`, `--separate-spec`, `--publish-to-tracker`,
-`--default-track`, repeatable `--override <track>:<dial>:<value>`).
+Additional flags: `--preset solo|standard|full` (an answer bundle that expands
+into explicit dials; never persisted), repeatable
+`--override <track>:<dial>:<value>`, `--tracker-repo`/`--tracker-board-number`/
+`--tracker-board-url`, `--hook-run`/`--hook-use` (you supply YOUR worktree
+tool/skill name — pi-sdlc ships none), `--seed-panels`, `--with-ci-workflow`,
+`--copy-prompts`, `--force`, `--yes`, `--format text|json`.
 
-`run` hooks execute arbitrary shell commands with the agent's privileges from
-the committed config; only commit hooks you trust (same boundary as
-`.pi/prompts`).
+`run` hooks execute arbitrary shell commands with the agent's privileges from the
+committed config; only commit hooks you trust (same boundary as `.pi/prompts`).
 
-After it writes `.pi/sdlc/`, confirm the generated `sdlc.config.json` back to
-the user, then have them commit `.pi/sdlc/` — adoption is the manifest blob in
-the current git `HEAD`, and readiness also needs the committed `panels` roster.
+## Finish: explain what was written, then commit and verify
+
+Setup writes both `.pi/sdlc/sdlc.config.json` (the authoritative manifest) **and**
+`.pi/sdlc/CONFIG.md` (a generated companion that *explains* the effective shape;
+JSON stays authoritative). Explain the generated `sdlc.config.json` back to the
+user and point them at `CONFIG.md` for the behavioural summary. Then have them
+**commit `.pi/sdlc/`** — adoption is the manifest blob in the current git `HEAD`,
+and readiness also needs the committed `panels` roster. `CONFIG.md` is **not**
+part of readiness — it is a generated explanation; startup warns and falls back to
+authoritative JSON when it is missing or stale, and `sdlc-status` never checks it.
 Verify with `<skill-dir>/scripts/sdlc-status.sh` in pi, or headlessly with
-`node <skill-dir>/scripts/sdlc-status.mjs` (exit 0 = ready; exit 3 = adopted
-but incomplete, for example uncommitted `.pi/sdlc/` files).
+`node <skill-dir>/scripts/sdlc-status.mjs` (exit 0 = ready; exit 3 = adopted but
+incomplete, for example uncommitted `.pi/sdlc/` files). Regenerate `CONFIG.md`
+any time with `<skill-dir>/scripts/config-doc.sh write`.

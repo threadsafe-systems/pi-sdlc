@@ -26,9 +26,11 @@ test("NR7: generic prompts do not require absent governing files", () => {
 
 test("NR7: skill dispatch instructions are concrete and CI claims are bounded", () => {
 	const skill = read("skills/sdlc/SKILL.md");
+	const prReview = read("skills/sdlc/references/phase-pr-review.md");
 	assert.doesNotMatch(skill, /FILL_IN_TASK_BLOCK/);
-	assert.match(skill, /Replace\s+its task value with the exact review task/);
-	assert.match(skill, /configured the shipped workflow|documented snippet/);
+	assert.doesNotMatch(prReview, /FILL_IN_TASK_BLOCK/);
+	assert.match(prReview, /Replace\s+its task value with the exact review task/);
+	assert.match(prReview, /configured the shipped workflow|documented snippet/);
 	assert.doesNotMatch(skill, /CI checks the declared track's artifacts are committed\./);
 });
 
