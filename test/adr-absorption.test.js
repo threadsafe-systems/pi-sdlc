@@ -13,7 +13,7 @@ const here = dirname(fileURLToPath(import.meta.url));
 const repo = dirname(here);
 const read = (rel) => readFileSync(join(repo, rel), "utf8");
 
-test("ASD17: ADR 0028 exists and states the authority hierarchy + trust model", () => {
+test("ASD17: ADR 0029 exists and states the authority hierarchy + trust model", () => {
 	const adrDir = join(repo, "docs", "adr");
 	const file = readdirSync(adrDir).find((f) => /^0029-/.test(f));
 	assert.ok(file, "ADR 0029 must exist");
@@ -54,6 +54,6 @@ test("ASD17: docs assert #91/#101/#102 remain independent and out of scope", () 
 	assert.match(read("skills/sdlc/references/system-reference.md"), /#101/);
 });
 
-test("ASD17: ADR 0028 is registered in the ADR directory (no orphan)", () => {
+test("ASD17: ADR 0029 is registered in the ADR directory (no orphan)", () => {
 	assert.ok(existsSync(join(repo, "docs", "adr", "README.md")), "ADR README should exist");
 });

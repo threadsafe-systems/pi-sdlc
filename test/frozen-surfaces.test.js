@@ -34,12 +34,14 @@ const FROZEN = [
 ];
 
 function baseRef() {
-	// The branch base: prefer the merge-base with main, fall back to main.
-	try {
-		return execFileSync("git", ["-C", repo, "merge-base", "HEAD", "main"], { encoding: "utf8" }).trim();
-	} catch {
-		return "main";
+	// The branch base: the merge-base with the main line. In CI `main` may not be a
+	// local branch (only origin/main is fetched), so try both refs.
+	for (const ref of ["main", "origin/main"]) {
+		try {
+			return execFileSync("git", ["-C", repo, "merge-base", "HEAD", ref], { encoding: "utf8" }).trim();
+		} catch {}
 	}
+	throw new Error("cannot resolve the main-line base ref (main / origin/main)");
 }
 
 test("ASD19: frozen surfaces are byte-identical to the branch base", () => {
