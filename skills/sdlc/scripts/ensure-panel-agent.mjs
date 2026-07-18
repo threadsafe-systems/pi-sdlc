@@ -22,11 +22,18 @@ import { emitEvent } from "./telemetry.mjs";
 
 const REVIEWER_TAG_REPLACEMENT = "one of several independent reviewers in a multi-model panel";
 const DEFAULT_TOOLS = "read,grep,find,ls,bash";
+// Panel reviewers are read-only text/diff reviewers that never declare a
+// lens/browser/worktree tool, so they gain nothing from those extensions
+// binding into the child process — only the paid cost of cold-starting their
+// LSP/tooling backends (tsserver, marksman, ...) for every dispatched
+// reviewer. Default to none; --extensions CSV opts a consumer back in.
+const DEFAULT_EXTENSIONS = "";
 
 const argv = process.argv.slice(2);
 let phase = "";
 let dir = "";
 let tools = DEFAULT_TOOLS;
+let extensions = DEFAULT_EXTENSIONS;
 let force = false;
 let config = "";
 let repoRoot = "";
@@ -41,19 +48,20 @@ for (let i = 0; i < argv.length; i++) {
 	};
 	if (a === "--dir") dir = needVal("--dir");
 	else if (a === "--tools") tools = needVal("--tools");
+	else if (a === "--extensions") extensions = needVal("--extensions");
 	else if (a === "--force") force = true;
 	else if (a === "--slug") slug = needVal("--slug");
 	else if (a === "--config") config = needVal("--config");
 	else if (a === "--repo-root") repoRoot = needVal("--repo-root");
 	else if (a === "-h" || a === "--help") {
-		console.log("usage: ensure-panel-agent.mjs <plan_review|spec_review|pr_review|task_validate> [--dir DIR] [--tools CSV] [--force] [--slug S] [--config DIR|--repo-root DIR]");
+		console.log("usage: ensure-panel-agent.mjs <plan_review|spec_review|pr_review|task_validate> [--dir DIR] [--tools CSV] [--extensions CSV] [--force] [--slug S] [--config DIR|--repo-root DIR]");
 		process.exit(0);
 	} else if (a.startsWith("-")) fail(`ensure-panel-agent: unknown flag ${a}`);
 	else if (!phase) phase = a;
 	else fail(`ensure-panel-agent: unexpected arg '${a}'`);
 }
 
-if (!phase) fail("usage: ensure-panel-agent.mjs <plan_review|spec_review|pr_review|task_validate> [--dir DIR] [--tools CSV] [--force] [--slug S] [--config DIR|--repo-root DIR]");
+if (!phase) fail("usage: ensure-panel-agent.mjs <plan_review|spec_review|pr_review|task_validate> [--dir DIR] [--tools CSV] [--extensions CSV] [--force] [--slug S] [--config DIR|--repo-root DIR]");
 if (!PHASES.includes(phase)) fail(`ensure-panel-agent: unknown phase '${phase}' (known: ${PHASES.join(" ")})`);
 
 const skillDir = dirname(dirname(fileURLToPath(import.meta.url))); // skills/sdlc
@@ -74,7 +82,7 @@ const description = agentDescription(cfg.labelPrefix, phase);
 const rawBody = readFileSync(promptPath, "utf8").replace(/\n+$/, "");
 const body = rawBody.split("REVIEWER_TAG").join(REVIEWER_TAG_REPLACEMENT);
 
-const content = `${["---", `name: ${name}`, `description: ${description}`, `tools: ${tools}`, "---", "", body].join("\n")}\n`;
+const content = `${["---", `name: ${name}`, `description: ${description}`, `tools: ${tools}`, `extensions: ${extensions}`, "---", "", body].join("\n")}\n`;
 
 const agentsDir = dir ? (isAbsolute(dir) ? dir : resolve(dir)) : resolveConsumerPath(root, cfg.paths.agents, "paths.agents").resolved;
 const out = join(agentsDir, `${name}.md`);

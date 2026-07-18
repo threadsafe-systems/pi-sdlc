@@ -1,3 +1,15 @@
+## [2.3.0](https://github.com/threadsafe-systems/pi-sdlc/compare/v2.2.1...v2.3.0) (2026-07-18)
+
+### Features
+
+* **resolve-panel:** collapse cross-provider Bedrock model identity + roster fallback ([#113](https://github.com/threadsafe-systems/pi-sdlc/issues/113)) ([4d58213](https://github.com/threadsafe-systems/pi-sdlc/commit/4d58213aa3f0a958d2a731f4a5e793e1e83ec113)), closes [#80](https://github.com/threadsafe-systems/pi-sdlc/issues/80)
+
+## [2.2.1](https://github.com/threadsafe-systems/pi-sdlc/compare/v2.2.0...v2.2.1) (2026-07-18)
+
+### Bug Fixes
+
+* **sdlc:** stamp panel reviewer agents with no extensions by default ([#112](https://github.com/threadsafe-systems/pi-sdlc/issues/112)) ([77609aa](https://github.com/threadsafe-systems/pi-sdlc/commit/77609aabb24afbc044712edf7692f47ebe7e484c))
+
 ## [2.2.0](https://github.com/threadsafe-systems/pi-sdlc/compare/v2.1.0...v2.2.0) (2026-07-18)
 
 ### Features
