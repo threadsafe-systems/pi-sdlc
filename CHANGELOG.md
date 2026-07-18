@@ -1,3 +1,9 @@
+## [2.2.0](https://github.com/threadsafe-systems/pi-sdlc/compare/v2.1.0...v2.2.0) (2026-07-18)
+
+### Features
+
+* **sdlc:** completion gate, worker dispatch guardrails, stall self-resume (batch 1) ([#103](https://github.com/threadsafe-systems/pi-sdlc/issues/103)) ([38ecf92](https://github.com/threadsafe-systems/pi-sdlc/commit/38ecf92cb3b15062067d7c9f0ba78212de8e75cf)), closes [#76](https://github.com/threadsafe-systems/pi-sdlc/issues/76) [#77](https://github.com/threadsafe-systems/pi-sdlc/issues/77) [#78](https://github.com/threadsafe-systems/pi-sdlc/issues/78) [#79](https://github.com/threadsafe-systems/pi-sdlc/issues/79) [#77](https://github.com/threadsafe-systems/pi-sdlc/issues/77) [#78](https://github.com/threadsafe-systems/pi-sdlc/issues/78) [#79](https://github.com/threadsafe-systems/pi-sdlc/issues/79)
+
 ## [2.1.0](https://github.com/threadsafe-systems/pi-sdlc/compare/v2.0.0...v2.1.0) (2026-07-18)
 
 ### Features
