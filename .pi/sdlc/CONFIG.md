@@ -1,4 +1,4 @@
-<!-- pi-sdlc:config-doc v1 fingerprint=c4c956f1cbd562c96fc26fbafdc624178f3562ce0f4311b16199c676233f9865 -->
+<!-- pi-sdlc:config-doc v1 fingerprint=b968d3e8b61c3bf1596e1b0598dee3154c36c40e50c0f71717a123add9c2a648 -->
 
 # pi-sdlc effective configuration (generated)
 
@@ -64,13 +64,13 @@ wins; else `task_validate` is 1; else the track's
   - separateSpec / publishToTracker / defaultTrack. Alternatives per schema; publishToTracker may be an integer or "never".
 - **`overrides`** = `{"reversible":{"review":{"design":"human"}}}`
   - Per-track (irreversible/reversible) dial overrides. Alternatives: omit, or override review dials for one track.
-- **`panels`** = `{"$comment":"Panel roster for pi-sdlc itself. Preference reconciled against live credentials by resolve-panel; model ids drift, re-check with `pi --list-models`. Entries may carry pi's ':<thinking>' suffix (off/minimal/low/medium/high/xhigh/max). panelSize is the per-phase distinct-model floor (model-identity axis). See docs/plans/2026-07-11-model-thinking-levels.md for the reasoning levels.","authorDefault":"anthropic/claude-opus-4-8:high","phases":{"plan_review":{"panelSize":2,"prefer":["openai-codex/gpt-5.6-sol:high","zai/glm-5.2:high","anthropic/claude-opus-4-8:high","deepseek/deepseek-v4-pro:high"]},"spec_review":{"panelSize":2,"prefer":["anthropic/claude-opus-4-8:high","openai-codex/gpt-5.6-luna:high","zai/glm-5.2:high","deepseek/deepseek-v4-pro:high"]},"pr_review":{"panelSize":3,"prefer":["anthropic/claude-fable-5:high","openai-codex/gpt-5.6-sol:high","google/gemini-3.1-pro-preview:high","deepseek/deepseek-v4-pro:high"]},"task_validate":{"panelSize":1,"prefer":["openai-codex/gpt-5.6-terra","anthropic/claude-haiku-4-5","deepseek/deepseek-v4-flash","zai/glm-5.2:low"]}}}`
+- **`panels`** = `{"$comment":"Panel roster for pi-sdlc itself. Preference reconciled against live credentials by resolve-panel; model ids drift, re-check with `pi --list-models`. Entries may carry pi's ':<thinking>' suffix (off/minimal/low/medium/high/xhigh/max). panelSize is the per-phase distinct-model floor (model-identity axis). See docs/plans/2026-07-11-model-thinking-levels.md for the reasoning levels. pr_review's amazon-bedrock/global.anthropic.claude-opus-4-8 fallback (added 2026-07-18, issue #80) collapses to the same identity as authorDefault (anthropic/claude-opus-4-8) — it is always excluded, and contributes nothing, whenever the author is the default identity; it only helps when a non-opus-4-8 author needs a 5th distinct-identity candidate.","authorDefault":"anthropic/claude-opus-4-8:high","phases":{"plan_review":{"panelSize":2,"prefer":["openai-codex/gpt-5.6-sol:high","zai/glm-5.2:high","anthropic/claude-opus-4-8:high","deepseek/deepseek-v4-pro:high"]},"spec_review":{"panelSize":2,"prefer":["anthropic/claude-opus-4-8:high","openai-codex/gpt-5.6-luna:high","zai/glm-5.2:high","deepseek/deepseek-v4-pro:high"]},"pr_review":{"panelSize":3,"prefer":["anthropic/claude-fable-5:high","openai-codex/gpt-5.6-sol:high","google/gemini-3.1-pro-preview:high","deepseek/deepseek-v4-pro:high","amazon-bedrock/global.anthropic.claude-opus-4-8:high"]},"task_validate":{"panelSize":1,"prefer":["openai-codex/gpt-5.6-terra","anthropic/claude-haiku-4-5","deepseek/deepseek-v4-flash","zai/glm-5.2:low"]}}}`
   - The panel roster (authorDefault + per-phase prefer/panelSize). Resolved live against credentials by resolve-panel.
 
 ## Fingerprint & generator format
 
 - generator format: `v1`
-- fingerprint: `c4c956f1cbd562c96fc26fbafdc624178f3562ce0f4311b16199c676233f9865`
+- fingerprint: `b968d3e8b61c3bf1596e1b0598dee3154c36c40e50c0f71717a123add9c2a648`
 - The fingerprint is `sha256(version + NUL + canonicalJson(config))`; it changes
   when any config value changes or the render format is bumped. The check also
   compares the full body byte-for-byte, so hand edits are detected as stale.
