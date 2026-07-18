@@ -373,6 +373,32 @@ at the PR panel. Model preference: `deepseek/deepseek-v4-flash`, then
 fits this role well, since a checklist executor doesn't need deep reasoning (see
 `sdlc.config.schema.json` for the full `provider/model[:thinking]` syntax).
 
+## Dispatching implementation workers
+
+When Implement delegates a task to a subagent rather than building in the
+surface directly, give it the same shape every time:
+
+- **Scope, stated as a stop-condition.** Name exactly the task's check
+  commands and Definition-of-Done items as the boundary of its work, and say
+  plainly not to explore or fix adjacent things past that boundary.
+- **A `toolBudget`/`turnBudget` by default.** Attach a bounded budget (the
+  `subagent` tool's own `toolBudget: { soft, hard }` / `turnBudget: {
+  maxTurns, graceTurns }` parameters) so a worker drifting past scope is
+  nudged, then finalized, without a human having to notice and intervene.
+- **A canonical "finalize now" resume message** for a worker caught
+  exploring past scope: "You were exploring past this task's stated scope.
+  Stop investigating and finalize your current change against the stated
+  check commands now." Reuse this wording rather than improvising a new one
+  each time.
+- **Infra failure gets one automatic retry; no verdict does.** If a
+  dispatched worker's run ends in an **infra-class failure** — a process
+  crash, an out-of-memory kill, a provider timeout, or a transport/tool
+  error — that is infrastructure noise, not a REVISE/FAIL verdict from the
+  model. Retry that exact dispatch once, automatically, before treating it as
+  needing human attention. A second consecutive infra failure on the same
+  dispatch, or any model-authored verdict, surfaces to the human as normal —
+  never silently retried away.
+
 ## PR and review cycle
 
 Prepare the PR body from `.github/pull_request_template.md`: declare the
@@ -392,6 +418,28 @@ skill path:
 ```bash
 node <skill-dir>/scripts/check-lifecycle.mjs --body pr-body.md --repo-root .
 ```
+
+**Completion is machine-checked, not narrated.** Do not state that
+implementation, the PR review cycle, or the tracked effort is "complete" or
+"PASS" without first running the matching `check-completion.mjs` claim and
+getting a pass — a confident summary is not evidence that a branch actually
+pushed, a PR actually opened, or a tracker item actually closed.
+
+- Before claiming the PR/Implement phase itself is ready (branch pushed, PR
+  open, exactly one valid declaration, every in-scope sub-issue referenced):
+
+  ```bash
+  node <skill-dir>/scripts/check-completion.mjs --claim pr-open --slug <slug> --closes <n> [--closes <n> ...]
+  ```
+
+- Before claiming the tracked effort (epic) itself is finished, after merge:
+
+  ```bash
+  node <skill-dir>/scripts/check-completion.mjs --claim epic-done --epic <epic-number>
+  ```
+
+Either check failing means the claim is false; state what's missing instead
+of declaring done.
 
 Then run the local PR panel (`prompts/adversary-review.prompt.md`) against the
 final committed branch, consolidate and adjudicate its findings in the durable
@@ -501,6 +549,23 @@ an opportunistic enhancement — its failure semantics are defined above
 (before=block, after=warn) and stand as written. A missing `use:` tool/skill
 on a configured hook is a hook failure, per Hooks, full stop.
 
+## Stall detection and self-resume
+
+This applies in any phase, live or dispatched, not only Spec. A provider or
+transport failure can exhaust its own retries and go quiet — empty assistant
+turns, a `stopReason: error`, no further output — leaving the human as the
+only thing watching for it. Don't wait for that: after **2 consecutive
+turns** end this way (an error-terminated turn with no assistant content),
+treat it as a stall, not a stop, and self-issue a continuation/retry before
+reporting anything as blocked. Only report a stall to the human if the
+self-issued retry also fails.
+
+This is an interim, prose-level mitigation, not a substitute for a genuine
+fix: the real fix is a harness-level visible "stalled — retryable" signal and
+true auto-resume, which is `pi`/`pi-coding-agent` runtime behaviour this
+project does not own or ship. Treat this section as covering the gap until
+that exists upstream, not as the final word.
+
 ## Delegation (do not reimplement)
 
 - `adversarial-review` (global): the generic reviewer template mechanics and the
@@ -549,3 +614,5 @@ governing docs are historical record and are not migrated.
   publish step.
 - Treating the tracker (map, epic, sub-issues, board) as the source of truth
   instead of the committed doc it projects.
+- Claiming a phase, PR, or tracked effort "complete"/"PASS" without running
+  the matching `check-completion.mjs` claim and it passing (a false summit).
