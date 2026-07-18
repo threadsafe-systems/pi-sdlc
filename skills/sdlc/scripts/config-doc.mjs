@@ -155,17 +155,22 @@ function keyReference(config) {
 	return lines.join("\n");
 }
 
-// Resolved panel floors: resolve-panel uses a per-phase
-// `panels.phases.<phase>.panelSize` override when present, else `review.panelSize`.
-// §14 requires the generated summary to explain the resolved floors/overrides.
+// Resolved panel floors, replicating resolve-panel's floorFor(): a per-phase
+// `panels.phases.<phase>.panelSize` wins; else `task_validate` is 1; else the
+// track's `overrides.<track>.review.panelSize`, else `review.panelSize`. Floors
+// are track-dependent, so both tracks are rendered (§14 resolved floors/overrides).
 function panelFloors(config) {
-	const base = config.review?.panelSize;
 	const phases = config.panels?.phases ?? {};
-	const lines = ["## Resolved panel floors", "", `- Default floor \`review.panelSize\`: ${base ?? "see sdlc.config.json"}.`];
-	for (const phase of ["plan_review", "spec_review", "pr_review", "task_validate"]) {
-		const override = phases[phase]?.panelSize;
-		const effective = override ?? base;
-		lines.push(`- \`${phase}\`: ${effective ?? "see sdlc.config.json"}${override === undefined ? " (default)" : ` (panels.phases.${phase}.panelSize override)`}.`);
+	const floorFor = (phase, track) => {
+		if (phases[phase]?.panelSize !== undefined) return phases[phase].panelSize;
+		if (phase === "task_validate") return 1;
+		return config.overrides?.[track]?.review?.panelSize ?? config.review?.panelSize;
+	};
+	const names = ["plan_review", "spec_review", "pr_review", "task_validate"];
+	const lines = ["## Resolved panel floors", "", "Resolved as `resolve-panel` does: a per-phase `panels.phases.<phase>.panelSize`", "wins; else `task_validate` is 1; else the track's", "`overrides.<track>.review.panelSize`, else `review.panelSize`.", ""];
+	for (const track of ["irreversible", "reversible"]) {
+		const parts = names.map((p) => `${p}=${floorFor(p, track) ?? "see sdlc.config.json"}`);
+		lines.push(`- **${track}:** ${parts.join(", ")}.`);
 	}
 	lines.push("");
 	return lines.join("\n");
@@ -231,11 +236,11 @@ export function check(repoRoot) {
 	const expected = render(loaded.config);
 	const expectedFingerprint = fingerprint(loaded.config);
 	const companionPath = join(repoRoot, COMPANION_REL);
-	if (!existsSync(companionPath)) {
-		return { ...base, state: "missing", exitCode: 1, sentinel: { present: false, wellFormed: false, version: null, recognized: false, fingerprint: null }, expectedFingerprint, reason: "companion file absent — run config-doc.sh write" };
-	}
 	if (isSymlink(companionPath)) {
 		return { ...base, state: "error", exitCode: 2, sentinel: { present: true, wellFormed: false, version: null, recognized: false, fingerprint: null }, expectedFingerprint, reason: "collision: companion is a symlink; not followed (resolve by hand)" };
+	}
+	if (!existsSync(companionPath)) {
+		return { ...base, state: "missing", exitCode: 1, sentinel: { present: false, wellFormed: false, version: null, recognized: false, fingerprint: null }, expectedFingerprint, reason: "companion file absent — run config-doc.sh write" };
 	}
 	const onDisk = readCompanion(companionPath);
 	if (onDisk === null) {
@@ -268,12 +273,12 @@ export function write(repoRoot, { force = false } = {}) {
 	const expectedFingerprint = fingerprint(loaded.config);
 	const companionPath = join(repoRoot, COMPANION_REL);
 
+	if (isSymlink(companionPath)) {
+		return { schemaVersion: 1, action: "refused", exitCode: 3, path: COMPANION_REL, reason: "companion is a symlink; not overwritten (resolve by hand, even with --force)" };
+	}
 	if (!existsSync(companionPath)) {
 		writeCompanion(companionPath, expected);
 		return { schemaVersion: 1, action: "created", exitCode: 0, path: COMPANION_REL, reason: "created new companion" };
-	}
-	if (isSymlink(companionPath)) {
-		return { schemaVersion: 1, action: "refused", exitCode: 3, path: COMPANION_REL, reason: "companion is a symlink; not overwritten (resolve by hand, even with --force)" };
 	}
 	const onDisk = readCompanion(companionPath);
 	if (onDisk === null) return { schemaVersion: 1, action: "refused", exitCode: 3, path: COMPANION_REL, reason: "companion is present but unreadable (not a regular file?) — resolve by hand" };

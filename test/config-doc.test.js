@@ -222,12 +222,27 @@ test("ASD6/sentinel: sentinelLine round-trips through parseSentinel as recognize
 	assert.equal(parsed.fingerprint, fingerprint(VALID_CONFIG));
 });
 
-test("panel floors: render surfaces per-phase panels.phases.*.panelSize overrides (§14)", () => {
+test("panel floors: render surfaces per-track resolved floors incl task_validate=1 and per-phase overrides (§14)", () => {
 	const body = render(VALID_CONFIG);
 	assert.match(body, /## Resolved panel floors/);
-	assert.match(body, /`pr_review`: 3 \(panels\.phases\.pr_review\.panelSize override\)/);
-	assert.match(body, /`task_validate`: 1 \(panels\.phases\.task_validate\.panelSize override\)/);
-	assert.match(body, /Default floor `review\.panelSize`: 2/);
+	assert.match(body, /\*\*irreversible:\*\* plan_review=2, spec_review=2, pr_review=3, task_validate=1\./);
+	assert.match(body, /\*\*reversible:\*\* plan_review=2, spec_review=2, pr_review=3, task_validate=1\./);
+});
+
+test("panel floors: task_validate resolves to 1 and per-track override applies when no per-phase panelSize", () => {
+	const cfg = structuredClone(VALID_CONFIG);
+	cfg.panels.phases = {
+		plan_review: { prefer: ["zai/glm-5.2:high", "deepseek/deepseek-v4-pro:high"] },
+		spec_review: { prefer: ["zai/glm-5.2:high", "deepseek/deepseek-v4-pro:high"] },
+		pr_review: { prefer: ["zai/glm-5.2:high", "deepseek/deepseek-v4-pro:high"] },
+		task_validate: { prefer: ["deepseek/deepseek-v4-flash"] },
+	};
+	cfg.overrides = { reversible: { review: { panelSize: 1 } } };
+	const body = render(cfg);
+	// irreversible: no per-phase size, not task_validate -> review.panelSize (2); task_validate -> 1
+	assert.match(body, /\*\*irreversible:\*\* plan_review=2, spec_review=2, pr_review=2, task_validate=1\./);
+	// reversible: overrides.reversible.review.panelSize (1); task_validate -> 1
+	assert.match(body, /\*\*reversible:\*\* plan_review=1, spec_review=1, pr_review=1, task_validate=1\./);
 });
 
 test("symlink safety: a symlinked companion is never followed (check error / write refused)", () => {
@@ -236,14 +251,24 @@ test("symlink safety: a symlinked companion is never followed (check error / wri
 	const victim = join(outside, "victim.txt");
 	writeFileSync(victim, "do not clobber\n");
 	symlinkSync(victim, companion(root));
-	// check: error/exit 2, does not read through the link as authoritative
 	const c = check(root);
 	assert.equal(c.state, "error");
 	assert.equal(c.exitCode, 2);
 	assert.match(c.reason, /symlink/);
-	// write: refused/exit 3 even with --force; the victim is untouched
 	const forced = write(root, { force: true });
 	assert.equal(forced.action, "refused");
 	assert.equal(forced.exitCode, 3);
 	assert.equal(readFileSync(victim, "utf8"), "do not clobber\n");
+});
+
+test("symlink safety: a DANGLING symlink is refused, never created through the link", () => {
+	const root = fixture();
+	const outside = mkdtempSync(join(tmpdir(), "config-doc-dangling-"));
+	const victim = join(outside, "does-not-exist.md");
+	symlinkSync(victim, companion(root)); // target absent -> existsSync(companion) is false
+	assert.equal(check(root).state, "error");
+	const forced = write(root, { force: true });
+	assert.equal(forced.action, "refused");
+	assert.equal(forced.exitCode, 3);
+	assert.equal(existsSync(victim), false, "a dangling symlink must not be written through");
 });

@@ -35,11 +35,12 @@ values, resolved per track. The default track is
 
 ## Resolved panel floors
 
-- Default floor `review.panelSize`: 2.
-- `plan_review`: 2 (panels.phases.plan_review.panelSize override).
-- `spec_review`: 2 (panels.phases.spec_review.panelSize override).
-- `pr_review`: 3 (panels.phases.pr_review.panelSize override).
-- `task_validate`: 1 (panels.phases.task_validate.panelSize override).
+Resolved as `resolve-panel` does: a per-phase `panels.phases.<phase>.panelSize`
+wins; else `task_validate` is 1; else the track's
+`overrides.<track>.review.panelSize`, else `review.panelSize`.
+
+- **irreversible:** plan_review=2, spec_review=2, pr_review=3, task_validate=1.
+- **reversible:** plan_review=2, spec_review=2, pr_review=3, task_validate=1.
 
 ## Configuration keys (JSON order)
 
