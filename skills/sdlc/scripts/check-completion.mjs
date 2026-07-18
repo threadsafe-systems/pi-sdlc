@@ -50,11 +50,12 @@ function parseArgs(argv) {
 	for (let i = 0; i < argv.length; i++) {
 		const a = argv[i];
 		const value = () => {
-			const v = argv[++i];
+			const v = argv[i + 1];
 			if (v === undefined || v.startsWith("--")) {
 				err(`${a} requires a value`);
 				return undefined;
 			}
+			i++;
 			return v;
 		};
 		if (a === "--help" || a === "-h") out.help = true;

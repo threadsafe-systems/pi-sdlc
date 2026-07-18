@@ -8,7 +8,7 @@ import { mkdtempSync, rmSync, writeFileSync, mkdirSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import test from "node:test";
-import { main } from "../skills/sdlc/scripts/check-completion.mjs";
+import { main, parseArgs } from "../skills/sdlc/scripts/check-completion.mjs";
 
 function fixtureRoot() {
 	const dir = mkdtempSync(join(tmpdir(), "sdlc-check-completion-"));
@@ -188,4 +188,10 @@ test("cli: rejects invalid issue numbers without throwing", () => {
 	const { report } = main(["--claim", "pr-open", "--slug", "x", "--closes", "77)"]);
 	assert.equal(report.state, "error");
 	assert.match(checkOf(report, "cli.arguments").message, /positive issue numbers/);
+});
+
+test("cli: does not consume a following flag when a value is missing", () => {
+	const parsed = parseArgs(["--claim", "pr-open", "--closes", "--slug", "x"]);
+	assert.equal(parsed.slug, "x");
+	assert.equal(parsed.error, "--closes requires a value");
 });

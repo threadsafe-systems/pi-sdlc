@@ -406,9 +406,9 @@ surface directly, give it the same shape every time:
   each time.
 - **Infra failure gets one automatic retry; no verdict does.** If a
   dispatched worker's run ends in an **infra-class failure** — a process
-  crash, an out-of-memory kill, a provider timeout, or a transport/tool
-  error — that is infrastructure noise, not a REVISE/FAIL verdict from the
-  model. Retry that exact dispatch once, automatically, before treating it as
+  crash, an out-of-memory kill, overload or billing exhaustion, a provider
+  timeout, a transport/tool error, or empty output — that is infrastructure
+  noise, not a REVISE/FAIL verdict from the model. Retry that exact dispatch once, automatically, before treating it as
   needing human attention. A second consecutive infra failure on the same
   dispatch, or any model-authored verdict, surfaces to the human as normal —
   never silently retried away.
