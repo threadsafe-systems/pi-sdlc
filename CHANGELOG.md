@@ -1,3 +1,9 @@
+## [2.5.0](https://github.com/threadsafe-systems/pi-sdlc/compare/v2.4.0...v2.5.0) (2026-07-19)
+
+### Features
+
+* **retro:** preserve logical review-wave identity + reconcile review-dir naming ([#125](https://github.com/threadsafe-systems/pi-sdlc/issues/125)) ([892a362](https://github.com/threadsafe-systems/pi-sdlc/commit/892a3627cb90ce4fe3f5412b9e9d5abdf406ded0)), closes [#118](https://github.com/threadsafe-systems/pi-sdlc/issues/118) [#121](https://github.com/threadsafe-systems/pi-sdlc/issues/121) [#122](https://github.com/threadsafe-systems/pi-sdlc/issues/122) [#123](https://github.com/threadsafe-systems/pi-sdlc/issues/123) [#124](https://github.com/threadsafe-systems/pi-sdlc/issues/124)
+
 ## [2.4.0](https://github.com/threadsafe-systems/pi-sdlc/compare/v2.3.0...v2.4.0) (2026-07-18)
 
 ### Features
