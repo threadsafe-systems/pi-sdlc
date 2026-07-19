@@ -1,0 +1,571 @@
+Task: Validate build task t1 of feature sdlc-retro-panel-precision (issue #121) in repo root /home/neil/code/threadsafe/pi-sdlc.worktrees/feat-sdlc-retro-panel-precision (branch feat/sdlc-retro-panel-precision, HEAD commit of that branch).
+First run the deterministic runner exactly (this actually executes the checks; do not skip it):
+cd /home/neil/code/threadsafe/pi-sdlc.worktrees/feat-sdlc-retro-panel-precision && skills/sdlc/scripts/validate-task.sh --manifest docs/validation/sdlc-retro-panel-precision/t1.json --slug sdlc-retro-panel-precision --format json --report docs/reviews/task-validate-sdlc-retro-panel-precision-t1-2026-07-19/validator-runner-report.json
+You are a checklist executor, not a judge: do not invent commands, weaken checks, or decide applicability — the manifest owns all of that. Read the JSON the runner prints, confirm the process exit code and the report's verdict field agree, then report with REAL values from the run (not template placeholders): the verdict (PASS/FAIL/ERROR), each category's status, each check id with its status, and any stderr diagnostics. If exit code and report verdict disagree, report that discrepancy explicitly and treat the run as ERROR. Do not edit any files.
+## Acceptance Contract
+Acceptance level: attested
+Completion is not accepted from prose alone. End with a structured acceptance report.
+Criteria:
+- criterion-1: Return concrete findings with file paths and severity when applicable
+Required evidence: review-findings, residual-risks
+Finish with a fenced JSON block tagged `acceptance-report` in this shape:
+Use empty arrays when no items apply; array fields contain strings unless object entries are shown.
+`criteriaSatisfied[].status` must be exactly one of: satisfied, not-satisfied, not-applicable.
+`commandsRun[].result` must be exactly one of: passed, failed, not-run.
+`manualNotes` and `notes` are optional strings; an empty string means no note and does not satisfy `manual-notes` evidence.
+```acceptance-report
+{
+  "criteriaSatisfied": [
+    {
+      "id": "criterion-1",
+      "status": "satisfied",
+      "evidence": "specific proof"
+    }
+  ],
+  "changedFiles": [
+    "src/file.ts"
+  ],
+  "testsAddedOrUpdated": [
+    "test/file.test.ts"
+  ],
+  "commandsRun": [
+    {
+      "command": "command",
+      "result": "passed",
+      "summary": "short result"
+    }
+  ],
+  "validationOutput": [
+    "validation output or concise summary"
+  ],
+  "residualRisks": [
+    "none"
+  ],
+  "noStagedFiles": true,
+  "diffSummary": "short description of the diff",
+  "reviewFindings": [
+    "blocker: file.ts:12 - issue found, or no blockers"
+  ],
+  "manualNotes": "anything else the parent should know"
+}
+```
+I'll validate build task t1 of sdlc-retro-panel-precision. Let me start by confirming the repo context and running the deterministic validator.
+bash: pwd && ls -la /home/neil/code/threadsafe/pi-sdlc.worktree...
+/home/neil/code/threadsafe/pi-sdlc.worktrees/feat-sdlc-retro-panel-precision
+ls: cannot access '/home/neil/code/threadsafe/pi-sdlc.worktrees/feat-sdlc-retro-panel-precision/.git/HEAD': Not a directory
+Command exited with code 2
+bash: cd /home/neil/code/threadsafe/pi-sdlc.worktrees/feat-sdlc...
+/home/neil/code/threadsafe/pi-sdlc.worktrees/feat-sdlc-retro-panel-precision
+  feat/config-versioning-migration 3ee5189 fix(migration): surface single-writer boundary
++ feat/sdlc-lifecycle-telemetry    6b41a13 fix(test): report unreadable schema fixtures cleanly
+* feat/sdlc-retro-panel-precision  d8d0c54 feat(telemetry): harvest --wave flag, meta.json sidecar, optional wave field (T1, #121)
++ main                             8c3d556 docs(sdlc): question-presentation discipline across all lifecycle phases (#119)
+bash: cd /home/neil/code/threadsafe/pi-sdlc.worktrees/feat-sdlc...
+-rw-rw-r-- 1 neil neil 3285 Jul 19 18:22 docs/validation/sdlc-retro-panel-precision/t1.json
+read: /home/neil/code/threadsafe/pi-sdlc.worktrees/feat-sdlc-re...
+{
+  "schemaVersion": 1,
+  "taskId": "t1",
+  "buildPlan": "docs/plans/2026-07-19-sdlc-retro-panel-precision-build.md",
+  "repoRoot": ".",
+  "ownedScenarios": [],
+  "checks": [
+    {
+      "id": "tests.full",
+      "argv": ["npm", "test"],
+      "timeoutMs": 300000,
+      "evidence": ["Full corpus green incl. new T1 harvest --wave/meta.json tests"]
+    },
+    {
+      "id": "static.lint",
+      "argv": ["npm", "run", "lint"],
+      "timeoutMs": 120000,
+      "evidence": ["Repository formatting and lint rules"]
+    },
+    {
+      "id": "static.check-harvest",
+      "argv": ["node", "--check", "skills/sdlc/scripts/harvest-panel.mjs"],
+      "evidence": ["harvest-panel.mjs parses with the --wave/meta.json additions"]
+    },
+    {
+      "id": "static.check-telemetry",
+      "argv": ["node", "--check", "skills/sdlc/scripts/telemetry.mjs"],
+      "evidence": ["telemetry.mjs parses with OPTIONAL_EVENT_PAYLOADS"]
+    },
+    {
+      "id": "static.schema-valid",
+      "argv": ["node", "-e", "JSON.parse(require('fs').readFileSync('skills/sdlc-retro/schema/event.schema.json','utf8'))"],
+      "evidence": ["Event schema remains valid JSON after additive wave properties"]
+    },
+    {
+      "id": "standards.wave-optional",
+      "argv": [
+        "node",
+        "--input-type=module",
+        "-e",
+        "import { EVENT_PAYLOADS, OPTIONAL_EVENT_PAYLOADS, validatePayload } from './skills/sdlc/scripts/telemetry.mjs'; const req = EVENT_PAYLOADS['panel.harvested'].map(([n])=>n); if (req.includes('wave')) { console.error('wave must NOT be a required field'); process.exit(1); } if (!OPTIONAL_EVENT_PAYLOADS['panel.harvested'].some(([n])=>n==='wave')) { console.error('wave must be an optional field'); process.exit(1); } const noWave = validatePayload('panel.harvested', { panelPhase:'pr_review', round:1, dir:'d', missed:[] }); if (noWave.length) { console.error('omitting wave must validate: '+noWave.join(';')); process.exit(1); } const okWave = validatePayload('panel.harvested', { panelPhase:'pr_review', round:2, wave:1, dir:'d', missed:[] }); if (okWave.length) { console.error('valid wave must pass: '+okWave.join(';')); process.exit(1); } const badWave = validatePayload('panel.harvested', { panelPhase:'pr_review', round:1, wave:0, dir:'d', missed:[] }); if (!badWave.length) { console.error('wave:0 must be rejected as non-posInt'); process.exit(1); }"
+      ],
+      "evidence": ["wave is optional (omission validates), type-guarded when present (wave:0 rejected), and never required (plan DoD 1)"]
+    },
+    {
+      "id": "patterns.diff",
+      "argv": ["git", "diff", "--check", "HEAD"],
+      "evidence": ["No whitespace-error banned patterns in the task diff"]
+    }
+  ],
+  "categories": {
+    "tests": { "applicability": "required", "checkIds": ["tests.full"] },
+    "static": { "applicability": "required", "checkIds": ["static.lint", "static.check-harvest", "static.check-telemetry", "static.schema-valid"] },
+    "scenarios": { "applicability": "n/a", "reason": "Reversible track: no Specification; T1 maps to approved plan DoD item 1 per the build plan's T1 check table." },
+    "standards": { "applicability": "required", "checkIds": ["standards.wave-optional"] },
+    "bannedPatterns": { "applicability": "required", "checkIds": ["patterns.diff"] }
+  }
+}
+bash: cd /home/neil/code/threadsafe/pi-sdlc.worktrees/feat-sdlc...
+#!/usr/bin/env bash
+# validate-task.sh — thin entry point for the deterministic per-task validation
+# runner (PV2). All logic lives in validate-task.mjs.
+#
+# Usage: validate-task.sh --manifest PATH [--repo-root DIR] [--format text|json] [--report PATH]
+# Exit: 0 PASS; 1 FAIL; 2 ERROR (CLI/manifest/root/runner/report-write).
+set -euo pipefail
+exec node "$(dirname "$0")/validate-task.mjs" "$@"
+bash: cd /home/neil/code/threadsafe/pi-sdlc.worktrees/feat-sdlc...
+usage: validate-task.sh --manifest PATH [--repo-root DIR] [--format text|json] [--report PATH] [--slug S]
+bash: cd /home/neil/code/threadsafe/pi-sdlc.worktrees/feat-sdlc...
+(no output)
+bash: cd /home/neil/code/threadsafe/pi-sdlc.worktrees/feat-sdlc...
+{
+  "schemaVersion": 1,
+  "taskId": "t1",
+  "manifest": "/home/neil/code/threadsafe/pi-sdlc.worktrees/feat-sdlc-retro-panel-precision/docs/validation/sdlc-retro-panel-precision/t1.json",
+  "repoRoot": "/home/neil/code/threadsafe/pi-sdlc.worktrees/feat-sdlc-retro-panel-precision",
+  "verdict": "PASS",
+  "exitCode": 0,
+  "errors": [],
+  "manifestErrors": [],
+  "commands": [
+    {
+      "id": "tests.full",
+      "argv": [
+        "npm",
+        "test"
+      ],
+      "evidence": [
+        "Full corpus green incl. new T1 harvest --wave/meta.json tests"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 5039,
+      "stdoutTail": "[...truncated; showing bounded tail...]\n✔ LT19: --no-llm (noLlm:true) output validates and carries soft.absent (3.472237ms)\n✔ LT17: --from-raw reproduces a byte-identical run.json after live sources are destroyed (144.410063ms)\n✔ LT28: neither the sentinel secret nor the verbatim prompt sentence appears in run.json (52.732675ms)\n✔ NF4 unit: sanitizeSoftString redacts, rejects n-gram containment, and caps at 500 chars (0.164948ms)\n✔ LT29: a failing --gh-cmd yields github.error, schema-valid, no fabricated PR data (28.536296ms)\n✔ LT29: an --llm-cmd returning invalid JSON yields llm.error:narrative, schema-valid, no fabricated summary (61.293276ms)\n✔ LT29: an --llm-cmd that times out yields llm.error:<kind>, schema-valid, exit unaffected (612.689103ms)\n✔ llm-protocol schema: request/response fixtures validate (1.04729ms)\n✔ LT13 (hard): complete fixture store -> schema-valid run.json with known-answer rollups (79.001311ms)\n✔ LT14: a gappy store names every gap and derives nothing from missing sources (63.942458ms)\n✔ LT14: --no-github records github.skipped, not github.error (4.21913ms)\n✔ LT15: manifest adapter skips and counts malformed lines (manifest.partial) (1.227647ms)\n✔ LT15: harvest adapter maps per-model fields correctly (1.026614ms)\n✔ LT15: transcript usage/cost sums correctly and a version-4 transcript soft-fails per-file (1.090556ms)\n✔ LT15: review-dir discovery matches <phase>-<slug>-<date> naming (0.61715ms)\n✔ LT15: git/GitHub adapters consume only the injected fakes (64.766471ms)\n✔ LT16: phase attribution, agent time, capped human-wait, rework, window bounds (2.390829ms)\n✔ LT16: a 3-hour gap contributes exactly 30 minutes to human-wait (3.470734ms)\n✔ collect-run: no run store exits 1 (nothing collectable) (30.139895ms)\n✔ collect-run: writes docs/retros/<slug>/run.json by default and validates (47.172129ms)\n✔ resolveSessionDirs: an override list is used verbatim; absence marks sessions.dir_unresolved (0.25421ms)\n✔ LT24: every mandated hook step names record-run-event.sh and its event-type token together (0.642535ms)\n✔ LT24: the panel-dispatch step and the validator-dispatch step each name harvest-panel.sh (0.142276ms)\n✔ LT24: sdlc-retro SKILL.md names collect and render invocations skill-relatively (FS12 forms) (0.077124ms)\n✔ LT25: check-references passes with the new inventory entries (31.497284ms)\n✔ LT25: deleting a new entry's target file fails check-references (64.695881ms)\n✔ structural coverage: every sdlc-retro script has an FS11 inventory entry (0.425129ms)\n✔ structural coverage: every hook script named by §4 has an FS11 inventory entry (0.234872ms)\n✔ structural coverage: every committed sdlc-retro schema file has an FS11 inventory entry (0.187511ms)\n✔ structural coverage: ADR 0028 has an FS11 inventory entry and exists (0.189156ms)\n✔ structural coverage: every run-store/retro path named normatively by either SKILL.md has an inventory entry (0.266326ms)\n✔ LT27: docs/retros/sdlc-lifecycle-telemetry/run.json and index.html exist (0.548695ms)\n✔ LT27: the dogfood run.json validates against the committed schema and hand-rolled validator (2.472207ms)\n✔ LT27: coverage markers honestly record the pre-instrumentation gap (partial coverage by design) (0.157547ms)\n✔ LT27: the committed dashboard renders all seven anchors for the dogfood run (0.143252ms)\n✔ LT1: valid emit appends one schema-conforming line, creating the store (31.279234ms)\n✔ LT1b: --by defaults to agent when omitted (22.925851ms)\n✔ LT2: bad inputs exit 2 and never touch the manifest (203.766072ms)\n✔ schema agreement: unknown event types remain valid for forward-compatible consumers (0.296123ms)\n✔ LT2b: a bad input against a non-existent store attempts no write (23.12224ms)\n✔ LT3: concurrent emitters produce N complete, non-interleaved lines (108.701077ms)\n✔ empty explicit identities do not fall through to another identity (51.160784ms)\n✔ LT4: --slug beats env beats branch mapping (98.397034ms)\n✔ LT5: unresolvable identity skips (exit 0, one warning, no write) (82.850757ms)\n✔ LT26: .gitignore ignores the run store (4.264108ms)\n✔ emitter: .sh wrapper delegates to .mjs identically (35.369598ms)\n✔ vocabulary: every known event has a payload descriptor (0.167973ms)\n✔ LT11: harvest copies status.json + events.jsonl and emits panel.harvested (30.949253ms)\n✔ T1: --wave records a logical wave distinct from the round allocation label (30.538948ms)\n✔ T1: --wave must be a positive integer (38.285546ms)\n✔ LT11: --with-transcripts copies the transcripts/ subdirectory (30.183578ms)\n✔ LT12: a missing source directory exits 0 with both files missed (37.582065ms)\n✔ LT12: a partially-present source (status without events) reports one missed (30.28574ms)\n✔ harvest-panel: unknown phase and non-positive round exit 2 (93.214062ms)\n✔ harvest-panel.sh wrapper delegates to .mjs identically (40.939574ms)\n✔ LT20: full fixture renders all seven anchors with known-answer data bindings (2.596689ms)\n✔ LT20: an empty-shell run.json fails to carry any pinned data binding (0.304995ms)\n✔ LT21: render-twice byte-identity and no generation-time values (0.624781ms)\n✔ LT21 (CLI): rendering the same --run input twice via the CLI is byte-identical (72.301465ms)\n✔ LT22: soft-data figures carry data-soft and visible attribution (0.426639ms)\n✔ LT22: a soft-less run.json renders coverage notices, not fabricated numbers (0.355626ms)\n✔ LT23: every coverage marker is rendered under #coverage (0.308098ms)\n✔ render-retro CLI: unreadable/unparseable/schema-invalid --run exits 1; usage errors exit 2 (129.270859ms)\n✔ render-retro CLI: default --out is index.html beside the input; --format json envelope (46.082642ms)\n✔ LT6: resolve-panel emits panel.resolved; stdout/exit byte-identical with/without --slug (157.732ms)\n✔ LT7: ensure-panel-agent emits panel.agent_stamped; stdout/exit byte-identical (180.735168ms)\n✔ LT8: validate-task emits task.validated on PASS with and without --report (206.691305ms)\n✔ LT8: validate-task emits task.validated on FAIL (55.655121ms)\n✔ LT8: validate-task emits task.validated on an ERROR fixture whose manifest parses (31.643485ms)\n✔ LT8: an unparseable-manifest ERROR skips emission with the standard warning (23.823001ms)\n✔ LT9: unwritable run store degrades to a warning; primary output unaffected (105.674492ms)\n✔ nested --repo-root run stores are git-ignored too (gitignore anchoring) (2.572672ms)\n✔ LT10: check-lifecycle.mjs and .sh are untouched by FS5 side-effect emission (0.817182ms)\n✔ PV1: a valid JavaScript manifest runs only declared checks and passes (123.984964ms)\n✔ PV2: only declared argv run; an undeclared tool command never executes (150.772389ms)\n✔ PV3: schema and inspectManifest reject the mutation matrix before any command runs (61.528886ms)\n✔ PV4: command outcomes are complete and deterministic; runner continues after failures (59.073466ms)\n✔ PV4: a timeout is reported as FAIL with timedOut (1067.655747ms)\n✔ PV5: category applicability is exact; injected n/a shapes are rejected (74.82918ms)\n✔ PV6: scenario mapping gates the verdict (78.041892ms)\n✔ PV7: standards and banned patterns are commands, not judgement (101.769242ms)\n✔ PV8: evidence is bounded and secrets are redacted (71.544732ms)\n✔ PV8 unit: boundStream and redaction name-matching are precise (226.8153ms)\n✔ PV9: JSON/text/exit agree and JSON mode is order-independent (445.408396ms)\n✔ PV9: --report writes the exact JSON bytes atomically (114.121583ms)\n✔ PV9: --report outside the repo root is refused and clobbers nothing (110.08776ms)\n✔ PV10: generic validator law and generated agent are portable (0.480881ms)\n✔ PV11: receipt hash verification detects mutation of any stored file (18.026495ms)\n✔ PV11: a FAIL runner-report cannot ride under runnerVerdict PASS (2.347386ms)\n✔ parseArgs: recognises JSON anywhere and rejects bad flags (1.376603ms)\n✔ PV13: renderText is a faithful projection of the report (78.212865ms)\nℹ tests 399\nℹ suites 0\nℹ pass 399\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 4934.713652\n",
+      "stderrTail": ""
+    },
+    {
+      "id": "static.lint",
+      "argv": [
+        "npm",
+        "run",
+        "lint"
+      ],
+      "evidence": [
+        "Repository formatting and lint rules"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 179,
+      "stdoutTail": "\n> pi-sdlc@0.1.1 lint\n> biome check .\n\nChecked 145 files in 66ms. No fixes applied.\n",
+      "stderrTail": ""
+    },
+    {
+      "id": "static.check-harvest",
+      "argv": [
+        "node",
+        "--check",
+        "skills/sdlc/scripts/harvest-panel.mjs"
+      ],
+      "evidence": [
+        "harvest-panel.mjs parses with the --wave/meta.json additions"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 25,
+      "stdoutTail": "",
+      "stderrTail": ""
+    },
+    {
+      "id": "static.check-telemetry",
+      "argv": [
+        "node",
+        "--check",
+        "skills/sdlc/scripts/telemetry.mjs"
+      ],
+      "evidence": [
+        "telemetry.mjs parses with OPTIONAL_EVENT_PAYLOADS"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 23,
+      "stdoutTail": "",
+      "stderrTail": ""
+    },
+    {
+      "id": "static.schema-valid",
+      "argv": [
+        "node",
+        "-e",
+        "JSON.parse(require('fs').readFileSync('skills/sdlc-retro/schema/event.schema.json','utf8'))"
+      ],
+      "evidence": [
+        "Event schema remains valid JSON after additive wave properties"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 22,
+      "stdoutTail": "",
+      "stderrTail": ""
+    },
+    {
+      "id": "standards.wave-optional",
+      "argv": [
+        "node",
+        "--input-type=module",
+        "-e",
+        "import { EVENT_PAYLOADS, OPTIONAL_EVENT_PAYLOADS, validatePayload } from './skills/sdlc/scripts/telemetry.mjs'; const req = EVENT_PAYLOADS['panel.harvested'].map(([n])=>n); if (req.includes('wave')) { console.error('wave must NOT be a required field'); process.exit(1); } if (!OPTIONAL_EVENT_PAYLOADS['panel.harvested'].some(([n])=>n==='wave')) { console.error('wave must be an optional field'); process.exit(1); } const noWave = validatePayload('panel.harvested', { panelPhase:'pr_review', round:1, dir:'d', missed:[] }); if (noWave.length) { console.error('omitting wave must validate: '+noWave.join(';')); process.exit(1); } const okWave = validatePayload('panel.harvested', { panelPhase:'pr_review', round:2, wave:1, dir:'d', missed:[] }); if (okWave.length) { console.error('valid wave must pass: '+okWave.join(';')); process.exit(1); } const badWave = validatePayload('panel.harvested', { panelPhase:'pr_review', round:1, wave:0, dir:'d', missed:[] }); if (!badWave.length) { console.error('wave:0 must be rejected as non-posInt'); process.exit(1); }"
+      ],
+      "evidence": [
+        "wave is optional (omission validates), type-guarded when present (wave:0 rejected), and never required (plan DoD 1)"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 31,
+      "stdoutTail": "",
+      "stderrTail": ""
+    },
+    {
+      "id": "patterns.diff",
+      "argv": [
+        "git",
+        "diff",
+        "--check",
+        "HEAD"
+      ],
+      "evidence": [
+        "No whitespace-error banned patterns in the task diff"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 5,
+      "stdoutTail": "",
+      "stderrTail": ""
+    }
+  ],
+  "categories": [
+    {
+      "category": "tests",
+      "status": "PASS",
+      "checkIds": [
+        "tests.full"
+      ]
+    },
+    {
+      "category": "static",
+      "status": "PASS",
+      "checkIds": [
+        "static.lint",
+        "static.check-harvest",
+        "static.check-telemetry",
+        "static.schema-valid"
+      ]
+    },
+    {
+      "category": "scenarios",
+      "status": "N/A",
+      "reason": "Reversible track: no Specification; T1 maps to approved plan DoD item 1 per the build plan's T1 check table."
+    },
+    {
+      "category": "standards",
+      "status": "PASS",
+      "checkIds": [
+        "standards.wave-optional"
+      ]
+    },
+    {
+      "category": "bannedPatterns",
+      "status": "PASS",
+      "checkIds": [
+        "patterns.diff"
+      ]
+    }
+  ],
+  "scenarios": []
+}
+bash: echo "Exit code: $?" && ls -la /home/neil/code/threadsafe...
+Exit code: 0
+total 32
+drwxrwxr-x   2 neil neil  4096 Jul 19 18:24 .
+drwxrwxr-x 101 neil neil 12288 Jul 19 18:24 ..
+-rw-rw-r--   1 neil neil 13479 Jul 19 18:24 validator-runner-report.json
+read: /home/neil/code/threadsafe/pi-sdlc.worktrees/feat-sdlc-re...
+{
+  "schemaVersion": 1,
+  "taskId": "t1",
+  "manifest": "/home/neil/code/threadsafe/pi-sdlc.worktrees/feat-sdlc-retro-panel-precision/docs/validation/sdlc-retro-panel-precision/t1.json",
+  "repoRoot": "/home/neil/code/threadsafe/pi-sdlc.worktrees/feat-sdlc-retro-panel-precision",
+  "verdict": "PASS",
+  "exitCode": 0,
+  "errors": [],
+  "manifestErrors": [],
+  "commands": [
+    {
+      "id": "tests.full",
+      "argv": [
+        "npm",
+        "test"
+      ],
+      "evidence": [
+        "Full corpus green incl. new T1 harvest --wave/meta.json tests"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 5039,
+      "stdoutTail": "[...truncated; showing bounded tail...]\n✔ LT19: --no-llm (noLlm:true) output validates and carries soft.absent (3.472237ms)\n✔ LT17: --from-raw reproduces a byte-identical run.json after live sources are destroyed (144.410063ms)\n✔ LT28: neither the sentinel secret nor the verbatim prompt sentence appears in run.json (52.732675ms)\n✔ NF4 unit: sanitizeSoftString redacts, rejects n-gram containment, and caps at 500 chars (0.164948ms)\n✔ LT29: a failing --gh-cmd yields github.error, schema-valid, no fabricated PR data (28.536296ms)\n✔ LT29: an --llm-cmd returning invalid JSON yields llm.error:narrative, schema-valid, no fabricated summary (61.293276ms)\n✔ LT29: an --llm-cmd that times out yields llm.error:<kind>, schema-valid, exit unaffected (612.689103ms)\n✔ llm-protocol schema: request/response fixtures validate (1.04729ms)\n✔ LT13 (hard): complete fixture store -> schema-valid run.json with known-answer rollups (79.001311ms)\n✔ LT14: a gappy store names every gap and derives nothing from missing sources (63.942458ms)\n✔ LT14: --no-github records github.skipped, not github.error (4.21913ms)\n✔ LT15: manifest adapter skips and counts malformed lines (manifest.partial) (1.227647ms)\n✔ LT15: harvest adapter maps per-model fields correctly (1.026614ms)\n✔ LT15: transcript usage/cost sums correctly and a version-4 transcript soft-fails per-file (1.090556ms)\n✔ LT15: review-dir discovery matches <phase>-<slug>-<date> naming (0.61715ms)\n✔ LT15: git/GitHub adapters consume only the injected fakes (64.766471ms)\n✔ LT16: phase attribution, agent time, capped human-wait, rework, window bounds (2.390829ms)\n✔ LT16: a 3-hour gap contributes exactly 30 minutes to human-wait (3.470734ms)\n✔ collect-run: no run store exits 1 (nothing collectable) (30.139895ms)\n✔ collect-run: writes docs/retros/<slug>/run.json by default and validates (47.172129ms)\n✔ resolveSessionDirs: an override list is used verbatim; absence marks sessions.dir_unresolved (0.25421ms)\n✔ LT24: every mandated hook step names record-run-event.sh and its event-type token together (0.642535ms)\n✔ LT24: the panel-dispatch step and the validator-dispatch step each name harvest-panel.sh (0.142276ms)\n✔ LT24: sdlc-retro SKILL.md names collect and render invocations skill-relatively (FS12 forms) (0.077124ms)\n✔ LT25: check-references passes with the new inventory entries (31.497284ms)\n✔ LT25: deleting a new entry's target file fails check-references (64.695881ms)\n✔ structural coverage: every sdlc-retro script has an FS11 inventory entry (0.425129ms)\n✔ structural coverage: every hook script named by §4 has an FS11 inventory entry (0.234872ms)\n✔ structural coverage: every committed sdlc-retro schema file has an FS11 inventory entry (0.187511ms)\n✔ structural coverage: ADR 0028 has an FS11 inventory entry and exists (0.189156ms)\n✔ structural coverage: every run-store/retro path named normatively by either SKILL.md has an inventory entry (0.266326ms)\n✔ LT27: docs/retros/sdlc-lifecycle-telemetry/run.json and index.html exist (0.548695ms)\n✔ LT27: the dogfood run.json validates against the committed schema and hand-rolled validator (2.472207ms)\n✔ LT27: coverage markers honestly record the pre-instrumentation gap (partial coverage by design) (0.157547ms)\n✔ LT27: the committed dashboard renders all seven anchors for the dogfood run (0.143252ms)\n✔ LT1: valid emit appends one schema-conforming line, creating the store (31.279234ms)\n✔ LT1b: --by defaults to agent when omitted (22.925851ms)\n✔ LT2: bad inputs exit 2 and never touch the manifest (203.766072ms)\n✔ schema agreement: unknown event types remain valid for forward-compatible consumers (0.296123ms)\n✔ LT2b: a bad input against a non-existent store attempts no write (23.12224ms)\n✔ LT3: concurrent emitters produce N complete, non-interleaved lines (108.701077ms)\n✔ empty explicit identities do not fall through to another identity (51.160784ms)\n✔ LT4: --slug beats env beats branch mapping (98.397034ms)\n✔ LT5: unresolvable identity skips (exit 0, one warning, no write) (82.850757ms)\n✔ LT26: .gitignore ignores the run store (4.264108ms)\n✔ emitter: .sh wrapper delegates to .mjs identically (35.369598ms)\n✔ vocabulary: every known event has a payload descriptor (0.167973ms)\n✔ LT11: harvest copies status.json + events.jsonl and emits panel.harvested (30.949253ms)\n✔ T1: --wave records a logical wave distinct from the round allocation label (30.538948ms)\n✔ T1: --wave must be a positive integer (38.285546ms)\n✔ LT11: --with-transcripts copies the transcripts/ subdirectory (30.183578ms)\n✔ LT12: a missing source directory exits 0 with both files missed (37.582065ms)\n✔ LT12: a partially-present source (status without events) reports one missed (30.28574ms)\n✔ harvest-panel: unknown phase and non-positive round exit 2 (93.214062ms)\n✔ harvest-panel.sh wrapper delegates to .mjs identically (40.939574ms)\n✔ LT20: full fixture renders all seven anchors with known-answer data bindings (2.596689ms)\n✔ LT20: an empty-shell run.json fails to carry any pinned data binding (0.304995ms)\n✔ LT21: render-twice byte-identity and no generation-time values (0.624781ms)\n✔ LT21 (CLI): rendering the same --run input twice via the CLI is byte-identical (72.301465ms)\n✔ LT22: soft-data figures carry data-soft and visible attribution (0.426639ms)\n✔ LT22: a soft-less run.json renders coverage notices, not fabricated numbers (0.355626ms)\n✔ LT23: every coverage marker is rendered under #coverage (0.308098ms)\n✔ render-retro CLI: unreadable/unparseable/schema-invalid --run exits 1; usage errors exit 2 (129.270859ms)\n✔ render-retro CLI: default --out is index.html beside the input; --format json envelope (46.082642ms)\n✔ LT6: resolve-panel emits panel.resolved; stdout/exit byte-identical with/without --slug (157.732ms)\n✔ LT7: ensure-panel-agent emits panel.agent_stamped; stdout/exit byte-identical (180.735168ms)\n✔ LT8: validate-task emits task.validated on PASS with and without --report (206.691305ms)\n✔ LT8: validate-task emits task.validated on FAIL (55.655121ms)\n✔ LT8: validate-task emits task.validated on an ERROR fixture whose manifest parses (31.643485ms)\n✔ LT8: an unparseable-manifest ERROR skips emission with the standard warning (23.823001ms)\n✔ LT9: unwritable run store degrades to a warning; primary output unaffected (105.674492ms)\n✔ nested --repo-root run stores are git-ignored too (gitignore anchoring) (2.572672ms)\n✔ LT10: check-lifecycle.mjs and .sh are untouched by FS5 side-effect emission (0.817182ms)\n✔ PV1: a valid JavaScript manifest runs only declared checks and passes (123.984964ms)\n✔ PV2: only declared argv run; an undeclared tool command never executes (150.772389ms)\n✔ PV3: schema and inspectManifest reject the mutation matrix before any command runs (61.528886ms)\n✔ PV4: command outcomes are complete and deterministic; runner continues after failures (59.073466ms)\n✔ PV4: a timeout is reported as FAIL with timedOut (1067.655747ms)\n✔ PV5: category applicability is exact; injected n/a shapes are rejected (74.82918ms)\n✔ PV6: scenario mapping gates the verdict (78.041892ms)\n✔ PV7: standards and banned patterns are commands, not judgement (101.769242ms)\n✔ PV8: evidence is bounded and secrets are redacted (71.544732ms)\n✔ PV8 unit: boundStream and redaction name-matching are precise (226.8153ms)\n✔ PV9: JSON/text/exit agree and JSON mode is order-independent (445.408396ms)\n✔ PV9: --report writes the exact JSON bytes atomically (114.121583ms)\n✔ PV9: --report outside the repo root is refused and clobbers nothing (110.08776ms)\n✔ PV10: generic validator law and generated agent are portable (0.480881ms)\n✔ PV11: receipt hash verification detects mutation of any stored file (18.026495ms)\n✔ PV11: a FAIL runner-report cannot ride under runnerVerdict PASS (2.347386ms)\n✔ parseArgs: recognises JSON anywhere and rejects bad flags (1.376603ms)\n✔ PV13: renderText is a faithful projection of the report (78.212865ms)\nℹ tests 399\nℹ suites 0\nℹ pass 399\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 4934.713652\n",
+      "stderrTail": ""
+    },
+    {
+      "id": "static.lint",
+      "argv": [
+        "npm",
+        "run",
+        "lint"
+      ],
+      "evidence": [
+        "Repository formatting and lint rules"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 179,
+      "stdoutTail": "\n> pi-sdlc@0.1.1 lint\n> biome check .\n\nChecked 145 files in 66ms. No fixes applied.\n",
+      "stderrTail": ""
+    },
+    {
+      "id": "static.check-harvest",
+      "argv": [
+        "node",
+        "--check",
+        "skills/sdlc/scripts/harvest-panel.mjs"
+      ],
+      "evidence": [
+        "harvest-panel.mjs parses with the --wave/meta.json additions"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 25,
+      "stdoutTail": "",
+      "stderrTail": ""
+    },
+    {
+      "id": "static.check-telemetry",
+      "argv": [
+        "node",
+        "--check",
+        "skills/sdlc/scripts/telemetry.mjs"
+      ],
+      "evidence": [
+        "telemetry.mjs parses with OPTIONAL_EVENT_PAYLOADS"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 23,
+      "stdoutTail": "",
+      "stderrTail": ""
+    },
+    {
+      "id": "static.schema-valid",
+      "argv": [
+        "node",
+        "-e",
+        "JSON.parse(require('fs').readFileSync('skills/sdlc-retro/schema/event.schema.json','utf8'))"
+      ],
+      "evidence": [
+        "Event schema remains valid JSON after additive wave properties"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 22,
+      "stdoutTail": "",
+      "stderrTail": ""
+    },
+    {
+      "id": "standards.wave-optional",
+      "argv": [
+        "node",
+        "--input-type=module",
+        "-e",
+        "import { EVENT_PAYLOADS, OPTIONAL_EVENT_PAYLOADS, validatePayload } from './skills/sdlc/scripts/telemetry.mjs'; const req = EVENT_PAYLOADS['panel.harvested'].map(([n])=>n); if (req.includes('wave')) { console.error('wave must NOT be a required field'); process.exit(1); } if (!OPTIONAL_EVENT_PAYLOADS['panel.harvested'].some(([n])=>n==='wave')) { console.error('wave must be an optional field'); process.exit(1); } const noWave = validatePayload('panel.harvested', { panelPhase:'pr_review', round:1, dir:'d', missed:[] }); if (noWave.length) { console.error('omitting wave must validate: '+noWave.join(';')); process.exit(1); } const okWave = validatePayload('panel.harvested', { panelPhase:'pr_review', round:2, wave:1, dir:'d', missed:[] }); if (okWave.length) { console.error('valid wave must pass: '+okWave.join(';')); process.exit(1); } const badWave = validatePayload('panel.harvested', { panelPhase:'pr_review', round:1, wave:0, dir:'d', missed:[] }); if (!badWave.length) { console.error('wave:0 must be rejected as non-posInt'); process.exit(1); }"
+      ],
+      "evidence": [
+        "wave is optional (omission validates), type-guarded when present (wave:0 rejected), and never required (plan DoD 1)"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 31,
+      "stdoutTail": "",
+      "stderrTail": ""
+    },
+    {
+      "id": "patterns.diff",
+      "argv": [
+        "git",
+        "diff",
+        "--check",
+        "HEAD"
+      ],
+      "evidence": [
+        "No whitespace-error banned patterns in the task diff"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 5,
+      "stdoutTail": "",
+      "stderrTail": ""
+    }
+  ],
+  "categories": [
+    {
+      "category": "tests",
+      "status": "PASS",
+      "checkIds": [
+        "tests.full"
+      ]
+    },
+    {
+      "category": "static",
+      "status": "PASS",
+      "checkIds": [
+        "static.lint",
+        "static.check-harvest",
+        "static.check-telemetry",
+        "static.schema-valid"
+      ]
+    },
+    {
+      "category": "scenarios",
+      "status": "N/A",
+      "reason": "Reversible track: no Specification; T1 maps to approved plan DoD item 1 per the build plan's T1 check table."
+    },
+    {
+      "category": "standards",
+      "status": "PASS",
+      "checkIds": [
+        "standards.wave-optional"
+      ]
+    },
+    {
+      "category": "bannedPatterns",
+      "status": "PASS",
+      "checkIds": [
+        "patterns.diff"
+      ]
+    }
+  ],
+  "scenarios": []
+}
+### Validation: t1
+- manifest: `docs/validation/sdlc-retro-panel-precision/t1.json`
+- runner: PASS — exit 0
+- report: `docs/reviews/task-validate-sdlc-retro-panel-precision-t1-2026-07-19/validator-runner-report.json`
+- commands: tests.full=PASS, static.lint=PASS, static.check-harvest=PASS, static.check-telemetry=PASS, static.schema-valid=PASS, standards.wave-optional=PASS, patterns.diff=PASS
+- categories: tests=PASS, static=PASS, scenarios=N/A, standards=PASS, bannedPatterns=PASS
+- scenarios: (empty, reversible track)
+### Verdict: PASS
+---
+```acceptance-report
+{
+  "criteriaSatisfied": [
+    {
+      "id": "criterion-1",
+      "status": "satisfied",
+      "evidence": "Runner verdict PASS with all 7 declared checks passing; 399/399 unit tests pass; schema valid; wave field correctly optional per standards check"
+    }
+  ],
+  "changedFiles": [],
+  "testsAddedOrUpdated": [],
+  "commandsRun": [
+    {
+      "command": "tests.full (npm test)",
+      "result": "passed",
+      "summary": "399 tests pass, 0 fail"
+    },
+    {
+      "command": "static.lint (npm run lint)",
+      "result": "passed",
+      "summary": "145 files checked, no fixes applied"
+    },
+    {
+      "command": "static.check-harvest (node --check harvest-panel.mjs)",
+      "result": "passed",
+      "summary": "Parses cleanly with --wave/meta.json additions"
+    },
+    {
+      "command": "static.check-telemetry (node --check telemetry.mjs)",
+      "result": "passed",
+      "summary": "Parses cleanly with OPTIONAL_EVENT_PAYLOADS"
+    },
+    {
+      "command": "static.schema-valid (JSON.parse event.schema.json)",
+      "result": "passed",
+      "summary": "Event schema valid JSON"
+    },
+    {
+      "command": "standards.wave-optional (semantic validator)",
+      "result": "passed",
+      "summary": "wave field is optional (omit validates), type-guarded when present (wave:0 rejected), never required"
+    },
+    {
+      "command": "patterns.diff (git diff --check)",
+      "result": "passed",
+      "summary": "No whitespace-error banned patterns"
+    }
+  ],
+  "validationOutput": [
+    "Runner exit: 0",
+    "Report verdict: PASS",
+    "All 7 checks passed",
+    "All 5 required categories passed (tests, static, standards, bannedPatterns)",
+    "scenarios category n/a per reversible track manifest"
+  ],
+  "residualRisks": [],
+  "noStagedFiles": true,
+  "diffSummary": "T1 feature implementation: harvest --wave flag and meta.json sidecar addition to sdlc-retro collector",
+  "reviewFindings": [],
+  "manualNotes": "Validation runner executed deterministically per PV2 manifest; all declared checks ran exactly once, no undeclared commands; report written atomically to configured path and verified byte-identical with runner stdout."
+}
+```

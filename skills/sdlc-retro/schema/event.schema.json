@@ -62,13 +62,19 @@
     { "if": { "properties": { "event": { "const": "panel.agent_stamped" } } }, "then": { "properties": { "payload": { "type": "object", "required": ["panelPhase", "agent"], "properties": { "panelPhase": { "$ref": "#/definitions/panelPhase" }, "agent": { "$ref": "#/definitions/nonEmptyString" } } } } } },
     {
       "if": { "properties": { "event": { "const": "panel.dispatched" } } },
-      "then": { "properties": { "payload": { "type": "object", "required": ["panelPhase", "round", "models"], "properties": { "panelPhase": { "$ref": "#/definitions/panelPhase" }, "round": { "$ref": "#/definitions/posInt" }, "models": { "$ref": "#/definitions/stringArray" } } } } }
+      "then": {
+        "properties": { "payload": { "type": "object", "required": ["panelPhase", "round", "models"], "properties": { "panelPhase": { "$ref": "#/definitions/panelPhase" }, "round": { "$ref": "#/definitions/posInt" }, "models": { "$ref": "#/definitions/stringArray" }, "wave": { "$ref": "#/definitions/posInt" } } } }
+      }
     },
     {
       "if": { "properties": { "event": { "const": "panel.harvested" } } },
       "then": {
         "properties": {
-          "payload": { "type": "object", "required": ["panelPhase", "round", "dir", "missed"], "properties": { "panelPhase": { "$ref": "#/definitions/panelPhase" }, "round": { "$ref": "#/definitions/posInt" }, "dir": { "$ref": "#/definitions/nonEmptyString" }, "missed": { "$ref": "#/definitions/stringArray" } } }
+          "payload": {
+            "type": "object",
+            "required": ["panelPhase", "round", "dir", "missed"],
+            "properties": { "panelPhase": { "$ref": "#/definitions/panelPhase" }, "round": { "$ref": "#/definitions/posInt" }, "dir": { "$ref": "#/definitions/nonEmptyString" }, "missed": { "$ref": "#/definitions/stringArray" }, "wave": { "$ref": "#/definitions/posInt" } }
+          }
         }
       }
     },
@@ -79,7 +85,14 @@
           "payload": {
             "type": "object",
             "required": ["panelPhase", "round", "findings", "incorporated", "dismissed"],
-            "properties": { "panelPhase": { "$ref": "#/definitions/panelPhase" }, "round": { "$ref": "#/definitions/posInt" }, "findings": { "$ref": "#/definitions/findings" }, "incorporated": { "$ref": "#/definitions/nonNegInt" }, "dismissed": { "$ref": "#/definitions/nonNegInt" } }
+            "properties": {
+              "panelPhase": { "$ref": "#/definitions/panelPhase" },
+              "round": { "$ref": "#/definitions/posInt" },
+              "findings": { "$ref": "#/definitions/findings" },
+              "incorporated": { "$ref": "#/definitions/nonNegInt" },
+              "dismissed": { "$ref": "#/definitions/nonNegInt" },
+              "wave": { "$ref": "#/definitions/posInt" }
+            }
           }
         }
       }

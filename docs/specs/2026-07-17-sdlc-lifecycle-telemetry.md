@@ -255,7 +255,9 @@ consulted.
    used only for steering classification and never copied into run.json
    verbatim).
 4. **Review artifacts**: `docs/reviews/<phase>-<slug>-<date>/` per-model
-   files and `consolidated.md`.
+   files and `consolidated.md`. The `<phase>-review-<slug>-<date>` form (a
+   `-review-` infix) is an equally-accepted alternative and the recommended
+   form going forward; the collector discovers both.
 5. **git/GitHub**: branch commits and diff stats via `--git-cmd` (default
    `git`) — an injectable seam exactly like `--gh-cmd`; a failing
    `--git-cmd` records `git.error` and collection continues. PR metadata,
@@ -362,6 +364,7 @@ schemaVersion: 1
 slug, title, track
 coverage:   [ { marker, detail? } ]          # closed v1 marker set:
             # manifest.absent, manifest.partial, panels.missing:<phase>,
+            # panels.malformed_meta:<phase>,
             # sessions.none, sessions.dir_unresolved, session.version:<file>,
             # github.skipped, github.error, git.error, llm.error:<kind>,
             # soft.absent, precision.unparsed:<dir>

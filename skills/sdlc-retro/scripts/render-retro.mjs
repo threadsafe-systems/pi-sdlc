@@ -87,10 +87,32 @@ function renderPanelDeepdive(run) {
 	const panels = run.hard.panels;
 	const precision = run.soft?.panelPrecision ?? [];
 	if (panels.length === 0) return `<section id="panel-deepdive"><h2>Panel deep-dive</h2><p class="coverage-notice">no harvested panel rounds</p></section>`;
-	const blocks = panels
-		.map((p) => {
-			const modelRows = p.models.map((m) => `<div class="panel-model-row" data-model="${esc(m.model)}"><span>${esc(m.model)}</span><span>${m.tokens ?? 0} tok</span><span>${esc(fmtCost(m.cost ?? 0))}</span><span>${esc(fmtMs(m.durationMs ?? 0))}</span><span>${m.turns ?? 0} turns</span></div>`).join("\n");
-			const findings = precision.filter((pr) => pr.panelPhase === p.panelPhase && pr.round === p.round);
+	// Group harvested rounds by logical wave (wave defaults to round for records
+	// predating the wave field), collapsing same-wave rounds (e.g. an
+	// infra-replacement dispatch) into one section with each round as sub-detail.
+	const groups = new Map();
+	for (const p of panels) {
+		const wave = p.wave ?? p.round;
+		const key = `${p.panelPhase}#${wave}`;
+		if (!groups.has(key)) groups.set(key, { panelPhase: p.panelPhase, wave, rounds: [] });
+		groups.get(key).rounds.push(p);
+	}
+	const ordered = [...groups.values()].sort((a, b) => (a.panelPhase < b.panelPhase ? -1 : a.panelPhase > b.panelPhase ? 1 : a.wave - b.wave));
+	const blocks = ordered
+		.map((g) => {
+			const roundBlocks = g.rounds
+				.slice()
+				.sort((a, b) => a.round - b.round)
+				.map((p) => {
+					const modelRows = p.models.map((m) => `<div class="panel-model-row" data-model="${esc(m.model)}"><span>${esc(m.model)}</span><span>${m.tokens ?? 0} tok</span><span>${esc(fmtCost(m.cost ?? 0))}</span><span>${esc(fmtMs(m.durationMs ?? 0))}</span><span>${m.turns ?? 0} turns</span></div>`).join("\n");
+					const roundLabel = p.round === g.wave ? `round ${p.round}` : `round ${p.round} (replacement)`;
+					return `<div class="panel-round" data-round="${p.round}">
+<h4>${esc(roundLabel)}</h4>
+${modelRows || '<p class="coverage-notice">no per-model metrics for this round</p>'}
+</div>`;
+				})
+				.join("\n");
+			const findings = precision.filter((pr) => pr.panelPhase === g.panelPhase && (pr.wave ?? pr.round) === g.wave);
 			const findingRows =
 				findings.length > 0
 					? findings
@@ -99,10 +121,10 @@ function renderPanelDeepdive(run) {
 									`<div class="panel-finding-row" data-soft="true" data-model="${esc(f.model)}"><span class="soft-attribution">soft (${esc(run.soft.attribution.model)})</span><span>${esc(f.model)}</span><span>raised ${f.raised}</span><span>incorporated ${f.incorporated}</span><span>dismissed ${f.dismissed}</span></div>`,
 							)
 							.join("\n")
-					: '<p class="coverage-notice">no precision figures for this round</p>';
-			return `<div class="panel-round" data-panel-phase="${esc(p.panelPhase)}" data-round="${p.round}">
-<h3>${esc(p.panelPhase)} round ${p.round}</h3>
-${modelRows}
+					: '<p class="coverage-notice">no precision figures for this wave</p>';
+			return `<div class="panel-wave" data-panel-phase="${esc(g.panelPhase)}" data-wave="${g.wave}">
+<h3>${esc(g.panelPhase)} wave ${g.wave}</h3>
+${roundBlocks}
 ${findingRows}
 </div>`;
 		})

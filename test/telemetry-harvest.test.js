@@ -78,8 +78,46 @@ test("LT11: harvest copies status.json + events.jsonl and emits panel.harvested"
 		assert.equal(events[0].by, "script:harvest-panel");
 		assert.equal(events[0].payload.panelPhase, "pr_review");
 		assert.equal(events[0].payload.round, 1);
+		assert.equal(events[0].payload.wave, 1, "wave defaults to round when --wave omitted");
 		assert.deepEqual(events[0].payload.missed, []);
 		assert.ok(events[0].payload.dir.includes("panels"));
+		// meta.json sidecar records the {round, wave} distinction (default wave===round).
+		assert.deepEqual(JSON.parse(readFileSync(join(destDir, "meta.json"), "utf8")), { round: 1, wave: 1 });
+	} finally {
+		rmSync(root, { recursive: true, force: true });
+		rmSync(src, { recursive: true, force: true });
+	}
+});
+
+test("T1: --wave records a logical wave distinct from the round allocation label", () => {
+	const root = tmp("sdlc-lt3-root-");
+	const src = mkAsyncDir();
+	try {
+		// a replacement dispatch: fresh round label 2, but logical wave 1
+		const r = run(["--phase", "pr_review", "--round", "2", "--wave", "1", "--from", src, "--repo-root", root, "--slug", "t1-wave", "--format", "json"]);
+		assert.equal(r.status, 0, r.stderr);
+		const report = JSON.parse(r.stdout);
+		assert.equal(report.round, 2);
+		assert.equal(report.wave, 1);
+		const date = new Date().toISOString().slice(0, 10);
+		const destDir = join(root, ".pi", "sdlc", "runs", "t1-wave", "panels", `pr_review-round2-${date}`);
+		assert.deepEqual(JSON.parse(readFileSync(join(destDir, "meta.json"), "utf8")), { round: 2, wave: 1 });
+		const events = readEvents(root, "t1-wave");
+		assert.equal(events[0].payload.round, 2);
+		assert.equal(events[0].payload.wave, 1);
+	} finally {
+		rmSync(root, { recursive: true, force: true });
+		rmSync(src, { recursive: true, force: true });
+	}
+});
+
+test("T1: --wave must be a positive integer", () => {
+	const root = tmp("sdlc-lt3-root-");
+	const src = mkAsyncDir();
+	try {
+		const bad = run(["--phase", "pr_review", "--round", "1", "--wave", "0", "--from", src, "--repo-root", root]);
+		assert.equal(bad.status, 2);
+		assert.match(bad.stderr, /--wave must be a positive integer/);
 	} finally {
 		rmSync(root, { recursive: true, force: true });
 		rmSync(src, { recursive: true, force: true });

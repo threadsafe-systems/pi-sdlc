@@ -2,7 +2,7 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "https://github.com/threadsafe-systems/pi-sdlc/skills/sdlc-retro/schema/run.schema.json",
   "title": "sdlc-retro-run-record",
-  "description": "run.json v1 (spec §7): the distilled post-mortem record produced by collect-run from the FS13 run store. hard values are measured or absent (coverage-marked), never estimated; soft values are model-attributed and structurally separated so the renderer cannot conflate them.",
+  "description": "run.json v1 (spec §7): the distilled post-mortem record produced by collect-run from the FS13 run store. hard values are measured or absent (coverage-marked), never estimated; soft values are model-attributed and structurally separated so the renderer cannot conflate them. This schema is consumed same-version-pinned with the collector that produced the file (both ship in the sdlc-retro bundle); additive optional fields (e.g. panels[].wave, panelPrecision[].wave) therefore do not bump schemaVersion, but a separately-pinned/older copy of this closed schema will reject a newer record's added fields — pin the schema to the producing collector.",
   "type": "object",
   "additionalProperties": false,
   "required": ["schemaVersion", "slug", "coverage", "sizeProxies", "hard"],
@@ -95,6 +95,7 @@
             "properties": {
               "panelPhase": { "$ref": "#/definitions/panelPhase" },
               "round": { "$ref": "#/definitions/posInt" },
+              "wave": { "$ref": "#/definitions/posInt" },
               "dir": { "type": "string", "minLength": 1 },
               "models": {
                 "type": "array",
@@ -206,6 +207,7 @@
             "properties": {
               "panelPhase": { "$ref": "#/definitions/panelPhase" },
               "round": { "$ref": "#/definitions/posInt" },
+              "wave": { "$ref": "#/definitions/posInt" },
               "model": { "type": "string", "minLength": 1 },
               "raised": { "$ref": "#/definitions/nonNegInt" },
               "incorporated": { "$ref": "#/definitions/nonNegInt" },

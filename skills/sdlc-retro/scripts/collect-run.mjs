@@ -203,6 +203,7 @@ export function discoverPanels(root, slug, events) {
 	const panels = [];
 	const foundPhases = new Set();
 	const partialPhases = new Set();
+	const malformedMetaPhases = new Set();
 	const byPhaseRound = new Map();
 	if (existsSync(panelsDir)) {
 		for (const name of readdirSync(panelsDir).sort()) {
@@ -231,7 +232,22 @@ export function discoverPanels(root, slug, events) {
 			if (complete) foundPhases.add(panelPhase);
 			else partialPhases.add(panelPhase);
 			const round = Number(roundStr);
-			const entry = { panelPhase, round, dir: `.pi/sdlc/runs/${slug}/panels/${name}`, models, date, complete };
+			// Logical review-wave from the meta.json sidecar (T1). Absent → wave=round
+			// (every pre-sidecar harvest degrades cleanly). Malformed → wave=round and
+			// a panels.malformed_meta marker; never throws (mirrors the tolerant
+			// status.json handling above).
+			let wave = round;
+			const metaPath = join(dir, "meta.json");
+			if (existsSync(metaPath)) {
+				try {
+					const meta = JSON.parse(readFileSync(metaPath, "utf8"));
+					if (isPosInt(meta.wave)) wave = meta.wave;
+					else malformedMetaPhases.add(panelPhase);
+				} catch {
+					malformedMetaPhases.add(panelPhase);
+				}
+			}
+			const entry = { panelPhase, round, wave, dir: `.pi/sdlc/runs/${slug}/panels/${name}`, models, date, complete };
 			// Dedupe by (panelPhase, round): a re-harvest of the same round across a
 			// date boundary must not double-count hard totals. Keep the latest date.
 			const key = `${panelPhase}#${round}`;
@@ -249,6 +265,7 @@ export function discoverPanels(root, slug, events) {
 	for (const phase of [...new Set([...expectedPhases, ...partialPhases])].sort()) {
 		if (!foundPhases.has(phase) || partialPhases.has(phase)) markers.push({ marker: `panels.missing:${phase}` });
 	}
+	for (const phase of [...malformedMetaPhases].sort()) markers.push({ marker: `panels.malformed_meta:${phase}` });
 	return { panels, markers };
 }
 
@@ -261,7 +278,15 @@ export function discoverPanels(root, slug, events) {
 // touches the live reviews path.
 export function discoverReviewDirs(root, slug, reviewsPath = "docs/reviews", { fromRaw = false } = {}) {
 	const rawListPath = join("reviews", "_dirs.json");
-	const re = new RegExp(`^(${LIFECYCLE_PHASES.join("|")})-${slug}-\\d{4}-\\d{2}-\\d{2}$`);
+	// Accept both the historical `<phase>-<slug>-<date>` and the now-dominant
+	// `<phase>-review-<slug>-<date>` naming (the `-review-` infix). Slugs match
+	// SLUG_RE (no regex-special chars), so interpolation is safe. To keep the two
+	// forms unambiguous, a slug that itself starts with `review-` is matched ONLY
+	// via the mandatory-infix form — otherwise `plan-review-foo-<date>` would be
+	// claimed by both slug `foo` (infix form) and slug `review-foo` (classic
+	// form). Such slugs use the recommended `-review-` form going forward.
+	const infix = slug.startsWith("review-") ? "review-" : "(?:review-)?";
+	const re = new RegExp(`^(${LIFECYCLE_PHASES.join("|")})-${infix}${slug}-\\d{4}-\\d{2}-\\d{2}$`);
 	if (fromRaw) {
 		if (!rawExists(root, slug, rawListPath)) return [];
 		try {
@@ -710,9 +735,9 @@ export function validateRunJson(raw) {
 	if (!Array.isArray(h.panels)) add("/hard/panels", "must be an array of {panelPhase, round, dir, models[]}");
 	else
 		h.panels.forEach((p, i) => {
-			if (!isPlainObject(p) || !PANEL_PHASES.includes(p.panelPhase) || !isPosInt(p.round) || typeof p.dir !== "string" || p.dir.length === 0 || !Array.isArray(p.models)) add(`/hard/panels/${i}`, "must be {panelPhase, round, dir, models[]}");
+			if (!isPlainObject(p) || !PANEL_PHASES.includes(p.panelPhase) || !isPosInt(p.round) || (p.wave !== undefined && !isPosInt(p.wave)) || typeof p.dir !== "string" || p.dir.length === 0 || !Array.isArray(p.models)) add(`/hard/panels/${i}`, "must be {panelPhase, round, dir, models[], wave?}");
 			else {
-				checkKeys(p, ["panelPhase", "round", "dir", "models"], `/hard/panels/${i}`, add);
+				checkKeys(p, ["panelPhase", "round", "wave", "dir", "models"], `/hard/panels/${i}`, add);
 				p.models.forEach((m, j) => {
 					if (
 						!isPlainObject(m) ||
@@ -770,8 +795,9 @@ export function validateRunJson(raw) {
 			if (!Array.isArray(sf.panelPrecision)) add("/soft/panelPrecision", "must be an array of {panelPhase, round, model, raised, incorporated, dismissed}");
 			else
 				sf.panelPrecision.forEach((p, i) => {
-					if (!isPlainObject(p) || !PANEL_PHASES.includes(p.panelPhase) || !isPosInt(p.round) || typeof p.model !== "string" || p.model.length === 0 || !isNonNegInt(p.raised) || !isNonNegInt(p.incorporated) || !isNonNegInt(p.dismissed)) add(`/soft/panelPrecision/${i}`, "must match the panelPrecision schema");
-					else checkKeys(p, ["panelPhase", "round", "model", "raised", "incorporated", "dismissed"], `/soft/panelPrecision/${i}`, add);
+					if (!isPlainObject(p) || !PANEL_PHASES.includes(p.panelPhase) || !isPosInt(p.round) || (p.wave !== undefined && !isPosInt(p.wave)) || typeof p.model !== "string" || p.model.length === 0 || !isNonNegInt(p.raised) || !isNonNegInt(p.incorporated) || !isNonNegInt(p.dismissed))
+						add(`/soft/panelPrecision/${i}`, "must match the panelPrecision schema");
+					else checkKeys(p, ["panelPhase", "round", "wave", "model", "raised", "incorporated", "dismissed"], `/soft/panelPrecision/${i}`, add);
 				});
 		}
 	}
@@ -880,14 +906,23 @@ function buildSoftData({ root, slug, llmCmd, noLlm, fromRaw, events, spans, sess
 
 	const panelPrecision = [];
 	for (const dir of reviewDirs) {
-		const lifecyclePhase = LIFECYCLE_PHASES.find((phase) => dir.startsWith(`${phase}-${slug}-`));
+		// Match both naming forms (see discoverReviewDirs), with the same
+		// disambiguation: a slug starting with `review-` is matched only via the
+		// mandatory-infix form so one directory never belongs to two slugs.
+		const startsReview = slug.startsWith("review-");
+		const lifecyclePhase = LIFECYCLE_PHASES.find((phase) => (!startsReview && dir.startsWith(`${phase}-${slug}-`)) || dir.startsWith(`${phase}-review-${slug}-`));
 		const panelPhase = lifecyclePhase ? LIFECYCLE_TO_PANEL[lifecyclePhase] : undefined;
 		const reviewDate = dir.match(/-(\d{4}-\d{2}-\d{2})$/)?.[1];
 		const matchingPanels = panelPhase ? panels.filter((p) => p.panelPhase === panelPhase) : [];
 		const datedPanels = reviewDate ? matchingPanels.filter((p) => p.dir.endsWith(`-${reviewDate}`)) : matchingPanels;
-		const candidates = datedPanels.length > 0 ? datedPanels : matchingPanels.length === 1 ? matchingPanels : [];
-		const panel = candidates.length === 1 ? candidates[0] : undefined;
-		if (!panel) {
+		const candidates = datedPanels.length > 0 ? datedPanels : matchingPanels;
+		// Group by logical wave, not harvest round: multiple same-day rounds of one
+		// review wave (e.g. an infra-replacement dispatch) share a wave and join
+		// cleanly. precision.unparsed is emitted only when the candidates span more
+		// than one distinct wave (a genuine same-date ambiguity) or none match.
+		const waves = [...new Set(candidates.map((p) => p.wave))];
+		const wave = waves.length === 1 ? waves[0] : undefined;
+		if (candidates.length === 0 || wave === undefined) {
 			markers.push({ marker: `precision.unparsed:${dir}` });
 			continue;
 		}
@@ -932,8 +967,9 @@ function buildSoftData({ root, slug, llmCmd, noLlm, fromRaw, events, spans, sess
 				continue;
 			}
 			panelPrecision.push({
-				panelPhase: panel.panelPhase,
-				round: panel.round,
+				panelPhase,
+				round: wave,
+				wave,
 				model,
 				raised: pm.raised,
 				incorporated: pm.incorporated,
@@ -1058,7 +1094,7 @@ export function collect({ root, slug, gitCmd = "git", baseRef = "main", ghCmd = 
 		window: { start: windowStart, end: windowEnd },
 		phases: spans.map((s) => ({ phase: s.phase, start: s.start, end: s.end, exitExplicit: s.exitExplicit })),
 		sessions: hardSessions,
-		panels: panels.map((p) => ({ panelPhase: p.panelPhase, round: p.round, dir: p.dir, models: p.models })),
+		panels: panels.map((p) => ({ panelPhase: p.panelPhase, round: p.round, wave: p.wave, dir: p.dir, models: p.models })),
 		models: [...distinctModels].sort(),
 		rollups: {
 			byModel: [...byModelMap.entries()].map(([model, v]) => ({ model, tokens: v.tokens, cost: v.cost })).sort((a, b) => (a.model < b.model ? -1 : 1)),

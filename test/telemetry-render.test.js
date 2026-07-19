@@ -120,6 +120,27 @@ test("LT20: full fixture renders all seven anchors with known-answer data bindin
 	assert.ok(/PR fix waves[\s\S]*?<span>1<\/span>/.test(html));
 });
 
+test("T4: same-wave harvest rounds collapse into one wave section with each round as sub-detail", () => {
+	const fx = fullFixture();
+	// two harvested rounds of one logical wave (round 2 a replacement dispatch)
+	fx.hard.panels = [
+		{ panelPhase: "pr_review", round: 1, wave: 1, dir: ".pi/sdlc/runs/lt20-run/panels/pr_review-round1-2026-07-18", models: [{ model: "openai/gpt-5", tokens: 100, cost: 0.5, durationMs: 1000, turns: 3 }] },
+		{ panelPhase: "pr_review", round: 2, wave: 1, dir: ".pi/sdlc/runs/lt20-run/panels/pr_review-round2-2026-07-18", models: [{ model: "deepseek/deepseek-v4-pro", tokens: 80, cost: 0.4, durationMs: 900, turns: 2 }] },
+	];
+	fx.soft.panelPrecision = [{ panelPhase: "pr_review", round: 1, wave: 1, model: "openai/gpt-5", raised: 2, incorporated: 1, dismissed: 1 }];
+	const html = renderDashboard(fx);
+	// exactly one wave section for pr_review wave 1
+	const waveSections = html.match(/data-wave="1"/g) ?? [];
+	assert.equal(waveSections.length, 1, "same-wave rounds collapse into one wave section");
+	assert.ok(html.includes('data-panel-phase="pr_review"'));
+	assert.ok(html.includes("wave 1"), "section titled by wave");
+	// both constituent rounds appear as sub-detail
+	assert.ok(html.includes('data-round="1"') && html.includes('data-round="2"'), "each round shown as sub-detail");
+	assert.ok(html.includes("(replacement)"), "a round whose label differs from the wave is marked a replacement");
+	// precision joined once on the wave
+	assert.ok(html.includes("raised 2") && html.includes("incorporated 1") && html.includes("dismissed 1"));
+});
+
 test("LT20: an empty-shell run.json fails to carry any pinned data binding", () => {
 	const html = renderDashboard(emptyFixture());
 	for (const anchor of SECTION_ANCHORS) assert.ok(html.includes(`id="${anchor}"`));

@@ -102,6 +102,16 @@ export const EVENT_PAYLOADS = Object.freeze({
 	],
 });
 
+// Optional, additive payload fields per event: type-checked when present, never
+// required (so emitting them is backward-compatible and omitting them is valid).
+// `wave` distinguishes the logical review-wave from the harvest allocation label
+// (`round`) on panel events; a replacement dispatch keeps its original wave.
+export const OPTIONAL_EVENT_PAYLOADS = Object.freeze({
+	"panel.dispatched": [["wave", "posInt"]],
+	"panel.harvested": [["wave", "posInt"]],
+	"panel.consolidated": [["wave", "posInt"]],
+});
+
 export const KNOWN_EVENTS = Object.keys(EVENT_PAYLOADS);
 
 function isPlainObject(v) {
@@ -164,6 +174,12 @@ export function validatePayload(event, payload) {
 			issues.push(`payload.${name} is required`);
 			continue;
 		}
+		const problem = fieldIssue(`payload.${name}`, type, payload[name]);
+		if (problem) issues.push(problem);
+	}
+	// Optional fields: type-checked only when present; absence is never an issue.
+	for (const [name, type] of OPTIONAL_EVENT_PAYLOADS[event] ?? []) {
+		if (!(name in payload)) continue;
 		const problem = fieldIssue(`payload.${name}`, type, payload[name]);
 		if (problem) issues.push(problem);
 	}

@@ -757,7 +757,7 @@
     {
       "id": "sdlc.skill.harvest-panel-pointer",
       "source": "skills/sdlc/references/system-reference.md",
-      "assertion": "scripts/harvest-panel.sh --phase <panelPhase> --round <n> --from <asyncDir>`\n  (skill-relative; headless: `node <skill-dir>/scripts/harvest-panel.mjs`).",
+      "assertion": "scripts/harvest-panel.sh --phase <panelPhase> --round <label> [--wave <wave>] --from <asyncDir>`\n  (skill-relative; headless: `node <skill-dir>/scripts/harvest-panel.mjs`).",
       "targetKind": "command",
       "ownership": "package",
       "required": true,
