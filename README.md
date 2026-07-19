@@ -6,9 +6,6 @@ change enters the codebase: **brainstorm → plan → spec → build → impleme
 with per-phase adversarial review panels, a per-task validator, worktree
 discipline, and optional GitHub tracker-backed builds.
 
-It is the generalised form of the `loom-sdlc` skill, driven by a small per-project
-manifest so the process is identical everywhere while the identity (name, labels,
-tracker, model roster) is per-project.
 
 ## Install
 
