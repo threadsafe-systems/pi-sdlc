@@ -328,6 +328,26 @@ test("LT15: review-dir discovery matches both <phase>-<slug>-<date> and <phase>-
 	}
 });
 
+test("T2/PR-fix: a review-<x> slug does not collide with slug <x> over one -review- directory", () => {
+	const root = tmp();
+	try {
+		// one physical directory that both slug 'foo' (infix form) and slug
+		// 'review-foo' (classic form) could otherwise claim
+		mkdirSync(join(root, "docs", "reviews", "plan-review-foo-2026-07-19"), { recursive: true });
+		const asFoo = discoverReviewDirs(root, "foo");
+		const asReviewFoo = discoverReviewDirs(root, "review-foo");
+		// exactly one slug owns it: 'foo' via the infix form; 'review-foo' is
+		// steered to the mandatory-infix form and must NOT claim it
+		assert.deepEqual(asFoo, ["plan-review-foo-2026-07-19"]);
+		assert.deepEqual(asReviewFoo, [], "review-<x> slug must not claim <x>'s -review- directory");
+		// review-foo still finds its own mandatory-infix directory
+		mkdirSync(join(root, "docs", "reviews", "plan-review-review-foo-2026-07-19"), { recursive: true });
+		assert.deepEqual(discoverReviewDirs(root, "review-foo"), ["plan-review-review-foo-2026-07-19"]);
+	} finally {
+		rmSync(root, { recursive: true, force: true });
+	}
+});
+
 test("LT15: git/GitHub adapters consume only the injected fakes", () => {
 	const root = tmp();
 	const bin = tmp("sdlc-lt4-bin-");
