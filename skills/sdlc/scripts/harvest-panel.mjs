@@ -4,7 +4,7 @@
 // panel dispatch's async run directory into the consumer's run store, before
 // they evaporate.
 //
-// Usage: harvest-panel.mjs --phase PANEL_PHASE --round N --from DIR [--slug S]
+// Usage: harvest-panel.mjs --phase PANEL_PHASE --round N [--wave W] --from DIR [--slug S]
 //                          [--with-transcripts] [--format text|json]
 //                          [--config DIR | --repo-root DIR]
 //
@@ -12,12 +12,15 @@
 // events.jsonl at its top level (the shape of a pi-subagents asyncDir).
 // Harvest copies both into panels/<panelPhase>-round<N>-<date>/;
 // --with-transcripts additionally copies a top-level transcripts/
-// subdirectory (when present) into transcripts/ at the destination. A
-// missing/aborted source directory or file is a report, not a throw: exit 0,
+// subdirectory (when present) into transcripts/ at the destination. It also
+// writes a meta.json sidecar {round, wave}: --round is the destination
+// allocation label, --wave is the logical review-wave (defaults to --round
+// when omitted, so a replacement dispatch can share its original wave while
+// taking a fresh label). A missing/aborted source directory or file is a report, not a throw: exit 0,
 // missed[] populated, and the panel.harvested event records the gap. Exit 2
 // only for usage errors or an unwritable destination.
 
-import { cpSync, existsSync, mkdirSync, statSync } from "node:fs";
+import { cpSync, existsSync, mkdirSync, statSync, writeFileSync } from "node:fs";
 import { join, relative } from "node:path";
 import { inspectRoot } from "./lib.mjs";
 import { emitEvent, PANEL_PHASES, resolveRunSlug, runStoreDir } from "./telemetry.mjs";
@@ -38,6 +41,7 @@ function parseArgs(argv) {
 		};
 		if (a === "--phase") opts.phase = val("--phase");
 		else if (a === "--round") opts.round = val("--round");
+		else if (a === "--wave") opts.wave = val("--wave");
 		else if (a === "--from") opts.from = val("--from");
 		else if (a === "--slug") opts.slug = val("--slug");
 		else if (a === "--with-transcripts") opts.withTranscripts = true;
@@ -54,7 +58,7 @@ function parseArgs(argv) {
 }
 
 function usage() {
-	return "usage: harvest-panel.mjs --phase PANEL_PHASE --round N --from DIR [--slug S] [--with-transcripts] [--format text|json] [--config DIR|--repo-root DIR]";
+	return "usage: harvest-panel.mjs --phase PANEL_PHASE --round N [--wave W] --from DIR [--slug S] [--with-transcripts] [--format text|json] [--config DIR|--repo-root DIR]";
 }
 
 // Copy one file if present; return "copied" | "missed".
@@ -83,6 +87,10 @@ function main() {
 	if (!opts.round) bail(usage());
 	const round = Number(opts.round);
 	if (!Number.isInteger(round) || round <= 0) bail("--round must be a positive integer");
+	// The logical review-wave defaults to the allocation label when not given, so
+	// existing single-dispatch harvests are byte-identical in meaning (wave===round).
+	const wave = opts.wave === undefined ? round : Number(opts.wave);
+	if (!Number.isInteger(wave) || wave <= 0) bail("--wave must be a positive integer");
 	if (!opts.from) bail(usage());
 
 	const rootResult = inspectRoot({ config: opts.config, repoRoot: opts.repoRoot });
@@ -116,13 +124,25 @@ function main() {
 		if (status === "missed") missed.push("transcripts");
 	}
 
+	// meta.json sidecar records the {round, wave} distinction so the collector
+	// can group same-wave harvest rounds without parsing prose. Written after the
+	// copies; a failure here is not fatal to the harvest itself.
+	let metaWritten = false;
+	try {
+		writeFileSync(join(destDir, "meta.json"), `${JSON.stringify({ round, wave }, null, 2)}\n`);
+		metaWritten = true;
+	} catch {
+		missed.push("meta.json");
+	}
+	files.push({ name: "meta.json", status: metaWritten ? "copied" : "missed" });
+
 	const relDir = relative(root, destDir);
-	const report = { ok: true, phase: opts.phase, round, dir: relDir, files, missed };
+	const report = { ok: true, phase: opts.phase, round, wave, dir: relDir, files, missed };
 
 	if (opts.format === "json") {
 		console.log(JSON.stringify(report, null, 2));
 	} else {
-		console.log(`harvested ${opts.phase} round ${round} -> ${relDir}`);
+		console.log(`harvested ${opts.phase} round ${round} (wave ${wave}) -> ${relDir}`);
 		for (const f of files) console.log(`  ${f.name}: ${f.status}`);
 		if (missed.length > 0) console.log(`missed: ${missed.join(", ")}`);
 	}
@@ -131,7 +151,7 @@ function main() {
 		event: "panel.harvested",
 		slug,
 		by: "script:harvest-panel",
-		payload: { panelPhase: opts.phase, round, dir: relDir, missed },
+		payload: { panelPhase: opts.phase, round, wave, dir: relDir, missed },
 		root,
 	});
 
