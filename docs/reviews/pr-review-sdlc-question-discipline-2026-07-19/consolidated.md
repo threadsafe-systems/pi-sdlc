@@ -58,6 +58,24 @@ rule.
 (original panel) and 2 (deepseek replacement); wave 2 (confirmation) = harvest
 round 3; wave-2 fix-verification pass = harvest round 4.
 
-## Round 3 — wave-2 fix verification
+## Round 3 — wave-2 fix verification (harvest label round 4)
 
-_Appended after the round-3 pass below._
+- **Panel:** anthropic/claude-fable-5:high, openai-codex/gpt-5.6-sol:high,
+  deepseek/deepseek-v4-pro:high, dispatched against `74aaafd`, scoped to the
+  wave-2 diff.
+- **Wave-2 confirmations:** N1–N4 verified RESOLVED (fable with `file:line`
+  evidence incl. collector-blob checks and the run store's late wave-1
+  dispatch event; deepseek re-ran tests/lint: 397 pass, clean).
+
+| ID | Severity | Raised by | Gist | Disposition |
+|---|---|---|---|---|
+| R1 | medium | sol (1/3; fable's grounded verification of the same collector code reached the contrary conclusion — no join mispairing) | Retro collector exposes harvest labels as panel rounds and never consumes the recorded label↔wave mapping; replacement dispatches inflate apparent rounds and same-date multi-harvests make the precision join non-unique | **Dismissed — human-ratified** (Neil, 2026-07-19): docs-only reversible stream with `scripts/` explicitly out of scope; collector behaviour pre-existing, not introduced by this diff; no data mispairing shown (fable's verification); durable mapping recorded here for its stated human/agent consumer. Tracked follow-up on the retro surface: #118 |
+| R2 | low | fable | §12 command templates reuse one `<n>` placeholder for two now-distinct numbers | **Recorded** — folded into #118 (documentation half) |
+| R3 | low | fable | Retro collector's review-directory pattern does not match the `pr-review-*` dir naming this reference produces (pre-existing) | **Recorded** — folded into #118 |
+
+## Final verdict
+
+No high or medium finding survives adjudication: rounds 1–2 fully
+incorporated (F1–F7, N1–N4; F8 partially, residue recorded), R1 dismissed
+with human ratification and follow-up #118. Panel clean — the branch may
+open its PR.
