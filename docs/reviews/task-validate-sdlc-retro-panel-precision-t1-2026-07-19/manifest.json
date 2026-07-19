@@ -1,0 +1,58 @@
+{
+  "schemaVersion": 1,
+  "taskId": "t1",
+  "buildPlan": "docs/plans/2026-07-19-sdlc-retro-panel-precision-build.md",
+  "repoRoot": ".",
+  "ownedScenarios": [],
+  "checks": [
+    {
+      "id": "tests.full",
+      "argv": ["npm", "test"],
+      "timeoutMs": 300000,
+      "evidence": ["Full corpus green incl. new T1 harvest --wave/meta.json tests"]
+    },
+    {
+      "id": "static.lint",
+      "argv": ["npm", "run", "lint"],
+      "timeoutMs": 120000,
+      "evidence": ["Repository formatting and lint rules"]
+    },
+    {
+      "id": "static.check-harvest",
+      "argv": ["node", "--check", "skills/sdlc/scripts/harvest-panel.mjs"],
+      "evidence": ["harvest-panel.mjs parses with the --wave/meta.json additions"]
+    },
+    {
+      "id": "static.check-telemetry",
+      "argv": ["node", "--check", "skills/sdlc/scripts/telemetry.mjs"],
+      "evidence": ["telemetry.mjs parses with OPTIONAL_EVENT_PAYLOADS"]
+    },
+    {
+      "id": "static.schema-valid",
+      "argv": ["node", "-e", "JSON.parse(require('fs').readFileSync('skills/sdlc-retro/schema/event.schema.json','utf8'))"],
+      "evidence": ["Event schema remains valid JSON after additive wave properties"]
+    },
+    {
+      "id": "standards.wave-optional",
+      "argv": [
+        "node",
+        "--input-type=module",
+        "-e",
+        "import { EVENT_PAYLOADS, OPTIONAL_EVENT_PAYLOADS, validatePayload } from './skills/sdlc/scripts/telemetry.mjs'; const req = EVENT_PAYLOADS['panel.harvested'].map(([n])=>n); if (req.includes('wave')) { console.error('wave must NOT be a required field'); process.exit(1); } if (!OPTIONAL_EVENT_PAYLOADS['panel.harvested'].some(([n])=>n==='wave')) { console.error('wave must be an optional field'); process.exit(1); } const noWave = validatePayload('panel.harvested', { panelPhase:'pr_review', round:1, dir:'d', missed:[] }); if (noWave.length) { console.error('omitting wave must validate: '+noWave.join(';')); process.exit(1); } const okWave = validatePayload('panel.harvested', { panelPhase:'pr_review', round:2, wave:1, dir:'d', missed:[] }); if (okWave.length) { console.error('valid wave must pass: '+okWave.join(';')); process.exit(1); } const badWave = validatePayload('panel.harvested', { panelPhase:'pr_review', round:1, wave:0, dir:'d', missed:[] }); if (!badWave.length) { console.error('wave:0 must be rejected as non-posInt'); process.exit(1); }"
+      ],
+      "evidence": ["wave is optional (omission validates), type-guarded when present (wave:0 rejected), and never required (plan DoD 1)"]
+    },
+    {
+      "id": "patterns.diff",
+      "argv": ["git", "diff", "--check", "HEAD"],
+      "evidence": ["No whitespace-error banned patterns in the task diff"]
+    }
+  ],
+  "categories": {
+    "tests": { "applicability": "required", "checkIds": ["tests.full"] },
+    "static": { "applicability": "required", "checkIds": ["static.lint", "static.check-harvest", "static.check-telemetry", "static.schema-valid"] },
+    "scenarios": { "applicability": "n/a", "reason": "Reversible track: no Specification; T1 maps to approved plan DoD item 1 per the build plan's T1 check table." },
+    "standards": { "applicability": "required", "checkIds": ["standards.wave-optional"] },
+    "bannedPatterns": { "applicability": "required", "checkIds": ["patterns.diff"] }
+  }
+}
