@@ -47,6 +47,24 @@ Produce the Spec doc: **contracts, interfaces, surface area, functional and
 non-functional requirements, and falsifiable verification scenarios with stable
 ids**. Its home routes to the configured `paths.specs`.
 
+**Dialogue discipline.** Ask per the shared contract
+(`references/system-reference.md`, "Presenting questions to the human") and
+Plan's draft-first rule, with Spec's delta:
+
+- **Behavioural and edge-case questions are posed as draft scenarios, never
+  open questions**: not "what should happen when X?" but "SN: when X → Y
+  (pass) / Z (fail). Recommended: Y — because …", ratified or amended by
+  exception. Drafted scenarios are Spec's assumption tier: gate approval
+  ratifies them.
+- The blocking slots are reserved for genuinely open **contract/surface
+  decisions** the agent cannot responsibly settle alone; the cap's escape
+  valve is demotion into the draft, never a longer block — edge cases
+  legitimately number in the dozens and belong in the draft as recommended
+  scenarios.
+- Never ask the human what the code currently does: the same `file:line`
+  grounding demanded of panel reviewers applies to the authoring agent's
+  questions — legitimate questions are about intent.
+
 > **Under your configuration:** the artifact home is `<paths.specs>/<date>-<feat>.md`
 > using the committed `paths.specs` value — do not hardcode `docs/specs`.
 

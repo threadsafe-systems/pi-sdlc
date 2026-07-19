@@ -36,10 +36,16 @@ Concrete behaviour, not just tone:
   the human might be unaware of or wrongly assuming is novel. This is
   proportional, not mandatory ceremony — a brief brainstorm does not need a
   research pass just to be brief.
-- **Present multiple open questions in a structured form** when the environment
-  provides a tool for that (e.g. a questions-helper plugin) rather than a wall of
-  unstructured prose. When it is not there, degrade to inline structured prose
-  (see `references/system-reference.md`, "Skills and tools are enhancements").
+- **Present open questions per the shared contract** —
+  `references/system-reference.md`, "Presenting questions to the human": one
+  numbered end-of-reply block, enumerated alternatives, reasoned
+  recommendations, the uniform soft cap, and the Blocking/Assumption/Parked
+  triage tiers — never a wall of unstructured prose. Brainstorm's delta: a
+  recommendation must **widen the option space, not steer it** — recommend
+  freely on mechanical questions (where something should live), sparingly on
+  design direction (what something should be). Assumptions stated in dialogue
+  need no ledger here: Brainstorm commits no artifact, and the Plan restates
+  every assumption that survives.
 - **Expand and pressure-test, don't commandeer.** Contradictions and questions
   exist to widen the human's option space, not to steer the design toward the
   agent's own preferred answer. The human remains the owner of the direction;
@@ -131,7 +137,10 @@ visible without reopening a conversation.
 **Fog of war.** Don't ticket what you can't yet phrase precisely. The test is
 whether the question is sharp now, not whether you can answer it now: ticket when
 it is already sharp (even if blocked); leave it in **Not yet specified** when you
-can't yet phrase it that sharply — write it as loosely as the view allows.
+can't yet phrase it that sharply — write it as loosely as the view allows. A
+**parked** question (the shared contract's tier) is fog by another name: in map
+mode it lands in Not yet specified rather than a separate ledger, graduating to
+a ticket once sharp.
 Resolving a ticket clears the fog ahead of it, graduating whatever is now
 specifiable into fresh tickets, one at a time.
 

@@ -37,6 +37,26 @@ Produce the Plan doc: **objectives, rationale, scope in/out, definition of done,
 and context for the next agent**. Its home routes to the configured
 `paths.plans`.
 
+**Dialogue discipline.** Ask per the shared contract
+(`references/system-reference.md`, "Presenting questions to the human") with
+Plan's convergent delta:
+
+- Every blocking question must **close a decision that blocks writing a
+  specific Plan section**. A question that would reopen the agreed design is
+  not a Plan question — present it as a proposed backward transition to
+  Brainstorm (§6), never smuggled into the block.
+- **Recommendations are expected**: by Plan the agent holds an agreed design;
+  a blocking question with no recommendation signals the design was not
+  actually agreed.
+- **Draft first**: present the drafted Plan doc with the question block
+  alongside it; ask before drafting only when a blocking question prevents any
+  credible draft.
+- The triage tiers map onto the artifact: **assumptions are written into the
+  doc** (rationale/context) so gate approval ratifies them rather than leaving
+  them in session scrollback, and **parked questions go into "context for the
+  next agent"**. Scope-boundary questions always carry enumerated
+  alternatives — "is X in or out" is never posed as open prose.
+
 > **Under your configuration:** the artifact home is `<paths.plans>/<date>-<feat>.md`
 > using the committed `paths.plans` value — do not hardcode `docs/plans`.
 

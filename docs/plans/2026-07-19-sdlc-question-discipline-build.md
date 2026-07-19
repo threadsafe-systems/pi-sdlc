@@ -101,6 +101,14 @@ Add the empty-allowed **"Assumptions & discretionary calls"** section to
 
 - (build-time) Two-task slicing and the T1→T2 edge, per the decomposition
   rationale above.
+- (T1) The shared-contract section wording avoids the repo's S2
+  generic-surface banned literals (e.g. the word "handover" is loom-domain);
+  "carried forward in the phase's context for the next agent" is the
+  sanctioned phrasing.
+- (T2) `docs/validation/sdlc-agent-self-documentation/disposition-ledger.md`
+  S25 anchor updated to the new brainstorm bullet text — one line, outside
+  the plan's stated scope, forced by ASD5's living-anchor test when the old
+  bullet was replaced. Treated as a discretionary call, not a scope change.
 
 ## Tracker projection
 

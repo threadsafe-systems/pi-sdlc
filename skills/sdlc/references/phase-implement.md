@@ -46,6 +46,24 @@ Produce code and tests on the feature branch (worktree or checkout per the
 project's hooks/workflow). Each task's checks are whatever its approved Build task
 declared.
 
+**Dialogue discipline.** Implement lowers the interrupt surface of the shared
+contract (`references/system-reference.md`,
+"Presenting questions to the human") to near zero:
+
+- **Mid-task interrupts are reserved for external blockers only** — missing
+  credentials, broken or absent tooling, billing/rate exhaustion, permissions:
+  cases where proceeding is impossible and no repository reading helps.
+- Everything else batches to the **task boundary** (the validator seam) under
+  the uniform cap. Expected steady state is near zero: an upstream flaw is a
+  backward transition (§6), and a discretionary implementation choice the
+  upstream deliberately left open is the agent's call, recorded as an
+  assumption — asking the human to make it is ceremony, not care.
+- Assumptions accrue in the build-plan doc's **"Assumptions" appendix** as
+  tasks complete (plus the task's close comment when tracker-backed) and are
+  copied into the PR body's **"Assumptions & discretionary calls"** section at
+  PR preparation, where the panel reads them as review input
+  (`references/phase-pr-review.md`).
+
 ## 5. Invariant gate/approval seam — the per-task validator
 
 The invariant seam is per-task validation selected by `review.tasks`:
@@ -135,6 +153,10 @@ surface directly, give it the same shape every time:
   Stop investigating and finalize your current change against the stated
   check commands now." Reuse this wording rather than improvising a new one
   each time.
+- **Workers never triage for themselves.** A dispatched worker's blocking
+  question returns to the dispatching implementer — its stop-condition and
+  budget shape already imply this — and the implementer applies the shared
+  contract's triage tiers. One channel to the human, never one per worker.
 - **Infra failure gets one automatic retry; no verdict does.** If a
   dispatched worker's run ends in an **infra-class failure** — a process
   crash, an out-of-memory kill, overload or billing exhaustion, a provider

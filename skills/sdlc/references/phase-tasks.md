@@ -41,6 +41,23 @@ objectives, rationale, check commands, and scenario ids per task. Its home route
 to the configured `paths.plans` as `<date>-<feat>-build.md`. This doc stays the
 authoritative record even when it is also projected to the tracker.
 
+**Dialogue discipline.** Build expects **zero blocking questions**
+(shared contract: `references/system-reference.md`,
+"Presenting questions to the human"). A genuinely blocking question here almost always means the Spec's
+scenarios or the Plan's definition of done are incomplete — present it as a
+proposed backward transition (§6). This is the counterfeit-artifact rule's
+conversational twin: Build papers over an upstream hole with neither
+fabricated ids nor questions. Mechanical decomposition choices — granularity,
+ordering, blocking edges, a near-threshold publish call — are the agent's
+derivation calls: state them inline as assumptions and proceed; the committed
+build-plan doc is the reviewable record, and a gateless phase manufactures no
+approval interaction. A question **parked to Implement attaches to the
+build-plan doc entry of the task it affects** (projected into the sub-issue
+body above threshold; the doc row is the source), so the claiming session sees
+it at claim time. The build-plan doc also carries an **"Assumptions"
+appendix** — the accrual home Implement appends discretionary calls to as
+tasks complete (`references/phase-implement.md`).
+
 > **Under your configuration:** the artifact home uses committed `paths.plans`;
 > do not hardcode `docs/plans`.
 

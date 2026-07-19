@@ -21,3 +21,9 @@ Build` and explain briefly.
 - Epic: `#<epic-issue>`
 - Tasks: `#<task-issue>`, `#<task-issue>`
 - Board: `<TRACKER_BOARD>`
+
+## Assumptions & discretionary calls
+
+Assumptions and discretionary implementation choices accrued during Implement,
+copied from the build-plan doc's "Assumptions" appendix. Review input for the
+PR panel — not a place for panel findings. Write `None` when nothing accrued.

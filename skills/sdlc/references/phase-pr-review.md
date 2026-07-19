@@ -43,6 +43,12 @@ shared board. Add `Closes #<task-issue>` for each task completed by merging the
 PR; use the explicit no-tracker exemption for a below-threshold (per
 `shape.publishToTracker`) or `track: none` change. The PR body describes the
 change for its audience; it does not carry the local panel's development findings.
+It **does** carry an **"Assumptions & discretionary calls"** section
+(provisioned by the PR template, empty-allowed): the assumptions accrued during
+Implement, copied from the build-plan doc's appendix
+(`references/phase-implement.md`). That section is **input to** the PR panel —
+named review material for the judgement pass — never a channel for panel
+findings; the no-development-findings rule above is unchanged.
 
 Every PR declares its track in the template's `sdlc` declaration block
 (provisioned by setup). The `check-lifecycle` script verifies the declared track's
@@ -116,7 +122,8 @@ hand-copy a prompt per model.
      stamps one prompt file across `--model` flags.
 
    Give each reviewer the exact inputs: the artifact under review, the upstream
-   artifacts it must be consistent with, the repo path and commit, and the
+   artifacts it must be consistent with, the repo path and commit, the PR body's
+   "Assumptions & discretionary calls" section as named review material, and the
    grounding rule (cite `file:line` for any framework claim). For `pr_review`,
    populate the prompt's `<TRACK>` from the PR declaration and `<GOVERNING_DOCS>`
    from the linked documents before dispatch; never send literal placeholders. On
@@ -173,6 +180,22 @@ child's transcript before treating a "detached" status label as lost output.
    human owner, who is the final adjudicator. Reviewer output is roughly eighty per
    cent right and overreaches, so nothing is actioned blindly and nothing is
    dismissed silently.
+
+   Escalate disputes to the human per the shared contract
+   (`references/system-reference.md`, "Presenting questions to the human") with
+   the PR delta: escalations reach the human **once per fix wave, after
+   consolidation, never streamed as reviewers return**, and arrive
+   **pre-adjudicated** as ratify/amend decisions — each escalated finding
+   carries its id, a one-line gist, the reviewers who raised it (cross-model
+   agreement is signal), and the agent's recommended disposition with its
+   reason. Only **proposed dismissals of high or medium findings** — plus
+   anything touching a previously human-ratified residual-risk boundary —
+   escalate; incorporating a finding is agreement and needs no permission.
+   Overflow past the cap usually means incorporate the cheap ones rather than
+   argue them. A **human-ratified dismissal binds forward**: record it in
+   `consolidated.md` with its human-ratified attribution and do not re-litigate
+   the same finding class in later waves or later sessions unless new evidence
+   emerges.
 5. **Stop** when no high or medium finding survives adjudication. Low findings are
    recorded, not blocking. Termination is measured against surviving findings, so a
    ruthless panel that always emits nits still converges.
