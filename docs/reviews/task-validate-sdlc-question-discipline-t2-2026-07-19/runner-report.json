@@ -1,0 +1,199 @@
+{
+  "schemaVersion": 1,
+  "taskId": "t2",
+  "manifest": "/home/neil/code/threadsafe/pi-sdlc.worktrees/feat-sdlc-question-discipline/docs/validation/sdlc-question-discipline/t2.json",
+  "repoRoot": "/home/neil/code/threadsafe/pi-sdlc.worktrees/feat-sdlc-question-discipline",
+  "verdict": "PASS",
+  "exitCode": 0,
+  "errors": [],
+  "manifestErrors": [],
+  "commands": [
+    {
+      "id": "tests.full",
+      "argv": [
+        "npm",
+        "test"
+      ],
+      "evidence": [
+        "Full corpus green with all six phase deltas (disposition-ledger anchor test included)"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 15627,
+      "stdoutTail": "[...truncated; showing bounded tail...]\n✔ LT18: soft data carries attribution and matches the fixture LLM's scripted responses (324.03675ms)\n✔ LT18: an unreadable review directory yields precision.unparsed:<dir> and no precision number (113.956463ms)\n✔ LT19: --no-llm (noLlm:true) output validates and carries soft.absent (23.604567ms)\n✔ LT17: --from-raw reproduces a byte-identical run.json after live sources are destroyed (507.300204ms)\n✔ LT28: neither the sentinel secret nor the verbatim prompt sentence appears in run.json (196.836588ms)\n✔ NF4 unit: sanitizeSoftString redacts, rejects n-gram containment, and caps at 500 chars (0.283826ms)\n✔ LT29: a failing --gh-cmd yields github.error, schema-valid, no fabricated PR data (109.395213ms)\n✔ LT29: an --llm-cmd returning invalid JSON yields llm.error:narrative, schema-valid, no fabricated summary (239.598723ms)\n✔ LT29: an --llm-cmd that times out yields llm.error:<kind>, schema-valid, exit unaffected (628.505342ms)\n✔ llm-protocol schema: request/response fixtures validate (2.005936ms)\n✔ LT13 (hard): complete fixture store -> schema-valid run.json with known-answer rollups (356.546516ms)\n✔ LT14: a gappy store names every gap and derives nothing from missing sources (209.335573ms)\n✔ LT14: --no-github records github.skipped, not github.error (14.185041ms)\n✔ LT15: manifest adapter skips and counts malformed lines (manifest.partial) (10.675306ms)\n✔ LT15: harvest adapter maps per-model fields correctly (6.555921ms)\n✔ LT15: transcript usage/cost sums correctly and a version-4 transcript soft-fails per-file (4.947708ms)\n✔ LT15: review-dir discovery matches <phase>-<slug>-<date> naming (6.343116ms)\n✔ LT15: git/GitHub adapters consume only the injected fakes (294.131439ms)\n✔ LT16: phase attribution, agent time, capped human-wait, rework, window bounds (10.213665ms)\n✔ LT16: a 3-hour gap contributes exactly 30 minutes to human-wait (22.64343ms)\n✔ collect-run: no run store exits 1 (nothing collectable) (189.93837ms)\n✔ collect-run: writes docs/retros/<slug>/run.json by default and validates (118.9903ms)\n✔ resolveSessionDirs: an override list is used verbatim; absence marks sessions.dir_unresolved (0.988768ms)\n✔ LT24: every mandated hook step names record-run-event.sh and its event-type token together (6.297077ms)\n✔ LT24: the panel-dispatch step and the validator-dispatch step each name harvest-panel.sh (0.434678ms)\n✔ LT24: sdlc-retro SKILL.md names collect and render invocations skill-relatively (FS12 forms) (0.185736ms)\n✔ LT25: check-references passes with the new inventory entries (213.372608ms)\n✔ LT25: deleting a new entry's target file fails check-references (361.282219ms)\n✔ structural coverage: every sdlc-retro script has an FS11 inventory entry (0.481045ms)\n✔ structural coverage: every hook script named by §4 has an FS11 inventory entry (0.892157ms)\n✔ structural coverage: every committed sdlc-retro schema file has an FS11 inventory entry (0.896637ms)\n✔ structural coverage: ADR 0028 has an FS11 inventory entry and exists (2.02459ms)\n✔ structural coverage: every run-store/retro path named normatively by either SKILL.md has an inventory entry (0.468488ms)\n✔ LT27: docs/retros/sdlc-lifecycle-telemetry/run.json and index.html exist (1.783118ms)\n✔ LT27: the dogfood run.json validates against the committed schema and hand-rolled validator (6.019525ms)\n✔ LT27: coverage markers honestly record the pre-instrumentation gap (partial coverage by design) (0.375417ms)\n✔ LT27: the committed dashboard renders all seven anchors for the dogfood run (0.381257ms)\n✔ LT1: valid emit appends one schema-conforming line, creating the store (185.622238ms)\n✔ LT1b: --by defaults to agent when omitted (152.562238ms)\n✔ LT2: bad inputs exit 2 and never touch the manifest (970.786954ms)\n✔ schema agreement: unknown event types remain valid for forward-compatible consumers (0.700568ms)\n✔ LT2b: a bad input against a non-existent store attempts no write (116.025957ms)\n✔ LT3: concurrent emitters produce N complete, non-interleaved lines (381.151332ms)\n✔ empty explicit identities do not fall through to another identity (264.090821ms)\n✔ LT4: --slug beats env beats branch mapping (378.95259ms)\n✔ LT5: unresolvable identity skips (exit 0, one warning, no write) (282.771149ms)\n✔ LT26: .gitignore ignores the run store (6.97599ms)\n✔ emitter: .sh wrapper delegates to .mjs identically (99.233423ms)\n✔ vocabulary: every known event has a payload descriptor (0.260209ms)\n✔ LT11: harvest copies status.json + events.jsonl and emits panel.harvested (167.299955ms)\n✔ LT11: --with-transcripts copies the transcripts/ subdirectory (103.474477ms)\n✔ LT12: a missing source directory exits 0 with both files missed (184.589666ms)\n✔ LT12: a partially-present source (status without events) reports one missed (91.076416ms)\n✔ harvest-panel: unknown phase and non-positive round exit 2 (340.993253ms)\n✔ harvest-panel.sh wrapper delegates to .mjs identically (119.382223ms)\n✔ LT20: full fixture renders all seven anchors with known-answer data bindings (16.050171ms)\n✔ LT20: an empty-shell run.json fails to carry any pinned data binding (12.903444ms)\n✔ LT21: render-twice byte-identity and no generation-time values (0.929116ms)\n✔ LT21 (CLI): rendering the same --run input twice via the CLI is byte-identical (406.097937ms)\n✔ LT22: soft-data figures carry data-soft and visible attribution (0.43306ms)\n✔ LT22: a soft-less run.json renders coverage notices, not fabricated numbers (0.229133ms)\n✔ LT23: every coverage marker is rendered under #coverage (0.250863ms)\n✔ render-retro CLI: unreadable/unparseable/schema-invalid --run exits 1; usage errors exit 2 (467.119557ms)\n✔ render-retro CLI: default --out is index.html beside the input; --format json envelope (83.501482ms)\n✔ LT6: resolve-panel emits panel.resolved; stdout/exit byte-identical with/without --slug (626.474458ms)\n✔ LT7: ensure-panel-agent emits panel.agent_stamped; stdout/exit byte-identical (566.249363ms)\n✔ LT8: validate-task emits task.validated on PASS with and without --report (1078.536955ms)\n✔ LT8: validate-task emits task.validated on FAIL (208.905687ms)\n✔ LT8: validate-task emits task.validated on an ERROR fixture whose manifest parses (92.656808ms)\n✔ LT8: an unparseable-manifest ERROR skips emission with the standard warning (138.553683ms)\n✔ LT9: unwritable run store degrades to a warning; primary output unaffected (381.941977ms)\n✔ nested --repo-root run stores are git-ignored too (gitignore anchoring) (4.36097ms)\n✔ LT10: check-lifecycle.mjs and .sh are untouched by FS5 side-effect emission (5.678827ms)\n✔ PV1: a valid JavaScript manifest runs only declared checks and passes (365.330714ms)\n✔ PV2: only declared argv run; an undeclared tool command never executes (708.768289ms)\n✔ PV3: schema and inspectManifest reject the mutation matrix before any command runs (351.684081ms)\n✔ PV4: command outcomes are complete and deterministic; runner continues after failures (171.273594ms)\n✔ PV4: a timeout is reported as FAIL with timedOut (1164.82737ms)\n✔ PV5: category applicability is exact; injected n/a shapes are rejected (245.585033ms)\n✔ PV6: scenario mapping gates the verdict (247.349776ms)\n✔ PV7: standards and banned patterns are commands, not judgement (336.623576ms)\n✔ PV8: evidence is bounded and secrets are redacted (208.880475ms)\n✔ PV8 unit: boundStream and redaction name-matching are precise (599.320659ms)\n✔ PV9: JSON/text/exit agree and JSON mode is order-independent (1390.437241ms)\n✔ PV9: --report writes the exact JSON bytes atomically (367.88469ms)\n✔ PV9: --report outside the repo root is refused and clobbers nothing (360.491755ms)\n✔ PV10: generic validator law and generated agent are portable (0.755362ms)\n✔ PV11: receipt hash verification detects mutation of any stored file (14.347706ms)\n✔ PV11: a FAIL runner-report cannot ride under runnerVerdict PASS (1.417516ms)\n✔ parseArgs: recognises JSON anywhere and rejects bad flags (1.500553ms)\n✔ PV13: renderText is a faithful projection of the report (234.559232ms)\nℹ tests 397\nℹ suites 0\nℹ pass 397\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 15244.223702\n",
+      "stderrTail": ""
+    },
+    {
+      "id": "static.lint",
+      "argv": [
+        "npm",
+        "run",
+        "lint"
+      ],
+      "evidence": [
+        "Repository formatting and lint rules"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 697,
+      "stdoutTail": "\n> pi-sdlc@0.1.1 lint\n> biome check .\n\nChecked 144 files in 283ms. No fixes applied.\n",
+      "stderrTail": ""
+    },
+    {
+      "id": "standards.all-six-deltas",
+      "argv": [
+        "node",
+        "-e",
+        "const fs=require('fs');const files=['phase-brainstorm','phase-plan','phase-spec','phase-tasks','phase-implement','phase-pr-review'].map(f=>'skills/sdlc/references/'+f+'.md');const missing=files.filter(f=>!fs.readFileSync(f,'utf8').includes('Presenting questions to the human'));if(missing.length){console.error('missing contract pointer: '+missing.join(', '));process.exit(1)}"
+      ],
+      "evidence": [
+        "Every phase reference layers its delta over the shared contract (plan DoD 2)"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 59,
+      "stdoutTail": "",
+      "stderrTail": ""
+    },
+    {
+      "id": "standards.pr-template-repo",
+      "argv": [
+        "grep",
+        "-q",
+        "Assumptions & discretionary calls",
+        ".github/pull_request_template.md"
+      ],
+      "evidence": [
+        "Repo PR template carries the assumptions section (plan DoD 4)"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 5,
+      "stdoutTail": "",
+      "stderrTail": ""
+    },
+    {
+      "id": "standards.pr-template-asset",
+      "argv": [
+        "grep",
+        "-q",
+        "Assumptions & discretionary calls",
+        "skills/sdlc/assets/pull_request_template.md"
+      ],
+      "evidence": [
+        "Setup-provisioned PR template carries the assumptions section (plan DoD 4)"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 7,
+      "stdoutTail": "",
+      "stderrTail": ""
+    },
+    {
+      "id": "standards.panel-input-naming",
+      "argv": [
+        "grep",
+        "-qF",
+        "input to** the PR panel",
+        "skills/sdlc/references/phase-pr-review.md"
+      ],
+      "evidence": [
+        "phase-pr-review names the section as panel input without weakening the no-findings rule (plan DoD 4/6)"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 2,
+      "stdoutTail": "",
+      "stderrTail": ""
+    },
+    {
+      "id": "patterns.no-tool-naming",
+      "argv": [
+        "node",
+        "-e",
+        "const fs=require('fs'),path=require('path');const walk=(d)=>fs.readdirSync(d,{withFileTypes:true}).flatMap((e)=>{const p=path.join(d,e.name);return e.isDirectory()?walk(p):[p];});const bad=walk('skills/sdlc').filter((f)=>/questions-helper|questions tool/i.test(fs.readFileSync(f,'latin1')));if(bad.length){console.error('banned naming in: '+bad.join(', '));process.exit(1);}"
+      ],
+      "evidence": [
+        "Tool-dependent phrasing absent across the skill (plan DoD 3)"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 74,
+      "stdoutTail": "",
+      "stderrTail": ""
+    },
+    {
+      "id": "patterns.diff",
+      "argv": [
+        "git",
+        "diff",
+        "--check",
+        "HEAD"
+      ],
+      "evidence": [
+        "No whitespace-error banned patterns in the task diff"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 15,
+      "stdoutTail": "",
+      "stderrTail": ""
+    }
+  ],
+  "categories": [
+    {
+      "category": "tests",
+      "status": "PASS",
+      "checkIds": [
+        "tests.full"
+      ]
+    },
+    {
+      "category": "static",
+      "status": "PASS",
+      "checkIds": [
+        "static.lint"
+      ]
+    },
+    {
+      "category": "scenarios",
+      "status": "N/A",
+      "reason": "Reversible track: no Specification exists; T2 maps to approved plan DoD items 2/3/4/5/6 per the build plan's T2 check table."
+    },
+    {
+      "category": "standards",
+      "status": "PASS",
+      "checkIds": [
+        "standards.all-six-deltas",
+        "standards.pr-template-repo",
+        "standards.pr-template-asset",
+        "standards.panel-input-naming"
+      ]
+    },
+    {
+      "category": "bannedPatterns",
+      "status": "PASS",
+      "checkIds": [
+        "patterns.no-tool-naming",
+        "patterns.diff"
+      ]
+    }
+  ],
+  "scenarios": []
+}
