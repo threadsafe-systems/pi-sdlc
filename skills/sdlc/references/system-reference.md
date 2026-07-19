@@ -100,7 +100,7 @@ carries a `class`:
   `hooks` object, `.pi/sdlc/workflow.md`, the tracker board, and the generated
   consumer `.pi/sdlc/CONFIG.md`.
 - **`optional-enhancement`** — optional enhancements (e.g. `sdlc-visual-docs`
-  rendering, a questions-helper plugin).
+  rendering, an interactive question-answering aid).
 - **`internal`** — implementation internals: the `*.mjs` implementations behind
   `*.sh` wrappers and `scripts/lib.mjs`. These are summarized as implementation
   and are not catalogued file by file.
@@ -194,12 +194,13 @@ once by `assets/tracker-ops.md`.
 
 ### Skills and tools are enhancements, not dependencies
 
-Any skill or tool the agent reaches for opportunistically — a questions-helper
-plugin, web research, codebase exploration, anything named anywhere in this
-documentation as a way to do a phase better — is an enhancement, never a hard
-dependency a phase blocks on. When it is missing, degrade to the plain fallback
-(inline structured prose for a missing questions tool, a direct read/grep for
-missing research tooling) and say so, rather than stopping or refusing to proceed.
+Any skill or tool the agent reaches for opportunistically — web research,
+codebase exploration, a richer rendering surface, anything named anywhere in
+this documentation as a way to do a phase better — is an enhancement, never a
+hard dependency a phase blocks on. When it is missing, degrade to the plain
+fallback (a direct read/grep for missing research tooling, plain structured
+prose for a missing richer surface) and say so, rather than stopping or
+refusing to proceed.
 Name no external tool as a shipped dependency of the skill itself. **This rule
 does not cover hooks:** a `hooks` entry a repo has explicitly configured is a
 deliberate, load-bearing contract with the failure semantics above (before=block,
@@ -282,6 +283,7 @@ trust model are recorded in ADR 0029.
 | What do those values mean here? | Current `.pi/sdlc/CONFIG.md`; validated JSON fallback when absent/stale |
 | What public surfaces comprise pi-sdlc? | `references/system-reference.md` + FS11 inventory |
 | What implementation realizes a surface? | Source, only when implementation work requires it |
+| How does any phase ask the human for input? | "Presenting questions to the human" (§14, this file) |
 
 ## 12. Lifecycle telemetry (FS13)
 
@@ -344,4 +346,46 @@ fix: the real fix is a harness-level visible "stalled — retryable" signal and
 true auto-resume, which is `pi`/`pi-coding-agent` runtime behaviour this
 project does not own or ship. Treat this section as covering the gap until
 that exists upstream, not as the final word.
+
+## 14. Presenting questions to the human
+
+Every phase asks the human for input the same way. This section is the single
+owner of that contract; each `references/phase-*.md` layers a phase-shaped
+delta on top and never restates it. The contract is deliberately
+**tool-agnostic**: it depends on no plugin or helper, degrades to plain prose
+in any environment, and is by construction the structure an interactive
+answering aid extracts well — so no environment detection is ever needed.
+
+**The block.**
+
+- All questions for the human go in **one numbered block, as the last thing in
+  the reply** — never scattered through prose.
+- One distinct question per numbered item, one question per sentence — no
+  compound questions.
+- Add a one-line context only when the bare question alone is ambiguous.
+- When alternatives exist, list them as a numbered list under the question.
+  Never fabricate alternatives — no invented yes/no framing of a genuinely
+  open question.
+- Mark at most one option per question **"Recommended — because <reason>"**.
+  Never a recommendation without a reason; never a fabricated recommendation
+  when genuinely neutral.
+
+**The budget.** At most **3–5 blocking questions per turn**: a soft cap
+applied with judgment, uniform across phases. A phase delta may only lower it,
+never raise it. Overflow **demotes** to a lower tier — it never lengthens the
+block.
+
+**The triage tiers.** Every candidate question lands in exactly one:
+
+- **Blocking** — asked now, in the block.
+- **Assumption** — not asked; stated explicitly ("Proceeding on the assumption
+  that X — object now if wrong"). Where the phase has an artifact, assumptions
+  are written into it so the gate ratifies them (see the phase deltas).
+- **Parked** — recorded as one line with its destination ("parked to Spec")
+  and carried forward in the phase's context for the next agent.
+
+**Never ask a repo-discoverable fact.** A legitimate question is about intent,
+priorities, or external state only the human knows. A question about what the
+code, config, or docs currently do means the reading was skipped — read first,
+using the degraded research fallbacks above when richer tooling is missing.
 
