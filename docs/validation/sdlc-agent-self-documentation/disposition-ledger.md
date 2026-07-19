@@ -54,7 +54,7 @@ anchor check.
 | S22 | Brainstorm is live dialogue; rubber-duck | moved | skills/sdlc/references/phase-brainstorm.md | rubber-duck the idea, not agree with it |
 | S23 | Raise a contradiction or say there isn't one | moved | skills/sdlc/references/phase-brainstorm.md | Raise a contradiction, or say there isn't one |
 | S24 | Use tools, proportional not mandatory | moved | skills/sdlc/references/phase-brainstorm.md | proportional, not mandatory ceremony |
-| S25 | Present open questions structured | moved | skills/sdlc/references/phase-brainstorm.md | Present multiple open questions in a structured form |
+| S25 | Present open questions structured | moved | skills/sdlc/references/phase-brainstorm.md | Present open questions per the shared contract |
 | S26 | Expand and pressure-test, don't commandeer | moved | skills/sdlc/references/phase-brainstorm.md | Expand and pressure-test, don't commandeer |
 | S27 | Map mode: switch when large/foggy | moved | skills/sdlc/references/phase-brainstorm.md | wayfinder-lite |
 | S28 | The map issue is the canonical resumable artifact | moved | skills/sdlc/references/phase-brainstorm.md | resumable artifact for the effort, not a doc |

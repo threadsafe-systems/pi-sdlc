@@ -43,6 +43,12 @@ shared board. Add `Closes #<task-issue>` for each task completed by merging the
 PR; use the explicit no-tracker exemption for a below-threshold (per
 `shape.publishToTracker`) or `track: none` change. The PR body describes the
 change for its audience; it does not carry the local panel's development findings.
+It **does** carry an **"Assumptions & discretionary calls"** section
+(provisioned by the PR template, empty-allowed): the assumptions accrued during
+Implement, copied from the build-plan doc's appendix
+(`references/phase-implement.md`). That section is **input to** the PR panel —
+named review material for the judgement pass — never a channel for panel
+findings; the no-development-findings rule above is unchanged.
 
 Every PR declares its track in the template's `sdlc` declaration block
 (provisioned by setup). The `check-lifecycle` script verifies the declared track's
@@ -101,17 +107,23 @@ hand-copy a prompt per model.
 
      `--emit-tasks` prints a ready-to-paste `subagent` `tasks: [...]` array. Replace
      its task value with the exact review task: name the artifact paths, commit,
-     governing documents, grounding rule, and required findings-only output; then
-     dispatch the populated array in one call. Per-model attribution comes back on
-     each task's `result.model`. `ensure-panel-agent.sh` copies the prompt body
-     verbatim and writes to the consumer repo's `.pi/agents` where the session
-     resolves project agents (NOT a `cd`-ed cwd). Consult the project's governing
-     documents (for example `AGENTS.md`) for any local sub-agent gotchas.
+     governing documents, grounding rule, and required findings-only output. Dispatch
+     the populated array with `async: true` (`subagent({ tasks: [...], async: true })`),
+     not as a blocking call: a blocking multi-model dispatch only returns control after
+     every reviewer finishes, so a reviewer that crashes in the first second still sits
+     unactioned until the slowest sibling completes minutes later. Async dispatch
+     returns immediately with one run id/`asyncDir` covering every child in the panel.
+     Per-model attribution comes back on each task's `result.model` once you read it.
+     `ensure-panel-agent.sh` copies the prompt body verbatim and writes to the
+     consumer repo's `.pi/agents` where the session resolves project agents (NOT a
+     `cd`-ed cwd). Consult the project's governing documents (for example
+     `AGENTS.md`) for any local sub-agent gotchas.
    - detached (headless/cron/CI, no live tool): `dispatch-subagents`'s `dispatch.sh`
      stamps one prompt file across `--model` flags.
 
    Give each reviewer the exact inputs: the artifact under review, the upstream
-   artifacts it must be consistent with, the repo path and commit, and the
+   artifacts it must be consistent with, the repo path and commit, the PR body's
+   "Assumptions & discretionary calls" section as named review material, and the
    grounding rule (cite `file:line` for any framework claim). For `pr_review`,
    populate the prompt's `<TRACK>` from the PR declaration and `<GOVERNING_DOCS>`
    from the linked documents before dispatch; never send literal placeholders. On
@@ -123,9 +135,25 @@ hand-copy a prompt per model.
    (the plugin registers tools at session start), NOT a switch to the detached path
    or a claim that you are outside pi. For a read-only research fan-out inside a
    worktree, dispatch the project `researcher-readonly` agent (no `write` tool,
-   returns the brief inline) so children never block on a forbidden write. Prefer
-`wait({ all: true })` over status-polling for read-only fan-out, and read a
-child's transcript before treating a "detached" status label as lost output.
+   returns the brief inline) so children never block on a forbidden write. For
+   such research fan-outs — not panel dispatch, which follows the per-child
+   polling rule below — prefer `wait({ all: true })` over status-polling, and
+   read a child's transcript before treating a "detached" status label as lost
+   output.
+
+   **React per-child, not per-batch.** Once dispatched async, poll
+   `subagent({ action: "status", id: <asyncId> })` (not a bare `wait` with no
+   timeout, which only unblocks once every child in that run finishes) at a
+   short interval; a `wait({ id: <asyncId>, timeoutMs: 20000 })` call doubles as
+   that interval's sleep, since a timeout returns control without stopping the
+   run. Diff each poll's per-child
+   status against the last one: the moment any child shows an infra failure (see
+   below) rather than a verdict, act on it immediately — do not wait for the other
+   panelists still running. A replacement dispatch for that model is a brand-new,
+   separate async `subagent` single-agent call, not folded back into the original
+   `tasks:` array, so it runs alongside whichever siblings from the first batch are
+   still going. Keep polling until every original child and every replacement is
+   accounted for.
 
    **Reviewer dispatch recovery.** The resolved `prefer` list is an ordered
    candidate pool, not merely documentation. A reviewer that returns a model
@@ -146,6 +174,17 @@ child's transcript before treating a "detached" status label as lost output.
    `scripts/harvest-panel.sh --phase <panelPhase> --round <n> --from <asyncDir>`,
    then `panel.consolidated` after adjudication — see
    `references/system-reference.md` ("Lifecycle telemetry") for the event map.
+   An async dispatch's harvest is a point-in-time copy: **re-run the same
+   harvest once every child has reached a terminal state** so the preserved
+   artifacts carry final results, and harvest each replacement dispatch's own
+   `asyncDir` too rather than letting it vanish from the run store. `--round`
+   is a positive-integer destination label, not only a fix-wave counter: a
+   replacement dispatch takes its **own round number** — reusing the
+   original's would overwrite that snapshot. The telemetry events keep the
+   **logical wave number** regardless (a replacement's `panel.dispatched`
+   carries its original wave's round; see `references/system-reference.md`,
+   "Lifecycle telemetry"); only the harvest label advances, and the
+   label↔wave mapping is recorded in the wave's `consolidated.md`.
 
 3. **Consolidate**: collapse duplicates into one issue, keep cross-model agreement
    as signal, preserve genuine disagreement.
@@ -155,6 +194,27 @@ child's transcript before treating a "detached" status label as lost output.
    human owner, who is the final adjudicator. Reviewer output is roughly eighty per
    cent right and overreaches, so nothing is actioned blindly and nothing is
    dismissed silently.
+
+   Escalate disputes to the human per the shared contract
+   (`references/system-reference.md`, "Presenting questions to the human") with
+   the PR delta: escalations reach the human **once per fix wave, after
+   consolidation, never streamed as reviewers return**, and arrive
+   **pre-adjudicated** as ratify/amend decisions — each escalated finding
+   carries its id, a one-line gist, the reviewers who raised it (cross-model
+   agreement is signal), and the agent's recommended disposition with its
+   reason. Only **proposed dismissals of high or medium findings** — plus
+   anything touching a previously human-ratified residual-risk boundary —
+   escalate; incorporating a finding is agreement and needs no permission.
+   Overflow past the cap usually means incorporate the cheap ones rather than
+   argue them. A **human-ratified dismissal binds forward**: record it in
+   `consolidated.md` with its human-ratified attribution and do not re-litigate
+   the same finding class in later waves or later sessions unless new evidence
+   emerges. The cross-session half of that rule needs a lookup, not memory:
+   **before adjudicating, search prior consolidated files under the configured
+   reviews home** (e.g. grep `<paths.reviews>/pr-*/consolidated.md` for
+   `ratif` — the broad stem, because records predating this attribution
+   convention word ratification differently) and treat any hit on the same
+   finding class as already adjudicated unless new evidence has emerged.
 5. **Stop** when no high or medium finding survives adjudication. Low findings are
    recorded, not blocking. Termination is measured against surviving findings, so a
    ruthless panel that always emits nits still converges.

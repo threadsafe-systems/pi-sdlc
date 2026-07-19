@@ -1,0 +1,81 @@
+{
+  "schemaVersion": 1,
+  "taskId": "t2",
+  "buildPlan": "docs/plans/2026-07-19-sdlc-question-discipline-build.md",
+  "repoRoot": ".",
+  "ownedScenarios": [],
+  "checks": [
+    {
+      "id": "tests.full",
+      "argv": ["npm", "test"],
+      "timeoutMs": 300000,
+      "evidence": ["Full corpus green with all six phase deltas (disposition-ledger anchor test included)"]
+    },
+    {
+      "id": "static.lint",
+      "argv": ["npm", "run", "lint"],
+      "timeoutMs": 120000,
+      "evidence": ["Repository formatting and lint rules"]
+    },
+    {
+      "id": "standards.all-six-deltas",
+      "argv": [
+        "node",
+        "-e",
+        "const fs=require('fs');const files=['phase-brainstorm','phase-plan','phase-spec','phase-tasks','phase-implement','phase-pr-review'].map(f=>'skills/sdlc/references/'+f+'.md');const missing=files.filter(f=>!fs.readFileSync(f,'utf8').includes('Presenting questions to the human'));if(missing.length){console.error('missing contract pointer: '+missing.join(', '));process.exit(1)}"
+      ],
+      "evidence": ["Every phase reference layers its delta over the shared contract (plan DoD 2)"]
+    },
+    {
+      "id": "standards.pr-template-repo",
+      "argv": ["grep", "-q", "Assumptions & discretionary calls", ".github/pull_request_template.md"],
+      "evidence": ["Repo PR template carries the assumptions section (plan DoD 4)"]
+    },
+    {
+      "id": "standards.pr-template-asset",
+      "argv": ["grep", "-q", "Assumptions & discretionary calls", "skills/sdlc/assets/pull_request_template.md"],
+      "evidence": ["Setup-provisioned PR template carries the assumptions section (plan DoD 4)"]
+    },
+    {
+      "id": "standards.panel-input-naming",
+      "argv": ["grep", "-qF", "input to** the PR panel", "skills/sdlc/references/phase-pr-review.md"],
+      "evidence": ["phase-pr-review names the section as panel input without weakening the no-findings rule (plan DoD 4/6)"]
+    },
+    {
+      "id": "patterns.no-tool-naming",
+      "argv": [
+        "node",
+        "-e",
+        "const fs=require('fs'),path=require('path');const walk=(d)=>fs.readdirSync(d,{withFileTypes:true}).flatMap((e)=>{const p=path.join(d,e.name);return e.isDirectory()?walk(p):[p];});const bad=walk('skills/sdlc').filter((f)=>/questions-helper|questions tool/i.test(fs.readFileSync(f,'latin1')));if(bad.length){console.error('banned naming in: '+bad.join(', '));process.exit(1);}"
+      ],
+      "evidence": ["Tool-dependent phrasing absent across the skill (plan DoD 3)"]
+    },
+    {
+      "id": "patterns.diff",
+      "argv": ["git", "diff", "--check", "HEAD"],
+      "evidence": ["No whitespace-error banned patterns in the task diff"]
+    }
+  ],
+  "categories": {
+    "tests": {
+      "applicability": "required",
+      "checkIds": ["tests.full"]
+    },
+    "static": {
+      "applicability": "required",
+      "checkIds": ["static.lint"]
+    },
+    "scenarios": {
+      "applicability": "n/a",
+      "reason": "Reversible track: no Specification exists; T2 maps to approved plan DoD items 2/3/4/5/6 per the build plan's T2 check table."
+    },
+    "standards": {
+      "applicability": "required",
+      "checkIds": ["standards.all-six-deltas", "standards.pr-template-repo", "standards.pr-template-asset", "standards.panel-input-naming"]
+    },
+    "bannedPatterns": {
+      "applicability": "required",
+      "checkIds": ["patterns.no-tool-naming", "patterns.diff"]
+    }
+  }
+}
