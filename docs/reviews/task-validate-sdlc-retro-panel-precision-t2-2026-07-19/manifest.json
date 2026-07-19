@@ -1,0 +1,53 @@
+{
+  "schemaVersion": 1,
+  "taskId": "t2",
+  "buildPlan": "docs/plans/2026-07-19-sdlc-retro-panel-precision-build.md",
+  "repoRoot": ".",
+  "ownedScenarios": [],
+  "checks": [
+    {
+      "id": "tests.full",
+      "argv": ["npm", "test"],
+      "timeoutMs": 300000,
+      "evidence": ["Full corpus green incl. extended LT15 both-forms discovery and the T2 -review- precision guard"]
+    },
+    {
+      "id": "static.lint",
+      "argv": ["npm", "run", "lint"],
+      "timeoutMs": 120000,
+      "evidence": ["Repository formatting and lint rules"]
+    },
+    {
+      "id": "static.check-collect",
+      "argv": ["node", "--check", "skills/sdlc-retro/scripts/collect-run.mjs"],
+      "evidence": ["collect-run.mjs parses with the widened regex and extraction"]
+    },
+    {
+      "id": "standards.references",
+      "argv": ["node", "skills/sdlc/scripts/check-references.mjs"],
+      "timeoutMs": 60000,
+      "evidence": ["Normative-reference inventory consistent after the §12 harvest-command update (plan DoD 5)"]
+    },
+    {
+      "id": "standards.spec-additive",
+      "argv": [
+        "node",
+        "-e",
+        "const fs=require('fs');const spec=fs.readFileSync('docs/specs/2026-07-17-sdlc-lifecycle-telemetry.md','utf8');if(!spec.includes('`docs/reviews/<phase>-<slug>-<date>/`')){console.error('spec must retain the original naming line');process.exit(1);}if(!spec.includes('<phase>-review-<slug>-<date>')){console.error('spec must gain the -review- alternative');process.exit(1);}const ref=fs.readFileSync('skills/sdlc/references/phase-pr-review.md','utf8');if(!ref.includes('<phase>-review-<feat>-<date>')){console.error('pr-review reference must gain the -review- note');process.exit(1);}"
+      ],
+      "evidence": ["Spec + PR-review reference keep the original naming line and gain the -review- alternative additively (plan DoD 3/5)"]
+    },
+    {
+      "id": "patterns.diff",
+      "argv": ["git", "diff", "--check", "HEAD"],
+      "evidence": ["No whitespace-error banned patterns in the task diff"]
+    }
+  ],
+  "categories": {
+    "tests": { "applicability": "required", "checkIds": ["tests.full"] },
+    "static": { "applicability": "required", "checkIds": ["static.lint", "static.check-collect"] },
+    "scenarios": { "applicability": "n/a", "reason": "Reversible track: no Specification; T2 maps to approved plan DoD items 3 (naming) and 5 per the build plan's T2 check table." },
+    "standards": { "applicability": "required", "checkIds": ["standards.references", "standards.spec-additive"] },
+    "bannedPatterns": { "applicability": "required", "checkIds": ["patterns.diff"] }
+  }
+}

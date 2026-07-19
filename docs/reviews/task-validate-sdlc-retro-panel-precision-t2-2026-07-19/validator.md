@@ -1,0 +1,513 @@
+Task: Validate build task t2 of feature sdlc-retro-panel-precision (issue #122) in repo root /home/neil/code/threadsafe/pi-sdlc.worktrees/feat-sdlc-retro-panel-precision (branch feat/sdlc-retro-panel-precision, HEAD commit of that branch).
+First run the deterministic runner exactly (this actually executes the checks; do not skip it):
+cd /home/neil/code/threadsafe/pi-sdlc.worktrees/feat-sdlc-retro-panel-precision && skills/sdlc/scripts/validate-task.sh --manifest docs/validation/sdlc-retro-panel-precision/t2.json --slug sdlc-retro-panel-precision --format json --report docs/reviews/task-validate-sdlc-retro-panel-precision-t2-2026-07-19/validator-runner-report.json
+You are a checklist executor, not a judge: do not invent commands, weaken checks, or decide applicability — the manifest owns all of that. Read the JSON the runner prints, confirm the process exit code and the report's verdict field agree, then report with REAL values from the run (not template placeholders): the verdict (PASS/FAIL/ERROR), each category's status, each check id with its status, and any stderr diagnostics. If exit code and report verdict disagree, report that discrepancy explicitly and treat the run as ERROR. Do not edit any files.
+## Acceptance Contract
+Acceptance level: attested
+Completion is not accepted from prose alone. End with a structured acceptance report.
+Criteria:
+- criterion-1: Return concrete findings with file paths and severity when applicable
+Required evidence: review-findings, residual-risks
+Finish with a fenced JSON block tagged `acceptance-report` in this shape:
+Use empty arrays when no items apply; array fields contain strings unless object entries are shown.
+`criteriaSatisfied[].status` must be exactly one of: satisfied, not-satisfied, not-applicable.
+`commandsRun[].result` must be exactly one of: passed, failed, not-run.
+`manualNotes` and `notes` are optional strings; an empty string means no note and does not satisfy `manual-notes` evidence.
+```acceptance-report
+{
+  "criteriaSatisfied": [
+    {
+      "id": "criterion-1",
+      "status": "satisfied",
+      "evidence": "specific proof"
+    }
+  ],
+  "changedFiles": [
+    "src/file.ts"
+  ],
+  "testsAddedOrUpdated": [
+    "test/file.test.ts"
+  ],
+  "commandsRun": [
+    {
+      "command": "command",
+      "result": "passed",
+      "summary": "short result"
+    }
+  ],
+  "validationOutput": [
+    "validation output or concise summary"
+  ],
+  "residualRisks": [
+    "none"
+  ],
+  "noStagedFiles": true,
+  "diffSummary": "short description of the diff",
+  "reviewFindings": [
+    "blocker: file.ts:12 - issue found, or no blockers"
+  ],
+  "manualNotes": "anything else the parent should know"
+}
+```
+I'll validate task t2 of sdlc-retro-panel-precision by running the deterministic validator runner and reporting the exact results.
+ls: /home/neil/code/threadsafe/pi-sdlc.worktrees/feat-sdlc-re...
+.git
+.github/
+.gitignore
+.pi/
+.releaserc.json
+biome.json
+CHANGELOG.md
+CONTRIBUTING.md
+docs/
+LICENSE
+node_modules/
+package-lock.json
+package.json
+pr-body.md
+README.md
+scripts/
+skills/
+templates/
+test/
+read: /home/neil/code/threadsafe/pi-sdlc.worktrees/feat-sdlc-re...
+{
+  "schemaVersion": 1,
+  "taskId": "t2",
+  "buildPlan": "docs/plans/2026-07-19-sdlc-retro-panel-precision-build.md",
+  "repoRoot": ".",
+  "ownedScenarios": [],
+  "checks": [
+    {
+      "id": "tests.full",
+      "argv": ["npm", "test"],
+      "timeoutMs": 300000,
+      "evidence": ["Full corpus green incl. extended LT15 both-forms discovery and the T2 -review- precision guard"]
+    },
+    {
+      "id": "static.lint",
+      "argv": ["npm", "run", "lint"],
+      "timeoutMs": 120000,
+      "evidence": ["Repository formatting and lint rules"]
+    },
+    {
+      "id": "static.check-collect",
+      "argv": ["node", "--check", "skills/sdlc-retro/scripts/collect-run.mjs"],
+      "evidence": ["collect-run.mjs parses with the widened regex and extraction"]
+    },
+    {
+      "id": "standards.references",
+      "argv": ["node", "skills/sdlc/scripts/check-references.mjs"],
+      "timeoutMs": 60000,
+      "evidence": ["Normative-reference inventory consistent after the §12 harvest-command update (plan DoD 5)"]
+    },
+    {
+      "id": "standards.spec-additive",
+      "argv": [
+        "node",
+        "-e",
+        "const fs=require('fs');const spec=fs.readFileSync('docs/specs/2026-07-17-sdlc-lifecycle-telemetry.md','utf8');if(!spec.includes('`docs/reviews/<phase>-<slug>-<date>/`')){console.error('spec must retain the original naming line');process.exit(1);}if(!spec.includes('<phase>-review-<slug>-<date>')){console.error('spec must gain the -review- alternative');process.exit(1);}const ref=fs.readFileSync('skills/sdlc/references/phase-pr-review.md','utf8');if(!ref.includes('<phase>-review-<feat>-<date>')){console.error('pr-review reference must gain the -review- note');process.exit(1);}"
+      ],
+      "evidence": ["Spec + PR-review reference keep the original naming line and gain the -review- alternative additively (plan DoD 3/5)"]
+    },
+    {
+      "id": "patterns.diff",
+      "argv": ["git", "diff", "--check", "HEAD"],
+      "evidence": ["No whitespace-error banned patterns in the task diff"]
+    }
+  ],
+  "categories": {
+    "tests": { "applicability": "required", "checkIds": ["tests.full"] },
+    "static": { "applicability": "required", "checkIds": ["static.lint", "static.check-collect"] },
+    "scenarios": { "applicability": "n/a", "reason": "Reversible track: no Specification; T2 maps to approved plan DoD items 3 (naming) and 5 per the build plan's T2 check table." },
+    "standards": { "applicability": "required", "checkIds": ["standards.references", "standards.spec-additive"] },
+    "bannedPatterns": { "applicability": "required", "checkIds": ["patterns.diff"] }
+  }
+}
+bash: cd /home/neil/code/threadsafe/pi-sdlc.worktrees/feat-sdlc...
+{
+  "schemaVersion": 1,
+  "taskId": "t2",
+  "manifest": "/home/neil/code/threadsafe/pi-sdlc.worktrees/feat-sdlc-retro-panel-precision/docs/validation/sdlc-retro-panel-precision/t2.json",
+  "repoRoot": "/home/neil/code/threadsafe/pi-sdlc.worktrees/feat-sdlc-retro-panel-precision",
+  "verdict": "PASS",
+  "exitCode": 0,
+  "errors": [],
+  "manifestErrors": [],
+  "commands": [
+    {
+      "id": "tests.full",
+      "argv": [
+        "npm",
+        "test"
+      ],
+      "evidence": [
+        "Full corpus green incl. extended LT15 both-forms discovery and the T2 -review- precision guard"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 5018,
+      "stdoutTail": "[...truncated; showing bounded tail...]\n✔ LT19: --no-llm (noLlm:true) output validates and carries soft.absent (3.091766ms)\n✔ LT17: --from-raw reproduces a byte-identical run.json after live sources are destroyed (130.536636ms)\n✔ LT28: neither the sentinel secret nor the verbatim prompt sentence appears in run.json (57.652607ms)\n✔ NF4 unit: sanitizeSoftString redacts, rejects n-gram containment, and caps at 500 chars (0.277156ms)\n✔ LT29: a failing --gh-cmd yields github.error, schema-valid, no fabricated PR data (24.630175ms)\n✔ LT29: an --llm-cmd returning invalid JSON yields llm.error:narrative, schema-valid, no fabricated summary (60.67533ms)\n✔ LT29: an --llm-cmd that times out yields llm.error:<kind>, schema-valid, exit unaffected (613.422284ms)\n✔ llm-protocol schema: request/response fixtures validate (3.998922ms)\n✔ LT13 (hard): complete fixture store -> schema-valid run.json with known-answer rollups (83.009135ms)\n✔ LT14: a gappy store names every gap and derives nothing from missing sources (51.412521ms)\n✔ LT14: --no-github records github.skipped, not github.error (4.319438ms)\n✔ LT15: manifest adapter skips and counts malformed lines (manifest.partial) (2.647338ms)\n✔ LT15: harvest adapter maps per-model fields correctly (1.043269ms)\n✔ LT15: transcript usage/cost sums correctly and a version-4 transcript soft-fails per-file (1.364012ms)\n✔ LT15: review-dir discovery matches both <phase>-<slug>-<date> and <phase>-review-<slug>-<date> naming (1.351022ms)\n✔ LT15: git/GitHub adapters consume only the injected fakes (67.295691ms)\n✔ LT16: phase attribution, agent time, capped human-wait, rework, window bounds (1.560184ms)\n✔ LT16: a 3-hour gap contributes exactly 30 minutes to human-wait (3.049275ms)\n✔ collect-run: no run store exits 1 (nothing collectable) (24.337152ms)\n✔ collect-run: writes docs/retros/<slug>/run.json by default and validates (39.64603ms)\n✔ resolveSessionDirs: an override list is used verbatim; absence marks sessions.dir_unresolved (0.29479ms)\n✔ LT24: every mandated hook step names record-run-event.sh and its event-type token together (1.358356ms)\n✔ LT24: the panel-dispatch step and the validator-dispatch step each name harvest-panel.sh (0.306948ms)\n✔ LT24: sdlc-retro SKILL.md names collect and render invocations skill-relatively (FS12 forms) (0.174279ms)\n✔ LT25: check-references passes with the new inventory entries (31.8369ms)\n✔ LT25: deleting a new entry's target file fails check-references (72.596717ms)\n✔ structural coverage: every sdlc-retro script has an FS11 inventory entry (0.488738ms)\n✔ structural coverage: every hook script named by §4 has an FS11 inventory entry (0.268019ms)\n✔ structural coverage: every committed sdlc-retro schema file has an FS11 inventory entry (0.381307ms)\n✔ structural coverage: ADR 0028 has an FS11 inventory entry and exists (0.762697ms)\n✔ structural coverage: every run-store/retro path named normatively by either SKILL.md has an inventory entry (0.761613ms)\n✔ LT27: docs/retros/sdlc-lifecycle-telemetry/run.json and index.html exist (0.498257ms)\n✔ LT27: the dogfood run.json validates against the committed schema and hand-rolled validator (2.671317ms)\n✔ LT27: coverage markers honestly record the pre-instrumentation gap (partial coverage by design) (0.168835ms)\n✔ LT27: the committed dashboard renders all seven anchors for the dogfood run (0.155608ms)\n✔ LT1: valid emit appends one schema-conforming line, creating the store (30.152724ms)\n✔ LT1b: --by defaults to agent when omitted (34.133516ms)\n✔ LT2: bad inputs exit 2 and never touch the manifest (215.801854ms)\n✔ schema agreement: unknown event types remain valid for forward-compatible consumers (0.309154ms)\n✔ LT2b: a bad input against a non-existent store attempts no write (24.772434ms)\n✔ LT3: concurrent emitters produce N complete, non-interleaved lines (102.010802ms)\n✔ empty explicit identities do not fall through to another identity (65.056152ms)\n✔ LT4: --slug beats env beats branch mapping (88.107ms)\n✔ LT5: unresolvable identity skips (exit 0, one warning, no write) (76.799824ms)\n✔ LT26: .gitignore ignores the run store (2.653333ms)\n✔ emitter: .sh wrapper delegates to .mjs identically (37.75626ms)\n✔ vocabulary: every known event has a payload descriptor (0.18159ms)\n✔ LT11: harvest copies status.json + events.jsonl and emits panel.harvested (44.821461ms)\n✔ T1: --wave records a logical wave distinct from the round allocation label (32.412774ms)\n✔ T1: --wave must be a positive integer (34.818819ms)\n✔ LT11: --with-transcripts copies the transcripts/ subdirectory (38.730519ms)\n✔ LT12: a missing source directory exits 0 with both files missed (27.108909ms)\n✔ LT12: a partially-present source (status without events) reports one missed (24.583604ms)\n✔ harvest-panel: unknown phase and non-positive round exit 2 (82.716463ms)\n✔ harvest-panel.sh wrapper delegates to .mjs identically (43.467634ms)\n✔ LT20: full fixture renders all seven anchors with known-answer data bindings (1.787649ms)\n✔ LT20: an empty-shell run.json fails to carry any pinned data binding (0.151423ms)\n✔ LT21: render-twice byte-identity and no generation-time values (0.366303ms)\n✔ LT21 (CLI): rendering the same --run input twice via the CLI is byte-identical (72.261136ms)\n✔ LT22: soft-data figures carry data-soft and visible attribution (0.2609ms)\n✔ LT22: a soft-less run.json renders coverage notices, not fabricated numbers (0.150889ms)\n✔ LT23: every coverage marker is rendered under #coverage (0.144966ms)\n✔ render-retro CLI: unreadable/unparseable/schema-invalid --run exits 1; usage errors exit 2 (104.454037ms)\n✔ render-retro CLI: default --out is index.html beside the input; --format json envelope (35.870923ms)\n✔ LT6: resolve-panel emits panel.resolved; stdout/exit byte-identical with/without --slug (158.312778ms)\n✔ LT7: ensure-panel-agent emits panel.agent_stamped; stdout/exit byte-identical (134.616724ms)\n✔ LT8: validate-task emits task.validated on PASS with and without --report (271.216576ms)\n✔ LT8: validate-task emits task.validated on FAIL (47.965252ms)\n✔ LT8: validate-task emits task.validated on an ERROR fixture whose manifest parses (23.980689ms)\n✔ LT8: an unparseable-manifest ERROR skips emission with the standard warning (18.864792ms)\n✔ LT9: unwritable run store degrades to a warning; primary output unaffected (97.988661ms)\n✔ nested --repo-root run stores are git-ignored too (gitignore anchoring) (2.829106ms)\n✔ LT10: check-lifecycle.mjs and .sh are untouched by FS5 side-effect emission (0.90807ms)\n✔ PV1: a valid JavaScript manifest runs only declared checks and passes (83.778378ms)\n✔ PV2: only declared argv run; an undeclared tool command never executes (205.104017ms)\n✔ PV3: schema and inspectManifest reject the mutation matrix before any command runs (79.008774ms)\n✔ PV4: command outcomes are complete and deterministic; runner continues after failures (46.902017ms)\n✔ PV4: a timeout is reported as FAIL with timedOut (1059.496651ms)\n✔ PV5: category applicability is exact; injected n/a shapes are rejected (56.791927ms)\n✔ PV6: scenario mapping gates the verdict (64.517463ms)\n✔ PV7: standards and banned patterns are commands, not judgement (94.977873ms)\n✔ PV8: evidence is bounded and secrets are redacted (68.606143ms)\n✔ PV8 unit: boundStream and redaction name-matching are precise (236.972093ms)\n✔ PV9: JSON/text/exit agree and JSON mode is order-independent (449.606726ms)\n✔ PV9: --report writes the exact JSON bytes atomically (139.633177ms)\n✔ PV9: --report outside the repo root is refused and clobbers nothing (115.744315ms)\n✔ PV10: generic validator law and generated agent are portable (0.460025ms)\n✔ PV11: receipt hash verification detects mutation of any stored file (5.750813ms)\n✔ PV11: a FAIL runner-report cannot ride under runnerVerdict PASS (0.956392ms)\n✔ parseArgs: recognises JSON anywhere and rejects bad flags (0.446895ms)\n✔ PV13: renderText is a faithful projection of the report (68.993728ms)\nℹ tests 400\nℹ suites 0\nℹ pass 400\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 4904.261097\n",
+      "stderrTail": ""
+    },
+    {
+      "id": "static.lint",
+      "argv": [
+        "npm",
+        "run",
+        "lint"
+      ],
+      "evidence": [
+        "Repository formatting and lint rules"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 226,
+      "stdoutTail": "\n> pi-sdlc@0.1.1 lint\n> biome check .\n\nChecked 146 files in 101ms. No fixes applied.\n",
+      "stderrTail": ""
+    },
+    {
+      "id": "static.check-collect",
+      "argv": [
+        "node",
+        "--check",
+        "skills/sdlc-retro/scripts/collect-run.mjs"
+      ],
+      "evidence": [
+        "collect-run.mjs parses with the widened regex and extraction"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 18,
+      "stdoutTail": "",
+      "stderrTail": ""
+    },
+    {
+      "id": "standards.references",
+      "argv": [
+        "node",
+        "skills/sdlc/scripts/check-references.mjs"
+      ],
+      "evidence": [
+        "Normative-reference inventory consistent after the §12 harvest-command update (plan DoD 5)"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 39,
+      "stdoutTail": "[...truncated; showing bounded tail...]\ncheck: tracker.asset pass — package source assertion and target are present\ncheck: agent-brief.asset pass — package source assertion and target are present\ncheck: prompt.plan pass — package source assertion and target are present\ncheck: prompt.validator pass — package source assertion and target are present\ncheck: prompt.spec pass — package source assertion and target are present\ncheck: prompt.review pass — package source assertion and target are present\ncheck: script.status pass — package source assertion and target are present\ncheck: script.panel-resolver pass — package source assertion and target are present\ncheck: script.panel-agent pass — package source assertion and target are present\ncheck: script.validator pass — package source assertion and target are present\ncheck: script.receipt-verifier pass — package source assertion and target are present\ncheck: schema.task-validation pass — package source assertion and target are present\ncheck: consumer.workflow unverified-consumer — consumer-owned target is not package-certified: .pi/sdlc/workflow.md\ncheck: external.gh external — external facility: github.com/issues-projects\ncheck: reference.system pass — package source assertion and target are present\ncheck: reference.phase-brainstorm pass — package source assertion and target are present\ncheck: reference.phase-plan pass — package source assertion and target are present\ncheck: reference.phase-spec pass — package source assertion and target are present\ncheck: reference.phase-tasks pass — package source assertion and target are present\ncheck: reference.phase-implement pass — package source assertion and target are present\ncheck: reference.phase-pr-review pass — package source assertion and target are present\ncheck: entrypoint.brainstorm pass — package source assertion and target are present\ncheck: entrypoint.plan pass — package source assertion and target are present\ncheck: entrypoint.spec pass — package source assertion and target are present\ncheck: entrypoint.tasks pass — package source assertion and target are present\ncheck: entrypoint.implement pass — package source assertion and target are present\ncheck: entrypoint.pr-review pass — package source assertion and target are present\ncheck: script.config-doc pass — package source assertion and target are present\ncheck: config-doc.impl pass — package source assertion and target are present\ncheck: script.lifecycle-checker-wrapper pass — package source assertion and target are present\ncheck: script.setup-wrapper pass — package source assertion and target are present\ncheck: schema.config pass — package source assertion and target are present\ncheck: schema.config-example pass — package source assertion and target are present\ncheck: delegated.adversarial-review external — external facility: skill:adversarial-review\ncheck: optional-enhancement.visual-docs external — external facility: skill:sdlc-visual-docs\ncheck: script.record-run-event pass — package source assertion and target are present\ncheck: script.record-run-event-wrapper pass — package source assertion and target are present\ncheck: script.harvest-panel pass — package source assertion and target are present\ncheck: script.harvest-panel-wrapper pass — package source assertion and target are present\ncheck: retro.script.collect-run pass — package source assertion and target are present\ncheck: retro.script.collect-run-wrapper pass — package source assertion and target are present\ncheck: retro.script.render-retro pass — package source assertion and target are present\ncheck: retro.script.render-retro-wrapper pass — package source assertion and target are present\ncheck: retro.schema.event pass — package source assertion and target are present\ncheck: retro.schema.run pass — package source assertion and target are present\ncheck: retro.schema.llm-protocol pass — package source assertion and target are present\ncheck: retro.skill.source pass — package source assertion and target are present\ncheck: retro.skill.store-layout pass — package source assertion and target are present\ncheck: retro.skill.retro-output pass — package source assertion and target are present\ncheck: retro.skill.collect-invocation pass — package source assertion and target are present\ncheck: retro.skill.render-invocation pass — package source assertion and target are present\ncheck: retro.skill.event-schema-pointer pass — package source assertion and target are present\ncheck: retro.skill.llm-schema-pointer pass — package source assertion and target are present\ncheck: telemetry.adr-0028 pass — package source assertion and target are present\ncheck: sdlc.skill.telemetry-section pass — package source assertion and target are present\ncheck: sdlc.skill.retro-pointer pass — package source assertion and target are present\ncheck: sdlc.skill.record-run-event-pointer pass — package source assertion and target are present\ncheck: sdlc.skill.harvest-panel-pointer pass — package source assertion and target are present\ncheck: script.check-completion-wrapper pass — package source assertion and target are present\ncheck: script.check-completion pass — package source assertion and target are present\ncheck: consumer.config-doc-companion unverified-consumer — consumer-owned target is not package-certified: .pi/sdlc/CONFIG.md\ncheck: delegated.dispatch-subagents external — external facility: skill:dispatch-subagents\ncheck: delegated.gh-pr-review-comments external — external facility: skill:gh-pr-review-comments\ncheck: runtime-tool.git external — external facility: tool:git\ncheck: runtime-tool.node external — external facility: tool:node\ncheck: consumer.hooks unverified-consumer — consumer-owned target is not package-certified: .pi/sdlc/sdlc.config.json\ncheck: consumer.tracker unverified-consumer — consumer-owned target is not package-certified: .pi/sdlc/sdlc.config.json\ncheck: discovery.skills/sdlc/references/phase-brainstorm.md pass — discovered public artifact has an inventory row\ncheck: discovery.skills/sdlc/references/phase-implement.md pass — discovered public artifact has an inventory row\ncheck: discovery.skills/sdlc/references/phase-plan.md pass — discovered public artifact has an inventory row\ncheck: discovery.skills/sdlc/references/phase-pr-review.md pass — discovered public artifact has an inventory row\ncheck: discovery.skills/sdlc/references/phase-spec.md pass — discovered public artifact has an inventory row\ncheck: discovery.skills/sdlc/references/phase-tasks.md pass — discovered public artifact has an inventory row\ncheck: discovery.skills/sdlc/references/system-reference.md pass — discovered public artifact has an inventory row\ncheck: discovery.templates/sdlc-brainstorm.md pass — discovered public artifact has an inventory row\ncheck: discovery.templates/sdlc-implement.md pass — discovered public artifact has an inventory row\ncheck: discovery.templates/sdlc-plan.md pass — discovered public artifact has an inventory row\ncheck: discovery.templates/sdlc-pr-review.md pass — discovered public artifact has an inventory row\ncheck: discovery.templates/sdlc-spec.md pass — discovered public artifact has an inventory row\ncheck: discovery.templates/sdlc-tasks.md pass — discovered public artifact has an inventory row\ncheck: discovery.templates/setup-sdlc.md pass — discovered public artifact has an inventory row\ncheck: discovery.skills/sdlc/scripts/check-completion.sh pass — discovered public artifact has an inventory row\ncheck: discovery.skills/sdlc/scripts/check-lifecycle.sh pass — discovered public artifact has an inventory row\ncheck: discovery.skills/sdlc/scripts/check-references.sh pass — discovered public artifact has an inventory row\ncheck: discovery.skills/sdlc/scripts/config-doc.sh pass — discovered public artifact has an inventory row\ncheck: discovery.skills/sdlc/scripts/ensure-panel-agent.sh pass — discovered public artifact has an inventory row\ncheck: discovery.skills/sdlc/scripts/harvest-panel.sh pass — discovered public artifact has an inventory row\ncheck: discovery.skills/sdlc/scripts/record-run-event.sh pass — discovered public artifact has an inventory row\ncheck: discovery.skills/sdlc/scripts/resolve-panel.sh pass — discovered public artifact has an inventory row\ncheck: discovery.skills/sdlc/scripts/sdlc-status.sh pass — discovered public artifact has an inventory row\ncheck: discovery.skills/sdlc/scripts/setup-sdlc.sh pass — discovered public artifact has an inventory row\ncheck: discovery.skills/sdlc/scripts/validate-task.sh pass — discovered public artifact has an inventory row\ncheck: discovery.skills/sdlc/prompts/adversary-plan.prompt.md pass — discovered public artifact has an inventory row\ncheck: discovery.skills/sdlc/prompts/adversary-review.prompt.md pass — discovered public artifact has an inventory row\ncheck: discovery.skills/sdlc/prompts/adversary-spec.prompt.md pass — discovered public artifact has an inventory row\ncheck: discovery.skills/sdlc/prompts/validator-task.prompt.md pass — discovered public artifact has an inventory row\ncheck: discovery.skills/sdlc/schema/sdlc.config.example.json pass — discovered public artifact has an inventory row\ncheck: discovery.skills/sdlc/schema/sdlc.config.schema.json pass — discovered public artifact has an inventory row\ncheck: discovery.skills/sdlc/schema/task-validation-manifest.schema.json pass — discovered public artifact has an inventory row\n",
+      "stderrTail": ""
+    },
+    {
+      "id": "standards.spec-additive",
+      "argv": [
+        "node",
+        "-e",
+        "const fs=require('fs');const spec=fs.readFileSync('docs/specs/2026-07-17-sdlc-lifecycle-telemetry.md','utf8');if(!spec.includes('`docs/reviews/<phase>-<slug>-<date>/`')){console.error('spec must retain the original naming line');process.exit(1);}if(!spec.includes('<phase>-review-<slug>-<date>')){console.error('spec must gain the -review- alternative');process.exit(1);}const ref=fs.readFileSync('skills/sdlc/references/phase-pr-review.md','utf8');if(!ref.includes('<phase>-review-<feat>-<date>')){console.error('pr-review reference must gain the -review- note');process.exit(1);}"
+      ],
+      "evidence": [
+        "Spec + PR-review reference keep the original naming line and gain the -review- alternative additively (plan DoD 3/5)"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 16,
+      "stdoutTail": "",
+      "stderrTail": ""
+    },
+    {
+      "id": "patterns.diff",
+      "argv": [
+        "git",
+        "diff",
+        "--check",
+        "HEAD"
+      ],
+      "evidence": [
+        "No whitespace-error banned patterns in the task diff"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 4,
+      "stdoutTail": "",
+      "stderrTail": ""
+    }
+  ],
+  "categories": [
+    {
+      "category": "tests",
+      "status": "PASS",
+      "checkIds": [
+        "tests.full"
+      ]
+    },
+    {
+      "category": "static",
+      "status": "PASS",
+      "checkIds": [
+        "static.lint",
+        "static.check-collect"
+      ]
+    },
+    {
+      "category": "scenarios",
+      "status": "N/A",
+      "reason": "Reversible track: no Specification; T2 maps to approved plan DoD items 3 (naming) and 5 per the build plan's T2 check table."
+    },
+    {
+      "category": "standards",
+      "status": "PASS",
+      "checkIds": [
+        "standards.references",
+        "standards.spec-additive"
+      ]
+    },
+    {
+      "category": "bannedPatterns",
+      "status": "PASS",
+      "checkIds": [
+        "patterns.diff"
+      ]
+    }
+  ],
+  "scenarios": []
+}
+read: /home/neil/code/threadsafe/pi-sdlc.worktrees/feat-sdlc-re...
+{
+  "schemaVersion": 1,
+  "taskId": "t2",
+  "manifest": "/home/neil/code/threadsafe/pi-sdlc.worktrees/feat-sdlc-retro-panel-precision/docs/validation/sdlc-retro-panel-precision/t2.json",
+  "repoRoot": "/home/neil/code/threadsafe/pi-sdlc.worktrees/feat-sdlc-retro-panel-precision",
+  "verdict": "PASS",
+  "exitCode": 0,
+  "errors": [],
+  "manifestErrors": [],
+  "commands": [
+    {
+      "id": "tests.full",
+      "argv": [
+        "npm",
+        "test"
+      ],
+      "evidence": [
+        "Full corpus green incl. extended LT15 both-forms discovery and the T2 -review- precision guard"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 5018,
+      "stdoutTail": "[...truncated; showing bounded tail...]\n✔ LT19: --no-llm (noLlm:true) output validates and carries soft.absent (3.091766ms)\n✔ LT17: --from-raw reproduces a byte-identical run.json after live sources are destroyed (130.536636ms)\n✔ LT28: neither the sentinel secret nor the verbatim prompt sentence appears in run.json (57.652607ms)\n✔ NF4 unit: sanitizeSoftString redacts, rejects n-gram containment, and caps at 500 chars (0.277156ms)\n✔ LT29: a failing --gh-cmd yields github.error, schema-valid, no fabricated PR data (24.630175ms)\n✔ LT29: an --llm-cmd returning invalid JSON yields llm.error:narrative, schema-valid, no fabricated summary (60.67533ms)\n✔ LT29: an --llm-cmd that times out yields llm.error:<kind>, schema-valid, exit unaffected (613.422284ms)\n✔ llm-protocol schema: request/response fixtures validate (3.998922ms)\n✔ LT13 (hard): complete fixture store -> schema-valid run.json with known-answer rollups (83.009135ms)\n✔ LT14: a gappy store names every gap and derives nothing from missing sources (51.412521ms)\n✔ LT14: --no-github records github.skipped, not github.error (4.319438ms)\n✔ LT15: manifest adapter skips and counts malformed lines (manifest.partial) (2.647338ms)\n✔ LT15: harvest adapter maps per-model fields correctly (1.043269ms)\n✔ LT15: transcript usage/cost sums correctly and a version-4 transcript soft-fails per-file (1.364012ms)\n✔ LT15: review-dir discovery matches both <phase>-<slug>-<date> and <phase>-review-<slug>-<date> naming (1.351022ms)\n✔ LT15: git/GitHub adapters consume only the injected fakes (67.295691ms)\n✔ LT16: phase attribution, agent time, capped human-wait, rework, window bounds (1.560184ms)\n✔ LT16: a 3-hour gap contributes exactly 30 minutes to human-wait (3.049275ms)\n✔ collect-run: no run store exits 1 (nothing collectable) (24.337152ms)\n✔ collect-run: writes docs/retros/<slug>/run.json by default and validates (39.64603ms)\n✔ resolveSessionDirs: an override list is used verbatim; absence marks sessions.dir_unresolved (0.29479ms)\n✔ LT24: every mandated hook step names record-run-event.sh and its event-type token together (1.358356ms)\n✔ LT24: the panel-dispatch step and the validator-dispatch step each name harvest-panel.sh (0.306948ms)\n✔ LT24: sdlc-retro SKILL.md names collect and render invocations skill-relatively (FS12 forms) (0.174279ms)\n✔ LT25: check-references passes with the new inventory entries (31.8369ms)\n✔ LT25: deleting a new entry's target file fails check-references (72.596717ms)\n✔ structural coverage: every sdlc-retro script has an FS11 inventory entry (0.488738ms)\n✔ structural coverage: every hook script named by §4 has an FS11 inventory entry (0.268019ms)\n✔ structural coverage: every committed sdlc-retro schema file has an FS11 inventory entry (0.381307ms)\n✔ structural coverage: ADR 0028 has an FS11 inventory entry and exists (0.762697ms)\n✔ structural coverage: every run-store/retro path named normatively by either SKILL.md has an inventory entry (0.761613ms)\n✔ LT27: docs/retros/sdlc-lifecycle-telemetry/run.json and index.html exist (0.498257ms)\n✔ LT27: the dogfood run.json validates against the committed schema and hand-rolled validator (2.671317ms)\n✔ LT27: coverage markers honestly record the pre-instrumentation gap (partial coverage by design) (0.168835ms)\n✔ LT27: the committed dashboard renders all seven anchors for the dogfood run (0.155608ms)\n✔ LT1: valid emit appends one schema-conforming line, creating the store (30.152724ms)\n✔ LT1b: --by defaults to agent when omitted (34.133516ms)\n✔ LT2: bad inputs exit 2 and never touch the manifest (215.801854ms)\n✔ schema agreement: unknown event types remain valid for forward-compatible consumers (0.309154ms)\n✔ LT2b: a bad input against a non-existent store attempts no write (24.772434ms)\n✔ LT3: concurrent emitters produce N complete, non-interleaved lines (102.010802ms)\n✔ empty explicit identities do not fall through to another identity (65.056152ms)\n✔ LT4: --slug beats env beats branch mapping (88.107ms)\n✔ LT5: unresolvable identity skips (exit 0, one warning, no write) (76.799824ms)\n✔ LT26: .gitignore ignores the run store (2.653333ms)\n✔ emitter: .sh wrapper delegates to .mjs identically (37.75626ms)\n✔ vocabulary: every known event has a payload descriptor (0.18159ms)\n✔ LT11: harvest copies status.json + events.jsonl and emits panel.harvested (44.821461ms)\n✔ T1: --wave records a logical wave distinct from the round allocation label (32.412774ms)\n✔ T1: --wave must be a positive integer (34.818819ms)\n✔ LT11: --with-transcripts copies the transcripts/ subdirectory (38.730519ms)\n✔ LT12: a missing source directory exits 0 with both files missed (27.108909ms)\n✔ LT12: a partially-present source (status without events) reports one missed (24.583604ms)\n✔ harvest-panel: unknown phase and non-positive round exit 2 (82.716463ms)\n✔ harvest-panel.sh wrapper delegates to .mjs identically (43.467634ms)\n✔ LT20: full fixture renders all seven anchors with known-answer data bindings (1.787649ms)\n✔ LT20: an empty-shell run.json fails to carry any pinned data binding (0.151423ms)\n✔ LT21: render-twice byte-identity and no generation-time values (0.366303ms)\n✔ LT21 (CLI): rendering the same --run input twice via the CLI is byte-identical (72.261136ms)\n✔ LT22: soft-data figures carry data-soft and visible attribution (0.2609ms)\n✔ LT22: a soft-less run.json renders coverage notices, not fabricated numbers (0.150889ms)\n✔ LT23: every coverage marker is rendered under #coverage (0.144966ms)\n✔ render-retro CLI: unreadable/unparseable/schema-invalid --run exits 1; usage errors exit 2 (104.454037ms)\n✔ render-retro CLI: default --out is index.html beside the input; --format json envelope (35.870923ms)\n✔ LT6: resolve-panel emits panel.resolved; stdout/exit byte-identical with/without --slug (158.312778ms)\n✔ LT7: ensure-panel-agent emits panel.agent_stamped; stdout/exit byte-identical (134.616724ms)\n✔ LT8: validate-task emits task.validated on PASS with and without --report (271.216576ms)\n✔ LT8: validate-task emits task.validated on FAIL (47.965252ms)\n✔ LT8: validate-task emits task.validated on an ERROR fixture whose manifest parses (23.980689ms)\n✔ LT8: an unparseable-manifest ERROR skips emission with the standard warning (18.864792ms)\n✔ LT9: unwritable run store degrades to a warning; primary output unaffected (97.988661ms)\n✔ nested --repo-root run stores are git-ignored too (gitignore anchoring) (2.829106ms)\n✔ LT10: check-lifecycle.mjs and .sh are untouched by FS5 side-effect emission (0.90807ms)\n✔ PV1: a valid JavaScript manifest runs only declared checks and passes (83.778378ms)\n✔ PV2: only declared argv run; an undeclared tool command never executes (205.104017ms)\n✔ PV3: schema and inspectManifest reject the mutation matrix before any command runs (79.008774ms)\n✔ PV4: command outcomes are complete and deterministic; runner continues after failures (46.902017ms)\n✔ PV4: a timeout is reported as FAIL with timedOut (1059.496651ms)\n✔ PV5: category applicability is exact; injected n/a shapes are rejected (56.791927ms)\n✔ PV6: scenario mapping gates the verdict (64.517463ms)\n✔ PV7: standards and banned patterns are commands, not judgement (94.977873ms)\n✔ PV8: evidence is bounded and secrets are redacted (68.606143ms)\n✔ PV8 unit: boundStream and redaction name-matching are precise (236.972093ms)\n✔ PV9: JSON/text/exit agree and JSON mode is order-independent (449.606726ms)\n✔ PV9: --report writes the exact JSON bytes atomically (139.633177ms)\n✔ PV9: --report outside the repo root is refused and clobbers nothing (115.744315ms)\n✔ PV10: generic validator law and generated agent are portable (0.460025ms)\n✔ PV11: receipt hash verification detects mutation of any stored file (5.750813ms)\n✔ PV11: a FAIL runner-report cannot ride under runnerVerdict PASS (0.956392ms)\n✔ parseArgs: recognises JSON anywhere and rejects bad flags (0.446895ms)\n✔ PV13: renderText is a faithful projection of the report (68.993728ms)\nℹ tests 400\nℹ suites 0\nℹ pass 400\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 4904.261097\n",
+      "stderrTail": ""
+    },
+    {
+      "id": "static.lint",
+      "argv": [
+        "npm",
+        "run",
+        "lint"
+      ],
+      "evidence": [
+        "Repository formatting and lint rules"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 226,
+      "stdoutTail": "\n> pi-sdlc@0.1.1 lint\n> biome check .\n\nChecked 146 files in 101ms. No fixes applied.\n",
+      "stderrTail": ""
+    },
+    {
+      "id": "static.check-collect",
+      "argv": [
+        "node",
+        "--check",
+        "skills/sdlc-retro/scripts/collect-run.mjs"
+      ],
+      "evidence": [
+        "collect-run.mjs parses with the widened regex and extraction"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 18,
+      "stdoutTail": "",
+      "stderrTail": ""
+    },
+    {
+      "id": "standards.references",
+      "argv": [
+        "node",
+        "skills/sdlc/scripts/check-references.mjs"
+      ],
+      "evidence": [
+        "Normative-reference inventory consistent after the §12 harvest-command update (plan DoD 5)"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 39,
+      "stdoutTail": "[...truncated; showing bounded tail...]\ncheck: tracker.asset pass — package source assertion and target are present\ncheck: agent-brief.asset pass — package source assertion and target are present\ncheck: prompt.plan pass — package source assertion and target are present\ncheck: prompt.validator pass — package source assertion and target are present\ncheck: prompt.spec pass — package source assertion and target are present\ncheck: prompt.review pass — package source assertion and target are present\ncheck: script.status pass — package source assertion and target are present\ncheck: script.panel-resolver pass — package source assertion and target are present\ncheck: script.panel-agent pass — package source assertion and target are present\ncheck: script.validator pass — package source assertion and target are present\ncheck: script.receipt-verifier pass — package source assertion and target are present\ncheck: schema.task-validation pass — package source assertion and target are present\ncheck: consumer.workflow unverified-consumer — consumer-owned target is not package-certified: .pi/sdlc/workflow.md\ncheck: external.gh external — external facility: github.com/issues-projects\ncheck: reference.system pass — package source assertion and target are present\ncheck: reference.phase-brainstorm pass — package source assertion and target are present\ncheck: reference.phase-plan pass — package source assertion and target are present\ncheck: reference.phase-spec pass — package source assertion and target are present\ncheck: reference.phase-tasks pass — package source assertion and target are present\ncheck: reference.phase-implement pass — package source assertion and target are present\ncheck: reference.phase-pr-review pass — package source assertion and target are present\ncheck: entrypoint.brainstorm pass — package source assertion and target are present\ncheck: entrypoint.plan pass — package source assertion and target are present\ncheck: entrypoint.spec pass — package source assertion and target are present\ncheck: entrypoint.tasks pass — package source assertion and target are present\ncheck: entrypoint.implement pass — package source assertion and target are present\ncheck: entrypoint.pr-review pass — package source assertion and target are present\ncheck: script.config-doc pass — package source assertion and target are present\ncheck: config-doc.impl pass — package source assertion and target are present\ncheck: script.lifecycle-checker-wrapper pass — package source assertion and target are present\ncheck: script.setup-wrapper pass — package source assertion and target are present\ncheck: schema.config pass — package source assertion and target are present\ncheck: schema.config-example pass — package source assertion and target are present\ncheck: delegated.adversarial-review external — external facility: skill:adversarial-review\ncheck: optional-enhancement.visual-docs external — external facility: skill:sdlc-visual-docs\ncheck: script.record-run-event pass — package source assertion and target are present\ncheck: script.record-run-event-wrapper pass — package source assertion and target are present\ncheck: script.harvest-panel pass — package source assertion and target are present\ncheck: script.harvest-panel-wrapper pass — package source assertion and target are present\ncheck: retro.script.collect-run pass — package source assertion and target are present\ncheck: retro.script.collect-run-wrapper pass — package source assertion and target are present\ncheck: retro.script.render-retro pass — package source assertion and target are present\ncheck: retro.script.render-retro-wrapper pass — package source assertion and target are present\ncheck: retro.schema.event pass — package source assertion and target are present\ncheck: retro.schema.run pass — package source assertion and target are present\ncheck: retro.schema.llm-protocol pass — package source assertion and target are present\ncheck: retro.skill.source pass — package source assertion and target are present\ncheck: retro.skill.store-layout pass — package source assertion and target are present\ncheck: retro.skill.retro-output pass — package source assertion and target are present\ncheck: retro.skill.collect-invocation pass — package source assertion and target are present\ncheck: retro.skill.render-invocation pass — package source assertion and target are present\ncheck: retro.skill.event-schema-pointer pass — package source assertion and target are present\ncheck: retro.skill.llm-schema-pointer pass — package source assertion and target are present\ncheck: telemetry.adr-0028 pass — package source assertion and target are present\ncheck: sdlc.skill.telemetry-section pass — package source assertion and target are present\ncheck: sdlc.skill.retro-pointer pass — package source assertion and target are present\ncheck: sdlc.skill.record-run-event-pointer pass — package source assertion and target are present\ncheck: sdlc.skill.harvest-panel-pointer pass — package source assertion and target are present\ncheck: script.check-completion-wrapper pass — package source assertion and target are present\ncheck: script.check-completion pass — package source assertion and target are present\ncheck: consumer.config-doc-companion unverified-consumer — consumer-owned target is not package-certified: .pi/sdlc/CONFIG.md\ncheck: delegated.dispatch-subagents external — external facility: skill:dispatch-subagents\ncheck: delegated.gh-pr-review-comments external — external facility: skill:gh-pr-review-comments\ncheck: runtime-tool.git external — external facility: tool:git\ncheck: runtime-tool.node external — external facility: tool:node\ncheck: consumer.hooks unverified-consumer — consumer-owned target is not package-certified: .pi/sdlc/sdlc.config.json\ncheck: consumer.tracker unverified-consumer — consumer-owned target is not package-certified: .pi/sdlc/sdlc.config.json\ncheck: discovery.skills/sdlc/references/phase-brainstorm.md pass — discovered public artifact has an inventory row\ncheck: discovery.skills/sdlc/references/phase-implement.md pass — discovered public artifact has an inventory row\ncheck: discovery.skills/sdlc/references/phase-plan.md pass — discovered public artifact has an inventory row\ncheck: discovery.skills/sdlc/references/phase-pr-review.md pass — discovered public artifact has an inventory row\ncheck: discovery.skills/sdlc/references/phase-spec.md pass — discovered public artifact has an inventory row\ncheck: discovery.skills/sdlc/references/phase-tasks.md pass — discovered public artifact has an inventory row\ncheck: discovery.skills/sdlc/references/system-reference.md pass — discovered public artifact has an inventory row\ncheck: discovery.templates/sdlc-brainstorm.md pass — discovered public artifact has an inventory row\ncheck: discovery.templates/sdlc-implement.md pass — discovered public artifact has an inventory row\ncheck: discovery.templates/sdlc-plan.md pass — discovered public artifact has an inventory row\ncheck: discovery.templates/sdlc-pr-review.md pass — discovered public artifact has an inventory row\ncheck: discovery.templates/sdlc-spec.md pass — discovered public artifact has an inventory row\ncheck: discovery.templates/sdlc-tasks.md pass — discovered public artifact has an inventory row\ncheck: discovery.templates/setup-sdlc.md pass — discovered public artifact has an inventory row\ncheck: discovery.skills/sdlc/scripts/check-completion.sh pass — discovered public artifact has an inventory row\ncheck: discovery.skills/sdlc/scripts/check-lifecycle.sh pass — discovered public artifact has an inventory row\ncheck: discovery.skills/sdlc/scripts/check-references.sh pass — discovered public artifact has an inventory row\ncheck: discovery.skills/sdlc/scripts/config-doc.sh pass — discovered public artifact has an inventory row\ncheck: discovery.skills/sdlc/scripts/ensure-panel-agent.sh pass — discovered public artifact has an inventory row\ncheck: discovery.skills/sdlc/scripts/harvest-panel.sh pass — discovered public artifact has an inventory row\ncheck: discovery.skills/sdlc/scripts/record-run-event.sh pass — discovered public artifact has an inventory row\ncheck: discovery.skills/sdlc/scripts/resolve-panel.sh pass — discovered public artifact has an inventory row\ncheck: discovery.skills/sdlc/scripts/sdlc-status.sh pass — discovered public artifact has an inventory row\ncheck: discovery.skills/sdlc/scripts/setup-sdlc.sh pass — discovered public artifact has an inventory row\ncheck: discovery.skills/sdlc/scripts/validate-task.sh pass — discovered public artifact has an inventory row\ncheck: discovery.skills/sdlc/prompts/adversary-plan.prompt.md pass — discovered public artifact has an inventory row\ncheck: discovery.skills/sdlc/prompts/adversary-review.prompt.md pass — discovered public artifact has an inventory row\ncheck: discovery.skills/sdlc/prompts/adversary-spec.prompt.md pass — discovered public artifact has an inventory row\ncheck: discovery.skills/sdlc/prompts/validator-task.prompt.md pass — discovered public artifact has an inventory row\ncheck: discovery.skills/sdlc/schema/sdlc.config.example.json pass — discovered public artifact has an inventory row\ncheck: discovery.skills/sdlc/schema/sdlc.config.schema.json pass — discovered public artifact has an inventory row\ncheck: discovery.skills/sdlc/schema/task-validation-manifest.schema.json pass — discovered public artifact has an inventory row\n",
+      "stderrTail": ""
+    },
+    {
+      "id": "standards.spec-additive",
+      "argv": [
+        "node",
+        "-e",
+        "const fs=require('fs');const spec=fs.readFileSync('docs/specs/2026-07-17-sdlc-lifecycle-telemetry.md','utf8');if(!spec.includes('`docs/reviews/<phase>-<slug>-<date>/`')){console.error('spec must retain the original naming line');process.exit(1);}if(!spec.includes('<phase>-review-<slug>-<date>')){console.error('spec must gain the -review- alternative');process.exit(1);}const ref=fs.readFileSync('skills/sdlc/references/phase-pr-review.md','utf8');if(!ref.includes('<phase>-review-<feat>-<date>')){console.error('pr-review reference must gain the -review- note');process.exit(1);}"
+      ],
+      "evidence": [
+        "Spec + PR-review reference keep the original naming line and gain the -review- alternative additively (plan DoD 3/5)"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 16,
+      "stdoutTail": "",
+      "stderrTail": ""
+    },
+    {
+      "id": "patterns.diff",
+      "argv": [
+        "git",
+        "diff",
+        "--check",
+        "HEAD"
+      ],
+      "evidence": [
+        "No whitespace-error banned patterns in the task diff"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 4,
+      "stdoutTail": "",
+      "stderrTail": ""
+    }
+  ],
+  "categories": [
+    {
+      "category": "tests",
+      "status": "PASS",
+      "checkIds": [
+        "tests.full"
+      ]
+    },
+    {
+      "category": "static",
+      "status": "PASS",
+      "checkIds": [
+        "static.lint",
+        "static.check-collect"
+      ]
+    },
+    {
+      "category": "scenarios",
+      "status": "N/A",
+      "reason": "Reversible track: no Specification; T2 maps to approved plan DoD items 3 (naming) and 5 per the build plan's T2 check table."
+    },
+    {
+      "category": "standards",
+      "status": "PASS",
+      "checkIds": [
+        "standards.references",
+        "standards.spec-additive"
+      ]
+    },
+    {
+      "category": "bannedPatterns",
+      "status": "PASS",
+      "checkIds": [
+        "patterns.diff"
+      ]
+    }
+  ],
+  "scenarios": []
+}
+### Validation: t2
+- manifest: `docs/validation/sdlc-retro-panel-precision/t2.json`
+- runner: PASS — exit 0
+- report: `docs/reviews/task-validate-sdlc-retro-panel-precision-t2-2026-07-19/validator-runner-report.json`
+- commands: tests.full=PASS, static.lint=PASS, static.check-collect=PASS, standards.references=PASS, standards.spec-additive=PASS, patterns.diff=PASS
+- categories: tests=PASS, static=PASS, scenarios=N/A, standards=PASS, bannedPatterns=PASS
+- scenarios: n/a
+### Verdict: PASS
+Exit code and verdict agree (0/PASS). All six declared checks executed successfully. Full corpus passed 400 tests including extended LT15 both-forms discovery and T2 -review- precision guard. Linting passed with 146 files checked. Static validation of collect-run.mjs passed. Standards checks confirmed normative-reference inventory consistency and spec additivity (both <phase>-<slug>-<date> and <phase>-review-<slug>-<date> naming preserved and gained). No whitespace-error banned patterns detected in diff.
+```acceptance-report
+{
+  "criteriaSatisfied": [
+    {
+      "id": "criterion-1",
+      "status": "satisfied",
+      "evidence": "Validator runner executed deterministically and returned PASS with exit code 0. All six checks passed: tests.full (400 tests, 5018ms), static.lint (146 files, 226ms), static.check-collect (18ms), standards.references (39ms), standards.spec-additive (16ms), patterns.diff (4ms). Report written atomically to docs/reviews/task-validate-sdlc-retro-panel-precision-t2-2026-07-19/validator-runner-report.json with schemaVersion 1, no manifest errors, no runtime errors."
+    }
+  ],
+  "changedFiles": [],
+  "testsAddedOrUpdated": [],
+  "commandsRun": [
+    {
+      "command": "npm test",
+      "result": "passed",
+      "summary": "400 tests passed in full corpus, including LT15 both-forms discovery and T2 -review- precision guard"
+    },
+    {
+      "command": "npm run lint",
+      "result": "passed",
+      "summary": "146 files checked; no fixes applied; biome clean"
+    },
+    {
+      "command": "node --check skills/sdlc-retro/scripts/collect-run.mjs",
+      "result": "passed",
+      "summary": "collect-run.mjs parses with widened regex and extraction"
+    },
+    {
+      "command": "node skills/sdlc/scripts/check-references.mjs",
+      "result": "passed",
+      "summary": "Normative-reference inventory consistent after §12 harvest-command update"
+    },
+    {
+      "command": "node -e (spec-additive check)",
+      "result": "passed",
+      "summary": "Spec + PR-review reference retain original naming line and gain -review- alternative additively"
+    },
+    {
+      "command": "git diff --check HEAD",
+      "result": "passed",
+      "summary": "No whitespace-error banned patterns in task diff"
+    }
+  ],
+  "validationOutput": [
+    "Runner exit code: 0",
+    "Report verdict: PASS",
+    "Agreement verified: exit code and verdict both indicate PASS",
+    "Report schema version: 1",
+    "No manifest errors recorded",
+    "No runtime errors recorded"
+  ],
+  "residualRisks": [
+    "none"
+  ],
+  "noStagedFiles": true,
+  "diffSummary": "Task t2 (sdlc-retro-panel-precision) introduces -review- naming alternative for harvest-review-dir discovery alongside the original <phase>-<slug>-<date> naming. Updates to spec and PR-review reference documentation are additive and preserve original naming line. All checks pass; no content changes to inventory or core logic beyond the new naming support and integration test coverage.",
+  "reviewFindings": [
+    "no blockers"
+  ],
+  "manualNotes": "Validator runner completed deterministically with full manifest validation before command execution. All six declared checks ran exactly as specified in the manifest argv arrays with no deviations. Report file written atomically to the specified path. Scenarios category marked N/A per Build-approved reason (reversible track, no Specification; T2 maps to plan DoD items 3 and 5). No post-judgement of n/a category applicability per validator role."
+}
+```
