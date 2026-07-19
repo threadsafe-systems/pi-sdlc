@@ -221,7 +221,9 @@ hand-copy a prompt per model.
 
 Save panel artifacts under `<configured paths.reviews>/<phase>-<feat>-<date>/`: one
 file per model, the shared `prompt.md`, and a `consolidated.md` carrying the
-adjudication and the orchestrating model.
+adjudication and the orchestrating model. The `<phase>-review-<feat>-<date>`
+form (a `-review-` infix) is equally accepted and recommended going forward;
+the retro collector discovers both.
 
 > **Under your configuration:** whether a Plan panel and a Spec panel run at all
 > depends on the effective track and `review.design`; the PR panel runs on both

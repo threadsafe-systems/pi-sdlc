@@ -155,6 +155,36 @@ test("LT18: soft data carries attribution and matches the fixture LLM's scripted
 	}
 });
 
+test("T2: a -review- form review directory yields non-empty precision (F1 extraction guard)", () => {
+	const root = tmp();
+	const bin = tmp("sdlc-lt5-bin-");
+	try {
+		const slug = "t2-review";
+		seedManifest(root, slug);
+		const date = "2026-07-18";
+		// a harvested panel the review dir can join to
+		const panelDir = join(root, ".pi", "sdlc", "runs", slug, "panels", `pr_review-round1-${date}`);
+		mkdirSync(panelDir, { recursive: true });
+		writeFileSync(join(panelDir, "status.json"), JSON.stringify({ state: "completed" }));
+		writeFileSync(join(panelDir, "events.jsonl"), "");
+		// the review dir uses the -review- infix form (would silently unparse before F1)
+		const reviewDir = join(root, "docs", "reviews", `pr-review-${slug}-${date}`);
+		mkdirSync(reviewDir, { recursive: true });
+		writeFileSync(join(reviewDir, "consolidated.md"), "adjudication prose");
+		writeFileSync(join(reviewDir, "model-a.md"), "findings");
+		const llmCmd = mkLlmStub(bin);
+
+		const { runJson } = collect({ root, slug, gitCmd: "false", ghCmd: "false", noGithub: true, llmCmd });
+		const markers = runJson.coverage.map((c) => c.marker);
+		assert.ok(!markers.includes(`precision.unparsed:pr-review-${slug}-${date}`), `-review- dir must not unparse; got ${markers}`);
+		assert.ok(runJson.soft.panelPrecision.length > 0, "precision recorded for the -review- directory");
+		assert.equal(runJson.soft.panelPrecision[0].panelPhase, "pr_review");
+	} finally {
+		rmSync(root, { recursive: true, force: true });
+		rmSync(bin, { recursive: true, force: true });
+	}
+});
+
 test("LT18: an unreadable review directory yields precision.unparsed:<dir> and no precision number", () => {
 	const root = tmp();
 	const home = tmp("sdlc-lt5-home-empty-");

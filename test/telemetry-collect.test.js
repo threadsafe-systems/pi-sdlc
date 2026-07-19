@@ -276,15 +276,17 @@ test("LT15: transcript usage/cost sums correctly and a version-4 transcript soft
 	}
 });
 
-test("LT15: review-dir discovery matches <phase>-<slug>-<date> naming", () => {
+test("LT15: review-dir discovery matches both <phase>-<slug>-<date> and <phase>-review-<slug>-<date> naming", () => {
 	const root = tmp();
 	try {
 		const slug = "lt15-review";
 		mkdirSync(join(root, "docs", "reviews", `spec-${slug}-2026-07-17`), { recursive: true });
 		mkdirSync(join(root, "docs", "reviews", `pr-${slug}-2026-07-18`), { recursive: true });
+		mkdirSync(join(root, "docs", "reviews", `pr-review-${slug}-2026-07-19`), { recursive: true }); // new -review- form
+		mkdirSync(join(root, "docs", "reviews", `plan-review-${slug}-2026-07-16`), { recursive: true }); // new -review- form
 		mkdirSync(join(root, "docs", "reviews", `task-validate-${slug}-lt-x-2026-07-17`), { recursive: true }); // must NOT match
 		const found = discoverReviewDirs(root, slug);
-		assert.deepEqual(found, [`pr-${slug}-2026-07-18`, `spec-${slug}-2026-07-17`]);
+		assert.deepEqual(found, [`plan-review-${slug}-2026-07-16`, `pr-${slug}-2026-07-18`, `pr-review-${slug}-2026-07-19`, `spec-${slug}-2026-07-17`]);
 	} finally {
 		rmSync(root, { recursive: true, force: true });
 	}

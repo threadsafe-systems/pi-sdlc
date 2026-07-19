@@ -261,7 +261,10 @@ export function discoverPanels(root, slug, events) {
 // touches the live reviews path.
 export function discoverReviewDirs(root, slug, reviewsPath = "docs/reviews", { fromRaw = false } = {}) {
 	const rawListPath = join("reviews", "_dirs.json");
-	const re = new RegExp(`^(${LIFECYCLE_PHASES.join("|")})-${slug}-\\d{4}-\\d{2}-\\d{2}$`);
+	// Accept both the historical `<phase>-<slug>-<date>` and the now-dominant
+	// `<phase>-review-<slug>-<date>` naming (the `-review-` infix). Slugs match
+	// SLUG_RE (no regex-special chars), so interpolation is safe.
+	const re = new RegExp(`^(${LIFECYCLE_PHASES.join("|")})-(?:review-)?${slug}-\\d{4}-\\d{2}-\\d{2}$`);
 	if (fromRaw) {
 		if (!rawExists(root, slug, rawListPath)) return [];
 		try {
@@ -880,7 +883,10 @@ function buildSoftData({ root, slug, llmCmd, noLlm, fromRaw, events, spans, sess
 
 	const panelPrecision = [];
 	for (const dir of reviewDirs) {
-		const lifecyclePhase = LIFECYCLE_PHASES.find((phase) => dir.startsWith(`${phase}-${slug}-`));
+		// Match both naming forms (see discoverReviewDirs): the `-review-` infix
+		// must be accepted here too, or every `-review-` directory silently yields
+		// no panelPhase and an unparsed precision marker.
+		const lifecyclePhase = LIFECYCLE_PHASES.find((phase) => dir.startsWith(`${phase}-${slug}-`) || dir.startsWith(`${phase}-review-${slug}-`));
 		const panelPhase = lifecyclePhase ? LIFECYCLE_TO_PANEL[lifecyclePhase] : undefined;
 		const reviewDate = dir.match(/-(\d{4}-\d{2}-\d{2})$/)?.[1];
 		const matchingPanels = panelPhase ? panels.filter((p) => p.panelPhase === panelPhase) : [];

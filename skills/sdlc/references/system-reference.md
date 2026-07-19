@@ -308,19 +308,23 @@ event-type payload:
 - **Every human gate approval**: when the human approves a phase's gate —
   `record-run-event.sh gate.approved --payload '{"phase":"<phase>","artifact":"<path>","rev":<n>,"approver":"human:<slug>"}'`.
 - **Panel dispatch**: immediately after dispatching a design or PR panel —
-  `record-run-event.sh panel.dispatched --payload '{"panelPhase":"<panelPhase>","round":<n>,"models":[...]}'`
+  `record-run-event.sh panel.dispatched --payload '{"panelPhase":"<panelPhase>","round":<wave>,"models":[...]}'`
   — and, harvest-at-dispatch, immediately preserve its artifacts with
-  `scripts/harvest-panel.sh --phase <panelPhase> --round <n> --from <asyncDir>`
+  `scripts/harvest-panel.sh --phase <panelPhase> --round <label> --wave <wave> --from <asyncDir>`
   (skill-relative; headless: `node <skill-dir>/scripts/harvest-panel.mjs`).
-  The `<n>` in `panel.dispatched` and `panel.consolidated` is the **logical
-  review-wave counter**: a replacement dispatch for an infra-failed reviewer
-  belongs to its original wave and emits `panel.dispatched` with that wave's
-  `<n>`. The harvest `--round` is a **destination allocation label** that may
-  advance past the wave counter to avoid overwriting a prior snapshot (see
-  `references/phase-pr-review.md`, "Harvest-at-dispatch"); whenever the two
-  diverge, record the label↔wave mapping in that wave's `consolidated.md`.
+  Two distinct numbers appear here on purpose: `<wave>` is the **logical
+  review-wave counter** — a replacement dispatch for an infra-failed reviewer
+  belongs to its original wave and carries that wave's `<wave>` in the `round`
+  payload field of both the dispatch and consolidation events and in
+  `harvest-panel --wave`. `<label>` is the harvest `--round` **destination
+  allocation label**, which may advance past the wave to avoid overwriting a
+  prior snapshot (see `references/phase-pr-review.md`, "Harvest-at-dispatch");
+  it defaults to `<wave>` when omitted. `harvest-panel` records both in a
+  `meta.json` sidecar so the collector groups same-wave rounds without parsing
+  prose; still note any label↔wave divergence in that wave's `consolidated.md`
+  for human readers.
 - **Panel consolidation**: after adjudicating a round's findings —
-  `record-run-event.sh panel.consolidated --payload '{"panelPhase":"<panelPhase>","round":<n>,"findings":{"high":<n>,"medium":<n>,"low":<n>},"incorporated":<n>,"dismissed":<n>}'`.
+  `record-run-event.sh panel.consolidated --payload '{"panelPhase":"<panelPhase>","round":<wave>,"findings":{"high":<n>,"medium":<n>,"low":<n>},"incorporated":<n>,"dismissed":<n>}'`.
 - **Caller-side lifecycle-check recording**: right after running
   `check-lifecycle` (itself untouched, FS9) —
   `record-run-event.sh lifecycle.checked --payload '{"verdict":"<verdict>"}'`.
