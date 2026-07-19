@@ -32,10 +32,32 @@ with the committed receipt; noted for future manifest authoring.
 
 ## Round 1 verdict
 
-No high findings. All three mediums incorporated in fix wave 1 (commit
-`fix-wave-1`); no high/medium survives adjudication. Round 2 dispatched against
-the fixed branch to confirm convergence per the fix-wave rule.
+No high findings. All three mediums incorporated in fix wave 1 (commits
+`3cd708a` and `d7766f7`); no high/medium survives adjudication. Round 2
+dispatched against the fixed branch to confirm convergence per the fix-wave
+rule.
 
 ## Round 2 — confirmation panel (post fix wave 1; harvest label round 3)
 
-_Recorded after dispatch — see below._
+- **Panel:** anthropic/claude-fable-5:high, openai-codex/gpt-5.6-sol:high,
+  deepseek/deepseek-v4-pro:high, dispatched against `d7766f7`.
+- **Round-1 confirmations:** F1, F2, F3 verified RESOLVED in the committed
+  blobs by all reviewers (F4–F7 also spot-verified by fable). 397 tests,
+  lint, lifecycle check, and both receipts re-verified at `d7766f7`.
+- **Escalations to the human owner:** none — zero proposed dismissals of
+  high/medium findings.
+
+| ID | Severity | Raised by | Gist | Disposition |
+|---|---|---|---|---|
+| N1 | medium | fable + sol (convergent) | F3's per-dispatch harvest labels were unreconciled with §12's telemetry event map; the retro collector pairs by (panelPhase, round), and this run's store mispaired (dispatched round=2 = confirmation roster vs harvest round2 = replacement) | **Incorporated** (fix wave 2): §12 now defines `<n>` in `panel.dispatched`/`panel.consolidated` as the logical review-wave counter (replacements keep their original wave), with harvest `--round` an allocation-only label and the label↔wave mapping recorded in `consolidated.md`; phase-pr-review cross-references the same rule. This run's store completed with a late `panel.dispatched` (wave 1) for the deepseek replacement |
+| N2 | low | fable | The cross-session lookup example (`human-ratified`) missed every pre-convention ratification record | **Incorporated** (fix wave 2): example broadened to the stem `ratif` with a legacy-wording note |
+| N3 | low | fable | Round-1 verdict cited symbolic "commit fix-wave-1" instead of SHAs | **Incorporated** (fix wave 2): pinned to `3cd708a`/`d7766f7` |
+| N4 | low | fable | Committed round-2 section was a dangling placeholder | **Incorporated** (fix wave 2): this section |
+
+**Harvest label↔wave mapping for this run:** wave 1 = harvest rounds 1
+(original panel) and 2 (deepseek replacement); wave 2 (confirmation) = harvest
+round 3; wave-2 fix-verification pass = harvest round 4.
+
+## Round 3 — wave-2 fix verification
+
+_Appended after the round-3 pass below._

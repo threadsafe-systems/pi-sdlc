@@ -180,7 +180,11 @@ hand-copy a prompt per model.
    `asyncDir` too rather than letting it vanish from the run store. `--round`
    is a positive-integer destination label, not only a fix-wave counter: a
    replacement dispatch takes its **own round number** — reusing the
-   original's would overwrite that snapshot.
+   original's would overwrite that snapshot. The telemetry events keep the
+   **logical wave number** regardless (a replacement's `panel.dispatched`
+   carries its original wave's round; see `references/system-reference.md`,
+   "Lifecycle telemetry"); only the harvest label advances, and the
+   label↔wave mapping is recorded in the wave's `consolidated.md`.
 
 3. **Consolidate**: collapse duplicates into one issue, keep cross-model agreement
    as signal, preserve genuine disagreement.
@@ -208,8 +212,9 @@ hand-copy a prompt per model.
    emerges. The cross-session half of that rule needs a lookup, not memory:
    **before adjudicating, search prior consolidated files under the configured
    reviews home** (e.g. grep `<paths.reviews>/pr-*/consolidated.md` for
-   "human-ratified") and treat any hit on the same finding class as already
-   adjudicated unless new evidence has emerged.
+   `ratif` — the broad stem, because records predating this attribution
+   convention word ratification differently) and treat any hit on the same
+   finding class as already adjudicated unless new evidence has emerged.
 5. **Stop** when no high or medium finding survives adjudication. Low findings are
    recorded, not blocking. Termination is measured against surviving findings, so a
    ruthless panel that always emits nits still converges.

@@ -312,6 +312,13 @@ event-type payload:
   — and, harvest-at-dispatch, immediately preserve its artifacts with
   `scripts/harvest-panel.sh --phase <panelPhase> --round <n> --from <asyncDir>`
   (skill-relative; headless: `node <skill-dir>/scripts/harvest-panel.mjs`).
+  The `<n>` in `panel.dispatched` and `panel.consolidated` is the **logical
+  review-wave counter**: a replacement dispatch for an infra-failed reviewer
+  belongs to its original wave and emits `panel.dispatched` with that wave's
+  `<n>`. The harvest `--round` is a **destination allocation label** that may
+  advance past the wave counter to avoid overwriting a prior snapshot (see
+  `references/phase-pr-review.md`, "Harvest-at-dispatch"); whenever the two
+  diverge, record the label↔wave mapping in that wave's `consolidated.md`.
 - **Panel consolidation**: after adjudicating a round's findings —
   `record-run-event.sh panel.consolidated --payload '{"panelPhase":"<panelPhase>","round":<n>,"findings":{"high":<n>,"medium":<n>,"low":<n>},"incorporated":<n>,"dismissed":<n>}'`.
 - **Caller-side lifecycle-check recording**: right after running
