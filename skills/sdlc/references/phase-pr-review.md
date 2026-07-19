@@ -177,8 +177,10 @@ hand-copy a prompt per model.
    An async dispatch's harvest is a point-in-time copy: **re-run the same
    harvest once every child has reached a terminal state** so the preserved
    artifacts carry final results, and harvest each replacement dispatch's own
-   `asyncDir` too (its own `--from`, same round) rather than letting it vanish
-   from the run store.
+   `asyncDir` too rather than letting it vanish from the run store. `--round`
+   is a positive-integer destination label, not only a fix-wave counter: a
+   replacement dispatch takes its **own round number** — reusing the
+   original's would overwrite that snapshot.
 
 3. **Consolidate**: collapse duplicates into one issue, keep cross-model agreement
    as signal, preserve genuine disagreement.

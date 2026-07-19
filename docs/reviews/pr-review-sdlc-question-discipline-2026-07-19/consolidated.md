@@ -17,7 +17,7 @@
 |---|---|---|---|---|
 | F1 | medium | fable | Retained "prefer `wait({ all: true })` for read-only fan-out" contradicts the new react-per-child mandate in the same section | **Incorporated** (fix wave 1): sentence rescoped to research fan-outs, explicitly excluding panel dispatch |
 | F2 | medium | fable | "Binds forward across sessions" had no cross-session discovery mechanism | **Incorporated** (fix wave 1): named lookup step added — search prior `<paths.reviews>/pr-*/consolidated.md` for human-ratified dismissals before adjudicating |
-| F3 | medium | sol | Harvest-at-dispatch copies a point-in-time snapshot; async finals and replacement dispatches were not preserved | **Incorporated** (fix wave 1): §5 harvest paragraph now requires re-harvest at terminal state and harvesting each replacement's own asyncDir; operationally re-harvested this run's dirs after completion |
+| F3 | medium | sol | Harvest-at-dispatch copies a point-in-time snapshot; async finals and replacement dispatches were not preserved | **Incorporated** (fix waves 1+2): §5 harvest paragraph now requires re-harvest at terminal state and a distinct positive-integer `--round` label per dispatch (a replacement reusing its original's round overwrites that snapshot — confirmed in vivo this run, then corrected). Run-store labels here: round 1 = original panel, round 2 = deepseek replacement, round 3 = confirmation panel |
 | F4 | low | fable | `wait` parenthetical ("only unblocks once every child finishes") contradicted the timeout-as-sleep advice | **Incorporated** (fix wave 1): reworded to "a bare `wait` with no timeout" |
 | F5 | low | fable | Committed `pr-body.md` blob at review SHA was stale (previous stream); the panel's named input existed only in the working tree | **Incorporated** (fix wave 1): current PR body committed |
 | F6 | low | fable + deepseek-adjacent, sol (cross-model agreement) | Brainstorm bullet restated the shared contract's element list, violating pointer-not-restatement | **Incorporated** (fix wave 1): bullet trimmed to pointer + brainstorm delta only |
@@ -36,6 +36,6 @@ No high findings. All three mediums incorporated in fix wave 1 (commit
 `fix-wave-1`); no high/medium survives adjudication. Round 2 dispatched against
 the fixed branch to confirm convergence per the fix-wave rule.
 
-## Round 2 (post fix wave 1)
+## Round 2 — confirmation panel (post fix wave 1; harvest label round 3)
 
 _Recorded after dispatch — see below._
