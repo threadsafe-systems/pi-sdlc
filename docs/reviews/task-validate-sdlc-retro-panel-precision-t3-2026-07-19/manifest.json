@@ -1,0 +1,58 @@
+{
+  "schemaVersion": 1,
+  "taskId": "t3",
+  "buildPlan": "docs/plans/2026-07-19-sdlc-retro-panel-precision-build.md",
+  "repoRoot": ".",
+  "ownedScenarios": [],
+  "checks": [
+    {
+      "id": "tests.full",
+      "argv": ["npm", "test"],
+      "timeoutMs": 300000,
+      "evidence": ["Full corpus green incl. T3 meta/wave discoverPanels tests and the one-wave-joins / disagreeing-waves-unparse join tests"]
+    },
+    {
+      "id": "static.lint",
+      "argv": ["npm", "run", "lint"],
+      "timeoutMs": 120000,
+      "evidence": ["Repository formatting and lint rules"]
+    },
+    {
+      "id": "static.check-collect",
+      "argv": ["node", "--check", "skills/sdlc-retro/scripts/collect-run.mjs"],
+      "evidence": ["collect-run.mjs parses with sidecar read + wave-grouped join"]
+    },
+    {
+      "id": "static.schemas-valid",
+      "argv": ["node", "-e", "JSON.parse(require('fs').readFileSync('skills/sdlc-retro/schema/run.schema.json','utf8')); JSON.parse(require('fs').readFileSync('skills/sdlc-retro/schema/event.schema.json','utf8'));"],
+      "evidence": ["run.schema.json and event.schema.json remain valid JSON after additive wave"]
+    },
+    {
+      "id": "standards.wave-validator-optional",
+      "argv": [
+        "node",
+        "--input-type=module",
+        "-e",
+        "import { validateRunJson } from './skills/sdlc-retro/scripts/collect-run.mjs'; const base = () => ({ schemaVersion:1, slug:'s', coverage:[], sizeProxies:{ scenarios:0, tasks:0, diff:{files:0,insertions:0,deletions:0}, sessions:0, phases:[] }, hard:{ window:{start:'2026-07-19T00:00:00Z',end:'2026-07-19T00:00:01Z'}, phases:[], sessions:[], panels:[], models:[], rollups:{byModel:[],byPhase:[]}, rework:{artifactRevised:0,phaseBackward:0,fixWave:0}, totals:{tokens:0,cost:0,wallMs:0,agentMs:0,humanWaitMs:0} } }); const withWave = base(); withWave.hard.panels = [{ panelPhase:'pr_review', round:2, wave:1, dir:'d', models:[] }]; const i1 = validateRunJson(withWave); if (i1.length) { console.error('wave-bearing panels[] must validate: '+i1.join(';')); process.exit(1); } const noWave = base(); noWave.hard.panels = [{ panelPhase:'pr_review', round:1, dir:'d', models:[] }]; const i2 = validateRunJson(noWave); if (i2.length) { console.error('wave-less panels[] must still validate: '+i2.join(';')); process.exit(1); }"
+      ],
+      "evidence": ["validateRunJson accepts both wave-bearing and wave-less panels (allowed-not-required, plan DoD 6)"]
+    },
+    {
+      "id": "standards.marker-registered",
+      "argv": ["grep", "-q", "panels.malformed_meta:<phase>", "docs/specs/2026-07-17-sdlc-lifecycle-telemetry.md"],
+      "evidence": ["panels.malformed_meta marker registered in the spec's closed v1 marker set (F5)"]
+    },
+    {
+      "id": "patterns.diff",
+      "argv": ["git", "diff", "--check", "HEAD"],
+      "evidence": ["No whitespace-error banned patterns in the task diff"]
+    }
+  ],
+  "categories": {
+    "tests": { "applicability": "required", "checkIds": ["tests.full"] },
+    "static": { "applicability": "required", "checkIds": ["static.lint", "static.check-collect", "static.schemas-valid"] },
+    "scenarios": { "applicability": "n/a", "reason": "Reversible track: no Specification; T3 maps to approved plan DoD items 2, 3 (marker), 6 per the build plan's T3 check table." },
+    "standards": { "applicability": "required", "checkIds": ["standards.wave-validator-optional", "standards.marker-registered"] },
+    "bannedPatterns": { "applicability": "required", "checkIds": ["patterns.diff"] }
+  }
+}

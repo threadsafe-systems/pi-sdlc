@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "taskId": "t3",
+  "manifestPath": "docs/validation/sdlc-retro-panel-precision/t3.json",
+  "manifestSha256": "e585b92c915cf0ce7851d2c21a107665b250481829a0826c21444fa46ff07932",
+  "runnerReportSha256": "74595106af681c60fe768a10b5eeb83a50235fa2ced66de4f43b21ac99f13398",
+  "generatedAgentSha256": "ec3895ff8b685dc90b6ce2db27aa82b37d1abeea1612749d9b1377c42d69cbdd",
+  "model": "anthropic/claude-haiku-4-5",
+  "runnerVerdict": "PASS",
+  "validatorVerdict": "PASS",
+  "createdAt": "2026-07-19T17:39:16Z"
+}
