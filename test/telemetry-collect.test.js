@@ -248,6 +248,42 @@ test("LT15: harvest adapter maps per-model fields correctly", () => {
 		assert.equal(panels[0].panelPhase, "pr_review");
 		assert.equal(panels[0].round, 1);
 		assert.deepEqual(panels[0].models, [{ model: "openai/gpt-5", tokens: 100, cost: 0.5, durationMs: 1000, turns: 3 }]);
+		assert.equal(panels[0].wave, 1, "wave defaults to round when no meta.json sidecar");
+	} finally {
+		rmSync(root, { recursive: true, force: true });
+	}
+});
+
+test("T3: discoverPanels reads the meta.json wave; malformed sidecar falls back to round with a marker", () => {
+	const root = tmp();
+	try {
+		const slug = "t3-meta";
+		seedManifest(root, slug);
+		const date = "2026-07-19";
+		const panelsRoot = join(root, ".pi", "sdlc", "runs", slug, "panels");
+		// round 2, logical wave 1 (a replacement dispatch) with a valid sidecar
+		const d1 = join(panelsRoot, `pr_review-round2-${date}`);
+		mkdirSync(d1, { recursive: true });
+		writeFileSync(join(d1, "status.json"), JSON.stringify({ state: "completed" }));
+		writeFileSync(join(d1, "events.jsonl"), "");
+		writeFileSync(join(d1, "meta.json"), JSON.stringify({ round: 2, wave: 1 }));
+		// a malformed sidecar on a plan_review round 1: wave falls back to round, marker emitted
+		const d2 = join(panelsRoot, `plan_review-round1-${date}`);
+		mkdirSync(d2, { recursive: true });
+		writeFileSync(join(d2, "status.json"), JSON.stringify({ state: "completed" }));
+		writeFileSync(join(d2, "events.jsonl"), "");
+		writeFileSync(join(d2, "meta.json"), "{ not valid json");
+		const { panels, markers } = discoverPanels(root, slug, []);
+		const pr = panels.find((p) => p.panelPhase === "pr_review");
+		const plan = panels.find((p) => p.panelPhase === "plan_review");
+		assert.equal(pr.round, 2);
+		assert.equal(pr.wave, 1, "valid sidecar wave is read");
+		assert.equal(plan.round, 1);
+		assert.equal(plan.wave, 1, "malformed sidecar falls back to wave=round");
+		assert.ok(
+			markers.some((m) => m.marker === "panels.malformed_meta:plan_review"),
+			`expected panels.malformed_meta marker; got ${JSON.stringify(markers)}`,
+		);
 	} finally {
 		rmSync(root, { recursive: true, force: true });
 	}

@@ -185,6 +185,78 @@ test("T2: a -review- form review directory yields non-empty precision (F1 extrac
 	}
 });
 
+test("T3: same-wave multi-round harvests (a replacement dispatch) join to one wave without precision.unparsed", () => {
+	const root = tmp();
+	const bin = tmp("sdlc-lt5-bin-");
+	try {
+		const slug = "t3-onewave";
+		seedManifest(root, slug);
+		const date = "2026-07-18";
+		// two harvested rounds on the same date, both logical wave 1 (round 2 is a replacement)
+		for (const [round, wave] of [
+			[1, 1],
+			[2, 1],
+		]) {
+			const pdir = join(root, ".pi", "sdlc", "runs", slug, "panels", `pr_review-round${round}-${date}`);
+			mkdirSync(pdir, { recursive: true });
+			writeFileSync(join(pdir, "status.json"), JSON.stringify({ state: "completed" }));
+			writeFileSync(join(pdir, "events.jsonl"), "");
+			writeFileSync(join(pdir, "meta.json"), JSON.stringify({ round, wave }));
+		}
+		const reviewDir = join(root, "docs", "reviews", `pr-review-${slug}-${date}`);
+		mkdirSync(reviewDir, { recursive: true });
+		writeFileSync(join(reviewDir, "consolidated.md"), "adjudication prose");
+		writeFileSync(join(reviewDir, "model-a.md"), "findings");
+		const llmCmd = mkLlmStub(bin);
+
+		const { runJson } = collect({ root, slug, gitCmd: "false", ghCmd: "false", noGithub: true, llmCmd });
+		const markers = runJson.coverage.map((c) => c.marker);
+		assert.ok(!markers.some((m) => m.startsWith("precision.unparsed")), `no unparse expected; got ${markers}`);
+		assert.ok(runJson.soft.panelPrecision.length > 0, "precision recorded for the one-wave review");
+		assert.ok(
+			runJson.soft.panelPrecision.every((p) => p.wave === 1 && p.round === 1),
+			"precision attributed to logical wave 1",
+		);
+	} finally {
+		rmSync(root, { recursive: true, force: true });
+		rmSync(bin, { recursive: true, force: true });
+	}
+});
+
+test("T3: harvests that disagree on wave for one review date emit precision.unparsed", () => {
+	const root = tmp();
+	const bin = tmp("sdlc-lt5-bin-");
+	try {
+		const slug = "t3-multiwave";
+		seedManifest(root, slug);
+		const date = "2026-07-18";
+		// two harvested rounds on the same date belonging to DIFFERENT waves
+		for (const [round, wave] of [
+			[1, 1],
+			[2, 2],
+		]) {
+			const pdir = join(root, ".pi", "sdlc", "runs", slug, "panels", `pr_review-round${round}-${date}`);
+			mkdirSync(pdir, { recursive: true });
+			writeFileSync(join(pdir, "status.json"), JSON.stringify({ state: "completed" }));
+			writeFileSync(join(pdir, "events.jsonl"), "");
+			writeFileSync(join(pdir, "meta.json"), JSON.stringify({ round, wave }));
+		}
+		const reviewDir = join(root, "docs", "reviews", `pr-review-${slug}-${date}`);
+		mkdirSync(reviewDir, { recursive: true });
+		writeFileSync(join(reviewDir, "consolidated.md"), "adjudication prose");
+		writeFileSync(join(reviewDir, "model-a.md"), "findings");
+		const llmCmd = mkLlmStub(bin);
+
+		const { runJson } = collect({ root, slug, gitCmd: "false", ghCmd: "false", noGithub: true, llmCmd });
+		const markers = runJson.coverage.map((c) => c.marker);
+		assert.ok(markers.includes(`precision.unparsed:pr-review-${slug}-${date}`), `expected wave-disagreement unparse; got ${markers}`);
+		assert.equal(runJson.soft.panelPrecision.length, 0, "no precision when waves disagree");
+	} finally {
+		rmSync(root, { recursive: true, force: true });
+		rmSync(bin, { recursive: true, force: true });
+	}
+});
+
 test("LT18: an unreadable review directory yields precision.unparsed:<dir> and no precision number", () => {
 	const root = tmp();
 	const home = tmp("sdlc-lt5-home-empty-");

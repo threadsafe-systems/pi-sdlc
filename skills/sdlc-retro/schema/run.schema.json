@@ -95,6 +95,7 @@
             "properties": {
               "panelPhase": { "$ref": "#/definitions/panelPhase" },
               "round": { "$ref": "#/definitions/posInt" },
+              "wave": { "$ref": "#/definitions/posInt" },
               "dir": { "type": "string", "minLength": 1 },
               "models": {
                 "type": "array",
@@ -206,6 +207,7 @@
             "properties": {
               "panelPhase": { "$ref": "#/definitions/panelPhase" },
               "round": { "$ref": "#/definitions/posInt" },
+              "wave": { "$ref": "#/definitions/posInt" },
               "model": { "type": "string", "minLength": 1 },
               "raised": { "$ref": "#/definitions/nonNegInt" },
               "incorporated": { "$ref": "#/definitions/nonNegInt" },
