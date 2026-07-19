@@ -101,12 +101,17 @@ hand-copy a prompt per model.
 
      `--emit-tasks` prints a ready-to-paste `subagent` `tasks: [...]` array. Replace
      its task value with the exact review task: name the artifact paths, commit,
-     governing documents, grounding rule, and required findings-only output; then
-     dispatch the populated array in one call. Per-model attribution comes back on
-     each task's `result.model`. `ensure-panel-agent.sh` copies the prompt body
-     verbatim and writes to the consumer repo's `.pi/agents` where the session
-     resolves project agents (NOT a `cd`-ed cwd). Consult the project's governing
-     documents (for example `AGENTS.md`) for any local sub-agent gotchas.
+     governing documents, grounding rule, and required findings-only output. Dispatch
+     the populated array with `async: true` (`subagent({ tasks: [...], async: true })`),
+     not as a blocking call: a blocking multi-model dispatch only returns control after
+     every reviewer finishes, so a reviewer that crashes in the first second still sits
+     unactioned until the slowest sibling completes minutes later. Async dispatch
+     returns immediately with one run id/`asyncDir` covering every child in the panel.
+     Per-model attribution comes back on each task's `result.model` once you read it.
+     `ensure-panel-agent.sh` copies the prompt body verbatim and writes to the
+     consumer repo's `.pi/agents` where the session resolves project agents (NOT a
+     `cd`-ed cwd). Consult the project's governing documents (for example
+     `AGENTS.md`) for any local sub-agent gotchas.
    - detached (headless/cron/CI, no live tool): `dispatch-subagents`'s `dispatch.sh`
      stamps one prompt file across `--model` flags.
 
@@ -126,6 +131,19 @@ hand-copy a prompt per model.
    returns the brief inline) so children never block on a forbidden write. Prefer
 `wait({ all: true })` over status-polling for read-only fan-out, and read a
 child's transcript before treating a "detached" status label as lost output.
+
+   **React per-child, not per-batch.** Once dispatched async, poll
+   `subagent({ action: "status", id: <asyncId> })` (not `wait`, which only unblocks
+   once every child in that run finishes) at a short interval; a `wait({ id:
+   <asyncId>, timeoutMs: 20000 })` call doubles as that interval's sleep, since a
+   timeout returns control without stopping the run. Diff each poll's per-child
+   status against the last one: the moment any child shows an infra failure (see
+   below) rather than a verdict, act on it immediately — do not wait for the other
+   panelists still running. A replacement dispatch for that model is a brand-new,
+   separate async `subagent` single-agent call, not folded back into the original
+   `tasks:` array, so it runs alongside whichever siblings from the first batch are
+   still going. Keep polling until every original child and every replacement is
+   accounted for.
 
    **Reviewer dispatch recovery.** The resolved `prefer` list is an ordered
    candidate pool, not merely documentation. A reviewer that returns a model
