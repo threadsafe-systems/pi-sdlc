@@ -135,15 +135,18 @@ hand-copy a prompt per model.
    (the plugin registers tools at session start), NOT a switch to the detached path
    or a claim that you are outside pi. For a read-only research fan-out inside a
    worktree, dispatch the project `researcher-readonly` agent (no `write` tool,
-   returns the brief inline) so children never block on a forbidden write. Prefer
-`wait({ all: true })` over status-polling for read-only fan-out, and read a
-child's transcript before treating a "detached" status label as lost output.
+   returns the brief inline) so children never block on a forbidden write. For
+   such research fan-outs — not panel dispatch, which follows the per-child
+   polling rule below — prefer `wait({ all: true })` over status-polling, and
+   read a child's transcript before treating a "detached" status label as lost
+   output.
 
    **React per-child, not per-batch.** Once dispatched async, poll
-   `subagent({ action: "status", id: <asyncId> })` (not `wait`, which only unblocks
-   once every child in that run finishes) at a short interval; a `wait({ id:
-   <asyncId>, timeoutMs: 20000 })` call doubles as that interval's sleep, since a
-   timeout returns control without stopping the run. Diff each poll's per-child
+   `subagent({ action: "status", id: <asyncId> })` (not a bare `wait` with no
+   timeout, which only unblocks once every child in that run finishes) at a
+   short interval; a `wait({ id: <asyncId>, timeoutMs: 20000 })` call doubles as
+   that interval's sleep, since a timeout returns control without stopping the
+   run. Diff each poll's per-child
    status against the last one: the moment any child shows an infra failure (see
    below) rather than a verdict, act on it immediately — do not wait for the other
    panelists still running. A replacement dispatch for that model is a brand-new,
@@ -171,6 +174,11 @@ child's transcript before treating a "detached" status label as lost output.
    `scripts/harvest-panel.sh --phase <panelPhase> --round <n> --from <asyncDir>`,
    then `panel.consolidated` after adjudication — see
    `references/system-reference.md` ("Lifecycle telemetry") for the event map.
+   An async dispatch's harvest is a point-in-time copy: **re-run the same
+   harvest once every child has reached a terminal state** so the preserved
+   artifacts carry final results, and harvest each replacement dispatch's own
+   `asyncDir` too (its own `--from`, same round) rather than letting it vanish
+   from the run store.
 
 3. **Consolidate**: collapse duplicates into one issue, keep cross-model agreement
    as signal, preserve genuine disagreement.
@@ -195,7 +203,11 @@ child's transcript before treating a "detached" status label as lost output.
    argue them. A **human-ratified dismissal binds forward**: record it in
    `consolidated.md` with its human-ratified attribution and do not re-litigate
    the same finding class in later waves or later sessions unless new evidence
-   emerges.
+   emerges. The cross-session half of that rule needs a lookup, not memory:
+   **before adjudicating, search prior consolidated files under the configured
+   reviews home** (e.g. grep `<paths.reviews>/pr-*/consolidated.md` for
+   "human-ratified") and treat any hit on the same finding class as already
+   adjudicated unless new evidence has emerged.
 5. **Stop** when no high or medium finding survives adjudication. Low findings are
    recorded, not blocking. Termination is measured against surviving findings, so a
    ruthless panel that always emits nits still converges.

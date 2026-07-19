@@ -176,7 +176,7 @@ validate-task.mjs-10- // (fail-soft; never alters stdout bytes or the exit code,
 validate-task.mjs-104- 	}
 validate-task.mjs-105- 	const allowed = new Set(["schemaVersion", "taskId", "buildPlan", "repoRoot", "ownedScenarios", "checks", "categories"]);
 validate-task.mjs:106: 	for (const k of Object.keys(raw)) if (!allowed.has(k)) add(`/${k}`, `unknown property '${k}'`);
-validate-task.mjs-107- 
+validate-task.mjs-107-
 validate-task.mjs-108- 	if (raw.schemaVersion !== 1) add("/schemaVersion", "must be 1");
 validate-task.mjs-125- 				return;
 validate-task.mjs-126- 			}

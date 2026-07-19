@@ -283,7 +283,7 @@ trust model are recorded in ADR 0029.
 | What do those values mean here? | Current `.pi/sdlc/CONFIG.md`; validated JSON fallback when absent/stale |
 | What public surfaces comprise pi-sdlc? | `references/system-reference.md` + FS11 inventory |
 | What implementation realizes a surface? | Source, only when implementation work requires it |
-| How does any phase ask the human for input? | "Presenting questions to the human" (§14, this file) |
+| How does any phase ask the human for input? | "Presenting questions to the human" (this file) |
 
 ## 12. Lifecycle telemetry (FS13)
 

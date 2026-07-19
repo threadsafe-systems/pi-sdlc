@@ -36,16 +36,14 @@ Concrete behaviour, not just tone:
   the human might be unaware of or wrongly assuming is novel. This is
   proportional, not mandatory ceremony — a brief brainstorm does not need a
   research pass just to be brief.
-- **Present open questions per the shared contract** —
-  `references/system-reference.md`, "Presenting questions to the human": one
-  numbered end-of-reply block, enumerated alternatives, reasoned
-  recommendations, the uniform soft cap, and the Blocking/Assumption/Parked
-  triage tiers — never a wall of unstructured prose. Brainstorm's delta: a
-  recommendation must **widen the option space, not steer it** — recommend
-  freely on mechanical questions (where something should live), sparingly on
-  design direction (what something should be). Assumptions stated in dialogue
-  need no ledger here: Brainstorm commits no artifact, and the Plan restates
-  every assumption that survives.
+- **Present open questions per the shared contract**
+  (`references/system-reference.md`, "Presenting questions to the human") —
+  never a wall of unstructured prose. Brainstorm's delta: a recommendation
+  must **widen the option space, not steer it** — recommend freely on
+  mechanical questions (where something should live), sparingly on design
+  direction (what something should be). Assumptions stated in dialogue need
+  no ledger here: Brainstorm commits no artifact, and the Plan restates every
+  assumption that survives.
 - **Expand and pressure-test, don't commandeer.** Contradictions and questions
   exist to widen the human's option space, not to steer the design toward the
   agent's own preferred answer. The human remains the owner of the direction;
