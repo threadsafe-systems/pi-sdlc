@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "taskId": "t1",
+  "manifestPath": "docs/validation/sdlc-question-discipline/t1.json",
+  "manifestSha256": "8a5d6998c52d29429fe97ccc769a2f9ecc68fb5a71a5b803c56291dfbe99821c",
+  "runnerReportSha256": "a4cd05e145eb3c4cda3380ea0093f881392122230adafa15cc97e78d80af4383",
+  "generatedAgentSha256": "ec3895ff8b685dc90b6ce2db27aa82b37d1abeea1612749d9b1377c42d69cbdd",
+  "model": "openai-codex/gpt-5.6-terra",
+  "runnerVerdict": "PASS",
+  "validatorVerdict": "PASS",
+  "createdAt": "2026-07-19T08:39:58Z"
+}
