@@ -310,7 +310,7 @@ event-type payload:
 - **Panel dispatch**: immediately after dispatching a design or PR panel —
   `record-run-event.sh panel.dispatched --payload '{"panelPhase":"<panelPhase>","round":<wave>,"models":[...]}'`
   — and, harvest-at-dispatch, immediately preserve its artifacts with
-  `scripts/harvest-panel.sh --phase <panelPhase> --round <label> --wave <wave> --from <asyncDir>`
+  `scripts/harvest-panel.sh --phase <panelPhase> --round <label> [--wave <wave>] --from <asyncDir>`
   (skill-relative; headless: `node <skill-dir>/scripts/harvest-panel.mjs`).
   Two distinct numbers appear here on purpose: `<wave>` is the **logical
   review-wave counter** — a replacement dispatch for an infra-failed reviewer
