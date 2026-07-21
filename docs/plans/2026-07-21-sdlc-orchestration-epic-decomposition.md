@@ -316,3 +316,52 @@ automated post-implementation drift detection to catch NFR gaps early.
   indicating piecemeal fixes rather than a robust, consolidated threat model.
 - **Implementation Guidance:** Consolidate the parser and write an extensive, adversarial
   test suite containing over 50 malformed, hostile, and option-injected inputs.
+
+---
+
+## Reassessment & regrouping (2026-07-21)
+
+The original five-epic grouping above sorted tickets by surface feature name. On
+review it misgrouped items across two axes: (a) **layer** — several tickets are
+execution/orchestration machinery that violate pi-sdlc's own scope boundary
+("an auditable agent protocol, not a hook engine", ADR 0011; programme
+Out-of-scope: *"a general workflow engine, daemon, or event bus"*), and
+(b) **theme** — panel-resolution mechanics, author-model selection, and
+task-validation integrity were split across the wrong epics. Priorities were
+also uniformly (and wrongly) `priority:low`.
+
+The board (GitHub Project 5, threadsafe-systems/pi-sdlc) is now the corrected
+source of truth. This section supersedes the epic grouping above; the individual
+ticket **descriptions** above remain valid, only their epic membership and
+priority changed. The `EPIC-x-Ty` title prefixes are retained as stable
+historical handles and no longer imply epic membership — use the map below.
+
+### Corrected epics
+
+- **#126 — Author-Model Governance & Phase Handover** (config/protocol, O7-aligned):
+  A-T1 (#127), A-T3 (#129), **B-T2 (#132, moved in)**.
+- **#130 — Orchestrator-Layer Work, out of pi-sdlc protocol scope** (parked, open,
+  labelled `scope:orchestrator-layer`): B-T3 (#133), **A-T2 (#128, moved in)**.
+  Wanted work — including the parallel build supervisor the owner called "the
+  major sticking point" — but it needs an explicit scope-boundary amendment or a
+  different home (orchestrator layer / attended-orchestration brief). B-T3 also
+  depends on C5/#144 landing first.
+- **#135 — Gate Integrity & Merge Compliance**: C-T1 (#136), C-T2 (#137),
+  **B-T4 (#134, moved in)**.
+- **#140 — Panel Resolution Reliability, Diversity & Telemetry**: D-T1 (#141),
+  D-T2 (#142), D-T3 (#143), D-T4 (#144), **C-T3 (#138, moved in)**,
+  **C-T4 (#139, moved in)**.
+- **#145 — Upstream Design Rigor & NFR Governance**: E-T1 (#146), E-T2 (#147),
+  E-T3 (#148), **B-T1 (#131, moved in)**.
+
+### Closed
+
+- **E-T4 (#149)** — source/ref-validation consolidation is Case-repo
+  (capability-collections) code tech-debt, not a pi-sdlc lifecycle concern.
+  Closed as not-planned; belongs on the Case board.
+
+### Priorities (re-derived from retro severity)
+
+- **high:** #136 (post-clearance commit blocker — the flagship HIGH finding).
+- **medium:** #129, #131, #137, #138, #141, #142, #143, #144, #146, #147, #148.
+- **low:** #127, #132, #134, #139, and the two parked items #128, #133.
