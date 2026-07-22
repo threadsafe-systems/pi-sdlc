@@ -23,8 +23,10 @@ run the readiness gate:
 
 ## 2. Load the phase reference
 
-Load `references/phase-pr-review.md` and run the panel under it; do not duplicate
-its mechanics.
+Load `references/phase-pr-review.md` and run the panel under it when
+`review.code.validate` is `panel` (when it is `skip`, no local panel runs — the
+phase is the pre-PR sense check plus `check-lifecycle`); do not duplicate its
+mechanics.
 
 ## 3. Degradation contract (#38)
 

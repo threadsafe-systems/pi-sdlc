@@ -255,7 +255,9 @@ or post them as GitHub review comments.
 
 Merging with a high or medium finding that survived adjudication is forbidden.
 Backward transition to any earlier phase is always allowed when the panel exposes
-a design flaw. Only after the panel is clean, open the PR with the clean body.
+a design flaw. When a panel runs (`review.code.validate` is `panel`), open the PR
+only after it is clean; when `validate` is `skip`, no local panel gates the
+opening — open once `check-lifecycle` passes with the clean body.
 
 ## 7. After-hook order and warning semantics
 
@@ -289,7 +291,8 @@ This checks every native epic sub-issue is closed and that the named merged PR
 closes all of them. Either check failing means the claim is false; state what's
 missing instead of declaring done. If a GitHub reviewer
 raises a new concern after opening, focus it with an inline comment, address it
-with a commit, reply with that commit's short SHA, and rerun the panel and the
+with a commit, reply with that commit's short SHA, and rerun the panel (when
+`review.code.validate` is `panel`) and the
 `pr-open` check before updating the PR. The post-PR review is for new reviewer
 concerns, not a transcript of the local sense check. The lifecycle completes on
 merge.
