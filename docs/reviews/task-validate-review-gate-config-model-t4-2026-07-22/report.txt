@@ -1,0 +1,134 @@
+{
+  "schemaVersion": 1,
+  "taskId": "t4",
+  "manifest": "/home/neil/code/threadsafe/pi-sdlc.worktrees/feat-review-gate-config-model/docs/validation/review-gate-config-model/t4.json",
+  "repoRoot": "/home/neil/code/threadsafe/pi-sdlc.worktrees/feat-review-gate-config-model",
+  "verdict": "PASS",
+  "exitCode": 0,
+  "errors": [],
+  "manifestErrors": [],
+  "commands": [
+    {
+      "id": "tests.t4",
+      "argv": [
+        "node",
+        "--test",
+        "test/phase-references.test.js",
+        "test/system-reference.test.js",
+        "test/skill-kernel.test.js",
+        "test/docs.test.js",
+        "test/adr-absorption.test.js",
+        "test/telemetry-emitter.test.js",
+        "test/review-gate-config-v4.test.js"
+      ],
+      "evidence": [
+        "prose+ADR+telemetry+sweep green"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 1684,
+      "stdoutTail": "✔ ASD17: ADR 0029 exists and states the authority hierarchy + trust model (1.515823ms)\n✔ ASD17: programme + IC-B + OL-C plans carry absorption notes (2.717659ms)\n✔ ASD17: docs assert #91/#101/#102 remain independent and out of scope (0.937034ms)\n✔ ASD17: ADR 0029 is registered in the ADR directory (no orphan) (0.338081ms)\n✔ OH7: readiness/hooks law lives in the system reference; SKILL keeps the red flags (2.190277ms)\n✔ OH7: the Implement table row no longer prescribes 'in a worktree' (0.440844ms)\n✔ OH8: announce-on-fire + workflow.md enumeration in system reference; conflict rule in SKILL (1.695016ms)\n✔ OH9: exactly two new ADRs (opt-in, hooks) with context/decision/consequences (0.687794ms)\n✔ OH12: README has the opt-in story and drops the old no-manifest-defaults claim (0.360688ms)\n✔ FS9/FS10 dogfood assets are present (0.313705ms)\n✔ FS9 documentation carries declaration rules and reversible grounding (0.499327ms)\n✔ FS9 and FS10 ADRs freeze the new surfaces (0.402834ms)\n✔ AR10: all four startup branches and every prohibition are present and mutation-detectable (0.783475ms)\n✔ AR10: docs never equate manifest presence with readiness or claim mechanical agent enforcement (1.593661ms)\n✔ AR11: README carries the complete migration story (0.559191ms)\n✔ AR11: ADR 0010 is superseded and the policy ADR 0015 restates the migration (0.497799ms)\n✔ AR11: ADR 0016 freezes the FS8 machine surface (0.4391ms)\n✔ AR11: no stale opted-in output claim remains in shipped guidance (0.330413ms)\n✔ AR11: wrapper help/comments and .mjs usage match the FS8 invocation (0.235505ms)\n✔ AR11: the setup template requires committing .pi⁄sdlc and points at the status gate (0.1753ms)\n✔ CV29: CI and shipped bindings point at the merged config surface (0.25447ms)\n✔ CV30: repository and consumer dogfood fixtures use one schemaVersion-4 config (0.505498ms)\n✔ CV31: startup clean-break and shortfall carry instructions are explicit (0.473118ms)\n✔ CV32: five migration ADRs exist and amended decisions link forward (1.425268ms)\n✔ RB1 (BT1): the PR reference requires check-completion.mjs before a complete/PASS claim (0.296708ms)\n✔ RB2 (BT2): the Implement reference states the worker task-prompt shape and infra-retry-once rule (0.183683ms)\n✔ RB3 (BT3): the system reference states the stall-detection threshold and self-resume action (0.242041ms)\n✔ RB4 (panel recovery): the PR reference advances failed reviewers through the configured prefer list (0.205093ms)\n✔ ASD3: phase-brainstorm.md carries all nine §6 headings (1.615182ms)\n✔ ASD3: phase-brainstorm.md has at least one 'under your configuration' callout to CONFIG.md/JSON (0.254268ms)\n✔ ASD3 (non-vacuous): removing the config callout from phase-brainstorm.md is detected (0.225288ms)\n✔ ASD3: phase-plan.md carries all nine §6 headings (0.16803ms)\n✔ ASD3: phase-plan.md has at least one 'under your configuration' callout to CONFIG.md/JSON (0.192196ms)\n✔ ASD3 (non-vacuous): removing the config callout from phase-plan.md is detected (0.127661ms)\n✔ ASD3: phase-spec.md carries all nine §6 headings (0.363281ms)\n✔ ASD3: phase-spec.md has at least one 'under your configuration' callout to CONFIG.md/JSON (0.114772ms)\n✔ ASD3 (non-vacuous): removing the config callout from phase-spec.md is detected (0.133095ms)\n✔ ASD3: phase-tasks.md carries all nine §6 headings (1.496498ms)\n✔ ASD3: phase-tasks.md has at least one 'under your configuration' callout to CONFIG.md/JSON (0.171381ms)\n✔ ASD3 (non-vacuous): removing the config callout from phase-tasks.md is detected (0.945577ms)\n✔ ASD3: phase-implement.md carries all nine §6 headings (0.108369ms)\n✔ ASD3: phase-implement.md has at least one 'under your configuration' callout to CONFIG.md/JSON (0.052102ms)\n✔ ASD3 (non-vacuous): removing the config callout from phase-implement.md is detected (0.077896ms)\n✔ ASD3: phase-pr-review.md carries all nine §6 headings (0.098293ms)\n✔ ASD3: phase-pr-review.md has at least one 'under your configuration' callout to CONFIG.md/JSON (0.047903ms)\n✔ ASD3 (non-vacuous): removing the config callout from phase-pr-review.md is detected (0.06585ms)\n✔ S9: no removed gate-scalar grammar survives (scoped; legal uses allowed) (7.164653ms)\n✔ S11: phase-plan, phase-spec, and phase-pr-review reconcile approve:agent (no unconditional human gate) (0.512892ms)\n✔ S12: ADR 0030 records the desugar table and the intentional advisory amendment (0.25555ms)\n✔ S17: system-reference telemetry directive covers agent approvals (0.261624ms)\n✔ ASD4: SKILL.md is within the 220-line / 16384-byte ceiling (1.060222ms)\n✔ ASD4: SKILL.md retains all seven kernel responsibilities (0.621483ms)\n✔ ASD4: SKILL.md contains no duplicated detailed phase-mechanics block (0.260065ms)\n✔ ASD2: system reference contains every §5 checklist section (2.094146ms)\n✔ ASD2 (non-vacuous): deleting any one section is detected (5.716251ms)\n✔ ASD2: §5 public-composition inventory narrates the six-class taxonomy (0.454987ms)\n✔ LT1: valid emit appends one schema-conforming line, creating the store (63.456178ms)\n✔ LT1b: --by defaults to agent when omitted (72.640056ms)\n✔ LT2: bad inputs exit 2 and never touch the manifest (458.140304ms)\n✔ schema agreement: unknown event types remain valid for forward-compatible consumers (1.468424ms)\n✔ LT2b: a bad input against a non-existent store attempts no write (61.854928ms)\n✔ LT3: concurrent emitters produce N complete, non-interleaved lines (185.1288ms)\n✔ empty explicit identities do not fall through to another identity (110.616964ms)\n✔ LT4: --slug beats env beats branch mapping (190.860152ms)\n✔ LT5: unresolvable identity skips (exit 0, one warning, no write) (156.216206ms)\n✔ LT26: .gitignore ignores the run store (5.221849ms)\n✔ emitter: .sh wrapper delegates to .mjs identically (54.493216ms)\n✔ vocabulary: every known event has a payload descriptor (0.430334ms)\nℹ tests 68\nℹ suites 0\nℹ pass 68\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 1629.905806\n",
+      "stderrTail": ""
+    },
+    {
+      "id": "static.lint",
+      "argv": [
+        "npm",
+        "run",
+        "lint"
+      ],
+      "evidence": [
+        "repo biome lint"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 348,
+      "stdoutTail": "\n> pi-sdlc@0.1.1 lint\n> biome check .\n\nChecked 154 files in 145ms. No fixes applied.\n",
+      "stderrTail": ""
+    },
+    {
+      "id": "standards.reconcile",
+      "argv": [
+        "node",
+        "-e",
+        "const fs=require('fs');const ok=['skills/sdlc/references/phase-plan.md','skills/sdlc/references/phase-spec.md'].every(f=>/effective approver/.test(fs.readFileSync(f,'utf8')));process.exit(ok?0:1)"
+      ],
+      "evidence": [
+        "effective-approver reconciliation present in phase-plan/spec"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 50,
+      "stdoutTail": "",
+      "stderrTail": ""
+    }
+  ],
+  "categories": [
+    {
+      "category": "tests",
+      "status": "PASS",
+      "checkIds": [
+        "tests.t4"
+      ]
+    },
+    {
+      "category": "static",
+      "status": "PASS",
+      "checkIds": [
+        "static.lint"
+      ]
+    },
+    {
+      "category": "scenarios",
+      "status": "PASS"
+    },
+    {
+      "category": "standards",
+      "status": "PASS",
+      "checkIds": [
+        "standards.reconcile"
+      ]
+    },
+    {
+      "category": "bannedPatterns",
+      "status": "N/A",
+      "reason": "sweep asserted in tests.t4 (review-gate-config-v4)"
+    }
+  ],
+  "scenarios": [
+    {
+      "scenarioId": "S11",
+      "status": "PASS",
+      "checkIds": [
+        "tests.t4"
+      ]
+    },
+    {
+      "scenarioId": "S12",
+      "status": "PASS",
+      "checkIds": [
+        "tests.t4"
+      ]
+    },
+    {
+      "scenarioId": "S17",
+      "status": "PASS",
+      "checkIds": [
+        "tests.t4"
+      ]
+    },
+    {
+      "scenarioId": "S9",
+      "status": "PASS",
+      "checkIds": [
+        "tests.t4"
+      ]
+    }
+  ]
+}

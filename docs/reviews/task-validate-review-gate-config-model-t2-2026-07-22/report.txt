@@ -1,0 +1,123 @@
+{
+  "schemaVersion": 1,
+  "taskId": "t2",
+  "manifest": "/home/neil/code/threadsafe/pi-sdlc.worktrees/feat-review-gate-config-model/docs/validation/review-gate-config-model/t2.json",
+  "repoRoot": "/home/neil/code/threadsafe/pi-sdlc.worktrees/feat-review-gate-config-model",
+  "verdict": "PASS",
+  "exitCode": 0,
+  "errors": [],
+  "manifestErrors": [],
+  "commands": [
+    {
+      "id": "tests.t2",
+      "argv": [
+        "node",
+        "--test",
+        "test/resolve-panel-v3.test.js",
+        "test/config-doc.test.js",
+        "test/setup-config-doc.test.js"
+      ],
+      "evidence": [
+        "resolver+renderer green"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 1456,
+      "stdoutTail": "✔ ASD6: render is deterministic and byte-identical across runs (4.297693ms)\n✔ ASD6: write twice is byte-identical (retained) (3.815317ms)\n✔ ASD6: rendered CONFIG.md carries all §14 sections and every schemaVersion-4 key in JSON order (1.017252ms)\n✔ ASD8: CONFIG.md declares JSON authority, warning, fingerprint identity, guidance, and pointer (0.55126ms)\n✔ ASD7: byte-matching current file is retained (1.666911ms)\n✔ ASD7: a recognized stale / body-edited companion is regenerated (5.611067ms)\n✔ ASD7: an unrecognized collision is refused (exit 3) without --force and forced (exit 0) with it (2.483068ms)\n✔ ASD7 (CLI): refused write exits 3 (45.771597ms)\n✔ ASD9: check returns current / missing / stale / error for the four inputs (4.989817ms)\n✔ ASD9: check detects a body edit and a render-format mismatch as stale (3.251942ms)\n✔ ASD9: check mutates nothing in any state (5.649648ms)\n✔ ASD6/sentinel: sentinelLine round-trips through parseSentinel as recognized (0.296327ms)\n✔ panel floors: render surfaces per-track resolved floors incl task_validate=1 and per-phase overrides (§14) (0.277426ms)\n✔ panel floors: task_validate resolves to 1 and per-track override applies when no per-phase panelSize (0.459903ms)\n✔ symlink safety: a symlinked companion is never followed (check error / write refused) (1.387848ms)\n✔ symlink safety: a DANGLING symlink is refused, never created through the link (1.141052ms)\n✔ ICA12: pr_review floor 3, author's provider-mate stays, author identity excluded (53.613788ms)\n✔ ICA12: plan_review floor 2 caps at two (49.181831ms)\n✔ ICA12: task_validate floors at 1 (57.69775ms)\n✔ ICA13: --track required when overrides present (63.85502ms)\n✔ ICA13: reversible design override refuses; irreversible resolves (150.583381ms)\n✔ S5/S6: an approve-only reversible override keeps validate:panel and still resolves a panel (71.447597ms)\n✔ ICA14: review.tasks off refuses task_validate (51.688315ms)\n✔ ICA14: design validate:skip refuses plan_review with no-panel message (59.151586ms)\n✔ ICA14: separateSpec false refuses spec_review with no-spec-gate message (54.604796ms)\n✔ ICA15: per-phase panelSize overrides review.panelSize (40.601315ms)\n✔ ICA15: floor 1 does not exclude the author identity (72.414222ms)\n✔ ICA16: onShortfall proceed advises and exits 0 below floor (66.592301ms)\n✔ ICA16: onShortfall fail exits 1 below floor (61.244787ms)\n✔ ICA14: review.tasks self refuses task_validate (only subagent resolves) (54.652467ms)\n✔ ICA24: separateSpec false precedes the human/off refusal for spec_review (75.624759ms)\n✔ rpi-t1: Bedrock-hosted Claude collapses to the direct-API identity for author-exclusion (71.540186ms)\n✔ rpi-t1: distinct Bedrock version qualifiers stay distinct identities (84.502774ms)\n✔ rpi-t1: same model + same version, different Bedrock region, dedupes to one panelist (77.641302ms)\n✔ rpi-t1: Bedrock-native model with no direct-provider equivalent is unaffected (65.671504ms)\nschema-version: 2\nroot: /tmp/setup-interview-rwdsCp\nexit-code: 0\nreference: reference.pr-template ok — resolved /home/neil/code/threadsafe/pi-sdlc.worktrees/feat-review-gate-config-model/skills/sdlc/assets/pull_request_template.md\nreference: reference.checker ok — resolved /home/neil/code/threadsafe/pi-sdlc.worktrees/feat-review-gate-config-model/skills/sdlc/scripts/check-lifecycle.mjs\nasset: config created — created /tmp/setup-interview-rwdsCp/.pi/sdlc/sdlc.config.json\nasset: config-doc created — created .pi/sdlc/CONFIG.md: created new companion\nasset: pr-template created — created /tmp/setup-interview-rwdsCp/.github/pull_request_template.md\n✔ ASD11: setup template names the kernel, tracks, gate modes, consequences, and two core decisions (2.006926ms)\n✔ ASD11: the interactive fallback asks at most 3 prompts (two decisions + confirmation) (6.900636ms)\n✔ ASD11: collectInterview asks exactly the two core decisions (1.184839ms)\n✔ ASD11: every dial remains reachable non-interactively by flag (0.214775ms)\n✔ ASD20: setup-sdlc.mjs carries the config-doc write call site (0.242328ms)\n✔ ASD20 (landing-order conditional): any already-landed telemetry call sites are preserved (0.155778ms)\nℹ tests 41\nℹ suites 0\nℹ pass 41\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 1381.755307\n",
+      "stderrTail": ""
+    },
+    {
+      "id": "static.lint",
+      "argv": [
+        "npm",
+        "run",
+        "lint"
+      ],
+      "evidence": [
+        "repo biome lint"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 410,
+      "stdoutTail": "\n> pi-sdlc@0.1.1 lint\n> biome check .\n\nChecked 154 files in 153ms. No fixes applied.\n",
+      "stderrTail": ""
+    },
+    {
+      "id": "patterns.no-decompose",
+      "argv": [
+        "node",
+        "-e",
+        "const fs=require('fs');const bad=['skills/sdlc/scripts/resolve-panel.mjs','skills/sdlc/scripts/config-doc.mjs'].some(f=>/decomposeGateMode/.test(fs.readFileSync(f,'utf8')));process.exit(bad?1:0)"
+      ],
+      "evidence": [
+        "decomposeGateMode absent from resolver+renderer"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 43,
+      "stdoutTail": "",
+      "stderrTail": ""
+    }
+  ],
+  "categories": [
+    {
+      "category": "tests",
+      "status": "PASS",
+      "checkIds": [
+        "tests.t2"
+      ]
+    },
+    {
+      "category": "static",
+      "status": "PASS",
+      "checkIds": [
+        "static.lint"
+      ]
+    },
+    {
+      "category": "scenarios",
+      "status": "PASS"
+    },
+    {
+      "category": "standards",
+      "status": "N/A",
+      "reason": "covered by tests.t2 assertions"
+    },
+    {
+      "category": "bannedPatterns",
+      "status": "PASS",
+      "checkIds": [
+        "patterns.no-decompose"
+      ]
+    }
+  ],
+  "scenarios": [
+    {
+      "scenarioId": "S10",
+      "status": "PASS",
+      "checkIds": [
+        "tests.t2"
+      ]
+    },
+    {
+      "scenarioId": "S5",
+      "status": "PASS",
+      "checkIds": [
+        "tests.t2"
+      ]
+    },
+    {
+      "scenarioId": "S6",
+      "status": "PASS",
+      "checkIds": [
+        "tests.t2"
+      ]
+    }
+  ]
+}

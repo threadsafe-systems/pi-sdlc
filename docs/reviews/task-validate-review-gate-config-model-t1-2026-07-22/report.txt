@@ -1,0 +1,173 @@
+{
+  "schemaVersion": 1,
+  "taskId": "t1",
+  "manifest": "/home/neil/code/threadsafe/pi-sdlc.worktrees/feat-review-gate-config-model/docs/validation/review-gate-config-model/t1.json",
+  "repoRoot": "/home/neil/code/threadsafe/pi-sdlc.worktrees/feat-review-gate-config-model",
+  "verdict": "PASS",
+  "exitCode": 0,
+  "errors": [],
+  "manifestErrors": [],
+  "commands": [
+    {
+      "id": "tests.t1",
+      "argv": [
+        "node",
+        "--test",
+        "test/lib-config.test.js",
+        "test/config-intent-vocabulary.test.js",
+        "test/schema-break.test.js",
+        "test/readiness-lib.test.js"
+      ],
+      "evidence": [
+        "validation + version classification green"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 1414,
+      "stdoutTail": "✔ ICA1: valid v3 config has zero issues (6.110981ms)\n✔ ICA1: shipped example is valid v3 (2.543354ms)\n✔ ICA1: minimal valid v3 (no optional blocks) has zero issues (0.713317ms)\n✔ ICA2: overrides.none is rejected (1.000441ms)\n✔ ICA2: a review.merge key is rejected (0.773449ms)\n✔ ICA2: shape.defaultTrack none is rejected (0.740353ms)\n✔ ICA2: retired/reserved top-level key 'lifecycle' is unknown (3.43354ms)\n✔ ICA2: retired/reserved top-level key 'enforcement' is unknown (0.414089ms)\n✔ ICA2: retired/reserved top-level key 'evidence' is unknown (0.379276ms)\n✔ ICA3: missing review block is an issue (0.893571ms)\n✔ ICA3: missing a required review dial is an issue (0.576ms)\n✔ ICA3: missing shape block is an issue (0.369646ms)\n✔ ICA3: overrides with an empty track object is an issue (0.496136ms)\n✔ ICA3: per-track brainstorm override is rejected (0.328791ms)\n✔ ICA4: panels.rules is an unknown key (0.393036ms)\n✔ ICA4: panels.phases.*.minVendor is an unknown key (0.298132ms)\n✔ ICA4: a panels phase without prefer is invalid (0.298298ms)\n✔ ICA7: migrate.mjs does not exist (0.469884ms)\n✔ ICA7: no migration symbols remain in scripts (7.255323ms)\n✔ ICA6: schema-older remedy names re-run/pin and never 'migration' (1.378307ms)\n✔ ICA6: a v2 config is refused (not mutated) by readConfig (85.375067ms)\n✔ ICA6: classifyConfigVersion is total over the version matrix (0.484329ms)\n✔ ICA20: retired config vocabulary has no runtime reader (3.241808ms)\n✔ ICA21: SKILL reads shape.publishToTracker (no hardcoded task-count law) (0.735806ms)\n✔ readConfig returns current defaults when the manifest is absent (3.268215ms)\n✔ readConfig validates and returns merged v4 fields (2.748229ms)\n✔ readConfig keeps newer and malformed version diagnostics distinct (139.796854ms)\n✔ S1: inspectConfig accepts a valid v4 config (0.547155ms)\n✔ S2: a base dial missing a field yields an 'is required' issue (0.712304ms)\n✔ S3: a scalar gate dial is rejected as not-an-object (0.291792ms)\n✔ S4: out-of-enum validate/approve are rejected naming the legal set (1.771686ms)\n✔ S13: reserved preview is accepted; non-boolean and unknown sibling rejected (0.412541ms)\n✔ S5: a partial override deep-merges, inheriting the un-named axis (0.6373ms)\n✔ S8: classifyConfigVersion(3) is older, not current (0.293412ms)\n✔ S7: decomposeGateMode / GATE_MODES / arbiter / blocking are gone from the core scripts (0.793847ms)\n✔ RL1: inspectRoot explicit precedence — config over repoRoot over sdlcRoot; relative resolves against cwd (3.234056ms)\n✔ RL2: inspectRoot walks ancestors from cwd to a configured project root (1.216517ms)\n✔ RL3: inspectRoot falls back to the git top-level for a manifest-less repo (44.379969ms)\n✔ RL4: inspectRoot returns the error member (never exits) outside any project (8.01478ms)\n✔ RL5: inspectRoot honours $SDLC_ROOT when no explicit option is given (1.307681ms)\n✔ SP4: consumer path seam preserves spelling and rejects slash/backslash escapes (8.39747ms)\n✔ RL6: inspectConfig — valid input yields [], non-objects yield the deterministic issue (3.236704ms)\n✔ RL7: inspectConfig — aggregates every issue in validation-rule order, never throws (1.649745ms)\n✔ RL7b: inspectConfig — malformed nested structures aggregate without throwing (1.07143ms)\n✔ RL9: validateConfig first diagnostic is byte-identical to the first collector issue (exit 2) (317.237567ms)\n✔ RL11: config validator still accepts valid input (exit 0) after delegation (33.568865ms)\n✔ CV28: watched config schema changes require the PR release signal (624.737952ms)\n✔ CV28: inner breaking commits are ignored in favour of the squash title (149.779125ms)\n✔ CV28: only the named schemas and CONFIG_SCHEMA_VERSION line are watched (451.955085ms)\nℹ tests 49\nℹ suites 0\nℹ pass 49\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 1371.926703\n",
+      "stderrTail": ""
+    },
+    {
+      "id": "static.lint",
+      "argv": [
+        "npm",
+        "run",
+        "lint"
+      ],
+      "evidence": [
+        "repo biome lint"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 435,
+      "stdoutTail": "\n> pi-sdlc@0.1.1 lint\n> biome check .\n\nChecked 154 files in 164ms. No fixes applied.\n",
+      "stderrTail": ""
+    },
+    {
+      "id": "standards.schema-v4",
+      "argv": [
+        "node",
+        "-e",
+        "import('./skills/sdlc/scripts/lib.mjs').then(m=>process.exit(m.CONFIG_SCHEMA_VERSION===4?0:1))"
+      ],
+      "evidence": [
+        "CONFIG_SCHEMA_VERSION is 4"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 34,
+      "stdoutTail": "",
+      "stderrTail": ""
+    },
+    {
+      "id": "patterns.no-dead-symbols",
+      "argv": [
+        "node",
+        "-e",
+        "const s=require('fs').readFileSync('skills/sdlc/scripts/lib.mjs','utf8');process.exit(/decomposeGateMode|GATE_MODES/.test(s)?1:0)"
+      ],
+      "evidence": [
+        "removed gate-mode symbols absent from lib.mjs"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 48,
+      "stdoutTail": "",
+      "stderrTail": ""
+    }
+  ],
+  "categories": [
+    {
+      "category": "tests",
+      "status": "PASS",
+      "checkIds": [
+        "tests.t1"
+      ]
+    },
+    {
+      "category": "static",
+      "status": "PASS",
+      "checkIds": [
+        "static.lint"
+      ]
+    },
+    {
+      "category": "scenarios",
+      "status": "PASS"
+    },
+    {
+      "category": "standards",
+      "status": "PASS",
+      "checkIds": [
+        "standards.schema-v4"
+      ]
+    },
+    {
+      "category": "bannedPatterns",
+      "status": "PASS",
+      "checkIds": [
+        "patterns.no-dead-symbols"
+      ]
+    }
+  ],
+  "scenarios": [
+    {
+      "scenarioId": "S1",
+      "status": "PASS",
+      "checkIds": [
+        "tests.t1"
+      ]
+    },
+    {
+      "scenarioId": "S13",
+      "status": "PASS",
+      "checkIds": [
+        "tests.t1"
+      ]
+    },
+    {
+      "scenarioId": "S2",
+      "status": "PASS",
+      "checkIds": [
+        "tests.t1"
+      ]
+    },
+    {
+      "scenarioId": "S3",
+      "status": "PASS",
+      "checkIds": [
+        "tests.t1"
+      ]
+    },
+    {
+      "scenarioId": "S4",
+      "status": "PASS",
+      "checkIds": [
+        "tests.t1"
+      ]
+    },
+    {
+      "scenarioId": "S7",
+      "status": "PASS",
+      "checkIds": [
+        "tests.t1",
+        "patterns.no-dead-symbols"
+      ]
+    },
+    {
+      "scenarioId": "S8",
+      "status": "PASS",
+      "checkIds": [
+        "tests.t1"
+      ]
+    }
+  ]
+}

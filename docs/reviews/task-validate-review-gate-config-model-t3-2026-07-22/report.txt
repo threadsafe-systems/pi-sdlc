@@ -1,0 +1,109 @@
+{
+  "schemaVersion": 1,
+  "taskId": "t3",
+  "manifest": "/home/neil/code/threadsafe/pi-sdlc.worktrees/feat-review-gate-config-model/docs/validation/review-gate-config-model/t3.json",
+  "repoRoot": "/home/neil/code/threadsafe/pi-sdlc.worktrees/feat-review-gate-config-model",
+  "verdict": "PASS",
+  "exitCode": 0,
+  "errors": [],
+  "manifestErrors": [],
+  "commands": [
+    {
+      "id": "tests.t3",
+      "argv": [
+        "node",
+        "--test",
+        "test/setup-sdlc.test.js",
+        "test/setup-v3.test.js",
+        "test/setup-config-doc.test.js"
+      ],
+      "evidence": [
+        "setup authoring green"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 1911,
+      "stdoutTail": "schema-version: 2\nroot: /tmp/setup-interview-ugJuM6\nexit-code: 0\nreference: reference.pr-template ok — resolved /home/neil/code/threadsafe/pi-sdlc.worktrees/feat-review-gate-config-model/skills/sdlc/assets/pull_request_template.md\nreference: reference.checker ok — resolved /home/neil/code/threadsafe/pi-sdlc.worktrees/feat-review-gate-config-model/skills/sdlc/scripts/check-lifecycle.mjs\nasset: config created — created /tmp/setup-interview-ugJuM6/.pi/sdlc/sdlc.config.json\nasset: config-doc created — created .pi/sdlc/CONFIG.md: created new companion\nasset: pr-template created — created /tmp/setup-interview-ugJuM6/.github/pull_request_template.md\n✔ ASD11: setup template names the kernel, tracks, gate modes, consequences, and two core decisions (1.709495ms)\n✔ ASD11: the interactive fallback asks at most 3 prompts (two decisions + confirmation) (5.857402ms)\n✔ ASD11: collectInterview asks exactly the two core decisions (1.145862ms)\n✔ ASD11: every dial remains reachable non-interactively by flag (0.209588ms)\n✔ ASD20: setup-sdlc.mjs carries the config-doc write call site (0.276257ms)\n✔ ASD20 (landing-order conditional): any already-landed telemetry call sites are preserved (0.17295ms)\n✔ OH4: --yes writes a schema-valid config; bundle re-run refuses config changes; --force overwrites (219.776766ms)\n✔ OH5: --hook-use fields 3-4 = use, do = remainder after 4th colon (colons in do preserved) (53.727624ms)\n✔ OH5: --hook-run command = remainder after 2nd colon (colons preserved); trust warning on stderr (47.816697ms)\n✔ OH5: mixed repeated hook flags preserve argv order in the written list (74.416009ms)\n✔ OH5: malformed hook flags exit 2 (515.406267ms)\n✔ PR-fix: value-taking flags accept values that begin with '-' (e.g. --announce '--foo') (46.866542ms)\n✔ OH5: partial tracker flags exit 2 (all-or-none) (57.197279ms)\n✔ OH5: no config flags and no TTY exits 2 (interview needs a TTY) (62.342124ms)\n✔ OH6: package.json pi.prompts includes ./templates and the template has a description (0.65736ms)\n✔ ICA17: --profile is retired (45.275834ms)\n✔ ICA17: --lifecycle-json is retired (75.507677ms)\n✔ ICA17: --enforcement is retired (79.070274ms)\n✔ ICA17: --preset custom is retired (64.755992ms)\n✔ ICA18: --preset standard writes the explicit standard bundle (55.091898ms)\n✔ ICA18: per-dial flags override the preset; --override lands in overrides (64.414408ms)\n✔ ICA18: --preset full carries the reversible design override (100.546247ms)\n✔ ICA19: --preset patches review/shape/overrides and preserves other keys (160.499723ms)\n✔ ICA19: patch that would delete consumer overrides refuses without --force (174.513007ms)\n✔ ICA23: --override reversible:brainstorm:off is rejected exit 2 (49.359775ms)\n✔ ICA23: --override reversible:onShortfall:fail is rejected exit 2 (68.387436ms)\n✔ ICA23: --override frozen:design:panel is rejected exit 2 (57.734241ms)\n✔ ICA23: --override reversible:design:banana is rejected exit 2 (74.491925ms)\n✔ ICA23: --override reversible:panelSize:zero is rejected exit 2 (64.929494ms)\n✔ ICA23: --override reversible:design is rejected exit 2 (79.811002ms)\n✔ ICA6: older-schema config + --force replaces with a fresh v4 config (131.63483ms)\n✔ ICA19: a single-dial patch preserves the other committed dials (166.044794ms)\n✔ ICA19: preset patch refuses when it would drop a consumer override track (236.955574ms)\nℹ tests 33\nℹ suites 0\nℹ pass 33\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 1850.319142\n",
+      "stderrTail": ""
+    },
+    {
+      "id": "static.lint",
+      "argv": [
+        "npm",
+        "run",
+        "lint"
+      ],
+      "evidence": [
+        "repo biome lint"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 395,
+      "stdoutTail": "\n> pi-sdlc@0.1.1 lint\n> biome check .\n\nChecked 154 files in 177ms. No fixes applied.\n",
+      "stderrTail": ""
+    },
+    {
+      "id": "patterns.no-gate-enum",
+      "argv": [
+        "node",
+        "-e",
+        "const fs=require('fs');const bad=['skills/sdlc/scripts/setup-sdlc.sh','templates/setup-sdlc.md'].some(f=>/panel[^\\n]*advisory[^\\n]*human[^\\n]*off/.test(fs.readFileSync(f,'utf8')));process.exit(bad?1:0)"
+      ],
+      "evidence": [
+        "no gate-scalar enumeration in setup wrapper/template"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 45,
+      "stdoutTail": "",
+      "stderrTail": ""
+    }
+  ],
+  "categories": [
+    {
+      "category": "tests",
+      "status": "PASS",
+      "checkIds": [
+        "tests.t3"
+      ]
+    },
+    {
+      "category": "static",
+      "status": "PASS",
+      "checkIds": [
+        "static.lint"
+      ]
+    },
+    {
+      "category": "scenarios",
+      "status": "PASS"
+    },
+    {
+      "category": "standards",
+      "status": "N/A",
+      "reason": "covered by tests.t3"
+    },
+    {
+      "category": "bannedPatterns",
+      "status": "PASS",
+      "checkIds": [
+        "patterns.no-gate-enum"
+      ]
+    }
+  ],
+  "scenarios": [
+    {
+      "scenarioId": "S14",
+      "status": "PASS",
+      "checkIds": [
+        "tests.t3"
+      ]
+    }
+  ]
+}
