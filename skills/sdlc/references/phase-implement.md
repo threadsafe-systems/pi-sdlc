@@ -106,7 +106,8 @@ task completion; a task is not done until the runner returns PASS. Each task sto
 a runtime receipt (manifest copy, runner report, hashes, verdicts, plus the
 generated-agent copy and model under `subagent`) under
 `docs/reviews/task-validate-<feature>-<task-id>-<date>/`, verifiable with
-`scripts/verify-task-receipt.mjs`. Judgement review happens later at the PR panel.
+`scripts/verify-task-receipt.mjs`. Judgement review happens later at the PR panel
+(when `review.code.validate` is `panel`).
 
 > **Under your configuration:** the task-validator model preference is
 > `deepseek/deepseek-v4-flash`, then `anthropic/claude-haiku-4-5` — a `:low` (or

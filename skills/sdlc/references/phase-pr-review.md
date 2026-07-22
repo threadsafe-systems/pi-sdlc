@@ -10,8 +10,10 @@
 
 ## 1. Purpose and invocation modes
 
-PR review runs the panel against the finished branch and drives the diff to a
-clean opening. It runs two ways:
+PR review runs the panel against the finished branch (when `review.code.validate`
+is `panel`) and drives the diff to a clean opening; when `validate` is `skip` no
+local panel runs and the phase is the pre-PR sense check plus `check-lifecycle`.
+It runs two ways:
 
 - **Full lifecycle:** the final phase, after Implement.
 - **Standalone entrypoint `sdlc:pr-review`** (`templates/sdlc-pr-review.md`):
@@ -198,9 +200,11 @@ hand-copy a prompt per model.
    high/medium survives). Reviewer output is roughly eighty per cent right and
    overreaches, so nothing is actioned blindly and nothing is dismissed silently.
 
-   Escalate disputes to the human per the shared contract
+   Under `approve: human`, escalate disputes to the human per the shared contract
    (`references/system-reference.md`, "Presenting questions to the human") with
-   the PR delta: escalations reach the human **once per fix wave, after
+   the PR delta (under `approve: agent` the agent adjudicates for that gate and
+   there is nothing to escalate): escalations reach the human **once per fix wave,
+   after
    consolidation, never streamed as reviewers return**, and arrive
    **pre-adjudicated** as ratify/amend decisions — each escalated finding
    carries its id, a one-line gist, the reviewers who raised it (cross-model
@@ -240,7 +244,7 @@ the retro collector discovers both.
 > high/medium may pass — `approve: agent` never means findings are ignored). Read
 > them; never assume `validate: panel` or `approve: human`.
 
-Run the local PR panel against the final committed branch, consolidate and
+When `review.code.validate` is `panel`, run the local PR panel against the final committed branch, consolidate and
 adjudicate its findings in the durable internal review artifact under
 `docs/reviews/`, and repeat after each fix wave until no high or medium survives.
 This is the pre-PR sense check that the branch is a finished artefact; retain the

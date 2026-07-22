@@ -122,7 +122,8 @@ function trackSummary(config, track) {
 	const r = effectiveReview(config, track);
 	const phases = track === "irreversible" ? "brainstorm, plan, spec, build, implement, PR" : "brainstorm, plan, build, implement, PR";
 	const prNote = r.code?.validate === "skip" ? "no PR panel runs (review.code.validate: skip)" : "the PR panel still runs";
-	const designNote = track === "reversible" ? ` (reversible: no pre-PR design panel unless configured; ${prNote})` : "";
+	const designPanelNote = r.design?.validate === "panel" ? "a pre-PR design panel is configured" : "no pre-PR design panel";
+	const designNote = track === "reversible" ? ` (reversible: ${designPanelNote}; ${prNote})` : "";
 	return [
 		`### Track: ${track}`,
 		"",

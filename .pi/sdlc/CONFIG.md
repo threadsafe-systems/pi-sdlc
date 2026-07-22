@@ -28,7 +28,7 @@ values, resolved per track. The default track is
 ### Track: reversible
 
 - **Phases:** brainstorm, plan, build, implement, PR.
-- **Design gate — validate (`review.design.validate`): skip** — no panel runs for this gate (an authored choice, not a bypass) (reversible: no pre-PR design panel unless configured; the PR panel still runs).
+- **Design gate — validate (`review.design.validate`): skip** — no panel runs for this gate (an authored choice, not a bypass) (reversible: no pre-PR design panel; the PR panel still runs).
 - **Design gate — approve (`review.design.approve`): human** — a human owner adjudicates and advances.
 - **Code/PR gate — validate (`review.code.validate`): panel** — an adversarial multi-model panel runs before the artifact is presented.
 - **Code/PR gate — approve (`review.code.approve`): human** — a human owner adjudicates and advances.

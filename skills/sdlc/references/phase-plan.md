@@ -64,7 +64,8 @@ Plan's convergent delta:
 
 The invariant seam is a **design gate plus approval by the effective approver**
 (a human owner, or the agent under `approve: agent`). The design gate is
-`review.design`; on the irreversible track a plan panel runs before approval.
+`review.design`; on the irreversible track a plan panel runs before approval when
+`review.design.validate` is `panel`.
 
 > **Under your configuration:** `review.design` is a `{ validate, approve }` gate
 > dial — `validate` is `panel` or `skip` (does an adversarial plan panel run?),
