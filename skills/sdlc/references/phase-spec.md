@@ -70,15 +70,20 @@ Plan's draft-first rule, with Spec's delta:
 
 ## 5. Invariant gate/approval seam
 
-The invariant seam is a **design gate grounded in the code, plus human
-approval**. On the irreversible track a spec panel runs, grounded against the
+The invariant seam is a **design gate grounded in the code, plus approval by the
+effective approver** (a human owner, or the agent under `approve: agent`). On the
+irreversible track a spec panel runs when `validate: panel`, grounded against the
 repository at a named commit.
 
-> **Under your configuration:** `review.design` (`panel` | `advisory` | `human` |
-> `off`), possibly adjusted by per-track `overrides`, sets the spec gate. Read the
-> effective value from current `CONFIG.md` (or authoritative `sdlc.config.json`);
-> never assume `panel`. When `shape.separateSpec: false`, there is no separate
-> spec gate — the merged Plan+Spec artifact carries one design gate.
+> **Under your configuration:** `review.design` is a `{ validate, approve }` gate
+> dial (`validate`: `panel` | `skip`; `approve`: `human` | `agent`), possibly
+> deep-merged by a partial per-track `override`, and it sets the spec gate. Read
+> the effective dial from current `CONFIG.md` (or authoritative
+> `sdlc.config.json`); never assume `validate: panel` or `approve: human`. Under
+> `approve: agent` the agent adjudicates and advances (disposition discipline
+> still binds); under `approve: human` the human owner is the final adjudicator.
+> When `shape.separateSpec: false`, there is no separate spec gate — the merged
+> Plan+Spec artifact carries one design gate.
 
 When a panel runs it follows the shared panel run-shape owned by
 `references/phase-pr-review.md`, "Panels", via the `spec_review` phase; the

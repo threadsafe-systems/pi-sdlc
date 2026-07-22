@@ -75,11 +75,11 @@ function panelFixture() {
 	mkdirSync(join(root, ".pi", "sdlc"), { recursive: true });
 	mkdirSync(join(home, ".pi", "agent"), { recursive: true });
 	const config = {
-		schemaVersion: 3,
+		schemaVersion: 4,
 		prefix: "sdlc",
 		labelPrefix: "sdlc",
 		announce: "test",
-		review: { brainstorm: "human", design: "panel", code: "panel", tasks: "subagent", panelSize: 1, onShortfall: "proceed" },
+		review: { brainstorm: "human", design: { validate: "panel", approve: "human" }, code: { validate: "panel", approve: "human" }, tasks: "subagent", panelSize: 1, onShortfall: "proceed" },
 		shape: { separateSpec: true, publishToTracker: 2, defaultTrack: "irreversible" },
 		panels: {
 			authorDefault: "anthropic/claude-opus-4",

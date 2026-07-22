@@ -8,10 +8,10 @@ import test, { after } from "node:test";
 const ROOT = new URL("..", import.meta.url).pathname.replace(/\/$/, "");
 const SCRIPT = join(ROOT, "skills", "sdlc", "scripts", "check-lifecycle.mjs");
 const BODY = "```sdlc\ntrack: reversible\nslug: sdlc-adoption-bundle\n```\n";
-const OLDER_REMEDY = "config schemaVersion 1 predates this skill (requires 3) — re-run setup-sdlc to write a fresh v3 config (--force to replace an existing one), or pin pi-sdlc to the release that wrote it; there is no pre-adoption fold-forward path";
-const NEWER_REMEDY = "config schemaVersion 4 is newer than this skill (requires 3) — upgrade pi-sdlc, or run the pinned pi-sdlc release that wrote this config";
+const OLDER_REMEDY = "config schemaVersion 1 predates this skill (requires 4) — re-run setup-sdlc to write a fresh v4 config (--force to replace an existing one), or pin pi-sdlc to the release that wrote it; there is no pre-adoption fold-forward path";
+const NEWER_REMEDY = "config schemaVersion 5 is newer than this skill (requires 4) — upgrade pi-sdlc, or run the pinned pi-sdlc release that wrote this config";
 
-function consumerFixture(schemaVersion = 3) {
+function consumerFixture(schemaVersion = 4) {
 	const dir = mkdtempSync(join(tmpdir(), "sdlc-lifecycle-consumer-"));
 	mkdirSync(join(dir, ".pi", "sdlc"), { recursive: true });
 	mkdirSync(join(dir, "docs", "plans"), { recursive: true });
@@ -20,7 +20,7 @@ function consumerFixture(schemaVersion = 3) {
 		prefix: "sdlc",
 		labelPrefix: "sdlc",
 		announce: "test",
-		review: { brainstorm: "human", design: "panel", code: "panel", tasks: "subagent", panelSize: 2, onShortfall: "proceed" },
+		review: { brainstorm: "human", design: { validate: "panel", approve: "human" }, code: { validate: "panel", approve: "human" }, tasks: "subagent", panelSize: 2, onShortfall: "proceed" },
 		shape: { separateSpec: true, publishToTracker: 2, defaultTrack: "irreversible" },
 	};
 	writeFileSync(join(dir, ".pi", "sdlc", "sdlc.config.json"), JSON.stringify(config));
@@ -185,7 +185,7 @@ test("CV27: config classification precedes inspection while FS9 semantics and en
 		rmSync(olderRoot, { recursive: true, force: true });
 	}
 
-	const newerRoot = consumerFixture(4);
+	const newerRoot = consumerFixture(5);
 	try {
 		const newer = jsonRun(["--track", "none", "--reason", "compatibility check"], newerRoot);
 		assert.equal(newer.status, 2);

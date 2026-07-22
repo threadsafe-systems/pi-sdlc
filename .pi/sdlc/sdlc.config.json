@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 3,
+  "schemaVersion": 4,
   "prefix": "pi-sdlc",
   "labelPrefix": "sdlc",
   "announce": "Using the sdlc skill to drive this change through its lifecycle (pi-sdlc, dogfooding itself).",
@@ -28,8 +28,8 @@
   },
   "review": {
     "brainstorm": "human",
-    "design": "panel",
-    "code": "panel",
+    "design": { "validate": "panel", "approve": "human" },
+    "code": { "validate": "panel", "approve": "human" },
     "tasks": "subagent",
     "panelSize": 2,
     "onShortfall": "fail"
@@ -40,7 +40,7 @@
     "defaultTrack": "irreversible"
   },
   "overrides": {
-    "reversible": { "review": { "design": "human" } }
+    "reversible": { "review": { "design": { "validate": "skip" } } }
   },
   "panels": {
     "$comment": "Panel roster for pi-sdlc itself, redesigned 2026-07-21 grounded in vals.ai SWE-bench-Verified and LM Council's HLE/GPQA-Diamond/FrontierMath/Terminal-Bench aggregates (see docs/briefs/2026-07-21-retro-informed-orchestration-and-ceremony-candidates.md and docs/briefs/2026-07-21-panel-roster-redesign.md for full rationale + citations). Preference reconciled against live credentials by resolve-panel; model ids drift, re-check with `pi --list-models`. Entries may carry pi's ':<thinking>' suffix (off/minimal/low/medium/high/xhigh/max). panelSize is the per-phase distinct-model floor (model-identity axis, verified exact-identity not vendor-wide in resolve-panel.mjs's modelIdentity()). plan_review/spec_review run rarely per effort and gate irreversible design tradeoffs, so cost is a rounding error against a bad architecture call: bumped to xhigh and re-led with the models that top HLE/GPQA-Diamond/FrontierMath (Fable 5, Gemini 3.1 Pro Preview), not just SWE-bench. pr_review is explicitly the highly-technical/high-reasoning gate (owner direction, 2026-07-21): bumped to xhigh throughout; kimi-k3 stays in the roster (genuinely top-tier on SWE-bench-Verified, 93.4%) but demoted to last preference after this repo's own retro evidence of two hard 1,200,000ms timeouts in a single Case PR-review run (docs/briefs/2026-07-21-retro-informed-orchestration-and-ceremony-candidates.md); gemini-3.1-pro-preview is likewise demoted, not dropped, pending its known API-credit/429 availability issue. task_validate drops gpt-5.6-terra (owner-reported operational trouble; it also ranks well down the SWE-bench-Verified table, consistent with that report) and leads with haiku-4-5, matching what Case's config already does. authorDefault moves off claude-opus-4-8 to claude-fable-5 (95.0% SWE-bench-Verified + FrontierMath Tier-4 leader vs opus-4-8's 88.6%/56.1%) as the best available single all-rounder until per-phase author preferences ship (see C1, same brief); a side effect verified against modelIdentity()'s exact-model (not vendor-wide) exclusion: the amazon-bedrock/global.anthropic.claude-opus-4-8 pr_review fallback, dead weight while authorDefault==opus-4-8, becomes a live distinct reviewer once the author identity moves to fable-5. Qwen (current Bedrock-hosted Qwen3-235B/Qwen3-Coder-480B) was evaluated and NOT added: it sits clearly behind every roster model on SWE-bench-Verified and WebDev Arena, and the newer, more competitive Qwen 3.6/3.7 line isn't available through any configured provider yet — worth re-checking once it is.",

@@ -1,7 +1,7 @@
 // ASD6-ASD9 (DoD 5/6/7): the config-doc module — deterministic render, the
 // write/collision matrix, the CONFIG.md content contract, and the four check
 // states. Node builtins only; no model calls. Uses a temp repo root with a
-// valid schemaVersion-3 config.
+// valid schemaVersion-4 config.
 
 import assert from "node:assert/strict";
 import { execFileSync } from "node:child_process";
@@ -17,14 +17,14 @@ const repo = dirname(here);
 const CLI = join(repo, "skills", "sdlc", "scripts", "config-doc.mjs");
 
 const VALID_CONFIG = {
-	schemaVersion: 3,
+	schemaVersion: 4,
 	prefix: "demo",
 	labelPrefix: "demo",
 	announce: "Using the sdlc skill.",
 	paths: { plans: "docs/plans", specs: "docs/specs", reviews: "docs/reviews", agents: ".pi/agents" },
-	review: { brainstorm: "human", design: "panel", code: "panel", tasks: "subagent", panelSize: 2, onShortfall: "fail" },
+	review: { brainstorm: "human", design: { validate: "panel", approve: "human" }, code: { validate: "panel", approve: "human" }, tasks: "subagent", panelSize: 2, onShortfall: "fail" },
 	shape: { separateSpec: true, publishToTracker: 2, defaultTrack: "irreversible" },
-	overrides: { reversible: { review: { design: "human" } } },
+	overrides: { reversible: { review: { design: { validate: "skip" } } } },
 	panels: {
 		authorDefault: "anthropic/claude-opus-4-8:high",
 		phases: {
@@ -68,7 +68,7 @@ test("ASD6: write twice is byte-identical (retained)", () => {
 	assert.equal(readFileSync(companion(root), "utf8"), a);
 });
 
-test("ASD6: rendered CONFIG.md carries all §14 sections and every schemaVersion-3 key in JSON order", () => {
+test("ASD6: rendered CONFIG.md carries all §14 sections and every schemaVersion-4 key in JSON order", () => {
 	const body = render(VALID_CONFIG);
 	// §14 ordered sections
 	assert.match(body, /^<!-- pi-sdlc:config-doc v1 fingerprint=[0-9a-f]{64} -->$/m); // 1 sentinel
@@ -162,7 +162,7 @@ test("ASD9: check returns current / missing / stale / error for the four inputs"
 	assert.match(errC.reason, /^collision:/);
 	// error: invalid-config
 	const c3 = fixture();
-	writeFileSync(join(c3, ".pi", "sdlc", "sdlc.config.json"), JSON.stringify({ schemaVersion: 3 }, null, 2));
+	writeFileSync(join(c3, ".pi", "sdlc", "sdlc.config.json"), JSON.stringify({ schemaVersion: 4 }, null, 2));
 	const errI = check(c3);
 	assert.equal(errI.state, "error");
 	assert.equal(errI.exitCode, 2);

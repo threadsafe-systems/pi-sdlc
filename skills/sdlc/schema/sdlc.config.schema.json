@@ -2,15 +2,15 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "https://github.com/threadsafe-systems/pi-sdlc/skills/sdlc/schema/sdlc.config.schema.json",
   "title": "sdlc.config.json",
-  "description": "Per-project configuration for the sdlc skill. schemaVersion 3: intent vocabulary (review/shape/overrides) plus the panel roster shape.",
+  "description": "Per-project configuration for the sdlc skill. schemaVersion 4: intent vocabulary (review/shape/overrides) with { validate, approve } gate dials, plus the panel roster shape.",
   "type": "object",
   "additionalProperties": false,
   "required": ["schemaVersion", "prefix", "labelPrefix", "announce", "review", "shape"],
   "properties": {
     "schemaVersion": {
       "type": "integer",
-      "const": 3,
-      "description": "Independent config schema version. Version 3 is the intent-vocabulary shape."
+      "const": 4,
+      "description": "Independent config schema version. Version 4 decomposes the design/code gate dials into { validate, approve } objects."
     },
     "prefix": {
       "type": "string",
@@ -73,11 +73,11 @@
       "type": "object",
       "additionalProperties": false,
       "required": ["brainstorm", "design", "code", "tasks", "panelSize", "onShortfall"],
-      "description": "Who reviews what, and how strictly. All six dials are explicit — v3 never leaves ceremony implicit.",
+      "description": "Who reviews what, and how strictly. All dials are explicit — v4 never leaves ceremony implicit.",
       "properties": {
         "brainstorm": { "enum": ["human", "off"], "description": "human: you approve the design; off: no brainstorm gate." },
-        "design": { "$ref": "#/definitions/gateMode", "description": "The plan+spec gate: panel | advisory | human | off." },
-        "code": { "$ref": "#/definitions/gateMode", "description": "The PR gate: panel | advisory | human | off." },
+        "design": { "$ref": "#/definitions/gateDial", "description": "The plan+spec gate: { validate: panel|skip, approve: human|agent }." },
+        "code": { "$ref": "#/definitions/gateDial", "description": "The PR gate: { validate: panel|skip, approve: human|agent }." },
         "tasks": { "enum": ["subagent", "self", "off"], "description": "Per-task validation: subagent | self | off." },
         "panelSize": { "type": "integer", "minimum": 1, "description": "Default distinct-model floor for review panels." },
         "onShortfall": { "enum": ["proceed", "fail"], "description": "When a panel can't reach its floor: proceed best-effort (surface it) or fail." }
@@ -134,7 +134,28 @@
     }
   },
   "definitions": {
-    "gateMode": { "enum": ["panel", "advisory", "human", "off"] },
+    "gateDial": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["validate", "approve"],
+      "description": "A review gate dial. validate: does an adversarial panel run before the artifact is presented? approve: who adjudicates findings and advances the phase? preview is reserved (no effect in v4).",
+      "properties": {
+        "validate": { "enum": ["panel", "skip"] },
+        "approve": { "enum": ["human", "agent"] },
+        "preview": { "type": "boolean", "description": "Reserved: accepted but read by nothing in v4." }
+      }
+    },
+    "gateDialOverride": {
+      "type": "object",
+      "additionalProperties": false,
+      "minProperties": 1,
+      "description": "A partial gate dial for per-track overrides: each field optional, deep-merged onto the base dial. At least one field required.",
+      "properties": {
+        "validate": { "enum": ["panel", "skip"] },
+        "approve": { "enum": ["human", "agent"] },
+        "preview": { "type": "boolean" }
+      }
+    },
     "trackOverride": {
       "type": "object",
       "additionalProperties": false,
@@ -144,10 +165,10 @@
           "type": "object",
           "additionalProperties": false,
           "minProperties": 1,
-          "description": "Per-track dials. Only design/code/tasks/panelSize are per-track.",
+          "description": "Per-track dials. Only design/code/tasks/panelSize are per-track. design/code are partial gate dials, deep-merged onto the base.",
           "properties": {
-            "design": { "$ref": "#/definitions/gateMode" },
-            "code": { "$ref": "#/definitions/gateMode" },
+            "design": { "$ref": "#/definitions/gateDialOverride" },
+            "code": { "$ref": "#/definitions/gateDialOverride" },
             "tasks": { "enum": ["subagent", "self", "off"] },
             "panelSize": { "type": "integer", "minimum": 1 }
           }

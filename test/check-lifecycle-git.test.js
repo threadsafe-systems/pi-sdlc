@@ -18,11 +18,11 @@ function fixture({ plan = true, spec = true, build = true, paths = undefined, sl
 	git(dir, "config", "user.email", "test@example.com");
 	git(dir, "config", "user.name", "Lifecycle Test");
 	const config = {
-		schemaVersion: 3,
+		schemaVersion: 4,
 		prefix: "sdlc",
 		labelPrefix: "sdlc",
 		announce: "test",
-		review: { brainstorm: "human", design: "panel", code: "panel", tasks: "subagent", panelSize: 2, onShortfall: "proceed" },
+		review: { brainstorm: "human", design: { validate: "panel", approve: "human" }, code: { validate: "panel", approve: "human" }, tasks: "subagent", panelSize: 2, onShortfall: "proceed" },
 		shape: { separateSpec: true, publishToTracker: 2, defaultTrack: "irreversible" },
 		...(paths ? { paths } : {}),
 	};

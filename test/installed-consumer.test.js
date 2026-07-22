@@ -57,12 +57,12 @@ test("ASD1: .pi/sdlc/CONFIG.md resolves consumer-relative (never package-relativ
 	const consumer = mkdtempSync(join(tmpdir(), "installed-consumer-"));
 	mkdirSync(join(consumer, ".pi", "sdlc"), { recursive: true });
 	const config = {
-		schemaVersion: 3,
+		schemaVersion: 4,
 		prefix: "demo",
 		labelPrefix: "demo",
 		announce: "Using the sdlc skill.",
 		paths: { plans: "docs/plans", specs: "docs/specs", reviews: "docs/reviews", agents: ".pi/agents" },
-		review: { brainstorm: "human", design: "panel", code: "panel", tasks: "subagent", panelSize: 2, onShortfall: "fail" },
+		review: { brainstorm: "human", design: { validate: "panel", approve: "human" }, code: { validate: "panel", approve: "human" }, tasks: "subagent", panelSize: 2, onShortfall: "fail" },
 		shape: { separateSpec: true, publishToTracker: 2, defaultTrack: "irreversible" },
 		panels: {
 			authorDefault: "anthropic/claude-opus-4-8:high",

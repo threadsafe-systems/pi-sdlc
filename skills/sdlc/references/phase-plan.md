@@ -62,16 +62,23 @@ Plan's convergent delta:
 
 ## 5. Invariant gate/approval seam
 
-The invariant seam is a **design gate plus human approval**. The design gate is
+The invariant seam is a **design gate plus approval by the effective approver**
+(a human owner, or the agent under `approve: agent`). The design gate is
 `review.design`; on the irreversible track a plan panel runs before approval.
 
-> **Under your configuration:** `review.design` is one of `panel` | `advisory` |
-> `human` | `off`, and per-track `overrides.{irreversible,reversible}` may adjust
-> it. On the **reversible** track there is no pre-PR design panel (the PR panel
-> still runs); on the **irreversible** track the plan panel runs. Read the
-> effective track and `review.design` from current `CONFIG.md` (or authoritative
-> `sdlc.config.json`) — never assume `panel`, and never assume the track. When
-> `shape.separateSpec: false`, Plan and Spec merge into one gated artifact.
+> **Under your configuration:** `review.design` is a `{ validate, approve }` gate
+> dial — `validate` is `panel` or `skip` (does an adversarial plan panel run?),
+> `approve` is `human` or `agent` (who adjudicates findings and advances?) — and
+> per-track `overrides.{irreversible,reversible}` may deep-merge a partial dial
+> over it. On the **reversible** track there is no pre-PR design panel (the PR
+> panel still runs); on the **irreversible** track the plan panel runs when
+> `validate: panel`. Under `approve: agent` the agent is the gate adjudicator and
+> advances with no human gate, but the disposition discipline still binds (no
+> surviving high/medium); under `approve: human` the human owner is the final
+> adjudicator. Read the effective track and dial from current `CONFIG.md` (or
+> authoritative `sdlc.config.json`) — never assume `validate: panel`, never assume
+> `approve: human`, and never assume the track. When `shape.separateSpec: false`,
+> Plan and Spec merge into one gated artifact.
 
 When a panel runs, it follows the shared panel run-shape (resolve → dispatch →
 consolidate → adjudicate → stop) owned by `references/phase-pr-review.md`,

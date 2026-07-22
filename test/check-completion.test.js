@@ -14,11 +14,11 @@ function fixtureRoot() {
 	const dir = mkdtempSync(join(tmpdir(), "sdlc-check-completion-"));
 	mkdirSync(join(dir, ".pi", "sdlc"), { recursive: true });
 	const config = {
-		schemaVersion: 3,
+		schemaVersion: 4,
 		prefix: "sdlc",
 		labelPrefix: "sdlc",
 		announce: "test",
-		review: { brainstorm: "human", design: "panel", code: "panel", tasks: "subagent", panelSize: 2, onShortfall: "proceed" },
+		review: { brainstorm: "human", design: { validate: "panel", approve: "human" }, code: { validate: "panel", approve: "human" }, tasks: "subagent", panelSize: 2, onShortfall: "proceed" },
 		shape: { separateSpec: true, publishToTracker: 2, defaultTrack: "irreversible" },
 	};
 	writeFileSync(join(dir, ".pi", "sdlc", "sdlc.config.json"), `${JSON.stringify(config)}\n`);

@@ -1,4 +1,6 @@
-// resolve-panel v3: effective-value resolution, floors, refusals, onShortfall.
+// resolve-panel v4: effective-value resolution, floors, refusals, onShortfall.
+// design/code are { validate, approve } gate-dial objects; overrides are partial
+// gate dials deep-merged via the shared effectiveReview helper.
 
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
@@ -47,11 +49,11 @@ function fixture({ review = {}, shape = {}, overrides, authorDefault = "anthropi
 	const rosterPhases = structuredClone(ROSTER);
 	for (const [phase, override] of Object.entries(phases)) rosterPhases[phase] = { ...rosterPhases[phase], ...override };
 	const config = {
-		schemaVersion: 3,
+		schemaVersion: 4,
 		prefix: "sdlc",
 		labelPrefix: "sdlc",
 		announce: "test",
-		review: { brainstorm: "human", design: "panel", code: "panel", tasks: "subagent", panelSize: 2, onShortfall: "proceed", ...review },
+		review: { brainstorm: "human", design: { validate: "panel", approve: "human" }, code: { validate: "panel", approve: "human" }, tasks: "subagent", panelSize: 2, onShortfall: "proceed", ...review },
 		shape: { separateSpec: true, publishToTracker: 2, defaultTrack: "irreversible", ...shape },
 		...(overrides ? { overrides } : {}),
 		panels: { authorDefault, phases: rosterPhases },
@@ -94,20 +96,31 @@ test("ICA12: task_validate floors at 1", () => {
 
 // ICA13: --track required with overrides; per-track dial resolution.
 test("ICA13: --track required when overrides present", () => {
-	const f = fixture({ overrides: { reversible: { review: { design: "human" } } } });
+	const f = fixture({ overrides: { reversible: { review: { design: { validate: "skip" } } } } });
 	const { status, stderr } = run(f, "plan_review", ["--author", "anthropic/claude-opus-4"]);
 	assert.equal(status, 1);
 	assert.match(stderr, /per-track overrides/);
 });
 
 test("ICA13: reversible design override refuses; irreversible resolves", () => {
-	const f = fixture({ overrides: { reversible: { review: { design: "human" } } } });
+	const f = fixture({ overrides: { reversible: { review: { design: { validate: "skip" } } } } });
 	const rev = run(f, "plan_review", ["--author", "anthropic/claude-opus-4", "--track", "reversible"]);
 	assert.equal(rev.status, 1);
 	assert.match(rev.stderr, /no panel to resolve/);
 	const irr = run(f, "plan_review", ["--author", "anthropic/claude-opus-4", "--track", "irreversible"]);
 	assert.equal(irr.status, 0);
 	assert.deepEqual(lines(irr.stdout), ["openai/gpt-5", "zai/glm-5"]);
+});
+
+// S5/S6 (resolver side): a partial override that names ONLY approve must not
+// drop the inherited validate:panel — the panel still resolves (a shallow
+// resolver merge would leave validate undefined and this would still pass the
+// guard, so this asserts the deep-merge is real and observable).
+test("S5/S6: an approve-only reversible override keeps validate:panel and still resolves a panel", () => {
+	const f = fixture({ overrides: { reversible: { review: { design: { approve: "agent" } } } } });
+	const rev = run(f, "plan_review", ["--author", "anthropic/claude-opus-4", "--track", "reversible"]);
+	assert.equal(rev.status, 0);
+	assert.deepEqual(lines(rev.stdout), ["openai/gpt-5", "zai/glm-5"]);
 });
 
 // ICA14: refusals.
@@ -117,8 +130,8 @@ test("ICA14: review.tasks off refuses task_validate", () => {
 	assert.match(stderr, /task validation is off/);
 });
 
-test("ICA14: design human refuses plan_review with no-panel message", () => {
-	const { status, stderr } = run(fixture({ review: { design: "human" } }), "plan_review");
+test("ICA14: design validate:skip refuses plan_review with no-panel message", () => {
+	const { status, stderr } = run(fixture({ review: { design: { validate: "skip", approve: "human" } } }), "plan_review");
 	assert.equal(status, 1);
 	assert.match(stderr, /no panel to resolve/);
 });
@@ -171,7 +184,7 @@ test("ICA14: review.tasks self refuses task_validate (only subagent resolves)", 
 
 // ICA24: refusal precedence — separateSpec:false + design:human → no-spec-gate, not no-panel.
 test("ICA24: separateSpec false precedes the human/off refusal for spec_review", () => {
-	const { status, stderr } = run(fixture({ review: { design: "human" }, shape: { separateSpec: false } }), "spec_review");
+	const { status, stderr } = run(fixture({ review: { design: { validate: "skip", approve: "human" } }, shape: { separateSpec: false } }), "spec_review");
 	assert.equal(status, 1);
 	assert.match(stderr, /no spec gate \(shape.separateSpec is false\)/);
 });

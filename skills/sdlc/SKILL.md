@@ -82,13 +82,19 @@ declaration dominates. Full PR-declaration and checker mechanics:
 ## Effective-shape reading protocol
 
 The table above states the **maximal** shape. Which gates actually run, and at
-what strength, is the repo's committed config: `review.design`
-(`panel` | `advisory` | `human` | `off`) gates plan+spec, `review.code` gates the
-PR, `review.tasks` (`subagent` | `self` | `off`) sets per-task validation,
-`review.brainstorm` (`human` | `off`) sets the brainstorm gate; per-track
-`overrides` (`irreversible`/`reversible`) adjust `design`/`code`/`tasks`/
-`panelSize`. `shape.separateSpec: false` merges Plan and Spec into one gated
-artifact.
+what strength, is the repo's committed config: `review.design` and `review.code`
+are each a **`{ validate, approve }`** gate dial — `validate` (`panel` | `skip`)
+is whether an adversarial panel runs before the artifact is presented, and
+`approve` (`human` | `agent`) is who adjudicates findings and advances the phase.
+`review.design` gates plan+spec, `review.code` gates the PR. `review.tasks`
+(`subagent` | `self` | `off`) sets per-task validation, `review.brainstorm`
+(`human` | `off`) sets the brainstorm gate; per-track `overrides`
+(`irreversible`/`reversible`) adjust `design`/`code` (as **partial** gate dials,
+deep-merged onto the base) plus `tasks`/`panelSize`. Whenever `validate: panel`
+the disposition discipline is invariant regardless of `approve` (every finding
+dispositioned; no surviving high/medium advances); `approve: agent` means the
+agent adjudicates and advances, never that findings are ignored.
+`shape.separateSpec: false` merges Plan and Spec into one gated artifact.
 
 `sdlc.config.json` is **authoritative** for values; the generated
 `.pi/sdlc/CONFIG.md` **explains** them and never overrides them. Read the config

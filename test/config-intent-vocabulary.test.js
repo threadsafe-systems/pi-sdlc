@@ -11,16 +11,16 @@ import { CONFIG_SCHEMA_VERSION, classifyConfigVersion, inspectConfig } from "../
 const repo = dirname(dirname(fileURLToPath(import.meta.url)));
 const scripts = join(repo, "skills", "sdlc", "scripts");
 
-// Canonical valid v3 config (a "full"-equivalent shape, roster present).
+// Canonical valid v4 config (a "full"-equivalent shape, roster present).
 function validV3() {
 	return {
-		schemaVersion: 3,
+		schemaVersion: 4,
 		prefix: "acme",
 		labelPrefix: "acme-sdlc",
 		announce: "Using the sdlc skill.",
-		review: { brainstorm: "human", design: "panel", code: "panel", tasks: "subagent", panelSize: 2, onShortfall: "proceed" },
+		review: { brainstorm: "human", design: { validate: "panel", approve: "human" }, code: { validate: "panel", approve: "human" }, tasks: "subagent", panelSize: 2, onShortfall: "proceed" },
 		shape: { separateSpec: true, publishToTracker: 2, defaultTrack: "irreversible" },
-		overrides: { reversible: { review: { design: "human" } } },
+		overrides: { reversible: { review: { design: { validate: "skip" } } } },
 		panels: {
 			authorDefault: "anthropic/claude-opus-4",
 			phases: {
@@ -54,7 +54,7 @@ test("ICA1: minimal valid v3 (no optional blocks) has zero issues", () => {
 // ICA2: kernel probes each yield >=1 issue.
 test("ICA2: overrides.none is rejected", () => {
 	const c = validV3();
-	c.overrides = { none: { review: { design: "panel" } } };
+	c.overrides = { none: { review: { design: { validate: "panel", approve: "human" } } } };
 	assert.ok(inspectConfig(c).some((i) => i.path.startsWith("overrides")));
 });
 
@@ -159,15 +159,16 @@ test("ICA6: a v2 config is refused (not mutated) by readConfig", () => {
 	assert.equal(readFileSync(p, "utf8"), `${JSON.stringify(v2)}\n`); // untouched
 });
 
-// Version classification is total and treats v1+v2 as recognised-older, v3 as
-// current, and >3 as newer (clean break, no migration).
+// Version classification is total and treats v1+v2+v3 as recognised-older, v4 as
+// current, and >4 as newer (clean break, no migration).
 test("ICA6: classifyConfigVersion is total over the version matrix", () => {
-	assert.equal(CONFIG_SCHEMA_VERSION, 3);
+	assert.equal(CONFIG_SCHEMA_VERSION, 4);
 	assert.equal(classifyConfigVersion({ schemaVersion: 1 }).kind, "older");
 	assert.equal(classifyConfigVersion({ schemaVersion: 2 }).kind, "older");
-	assert.equal(classifyConfigVersion({ schemaVersion: 3 }).kind, "current");
-	assert.equal(classifyConfigVersion({ schemaVersion: 4 }).kind, "newer");
-	assert.equal(classifyConfigVersion({ schemaVersion: "3" }).kind, "invalid");
+	assert.equal(classifyConfigVersion({ schemaVersion: 3 }).kind, "older");
+	assert.equal(classifyConfigVersion({ schemaVersion: 4 }).kind, "current");
+	assert.equal(classifyConfigVersion({ schemaVersion: 5 }).kind, "newer");
+	assert.equal(classifyConfigVersion({ schemaVersion: "4" }).kind, "invalid");
 	assert.equal(classifyConfigVersion({}).kind, "invalid");
 	assert.equal(classifyConfigVersion(null).kind, "invalid");
 });

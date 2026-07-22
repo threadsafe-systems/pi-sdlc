@@ -73,9 +73,13 @@ config — see §6 and each phase reference's `under your configuration` callout
 | PR review | the diff, driven to a clean panel | `references/phase-pr-review.md` |
 
 Transitions run forward through the sequence; backward transitions are always
-permitted. Gates: `review.design` gates Plan+Spec, `review.code` gates the PR,
-`review.tasks` sets per-task validation, `review.brainstorm` sets the brainstorm
-gate; per-track `overrides` may adjust them. Refusal and backward behaviour for
+permitted. Gates: `review.design` gates Plan+Spec and `review.code` gates the PR
+— each a `{ validate, approve }` gate dial (`validate`: `panel` | `skip`;
+`approve`: `human` | `agent`); `review.tasks` sets per-task validation,
+`review.brainstorm` sets the brainstorm gate; per-track `overrides` may adjust
+them (partial gate dials deep-merge). Whenever `validate: panel` the disposition
+discipline binds regardless of `approve`; `approve: agent` = the agent
+adjudicates and advances, never that findings are ignored. Refusal and backward behaviour for
 each phase is documented in that phase's reference. The shared panel run-shape
 (resolve → dispatch → consolidate → adjudicate → stop) is owned by
 `references/phase-pr-review.md`, "Panels".
@@ -113,7 +117,7 @@ each surface is used, and §10 for the source-inspection boundary.
 
 ## 6. Configuration & extension surfaces
 
-- **`sdlc.config.json`** (schemaVersion 3) — the authoritative manifest. It owns
+- **`sdlc.config.json`** (schemaVersion 4) — the authoritative manifest. It owns
   the configured values; the phase references route every configuration-dependent
   branch to it via `under your configuration` callouts. Its shape is documented in
   `schema/sdlc.config.schema.json` and `schema/sdlc.config.example.json`.
@@ -305,8 +309,11 @@ event-type payload:
   `record-run-event.sh run.started --payload '{"title":"<feature title>","track":"<irreversible|reversible>"}'`.
 - **Every phase entry**: on entering brainstorm/plan/spec/build/implement/pr —
   `record-run-event.sh phase.entered --payload '{"phase":"<phase>"}'`.
-- **Every human gate approval**: when the human approves a phase's gate —
-  `record-run-event.sh gate.approved --payload '{"phase":"<phase>","artifact":"<path>","rev":<n>,"approver":"human:<slug>"}'`.
+- **Every gate approval (human or agent)**: when a phase's gate is approved and
+  the phase advances — `record-run-event.sh gate.approved --payload
+  '{"phase":"<phase>","artifact":"<path>","rev":<n>,"approver":"<who>"}'`. Under
+  `approve: human` the approver is `human:<slug>`; under `approve: agent` the
+  agent is the gate adjudicator and the approver is the bare token `agent`.
 - **Panel dispatch**: immediately after dispatching a design or PR panel —
   `record-run-event.sh panel.dispatched --payload '{"panelPhase":"<panelPhase>","round":<wave>,"models":[...]}'`
   — and, harvest-at-dispatch, immediately preserve its artifacts with

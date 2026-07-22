@@ -202,7 +202,7 @@ test("CV29: CI and shipped bindings point at the merged config surface", () => {
 	assert.doesNotMatch(skillMd, /sdlc\.models\.schema\.json/);
 });
 
-test("CV30: repository and consumer dogfood fixtures use one schemaVersion-3 config", () => {
+test("CV30: repository and consumer dogfood fixtures use one schemaVersion-4 config", () => {
 	for (const root of [repo, join(repo, "test", "fixtures", "consumer")]) {
 		const dir = join(root, ".pi", "sdlc");
 		let config;
@@ -211,8 +211,8 @@ test("CV30: repository and consumer dogfood fixtures use one schemaVersion-3 con
 		} catch (error) {
 			assert.fail(`invalid dogfood config at ${root}: ${error.message}`);
 		}
-		assert.equal(config.schemaVersion, 3);
-		assert.ok(config.review && config.shape, `${root} lacks v3 review/shape`);
+		assert.equal(config.schemaVersion, 4);
+		assert.ok(config.review && config.shape, `${root} lacks v4 review/shape`);
 		assert.ok(config.panels && typeof config.panels === "object", `${root} lacks merged panels`);
 		assert.equal(existsSync(join(dir, "sdlc.models.json")), false, `${root} retains the retired models file`);
 	}

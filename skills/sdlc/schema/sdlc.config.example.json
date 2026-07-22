@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 3,
+  "schemaVersion": 4,
   "prefix": "acme",
   "labelPrefix": "acme-sdlc",
   "announce": "Using the sdlc skill to drive this change through its lifecycle.",
@@ -28,8 +28,8 @@
   },
   "review": {
     "brainstorm": "human",
-    "design": "panel",
-    "code": "panel",
+    "design": { "validate": "panel", "approve": "human" },
+    "code": { "validate": "panel", "approve": "human" },
     "tasks": "subagent",
     "panelSize": 2,
     "onShortfall": "proceed"
@@ -40,7 +40,7 @@
     "defaultTrack": "irreversible"
   },
   "overrides": {
-    "reversible": { "review": { "design": "human" } }
+    "reversible": { "review": { "design": { "validate": "skip" } } }
   },
   "panels": {
     "$comment": "Panel roster. Model ids drift; re-check with `pi --list-models`. Entries may carry pi's ':<thinking>' suffix. panelSize is an optional per-phase floor override of review.panelSize (distinct-model axis).",

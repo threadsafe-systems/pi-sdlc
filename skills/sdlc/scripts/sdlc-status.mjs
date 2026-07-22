@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // sdlc-status.mjs — FS8 four-state readiness inspection (config-versioning
-// spec §6; version classification updated for schemaVersion 3 per ADR 0026).
+// spec §6; version classification updated for schemaVersion 4 per ADR 0030).
 // Read-only: bounded git/filesystem checks, no hooks, no model calls, no
 // network, no mutation.
 //

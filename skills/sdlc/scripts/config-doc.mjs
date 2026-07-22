@@ -17,7 +17,7 @@ import { createHash } from "node:crypto";
 import { existsSync, lstatSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { inspectConfig } from "./lib.mjs";
+import { effectiveReview, inspectConfig } from "./lib.mjs";
 
 export const CURRENT_SENTINEL_VERSION = "v1";
 // Every render-format version ever shipped in a released pi-sdlc stays here so a
@@ -89,19 +89,27 @@ function loadConfig(repoRoot) {
 }
 
 // ---- effective-shape helpers ----------------------------------------------
+// effectiveReview is the single shared helper imported from lib.mjs (Spec C3c);
+// this renderer keeps no private merge so it cannot drift from resolve-panel.
 
-function effectiveReview(config, track) {
-	const base = config.review ?? {};
-	const over = config.overrides?.[track]?.review ?? {};
-	return { ...base, ...over };
+const VALIDATE_MEANING = {
+	panel: "an adversarial multi-model panel runs before the artifact is presented",
+	skip: "no panel runs for this gate (an authored choice, not a bypass)",
+};
+const APPROVE_MEANING = {
+	human: "a human owner adjudicates and advances",
+	agent: "the agent adjudicates findings and advances (no human gate; the disposition discipline still applies)",
+};
+
+// Render one { validate, approve, preview? } gate dial to CONFIG.md lines; an
+// optional note is appended to the validate line (e.g. the reversible caveat).
+function gateDialLines(label, key, dial, note = "") {
+	if (!dial || typeof dial !== "object") return [`- **${label} (\`${key}\`):** see sdlc.config.json.`];
+	const lines = [`- **${label} — validate (\`${key}.validate\`): ${dial.validate}** — ${VALIDATE_MEANING[dial.validate] ?? "see sdlc.config.json"}${note}.`, `- **${label} — approve (\`${key}.approve\`): ${dial.approve}** — ${APPROVE_MEANING[dial.approve] ?? "see sdlc.config.json"}.`];
+	if (dial.preview !== undefined) lines.push(`- **${label} — preview (\`${key}.preview\`):** reserved (no effect in v4).`);
+	return lines;
 }
 
-const GATE_MEANING = {
-	panel: "an adversarial multi-model panel runs and must reach its stop condition",
-	advisory: "a panel runs for advice only; findings do not block",
-	human: "a human owner reviews and approves; no model panel",
-	off: "no gate runs at this phase",
-};
 const TASKS_MEANING = {
 	subagent: "each task ends with a validator subagent running the deterministic runner",
 	self: "the implementer runs the declared checks directly (no subagent dispatch)",
@@ -118,8 +126,8 @@ function trackSummary(config, track) {
 		`### Track: ${track}`,
 		"",
 		`- **Phases:** ${phases}.`,
-		`- **Design gate (\`review.design\`): ${r.design}** — ${GATE_MEANING[r.design] ?? "see sdlc.config.json"}${designNote}.`,
-		`- **Code/PR gate (\`review.code\`): ${r.code}** — ${GATE_MEANING[r.code] ?? "see sdlc.config.json"}.`,
+		...gateDialLines("Design gate", "review.design", r.design, designNote),
+		...gateDialLines("Code/PR gate", "review.code", r.code),
 		`- **Brainstorm gate (\`review.brainstorm\`): ${r.brainstorm ?? "see sdlc.config.json"}**.`,
 		`- **Task validation (\`review.tasks\`): ${r.tasks ?? "see sdlc.config.json"}** — ${TASKS_MEANING[r.tasks] ?? "see sdlc.config.json"}.`,
 		`- **Panel floor (\`review.panelSize\`): ${r.panelSize ?? "see sdlc.config.json"}** distinct model(s); shortfall posture \`review.onShortfall\`: ${r.onShortfall ?? "see sdlc.config.json"}.`,

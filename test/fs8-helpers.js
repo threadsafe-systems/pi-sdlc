@@ -13,11 +13,11 @@ export const statusMjs = join(repoRootDir, "skills", "sdlc", "scripts", "sdlc-st
 export const statusSh = join(repoRootDir, "skills", "sdlc", "scripts", "sdlc-status.sh");
 
 export const VALID_CONFIG = {
-	schemaVersion: 3,
+	schemaVersion: 4,
 	prefix: "acme",
 	labelPrefix: "acme-sdlc",
 	announce: "a",
-	review: { brainstorm: "human", design: "panel", code: "panel", tasks: "subagent", panelSize: 1, onShortfall: "proceed" },
+	review: { brainstorm: "human", design: { validate: "panel", approve: "human" }, code: { validate: "panel", approve: "human" }, tasks: "subagent", panelSize: 1, onShortfall: "proceed" },
 	shape: { separateSpec: true, publishToTracker: 2, defaultTrack: "irreversible" },
 	panels: {
 		phases: {

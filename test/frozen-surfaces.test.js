@@ -1,8 +1,14 @@
 // ASD19 (explicit non-changes): the frozen surfaces are byte-identical to the
-// branch base. sdlc-status (FS8), check-lifecycle (FS9), lib.mjs +
-// sdlc.config.schema.json (config schemaVersion 3), resolve-panel, the PV1/PV2
-// validator, the four reviewer prompts, and panel/ceremony law are untouched;
-// #91/#101/#102 scopes are not re-opened. Uses git to compare against the base.
+// branch base. check-lifecycle (FS9), the PV1/PV2 validator, the four reviewer
+// prompts, and panel/ceremony law are untouched.
+//
+// #150 (review-gate config model) intentionally changes the config-schema core:
+// lib.mjs (validation + the shared effectiveReview helper), sdlc.config.schema.json
+// and sdlc.config.example.json (the { validate, approve } gate dial, schemaVersion
+// 3 -> 4), resolve-panel.mjs (the .validate === "skip" guard), and a stale version
+// comment in sdlc-status.mjs. Those five are removed from the frozen list here;
+// FS8's behaviour (check ids + exits) is unchanged and still guarded by the
+// second test below.
 
 import assert from "node:assert/strict";
 import { execFileSync } from "node:child_process";
@@ -14,15 +20,10 @@ const here = dirname(fileURLToPath(import.meta.url));
 const repo = dirname(here);
 
 const FROZEN = [
-	"skills/sdlc/scripts/sdlc-status.mjs",
 	"skills/sdlc/scripts/sdlc-status.sh",
 	"skills/sdlc/scripts/check-lifecycle.mjs",
 	"skills/sdlc/scripts/check-lifecycle.sh",
-	"skills/sdlc/scripts/lib.mjs",
-	"skills/sdlc/schema/sdlc.config.schema.json",
-	"skills/sdlc/schema/sdlc.config.example.json",
 	"skills/sdlc/schema/task-validation-manifest.schema.json",
-	"skills/sdlc/scripts/resolve-panel.mjs",
 	"skills/sdlc/scripts/resolve-panel.sh",
 	"skills/sdlc/scripts/validate-task.mjs",
 	"skills/sdlc/scripts/validate-task.sh",

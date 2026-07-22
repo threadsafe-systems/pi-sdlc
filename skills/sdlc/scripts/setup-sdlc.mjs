@@ -30,26 +30,48 @@ function packageRepository() {
 const RUN_HOOK_WARNING = "sdlc: WARNING — 'run' hooks execute arbitrary shell commands with the agent's\nprivileges from the committed config. Only commit hooks you trust, exactly as\nyou would for .pi/prompts or project settings.";
 const PROMPT_BASES = ["adversary-plan", "adversary-spec", "adversary-review", "validator-task"];
 const USAGE =
-	"usage: setup-sdlc.sh [--preset solo|standard|full] [--review-brainstorm human|off] [--review-design panel|advisory|human|off] [--review-code panel|advisory|human|off] [--review-tasks subagent|self|off] [--panel-size N] [--on-shortfall proceed|fail] [--separate-spec true|false] [--publish-to-tracker N|never] [--default-track irreversible|reversible] [--override track:dial:value] [--prefix V] [--label-prefix V] [--announce V] [--tracker-repo o/n --tracker-board-number N --tracker-board-url U] [--hook-run S] [--hook-use S] [--seed-panels] [--with-ci-workflow] [--copy-prompts] [--format text|json] [--force] [--yes] [--config DIR|--repo-root DIR]";
-const RETIRED_WITH_MODELS = "setup-sdlc: --with-models is retired — the panel roster lives in .pi/sdlc/sdlc.config.json (schemaVersion 3); use --seed-panels";
+	"usage: setup-sdlc.sh [--preset solo|standard|full] [--review-brainstorm human|off] [--review-design <validate>/<approve>] [--review-code <validate>/<approve>] (validate=panel|skip, approve=human|agent) [--review-tasks subagent|self|off] [--panel-size N] [--on-shortfall proceed|fail] [--separate-spec true|false] [--publish-to-tracker N|never] [--default-track irreversible|reversible] [--override track:dial:value] [--prefix V] [--label-prefix V] [--announce V] [--tracker-repo o/n --tracker-board-number N --tracker-board-url U] [--hook-run S] [--hook-use S] [--seed-panels] [--with-ci-workflow] [--copy-prompts] [--format text|json] [--force] [--yes] [--config DIR|--repo-root DIR]";
+const RETIRED_WITH_MODELS = "setup-sdlc: --with-models is retired — the panel roster lives in .pi/sdlc/sdlc.config.json (schemaVersion 4); use --seed-panels";
 
-// v3 answer bundles. Presets are NEVER persisted — they seed the explicit dials
-// that setup writes. Not choosing a preset IS "custom".
+// v4 answer bundles. Presets are NEVER persisted — they seed the explicit dials
+// that setup writes. Not choosing a preset IS "custom". design/code are
+// { validate, approve } gate-dial objects.
 export const PRESETS = Object.freeze({
 	solo: {
-		review: { brainstorm: "off", design: "human", code: "advisory", tasks: "self", panelSize: 1, onShortfall: "proceed" },
+		review: { brainstorm: "off", design: { validate: "skip", approve: "human" }, code: { validate: "panel", approve: "agent" }, tasks: "self", panelSize: 1, onShortfall: "proceed" },
 		shape: { separateSpec: false, publishToTracker: "never", defaultTrack: "irreversible" },
 	},
 	standard: {
-		review: { brainstorm: "human", design: "human", code: "panel", tasks: "subagent", panelSize: 2, onShortfall: "proceed" },
+		review: { brainstorm: "human", design: { validate: "skip", approve: "human" }, code: { validate: "panel", approve: "human" }, tasks: "subagent", panelSize: 2, onShortfall: "proceed" },
 		shape: { separateSpec: false, publishToTracker: 4, defaultTrack: "irreversible" },
 	},
 	full: {
-		review: { brainstorm: "human", design: "panel", code: "panel", tasks: "subagent", panelSize: 2, onShortfall: "proceed" },
+		review: { brainstorm: "human", design: { validate: "panel", approve: "human" }, code: { validate: "panel", approve: "human" }, tasks: "subagent", panelSize: 2, onShortfall: "proceed" },
 		shape: { separateSpec: true, publishToTracker: 2, defaultTrack: "irreversible" },
-		overrides: { reversible: { review: { design: "human" } } },
+		overrides: { reversible: { review: { design: { validate: "skip" } } } },
 	},
 });
+
+// Parse a "<validate>/<approve>" gate-dial flag value into an object. For a base
+// dial both halves are required; for a partial override either half may be empty
+// (but at least one must be set).
+export function parseGateDial(raw, { partial = false } = {}) {
+	if (typeof raw !== "string" || !raw.includes("/")) throw new SetupError(`setup-sdlc: gate dial must be "<validate>/<approve>" (got ${JSON.stringify(raw)})`);
+	const slash = raw.indexOf("/");
+	const validate = raw.slice(0, slash);
+	const approve = raw.slice(slash + 1);
+	const dial = {};
+	if (validate !== "") {
+		if (validate !== "panel" && validate !== "skip") throw new SetupError(`setup-sdlc: validate must be panel|skip (got ${JSON.stringify(validate)})`);
+		dial.validate = validate;
+	} else if (!partial) throw new SetupError(`setup-sdlc: validate is required in "<validate>/<approve>" (got ${JSON.stringify(raw)})`);
+	if (approve !== "") {
+		if (approve !== "human" && approve !== "agent") throw new SetupError(`setup-sdlc: approve must be human|agent (got ${JSON.stringify(approve)})`);
+		dial.approve = approve;
+	} else if (!partial) throw new SetupError(`setup-sdlc: approve is required in "<validate>/<approve>" (got ${JSON.stringify(raw)})`);
+	if (partial && Object.keys(dial).length === 0) throw new SetupError(`setup-sdlc: a partial gate-dial override must set validate and/or approve (got ${JSON.stringify(raw)})`);
+	return dial;
+}
 
 class SetupError extends Error {
 	constructor(message, code = 2) {
@@ -83,18 +105,19 @@ function parseOverride(raw) {
 	if (parts.length !== 3) throw new SetupError(`setup-sdlc: --override must be "<track>:<dial>:<value>" (got ${JSON.stringify(raw)})`);
 	const [track, dial, value] = parts;
 	if (track !== "irreversible" && track !== "reversible") throw new SetupError(`setup-sdlc: --override track must be irreversible or reversible (got ${JSON.stringify(track)})`);
-	const gateModes = new Set(["panel", "advisory", "human", "off"]);
 	if (dial === "design" || dial === "code") {
-		if (!gateModes.has(value)) throw new SetupError(`setup-sdlc: --override ${dial} value must be panel|advisory|human|off (got ${JSON.stringify(value)})`);
-	} else if (dial === "tasks") {
+		return { track, dial, value: parseGateDial(value, { partial: true }) };
+	}
+	if (dial === "tasks") {
 		if (!new Set(["subagent", "self", "off"]).has(value)) throw new SetupError(`setup-sdlc: --override tasks value must be subagent|self|off (got ${JSON.stringify(value)})`);
-	} else if (dial === "panelSize") {
+		return { track, dial, value };
+	}
+	if (dial === "panelSize") {
 		const n = Number(value);
 		if (!Number.isInteger(n) || n < 1) throw new SetupError(`setup-sdlc: --override panelSize value must be an integer >= 1 (got ${JSON.stringify(value)})`);
-	} else {
-		throw new SetupError(`setup-sdlc: --override dial must be design|code|tasks|panelSize (got ${JSON.stringify(dial)}); brainstorm and onShortfall are not per-track)`);
+		return { track, dial, value: n };
 	}
-	return { track, dial, value };
+	throw new SetupError(`setup-sdlc: --override dial must be design|code|tasks|panelSize (got ${JSON.stringify(dial)}); brainstorm and onShortfall are not per-track)`);
 }
 function addHook(hooks, phase, timing, item) {
 	if (!HOOK_PHASES.includes(phase)) throw new SetupError(`setup-sdlc: unknown hook phase '${phase}' (allowed: ${HOOK_PHASES.join(", ")})`);
@@ -129,7 +152,7 @@ function assembleConfig(opts, tracker, hooks) {
 	return config;
 }
 
-// Build the explicit v3 review/shape/overrides from a seed + per-dial flag
+// Build the explicit v4 review/shape/overrides from a seed + per-dial flag
 // overrides + repeatable --override entries. The seed is the chosen preset
 // (or standard) for a fresh write, or an existing config's intent blocks when
 // patching a single dial. Presets are never persisted.
@@ -151,7 +174,7 @@ function reviewShapeFromOptions(opts, base) {
 		overrides ??= {};
 		overrides[track] ??= { review: {} };
 		overrides[track].review ??= {};
-		overrides[track].review[dial] = dial === "panelSize" ? Number(value) : value;
+		overrides[track].review[dial] = value;
 	}
 	return { review, shape, overrides };
 }
@@ -180,12 +203,12 @@ function parseArgs(argv) {
 				opts.rootFlagOnly = false;
 				break;
 			case "--review-design":
-				opts.reviewDesign = value();
+				opts.reviewDesign = parseGateDial(value());
 				opts.runFlag = true;
 				opts.rootFlagOnly = false;
 				break;
 			case "--review-code":
-				opts.reviewCode = value();
+				opts.reviewCode = parseGateDial(value());
 				opts.runFlag = true;
 				opts.rootFlagOnly = false;
 				break;
@@ -241,7 +264,7 @@ function parseArgs(argv) {
 				break;
 			}
 			case "--profile":
-				throw new SetupError("setup-sdlc: --profile is retired — use --preset solo|standard|full (and per-dial flags); there is no persisted profile in schemaVersion 3");
+				throw new SetupError("setup-sdlc: --profile is retired — use --preset solo|standard|full (and per-dial flags); there is no persisted profile in schemaVersion 4");
 			case "--lifecycle-json":
 				throw new SetupError("setup-sdlc: --lifecycle-json is retired — set dials via --review-*/--panel-size/--on-shortfall/--separate-spec/--publish-to-tracker/--default-track/--override");
 			case "--enforcement":
@@ -564,7 +587,7 @@ function writeBundle(root, opts, cfg, hooks, tracker, residueAssets = []) {
 	} else if (existingVersion && existingVersion.kind === "newer" && !opts.force) {
 		report.assets.push({ id: "config", action: "refused", message: `refused ${configTarget}: ${REMEDY_SCHEMA_NEWER(existingVersion.version)}`, remediation: "upgrade pi-sdlc or run the pinned release; --force to overwrite" });
 	} else if (existingVersion && existingVersion.kind === "older" && !opts.force) {
-		report.assets.push({ id: "config", action: "refused", message: `refused ${configTarget}: ${REMEDY_SCHEMA_OLDER(existingVersion.version)}`, remediation: "re-run with --force to write a fresh v3 config, or pin the prior release" });
+		report.assets.push({ id: "config", action: "refused", message: `refused ${configTarget}: ${REMEDY_SCHEMA_OLDER(existingVersion.version)}`, remediation: "re-run with --force to write a fresh v4 config, or pin the prior release" });
 	} else if (existingVersion && existingVersion.kind !== "current" && opts.force) {
 		// Older/newer schema + --force: honest clean-break replacement.
 		writeFileSync(configTarget, `${JSON.stringify(cfg, null, 2)}\n`);
@@ -611,7 +634,7 @@ function writeBundle(root, opts, cfg, hooks, tracker, residueAssets = []) {
 		const docAsset = { id: "config-doc", action: docReport.action, message: `${docReport.action} ${docReport.path}: ${docReport.reason}` };
 		if (docReport.exitCode === 3) docAsset.remediation = "re-run setup with --force to overwrite the consumer-authored .pi/sdlc/CONFIG.md";
 		report.assets.push(docAsset);
-		// A config-doc error (e.g. an on-disk config that is v3 but invalid) must not
+		// A config-doc error (e.g. an on-disk config that is older but invalid) must not
 		// be swallowed behind an exit-0 setup; hard-stop the bundle.
 		if (docReport.exitCode === 2) {
 			report.exitCode = 2;
@@ -640,15 +663,11 @@ function writeBundle(root, opts, cfg, hooks, tracker, residueAssets = []) {
 // templates/setup-sdlc.md) rather than being asked as a jargon quiz. Every dial
 // stays reachable non-interactively via flags.
 export async function collectInterview(ask) {
-	const gateModes = ["panel", "advisory", "human", "off"];
-	const choice = async (question, values, fallback) => {
-		const answer = await ask(question, fallback);
-		if (!values.includes(answer)) throw new SetupError(`setup-sdlc: ${question} must be one of ${values.join(", ")}`, 1);
-		return answer;
-	};
 	const base = structuredClone(PRESETS.standard);
-	base.review.design = await choice("who reviews DESIGNS (plan+spec) — panel: cross-model panel; advisory: panel, non-blocking; human: you; off: no gate (panel/advisory/human/off)", gateModes, "panel");
-	base.review.code = await choice("who reviews CODE (the PR) — panel/advisory/human/off", gateModes, "panel");
+	// One compound prompt per object dial (≤ 3-prompt ceiling): validate=panel|skip
+	// (does a panel run?), approve=human|agent (who adjudicates and advances?).
+	base.review.design = parseGateDial(await ask("DESIGNS (plan+spec) gate — <validate>/<approve>; validate=panel|skip (does an adversarial panel run?), approve=human|agent (who adjudicates & advances?)", "panel/human"));
+	base.review.code = parseGateDial(await ask("CODE (the PR) gate — <validate>/<approve> (panel|skip / human|agent)", "panel/human"));
 	return base;
 }
 

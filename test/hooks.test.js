@@ -21,11 +21,11 @@ const ajv = new Ajv({ allErrors: true, strict: false });
 const validateSchema = ajv.compile(schema);
 
 const BASE = {
-	schemaVersion: 3,
+	schemaVersion: 4,
 	prefix: "acme",
 	labelPrefix: "acme-sdlc",
 	announce: "a",
-	review: { brainstorm: "human", design: "panel", code: "panel", tasks: "subagent", panelSize: 2, onShortfall: "proceed" },
+	review: { brainstorm: "human", design: { validate: "panel", approve: "human" }, code: { validate: "panel", approve: "human" }, tasks: "subagent", panelSize: 2, onShortfall: "proceed" },
 	shape: { separateSpec: true, publishToTracker: 2, defaultTrack: "irreversible" },
 };
 const GOOD_HOOKS = {

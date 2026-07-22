@@ -226,9 +226,15 @@ form (a `-review-` infix) is equally accepted and recommended going forward;
 the retro collector discovers both.
 
 > **Under your configuration:** whether a Plan panel and a Spec panel run at all
-> depends on the effective track and `review.design`; the PR panel runs on both
-> tracks. `review.code` (`panel` | `advisory` | `human` | `off`) sets the PR gate
-> strength. Read them; never assume `panel`.
+> depends on the effective track and `review.design.validate`; the PR panel runs
+> on both tracks. `review.code` is a `{ validate, approve }` gate dial —
+> `validate` (`panel` | `skip`) sets whether the PR panel runs, `approve`
+> (`human` | `agent`) sets who adjudicates and advances. The human-final-
+> adjudicator rule in step 4 governs `approve: human` gates; under `approve:
+> agent` the agent is the gate adjudicator and advances with no human
+> escalation, but the disposition discipline is unchanged (no surviving
+> high/medium may pass — `approve: agent` never means findings are ignored). Read
+> them; never assume `validate: panel` or `approve: human`.
 
 Run the local PR panel against the final committed branch, consolidate and
 adjudicate its findings in the durable internal review artifact under

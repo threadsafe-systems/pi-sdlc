@@ -41,3 +41,20 @@ plumbing.
 - **This policy expires at first external adoption.** From that point a
   schema break must ship a migration (or an equivalently honest forward path),
   and this ADR is superseded by whatever records that decision.
+
+## Amendment (2026-07-22, ADR 0030)
+
+The schemaVersion 3 → 4 review-gate decomposition (ADR 0030, #150) surfaced the
+question of whether **Case** (`threadsafe/case`) — a separate repo that pins
+pi-sdlc and carries its own committed config — closes the clean-break window.
+Owner-adjudicated: it does not. **"External adopter" means a genuine third
+party; it explicitly excludes co-owned dogfood repos** (repos the same owner
+controls and can hand-author). The clean-break rationale ("a migration for a
+population of one is ceremony with no beneficiary") still holds when the whole
+adopter population is two co-owned repos, both hand-authorable.
+
+Accordingly, v3 → v4 ships as a **coordinated clean break with no migrator**:
+this repo hand-authors its v4 config in the landing change, and Case re-authors
+its config as a coordinated follow-up (pinning the pre-v4 release until it does).
+That coordinated re-author is the "equivalently honest forward path" this policy
+requires. The window still closes at the first genuinely external adopter.

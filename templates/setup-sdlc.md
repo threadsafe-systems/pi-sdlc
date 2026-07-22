@@ -26,10 +26,13 @@ target repo so root resolution finds it.
    path with design panels. A **reversible** change (internal refactors, docs,
    tests, tooling) takes the fast path — no pre-PR design panel, but the PR panel
    still runs. `shape.defaultTrack` is the when-in-doubt track.
-3. **What `panel` / `advisory` / `human` / `off` mean in practice.** `panel` = an
-   adversarial multi-model review that must reach its stop condition; `advisory`
-   = the same panel but non-blocking; `human` = a human owner approves, no model
-   panel; `off` = no gate at that phase. Explain each in plain terms.
+3. **What the two gate-dial axes mean in practice.** Each design/code gate is
+   `{ validate, approve }`. `validate` = does an adversarial panel run before the
+   artifact is presented? `panel` = yes (findings must be dispositioned); `skip` =
+   no panel for this gate (an authored choice, not a bypass). `approve` = who
+   adjudicates findings and advances the phase? `human` = a human owner; `agent` =
+   the agent adjudicates and advances (no human gate; the disposition discipline
+   still applies either way). Explain each in plain terms.
 4. **The consequences of the other dials.** `shape.separateSpec` (a distinct Spec
    gate vs merging plan+spec into one gated artifact); `shape.publishToTracker`
    (the build-task count at which the breakdown is projected to an epic/board, or
@@ -38,10 +41,10 @@ target repo so root resolution finds it.
    `review.onShortfall` (`proceed` = best-effort when the panel roster falls short
    of the floor and surface it; `fail` = hard-fail below the floor).
 5. **Adoption reduces to two owner decisions.** Everything above is defaulted;
-   the only two choices the owner must actively make are **who reviews designs
-   (`review.design`)** and **who reviews code (`review.code`)**. Frame the
-   interview around those two, defaulting the rest and explaining what the
-   defaults mean.
+   the only two choices the owner must actively make are the **designs gate
+   (`review.design` = `<validate>/<approve>`)** and the **code gate
+   (`review.code`)**. Frame the interview around those two compound choices
+   (one prompt each), defaulting the rest and explaining what the defaults mean.
 
 ## Run the scaffolder
 
@@ -57,7 +60,7 @@ reducing the fallback removes no configurability:
 
 ```bash
 <skill-dir>/scripts/setup-sdlc.sh \
-  --review-design panel --review-code panel \
+  --review-design panel/human --review-code panel/human \
   --review-brainstorm human --review-tasks subagent --panel-size 2 \
   --on-shortfall fail --separate-spec true --publish-to-tracker 2 \
   --default-track irreversible \

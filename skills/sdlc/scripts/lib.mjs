@@ -21,11 +21,12 @@ const PM_RE = /^[^/]+\/.+$/; // provider/model
 const REPO_RE = /^[^/]+\/[^/]+$/;
 export const USE_RE = /^(skill|tool):[a-z][a-z0-9_-]*$/;
 const SINGLE_LINE_RE = /^[^\r\n]+$/; // non-empty, single-line (run/do)
-const GATE_MODES = new Set(["panel", "advisory", "human", "off"]);
+const VALIDATE_MODES = new Set(["panel", "skip"]);
+const APPROVE_MODES = new Set(["human", "agent"]);
 
-export const CONFIG_SCHEMA_VERSION = 3;
-export const KNOWN_PAST_VERSIONS = new Set([1, 2]);
-export const REMEDY_SCHEMA_OLDER = (found) => `config schemaVersion ${found} predates this skill (requires ${CONFIG_SCHEMA_VERSION}) — re-run setup-sdlc to write a fresh v3 config (--force to replace an existing one), or pin pi-sdlc to the release that wrote it; there is no pre-adoption fold-forward path`;
+export const CONFIG_SCHEMA_VERSION = 4;
+export const KNOWN_PAST_VERSIONS = new Set([1, 2, 3]);
+export const REMEDY_SCHEMA_OLDER = (found) => `config schemaVersion ${found} predates this skill (requires ${CONFIG_SCHEMA_VERSION}) — re-run setup-sdlc to write a fresh v4 config (--force to replace an existing one), or pin pi-sdlc to the release that wrote it; there is no pre-adoption fold-forward path`;
 export const REMEDY_SCHEMA_NEWER = (found) => `config schemaVersion ${found} is newer than this skill (requires ${CONFIG_SCHEMA_VERSION}) — upgrade pi-sdlc, or run the pinned pi-sdlc release that wrote this config`;
 
 // Hook phase vocabulary: the six lifecycle phases + '*' (every phase). This is
@@ -130,17 +131,30 @@ function isPlainObject(v) {
 	return typeof v === "object" && v !== null && !Array.isArray(v);
 }
 
-// Reviewer × arbiter is the extensibility seam for lifecycle gate modes.
-// Keep raw mode interpretation here; callers branch only on these fields.
-export function decomposeGateMode(value) {
-	const table = {
-		panel: { reviewer: "panel", arbiter: "human", blocking: true },
-		advisory: { reviewer: "panel", arbiter: "none", blocking: false },
-		human: { reviewer: "none", arbiter: "human", blocking: true },
-		off: { reviewer: "none", arbiter: "none", blocking: false },
-	};
-	if (!Object.hasOwn(table, value)) throw new RangeError(`unknown gate mode ${JSON.stringify(value)}`);
-	return table[value];
+// The two gate dials that carry a { validate, approve, preview? } object shape
+// (v4). brainstorm/tasks/panelSize/onShortfall stay scalar.
+export const OBJECT_DIALS = new Set(["design", "code"]);
+
+// Deep-merge one gate dial: an override supplies a partial dial whose present
+// fields win and absent fields inherit the base. Scalar dials replace wholesale.
+export function effectiveReviewDial(baseDial, overrideDial) {
+	if (overrideDial === undefined) return baseDial;
+	if (isPlainObject(baseDial) && isPlainObject(overrideDial)) return { ...baseDial, ...overrideDial };
+	return overrideDial;
+}
+
+// The single shared effective-review resolver used by BOTH config-doc.mjs and
+// resolve-panel.mjs (neither keeps a private merge, so they cannot drift):
+// dial-level override replaces, then the object dials (design/code) deep-merge
+// field-by-field so a track can relax one axis without dropping the other.
+export function effectiveReview(config, track) {
+	const base = config.review ?? {};
+	const over = (track && config.overrides?.[track]?.review) ?? {};
+	const out = { ...base, ...over };
+	for (const dial of OBJECT_DIALS) {
+		if (over[dial] !== undefined) out[dial] = effectiveReviewDial(base[dial], over[dial]);
+	}
+	return out;
 }
 
 // Pure, total version seam shared by every version-sensitive consumer.
@@ -306,23 +320,52 @@ function collectPanelIssues(panels) {
 	return issues;
 }
 
-// v3 intent vocabulary (schemaVersion 3). Closed enums; the merge gate has no
-// key; overrides keys are exactly the two lifecycle tracks (never `none`).
+// v4 intent vocabulary (schemaVersion 4). Closed enums; the design/code dials are
+// { validate, approve, preview? } objects; overrides keys are exactly the two
+// lifecycle tracks (never `none`).
 const TASKS_MODES = new Set(["subagent", "self", "off"]);
 const TRACK_KEYS = new Set(["irreversible", "reversible"]);
 const REVIEW_DIAL_KEYS = new Set(["brainstorm", "design", "code", "tasks", "panelSize", "onShortfall"]);
 
+// A gate dial object { validate, approve, preview? }. Base dials (partial=false)
+// require both validate and approve; override dials (partial=true) allow a partial
+// object that deep-merges onto the base, but must set at least one field.
+function validateGateDial(at, value, partial, add) {
+	if (!isPlainObject(value)) {
+		add(at, `${at} must be an object with validate and approve`);
+		return;
+	}
+	const allowed = new Set(["validate", "approve", "preview"]);
+	for (const k of Object.keys(value)) {
+		if (!allowed.has(k)) add(`${at}.${k}`, `unknown key ${at}.${k}`);
+	}
+	for (const [field, modes, list] of [
+		["validate", VALIDATE_MODES, "panel, skip"],
+		["approve", APPROVE_MODES, "human, agent"],
+	]) {
+		if (field in value) {
+			if (!modes.has(value[field])) add(`${at}.${field}`, `${at}.${field} must be one of ${list}`);
+		} else if (!partial) {
+			add(`${at}.${field}`, `${at}.${field} is required`);
+		}
+	}
+	if ("preview" in value && typeof value.preview !== "boolean") add(`${at}.preview`, `${at}.preview must be a boolean`);
+	if (partial && !("validate" in value) && !("approve" in value) && !("preview" in value)) {
+		add(at, `${at} must set at least one of validate, approve, preview`);
+	}
+}
+
 // One dial validator shared by review.* and overrides.<track>.review.*.
-function validateReviewDial(at, key, value, add) {
+function validateReviewDial(at, key, value, add, partial = false) {
 	switch (key) {
 		case "brainstorm":
 			if (!new Set(["human", "off"]).has(value)) add(`${at}.brainstorm`, `${at}.brainstorm must be one of human, off`);
 			break;
 		case "design":
-			if (!GATE_MODES.has(value)) add(`${at}.design`, `${at}.design must be one of panel, advisory, human, off`);
+			validateGateDial(`${at}.design`, value, partial, add);
 			break;
 		case "code":
-			if (!GATE_MODES.has(value)) add(`${at}.code`, `${at}.code must be one of panel, advisory, human, off`);
+			validateGateDial(`${at}.code`, value, partial, add);
 			break;
 		case "tasks":
 			if (!TASKS_MODES.has(value)) add(`${at}.tasks`, `${at}.tasks must be one of subagent, self, off`);
@@ -348,10 +391,10 @@ function collectReviewIssues(review) {
 	for (const key of Object.keys(review)) {
 		if (!REVIEW_DIAL_KEYS.has(key)) add(`review.${key}`, `unknown key review.${key}`);
 	}
-	// All six dials are required — v3 is always explicit.
+	// All six dials are required — v4 is always explicit (base dials in full).
 	for (const key of REVIEW_DIAL_KEYS) {
 		if (!(key in review)) add(`review.${key}`, `review.${key} is required`);
-		else validateReviewDial("review", key, review[key], add);
+		else validateReviewDial("review", key, review[key], add, false);
 	}
 	return issues;
 }
@@ -413,7 +456,7 @@ function collectOverridesIssues(overrides) {
 		if (reviewKeys.length === 0) add(`${at}.review`, `${at}.review must contain at least one dial`);
 		for (const key of reviewKeys) {
 			if (!OVERRIDE_DIAL_KEYS.has(key)) add(`${at}.review.${key}`, `unknown key ${at}.review.${key} (per-track dials are design, code, tasks, panelSize)`);
-			else validateReviewDial(`${at}.review`, key, block.review[key], add);
+			else validateReviewDial(`${at}.review`, key, block.review[key], add, true);
 		}
 	}
 	return issues;

@@ -124,13 +124,13 @@ test("RL5: inspectRoot honours $SDLC_ROOT when no explicit option is given", () 
 // ---------------------------------------------------------------------------
 
 const GOOD_CONFIG = {
-	schemaVersion: 3,
+	schemaVersion: 4,
 	prefix: "acme",
 	labelPrefix: "acme-sdlc",
 	announce: "hi",
 	paths: { plans: "docs/plans" },
 	hooks: { implement: { before: [{ use: "tool:worktree_session", do: "enter the worktree" }] } },
-	review: { brainstorm: "human", design: "panel", code: "panel", tasks: "subagent", panelSize: 2, onShortfall: "proceed" },
+	review: { brainstorm: "human", design: { validate: "panel", approve: "human" }, code: { validate: "panel", approve: "human" }, tasks: "subagent", panelSize: 2, onShortfall: "proceed" },
 	shape: { separateSpec: true, publishToTracker: 2, defaultTrack: "irreversible" },
 };
 
@@ -168,7 +168,7 @@ test("RL7: inspectConfig — aggregates every issue in validation-rule order, ne
 		paths: { plans: "", nope: "x" },
 		tracker: "not-an-object",
 		hooks: { deploy: { before: [{ run: "x" }] } },
-		review: { brainstorm: "human", design: "panel", code: "panel", tasks: "subagent", panelSize: 2, onShortfall: "proceed" },
+		review: { brainstorm: "human", design: { validate: "panel", approve: "human" }, code: { validate: "panel", approve: "human" }, tasks: "subagent", panelSize: 2, onShortfall: "proceed" },
 		shape: { separateSpec: true, publishToTracker: 2, defaultTrack: "irreversible" },
 	};
 	const issues = inspectConfig(raw);
@@ -177,7 +177,7 @@ test("RL7: inspectConfig — aggregates every issue in validation-rule order, ne
 	assert.deepEqual(inspectConfig(raw), issues);
 	// validation-rule order: unknown key first, then schemaVersion, then prefix...
 	assert.equal(issues[0].message, "unknown key 'bogus'");
-	assert.equal(issues[1].message, "schemaVersion must be 3 (got 2)");
+	assert.equal(issues[1].message, "schemaVersion must be 4 (got 2)");
 	assert.match(issues[2].message, /^prefix must match /);
 	const messages = issues.map((i) => i.message);
 	assert.ok(messages.includes("announce must be a non-empty string"));

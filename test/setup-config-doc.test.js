@@ -24,7 +24,7 @@ test("ASD11: setup template names the kernel, tracks, gate modes, consequences, 
 	assert.match(template, /configurable scaffolding|scaffolding/i);
 	assert.match(template, /irreversible\/reversible|irreversible.*reversible/is);
 	// gate modes explained
-	for (const mode of ["panel", "advisory", "human", "off"]) assert.match(template, new RegExp(`\`${mode}\``));
+	for (const mode of ["panel", "skip", "human", "agent"]) assert.match(template, new RegExp(`\`${mode}\``));
 	// consequences of the other dials
 	assert.match(template, /shape\.separateSpec/);
 	assert.match(template, /shape\.publishToTracker/);
@@ -64,8 +64,8 @@ test("ASD11: collectInterview asks exactly the two core decisions", async () => 
 		return fallback;
 	});
 	assert.equal(questions.length, 2);
-	assert.equal(rs.review.design, "panel");
-	assert.equal(rs.review.code, "panel");
+	assert.deepEqual(rs.review.design, { validate: "panel", approve: "human" });
+	assert.deepEqual(rs.review.code, { validate: "panel", approve: "human" });
 	// the rest come from the standard bundle, not asked
 	assert.equal(rs.review.brainstorm, "human");
 	assert.equal(rs.review.tasks, "subagent");

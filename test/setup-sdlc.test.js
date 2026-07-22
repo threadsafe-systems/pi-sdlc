@@ -36,7 +36,7 @@ test("OH4: --yes writes a schema-valid config; bundle re-run refuses config chan
 		const cfg = readCfg(dir);
 		assert.equal(cfg.prefix, "x");
 		assert.equal(cfg.labelPrefix, "y");
-		assert.equal(cfg.schemaVersion, 3);
+		assert.equal(cfg.schemaVersion, 4);
 		assert.equal(cfg.review.onShortfall, "proceed");
 		const before = readFileSync(join(dir, ".pi", "sdlc", "sdlc.config.json"), "utf8");
 

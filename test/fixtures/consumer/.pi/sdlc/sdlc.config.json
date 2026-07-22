@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 3,
+  "schemaVersion": 4,
   "prefix": "loom",
   "labelPrefix": "loom-sdlc",
   "announce": "Using loom-sdlc to drive this change through its lifecycle.",
@@ -18,8 +18,8 @@
   },
   "review": {
     "brainstorm": "human",
-    "design": "panel",
-    "code": "panel",
+    "design": { "validate": "panel", "approve": "human" },
+    "code": { "validate": "panel", "approve": "human" },
     "tasks": "subagent",
     "panelSize": 2,
     "onShortfall": "fail"

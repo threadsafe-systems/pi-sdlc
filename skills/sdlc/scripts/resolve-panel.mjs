@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // resolve-panel.mjs — resolve a live, deduped, author-excluded review panel for
-// an sdlc phase from the consumer's validated v3 config (schemaVersion 3).
+// an sdlc phase from the consumer's validated v4 config (schemaVersion 4).
 //
 // Usage: resolve-panel.mjs <phase> [--author <provider/model>] [--pong]
 //          [--track irreversible|reversible] [--emit-tasks <agent>]
@@ -13,7 +13,7 @@ import { execFileSync } from "node:child_process";
 import { existsSync, readFileSync } from "node:fs";
 import { homedir } from "node:os";
 import { join } from "node:path";
-import { decomposeGateMode, fail, inspectRoot, PHASES, readConfig } from "./lib.mjs";
+import { effectiveReview, fail, inspectRoot, PHASES, readConfig } from "./lib.mjs";
 import { emitEvent } from "./telemetry.mjs";
 
 const argv = process.argv.slice(2);
@@ -52,7 +52,7 @@ for (let i = 0; i < argv.length; i++) {
 		else track = argv[++i];
 	} else if (a === "--emit-tasks") emitTasksAgent = needVal("--emit-tasks");
 	else if (a === "--slug") slug = needVal("--slug");
-	else if (a === "--models-file") fail("resolve-panel: --models-file is retired — the panel roster lives in .pi/sdlc/sdlc.config.json (schemaVersion 3)");
+	else if (a === "--models-file") fail("resolve-panel: --models-file is retired — the panel roster lives in .pi/sdlc/sdlc.config.json (schemaVersion 4)");
 	else if (a === "--config") config = needVal("--config");
 	else if (a === "--repo-root") repoRoot = needVal("--repo-root");
 	else if (a.startsWith("-")) reportParseError(`resolve-panel: unexpected argument: ${a}`);
@@ -87,11 +87,12 @@ if (!panels || !ph) {
 	fail(`resolve-panel: no panels roster for ${phase} in .pi/sdlc/sdlc.config.json — add a panels block (see schema/sdlc.config.example.json)`, 1);
 }
 
-// --- v3 effective-value resolution (spec §3) ---
+// --- v4 effective-value resolution (spec §3): design/code deep-merge via the
+// single shared effectiveReview helper from lib.mjs (no private merge here). ---
 const DIAL_FOR = { plan_review: "design", spec_review: "design", pr_review: "code", task_validate: "tasks" };
+const effReview = effectiveReview(cfg, track || undefined);
 function effective(dial) {
-	const o = track ? overrides?.[track]?.review?.[dial] : undefined;
-	return o ?? review[dial];
+	return effReview[dial];
 }
 function floorFor() {
 	if (ph.panelSize !== undefined) return ph.panelSize;
@@ -196,8 +197,8 @@ if (phase === "task_validate") {
 	if (mode === "off") fail("resolve-panel: task validation is off in the committed shape (review.tasks)", 1);
 	if (mode !== "subagent") fail(`resolve-panel: task validation is '${mode}' in the committed shape (review.tasks) — only 'subagent' resolves a validator panel`, 1);
 } else {
-	const mode = effective(DIAL_FOR[phase]);
-	if (decomposeGateMode(mode).reviewer === "none") fail(`resolve-panel: ${DIAL_FOR[phase]} gate mode is '${mode}' in the committed shape — no panel to resolve`, 1);
+	const dial = effective(DIAL_FOR[phase]);
+	if (dial.validate === "skip") fail(`resolve-panel: ${DIAL_FOR[phase]} gate does not run a panel (validate: skip) in the committed shape — no panel to resolve`, 1);
 }
 
 const onShortfall = review.onShortfall;
