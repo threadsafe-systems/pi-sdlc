@@ -173,7 +173,7 @@ function panelFloors(config) {
 	const floorFor = (phase, track) => {
 		if (phases[phase]?.panelSize !== undefined) return phases[phase].panelSize;
 		if (phase === "task_validate") return 1;
-		return config.overrides?.[track]?.review?.panelSize ?? config.review?.panelSize;
+		return effectiveReview(config, track).panelSize; // shared merge (no private panelSize merge)
 	};
 	const names = ["plan_review", "spec_review", "pr_review", "task_validate"];
 	const lines = ["## Resolved panel floors", "", "Resolved as `resolve-panel` does: a per-phase `panels.phases.<phase>.panelSize`", "wins; else `task_validate` is 1; else the track's", "`overrides.<track>.review.panelSize`, else `review.panelSize`.", ""];

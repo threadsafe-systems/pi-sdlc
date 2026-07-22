@@ -62,7 +62,9 @@ for (let i = 0; i < argv.length; i++) {
 if (!phase) fail("usage: resolve-panel <phase> [--author <provider/model>] [--pong] [--track irreversible|reversible] [--emit-tasks <agent>] [--slug S] [--config DIR|--repo-root DIR]");
 if (!PHASES.includes(phase)) fail(`resolve-panel: unknown phase '${phase}'. Known: ${PHASES.join(", ")}`);
 
-const rootResult = inspectRoot({ config, repoRoot });
+// Pass empty strings as undefined so inspectRoot's ?? precedence doesn't treat an
+// unset --config as shadowing a supplied --repo-root.
+const rootResult = inspectRoot({ config: config || undefined, repoRoot: repoRoot || undefined });
 if (!rootResult.ok) {
 	if (trackSeen) fail("resolve-panel: unexpected argument: --track");
 	fail(`sdlc: ${rootResult.message}`);

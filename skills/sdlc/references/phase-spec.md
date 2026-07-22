@@ -103,12 +103,13 @@ then `*`. A failed `after` hook **warns** (recorded, never blocking).
 
 ## 8. Completion evidence and next transition
 
-Completion evidence is the committed Spec doc, plus — when
-`review.design.validate` is `panel` — the consolidated spec-panel artifact under
-the configured reviews home, and approval by the effective approver (a human
-owner under `approve: human`, or the agent's recorded adjudication under
-`approve: agent`; the disposition discipline binds either way). Next transition
-is **Build/Tasks** (`references/phase-tasks.md`).
+Completion evidence is the committed Spec doc; the consolidated spec-panel
+artifact under the configured reviews home **when `review.design.validate` is
+`panel`**; and **approval by the effective approver** (a human owner under
+`approve: human`, or the agent's recorded adjudication under `approve: agent`) —
+the approval step always happens, only its approver differs, and the disposition
+discipline binds whenever a panel ran. Next transition is **Build/Tasks**
+(`references/phase-tasks.md`).
 
 ## 9. Advanced-mode pointers
 

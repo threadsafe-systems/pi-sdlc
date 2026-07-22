@@ -190,10 +190,13 @@ hand-copy a prompt per model.
    as signal, preserve genuine disagreement.
 4. **Adjudicate**: for every high or medium finding, either incorporate it or
    record a one-line reason for dismissal. Disclose the orchestrating model in the
-   consolidated file. Disputed high or medium findings are decided by the project's
-   human owner, who is the final adjudicator. Reviewer output is roughly eighty per
-   cent right and overreaches, so nothing is actioned blindly and nothing is
-   dismissed silently.
+   consolidated file. Disputed high or medium findings are decided by the gate's
+   **effective approver**: under `approve: human` the project's human owner is the
+   final adjudicator (escalate per below); under `approve: agent` the agent
+   adjudicates for that gate with no human escalation — still bound by the
+   disposition discipline (nothing dismissed without a recorded reason, no
+   high/medium survives). Reviewer output is roughly eighty per cent right and
+   overreaches, so nothing is actioned blindly and nothing is dismissed silently.
 
    Escalate disputes to the human per the shared contract
    (`references/system-reference.md`, "Presenting questions to the human") with
@@ -226,8 +229,9 @@ form (a `-review-` infix) is equally accepted and recommended going forward;
 the retro collector discovers both.
 
 > **Under your configuration:** whether a Plan panel and a Spec panel run at all
-> depends on the effective track and `review.design.validate`; the PR panel runs
-> on both tracks. `review.code` is a `{ validate, approve }` gate dial —
+> depends on the effective track and `review.design.validate`; the PR panel is
+> eligible on both tracks (unlike the design panel) and runs when
+> `review.code.validate` is `panel`. `review.code` is a `{ validate, approve }` gate dial —
 > `validate` (`panel` | `skip`) sets whether the PR panel runs, `approve`
 > (`human` | `agent`) sets who adjudicates and advances. The human-final-
 > adjudicator rule in step 4 governs `approve: human` gates; under `approve:
@@ -256,13 +260,13 @@ then `*`. A failed `after` hook **warns** (recorded, never blocking).
 
 ## 8. Completion evidence and next transition
 
-Completion evidence is — when `review.code.validate` is `panel` — a clean panel
-(no surviving high/medium) adjudicated by the effective approver (`approve:
-human` = the human owner is final adjudicator; `approve: agent` = the agent
-adjudicates, disposition discipline unchanged), plus a passing `check-lifecycle`
-and the opened PR with its clean body. When `review.code.validate` is `skip` no
-local PR panel runs, and completion rests on the passing `check-lifecycle` and
-the opened PR. **Completion is machine-checked, not narrated.** After the PR exists, do not state that the
+Completion evidence is: a clean panel (no surviving high/medium) **when
+`review.code.validate` is `panel`** (when it is `skip`, no local PR panel runs);
+approval by the **effective approver** — `approve: human` = the human owner
+adjudicates and approves, `approve: agent` = the agent adjudicates and advances
+(the disposition discipline binds whenever a panel ran); a passing
+`check-lifecycle`; and the opened PR with its clean body. **Completion is
+machine-checked, not narrated.** After the PR exists, do not state that the
 Implement/PR phase is "complete" or "PASS" without first running:
 
 ```bash

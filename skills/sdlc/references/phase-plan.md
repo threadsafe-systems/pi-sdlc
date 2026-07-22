@@ -70,9 +70,11 @@ The invariant seam is a **design gate plus approval by the effective approver**
 > dial — `validate` is `panel` or `skip` (does an adversarial plan panel run?),
 > `approve` is `human` or `agent` (who adjudicates findings and advances?) — and
 > per-track `overrides.{irreversible,reversible}` may deep-merge a partial dial
-> over it. On the **reversible** track there is no pre-PR design panel (the PR
-> panel still runs); on the **irreversible** track the plan panel runs when
-> `validate: panel`. Under `approve: agent` the agent is the gate adjudicator and
+> over it. The **reversible** track defaults to no pre-PR design panel unless a
+> reversible override sets `review.design.validate: panel`; on the
+> **irreversible** track the plan panel runs when `validate: panel`. Whichever
+> the effective dial says, run exactly that — do not assume the track's default
+> over a committed override. Under `approve: agent` the agent is the gate adjudicator and
 > advances with no human gate, but the disposition discipline still binds (no
 > surviving high/medium); under `approve: human` the human owner is the final
 > adjudicator. Read the effective track and dial from current `CONFIG.md` (or
@@ -97,12 +99,13 @@ then `*`. A failed `after` hook **warns** (recorded, never blocking).
 
 ## 8. Completion evidence and next transition
 
-Completion evidence is the committed Plan doc plus, when `review.design.validate`
-is `panel`, the consolidated plan-panel artifact under the configured reviews
-home, and approval by the effective approver — a human owner under `approve:
-human`, or the agent's recorded adjudication under `approve: agent` (no separate
-human approval, but the disposition discipline still binds). Next transition is
-**Specification** (or **Build/Tasks** directly when
+Completion evidence is the committed Plan doc; the consolidated plan-panel
+artifact under the configured reviews home **when `review.design.validate` is
+`panel`**; and **approval by the effective approver** — a human owner under
+`approve: human`, or the agent's recorded adjudication under `approve: agent`
+(the approval step always happens; only its approver differs, and the disposition
+discipline binds whenever a panel ran). Next transition is **Specification** (or
+**Build/Tasks** directly when
 `shape.separateSpec: false` merges them, or on the reversible track where Spec is
 not required).
 
