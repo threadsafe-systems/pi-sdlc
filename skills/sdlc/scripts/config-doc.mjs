@@ -121,7 +121,8 @@ const TASKS_MEANING = {
 function trackSummary(config, track) {
 	const r = effectiveReview(config, track);
 	const phases = track === "irreversible" ? "brainstorm, plan, spec, build, implement, PR" : "brainstorm, plan, build, implement, PR";
-	const designNote = track === "reversible" ? " (reversible: no pre-PR design panel unless configured; the PR panel still runs)" : "";
+	const prNote = r.code?.validate === "skip" ? "no PR panel runs (review.code.validate: skip)" : "the PR panel still runs";
+	const designNote = track === "reversible" ? ` (reversible: no pre-PR design panel unless configured; ${prNote})` : "";
 	return [
 		`### Track: ${track}`,
 		"",
@@ -188,7 +189,7 @@ function panelFloors(config) {
 // repeated calls with the same config are byte-identical.
 export function render(config) {
 	if (!config || typeof config !== "object" || !config.shape || !config.review) {
-		throw new Error("config-doc render requires a validated schemaVersion-3 config (review + shape present)");
+		throw new Error("config-doc render requires a validated schemaVersion-4 config (review + shape present)");
 	}
 	const fp = fingerprint(config);
 	const parts = [

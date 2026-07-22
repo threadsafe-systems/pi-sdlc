@@ -18,7 +18,7 @@ const GATE_SURFACES = ["skills/sdlc/schema/sdlc.config.schema.json", "skills/sdl
 // The full swept set (adds prose that legitimately still uses the word
 // "advisory" for the unadopted-session advisory MODE / shortfall log prefix).
 const SWEPT = [...GATE_SURFACES, "skills/sdlc/SKILL.md", "skills/sdlc/references/phase-plan.md", "skills/sdlc/references/phase-spec.md", "skills/sdlc/references/phase-pr-review.md", "skills/sdlc/references/system-reference.md", "skills/sdlc/scripts/resolve-panel.mjs"];
-const VERSION_SWEPT = ["skills/sdlc/scripts/resolve-panel.mjs", "skills/sdlc/scripts/config-doc.mjs", "skills/sdlc/scripts/setup-sdlc.mjs", "skills/sdlc/scripts/setup-sdlc.sh", "skills/sdlc/scripts/sdlc-status.mjs"];
+const VERSION_SWEPT = ["skills/sdlc/scripts/resolve-panel.mjs", "skills/sdlc/scripts/config-doc.mjs", "skills/sdlc/scripts/setup-sdlc.mjs", "skills/sdlc/scripts/setup-sdlc.sh", "skills/sdlc/scripts/sdlc-status.mjs", "skills/sdlc/scripts/lib.mjs"];
 
 // S9 — scoped stale-vocabulary sweep.
 test("S9: no removed gate-scalar grammar survives (scoped; legal uses allowed)", () => {
@@ -35,7 +35,7 @@ test("S9: no removed gate-scalar grammar survives (scoped; legal uses allowed)",
 	assert.match(read("skills/sdlc/SKILL.md"), /advisory mode/);
 	assert.match(read("skills/sdlc/scripts/resolve-panel.mjs"), /advisory\[\$\{phase\}\]/);
 	// (e) version-string sweep: no stale v3 in the swept scripts.
-	for (const rel of VERSION_SWEPT) assert.doesNotMatch(read(rel), /schemaVersion 3\b|requires 3\)|fresh v3/, `${rel} carries a stale v3 version string`);
+	for (const rel of VERSION_SWEPT) assert.doesNotMatch(read(rel), /schemaVersion[ -]3\b|requires 3\)|fresh v3/, `${rel} carries a stale v3 version string`);
 });
 
 // S11 — approve:agent reconciliation across all three design/PR references.

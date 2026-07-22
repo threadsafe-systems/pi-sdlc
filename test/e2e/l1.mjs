@@ -68,9 +68,9 @@ async function checkDiscovery(sandbox) {
 }
 
 const PRESET_DIALS = {
-	solo: { code: "advisory", tasks: "self", separateSpec: false, publishToTracker: "never" },
-	standard: { code: "panel", tasks: "subagent", separateSpec: false, publishToTracker: 4 },
-	full: { code: "panel", tasks: "subagent", separateSpec: true, publishToTracker: 2 },
+	solo: { code: { validate: "panel", approve: "agent" }, tasks: "self", separateSpec: false, publishToTracker: "never" },
+	standard: { code: { validate: "panel", approve: "human" }, tasks: "subagent", separateSpec: false, publishToTracker: 4 },
+	full: { code: { validate: "panel", approve: "human" }, tasks: "subagent", separateSpec: true, publishToTracker: 2 },
 };
 
 async function checkSetupPresets(sandbox) {
@@ -82,8 +82,8 @@ async function checkSetupPresets(sandbox) {
 		const configAsset = report.assets.find((a) => a.id === "config");
 		assert(configAsset?.action === "created", `setup --preset ${preset} did not create a fresh config (${configAsset?.action})`);
 		const config = parseJson(await readFile(join(consumer, ".pi", "sdlc", "sdlc.config.json"), "utf8"), `${preset} config`);
-		assert(config.schemaVersion === 3, `${preset} config not schemaVersion 3`);
-		assert(config.review.code === dials.code, `${preset} review.code = ${config.review.code}, expected ${dials.code}`);
+		assert(config.schemaVersion === 4, `${preset} config not schemaVersion 4`);
+		assert(JSON.stringify(config.review.code) === JSON.stringify(dials.code), `${preset} review.code = ${JSON.stringify(config.review.code)}, expected ${JSON.stringify(dials.code)}`);
 		assert(config.review.tasks === dials.tasks, `${preset} review.tasks = ${config.review.tasks}, expected ${dials.tasks}`);
 		assert(config.shape.separateSpec === dials.separateSpec, `${preset} shape.separateSpec = ${config.shape.separateSpec}`);
 		assert(config.shape.publishToTracker === dials.publishToTracker, `${preset} shape.publishToTracker = ${config.shape.publishToTracker}`);
@@ -93,11 +93,11 @@ async function checkSetupPresets(sandbox) {
 async function checkPresetPatchAndOverrideGuard(sandbox) {
 	const consumer = await makeConsumer(sandbox, "patch-guard");
 	// Fresh full preset with an extra per-track override applied at write time.
-	const created = await runInstalled(sandbox, "setup-sdlc.mjs", ["--preset", "full", "--seed-panels", "--override", "reversible:code:advisory", "--yes", "--format", "json", "--repo-root", consumer], sandbox.dir);
+	const created = await runInstalled(sandbox, "setup-sdlc.mjs", ["--preset", "full", "--seed-panels", "--override", "reversible:code:panel/agent", "--yes", "--format", "json", "--repo-root", consumer], sandbox.dir);
 	assert(created.code === 0, `setup --preset full exited ${created.code}: ${created.stderr}`);
 	const configPath = join(consumer, ".pi", "sdlc", "sdlc.config.json");
 	let config = parseJson(await readFile(configPath, "utf8"), "full config");
-	assert(config.overrides?.reversible?.review?.code === "advisory", `--override reversible:code:advisory not applied (${JSON.stringify(config.overrides)})`);
+	assert(JSON.stringify(config.overrides?.reversible?.review?.code) === JSON.stringify({ validate: "panel", approve: "agent" }), `--override reversible:code:panel/agent not applied (${JSON.stringify(config.overrides)})`);
 
 	// A per-dial-only patch preserves unrelated dials (action: patched).
 	const patch = await runInstalled(sandbox, "setup-sdlc.mjs", ["--review-brainstorm", "off", "--yes", "--format", "json", "--repo-root", consumer], sandbox.dir);
@@ -106,7 +106,7 @@ async function checkPresetPatchAndOverrideGuard(sandbox) {
 	const patchAsset = patchReport.assets.find((a) => a.id === "config");
 	assert(patchAsset?.action === "patched", `dial-only re-run did not patch (${patchAsset?.action})`);
 	config = parseJson(await readFile(configPath, "utf8"), "patched config");
-	assert(config.overrides?.reversible?.review?.code === "advisory", "patch clobbered the consumer override it did not carry");
+	assert(JSON.stringify(config.overrides?.reversible?.review?.code) === JSON.stringify({ validate: "panel", approve: "agent" }), "patch clobbered the consumer override it did not carry");
 	assert(config.review.brainstorm === "off", "dial patch did not apply --review-brainstorm off");
 
 	// Override guard: a preset re-run that would drop the override refuses without --force.

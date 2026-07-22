@@ -97,8 +97,7 @@ function effective(dial) {
 function floorFor() {
 	if (ph.panelSize !== undefined) return ph.panelSize;
 	if (phase === "task_validate") return 1;
-	const o = track ? overrides?.[track]?.review?.panelSize : undefined;
-	return o ?? review.panelSize;
+	return effReview.panelSize; // via the shared merge (no private panelSize merge)
 }
 
 // Credentials: a provider is usable if it has an auth.json entry or its env var.

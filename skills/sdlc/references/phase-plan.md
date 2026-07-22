@@ -97,9 +97,12 @@ then `*`. A failed `after` hook **warns** (recorded, never blocking).
 
 ## 8. Completion evidence and next transition
 
-Completion evidence is the committed Plan doc plus, on the irreversible track,
-the consolidated plan-panel artifact under the configured reviews home and human
-approval. Next transition is **Specification** (or **Build/Tasks** directly when
+Completion evidence is the committed Plan doc plus, when `review.design.validate`
+is `panel`, the consolidated plan-panel artifact under the configured reviews
+home, and approval by the effective approver — a human owner under `approve:
+human`, or the agent's recorded adjudication under `approve: agent` (no separate
+human approval, but the disposition discipline still binds). Next transition is
+**Specification** (or **Build/Tasks** directly when
 `shape.separateSpec: false` merges them, or on the reversible track where Spec is
 not required).
 

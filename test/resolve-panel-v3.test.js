@@ -112,15 +112,26 @@ test("ICA13: reversible design override refuses; irreversible resolves", () => {
 	assert.deepEqual(lines(irr.stdout), ["openai/gpt-5", "zai/glm-5"]);
 });
 
-// S5/S6 (resolver side): a partial override that names ONLY approve must not
-// drop the inherited validate:panel — the panel still resolves (a shallow
-// resolver merge would leave validate undefined and this would still pass the
-// guard, so this asserts the deep-merge is real and observable).
-test("S5/S6: an approve-only reversible override keeps validate:panel and still resolves a panel", () => {
-	const f = fixture({ overrides: { reversible: { review: { design: { approve: "agent" } } } } });
+// S5/S6 (resolver side, OBSERVABLE): a partial override that names ONLY approve
+// must deep-merge onto the base, keeping the inherited `validate`. With a
+// `validate: skip` base, an approve-only reversible override must STILL refuse
+// (validate:skip is inherited) — a shallow `override ?? base[dial]` merge would
+// return `{approve:"agent"}` (validate undefined), and `undefined === "skip"` is
+// false, so the panel would wrongly resolve. This test fails on that regression.
+test("S5/S6: an approve-only override deep-merges onto a validate:skip base and still refuses", () => {
+	const f = fixture({
+		review: { design: { validate: "skip", approve: "human" } },
+		overrides: { reversible: { review: { design: { approve: "agent" } } } },
+	});
 	const rev = run(f, "plan_review", ["--author", "anthropic/claude-opus-4", "--track", "reversible"]);
-	assert.equal(rev.status, 0);
-	assert.deepEqual(lines(rev.stdout), ["openai/gpt-5", "zai/glm-5"]);
+	assert.equal(rev.status, 1, rev.stdout || rev.stderr);
+	assert.match(rev.stderr, /no panel to resolve/);
+	// control: a validate:panel base with the same approve-only override resolves,
+	// proving the override didn't force a skip either.
+	const g = fixture({ overrides: { reversible: { review: { design: { approve: "agent" } } } } });
+	const ok = run(g, "plan_review", ["--author", "anthropic/claude-opus-4", "--track", "reversible"]);
+	assert.equal(ok.status, 0);
+	assert.deepEqual(lines(ok.stdout), ["openai/gpt-5", "zai/glm-5"]);
 });
 
 // ICA14: refusals.

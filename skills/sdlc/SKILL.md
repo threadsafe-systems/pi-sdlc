@@ -155,8 +155,8 @@ package-owned `templates/sdlc-<slug>.md` prompts — one lifecycle skill's share
 named surfaces, not six discovered skills.
 
 Instrumented runs emit **lifecycle telemetry** (FS13): at run start (before
-announcing), on each phase entry, at every human gate approval, and at each
-panel dispatch (with harvest-at-dispatch), emit the matching `record-run-event`
+announcing), on each phase entry, at every gate approval (human or agent), and at
+each panel dispatch (with harvest-at-dispatch), emit the matching `record-run-event`
 event and harvest panels — **load and follow** `references/system-reference.md`
 ("Lifecycle telemetry") for the event map. PR/epic **completion is
 machine-checked** (`check-completion.mjs`), not narrated — see

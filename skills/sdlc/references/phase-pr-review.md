@@ -256,9 +256,13 @@ then `*`. A failed `after` hook **warns** (recorded, never blocking).
 
 ## 8. Completion evidence and next transition
 
-Completion evidence is a clean panel (no surviving high/medium), a passing
-`check-lifecycle`, and the opened PR with its clean body. **Completion is
-machine-checked, not narrated.** After the PR exists, do not state that the
+Completion evidence is — when `review.code.validate` is `panel` — a clean panel
+(no surviving high/medium) adjudicated by the effective approver (`approve:
+human` = the human owner is final adjudicator; `approve: agent` = the agent
+adjudicates, disposition discipline unchanged), plus a passing `check-lifecycle`
+and the opened PR with its clean body. When `review.code.validate` is `skip` no
+local PR panel runs, and completion rests on the passing `check-lifecycle` and
+the opened PR. **Completion is machine-checked, not narrated.** After the PR exists, do not state that the
 Implement/PR phase is "complete" or "PASS" without first running:
 
 ```bash
