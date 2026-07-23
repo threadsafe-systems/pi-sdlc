@@ -1,0 +1,9 @@
+panel[pr_review]: 2 distinct model(s); need >= 2; author model excluded: anthropic/claude-fable-5 (anthropic/claude-fable-5)
+sdlc-telemetry: run identity unresolvable: detached HEAD or no git branch — skipping emission
+roster (host-resolved): deepseek/deepseek-v4-flash, zai/glm-5.2:low
+PARKED: awaiting decision.json …
+decision received: approve
+
+status=completed ok=true wall=261521ms
+ phase panel: status=done gate=null approval=null cost=$0.0011
+ phase ratify: status=done gate=null approval={"decision":"approve","note":"spike ratification via file seam"} cost=$0.0000

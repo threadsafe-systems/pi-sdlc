@@ -1,0 +1,9 @@
+{"ts":"2026-07-23T14:50:50.056Z","type":"run.started","payload":{"runDir":"run3","subject":"subject.diff (pi-sdlc 7621fe8 config hunk)"}}
+{"ts":"2026-07-23T14:50:50.056Z","type":"panel.resolved","payload":{"phase":"pr_review","roster":["deepseek/deepseek-v4-flash","zai/glm-5.2:low"],"floor":2}}
+{"ts":"2026-07-23T14:50:50.087Z","type":"reviewer.started","payload":{"model":"deepseek/deepseek-v4-flash","attempt":1,"effectiveModel":"deepseek/deepseek-v4-flash"}}
+{"ts":"2026-07-23T14:50:50.091Z","type":"reviewer.started","payload":{"model":"zai/glm-5.2:low","attempt":1,"effectiveModel":"zai/glm-5.2:low"}}
+{"ts":"2026-07-23T14:51:36.626Z","type":"reviewer.completed","payload":{"model":"deepseek/deepseek-v4-flash","attempt":1,"ms":46539,"costUSD":0.0012584936000000003,"verdict":"BLOCK","findings":1}}
+{"ts":"2026-07-23T14:51:55.605Z","type":"reviewer.started","payload":{"model":"zai/glm-5.2:low","attempt":1,"effectiveModel":"zai/glm-5.2:low"}}
+{"ts":"2026-07-23T14:53:45.060Z","type":"reviewer.completed","payload":{"model":"zai/glm-5.2:low","attempt":1,"ms":109455,"costUSD":0,"verdict":"BLOCK","findings":2}}
+{"ts":"2026-07-23T14:53:45.064Z","type":"panel.consolidated","payload":{"reviewers":2,"verdicts":["BLOCK","BLOCK"],"findings":3,"survivingHighMedium":2}}
+{"ts":"2026-07-23T14:53:45.064Z","type":"ceremony.recommended","payload":{"handoffId":"b0c7e688c3b0d123","phase":"pr_review","recommendation":{"nextProducerClass":"strong","panel":{"size":2,"class":"fast"}},"evidence":["panel 2/2 completed, verdicts: BLOCK/BLOCK","2 surviving high/medium finding(s) of 3 total","panel cost $0.0013, wall 109455ms"],"deviations":[]}}

@@ -1,0 +1,113 @@
+{
+ "state": "done",
+ "handoffId": "e06310ae0c99d680",
+ "subject": "subject.diff (pi-sdlc 7621fe8 config hunk)",
+ "floor": 2,
+ "pool": [],
+ "roster": [
+  {
+   "model": "anthropic/claude-haiku-4-5",
+   "status": "failed",
+   "attempts": [
+    {
+     "attempt": 1,
+     "effectiveModel": "anthropic/claude-haiku-4-5",
+     "ms": 1118,
+     "kind": "infra",
+     "reason": "provider error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Third-party apps now draw from your extra usage, not your plan limits. Add more at claude.ai/settings/usage and keep going.\"},\"re",
+     "costUSD": null,
+     "stderrTail": ""
+    },
+    {
+     "attempt": 2,
+     "effectiveModel": "anthropic/claude-haiku-4-5",
+     "ms": 1006,
+     "kind": "infra",
+     "reason": "provider error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Third-party apps now draw from your extra usage, not your plan limits. Add more at claude.ai/settings/usage and keep going.\"},\"re",
+     "costUSD": null,
+     "stderrTail": ""
+    }
+   ],
+   "verdict": null
+  },
+  {
+   "model": "deepseek/deepseek-v4-flash",
+   "status": "completed",
+   "attempts": [
+    {
+     "attempt": 1,
+     "effectiveModel": "deepseek/no-such-model-xyz",
+     "ms": 1132,
+     "kind": "infra",
+     "reason": "provider error: 400: {\"message\":\"The supported API model names are deepseek-v4-pro or deepseek-v4-flash, but you passed no-such-model-xyz.\",\"type\":\"invalid_request_error\",\"param\":null,\"code\":\"invalid_request_error\"}",
+     "costUSD": null,
+     "stderrTail": "Warning: Model \"no-such-model-xyz\" not found for provider \"deepseek\". Using custom model id.\n"
+    },
+    {
+     "attempt": 2,
+     "effectiveModel": "deepseek/deepseek-v4-flash",
+     "ms": 36318,
+     "kind": "verdict",
+     "reason": null,
+     "costUSD": 0.0011176536000000001
+    }
+   ],
+   "verdict": {
+    "verdict": "PASS",
+    "findings": [
+     {
+      "severity": "low",
+      "title": "Gemini availability risk in design-review phases",
+      "detail": "gemini-3.1-pro-preview is placed at position 2 in plan_review and spec_review (the two phases that gate irreversible design tradeoffs) despite having a documented 'known API-credit/429 availability issue' — the same availability concern that warranted its demotion in pr_review. If the model is unavailable during these high-impact, rarely-run phases, the panel falls through to gpt-5.6-luna which, per the cited benchmarks, trails on HLE/GPQA/FrontierMath. This is acknowledged in the commit message but the asymmetric handling (demoted in pr_review, promoted in plan/spec) is not further justified."
+     },
+     {
+      "severity": "low",
+      "title": "kimi-k3 timeout risk not structurally mitigated",
+      "detail": "kimi-k3 is retained in the pr_review preference list at last position despite 'two hard 1,200,000ms timeouts in a single Case PR-review run'. Moving it to last preference does not prevent it from being selected if earlier models cannot satisfy the panelSize=3 distinct-identity requirement (e.g., if authors or other providers are unavailable). If selected, the documented timeout could still block the pipeline."
+     },
+     {
+      "severity": "low",
+      "title": "No per-phase reasoning-level differentiation for authorDefault",
+      "detail": "authorDefault is set to claude-fable-5:high while the three main review phases all use :xhigh. This is noted as temporary pending 'per-phase author preferences (C1)', but until that ships, an author override would run at high reasoning when the phase demands xhigh, potentially producing less thorough reviews or requiring the phase preference-chain to fully resolve before falling back."
+     }
+    ]
+   }
+  },
+  {
+   "model": "zai/glm-5.2:low",
+   "status": "completed",
+   "attempts": [
+    {
+     "attempt": 1,
+     "effectiveModel": "zai/glm-5.2:low",
+     "ms": 124603,
+     "kind": "verdict",
+     "reason": null,
+     "costUSD": 0
+    }
+   ],
+   "verdict": {
+    "verdict": "PASS",
+    "findings": [
+     {
+      "severity": "low",
+      "title": "pr_review 'demoted not dropped' models are effectively unreachable at panelSize 3",
+      "detail": "pr_review grows to 8 candidates with panelSize 3. The two models explicitly flagged as fragile (google/gemini-3.1-pro-preview for 429/credit issues, moonshotai/kimi-k3 for two hard 20-min timeouts) are placed at positions 7-8. Given authorDefault (claude-fable-5) is identity-excluded and 6 healthier distinct identities sit ahead, kimi/gemini will only ever seat if ~4 higher-preferred models all fail in the same run. The stated 'demoted, not dropped' rationale is therefore mostly cosmetic; the thin justification for retaining them over a cleaner roster is a low concern, not a blocker."
+     },
+     {
+      "severity": "low",
+      "title": "Oversized $comment duplicates rationale that lives in the referenced briefs",
+      "detail": "The single $comment line is extremely long and restates benchmark citations, retro evidence, and the Qwen non-add that the commit says are captured in docs/briefs/*.md. Valid JSON (UTF-8), but this maximizes drift risk between the inline comment and the briefs over time. Consider trimming to the invariant rules (thinking-level legend, panelSize identity axis, authorDefault interaction). Low/style only."
+     }
+    ]
+   },
+   "substituteFor": "anthropic/claude-haiku-4-5"
+  }
+ ],
+ "ratification": {
+  "decision": "approve",
+  "note": "spike ratification",
+  "ratifier": "neilwashere",
+  "at": "2026-07-23T14:50:32.253Z"
+ }
+}
