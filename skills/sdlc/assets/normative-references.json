@@ -139,6 +139,28 @@
       "class": "package-public"
     },
     {
+      "id": "script.tracker-ops",
+      "source": "skills/sdlc/scripts/tracker-ops.mjs",
+      "assertion": "tracker-ops.mjs — scripted wrapper for the GitHub tracker mutations",
+      "targetKind": "file",
+      "ownership": "package",
+      "required": true,
+      "resolution": "package",
+      "target": "skills/sdlc/scripts/tracker-ops.mjs",
+      "class": "internal"
+    },
+    {
+      "id": "script.tracker-ops-wrapper",
+      "source": "skills/sdlc/scripts/tracker-ops.sh",
+      "assertion": "tracker-ops.sh — thin entry point for the sdlc tracker-ops helper.",
+      "targetKind": "command",
+      "ownership": "package",
+      "required": true,
+      "resolution": "package",
+      "target": "skills/sdlc/scripts/tracker-ops.sh",
+      "class": "package-public"
+    },
+    {
       "id": "agent-brief.asset",
       "source": "skills/sdlc/assets/agent-brief.md",
       "assertion": "# Writing durable issue/ticket bodies",
