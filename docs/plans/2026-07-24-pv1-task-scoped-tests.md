@@ -57,7 +57,14 @@
   the Spec's own now-invalid worked example or its §1.3–1.5 prose; the
   Objective's zero-scenario wording overclaimed "unaffected" instead of
   "unaffected by requirement (b) only"). All three verified directly and
-  incorporated (fix-wave commit, this commit).
+  incorporated (fix-wave commit `77ffa74`).
+- **Plan panel, round 8** (same two reviewers): gemini reports genuinely
+  clean. luna found 3 more: 2 medium (the deterministic error-ordering
+  requirement wasn't tied to the existing runtime sort mechanism or a golden
+  test; DoD 9 didn't enumerate all four Spec-amendment sub-items Scope item 9
+  already required) and 1 low (the public README's manifest-authoring
+  section would stay silent on the new rules). All three verified directly
+  and incorporated (fix-wave commit, this commit).
 
 ## Objective
 
@@ -231,10 +238,20 @@ scenarios or not: a `"full"`-tagged check must be present regardless.
      manifest with `categories.tests: n/a` is unaffected by both rules.
      `scope` absent (or a check simply not referenced) satisfies neither rule
      — invisible to both counts, never an error on its own.
+   - All three new checks (`scope` shape, Rule A, Rule B) report through the
+     existing `add(pointer, message)` / `sortAndFormat()` mechanism every
+     other rule already uses (verified: `validate-task.mjs`'s `inspectManifest`
+     sorts lexicographically by pointer then message) — not a parallel or
+     bespoke reporting path, so the pointer-scheme's determinism (Scope item
+     10) actually holds at runtime, not only on paper.
 3. `references/phase-tasks.md` / `references/phase-implement.md` (both under
    `skills/sdlc/`): document the `scope` field (array-valued, both tags
    allowed on one check), Rules A/B, and both degradations, as part of
-   Build's manifest authoring guidance.
+   Build's manifest authoring guidance. `README.md`'s manifest-authoring
+   section (lines 84–107, verified — currently silent on `scope`/Rule A/
+   Rule B) gets a brief summary or a link to this fuller guidance, so a
+   consumer reading only the public README doesn't author a manifest that
+   silently fails the new rules.
 4. `skills/sdlc/prompts/validator-task.prompt.md`: no mandate change
    (confirmed unnecessary per Rationale) — confirm in Build whether its
    "Checks" list needs a one-line note (likely not; it already reports every
@@ -404,18 +421,32 @@ scenarios or not: a `"full"`-tagged check must be present regardless.
    and 8) and the full corpus passes with no other fixture regressed.
 9. **`docs/specs/2026-07-12-sdlc-portable-validator.md` carries an explicit
    amendment section** naming and superseding its old `CommandCheck` type,
-   "no additional properties" line, and extending its fixed cross-field
-   error rule-order/pointer scheme to the three new error types (Scope items
-   9–10) — the repo never holds two silently-contradictory normative
-   Specifications, and `manifestErrors` stays deterministic and
-   golden-testable.
-10. The landing PR/commit carries a `BREAKING CHANGE:` footer (Scope item 11)
+   "no additional properties" line, **its worked example manifest, and its
+   §1.3–1.5 constraint prose** (all four named sub-items of Scope item 9),
+   plus extending its fixed cross-field error rule-order/pointer scheme to
+   the three new error types (Scope item 10) — the repo never holds two
+   silently-contradictory normative Specifications, and `manifestErrors`
+   stays deterministic and golden-testable.
+10. The three new error checks (`scope` shape, Rule A, Rule B) route through
+    `inspectManifest`'s existing `add(pointer, message)`/`sortAndFormat()`
+    mechanism — the same one every existing rule already uses — not a
+    parallel reporting path; a golden multi-error test proves correct
+    lexicographic pointer-then-message ordering when a new-rule error
+    co-occurs with a pre-existing error type (e.g. a dangling-check error) in
+    one manifest, so the deterministic-ordering contract (Scope item 10’s
+    pointer scheme) is verified, not merely documented.
+11. The landing PR/commit carries a `BREAKING CHANGE:` footer (Scope item 11)
     — the only release-channel signal this change gets, since
     `check-schema-break.mjs` deliberately excludes PV1 by prior design.
-11. Full test corpus green; touched files biome-clean; `schemaVersion` stays 1
+12. Full test corpus green; touched files biome-clean; `schemaVersion` stays 1
     per the ratified ADR 0013 amendment.
-12. A Specification exists (irreversible track) with falsifiable scenarios
-    covering DoD 1–10, reviewed by a plan panel (this doc, converged clean)
+13. `README.md`'s manifest-authoring section (lines 84–107) is updated with a
+    brief `scope`/Rule A/Rule B summary or a link to the fuller
+    `phase-tasks.md`/`phase-implement.md` guidance (Scope item 3) — a
+    consumer following only the public README should not author a manifest
+    that silently fails the new rules.
+14. A Specification exists (irreversible track) with falsifiable scenarios
+    covering DoD 1–13, reviewed by a plan panel (this doc, converged clean)
     and a spec panel (the Spec doc), both clean before Build.
 
 ## Context for the next agent
