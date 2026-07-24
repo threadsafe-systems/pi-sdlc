@@ -118,7 +118,21 @@
   checkable. Also found 1 medium (DoD item 7 accepted a mere tracked issue
   for the FROZEN follow-up, weaker than Scope item 6's "not an acceptable
   end state" language — tightened to require the follow-up PR actually
-  merging). Both incorporated (fix-wave commit, this commit).
+  merging). Both incorporated (fix-wave commit `af2784a`).
+- **Plan panel, round 13** (same two reviewers): gemini reports genuinely
+  clean, **explicitly confirming the round-12 Build-authority reconciliation
+  is sound and consistent with the cited ADR/Spec text** — independent
+  confirmation on the topic that oscillated across three rounds. luna found
+  3 more, all wording-precision, no new structural issues (a good
+  convergence signal): 1 medium (the Objective's "unaffected by both
+  requirements" phrasing blurred that requirement (a)/Rule A is a
+  manifest-level constraint that doesn't turn off just because one
+  scenario's evidence is static-only) and 2 low (the worked-example vs
+  `pv-t1.json` "exactly the same manifest" claim was false — verified,
+  they differ in scenario/check/argv content though they share the same
+  structural defect; the compatibility note's "old or newly-authored alike"
+  wrongly implied a correctly-tagged new manifest would also fail). All
+  three verified directly and incorporated (fix-wave commit, this commit).
 
 ## Objective
 
@@ -146,12 +160,18 @@ checks' `scope` must include `"task"` — scenario evidence can no longer rest
 solely on a check that isn't tagged task-scoped. A single check that
 legitimately serves both roles (e.g. a small task where the full suite *is*
 the task-specific evidence) tags `scope: ["full", "task"]` and satisfies both
-requirements without duplication. A scenario evidenced purely by non-test
-categories, or a manifest with `tests: n/a`, is unaffected by both
-requirements. A manifest with **no owned scenarios** is unaffected by
-requirement (b) only — it is never asked to declare or cite a `"task"`-tagged
-check — but requirement (a) still applies whenever `tests` is required,
-scenarios or not: a `"full"`-tagged check must be present regardless.
+requirements without duplication. **Precisely, since requirement (a) is a
+manifest-level constraint and requirement (b) is scenario-level, they don't
+turn off together:** a scenario evidenced purely by non-test categories is
+unaffected by requirement (b) for *that scenario* (Rule B never fires for
+it) — but the *manifest* as a whole remains subject to requirement (a)
+whenever `tests` is required, regardless of any individual scenario's
+evidence shape. Only a manifest with `categories.tests: n/a` is unaffected
+by requirement (a) too. A manifest with **no owned scenarios** is
+similarly unaffected by requirement (b) only — it is never asked to
+declare or cite a `"task"`-tagged check — while requirement (a) still
+applies whenever `tests` is required: a `"full"`-tagged check must be
+present regardless.
 
 ## Rationale
 
@@ -404,11 +424,16 @@ scenarios or not: a `"full"`-tagged check must be present regardless.
    `CommandCheck` TypeScript type and its "No additional properties are
    allowed at any level in PV1 schema version 1" line (neither currently
    mentions `scope`, and the latter is literally false once `scope` ships);
-   (b) **the worked example manifest** (§1, lines 52–103) — its single check
-   `tests.contract` is, by construction, exactly the same manifest as
-   `docs/validation/portable-validator/pv-t1.json` (round 2's counter-
-   example) and fails both Rule A and Rule B unchanged; a "normative" example
-   presenting an invalid manifest is incoherent. **Correcting the Spec's own
+   (b) **the worked example manifest** (§1, lines 52–103) — correction
+   (round 13): not byte-identical to `docs/validation/portable-validator/
+   pv-t1.json` (round 2's counter-example) as an earlier draft of this Plan
+   overstated — verified, they differ in `ownedScenarios`, check count, and
+   argv — but they **share the same structural defect**: a single unscoped
+   check (`tests.contract` in both) doing double duty as the sole tests-
+   category check and the sole scenario evidence, with no `scope` tag,
+   failing both Rule A and Rule B identically; a "normative" example
+   presenting an invalid manifest is incoherent regardless. **Correcting the
+   Spec's own
    example necessarily makes it diverge from the still-committed
    `pv-t1.json` file** (and, by the same logic, from all 53 of this repo's
    pre-law manifests, verified: every one lacks `scope`) — this divergence
@@ -481,11 +506,14 @@ scenarios or not: a `"full"`-tagged check must be present regardless.
     commit-authoring one — stated here so it isn't lost between Plan and PR.
 12. Compatibility note for **existing** manifests in this repo
     (`docs/validation/*/*.json`): the `scope` field does not exist before this
-    change, so **no historical manifest declares it** — every manifest with
-    `tests: required` fails Rule A the moment it is re-validated under the new
-    rules, old or newly-authored alike, unconditionally, with no partial-
-    compliance exceptions to hunt for. This is a clean break exactly as ADR
-    0027 anticipates. What does *not* happen: retroactive invalidation of
+    change, so **every currently-committed pre-law manifest** with `tests:
+    required` fails Rule A the moment it is re-validated under the new rules
+    (round 13 correction: not "old or newly-authored alike" — that
+    overclaimed that a *correctly* `scope`-tagged manifest, authored after
+    this change ships, would also fail; it would not, by design), with no
+    partial-compliance exceptions to hunt for among the pre-law population.
+    This is a clean break exactly as ADR 0027 anticipates. What does *not*
+    happen: retroactive invalidation of
     already-merged historical receipts — those are hash-verified against
     their own recorded content (`verify-task-receipt.mjs`), never re-run
     through `inspectManifest`, so a past PASS stays a past PASS on record
