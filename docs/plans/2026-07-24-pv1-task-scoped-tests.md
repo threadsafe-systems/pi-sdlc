@@ -85,7 +85,24 @@
   *decides* each check's tag, leaving it an unaudited Implement-time choice;
   resolved by deriving `scope` mechanically from Build's already-approved
   scenario-evidence mapping rather than inventing new Build-doc machinery.
-  Both verified directly and incorporated (fix-wave commit, this commit).
+  Both verified directly and incorporated (fix-wave commit `915f915`).
+- **Plan panel, round 11** (same two reviewers): gemini found 1 high
+  (removing the two `FROZEN` entries has no mechanism to restore protection
+  — verified mechanically impossible within the same PR, since `ASD19`
+  diffs against the merge-base with `main`; requires a mandatory follow-up
+  PR). luna found 1 high (a genuinely important correction to my *own*
+  round-10 fix: "derives from Build's approved evidence mapping" overclaimed
+  a formal Build-time gate that, verified against `phase-tasks.md` §5,
+  doesn't exist — "Build has no gate of its own"; retracted to an honest
+  statement that `scope` is decided at manifest-authoring time like the
+  mapping it complements) plus 2 medium (a promised static-only-scenario
+  case wasn't in the required regression test list; the "fixed rule order"
+  vs. lexicographic-sort ambiguity from round 8 was still unresolved in the
+  Plan text, and verified to genuinely differ when worked through
+  mechanically — resolved definitively as rule-to-pointer catalog, not a
+  display-order override) and 1 low (DoD item 1's schema-layer wording read
+  as if it covered `inspectManifest` too). All five verified directly and
+  incorporated (fix-wave commit, this commit).
 
 ## Objective
 
@@ -268,20 +285,27 @@ scenarios or not: a `"full"`-tagged check must be present regardless.
 3. `references/phase-tasks.md` / `references/phase-implement.md` (both under
    `skills/sdlc/`): document the `scope` field (array-valued, both tags
    allowed on one check), Rules A/B, and both degradations, as part of
-   Build's manifest authoring guidance. **Critically, this guidance states
-   `scope` tagging is not a free Implement-time choice**: a check is
-   `scope: [..., "task"]`-tagged if and only if the committed build-plan
-   doc's approved scenario-evidence mapping cites it as a scenario's
-   evidence; `scope: [..., "full"]` is reserved for whichever check(s) that
-   same approved plan designates as the task's regression-net command. This
-   anchors the acceptance-critical classification to Build's *existing*
-   human-gated approval surface (the scenario-evidence mapping, already
-   canonical per `docs/specs/2026-07-12-sdlc-portable-validator.md`'s "the
-   approved Build-plan task is canonical; the manifest is a mechanically
-   executable projection") rather than inventing new Build-doc machinery —
-   the manifest's `scope` tags are then a mechanical *derivation* from an
-   approval that already exists, not a new decision made after the human
-   gate has already passed. `README.md`'s manifest-authoring section (lines
+   Build's manifest authoring guidance. **Correction to an earlier draft of
+   this Plan (round 11 finding), stated honestly this time:** round 10
+   claimed `scope` tagging "derives from Build's already-approved
+   scenario-evidence mapping," implying a formal, human-gated Build artifact
+   that, verified directly against `phase-tasks.md` §4–§5, does not exist —
+   Build's committed output is "check commands, and scenario ids per task"
+   (coarser than per-check evidence wiring) and, explicitly, "**Build has no
+   gate of its own**"; the exact check-to-scenario mapping is decided when
+   the manifest itself is authored, during Implement, exactly as the
+   pre-existing (pre-this-slice) scenario-evidence mapping already is.
+   `scope` tagging does not change this: it follows the **same** discipline
+   as the mapping it complements, decided at manifest-authoring time,
+   consistent with whatever check commands and scenario-id list Build did
+   approve, and subject to the same review this system already relies on for
+   manifest correctness — the new mechanical Rule A/B checks (structural,
+   this slice) plus PR-panel judgement review (a wrongly-tagged manifest is
+   exactly the kind of thing the panel already catches for a wrongly-
+   evidenced scenario today). Inventing a new Build-time gate specifically
+   for `scope`, while the underlying evidence mapping it builds on remains
+   ungated, would be disproportionate and inconsistent — explicitly declined
+   (see Out of scope). `README.md`'s manifest-authoring section (lines
    84–107, verified — currently silent on `scope`/Rule A/Rule B) gets a
    brief summary or a link to this fuller guidance, so a consumer reading
    only the public README doesn't author a manifest that silently fails the
@@ -308,7 +332,22 @@ scenarios or not: a `"full"`-tagged check must be present regardless.
    Plan as the deliberate reopening, mirroring how the surface was originally
    frozen with a named rationale. The file's own header comment (currently
    "the PV1/PV2 validator... [is] untouched") is updated in the same edit so
-   the prose doesn't contradict the array's new contents. Do **not**
+   the prose doesn't contradict the array's new contents.
+
+   **Removal alone is not the end state (round 11 finding, verified
+   mechanically): `ASD19` diffs against the merge-base with `main`, which
+   only advances once this PR merges — nothing can restore the freeze
+   *within this same PR*, because any content difference from these two
+   files relative to `main` (which is exactly this PR's own purpose) would
+   immediately fail `ASD19` again if the entries were re-added before merge.
+   This is therefore a mandatory two-PR sequence, not a one-time edit:**
+   this PR removes the two entries (necessary and sufficient for this PR to
+   land); a small, immediate, single-purpose **follow-up PR** — opened right
+   after this one merges, touching only `test/frozen-surfaces.test.js` —
+   re-adds both entries to `FROZEN`, restoring standing protection for every
+   PR after that point. Leaving the surface permanently unguarded (silently
+   dropping ADR 0013's standing law rather than deliberately reopening it
+   once) is not an acceptable end state. Do **not**
    additionally amend
    `docs/specs/2026-07-18-sdlc-agent-self-documentation.md` or
    `docs/specs/2026-07-16-config-versioning-migration.md`'s own
@@ -368,11 +407,29 @@ scenarios or not: a `"full"`-tagged check must be present regardless.
 10. **The same Specification amendment must also extend §6's fixed
     cross-field error rule-order and pointer scheme** (`docs/specs/2026-07-
     12-sdlc-portable-validator.md`, the "JSON Schema errors use AJV-compatible
-    instance pointers... fixed rule order and pointer" paragraph, verified
-    directly) to the three new error types, so `manifestErrors` ordering and
-    pointers stay deterministic and golden-testable rather than
-    implementation-defined. Starting point for Spec to finalize (not this
-    Plan's to fix precisely — exact wording is Spec-level normative detail):
+    instance pointers... fixed rule order and pointer" paragraph) to the
+    three new error types, so `manifestErrors` ordering and pointers stay
+    deterministic and golden-testable rather than implementation-defined.
+
+    **Resolving an ambiguity round 11 found in that existing paragraph,
+    definitively, so it doesn't propagate into the amendment:** the
+    paragraph's "fixed rule order" list (`/checks` first, then categories,
+    then scenario pointers, then `/buildPlan`/`/repoRoot` last) is **not**
+    the final array order — verified directly, plain lexicographic sort of
+    those same example pointers produces `/buildPlan` first, then
+    `/categories/...`, then `/checks/...`, a *different* order, and the
+    actual shipped code (`inspectManifest`'s `sortAndFormat`) implements
+    exactly that lexicographic sort, nothing else. The "fixed rule order"
+    list is read as a **rule-to-pointer catalog** (documentation of which
+    rule uses which pointer string), not a display-order override; "within
+    one pointer, messages sort lexicographically" is not a narrower carve-out
+    of a broader non-lexicographic order — it's describing the *only*
+    ordering rule, which also governs *across* pointers, matching the code.
+    The Spec amendment must state this explicitly (not merely extend the
+    ambiguous prose verbatim), so a future reader cannot construct the same
+    contradiction from the existing text. Starting point for Spec to
+    finalize the new pointers (not this Plan's to fix precisely — exact
+    wording is Spec-level normative detail):
     `scope` shape errors at `/checks/<i>/scope` (per-check field, consistent
     with existing `id`/`argv`/`timeoutMs`/`evidence` pointers); Rule A
     failures at `/categories/tests` (category-level, consistent with the
@@ -421,8 +478,19 @@ scenarios or not: a `"full"`-tagged check must be present regardless.
    evidence citing only an unscoped or `"full"`-only check); the zero-
    scenario and `tests: n/a` degradations; the spelling-vs-field case (an
    unscoped check literally named `tests.full` must **not** satisfy Rule A);
-   and the new `scope` shape-validation itself (wrong type, empty array,
-   duplicate entry, unknown string value — each a manifest error).
+   the new `scope` shape-validation itself (wrong type, empty array,
+   duplicate entry, unknown string value — each a manifest error); **the
+   static-only-scenario case Rule B's own design promises but round 11
+   found untested**: a manifest with `tests: required` (satisfied by a
+   `scope: ["full"]` check, so Rule A passes) and a scenario whose evidence
+   cites only a `static`-category check (no `tests`-category id at all) must
+   **PASS** — Rule B must not fire merely because `tests` is required
+   elsewhere in the manifest; and a **golden multi-error ordering test**
+   (DoD item 10) with a scope-shape error, a Rule A error, and a
+   pre-existing dangling-check error co-occurring in one manifest, asserting
+   the exact final `manifestErrors` array matches pure lexicographic
+   pointer-then-message order (see Scope item 10's clarified ordering
+   semantics).
 
 **Out:**
 - Any diff-correspondence judgement capability in `task_validate` (rejected in
@@ -437,10 +505,15 @@ scenarios or not: a `"full"`-tagged check must be present regardless.
   population, directly contradicting the ratified ADR 0027 clean-break
   extension. They stay as committed history; only the Spec's own worked
   example and forward-facing guidance (Scope items 3, 9) are corrected.
-- **A new required Build-doc field/column explicitly declaring each check's
-  `scope`** — explicitly declined (round 10 finding): the classification is
-  instead a mechanical derivation from Build's *existing* approved
-  scenario-evidence mapping (Scope item 3), not new Build-doc machinery.
+- **A new Build-time gate, field, or column formally approving each check's
+  `scope`** — explicitly declined (rounds 10–11): Build has no gate of its
+  own today (verified, `phase-tasks.md` §5) and the pre-existing scenario-
+  evidence mapping it would need to anchor to isn't itself a formally-
+  approved, per-check Build artifact either. Inventing new Build-time
+  ceremony for `scope` alone, while that underlying mapping stays ungated,
+  would be disproportionate and inconsistent. `scope` is decided at
+  manifest-authoring time, like the mapping it complements, and reviewed by
+  the same existing mechanisms (Scope item 3).
 - Any change to `schemaVersion` (stays 1 per the ratified ADR 0013 amendment
   — `scope` is an additive optional field).
 - Coordinating a simultaneous change to `threadsafe/case` or
@@ -457,8 +530,13 @@ scenarios or not: a `"full"`-tagged check must be present regardless.
 
 1. `skills/sdlc/schema/task-validation-manifest.schema.json` accepts an
    optional `scope` array property (`"full"`/`"task"`, non-empty, unique) on
-   each `checks[]` item, rejects any other shape, and requires nothing new of
-   manifests that omit it.
+   each `checks[]` item, rejects any other shape, and requires nothing new **at
+   the schema layer** of manifests that omit it. **This is schema-shape
+   permissiveness only** (round 11 clarification: DoD 1 in isolation read as
+   if omission were unconditionally fine) — `inspectManifest` separately and
+   additionally rejects omission whenever Rule A applies (DoD item 2); the
+   two layers are deliberately different (Rationale, "enforcement lives in
+   `inspectManifest`").
 2. `inspectManifest` independently validates `scope`'s shape when present
    (not relying on the schema file) and rejects a manifest with
    `categories.tests: required` whose referenced checks include no check
@@ -475,14 +553,17 @@ scenarios or not: a `"full"`-tagged check must be present regardless.
    case from Scope item 13).
 6. `references/phase-tasks.md`/`phase-implement.md` document the `scope`
    field (array-valued) and both rules, including both degradations, for
-   Build authors, and state the `scope`-tagging derivation rule: `"task"`
-   iff cited in the build-plan's approved scenario-evidence mapping,
-   `"full"` iff designated the regression-net check — never a free
-   Implement-time choice.
+   Build authors, and honestly state that `scope` is decided at
+   manifest-authoring time — consistent with, not a free-standing choice
+   from, whatever check commands and scenario-id list Build approved — and
+   reviewed by the same mechanisms (mechanical Rule A/B, PR-panel judgement)
+   already governing manifest correctness today.
 7. `test/frozen-surfaces.test.js`'s `FROZEN` array drops exactly the schema
    and `validate-task.mjs` entries and its header comment is updated (Scope
    item 6), with `ASD19` passing and every other listed frozen surface still
-   byte-identical to the branch base.
+   byte-identical to the branch base. **A tracked follow-up (issue or a
+   noted next action) exists to re-add both entries once this PR merges**
+   (Scope item 6) — this DoD item is not satisfied by the removal alone.
 8. `test/telemetry-side-effects.test.js`'s and `test/validator-contract.
    test.js`'s existing fixtures are updated with `scope` tags (Scope items 7
    and 8) and the full corpus passes with no other fixture regressed.
@@ -531,6 +612,13 @@ scenarios or not: a `"full"`-tagged check must be present regardless.
   `scope` as a "simpler" alternative without re-reading this Plan's
   Rationale in full — every simplification attempted so far has had a real,
   reviewer-proven counter-example.
+- **Do not merge this PR without also opening the follow-up `FROZEN`-array
+  re-add PR the moment this one lands** (Scope/DoD item 6/7) — the re-add
+  cannot happen in this same PR (mechanically impossible: `ASD19` diffs
+  against the merge-base with `main`, which only advances post-merge), so it
+  is trivially easy to forget as a distinct, separate action. Track it
+  explicitly (a tracker issue, or a same-session immediate next step) rather
+  than relying on memory across the merge boundary.
 - The ADR 0013 amendment is ratified (2026-07-24, human:neil): `schemaVersion`
   tracks shape only, stays 1 for this change; acceptance-rule strictness is
   lifecycle-governed, not version-signalled. Do not re-litigate this in Spec
