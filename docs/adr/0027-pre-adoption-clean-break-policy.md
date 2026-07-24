@@ -41,3 +41,23 @@ plumbing.
 - **This policy expires at first external adoption.** From that point a
   schema break must ship a migration (or an equivalently honest forward path),
   and this ADR is superseded by whatever records that decision.
+
+## Amendment (2026-07-24): "external adopter" excludes co-owned dogfood
+
+A schema-shape clean break raises the same question for every repo that pins
+pi-sdlc and carries its own committed config but is controlled by the same
+owner — currently `threadsafe/case` and `threadsafe/pi-notion`. Does a
+co-owned dogfood repo close the clean-break window described above?
+Owner-adjudicated: it does not. **"External adopter" means a genuine third
+party; it explicitly excludes co-owned dogfood repos** (repos the same owner
+controls and can hand-author). The clean-break rationale ("a migration for a
+population of one is ceremony with no beneficiary") still holds when the whole
+adopter population is several co-owned repos, all hand-authorable.
+
+Accordingly, a schema break affecting co-owned dogfood repos ships as a
+**coordinated clean break with no migrator**: this repo hand-authors its
+config in the landing change, and each co-owned dogfood repo re-authors its
+config as a coordinated follow-up, pinning the pre-break release until it
+does. That coordinated re-author is the "equivalently honest forward path"
+this policy requires. The window still closes at the first genuinely external
+adopter.
