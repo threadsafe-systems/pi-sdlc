@@ -14,27 +14,40 @@
   low, both incorporated (fix-wave commit `7dc5c50`).
 - **Plan panel, round 2** (same two reviewers): 2 more findings (1 high from
   gemini proving the round-1 fix was itself still wrong; 1 low) plus 4 medium
-  from luna. All six converge on one root cause — see Rationale — and are
-  incorporated below as a design pivot, not another patch.
+  from luna. All six converged on one root cause and drove a design pivot
+  from a naming-convention rule to an explicit schema field (fix-wave commit
+  `389ec6f`).
+- **Plan panel, round 3** (same two reviewers): 1 high from gemini (the
+  single-valued field still forces dummy duplicate checks in the overlap
+  case) + 2 high from luna (schema-only enforcement is not runtime
+  enforcement; same-schemaVersion hides a breaking acceptance-rule change).
+  All three incorporated below; the schemaVersion finding also produced a
+  proposed ADR 0013 amendment, **pending your ratification** (flagged
+  in-line, not self-adjudicated).
 
 ## Objective
 
 Today a PV1 manifest satisfies its `tests` category and any scenario's test
 evidence by pointing at a single whole-suite check. The validator's only
 inference is "did the suite run" — there is no visibility into *which* tests a
-task actually introduced or modified to earn its scenario evidence, and (round
-2 finding) no *mechanically reliable* way to tell a broad regression check
-apart from a narrow one by naming convention alone.
+task actually introduced or modified to earn its scenario evidence, and no
+*mechanically reliable* way to tell a broad regression check apart from a
+narrow one by naming convention alone (round 2 finding).
 
-Add an explicit, optional per-check manifest field, `scope: "full" | "task"`.
-Require: (a) whenever a manifest's `tests` category is required, at least one
-of its declared checks carries `scope: "full"` — a regression net is
-mechanically guaranteed present, not inferred from a naming pattern; (b)
-whenever an owned scenario's evidence cites any `tests`-category check at all,
-at least one of the cited checks must carry `scope: "task"` — scenario
-evidence can no longer rest solely on the full-suite check. A scenario
-evidenced purely by non-test categories, or a manifest with no owned
-scenarios, or a manifest with `tests: n/a`, is unaffected.
+Add an explicit, optional per-check manifest field, **`scope: ("full" |
+"task")[]`** — a non-empty array of tags, not a single value (round 3
+finding: a check can legitimately be both). Require: (a) whenever a
+manifest's `tests` category is required, at least one of its declared checks'
+`scope` includes `"full"` — a regression net is mechanically guaranteed
+present, not inferred from a naming pattern; (b) whenever an owned scenario's
+evidence cites any `tests`-category check at all, at least one of the cited
+checks' `scope` must include `"task"` — scenario evidence can no longer rest
+solely on a check that isn't tagged task-scoped. A single check that
+legitimately serves both roles (e.g. a small task where the full suite *is*
+the task-specific evidence) tags `scope: ["full", "task"]` and satisfies both
+requirements without duplication. A scenario evidenced purely by non-test
+categories, a manifest with no owned scenarios, or a manifest with `tests:
+n/a`, is unaffected.
 
 ## Rationale
 
@@ -43,12 +56,12 @@ scenarios, or a manifest with `tests: n/a`, is unaffected.
   no quality opinions, no diff review, judgement is the PR panel's job. This
   slice does not ask the validator to check that the declared task-scoped
   tests *correspond* to the diff. It makes the right evidence land in the
-  receipt for free: the `scope: "task"` check's exact argv and stdout tail
+  receipt for free: a `"task"`-tagged check's exact argv and stdout tail
   (naming the specific tests that ran) is already captured by the existing
   evidence-bounding/redaction pipeline once the check is declared. A human, or
   the PR panel (which *is* mandated to judge), can eyeball it.
 - **Why an explicit field, not a naming convention (the round-2 pivot).** The
-  original design (v1, fix-wave 1) used a reserved id prefix
+  original design (fix-wave 1) used a reserved id prefix
   (`/^tests\.task(?:[.-]|$)/`) and inferred "the broader check" as "whatever
   isn't prefixed that way." Two independent reviewers, across two rounds,
   converged on why that's unsound:
@@ -67,30 +80,63 @@ scenarios, or a manifest with `tests: n/a`, is unaffected.
     test/extraction.test.js test/docs.test.js`) that "does not match the
     task-prefix pattern" is **not** the same claim as "is the full/broad
     suite" — `tests.contract` is itself a narrow, specific test selection
-    that simply happens not to be named with the reserved prefix. A rule
-    inferring "broader check present" from mere absence-of-prefix is
-    satisfiable by another narrow check under a different name, which proves
-    nothing about regression coverage.
-  - Both findings share one root cause: inferring semantic role (full vs.
-    task-scoped) from an id's *spelling* is unreliable — a manifest author's
-    naming choices, not the check's actual scope, drive whether the law's
-    intent is honored. An explicit field removes the inference entirely: the
-    author states the scope directly, `inspectManifest` reads it directly, no
-    naming convention to satisfy by accident or violate by accident. This
-    also cleanly resolves gemini's redundant-rule finding: dropping the
-    separate existence rule (former Rule A2) in favor of Rule B alone (now
-    keyed on `scope: "task"` instead of a regex) is *only* safe once
-    existence is unambiguous — with a spelling-based rule, dropping A2 would
-    have reopened a gap the field closes for free (Rule B's own "must cite a
-    `scope: "task"` check" already forces existence exactly when a scenario
-    needs it, no separate rule required).
+    that simply happens not to be named with the reserved prefix.
+  - Both findings share one root cause: inferring semantic role from an id's
+    *spelling* is unreliable. An explicit field removes the inference
+    entirely: the author states the scope directly, `inspectManifest` reads
+    it directly. This also cleanly resolves gemini's redundant-rule finding:
+    dropping the separate existence rule (former Rule A2) in favor of Rule B
+    alone is only safe once existence is unambiguous — the field makes it so.
   - **Portability preserved.** The field, not the id, carries meaning — a
-    consuming repo names its checks however its own tooling dictates
-    (`tests.contract`, `unit-fast`, `pytest-marked-foo`, anything); it only
-    needs to add `"scope": "full"` or `"scope": "task"` to the relevant check
-    objects. This is the same portability goal the original naming-prefix
-    design was reaching for, achieved with a mechanism that can't be
-    accidentally satisfied or violated by an unrelated id.
+    consuming repo names its checks however its own tooling dictates.
+- **Why an array, not a single value (the round-3 gemini fix).** A strict
+  single-valued `scope` (`"full"` **xor** `"task"`) directly contradicts this
+  plan's own stated goal of eliminating meaningless dummy checks: a task where
+  the full suite legitimately *is* the correct scenario evidence (small repo,
+  comprehensive refactor) would be forced to declare two check entries with
+  identical argv, one tagged each way, purely to satisfy both rules on paper.
+  An array lets one check honestly declare both roles when both are true,
+  with no duplication and no dummy checks — the exact failure mode the pivot
+  was meant to prevent, closed for the field-based design too, not just the
+  abandoned regex design.
+- **Enforcement lives in `inspectManifest`, not the schema file (the round-3
+  luna fix).** `runManifest` (the actual PV2 runtime path) calls only
+  `inspectManifest` — it never loads or validates against
+  `schema/task-validation-manifest.schema.json` at runtime; Ajv is used only
+  in this repo's own test suite to keep the schema and `inspectManifest` in
+  sync for external consumers who might validate independently. Treating "add
+  it to the schema" as sufficient enforcement was a real gap: a malformed
+  `scope` value (wrong type, unknown string, empty array) would pass the
+  actual runtime validator silently if only the schema file constrained it.
+  Fix: `inspectManifest` directly validates `scope` when present — must be a
+  non-empty array, every entry one of `"full"`/`"task"`, no duplicates —
+  exactly like every other per-check field (`id`, `argv`, `timeoutMs`,
+  `evidence`) is already independently validated by `inspectManifest` itself,
+  never delegated to the schema file. The schema stays the *documented,
+  externally-consumable* mirror of the same rule (unchanged intent from
+  round 2), not the enforcement point.
+- **schemaVersion and the round-3 luna finding this plan cannot self-resolve.**
+  Luna's sharpest finding: keeping `schemaVersion: 1` while `scope` becomes
+  *conditionally* load-bearing for acceptance (Rule A/B) means a manifest's
+  `schemaVersion` field can no longer tell a consumer which acceptance rules
+  apply — both the old and new rule-sets read `schemaVersion: 1` identically,
+  and ADR 0013's original text ("a new required field or category is a major
+  bump") did not anticipate a rules-only tightening with no shape change at
+  all. This is a genuine gap in ADR 0013, not just this plan, and is answered
+  by a **proposed** ADR 0013 amendment (already drafted in
+  `docs/adr/0013-task-validation-manifest-pv1.md`, marked pending
+  ratification, not self-adjudicated): `schemaVersion` tracks manifest
+  *shape* (field/category presence, type, cardinality — what an old,
+  unmodified manifest can and cannot satisfy no matter what rules run), while
+  acceptance-*rule* strictness is tracked by the ordinary lifecycle (Plan +
+  Spec + panel review, exactly this process) rather than a manifest-embedded
+  integer. Under that reading, `scope` being an optional field keeps
+  `schemaVersion` at 1 correctly; the acceptance-rule change is real,
+  breaking, and irreversible-classified regardless (Brainstorm Finding 1
+  already established that), just not schemaVersion-signalled. **This
+  amendment needs your explicit ratification before Build** — it changes how
+  a locked ADR is read, which is squarely a human-authority decision, not an
+  agent's to make alone.
 - **Track (Brainstorm Finding 1).** PV1/PV2 is consumed by every repo that has
   adopted the sdlc skill — this repo, and the co-owned dogfood repos
   `threadsafe/case` and `threadsafe/pi-notion` (both named in ADR 0027's
@@ -104,141 +150,150 @@ scenarios, or a manifest with `tests: n/a`, is unaffected.
   agree. Per ADR 0027's already-established policy this ships as a
   **coordinated clean break with no migrator**: this repo hand-authors the
   landing change; each co-owned repo re-authors its own manifests as a
-  follow-up while pinning the pre-break skill release until it does. That
-  coordinated re-author — not a forced lockstep bump in this PR — is the
-  policy's own "equivalently honest forward path"; no new coordination
-  mechanism is invented here.
+  follow-up while pinning the pre-break skill release until it does.
 
 ## Scope
 
 **In:**
 1. `skills/sdlc/schema/task-validation-manifest.schema.json`: add an optional
-   `scope` property to each `checks[]` item, `enum: ["full", "task"]`. Purely
-   additive at the JSON Schema level (an optional enum field), consistent with
-   PV1 staying `schemaVersion: 1`. This is a genuine shape addition (unlike
-   the round-1 design's regex rules, which were cross-field semantics that
-   don't belong in a shape schema) and is added to the schema directly, not
-   deferred — resolves round-2 luna's "schema enforcement left unresolved"
-   finding by making the split explicit: `scope` is schema-enforced shape;
-   the counting/mapping rules below (which checks' scopes satisfy which
-   category) stay `inspectManifest`-only, matching the existing precedent
-   that every other cross-category rule in `inspectManifest` (e.g. "every
-   declared check referenced by at least one required category") is
-   inspect-only, not schema-expressed.
-2. `inspectManifest` (`validate-task.mjs`): two structural rules (down from
-   three — the round-1 "Rule A2" is deleted per Rationale, not replaced).
+   `scope` property to each `checks[]` item —
+   `{"type": "array", "items": {"enum": ["full", "task"]}, "minItems": 1,
+   "uniqueItems": true}`. Purely additive (an optional array-of-enum field).
+   Documents the same rule `inspectManifest` enforces (see Rationale); the
+   schema is not itself the enforcement point.
+2. `inspectManifest` (`validate-task.mjs`):
+   - **New per-check field validation**, alongside the existing `id`/`argv`/
+     `timeoutMs`/`evidence` checks: when `checks[i].scope` is present, it must
+     be a non-empty array of unique strings, each exactly `"full"` or
+     `"task"` — a manifest error otherwise (wrong type, unknown value,
+     duplicate, or empty array).
    - **Rule A** (unconditional whenever tests apply, scenarios or not): when
      `categories.tests.applicability === "required"`, at least one of the
-     checks referenced by that category's `checkIds` must have
-     `scope === "full"`.
+     checks referenced by that category's `checkIds` must have a `scope`
+     array including `"full"`.
    - **Rule B** (evidence-mapping, gated on owning scenarios): when
      `categories.scenarios.applicability === "required"`, for every owned
      scenario's evidence array, restrict to ids that are also referenced by
      the `tests` category's `checkIds`; if that restricted set is non-empty,
-     at least one of those *checks* must have `scope === "task"`. (A scenario
-     evidenced purely by non-test categories is unaffected — the restricted
-     set is empty, so the rule is vacuous for it, by construction, not by a
-     special-cased exemption.)
+     at least one of those checks must have a `scope` array including
+     `"task"`. (A scenario evidenced purely by non-test categories is
+     unaffected — the restricted set is empty, so the rule is vacuous for it
+     by construction.)
    - Degradation: a manifest with **zero owned scenarios** is unaffected by
-     Rule B entirely (never asked to declare or cite a `scope: "task"`
-     check), but remains subject to Rule A whenever `tests: required`. A
+     Rule B, but remains subject to Rule A whenever `tests: required`. A
      manifest with `categories.tests: n/a` is unaffected by both rules.
-     `scope` is optional and absent-by-default; an unclassified check
-     (`scope` omitted) satisfies neither rule — it is simply invisible to
-     both counts, never an error on its own.
+     `scope` absent (or a check simply not referenced) satisfies neither rule
+     — invisible to both counts, never an error on its own.
 3. `references/phase-tasks.md` / `references/phase-implement.md` (both under
-   `skills/sdlc/`): document the `scope` field and Rules A/B, including the
-   zero-scenario and `tests: n/a` degradations, as part of Build's manifest
-   authoring guidance.
+   `skills/sdlc/`): document the `scope` field (array-valued, both tags
+   allowed on one check), Rules A/B, and both degradations, as part of
+   Build's manifest authoring guidance.
 4. `skills/sdlc/prompts/validator-task.prompt.md`: no mandate change
    (confirmed unnecessary per Rationale) — confirm in Build whether its
-   "Checks" list needs a one-line note that a `scope: "task"` check's result
-   is reported the same as any other declared check (it already reports every
-   command by id; likely no change needed).
-5. Compatibility note for **existing** manifests in this repo
-   (`docs/validation/*/*.json`), stated honestly this time: the `scope` field
-   does not exist before this change, so **no historical manifest declares
-   it** — every manifest with `tests: required` fails Rule A on its first
-   re-validation after upgrade, unconditionally, with no partial-compliance
-   exceptions to hunt for. This is a clean break exactly as ADR 0027
-   anticipates: unambiguous, not a spectrum of edge cases. Historical receipts
-   are not retroactively re-validated (`verify-task-receipt.mjs` only
-   hash-checks self-consistency, never re-runs `inspectManifest`), so nothing
-   already merged is affected; the law applies to manifests authored from this
-   change forward.
-6. Regression tests in `test/portable-validator.test.js` (or wherever PV1/PV2
-   tests live — confirm exact file in Build) for both rules: positive
-   (a compliant manifest with a `scope: "full"` check, and separately one
-   with both `scope: "full"` and `scope: "task"` checks plus scenario
-   evidence citing the task-scoped one, both pass); negative (Rule A: `tests:
-   required` with checks but none `scope: "full"`; Rule B: a scenario's
-   evidence citing only a `scope: "full"` or unscoped check); the zero-
-   scenario degradation (Rule B doesn't fire, Rule A still does); the `tests:
-   n/a` degradation (neither fires); and the case that motivated the pivot —
-   an unscoped or `scope`-mismatched check with a name that *looks* like it
-   should count (e.g. an unscoped check literally named `tests.full`) must
-   **not** satisfy Rule A — only the field counts, never the spelling.
+   "Checks" list needs a one-line note (likely not; it already reports every
+   command by id regardless of `scope`).
+5. `docs/adr/0013-task-validation-manifest-pv1.md`: the proposed amendment
+   (drafted, pending your ratification) distinguishing shape-versioning from
+   acceptance-rule strictness — see Rationale. If ratified as-is, no further
+   edit needed; if you want different wording or a different resolution
+   (e.g. an actual schemaVersion bump instead), that supersedes this Scope
+   item and cascades into DoD item 6 and the compatibility note below.
+6. Compatibility note for **existing** manifests in this repo
+   (`docs/validation/*/*.json`): the `scope` field does not exist before this
+   change, so **no historical manifest declares it** — every manifest with
+   `tests: required` fails Rule A on its first re-validation after upgrade,
+   unconditionally, with no partial-compliance exceptions to hunt for. This
+   is a clean break exactly as ADR 0027 anticipates. Historical receipts are
+   not retroactively re-validated (`verify-task-receipt.mjs` only hash-checks
+   self-consistency, never re-runs `inspectManifest`), so nothing already
+   merged is affected; the law applies to manifests authored from this change
+   forward.
+7. Regression tests in `test/portable-validator.test.js` (or wherever PV1/PV2
+   tests live — confirm exact file in Build) for: both rules positive
+   (a compliant manifest with a `scope: ["full"]` check; one with separate
+   `["full"]` and `["task"]` checks; one with a single `["full", "task"]`
+   check satisfying both roles at once); both rules negative (Rule A: `tests:
+   required` with checks but none tagged `"full"`; Rule B: a scenario's
+   evidence citing only an unscoped or `"full"`-only check); the zero-
+   scenario and `tests: n/a` degradations; the spelling-vs-field case (an
+   unscoped check literally named `tests.full` must **not** satisfy Rule A);
+   and the new `scope` shape-validation itself (wrong type, empty array,
+   duplicate entry, unknown string value — each a manifest error).
 
 **Out:**
 - Any diff-correspondence judgement capability in `task_validate` (rejected in
   Brainstorm Finding 2).
-- A full inventory/audit of every historical manifest under
-  `docs/validation/` classified against the new rules (per the corrected
-  compatibility note, the classification is now uniform — none declare
-  `scope` — so no per-file audit has anything to discover).
-- Any change to `schemaVersion` (stays 1 — `scope` is an additive optional
-  field; the manifest *shape* is backward compatible even though the
-  *acceptance rules* built on top of it are not — Spec should state this
-  distinction precisely, as it is the crux of the irreversible
-  classification).
+- A full inventory/audit of every historical manifest under `docs/validation/`
+  classified against the new rules (the compatibility note's classification
+  is uniform — none declare `scope` — so no per-file audit has anything to
+  discover).
+- Any change to `schemaVersion` **unless the pending ADR 0013 amendment above
+  is rejected** — if you ratify the amendment as drafted, `schemaVersion`
+  stays 1 (an additive optional field); if you want a different resolution,
+  this item and the amendment both need revisiting before Build, not after.
 - Coordinating a simultaneous change to `threadsafe/case` or
   `threadsafe/pi-notion` beyond what ADR 0027's existing coordinated-clean-
-  break policy already prescribes (see Rationale) — no new coordination
-  mechanism is invented here.
+  break policy already prescribes.
 - A migration path for `TESTS_TASK_RE` or any other artifact of the
   abandoned round-1 naming-convention design — it never shipped past this
-  Plan doc, so there is nothing to migrate away from.
+  Plan doc.
+- Inventing a distinct acceptance-rule version axis (an idea the ADR 0013
+  amendment explicitly declines to build speculatively) — out of scope unless
+  a future need proves the shape/strictness split insufficient.
 
 ## Definition of done
 
 1. `skills/sdlc/schema/task-validation-manifest.schema.json` accepts an
-   optional `scope: "full" | "task"` property on each `checks[]` item, rejects
-   any other value, and requires nothing new of manifests that omit it.
-2. `inspectManifest` rejects a manifest with `categories.tests: required`
-   whose referenced checks include no `scope === "full"` check (Rule A) —
-   including the case where an unscoped or wrongly-scoped check merely has a
-   name that looks like a full-suite check.
+   optional `scope` array property (`"full"`/`"task"`, non-empty, unique) on
+   each `checks[]` item, rejects any other shape, and requires nothing new of
+   manifests that omit it.
+2. `inspectManifest` independently validates `scope`'s shape when present
+   (not relying on the schema file) and rejects a manifest with
+   `categories.tests: required` whose referenced checks include no check
+   tagged `"full"` (Rule A) — including the case where an unscoped or
+   wrongly-tagged check merely has a name that looks like a full-suite check.
 3. `inspectManifest` rejects a manifest with `categories.scenarios: required`
    where any scenario's evidence cites a `tests`-category check but none of
-   those cited checks has `scope === "task"` (Rule B).
-4. A manifest with `categories.tests: n/a` is unaffected by both rules; a
+   those cited checks is tagged `"task"` (Rule B).
+4. A single check tagged `scope: ["full", "task"]` satisfies both Rule A and
+   Rule B without a second, duplicate check (regression-tested).
+5. A manifest with `categories.tests: n/a` is unaffected by both rules; a
    manifest with zero owned scenarios is unaffected by Rule B but remains
    subject to Rule A (regression-tested, including the spelling-vs-field
-   case from Scope item 6).
-5. `references/phase-tasks.md`/`phase-implement.md` document the `scope`
-   field and both rules, including both degradations, for Build authors.
-6. Full test corpus green; touched files biome-clean; `schemaVersion` stays 1.
-7. A Specification exists (irreversible track) with falsifiable scenarios
-   covering DoD 1–4, reviewed by a plan panel (this doc, converged clean) and
-   a spec panel (the Spec doc), both clean before Build.
+   case from Scope item 7).
+6. `references/phase-tasks.md`/`phase-implement.md` document the `scope`
+   field (array-valued) and both rules, including both degradations, for
+   Build authors.
+7. Full test corpus green; touched files biome-clean; `schemaVersion` stays 1
+   **iff** the ADR 0013 amendment is ratified as drafted (see Scope item 5) —
+   otherwise this item is superseded by whatever resolution you choose.
+8. A Specification exists (irreversible track) with falsifiable scenarios
+   covering DoD 1–6, reviewed by a plan panel (this doc, converged clean —
+   pending only the ADR ratification below) and a spec panel (the Spec doc),
+   both clean before Build.
 
 ## Context for the next agent
 
 - Core file: `skills/sdlc/scripts/validate-task.mjs`, `inspectManifest`
   function (read via `read_symbol` before editing — do not re-derive its
   structure from memory; it has five interacting category branches already).
-- The design landed here after two plan-panel rounds pivoted away from a
-  naming-convention approach (`TESTS_TASK_RE`) that both reviewers
-  independently proved unsound — do not resurrect prefix-matching as a
-  "simpler" alternative in Spec/Build without re-reading this Plan's
-  Rationale; the counter-examples (`pv-t1.json`'s `tests.contract`, and the
-  static-scenario redundancy case) are real and already verified against this
-  repo's own history.
+- The design went through **three** plan-panel rounds: round 1 fixed
+  scenario-gating; round 2 pivoted from a naming convention (`TESTS_TASK_RE`)
+  to an explicit field after both reviewers independently proved the regex
+  approach unsound; round 3 fixed the field to be array-valued (not
+  single-valued) and clarified enforcement lives in `inspectManifest`, not
+  the schema file. Do not resurrect prefix-matching or a single-valued
+  `scope` as a "simpler" alternative without re-reading this Plan's
+  Rationale in full — every simplification attempted so far has had a real,
+  reviewer-proven counter-example.
+- **Check whether the ADR 0013 amendment was ratified, and in what form**,
+  before starting Build — it changes whether `schemaVersion` bumps and is a
+  precondition this Plan explicitly could not resolve alone (see Scope item 5
+  and DoD item 7).
 - `docs/validation/*/*.json` under this repo are **uniformly pre-law**: none
   declare `scope` (the field didn't exist), so all fail Rule A once
-  re-validated with `tests: required`. This is now unambiguous — no need to
-  spot-check individual files for partial compliance as earlier drafts of
-  this Plan incorrectly assumed.
+  re-validated with `tests: required`. Unambiguous — no need to spot-check
+  individual files for partial compliance.
 - Irreversible track: `review.design: panel` (no reversible override applies)
   → both a Plan panel and a Spec panel run before Build.
 - Co-owned dogfood repos affected by this break: `threadsafe/case` and
