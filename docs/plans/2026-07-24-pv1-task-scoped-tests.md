@@ -73,7 +73,19 @@
   PV1-exclusion rationale I'd quoted lives in
   `docs/specs/2026-07-16-config-versioning-migration.md`, not literally in
   `check-schema-break.mjs` itself). Both verified directly and incorporated
-  (fix-wave commit, this commit).
+  (fix-wave commit `981f13a`).
+- **Plan panel, round 10** (same two reviewers): gemini reports genuinely
+  clean. luna found 2 more medium: (1) correcting the Spec's worked example
+  makes it diverge from the still-committed `pv-t1.json` and all 53
+  historical manifest files, and the Plan hadn't said whether that
+  divergence needed reconciling; resolved by declaring it expected/ratified
+  (not a defect) and explicitly declining to reauthor/archive the historical
+  population, consistent with the ADR 0027 clean-break extension. (2) the
+  Plan asked documentation to *describe* `scope` but never anchored who
+  *decides* each check's tag, leaving it an unaudited Implement-time choice;
+  resolved by deriving `scope` mechanically from Build's already-approved
+  scenario-evidence mapping rather than inventing new Build-doc machinery.
+  Both verified directly and incorporated (fix-wave commit, this commit).
 
 ## Objective
 
@@ -256,11 +268,24 @@ scenarios or not: a `"full"`-tagged check must be present regardless.
 3. `references/phase-tasks.md` / `references/phase-implement.md` (both under
    `skills/sdlc/`): document the `scope` field (array-valued, both tags
    allowed on one check), Rules A/B, and both degradations, as part of
-   Build's manifest authoring guidance. `README.md`'s manifest-authoring
-   section (lines 84–107, verified — currently silent on `scope`/Rule A/
-   Rule B) gets a brief summary or a link to this fuller guidance, so a
-   consumer reading only the public README doesn't author a manifest that
-   silently fails the new rules.
+   Build's manifest authoring guidance. **Critically, this guidance states
+   `scope` tagging is not a free Implement-time choice**: a check is
+   `scope: [..., "task"]`-tagged if and only if the committed build-plan
+   doc's approved scenario-evidence mapping cites it as a scenario's
+   evidence; `scope: [..., "full"]` is reserved for whichever check(s) that
+   same approved plan designates as the task's regression-net command. This
+   anchors the acceptance-critical classification to Build's *existing*
+   human-gated approval surface (the scenario-evidence mapping, already
+   canonical per `docs/specs/2026-07-12-sdlc-portable-validator.md`'s "the
+   approved Build-plan task is canonical; the manifest is a mechanically
+   executable projection") rather than inventing new Build-doc machinery —
+   the manifest's `scope` tags are then a mechanical *derivation* from an
+   approval that already exists, not a new decision made after the human
+   gate has already passed. `README.md`'s manifest-authoring section (lines
+   84–107, verified — currently silent on `scope`/Rule A/Rule B) gets a
+   brief summary or a link to this fuller guidance, so a consumer reading
+   only the public README doesn't author a manifest that silently fails the
+   new rules.
 4. `skills/sdlc/prompts/validator-task.prompt.md`: no mandate change
    (confirmed unnecessary per Rationale) — confirm in Build whether its
    "Checks" list needs a one-line note (likely not; it already reports every
@@ -323,7 +348,17 @@ scenarios or not: a `"full"`-tagged check must be present regardless.
    `tests.contract` is, by construction, exactly the same manifest as
    `docs/validation/portable-validator/pv-t1.json` (round 2's counter-
    example) and fails both Rule A and Rule B unchanged; a "normative" example
-   presenting an invalid manifest is incoherent; (c) §1.3–1.5's field/
+   presenting an invalid manifest is incoherent. **Correcting the Spec's own
+   example necessarily makes it diverge from the still-committed
+   `pv-t1.json` file** (and, by the same logic, from all 53 of this repo's
+   pre-law manifests, verified: every one lacks `scope`) — this divergence
+   is the *expected, ratified* shape of a clean break (ADR 0027 amendment),
+   not a defect to reconcile. This slice does not reauthor or archive any of
+   the 53 historical manifest files (Out of scope, below); the Spec's
+   corrected example and the updated `phase-tasks.md`/README guidance
+   (Scope item 3) are the authoritative template for manifests authored
+   going forward, superseding any historical file a future author might
+   otherwise copy from; (c) §1.3–1.5's field/
    scenario/category constraint prose, which currently has nothing to say
    about `scope`, Rule A, or Rule B. Leaving any of the three uncorrected
    would commit two contradictory normative documents — the Spec phase must
@@ -396,6 +431,16 @@ scenarios or not: a `"full"`-tagged check must be present regardless.
   classified against the new rules (the compatibility note's classification
   is uniform — none declare `scope` — so no per-file audit has anything to
   discover).
+- **Reauthoring, archiving, or removing any of the 53 existing manifest
+  files** under `docs/validation/` — explicitly declined (round 10 finding):
+  doing so would itself be migration tooling/effort applied to the historical
+  population, directly contradicting the ratified ADR 0027 clean-break
+  extension. They stay as committed history; only the Spec's own worked
+  example and forward-facing guidance (Scope items 3, 9) are corrected.
+- **A new required Build-doc field/column explicitly declaring each check's
+  `scope`** — explicitly declined (round 10 finding): the classification is
+  instead a mechanical derivation from Build's *existing* approved
+  scenario-evidence mapping (Scope item 3), not new Build-doc machinery.
 - Any change to `schemaVersion` (stays 1 per the ratified ADR 0013 amendment
   — `scope` is an additive optional field).
 - Coordinating a simultaneous change to `threadsafe/case` or
@@ -430,7 +475,10 @@ scenarios or not: a `"full"`-tagged check must be present regardless.
    case from Scope item 13).
 6. `references/phase-tasks.md`/`phase-implement.md` document the `scope`
    field (array-valued) and both rules, including both degradations, for
-   Build authors.
+   Build authors, and state the `scope`-tagging derivation rule: `"task"`
+   iff cited in the build-plan's approved scenario-evidence mapping,
+   `"full"` iff designated the regression-net check — never a free
+   Implement-time choice.
 7. `test/frozen-surfaces.test.js`'s `FROZEN` array drops exactly the schema
    and `validate-task.mjs` entries and its header comment is updated (Scope
    item 6), with `ASD19` passing and every other listed frozen surface still
