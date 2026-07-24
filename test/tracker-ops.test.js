@@ -601,3 +601,72 @@ process.exit(1);
 	rmSync(root, { recursive: true, force: true });
 	rmSync(fakeGhDir, { recursive: true, force: true });
 });
+
+// ---- --repo/--owner/--project overrides (owner-adjudicated round-2 disputed finding) --------
+
+test("main: --repo overrides lookup-node's target repo instead of the configured tracker.repo", () => {
+	const root = fixtureRoot();
+	let calledArgs;
+	const r = main(["lookup-node", "--number", "9", "--repo", "other-owner/other-repo", "--repo-root", root], {
+		gh: (_cwd, args) => {
+			calledArgs = args;
+			return { code: 0, stdout: JSON.stringify({ data: { repository: { issue: { id: "I_9", number: 9, title: "t" } } } }), stderr: "" };
+		},
+	});
+	assert.equal(r.result.ok, true);
+	assert.ok(calledArgs.includes("owner=other-owner"));
+	assert.ok(calledArgs.includes("repo=other-repo"));
+	rmSync(root, { recursive: true, force: true });
+});
+
+test("main: --repo malformed value is a usage error before any gh call", () => {
+	const root = fixtureRoot();
+	const r = spawnSync(process.execPath, [SCRIPT, "lookup-node", "--number", "1", "--repo", "not-a-repo", "--repo-root", root], { encoding: "utf8" });
+	assert.equal(r.status, 2);
+	assert.match(r.stderr, /--repo must be owner\/name/);
+	rmSync(root, { recursive: true, force: true });
+});
+
+test("main: --owner/--project override find-items' target board instead of the configured tracker.board", () => {
+	const root = fixtureRoot();
+	let calledArgs;
+	const r = main(["find-items", "--owner", "other-org", "--project", "77", "--repo", "owner/repo", "--repo-root", root], {
+		gh: (_cwd, args) => {
+			calledArgs = args;
+			return { code: 0, stdout: JSON.stringify({ items: [], totalCount: 0 }), stderr: "" };
+		},
+	});
+	assert.equal(r.result.ok, true);
+	assert.ok(calledArgs.includes("77"));
+	assert.ok(calledArgs.includes("other-org"));
+	rmSync(root, { recursive: true, force: true });
+});
+
+test("main: config-derived resolution is unchanged when no override flags are given (defaults preserved)", () => {
+	const root = fixtureRoot();
+	const { result } = main(["find-items", "--repo-root", root, "--status", "Todo"], { gh: fakeItemList(SAMPLE_ITEMS) });
+	assert.equal(result.ok, true);
+	assert.deepEqual(
+		result.items.map((i) => i.number),
+		[1, 3],
+	);
+	rmSync(root, { recursive: true, force: true });
+});
+
+test("board-add: --repo/--owner/--project override the target board and URL repo", () => {
+	const root = fixtureRoot();
+	let calledArgs;
+	let calledUrl;
+	const r = main(["board-add", "--issue", "5", "--repo", "other-owner/other-repo", "--owner", "other-org", "--project", "9", "--repo-root", root], {
+		gh: (_cwd, args) => {
+			calledArgs = args;
+			calledUrl = args[args.indexOf("--url") + 1];
+			return { code: 0, stdout: JSON.stringify({ id: "PVTI_x" }), stderr: "" };
+		},
+	});
+	assert.equal(r.result.ok, true);
+	assert.equal(calledUrl, "https://github.com/other-owner/other-repo/issues/5");
+	assert.ok(calledArgs.includes("9"));
+	assert.ok(calledArgs.includes("other-org"));
+	rmSync(root, { recursive: true, force: true });
+});

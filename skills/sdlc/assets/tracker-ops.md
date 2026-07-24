@@ -64,6 +64,13 @@ against the real tracker).
 # — GitHub's project/sub-issue/blocking mutations take node ids, not numbers).
 scripts/tracker-ops.sh lookup-node --number 42
 
+# lookup-node/find-items/set-status/board-add accept optional --repo
+# owner/name, --owner ORG, --project N overrides of the config-derived
+# tracker.repo/tracker.board — an escape hatch for targeting a different
+# repo/board than this project's own configured tracker; omit them for the
+# (default, and by far the common) config-derived behavior.
+scripts/tracker-ops.sh lookup-node --number 42 --repo some-org/some-other-repo
+
 # Create the epic, or a task wired to its parent epic — both create the
 # issue, label it, add it to the board (Todo), and return
 # {number, nodeId, itemId, url} in one call (the exact "re-finding what I

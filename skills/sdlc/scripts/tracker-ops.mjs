@@ -9,16 +9,19 @@
 //
 // Usage: tracker-ops.mjs <subcommand> [options] [--repo-root DIR|--config DIR]
 //          [--gh-cmd CMD] [--format json|text]
-// Subcommands:
-//   lookup-node --number N
+// Subcommands (lookup-node/find-items/set-status/board-add additionally
+// accept optional --repo owner/name, --owner ORG, --project N overrides of
+// the config-derived tracker.repo/tracker.board — config-derived stays the
+// default; the override is an escape hatch, not a required flag):
+//   lookup-node --number N [--repo owner/name]
 //   create-epic --title T --body B [--label L]...
 //   create-task --title T --body B --parent N [--label L]...
 //   add-blocked-by --issue N --blocking N
 //   frontier --parent N
 //   claim --issue N --login L
-//   find-items [--since ISO] [--status S] [--number N] [--title-contains STR]
-//   set-status (--item <PVTI_id-or-issue-number> | --from-status S [--status-filters...]) --status <Todo|In Progress|Blocked|In Review|Done>
-//   board-add --issue N
+//   find-items [--since ISO] [--status S] [--number N] [--title-contains STR] [--repo owner/name] [--owner ORG] [--project N]
+//   set-status (--item <PVTI_id-or-issue-number> | --from-status S [--status-filters...]) --status <Todo|In Progress|Blocked|In Review|Done> [--repo owner/name] [--owner ORG] [--project N]
+//   board-add --issue N [--repo owner/name] [--owner ORG] [--project N]
 //
 // Exit: 0 success, 1 operation failed (structured {ok:false,reason}), 2 usage/error.
 //
@@ -28,7 +31,10 @@
 // required-arg validation (a repro created a live issue, #173, since
 // deleted), the binding --gh-cmd flag never implemented, blockedBy/
 // find-items pagination unguarded, partial-create-failure identity loss,
-// creation not explicitly setting Todo, and no bulk set-status.
+// creation not explicitly setting Todo, and no bulk set-status. Round 2
+// (verification) closed a residual of the required-arg finding (--parent
+// 0/"" silently orphaned a task) and added --repo/--owner/--project
+// overrides per the owner's disputed-finding adjudication.
 
 import { spawnSync } from "node:child_process";
 import { resolve } from "node:path";
@@ -340,6 +346,11 @@ function parseArgs(argv) {
 		else if (a === "--from-status") opts.fromStatus = needVal(argv, i++, "--from-status");
 		else if (a === "--title-contains") opts.titleContains = needVal(argv, i++, "--title-contains");
 		else if (a === "--item") opts.item = needVal(argv, i++, "--item");
+		else if (a === "--repo") {
+			opts.repo = needVal(argv, i++, "--repo");
+			if (!/^[^/]+\/[^/]+$/.test(opts.repo)) fail(`tracker-ops: --repo must be owner/name, got ${JSON.stringify(opts.repo)}`);
+		} else if (a === "--owner") opts.owner = needVal(argv, i++, "--owner");
+		else if (a === "--project") opts.project = needInt(argv, i++, "--project");
 		else fail(`tracker-ops: unexpected argument: ${a}`);
 	}
 	validateRequired(sub, opts);
@@ -375,6 +386,20 @@ function validateRequired(sub, opts) {
 	} else if (sub === "board-add") need(opts.issue !== undefined, "requires --issue");
 }
 
+// --repo/--owner/--project are optional per-call overrides of the
+// config-derived tokens, for lookup-node/find-items/set-status/board-add
+// only (create-epic/create-task/add-blocked-by/frontier/claim always
+// target this project's own configured tracker — no bullet in the Build
+// plan ever named overrides for those, and there's no use case for wiring
+// a sub-issue or blocking edge across repos). Config-derived resolution
+// stays the default; this adds an escape hatch without abandoning it
+// (owner-adjudicated, round-2 PR review — see consolidated-round2.md).
+function effectiveTargets(tok, opts) {
+	const repo = opts.repo ?? tok.repo;
+	const [owner, name] = repo.split("/");
+	return { ...tok, repo, owner, name, boardOwner: opts.owner ?? tok.boardOwner, boardNumber: opts.project ?? tok.boardNumber };
+}
+
 function main(argv = process.argv.slice(2), { cwd = process.cwd(), gh } = {}) {
 	const { sub, opts } = parseArgs(argv);
 	if (!sub || !SUBCOMMANDS.includes(sub)) fail(USAGE);
@@ -383,17 +408,18 @@ function main(argv = process.argv.slice(2), { cwd = process.cwd(), gh } = {}) {
 	const root = inspected.root;
 	const tok = tokens(root);
 	const effectiveGh = gh ?? makeDefaultGh(opts.ghCmd);
+	const target = effectiveTargets(tok, opts);
 
 	let result;
-	if (sub === "lookup-node") result = lookupNode({ root, gh: effectiveGh, owner: tok.owner, name: tok.name, number: opts.number });
+	if (sub === "lookup-node") result = lookupNode({ root, gh: effectiveGh, owner: target.owner, name: target.name, number: opts.number });
 	else if (sub === "create-epic") result = opCreateEpicOrTask({ root, gh: effectiveGh, tok, title: opts.title, body: opts.body, extraLabels: opts.labels, kind: "epic" });
 	else if (sub === "create-task") result = opCreateEpicOrTask({ root, gh: effectiveGh, tok, title: opts.title, body: opts.body, extraLabels: opts.labels, parent: opts.parent, kind: "task" });
 	else if (sub === "add-blocked-by") result = opAddBlockedBy({ root, gh: effectiveGh, tok, issue: opts.issue, blocking: opts.blocking });
 	else if (sub === "frontier") result = opFrontier({ root, gh: effectiveGh, tok, parent: opts.parent });
 	else if (sub === "claim") result = opClaim({ root, gh: effectiveGh, tok, issue: opts.issue, login: opts.login });
-	else if (sub === "find-items") result = opFindItems({ root, gh: effectiveGh, tok, since: opts.since, status: opts.status, number: opts.number, titleContains: opts.titleContains });
-	else if (sub === "set-status") result = opSetStatus({ root, gh: effectiveGh, tok, item: opts.item, status: opts.status, fromStatus: opts.fromStatus, number: opts.number, titleContains: opts.titleContains, since: opts.since });
-	else if (sub === "board-add") result = boardAdd({ root, gh: effectiveGh, boardNumber: tok.boardNumber, boardOwner: tok.boardOwner, repo: tok.repo, issue: opts.issue });
+	else if (sub === "find-items") result = opFindItems({ root, gh: effectiveGh, tok: target, since: opts.since, status: opts.status, number: opts.number, titleContains: opts.titleContains });
+	else if (sub === "set-status") result = opSetStatus({ root, gh: effectiveGh, tok: target, item: opts.item, status: opts.status, fromStatus: opts.fromStatus, number: opts.number, titleContains: opts.titleContains, since: opts.since });
+	else if (sub === "board-add") result = boardAdd({ root, gh: effectiveGh, boardNumber: target.boardNumber, boardOwner: target.boardOwner, repo: target.repo, issue: opts.issue });
 
 	return { result, format: opts.format };
 }
