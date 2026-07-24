@@ -145,16 +145,23 @@ function addSubIssue({ root, gh, issueNodeId, subIssueNodeId }) {
 
 // created-issue identity (number/url) is preserved on every failure path
 // past createIssue so a caller never has to re-derive "what did I just
-// create" from a bare error (finding M1).
+// create" from a bare error (finding M1). A bad --parent is looked up
+// BEFORE createIssue so a typo'd parent never creates a live orphan issue
+// (round-2 finding, Fable) — parent is validated positive by needInt so
+// `parent !== undefined` (not truthiness) is what gates this branch
+// (round-2 finding: --parent 0/"" previously slipped past `if (parent)`).
 function opCreateEpicOrTask({ root, gh, tok, title, body, extraLabels, parent, kind }) {
+	let parentNode;
+	if (parent !== undefined) {
+		parentNode = lookupNode({ root, gh, owner: tok.owner, name: tok.name, number: parent });
+		if (!parentNode.ok) return { ok: false, reason: parentNode.reason, failedStep: "lookup-parent" };
+	}
 	const label = kind === "epic" ? `${tok.labelPrefix}:epic` : `${tok.labelPrefix}:build-task`;
 	const created = createIssue({ root, gh, repo: tok.repo, title, body, labels: [label, ...extraLabels] });
 	if (!created.ok) return created;
 	const node = lookupNode({ root, gh, owner: tok.owner, name: tok.name, number: created.number });
 	if (!node.ok) return { ok: false, reason: node.reason, failedStep: "lookup-node", created: { number: created.number, url: created.url } };
-	if (parent) {
-		const parentNode = lookupNode({ root, gh, owner: tok.owner, name: tok.name, number: parent });
-		if (!parentNode.ok) return { ok: false, reason: parentNode.reason, failedStep: "lookup-parent", created: { number: created.number, url: created.url } };
+	if (parentNode) {
 		const wired = addSubIssue({ root, gh, issueNodeId: parentNode.nodeId, subIssueNodeId: node.nodeId });
 		if (!wired.ok) return { ok: false, reason: wired.reason, failedStep: "add-sub-issue", created: { number: created.number, url: created.url } };
 	}
@@ -214,19 +221,23 @@ function opClaim({ root, gh, tok, issue, login }) {
 // Carries `repository` per item (finding M4 — a multi-repo org board makes
 // bare issue numbers ambiguous) and refuses a truncated result instead of
 // silently under-reporting (finding M3), matching frontier's honesty
-// convention.
-function opFindItems({ root, gh, tok, since, status, number, titleContains, repository }) {
+// convention. Scoped strictly to `tok.repo` — a repo-less (draft) board
+// item is EXCLUDED, not passed through: round-2 verification found the
+// original `repository === undefined` escape let bulk set-status mutate
+// unrelated draft items on a shared org board, defeating M4's own point.
+function opFindItems({ root, gh, tok, since, status, number, titleContains }) {
+	if (status !== undefined && !STATUS_OPTIONS.includes(status)) return { ok: false, reason: `unknown status ${JSON.stringify(status)}; known: ${STATUS_OPTIONS.join(", ")}` };
+	if (since !== undefined && Number.isNaN(Date.parse(since))) return { ok: false, reason: `--since is not a parsable date/time: ${JSON.stringify(since)}` };
 	const limit = 1000;
 	const list = gh(root, ["project", "item-list", String(tok.boardNumber), "--owner", tok.boardOwner, "--format", "json", "--limit", String(limit)]);
 	const parsed = parseJson(list, "gh project item-list failed");
 	if (!parsed.ok) return parsed;
 	const rawItems = parsed.value?.items ?? [];
 	if (typeof parsed.value?.totalCount === "number" && parsed.value.totalCount > rawItems.length) {
-		return { ok: false, reason: `board has ${parsed.value.totalCount} items but only ${rawItems.length} were returned (limit ${limit}); refusing an incomplete find-items result — narrow with --status/--number/--title-contains` };
+		return { ok: false, reason: `board has ${parsed.value.totalCount} items but only ${rawItems.length} were returned (limit ${limit}); this tool has no server-side filter, so no flag can narrow the fetch — refusing an incomplete result rather than under-report` };
 	}
 	let items = rawItems.map((i) => ({ itemId: i.id, number: i.content?.number, title: i.content?.title, status: i.status, labels: i.labels ?? [], repository: i.content?.repository }));
-	const repoFilter = repository ?? tok.repo;
-	items = items.filter((i) => i.repository === undefined || i.repository === repoFilter);
+	items = items.filter((i) => i.repository === tok.repo);
 	if (number !== undefined) items = items.filter((i) => i.number === number);
 	if (status !== undefined) items = items.filter((i) => i.status === status);
 	if (titleContains !== undefined) items = items.filter((i) => (i.title ?? "").toLowerCase().includes(titleContains.toLowerCase()));
@@ -254,6 +265,7 @@ function opFindItems({ root, gh, tok, since, status, number, titleContains, repo
 // both resolve through this one entry point.
 function opSetStatus({ root, gh, tok, item, status, fromStatus, number, titleContains, since }) {
 	if (!STATUS_OPTIONS.includes(status)) return { ok: false, reason: `unknown status ${JSON.stringify(status)}; known: ${STATUS_OPTIONS.join(", ")}` };
+	if (item !== undefined && fromStatus !== undefined) return { ok: false, reason: "set-status: pass --item (single) or --from-status (bulk), not both — the combination silently ignored --from-status" };
 	const board = resolveBoard({ root, gh, boardNumber: tok.boardNumber, boardOwner: tok.boardOwner });
 	if (!board.ok) return board;
 
@@ -292,10 +304,15 @@ function needVal(argv, i, name) {
 	return v;
 }
 
+// Every current caller (--parent/--issue/--blocking/--number) is a GitHub
+// issue number, always >=1 — floored here so `Number("")===0` or a
+// negative value fails usage instead of silently reading as falsy
+// downstream (round-2 finding: `--parent 0`/`--parent ""` created a live,
+// unwired orphan task because `if (parent)` treated 0 as "absent").
 function needInt(argv, i, name) {
 	const raw = needVal(argv, i, name);
 	const n = Number(raw);
-	if (!Number.isInteger(n)) fail(`tracker-ops: ${name} must be an integer, got ${JSON.stringify(raw)}`);
+	if (!Number.isInteger(n) || n < 1) fail(`tracker-ops: ${name} must be a positive integer, got ${JSON.stringify(raw)}`);
 	return n;
 }
 

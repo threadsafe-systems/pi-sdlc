@@ -498,7 +498,74 @@ test("main: --number rejects a non-integer value with a usage error, not a NaN g
 	const root = fixtureRoot();
 	const r = spawnSync(process.execPath, [SCRIPT, "lookup-node", "--number", "abc", "--repo-root", root], { encoding: "utf8" });
 	assert.equal(r.status, 2);
-	assert.match(r.stderr, /--number must be an integer/);
+	assert.match(r.stderr, /--number must be a positive integer/);
+	rmSync(root, { recursive: true, force: true });
+});
+
+test("main: --parent 0 is rejected by needInt's positive floor, not silently treated as absent (round-2 finding: previously created a live unwired orphan task)", () => {
+	const root = fixtureRoot();
+	const r = spawnSync(process.execPath, [SCRIPT, "create-task", "--title", "t", "--body", "b", "--parent", "0", "--repo-root", root], { encoding: "utf8" });
+	assert.equal(r.status, 2);
+	assert.match(r.stderr, /--parent must be a positive integer/);
+	rmSync(root, { recursive: true, force: true });
+});
+
+test("create-task: a bad --parent is looked up BEFORE the issue is created — no live orphan on a typo'd parent (round-2 finding)", () => {
+	const root = fixtureRoot();
+	const calls = [];
+	const gh = (_cwd, args) => {
+		calls.push(args);
+		if (/issue\(number:\$n\)/.test(queryOf(args))) return { code: 0, stdout: JSON.stringify({ data: { repository: { issue: null } } }), stderr: "" };
+		throw new Error(`unexpected gh args: ${args.join(" ")}`);
+	};
+	const r = opCreateEpicOrTask({ root, gh, tok: TOK, title: "t", body: "b", extraLabels: [], parent: 999, kind: "task" });
+	assert.equal(r.ok, false);
+	assert.equal(r.failedStep, "lookup-parent");
+	assert.equal(r.created, undefined);
+	assert.ok(!calls.some((a) => a[0] === "issue" && a[1] === "create"));
+	rmSync(root, { recursive: true, force: true });
+});
+
+test("find-items: repo-less (draft) board items are excluded, not passed through (round-2 finding: bulk set-status previously mutated unrelated drafts)", () => {
+	const root = fixtureRoot();
+	const draft = { id: "PVTI_draft", status: "Todo", labels: [], content: { title: "a draft note" } }; // DraftIssue: no .number, no .repository
+	const items = [...SAMPLE_ITEMS, draft];
+	const r = opFindItems({ root, gh: fakeItemList(items, { totalCount: items.length }), tok: TOK, status: "Todo" });
+	assert.equal(r.ok, true);
+	assert.deepEqual(r.items.map((i) => i.itemId).sort(), ["PVTI_1", "PVTI_3"]);
+	rmSync(root, { recursive: true, force: true });
+});
+
+test("find-items: an unparsable --since is a usage-shaped failure, not a silent empty result (round-2 finding)", () => {
+	const root = fixtureRoot();
+	const gh = () => {
+		throw new Error("should not call gh");
+	};
+	const r = opFindItems({ root, gh, tok: TOK, since: "not-a-date" });
+	assert.equal(r.ok, false);
+	assert.match(r.reason, /--since is not a parsable date/);
+	rmSync(root, { recursive: true, force: true });
+});
+
+test("find-items: an unknown --status is a usage-shaped failure, not a silent empty result (round-2 finding)", () => {
+	const root = fixtureRoot();
+	const gh = () => {
+		throw new Error("should not call gh");
+	};
+	const r = opFindItems({ root, gh, tok: TOK, status: "todo" }); // wrong case
+	assert.equal(r.ok, false);
+	assert.match(r.reason, /unknown status/);
+	rmSync(root, { recursive: true, force: true });
+});
+
+test("set-status: --item and --from-status together is rejected before any gh call, not silently resolved by --item winning (round-2 finding)", () => {
+	const root = fixtureRoot();
+	const gh = () => {
+		throw new Error("should not call gh");
+	};
+	const r = opSetStatus({ root, gh, tok: TOK, item: "PVTI_1", fromStatus: "Todo", status: "Done" });
+	assert.equal(r.ok, false);
+	assert.match(r.reason, /not both/);
 	rmSync(root, { recursive: true, force: true });
 });
 

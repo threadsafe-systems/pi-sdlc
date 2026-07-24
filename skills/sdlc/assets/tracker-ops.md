@@ -54,7 +54,10 @@ subcommand of `scripts/tracker-ops.mjs` (`tracker-ops.sh` thin wrapper), not a
 `--repo-root DIR` when not running from the consumer root. Every subcommand
 prints `--format json` (default) or `--format text`, and returns
 `{ok:true, ...}` / `{ok:false, reason}` — it never throws on a
-caller-recoverable `gh` failure.
+caller-recoverable `gh` failure. Pass `--gh-cmd CMD` to point the real spawn
+at a fake executable (safe manual exploration and CLI-level testing without
+hitting live `gh` — use this rather than guessing at a subcommand's flags
+against the real tracker).
 
 ```bash
 # Resolve an issue's GraphQL node id (the primitive every mutation below needs
@@ -89,6 +92,13 @@ scripts/tracker-ops.sh find-items --since 2026-07-20T00:00:00Z
 # Set status — pass an item id (PVTI_...) or a bare issue number (resolved
 # to its board item id first).
 scripts/tracker-ops.sh set-status --item 169 --status "In Progress"
+
+# Bulk set-status by filter (--item and --from-status are mutually
+# exclusive) — moves every item currently in --from-status, optionally
+# narrowed further by --number/--title-contains/--since, to --status. This
+# is the scripted form of a board-wide cleanup pass (e.g. moving a batch of
+# stale Todo items to Done after a bulk close).
+scripts/tracker-ops.sh set-status --from-status Todo --status Done --title-contains "spike"
 
 # Add an existing issue to the board without changing anything else.
 scripts/tracker-ops.sh board-add --issue 42
