@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "taskId": "t1",
+  "manifestPath": "docs/validation/telemetry-emitter-dx/t1.json",
+  "manifestSha256": "14836be4c8bb2f8ff4351207f31d079763fe108141168496eb8aea9a7b0a84fb",
+  "runnerReportSha256": "504e2197af8327ba1dbbe51c4f63a18531ac0c73c49043952384111c772e5902",
+  "generatedAgentSha256": "ec3895ff8b685dc90b6ce2db27aa82b37d1abeea1612749d9b1377c42d69cbdd",
+  "model": "anthropic/claude-haiku-4-5",
+  "runnerVerdict": "PASS",
+  "validatorVerdict": "PASS",
+  "createdAt": "2026-07-24T09:40:12Z"
+}
