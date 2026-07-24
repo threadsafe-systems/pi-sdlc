@@ -23,15 +23,25 @@
   enforcement; same-schemaVersion hides a breaking acceptance-rule change).
   All three incorporated below; the schemaVersion finding also produced an
   ADR 0013 amendment, **ratified 2026-07-24 (human:neil)**.
+- **Plan panel, round 4** (same two reviewers): gemini reported CLEAR across
+  the board (fully resolved, no new findings). luna found 3 more: 1 high (the
+  ADR amendment's own consequence text self-contradicted the Plan's
+  compatibility note), 2 medium (Objective wording overclaimed correspondence
+  the design deliberately doesn't provide; the pre-existing PV1 Specification
+  needs an explicit amendment, not a silent second document). All three
+  incorporated (fix-wave commit, this commit).
 
 ## Objective
 
 Today a PV1 manifest satisfies its `tests` category and any scenario's test
 evidence by pointing at a single whole-suite check. The validator's only
-inference is "did the suite run" — there is no visibility into *which* tests a
-task actually introduced or modified to earn its scenario evidence, and no
-*mechanically reliable* way to tell a broad regression check apart from a
-narrow one by naming convention alone (round 2 finding).
+inference is "did the suite run" — there is no visibility into *which* checks
+a task's author *declared* as its task-specific tests, and no *mechanically
+reliable* way to tell a declared-broad check apart from a declared-narrow one
+by naming convention alone (round 2 finding). This slice adds that
+visibility; it does not, and cannot, verify that the declared tests actually
+correspond to the diff — that stays a human/PR-panel judgement, deliberately
+(Brainstorm Finding 2, restated below).
 
 Add an explicit, optional per-check manifest field, **`scope: ("full" |
 "task")[]`** — a non-empty array of tags, not a single value (round 3
@@ -191,17 +201,28 @@ n/a`, is unaffected.
 5. `docs/adr/0013-task-validation-manifest-pv1.md`: the ratified amendment
    distinguishing shape-versioning from acceptance-rule strictness — see
    Rationale. No further edit needed; `schemaVersion` stays 1.
-6. Compatibility note for **existing** manifests in this repo
+6. **The upcoming Specification must explicitly amend/supersede
+   `docs/specs/2026-07-12-sdlc-portable-validator.md`** §1's normative
+   `CommandCheck` TypeScript type and its "No additional properties are
+   allowed at any level in PV1 schema version 1" line (verified: neither
+   currently mentions `scope`, and the latter sentence is literally false
+   once `scope` ships). Leaving the old Specification uncorrected would
+   commit two contradictory normative documents — the Spec phase must add an
+   explicit amendment section (mirroring how the ADR 0013 amendment above
+   extends rather than silently overrides its base document) naming exactly
+   which lines it supersedes, not a silent second document.
+7. Compatibility note for **existing** manifests in this repo
    (`docs/validation/*/*.json`): the `scope` field does not exist before this
    change, so **no historical manifest declares it** — every manifest with
-   `tests: required` fails Rule A on its first re-validation after upgrade,
-   unconditionally, with no partial-compliance exceptions to hunt for. This
-   is a clean break exactly as ADR 0027 anticipates. Historical receipts are
-   not retroactively re-validated (`verify-task-receipt.mjs` only hash-checks
-   self-consistency, never re-runs `inspectManifest`), so nothing already
-   merged is affected; the law applies to manifests authored from this change
-   forward.
-7. Regression tests in `test/portable-validator.test.js` (or wherever PV1/PV2
+   `tests: required` fails Rule A the moment it is re-validated under the new
+   rules, old or newly-authored alike, unconditionally, with no partial-
+   compliance exceptions to hunt for. This is a clean break exactly as ADR
+   0027 anticipates. What does *not* happen: retroactive invalidation of
+   already-merged historical receipts — those are hash-verified against
+   their own recorded content (`verify-task-receipt.mjs`), never re-run
+   through `inspectManifest`, so a past PASS stays a past PASS on record
+   (matching the corrected ADR 0013 amendment wording).
+8. Regression tests in `test/portable-validator.test.js` (or wherever PV1/PV2
    tests live — confirm exact file in Build) for: both rules positive
    (a compliant manifest with a `scope: ["full"]` check; one with separate
    `["full"]` and `["task"]` checks; one with a single `["full", "task"]`
@@ -251,14 +272,19 @@ n/a`, is unaffected.
 5. A manifest with `categories.tests: n/a` is unaffected by both rules; a
    manifest with zero owned scenarios is unaffected by Rule B but remains
    subject to Rule A (regression-tested, including the spelling-vs-field
-   case from Scope item 7).
+   case from Scope item 8).
 6. `references/phase-tasks.md`/`phase-implement.md` document the `scope`
    field (array-valued) and both rules, including both degradations, for
    Build authors.
-7. Full test corpus green; touched files biome-clean; `schemaVersion` stays 1
+7. **`docs/specs/2026-07-12-sdlc-portable-validator.md` carries an explicit
+   amendment section** naming and superseding its old `CommandCheck` type
+   and "no additional properties" line (Scope item 6) — the repo never holds
+   two silently-contradictory normative Specifications for the same manifest
+   shape.
+8. Full test corpus green; touched files biome-clean; `schemaVersion` stays 1
    per the ratified ADR 0013 amendment.
-8. A Specification exists (irreversible track) with falsifiable scenarios
-   covering DoD 1–6, reviewed by a plan panel (this doc, converged clean) and
+9. A Specification exists (irreversible track) with falsifiable scenarios
+   covering DoD 1–7, reviewed by a plan panel (this doc, converged clean) and
    a spec panel (the Spec doc), both clean before Build.
 
 ## Context for the next agent

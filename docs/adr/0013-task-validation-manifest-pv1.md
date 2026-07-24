@@ -47,8 +47,13 @@ changes an old, unmodified manifest cannot possibly satisfy regardless of
 what rules run against it. Bumping schemaVersion for a rules-only tightening
 would be a false signal in the other direction too: it would suggest existing
 compliant manifests need re-authoring for their *shape*, when in fact their
-shape is untouched and only new manifests (or old ones adding new checks) are
-affected.
+shape is untouched — the acceptance-rule change affects any manifest
+re-validated under the new rules, old or newly-authored alike, not only new
+ones. What does *not* happen is retroactive invalidation of already-merged
+historical receipts: those are hash-verified against their own recorded
+content (`verify-task-receipt.mjs`), never re-run through `inspectManifest`,
+so a past PASS stays a past PASS on record even though the same manifest
+file would newly fail if someone re-validated it today.
 
 Consequence: this ADR's original bump trigger is read narrowly (shape only,
 as literally written); rules-only tightenings ship under the existing
