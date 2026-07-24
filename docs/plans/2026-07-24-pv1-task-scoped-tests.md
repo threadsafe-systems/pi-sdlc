@@ -30,18 +30,29 @@
   the design deliberately doesn't provide; the pre-existing PV1 Specification
   needs an explicit amendment, not a silent second document). All three
   incorporated (fix-wave commit, this commit).
+- **Plan panel, round 5** (same two reviewers): gemini reported CLEAR again.
+  luna found 3 more, the most operationally serious yet: 1 high (this
+  slice's target files are in `test/frozen-surfaces.test.js`'s `FROZEN`
+  array — the entire implementation is mechanically blocked by ASD19 as
+  written), 1 medium (existing `test/telemetry-side-effects.test.js`
+  fixtures would regress from PASS/FAIL to manifest-errors under the new
+  rules), 1 low (Objective baseline description imprecise). All three
+  verified directly and incorporated (fix-wave commit, this commit).
 
 ## Objective
 
-Today a PV1 manifest satisfies its `tests` category and any scenario's test
-evidence by pointing at a single whole-suite check. The validator's only
-inference is "did the suite run" — there is no visibility into *which* checks
-a task's author *declared* as its task-specific tests, and no *mechanically
-reliable* way to tell a declared-broad check apart from a declared-narrow one
-by naming convention alone (round 2 finding). This slice adds that
-visibility; it does not, and cannot, verify that the declared tests actually
-correspond to the diff — that stays a human/PR-panel judgement, deliberately
-(Brainstorm Finding 2, restated below).
+Today a PV1 manifest's `tests`-category checks (there may be one or several —
+e.g. `docs/validation/sdlc-lifecycle-telemetry/lt-t5.json` already declares
+three) carry **no declared semantic role**: nothing distinguishes "this is
+the broad regression net" from "this is this task's specific evidence,"
+regardless of count. The validator's only inference is "did the suite run" —
+there is no visibility into *which* checks a task's author *declared* as its
+task-specific tests, and no *mechanically reliable* way to tell a
+declared-broad check apart from a declared-narrow one by naming convention
+alone (round 2 finding). This slice adds that role declaration; it does not,
+and cannot, verify that the declared tests actually correspond to the diff —
+that stays a human/PR-panel judgement, deliberately (Brainstorm Finding 2,
+restated below).
 
 Add an explicit, optional per-check manifest field, **`scope: ("full" |
 "task")[]`** — a non-empty array of tags, not a single value (round 3
@@ -201,7 +212,40 @@ n/a`, is unaffected.
 5. `docs/adr/0013-task-validation-manifest-pv1.md`: the ratified amendment
    distinguishing shape-versioning from acceptance-rule strictness — see
    Rationale. No further edit needed; `schemaVersion` stays 1.
-6. **The upcoming Specification must explicitly amend/supersede
+6. **`test/frozen-surfaces.test.js`'s `FROZEN` array (ASD19) currently lists
+   both `skills/sdlc/schema/task-validation-manifest.schema.json` and
+   `skills/sdlc/scripts/validate-task.mjs`** — verified directly: this slice's
+   entire Scope items 1–2 are mechanically blocked by that test as it stands
+   (`ASD19: frozen surfaces are byte-identical to the branch base` diffs the
+   branch against the main merge-base for exactly those paths). This is the
+   live, per-branch enforcement of the same "don't touch without deliberate
+   intent" discipline this Plan already satisfies via the irreversible track
+   and the ratified ADR 0013 amendment — not a newly-discovered blocker, but
+   its mechanical trip-wire. Build must remove exactly those two entries from
+   `FROZEN` (no others — `validate-task.sh` and `verify-task-receipt.mjs` stay
+   frozen; this slice never touches them) with an inline comment naming this
+   Plan as the deliberate reopening, mirroring how the surface was originally
+   frozen with a named rationale. Do **not** additionally amend
+   `docs/specs/2026-07-18-sdlc-agent-self-documentation.md` or
+   `docs/specs/2026-07-16-config-versioning-migration.md`'s own
+   "explicitly unchanged (frozen)" sections — those are accurate, point-in-
+   time scope declarations for *their own*, already-merged changes, not a
+   standing law that accumulates amendments; the live, operative definition
+   of what's frozen is the `FROZEN` array itself, and only that needs
+   updating.
+7. `test/telemetry-side-effects.test.js`'s `passManifest()`/`failManifest()`
+   fixtures (verified directly, lines 188–212) declare `tests: required` with
+   a single check (`tests.ok` / `tests.bad`) that is *also* the scenario
+   LT8's sole evidence — exactly the single-check-serves-both-roles case this
+   Plan's array-valued `scope` design exists for. Without an update these
+   fixtures regress from their expected PASS/FAIL outcomes to manifest-errors
+   under the new Rules A/B, breaking the full test corpus (contradicts DoD
+   item 8). Fix: tag that one check `"scope": ["full", "task"]` in both
+   fixture functions — satisfies Rule A and Rule B simultaneously with no
+   fixture restructuring, and doubles as the DoD-4 regression case's real
+   usage in already-existing test infrastructure rather than only a new,
+   synthetic one.
+8. **The upcoming Specification must explicitly amend/supersede
    `docs/specs/2026-07-12-sdlc-portable-validator.md`** §1's normative
    `CommandCheck` TypeScript type and its "No additional properties are
    allowed at any level in PV1 schema version 1" line (verified: neither
@@ -211,7 +255,7 @@ n/a`, is unaffected.
    explicit amendment section (mirroring how the ADR 0013 amendment above
    extends rather than silently overrides its base document) naming exactly
    which lines it supersedes, not a silent second document.
-7. Compatibility note for **existing** manifests in this repo
+9. Compatibility note for **existing** manifests in this repo
    (`docs/validation/*/*.json`): the `scope` field does not exist before this
    change, so **no historical manifest declares it** — every manifest with
    `tests: required` fails Rule A the moment it is re-validated under the new
@@ -222,7 +266,7 @@ n/a`, is unaffected.
    their own recorded content (`verify-task-receipt.mjs`), never re-run
    through `inspectManifest`, so a past PASS stays a past PASS on record
    (matching the corrected ADR 0013 amendment wording).
-8. Regression tests in `test/portable-validator.test.js` (or wherever PV1/PV2
+10. Regression tests in `test/portable-validator.test.js` (or wherever PV1/PV2
    tests live — confirm exact file in Build) for: both rules positive
    (a compliant manifest with a `scope: ["full"]` check; one with separate
    `["full"]` and `["task"]` checks; one with a single `["full", "task"]`
@@ -272,20 +316,26 @@ n/a`, is unaffected.
 5. A manifest with `categories.tests: n/a` is unaffected by both rules; a
    manifest with zero owned scenarios is unaffected by Rule B but remains
    subject to Rule A (regression-tested, including the spelling-vs-field
-   case from Scope item 8).
+   case from Scope item 10).
 6. `references/phase-tasks.md`/`phase-implement.md` document the `scope`
    field (array-valued) and both rules, including both degradations, for
    Build authors.
-7. **`docs/specs/2026-07-12-sdlc-portable-validator.md` carries an explicit
+7. `test/frozen-surfaces.test.js`'s `FROZEN` array drops exactly the schema
+   and `validate-task.mjs` entries (Scope item 6), with `ASD19` passing and
+   every other listed frozen surface still byte-identical to the branch base.
+8. `test/telemetry-side-effects.test.js`'s existing fixtures are updated with
+   `scope` tags (Scope item 7) and the full corpus passes with no other
+   fixture regressed.
+9. **`docs/specs/2026-07-12-sdlc-portable-validator.md` carries an explicit
    amendment section** naming and superseding its old `CommandCheck` type
-   and "no additional properties" line (Scope item 6) — the repo never holds
+   and "no additional properties" line (Scope item 8) — the repo never holds
    two silently-contradictory normative Specifications for the same manifest
    shape.
-8. Full test corpus green; touched files biome-clean; `schemaVersion` stays 1
-   per the ratified ADR 0013 amendment.
-9. A Specification exists (irreversible track) with falsifiable scenarios
-   covering DoD 1–7, reviewed by a plan panel (this doc, converged clean) and
-   a spec panel (the Spec doc), both clean before Build.
+10. Full test corpus green; touched files biome-clean; `schemaVersion` stays 1
+    per the ratified ADR 0013 amendment.
+11. A Specification exists (irreversible track) with falsifiable scenarios
+    covering DoD 1–9, reviewed by a plan panel (this doc, converged clean) and
+    a spec panel (the Spec doc), both clean before Build.
 
 ## Context for the next agent
 
