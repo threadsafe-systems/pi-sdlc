@@ -46,7 +46,18 @@
   `check-schema-break.mjs` deliberately excludes PV1; new error types not
   slotted into the existing deterministic pointer/rule-order contract) and 1
   low (ASD19's header comment would contradict its own edited array). All
-  four verified directly and incorporated (fix-wave commit, this commit).
+  four verified directly and incorporated (fix-wave commit `fac770d`).
+- **Plan panel, round 7** (same two reviewers): gemini reports genuinely
+  clean, including independently confirming no other repo fixture regresses
+  (matching my own direct check). luna found 1 high (ADR 0027, as literally
+  written, covers only "config-schema shape breaks" — citing it for a PV1
+  manifest break was a scope misapplication; same underlying rationale
+  applies, but needs its own amendment, **pending your ratification**, not
+  self-adjudicated) and 2 medium (the Spec amendment requirement didn't cover
+  the Spec's own now-invalid worked example or its §1.3–1.5 prose; the
+  Objective's zero-scenario wording overclaimed "unaffected" instead of
+  "unaffected by requirement (b) only"). All three verified directly and
+  incorporated (fix-wave commit, this commit).
 
 ## Objective
 
@@ -75,8 +86,11 @@ solely on a check that isn't tagged task-scoped. A single check that
 legitimately serves both roles (e.g. a small task where the full suite *is*
 the task-specific evidence) tags `scope: ["full", "task"]` and satisfies both
 requirements without duplication. A scenario evidenced purely by non-test
-categories, a manifest with no owned scenarios, or a manifest with `tests:
-n/a`, is unaffected.
+categories, or a manifest with `tests: n/a`, is unaffected by both
+requirements. A manifest with **no owned scenarios** is unaffected by
+requirement (b) only — it is never asked to declare or cite a `"task"`-tagged
+check — but requirement (a) still applies whenever `tests` is required,
+scenarios or not: a `"full"`-tagged check must be present regardless.
 
 ## Rationale
 
@@ -173,10 +187,22 @@ n/a`, is unaffected.
   no change to the manifest itself. That is a breaking change to a public
   contract other repos commit to — the SKILL.md iron law's own definition of
   irreversible, and its own tiebreaker (`shape.defaultTrack: irreversible`),
-  agree. Per ADR 0027's already-established policy this ships as a
-  **coordinated clean break with no migrator**: this repo hand-authors the
+  agree. ADR 0027's coordinated-clean-break-with-no-migrator policy, as
+  **written**, covers only "config-schema shape breaks" — citing it here
+  outright for a PV1 manifest break was a scope misapplication the round-7
+  plan panel caught. The underlying rationale (pre-external-adoption, the
+  whole affected population is this repo plus hand-authorable co-owned
+  repos, a migration for that population is disproportionate ceremony)
+  applies identically to PV1 manifests, so a **proposed amendment** to ADR
+  0027 extends its decision to cover this surface too (drafted in
+  `docs/adr/0027-pre-adoption-clean-break-policy.md`, pending your
+  ratification — the same class of ADR-reading decision as the ADR 0013
+  amendment, not this Plan's to self-adjudicate). If ratified, this ships as
+  a **coordinated clean break with no migrator**: this repo hand-authors the
   landing change; each co-owned repo re-authors its own manifests as a
-  follow-up while pinning the pre-break skill release until it does.
+  follow-up while pinning the pre-break skill release until it does. If you
+  want a different resolution, this Rationale paragraph and the Out-of-scope
+  co-owned-repo item below both need revisiting before Build.
 
 ## Scope
 
@@ -267,15 +293,22 @@ n/a`, is unaffected.
    style override that replaces `checks`) `"scope": ["full", "task"]` so the
    existing contract suite stays green under the new rules.
 9. **The upcoming Specification must explicitly amend/supersede
-   `docs/specs/2026-07-12-sdlc-portable-validator.md`** §1's normative
+   `docs/specs/2026-07-12-sdlc-portable-validator.md`** in full, not only its
+   normative type — verified, three distinct locations need it: (a) §1's
    `CommandCheck` TypeScript type and its "No additional properties are
-   allowed at any level in PV1 schema version 1" line (verified: neither
-   currently mentions `scope`, and the latter sentence is literally false
-   once `scope` ships). Leaving the old Specification uncorrected would
-   commit two contradictory normative documents — the Spec phase must add an
-   explicit amendment section (mirroring how the ADR 0013 amendment above
-   extends rather than silently overrides its base document) naming exactly
-   which lines it supersedes, not a silent second document.
+   allowed at any level in PV1 schema version 1" line (neither currently
+   mentions `scope`, and the latter is literally false once `scope` ships);
+   (b) **the worked example manifest** (§1, lines 52–103) — its single check
+   `tests.contract` is, by construction, exactly the same manifest as
+   `docs/validation/portable-validator/pv-t1.json` (round 2's counter-
+   example) and fails both Rule A and Rule B unchanged; a "normative" example
+   presenting an invalid manifest is incoherent; (c) §1.3–1.5's field/
+   scenario/category constraint prose, which currently has nothing to say
+   about `scope`, Rule A, or Rule B. Leaving any of the three uncorrected
+   would commit two contradictory normative documents — the Spec phase must
+   add an explicit amendment section (mirroring how the ADR 0013 amendment
+   above extends rather than silently overrides its base document) naming
+   exactly which lines/sections it supersedes, not a silent second document.
 10. **The same Specification amendment must also extend §6's fixed
     cross-field error rule-order and pointer scheme** (`docs/specs/2026-07-
     12-sdlc-portable-validator.md`, the "JSON Schema errors use AJV-compatible
