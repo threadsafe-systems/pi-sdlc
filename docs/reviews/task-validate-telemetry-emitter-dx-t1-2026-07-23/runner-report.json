@@ -1,0 +1,265 @@
+{
+  "schemaVersion": 1,
+  "taskId": "t1",
+  "manifest": "/home/neil/code/threadsafe/pi-sdlc.worktrees/feat-telemetry-emitter-dx/docs/validation/telemetry-emitter-dx/t1.json",
+  "repoRoot": "/home/neil/code/threadsafe/pi-sdlc.worktrees/feat-telemetry-emitter-dx",
+  "verdict": "PASS",
+  "exitCode": 0,
+  "errors": [],
+  "manifestErrors": [],
+  "commands": [
+    {
+      "id": "tests.task",
+      "argv": [
+        "node",
+        "--test",
+        "test/telemetry-emitter.test.js"
+      ],
+      "evidence": [
+        "Task-scoped: every telemetry-emitter test, including the 12 new DX cases, passes"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 2532,
+      "stdoutTail": "✔ LT1: valid emit appends one schema-conforming line, creating the store (53.384361ms)\n✔ LT1b: --by defaults to agent when omitted (55.069015ms)\n✔ LT2: bad inputs exit 2 and never touch the manifest (438.675465ms)\n✔ schema agreement: unknown event types remain valid for forward-compatible consumers (0.912993ms)\n✔ LT2b: a bad input against a non-existent store attempts no write (75.42058ms)\n✔ LT3: concurrent emitters produce N complete, non-interleaved lines (191.536553ms)\n✔ empty explicit identities do not fall through to another identity (111.618194ms)\n✔ LT4: --slug beats env beats branch mapping (212.335803ms)\n✔ LT5: unresolvable identity skips (exit 0, one warning, no write) (208.541606ms)\n✔ LT26: .gitignore ignores the run store (7.557225ms)\n✔ emitter: .sh wrapper delegates to .mjs identically (72.116074ms)\n✔ vocabulary: every known event has a payload descriptor (0.32151ms)\n✔ DX: unknown-event bail suggests the nearest known event and lists all (73.406957ms)\n✔ DX: garbled event input yields no suggestion (nothing close enough) (63.183109ms)\n✔ DX: invalid-payload bail carries the exact expected template (67.609995ms)\n✔ DX: expected-template payload for an event with an optional field annotates it (60.667666ms)\n✔ DX: renderEventTemplate is stable across calls and unknown for an unknown event (0.395324ms)\n✔ DX: --list prints the known-event vocabulary, never touches the run store, needs no identity (85.381395ms)\n✔ DX: --describe prints the template for a known event and exits 0 (78.258796ms)\n✔ DX: --describe on an unknown event exits 2 with a suggestion, no stdout (56.898401ms)\n✔ DX: bare --describe with no event name is a usage error, exit 2 (63.614234ms)\n✔ DX: suggestEvent finds close typos and returns null for nothing close (3.901821ms)\n✔ DX: --list/--describe never mutate an existing run store mid-run (125.442021ms)\n✔ DX-fix: malformed --payload JSON still carries the expected template (PR panel finding) (34.196662ms)\n✔ DX-fix: a missing --payload value carries the expected template when the event is already known (PR panel finding) (34.389442ms)\n✔ DX-fix: a missing --payload value with no prior event token degrades without a template (documented limitation) (48.211318ms)\n✔ DX-fix: renderEventTemplate never crashes on inherited-property lookups (PR panel finding) (0.513188ms)\n✔ DX: existing emission invocations remain byte-identical on stdout and exit code (88.706611ms)\nℹ tests 28\nℹ suites 0\nℹ pass 28\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 2491.225538\n",
+      "stderrTail": ""
+    },
+    {
+      "id": "tests.full",
+      "argv": [
+        "npm",
+        "test"
+      ],
+      "evidence": [
+        "Full corpus green (417 tests) with no regression from the emitter change"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 7867,
+      "stdoutTail": "[...truncated; showing bounded tail...]\n✔ LT16: a 3-hour gap contributes exactly 30 minutes to human-wait (4.950986ms)\n✔ collect-run: no run store exits 1 (nothing collectable) (52.62531ms)\n✔ collect-run: writes docs/retros/<slug>/run.json by default and validates (76.881914ms)\n✔ resolveSessionDirs: an override list is used verbatim; absence marks sessions.dir_unresolved (0.677045ms)\n✔ LT24: every mandated hook step names record-run-event.sh and its event-type token together (0.905717ms)\n✔ LT24: the panel-dispatch step and the validator-dispatch step each name harvest-panel.sh (0.216631ms)\n✔ LT24: sdlc-retro SKILL.md names collect and render invocations skill-relatively (FS12 forms) (0.11781ms)\n✔ LT25: check-references passes with the new inventory entries (54.812801ms)\n✔ LT25: deleting a new entry's target file fails check-references (80.580698ms)\n✔ structural coverage: every sdlc-retro script has an FS11 inventory entry (0.733182ms)\n✔ structural coverage: every hook script named by §4 has an FS11 inventory entry (3.449583ms)\n✔ structural coverage: every committed sdlc-retro schema file has an FS11 inventory entry (0.948199ms)\n✔ structural coverage: ADR 0028 has an FS11 inventory entry and exists (8.397816ms)\n✔ structural coverage: every run-store/retro path named normatively by either SKILL.md has an inventory entry (0.701086ms)\n✔ LT27: docs/retros/sdlc-lifecycle-telemetry/run.json and index.html exist (1.463917ms)\n✔ LT27: the dogfood run.json validates against the committed schema and hand-rolled validator (15.057616ms)\n✔ LT27: coverage markers honestly record the pre-instrumentation gap (partial coverage by design) (0.515588ms)\n✔ LT27: the committed dashboard renders all seven anchors for the dogfood run (5.591161ms)\n✔ LT1: valid emit appends one schema-conforming line, creating the store (43.486485ms)\n✔ LT1b: --by defaults to agent when omitted (40.495438ms)\n✔ LT2: bad inputs exit 2 and never touch the manifest (295.812624ms)\n✔ schema agreement: unknown event types remain valid for forward-compatible consumers (0.61603ms)\n✔ LT2b: a bad input against a non-existent store attempts no write (53.738969ms)\n✔ LT3: concurrent emitters produce N complete, non-interleaved lines (198.968463ms)\n✔ empty explicit identities do not fall through to another identity (117.372633ms)\n✔ LT4: --slug beats env beats branch mapping (190.821821ms)\n✔ LT5: unresolvable identity skips (exit 0, one warning, no write) (202.300152ms)\n✔ LT26: .gitignore ignores the run store (6.244167ms)\n✔ emitter: .sh wrapper delegates to .mjs identically (49.505582ms)\n✔ vocabulary: every known event has a payload descriptor (0.232489ms)\n✔ DX: unknown-event bail suggests the nearest known event and lists all (52.328917ms)\n✔ DX: garbled event input yields no suggestion (nothing close enough) (56.669805ms)\n✔ DX: invalid-payload bail carries the exact expected template (53.165632ms)\n✔ DX: expected-template payload for an event with an optional field annotates it (46.733039ms)\n✔ DX: renderEventTemplate is stable across calls and unknown for an unknown event (0.201731ms)\n✔ DX: --list prints the known-event vocabulary, never touches the run store, needs no identity (57.536339ms)\n✔ DX: --describe prints the template for a known event and exits 0 (77.289668ms)\n✔ DX: --describe on an unknown event exits 2 with a suggestion, no stdout (67.351913ms)\n✔ DX: bare --describe with no event name is a usage error, exit 2 (50.056222ms)\n✔ DX: suggestEvent finds close typos and returns null for nothing close (1.846589ms)\n✔ DX: --list/--describe never mutate an existing run store mid-run (144.252428ms)\n✔ DX-fix: malformed --payload JSON still carries the expected template (PR panel finding) (52.790908ms)\n✔ DX-fix: a missing --payload value carries the expected template when the event is already known (PR panel finding) (55.802858ms)\n✔ DX-fix: a missing --payload value with no prior event token degrades without a template (documented limitation) (63.970885ms)\n✔ DX-fix: renderEventTemplate never crashes on inherited-property lookups (PR panel finding) (1.062761ms)\n✔ DX: existing emission invocations remain byte-identical on stdout and exit code (126.422087ms)\n✔ LT11: harvest copies status.json + events.jsonl and emits panel.harvested (47.954468ms)\n✔ T1: --wave records a logical wave distinct from the round allocation label (66.653231ms)\n✔ T1: --wave must be a positive integer (35.235385ms)\n✔ LT11: --with-transcripts copies the transcripts/ subdirectory (59.171325ms)\n✔ LT12: a missing source directory exits 0 with both files missed (37.276208ms)\n✔ LT12: a partially-present source (status without events) reports one missed (43.348098ms)\n✔ harvest-panel: unknown phase and non-positive round exit 2 (140.968069ms)\n✔ harvest-panel.sh wrapper delegates to .mjs identically (101.431195ms)\n✔ LT20: full fixture renders all seven anchors with known-answer data bindings (2.751607ms)\n✔ T4: same-wave harvest rounds collapse into one wave section with each round as sub-detail (0.333253ms)\n✔ LT20: an empty-shell run.json fails to carry any pinned data binding (0.18729ms)\n✔ LT21: render-twice byte-identity and no generation-time values (0.457827ms)\n✔ LT21 (CLI): rendering the same --run input twice via the CLI is byte-identical (132.469447ms)\n✔ LT22: soft-data figures carry data-soft and visible attribution (0.345948ms)\n✔ LT22: a soft-less run.json renders coverage notices, not fabricated numbers (0.199414ms)\n✔ LT23: every coverage marker is rendered under #coverage (0.227183ms)\n✔ render-retro CLI: unreadable/unparseable/schema-invalid --run exits 1; usage errors exit 2 (233.906883ms)\n✔ render-retro CLI: default --out is index.html beside the input; --format json envelope (73.989703ms)\n✔ LT6: resolve-panel emits panel.resolved; stdout/exit byte-identical with/without --slug (234.954679ms)\n✔ LT7: ensure-panel-agent emits panel.agent_stamped; stdout/exit byte-identical (331.974492ms)\n✔ LT8: validate-task emits task.validated on PASS with and without --report (335.364651ms)\n✔ LT8: validate-task emits task.validated on FAIL (91.052531ms)\n✔ LT8: validate-task emits task.validated on an ERROR fixture whose manifest parses (72.946712ms)\n✔ LT8: an unparseable-manifest ERROR skips emission with the standard warning (43.754701ms)\n✔ LT9: unwritable run store degrades to a warning; primary output unaffected (190.396244ms)\n✔ nested --repo-root run stores are git-ignored too (gitignore anchoring) (3.17436ms)\n✔ LT10: check-lifecycle.mjs and .sh are untouched by FS5 side-effect emission (0.723988ms)\n✔ PV1: a valid JavaScript manifest runs only declared checks and passes (237.500396ms)\n✔ PV2: only declared argv run; an undeclared tool command never executes (238.94682ms)\n✔ PV3: schema and inspectManifest reject the mutation matrix before any command runs (152.097949ms)\n✔ PV4: command outcomes are complete and deterministic; runner continues after failures (108.419576ms)\n✔ PV4: a timeout is reported as FAIL with timedOut (1128.42126ms)\n✔ PV5: category applicability is exact; injected n/a shapes are rejected (140.779755ms)\n✔ PV6: scenario mapping gates the verdict (86.105183ms)\n✔ PV7: standards and banned patterns are commands, not judgement (138.599657ms)\n✔ PV8: evidence is bounded and secrets are redacted (133.271031ms)\n✔ PV8 unit: boundStream and redaction name-matching are precise (404.068177ms)\n✔ PV9: JSON/text/exit agree and JSON mode is order-independent (951.395095ms)\n✔ PV9: --report writes the exact JSON bytes atomically (240.948712ms)\n✔ PV9: --report outside the repo root is refused and clobbers nothing (233.950144ms)\n✔ PV10: generic validator law and generated agent are portable (0.841068ms)\n✔ PV11: receipt hash verification detects mutation of any stored file (7.623509ms)\n✔ PV11: a FAIL runner-report cannot ride under runnerVerdict PASS (1.295374ms)\n✔ parseArgs: recognises JSON anywhere and rejects bad flags (0.892439ms)\n✔ PV13: renderText is a faithful projection of the report (156.235276ms)\nℹ tests 421\nℹ suites 0\nℹ pass 421\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 7685.21843\n",
+      "stderrTail": ""
+    },
+    {
+      "id": "static.lint",
+      "argv": [
+        "npx",
+        "biome",
+        "check",
+        "skills/sdlc/references/system-reference.md",
+        "skills/sdlc/scripts/record-run-event.mjs",
+        "skills/sdlc/scripts/telemetry.mjs",
+        "test/telemetry-emitter.test.js",
+        "docs/validation/telemetry-emitter-dx/t1.json"
+      ],
+      "evidence": [
+        "Touched files biome-clean; scoped vs npm run lint because main has 8 pre-existing unrelated errors from commit aa58163 (see build plan Assumptions)"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 341,
+      "stdoutTail": "Checked 4 files in 29ms. No fixes applied.\n",
+      "stderrTail": ""
+    },
+    {
+      "id": "standards.template-helper-exported",
+      "argv": [
+        "grep",
+        "-q",
+        "export function renderEventTemplate",
+        "skills/sdlc/scripts/telemetry.mjs"
+      ],
+      "evidence": [
+        "Template derivation is one exported pure helper, not a per-call-site string (plan DoD 5)"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 2,
+      "stdoutTail": "",
+      "stderrTail": ""
+    },
+    {
+      "id": "standards.suggest-helper-exported",
+      "argv": [
+        "grep",
+        "-q",
+        "export function suggestEvent",
+        "skills/sdlc/scripts/telemetry.mjs"
+      ],
+      "evidence": [
+        "Nearest-event suggestion is one exported pure helper (plan DoD 1)"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 3,
+      "stdoutTail": "",
+      "stderrTail": ""
+    },
+    {
+      "id": "standards.emitter-uses-shared-helpers",
+      "argv": [
+        "grep",
+        "-qE",
+        "renderEventTemplate|suggestEvent",
+        "skills/sdlc/scripts/record-run-event.mjs"
+      ],
+      "evidence": [
+        "record-run-event.mjs consumes the shared helpers rather than reimplementing them (plan DoD 1, 2, 5)"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 3,
+      "stdoutTail": "",
+      "stderrTail": ""
+    },
+    {
+      "id": "standards.list-flag-present",
+      "argv": [
+        "grep",
+        "-q",
+        "\"--list\"",
+        "skills/sdlc/scripts/record-run-event.mjs"
+      ],
+      "evidence": [
+        "--list is implemented (plan DoD 3)"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 2,
+      "stdoutTail": "",
+      "stderrTail": ""
+    },
+    {
+      "id": "standards.describe-flag-present",
+      "argv": [
+        "grep",
+        "-q",
+        "\"--describe\"",
+        "skills/sdlc/scripts/record-run-event.mjs"
+      ],
+      "evidence": [
+        "--describe is implemented (plan DoD 4)"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 4,
+      "stdoutTail": "",
+      "stderrTail": ""
+    },
+    {
+      "id": "standards.scoped-stdout-contract-comment",
+      "argv": [
+        "grep",
+        "-q",
+        "no \\*emission\\* invocation ever writes to stdout",
+        "skills/sdlc/scripts/record-run-event.mjs"
+      ],
+      "evidence": [
+        "Emitter file-header contract comment states the scoped no-stdout rule (plan DoD 7)"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 3,
+      "stdoutTail": "",
+      "stderrTail": ""
+    },
+    {
+      "id": "standards.system-reference-documents-flags",
+      "argv": [
+        "grep",
+        "-q",
+        "describe <event>",
+        "skills/sdlc/references/system-reference.md"
+      ],
+      "evidence": [
+        "system-reference.md §12 documents --list/--describe and the richer bail diagnostics (plan DoD 7)"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 3,
+      "stdoutTail": "",
+      "stderrTail": ""
+    },
+    {
+      "id": "patterns.diff",
+      "argv": [
+        "git",
+        "diff",
+        "--check",
+        "HEAD"
+      ],
+      "evidence": [
+        "No whitespace-error banned patterns in the task diff"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 10,
+      "stdoutTail": "",
+      "stderrTail": ""
+    }
+  ],
+  "categories": [
+    {
+      "category": "tests",
+      "status": "PASS",
+      "checkIds": [
+        "tests.task",
+        "tests.full"
+      ]
+    },
+    {
+      "category": "static",
+      "status": "PASS",
+      "checkIds": [
+        "static.lint"
+      ]
+    },
+    {
+      "category": "scenarios",
+      "status": "N/A",
+      "reason": "Reversible track: no Specification exists; T1 maps to approved Plan DoD items 1-7 per the build plan's T1 scope."
+    },
+    {
+      "category": "standards",
+      "status": "PASS",
+      "checkIds": [
+        "standards.template-helper-exported",
+        "standards.suggest-helper-exported",
+        "standards.emitter-uses-shared-helpers",
+        "standards.list-flag-present",
+        "standards.describe-flag-present",
+        "standards.scoped-stdout-contract-comment",
+        "standards.system-reference-documents-flags"
+      ]
+    },
+    {
+      "category": "bannedPatterns",
+      "status": "PASS",
+      "checkIds": [
+        "patterns.diff"
+      ]
+    }
+  ],
+  "scenarios": []
+}

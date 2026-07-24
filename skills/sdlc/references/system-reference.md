@@ -293,7 +293,16 @@ skill distills it into a committed post-mortem — see that skill's SKILL.md
 for the collect/render pipeline once the run store has anything to distill).
 Emission is fail-soft everywhere (an unresolvable run identity or an
 unwritable store degrades to one stderr warning, never a behavioural change)
-and additive-only to every frozen FS5 contract (ADR 0028).
+and additive-only to every frozen FS5 contract (ADR 0028). No *emission*
+invocation ever writes to stdout; a rejected event or payload's stderr
+diagnostic names the nearest known event (for a mistyped event name) or the
+exact expected `--payload` template (for a missing/malformed field), so a
+miss self-corrects in one bounce instead of a reload-the-docs guessing loop.
+Two informational-only flags — `--list` (the known-event vocabulary) and
+`--describe <event>` (that event's full invocation template) — print to
+stdout, exit 0, and never resolve run identity or touch the run store; use
+them to discover the exact shape before emitting rather than guessing from
+memory.
 
 Record these prose-emitted inflection points with
 `scripts/record-run-event.sh <event>` (relative to this loaded skill;

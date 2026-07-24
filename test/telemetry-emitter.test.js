@@ -12,7 +12,7 @@ import { fileURLToPath } from "node:url";
 import { test } from "node:test";
 
 import Ajv from "ajv";
-import { KNOWN_EVENTS, MAX_EVENT_BYTES, validateEnvelope, validatePayload } from "../skills/sdlc/scripts/telemetry.mjs";
+import { KNOWN_EVENTS, MAX_EVENT_BYTES, renderEventTemplate, suggestEvent, validateEnvelope, validatePayload } from "../skills/sdlc/scripts/telemetry.mjs";
 
 const here = dirname(fileURLToPath(import.meta.url));
 const repoRoot = dirname(here);
@@ -326,4 +326,180 @@ test("vocabulary: every known event has a payload descriptor", () => {
 	assert.ok(KNOWN_EVENTS.includes("run.started"));
 	assert.ok(KNOWN_EVENTS.includes("task.validated"));
 	assert.equal(KNOWN_EVENTS.length, 15, "v1 vocabulary has 15 event types");
+});
+
+// ---------------------------------------------------------------------------
+// Telemetry emitter DX (2026-07-23): unknown-event bail carries a suggestion,
+// invalid-payload bail carries the expected template, and --list/--describe
+// are informational-only (stdout, exit 0, never touch the run store).
+// ---------------------------------------------------------------------------
+
+test("DX: unknown-event bail suggests the nearest known event and lists all", () => {
+	const root = tmp();
+	try {
+		const r = run(["run.start", "--repo-root", root, "--slug", "s", "--payload", "{}"]);
+		assert.equal(r.code, 2, r.stderr);
+		assert.equal(r.stdout, "", "no stdout on a bail");
+		assert.ok(r.stderr.includes("did you mean 'run.started'?"), `stderr missing suggestion: ${r.stderr}`);
+		for (const event of KNOWN_EVENTS) assert.ok(r.stderr.includes(event), `stderr missing '${event}' from the known-event list`);
+		assert.equal(existsSync(eventsPath(root, "s")), false, "no write attempted");
+	} finally {
+		rmSync(root, { recursive: true, force: true });
+	}
+});
+
+test("DX: garbled event input yields no suggestion (nothing close enough)", () => {
+	const r = run(["xk9", "--repo-root", tmp(), "--slug", "s", "--payload", "{}"]);
+	assert.equal(r.code, 2);
+	assert.ok(!r.stderr.includes("did you mean"), `expected no suggestion for garbled input: ${r.stderr}`);
+});
+
+test("DX: invalid-payload bail carries the exact expected template", () => {
+	const root = tmp();
+	try {
+		const r = run(["gate.approved", "--repo-root", root, "--slug", "s", "--payload", JSON.stringify({ phase: "plan" })]);
+		assert.equal(r.code, 2);
+		assert.ok(r.stderr.includes(`expected: ${renderEventTemplate("gate.approved")}`), `stderr missing exact template: ${r.stderr}`);
+		assert.equal(existsSync(eventsPath(root, "s")), false, "no write attempted");
+	} finally {
+		rmSync(root, { recursive: true, force: true });
+	}
+});
+
+test("DX: expected-template payload for an event with an optional field annotates it", () => {
+	const root = tmp();
+	try {
+		const r = run(["panel.dispatched", "--repo-root", root, "--slug", "s", "--payload", JSON.stringify({ panelPhase: "pr_review" })]);
+		assert.equal(r.code, 2);
+		const template = renderEventTemplate("panel.dispatched");
+		assert.ok(template.includes("wave optional"), `template should note wave is optional: ${template}`);
+		assert.ok(r.stderr.includes(`expected: ${template}`), `stderr missing exact template: ${r.stderr}`);
+	} finally {
+		rmSync(root, { recursive: true, force: true });
+	}
+});
+
+test("DX: renderEventTemplate is stable across calls and unknown for an unknown event", () => {
+	assert.equal(renderEventTemplate("gate.approved"), renderEventTemplate("gate.approved"));
+	assert.equal(renderEventTemplate("no.such.event"), null);
+});
+
+test("DX: --list prints the known-event vocabulary, never touches the run store, needs no identity", () => {
+	const mainRepo = gitRepo({ branch: "main" });
+	try {
+		const r = run(["--list"], { cwd: mainRepo, env: baseEnv() });
+		assert.equal(r.code, 0, r.stderr);
+		assert.equal(r.stderr, "", "no stderr");
+		assert.deepEqual(r.stdout.split("\n").filter(Boolean), KNOWN_EVENTS, "stdout is exactly the declared event list, one per line");
+		assert.equal(existsSync(join(mainRepo, ".pi", "sdlc", "runs")), false, "--list never creates a run store");
+	} finally {
+		rmSync(mainRepo, { recursive: true, force: true });
+	}
+});
+
+test("DX: --describe prints the template for a known event and exits 0", () => {
+	const mainRepo = gitRepo({ branch: "main" });
+	try {
+		const r = run(["--describe", "gate.approved"], { cwd: mainRepo, env: baseEnv() });
+		assert.equal(r.code, 0, r.stderr);
+		assert.equal(r.stderr, "", "no stderr");
+		assert.equal(r.stdout, `${renderEventTemplate("gate.approved")}\n`);
+		assert.equal(existsSync(join(mainRepo, ".pi", "sdlc", "runs")), false, "--describe never creates a run store");
+	} finally {
+		rmSync(mainRepo, { recursive: true, force: true });
+	}
+});
+
+test("DX: --describe on an unknown event exits 2 with a suggestion, no stdout", () => {
+	const r = run(["--describe", "run.start"]);
+	assert.equal(r.code, 2);
+	assert.equal(r.stdout, "");
+	assert.ok(r.stderr.includes("did you mean 'run.started'?"), r.stderr);
+});
+
+test("DX: bare --describe with no event name is a usage error, exit 2", () => {
+	const r = run(["--describe"]);
+	assert.equal(r.code, 2);
+	assert.equal(r.stdout, "");
+	assert.ok(r.stderr.includes("--describe requires an event name"), r.stderr);
+});
+
+test("DX: suggestEvent finds close typos and returns null for nothing close", () => {
+	assert.equal(suggestEvent("run.start"), "run.started");
+	assert.equal(suggestEvent("gate.approve"), "gate.approved");
+	assert.equal(suggestEvent("panel.dispatch"), "panel.dispatched");
+	assert.equal(suggestEvent("totally-unrelated-garbage"), null);
+	assert.equal(suggestEvent(""), null);
+});
+
+test("DX: --list/--describe never mutate an existing run store mid-run", () => {
+	const root = tmp();
+	try {
+		const seed = run(["run.started", "--repo-root", root, "--slug", "s", "--payload", JSON.stringify({ title: "T", track: "reversible" })]);
+		assert.equal(seed.code, 0, seed.stderr);
+		const path = eventsPath(root, "s");
+		const before = readFileSync(path);
+
+		const list = run(["--list", "--repo-root", root, "--slug", "s"]);
+		assert.equal(list.code, 0, list.stderr);
+		const describe = run(["--describe", "run.started", "--repo-root", root, "--slug", "s"]);
+		assert.equal(describe.code, 0, describe.stderr);
+
+		assert.deepEqual(readFileSync(path), before, "the run store is byte-identical after --list/--describe");
+	} finally {
+		rmSync(root, { recursive: true, force: true });
+	}
+});
+
+test("DX-fix: malformed --payload JSON still carries the expected template (PR panel finding)", () => {
+	const root = tmp();
+	try {
+		const r = run(["gate.approved", "--repo-root", root, "--slug", "s", "--payload", "{bad"]);
+		assert.equal(r.code, 2);
+		assert.ok(r.stderr.includes("--payload is not valid JSON"), r.stderr);
+		assert.ok(r.stderr.includes(`expected: ${renderEventTemplate("gate.approved")}`), `stderr missing template: ${r.stderr}`);
+	} finally {
+		rmSync(root, { recursive: true, force: true });
+	}
+});
+
+test("DX-fix: a missing --payload value carries the expected template when the event is already known (PR panel finding)", () => {
+	const root = tmp();
+	try {
+		const r = run(["gate.approved", "--repo-root", root, "--slug", "s", "--payload"]);
+		assert.equal(r.code, 2);
+		assert.ok(r.stderr.includes("--payload requires a value"), r.stderr);
+		assert.ok(r.stderr.includes(`expected: ${renderEventTemplate("gate.approved")}`), `stderr missing template: ${r.stderr}`);
+	} finally {
+		rmSync(root, { recursive: true, force: true });
+	}
+});
+
+test("DX-fix: a missing --payload value with no prior event token degrades without a template (documented limitation)", () => {
+	const r = run(["--payload"]);
+	assert.equal(r.code, 2);
+	assert.ok(r.stderr.includes("--payload requires a value"), r.stderr);
+	assert.ok(!r.stderr.includes("expected:"), `unexpected template with no known event: ${r.stderr}`);
+});
+
+test("DX-fix: renderEventTemplate never crashes on inherited-property lookups (PR panel finding)", () => {
+	for (const poisoned of ["__proto__", "constructor", "toString", "hasOwnProperty"]) {
+		assert.equal(renderEventTemplate(poisoned), null, `renderEventTemplate('${poisoned}') must return null, not throw`);
+		assert.equal(suggestEvent(poisoned), null, `suggestEvent('${poisoned}') should find nothing close`);
+	}
+});
+
+test("DX: existing emission invocations remain byte-identical on stdout and exit code", () => {
+	const root = tmp();
+	try {
+		const ok = run(["run.started", "--repo-root", root, "--slug", "s", "--payload", JSON.stringify({ title: "T", track: "reversible" })]);
+		assert.equal(ok.code, 0);
+		assert.equal(ok.stdout, "");
+
+		const bad = run(["no.such.event", "--repo-root", root, "--slug", "s", "--payload", "{}"]);
+		assert.equal(bad.code, 2);
+		assert.equal(bad.stdout, "");
+	} finally {
+		rmSync(root, { recursive: true, force: true });
+	}
 });

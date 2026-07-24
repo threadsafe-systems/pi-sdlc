@@ -114,6 +114,87 @@ export const OPTIONAL_EVENT_PAYLOADS = Object.freeze({
 
 export const KNOWN_EVENTS = Object.keys(EVENT_PAYLOADS);
 
+// ---- self-correction helpers (telemetry emitter DX) -----------------------
+// Deriving both from the same EVENT_PAYLOADS/OPTIONAL_EVENT_PAYLOADS
+// descriptors used for validation keeps templates and validation from
+// drifting apart: one source of truth, no hand-written per-event strings.
+
+// One "<name>":<placeholder> fragment for a payload field, typed per its
+// declared validator type. Placeholders are illustrative, not valid JSON on
+// their own (matching the existing prose convention in system-reference.md).
+function fieldTemplate(name, type) {
+	switch (type) {
+		case "string":
+		case "nonEmptyString":
+			return `"${name}":"<${name}>"`;
+		case "lifecyclePhase":
+			return `"${name}":"<${LIFECYCLE_PHASES.join("|")}>"`;
+		case "panelPhase":
+			return `"${name}":"<${PANEL_PHASES.join("|")}>"`;
+		case "posInt":
+		case "nonNegInt":
+			return `"${name}":<n>`;
+		case "stringArray":
+			return `"${name}":[...]`;
+		case "findings":
+			return `"${name}":{"high":<n>,"medium":<n>,"low":<n>}`;
+		default:
+			return `"${name}":"<${name}>"`;
+	}
+}
+
+// The full `<event> --payload '{...}'` invocation template for a known event:
+// required fields first, then any optional fields folded into the same
+// payload object and named in a trailing note. Returns null for an unknown
+// event (the caller decides how to report that).
+export function renderEventTemplate(event) {
+	// Object.hasOwn guards against inherited-property lookups (e.g. event ===
+	// "__proto__"/"constructor"/"toString"): a bracket lookup on those names
+	// resolves to an inherited object, not undefined, which would otherwise be
+	// treated as a (bogus) descriptor instead of "unknown event".
+	if (!Object.hasOwn(EVENT_PAYLOADS, event)) return null;
+	const required = EVENT_PAYLOADS[event];
+	const optional = Object.hasOwn(OPTIONAL_EVENT_PAYLOADS, event) ? OPTIONAL_EVENT_PAYLOADS[event] : [];
+	const fields = [...required, ...optional].map(([name, type]) => fieldTemplate(name, type));
+	const invocation = `${event} --payload '{${fields.join(",")}}'`;
+	if (optional.length === 0) return invocation;
+	const names = optional.map(([name]) => name).join(", ");
+	return `${invocation} (${names} optional)`;
+}
+
+// Plain Levenshtein edit distance (iterative DP, no deps).
+function editDistance(a, b) {
+	const rows = a.length + 1;
+	const cols = b.length + 1;
+	const dp = Array.from({ length: rows }, () => new Array(cols).fill(0));
+	for (let i = 0; i < rows; i++) dp[i][0] = i;
+	for (let j = 0; j < cols; j++) dp[0][j] = j;
+	for (let i = 1; i < rows; i++) {
+		for (let j = 1; j < cols; j++) {
+			dp[i][j] = a[i - 1] === b[j - 1] ? dp[i - 1][j - 1] : 1 + Math.min(dp[i - 1][j - 1], dp[i - 1][j], dp[i][j - 1]);
+		}
+	}
+	return dp[rows - 1][cols - 1];
+}
+
+// The nearest known event to a mistyped input, or null when nothing is close
+// enough to be a useful suggestion (threshold: <=3 edits, capped at half the
+// input's length, so short/garbled input doesn't produce a nonsense guess).
+export function suggestEvent(input) {
+	if (typeof input !== "string" || input.length === 0) return null;
+	const threshold = Math.min(3, Math.ceil(input.length / 2));
+	let best = null;
+	let bestDist = Number.POSITIVE_INFINITY;
+	for (const event of KNOWN_EVENTS) {
+		const dist = editDistance(input, event);
+		if (dist < bestDist) {
+			bestDist = dist;
+			best = event;
+		}
+	}
+	return best !== null && bestDist <= threshold ? best : null;
+}
+
 function isPlainObject(v) {
 	return typeof v === "object" && v !== null && !Array.isArray(v);
 }
