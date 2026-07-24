@@ -52,8 +52,8 @@
   (matching my own direct check). luna found 1 high (ADR 0027, as literally
   written, covers only "config-schema shape breaks" — citing it for a PV1
   manifest break was a scope misapplication; same underlying rationale
-  applies, but needs its own amendment, **pending your ratification**, not
-  self-adjudicated) and 2 medium (the Spec amendment requirement didn't cover
+  applies, extended via a second ADR 0027 amendment, **ratified 2026-07-24,
+  human:neil**) and 2 medium (the Spec amendment requirement didn't cover
   the Spec's own now-invalid worked example or its §1.3–1.5 prose; the
   Objective's zero-scenario wording overclaimed "unaffected" instead of
   "unaffected by requirement (b) only"). All three verified directly and
@@ -187,22 +187,17 @@ scenarios or not: a `"full"`-tagged check must be present regardless.
   no change to the manifest itself. That is a breaking change to a public
   contract other repos commit to — the SKILL.md iron law's own definition of
   irreversible, and its own tiebreaker (`shape.defaultTrack: irreversible`),
-  agree. ADR 0027's coordinated-clean-break-with-no-migrator policy, as
-  **written**, covers only "config-schema shape breaks" — citing it here
-  outright for a PV1 manifest break was a scope misapplication the round-7
-  plan panel caught. The underlying rationale (pre-external-adoption, the
-  whole affected population is this repo plus hand-authorable co-owned
-  repos, a migration for that population is disproportionate ceremony)
-  applies identically to PV1 manifests, so a **proposed amendment** to ADR
-  0027 extends its decision to cover this surface too (drafted in
-  `docs/adr/0027-pre-adoption-clean-break-policy.md`, pending your
-  ratification — the same class of ADR-reading decision as the ADR 0013
-  amendment, not this Plan's to self-adjudicate). If ratified, this ships as
-  a **coordinated clean break with no migrator**: this repo hand-authors the
-  landing change; each co-owned repo re-authors its own manifests as a
-  follow-up while pinning the pre-break skill release until it does. If you
-  want a different resolution, this Rationale paragraph and the Out-of-scope
-  co-owned-repo item below both need revisiting before Build.
+  agree. ADR 0027's coordinated-clean-break-with-no-migrator policy was
+  written to cover only "config-schema shape breaks"; a **ratified amendment**
+  (2026-07-24, human:neil, drafted in
+  `docs/adr/0027-pre-adoption-clean-break-policy.md`) extends its decision to
+  cover PV1 manifests too, on the same underlying rationale (pre-external-
+  adoption, the whole affected population is this repo plus hand-authorable
+  co-owned repos, a migration for that population is disproportionate
+  ceremony). This ships as a **coordinated clean break with no migrator**:
+  this repo hand-authors the landing change; each co-owned repo re-authors
+  its own manifests as a follow-up while pinning the pre-break skill release
+  until it does.
 
 ## Scope
 

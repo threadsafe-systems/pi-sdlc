@@ -70,8 +70,8 @@ that citing it for a PV1 task-validation-manifest acceptance-rule tightening
 (a materially different committed artifact: `docs/validation/*/*.json`, not
 `.pi/sdlc/sdlc.config.json`) was a scope misapplication, not a covered case.
 
-Proposed resolution (pending owner ratification, not self-adjudicated — this
-changes how a locked ADR is read): **the same underlying rationale applies
+Owner-adjudicated (2026-07-24, ratified in the pv1-task-scoped-tests Plan
+phase): **the same underlying rationale applies
 identically to PV1 manifests.** Every fact this policy was adjudicated on—
 pre-external-adoption, the whole affected population is this repo plus
 co-owned dogfood repos (`threadsafe/case`, `threadsafe/pi-notion`), all
