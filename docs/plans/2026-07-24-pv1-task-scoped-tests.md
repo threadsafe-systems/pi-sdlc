@@ -38,6 +38,15 @@
   fixtures would regress from PASS/FAIL to manifest-errors under the new
   rules), 1 low (Objective baseline description imprecise). All three
   verified directly and incorporated (fix-wave commit, this commit).
+- **Plan panel, round 6** (same two reviewers): 1 high from gemini (the PV1
+  contract test suite's own root fixture, `baseManifest()` in
+  `test/validator-contract.test.js`, has the identical fixture-regression
+  shape round 5 found elsewhere — even higher blast radius, 15+ call sites).
+  luna found 2 medium (no explicit release-signal requirement, given
+  `check-schema-break.mjs` deliberately excludes PV1; new error types not
+  slotted into the existing deterministic pointer/rule-order contract) and 1
+  low (ASD19's header comment would contradict its own edited array). All
+  four verified directly and incorporated (fix-wave commit, this commit).
 
 ## Objective
 
@@ -225,7 +234,10 @@ n/a`, is unaffected.
    `FROZEN` (no others — `validate-task.sh` and `verify-task-receipt.mjs` stay
    frozen; this slice never touches them) with an inline comment naming this
    Plan as the deliberate reopening, mirroring how the surface was originally
-   frozen with a named rationale. Do **not** additionally amend
+   frozen with a named rationale. The file's own header comment (currently
+   "the PV1/PV2 validator... [is] untouched") is updated in the same edit so
+   the prose doesn't contradict the array's new contents. Do **not**
+   additionally amend
    `docs/specs/2026-07-18-sdlc-agent-self-documentation.md` or
    `docs/specs/2026-07-16-config-versioning-migration.md`'s own
    "explicitly unchanged (frozen)" sections — those are accurate, point-in-
@@ -245,7 +257,16 @@ n/a`, is unaffected.
    fixture restructuring, and doubles as the DoD-4 regression case's real
    usage in already-existing test infrastructure rather than only a new,
    synthetic one.
-8. **The upcoming Specification must explicitly amend/supersede
+8. `test/validator-contract.test.js`'s `baseManifest()` fixture (verified
+   directly — the root fixture behind 15+ direct call sites and every
+   composed variant in the file; `checks: [{id: "tests.ok", ...}]` is both
+   `tests: required`'s sole check and PV1 scenario's sole evidence) has the
+   identical single-check-serves-both-roles shape as Scope item 7's fixture,
+   at even greater blast radius — this is the PV1 contract test suite itself.
+   Tag `tests.ok` (and any inline-redefined equivalents, e.g. a `withMarker`-
+   style override that replaces `checks`) `"scope": ["full", "task"]` so the
+   existing contract suite stays green under the new rules.
+9. **The upcoming Specification must explicitly amend/supersede
    `docs/specs/2026-07-12-sdlc-portable-validator.md`** §1's normative
    `CommandCheck` TypeScript type and its "No additional properties are
    allowed at any level in PV1 schema version 1" line (verified: neither
@@ -255,19 +276,45 @@ n/a`, is unaffected.
    explicit amendment section (mirroring how the ADR 0013 amendment above
    extends rather than silently overrides its base document) naming exactly
    which lines it supersedes, not a silent second document.
-9. Compatibility note for **existing** manifests in this repo
-   (`docs/validation/*/*.json`): the `scope` field does not exist before this
-   change, so **no historical manifest declares it** — every manifest with
-   `tests: required` fails Rule A the moment it is re-validated under the new
-   rules, old or newly-authored alike, unconditionally, with no partial-
-   compliance exceptions to hunt for. This is a clean break exactly as ADR
-   0027 anticipates. What does *not* happen: retroactive invalidation of
-   already-merged historical receipts — those are hash-verified against
-   their own recorded content (`verify-task-receipt.mjs`), never re-run
-   through `inspectManifest`, so a past PASS stays a past PASS on record
-   (matching the corrected ADR 0013 amendment wording).
-10. Regression tests in `test/portable-validator.test.js` (or wherever PV1/PV2
-   tests live — confirm exact file in Build) for: both rules positive
+10. **The same Specification amendment must also extend §6's fixed
+    cross-field error rule-order and pointer scheme** (`docs/specs/2026-07-
+    12-sdlc-portable-validator.md`, the "JSON Schema errors use AJV-compatible
+    instance pointers... fixed rule order and pointer" paragraph, verified
+    directly) to the three new error types, so `manifestErrors` ordering and
+    pointers stay deterministic and golden-testable rather than
+    implementation-defined. Starting point for Spec to finalize (not this
+    Plan's to fix precisely — exact wording is Spec-level normative detail):
+    `scope` shape errors at `/checks/<i>/scope` (per-check field, consistent
+    with existing `id`/`argv`/`timeoutMs`/`evidence` pointers); Rule A
+    failures at `/categories/tests` (category-level, consistent with the
+    existing "category applicability/reference" pointer); Rule B failures at
+    `/categories/scenarios/evidence/<escaped-id>` per offending scenario
+    (consistent with the existing "scenario mapped to non-required check"
+    pointer, since Rule B is conceptually the same shape — a scenario mapped
+    to a check that doesn't fulfil its evidentiary role).
+11. **The landing PR/commit carries a `BREAKING CHANGE:` footer** (this
+    repo's existing conventional-commits release signal, ADR 0012). Verified:
+    `check-schema-break.mjs`'s own comment explicitly and deliberately
+    excludes `task-validation-manifest.schema.json` from its automated guard
+    ("PV1... an independent frozen surface under ADR 0013/0014 with its own
+    version axis") — by prior design, PV1 breaks are not caught by dedicated
+    tooling the way config-schema breaks are; the general commit-footer
+    convention is the only release-channel signal this change gets, so it
+    must not be silently omitted. This is a Build-time requirement (the
+    commit itself), stated here so it isn't lost between Plan and PR.
+12. Compatibility note for **existing** manifests in this repo
+    (`docs/validation/*/*.json`): the `scope` field does not exist before this
+    change, so **no historical manifest declares it** — every manifest with
+    `tests: required` fails Rule A the moment it is re-validated under the new
+    rules, old or newly-authored alike, unconditionally, with no partial-
+    compliance exceptions to hunt for. This is a clean break exactly as ADR
+    0027 anticipates. What does *not* happen: retroactive invalidation of
+    already-merged historical receipts — those are hash-verified against
+    their own recorded content (`verify-task-receipt.mjs`), never re-run
+    through `inspectManifest`, so a past PASS stays a past PASS on record
+    (matching the corrected ADR 0013 amendment wording).
+13. Regression tests in `test/portable-validator.test.js` (or wherever PV1/PV2
+    tests live — confirm exact file in Build) for: both rules positive
    (a compliant manifest with a `scope: ["full"]` check; one with separate
    `["full"]` and `["task"]` checks; one with a single `["full", "task"]`
    check satisfying both roles at once); both rules negative (Rule A: `tests:
@@ -316,26 +363,32 @@ n/a`, is unaffected.
 5. A manifest with `categories.tests: n/a` is unaffected by both rules; a
    manifest with zero owned scenarios is unaffected by Rule B but remains
    subject to Rule A (regression-tested, including the spelling-vs-field
-   case from Scope item 10).
+   case from Scope item 13).
 6. `references/phase-tasks.md`/`phase-implement.md` document the `scope`
    field (array-valued) and both rules, including both degradations, for
    Build authors.
 7. `test/frozen-surfaces.test.js`'s `FROZEN` array drops exactly the schema
-   and `validate-task.mjs` entries (Scope item 6), with `ASD19` passing and
-   every other listed frozen surface still byte-identical to the branch base.
-8. `test/telemetry-side-effects.test.js`'s existing fixtures are updated with
-   `scope` tags (Scope item 7) and the full corpus passes with no other
-   fixture regressed.
+   and `validate-task.mjs` entries and its header comment is updated (Scope
+   item 6), with `ASD19` passing and every other listed frozen surface still
+   byte-identical to the branch base.
+8. `test/telemetry-side-effects.test.js`'s and `test/validator-contract.
+   test.js`'s existing fixtures are updated with `scope` tags (Scope items 7
+   and 8) and the full corpus passes with no other fixture regressed.
 9. **`docs/specs/2026-07-12-sdlc-portable-validator.md` carries an explicit
-   amendment section** naming and superseding its old `CommandCheck` type
-   and "no additional properties" line (Scope item 8) — the repo never holds
-   two silently-contradictory normative Specifications for the same manifest
-   shape.
-10. Full test corpus green; touched files biome-clean; `schemaVersion` stays 1
+   amendment section** naming and superseding its old `CommandCheck` type,
+   "no additional properties" line, and extending its fixed cross-field
+   error rule-order/pointer scheme to the three new error types (Scope items
+   9–10) — the repo never holds two silently-contradictory normative
+   Specifications, and `manifestErrors` stays deterministic and
+   golden-testable.
+10. The landing PR/commit carries a `BREAKING CHANGE:` footer (Scope item 11)
+    — the only release-channel signal this change gets, since
+    `check-schema-break.mjs` deliberately excludes PV1 by prior design.
+11. Full test corpus green; touched files biome-clean; `schemaVersion` stays 1
     per the ratified ADR 0013 amendment.
-11. A Specification exists (irreversible track) with falsifiable scenarios
-    covering DoD 1–9, reviewed by a plan panel (this doc, converged clean) and
-    a spec panel (the Spec doc), both clean before Build.
+12. A Specification exists (irreversible track) with falsifiable scenarios
+    covering DoD 1–10, reviewed by a plan panel (this doc, converged clean)
+    and a spec panel (the Spec doc), both clean before Build.
 
 ## Context for the next agent
 
