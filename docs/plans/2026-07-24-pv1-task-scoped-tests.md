@@ -102,7 +102,23 @@
   mechanically — resolved definitively as rule-to-pointer catalog, not a
   display-order override) and 1 low (DoD item 1's schema-layer wording read
   as if it covered `inspectManifest` too). All five verified directly and
-  incorporated (fix-wave commit, this commit).
+  incorporated (fix-wave commit `15ad550`).
+- **Plan panel, round 12** (same two reviewers): gemini reports genuinely
+  clean. luna pushed back a third time on the Build-authority framing (high)
+  — verified by reading ADR 0013 and Spec §1.1/§1.5 directly: they
+  explicitly say the scenario-evidence mapping **is** Build-canonical and
+  **is** reviewed at "the Build human gate," with "Human Build approval
+  owns the semantic judgement." Round 11's retraction over-corrected by
+  reading `phase-tasks.md`'s "Build has no gate of its own" (about the
+  Build *phase* having no standalone ceremony) as if it meant the mapping
+  is ungated (it isn't — the gate is real, just instantiated downstream as
+  PR-panel review of the manifest). Reconciled: `scope` is data within what
+  that existing gate already reviews, needing no ADR/Spec amendment because
+  it changes no authority, only makes an existing judgement machine-
+  checkable. Also found 1 medium (DoD item 7 accepted a mere tracked issue
+  for the FROZEN follow-up, weaker than Scope item 6's "not an acceptable
+  end state" language — tightened to require the follow-up PR actually
+  merging). Both incorporated (fix-wave commit, this commit).
 
 ## Objective
 
@@ -285,27 +301,32 @@ scenarios or not: a `"full"`-tagged check must be present regardless.
 3. `references/phase-tasks.md` / `references/phase-implement.md` (both under
    `skills/sdlc/`): document the `scope` field (array-valued, both tags
    allowed on one check), Rules A/B, and both degradations, as part of
-   Build's manifest authoring guidance. **Correction to an earlier draft of
-   this Plan (round 11 finding), stated honestly this time:** round 10
-   claimed `scope` tagging "derives from Build's already-approved
-   scenario-evidence mapping," implying a formal, human-gated Build artifact
-   that, verified directly against `phase-tasks.md` §4–§5, does not exist —
-   Build's committed output is "check commands, and scenario ids per task"
-   (coarser than per-check evidence wiring) and, explicitly, "**Build has no
-   gate of its own**"; the exact check-to-scenario mapping is decided when
-   the manifest itself is authored, during Implement, exactly as the
-   pre-existing (pre-this-slice) scenario-evidence mapping already is.
-   `scope` tagging does not change this: it follows the **same** discipline
-   as the mapping it complements, decided at manifest-authoring time,
-   consistent with whatever check commands and scenario-id list Build did
-   approve, and subject to the same review this system already relies on for
-   manifest correctness — the new mechanical Rule A/B checks (structural,
-   this slice) plus PR-panel judgement review (a wrongly-tagged manifest is
-   exactly the kind of thing the panel already catches for a wrongly-
-   evidenced scenario today). Inventing a new Build-time gate specifically
-   for `scope`, while the underlying evidence mapping it builds on remains
-   ungated, would be disproportionate and inconsistent — explicitly declined
-   (see Out of scope). `README.md`'s manifest-authoring section (lines
+   Build's manifest authoring guidance. **This Plan's authority-model framing
+   went through two prior drafts before landing here (rounds 10–12); this is
+   the reconciled, fully-cited version, and it does not need an ADR/Spec
+   amendment (unlike the shape-level items in Scope item 9), because it
+   changes no authority — only makes an existing one machine-checkable.**
+   ADR 0013 and the Spec are explicit and repeated: "an exact owned-scenario
+   → required-check mapping. The Build plan is canonical; the manifest is
+   its executable projection **and is reviewed at the Build human gate**"
+   (ADR 0013); "**Human Build approval owns the semantic judgement** that a
+   command genuinely exercises its mapped scenario" (Spec §1.5). The exact
+   scenario-evidence mapping **is** Build-canonical and **is** human-gated
+   today — `phase-tasks.md` §5's "Build has no gate of its own" describes
+   the Build **phase** having no standalone, separate-from-everything-else
+   ceremony; it does not mean the mapping goes unreviewed. "The Build human
+   gate" is instantiated downstream, when the committed manifest is
+   human-reviewed (concretely, today: PR-panel review of the manifest as
+   part of the PR diff) — that review **is** the Build human gate's
+   concrete form, not a separate, additional layer. `scope` tagging is new
+   *data* squarely within what that existing gate already governs (whether a
+   check genuinely exercises its mapped semantics is precisely the
+   "semantic judgement" the Spec already assigns to Build human approval) —
+   it does not create a new decision point or move an existing one; it makes
+   an already-approved judgement machine-checkable via Rules A/B, with the
+   human review that already happens (PR-panel) now able to catch a
+   *mistagged* check the same way it already catches a *miswired* evidence
+   mapping. `README.md`'s manifest-authoring section (lines
    84–107, verified — currently silent on `scope`/Rule A/Rule B) gets a
    brief summary or a link to this fuller guidance, so a consumer reading
    only the public README doesn't author a manifest that silently fails the
@@ -505,15 +526,17 @@ scenarios or not: a `"full"`-tagged check must be present regardless.
   population, directly contradicting the ratified ADR 0027 clean-break
   extension. They stay as committed history; only the Spec's own worked
   example and forward-facing guidance (Scope items 3, 9) are corrected.
-- **A new Build-time gate, field, or column formally approving each check's
-  `scope`** — explicitly declined (rounds 10–11): Build has no gate of its
-  own today (verified, `phase-tasks.md` §5) and the pre-existing scenario-
-  evidence mapping it would need to anchor to isn't itself a formally-
-  approved, per-check Build artifact either. Inventing new Build-time
-  ceremony for `scope` alone, while that underlying mapping stays ungated,
-  would be disproportionate and inconsistent. `scope` is decided at
-  manifest-authoring time, like the mapping it complements, and reviewed by
-  the same existing mechanisms (Scope item 3).
+- **A new, separate Build-time gate/ceremony/field for `scope`**, and
+  **any ADR 0013 or Spec §1.1/§1.5 amendment to the authority model** —
+  explicitly declined (rounds 10–12, reconciled): the existing "Build human
+  gate" (ADR 0013; Spec §1.5, "Human Build approval owns the semantic
+  judgement") already governs exactly this class of decision, instantiated
+  today as PR-panel review of the committed manifest. `scope` adds
+  machine-checkable *data* to a judgement that gate already makes; it
+  neither creates a new decision point nor requires new textual authority
+  (contrast Scope item 9, which *does* need amendment — that item changes
+  the manifest *shape* the Spec normatively describes, not who decides
+  what).
 - Any change to `schemaVersion` (stays 1 per the ratified ADR 0013 amendment
   — `scope` is an additive optional field).
 - Coordinating a simultaneous change to `threadsafe/case` or
@@ -553,17 +576,19 @@ scenarios or not: a `"full"`-tagged check must be present regardless.
    case from Scope item 13).
 6. `references/phase-tasks.md`/`phase-implement.md` document the `scope`
    field (array-valued) and both rules, including both degradations, for
-   Build authors, and honestly state that `scope` is decided at
-   manifest-authoring time — consistent with, not a free-standing choice
-   from, whatever check commands and scenario-id list Build approved — and
-   reviewed by the same mechanisms (mechanical Rule A/B, PR-panel judgement)
-   already governing manifest correctness today.
+   Build authors, correctly citing ADR 0013/Spec §1.5's existing "Build
+   human gate" (instantiated as PR-panel review of the manifest) as the
+   authority that already governs this class of judgement — `scope` makes
+   it machine-checkable, it does not relocate or weaken it.
 7. `test/frozen-surfaces.test.js`'s `FROZEN` array drops exactly the schema
    and `validate-task.mjs` entries and its header comment is updated (Scope
    item 6), with `ASD19` passing and every other listed frozen surface still
-   byte-identical to the branch base. **A tracked follow-up (issue or a
-   noted next action) exists to re-add both entries once this PR merges**
-   (Scope item 6) — this DoD item is not satisfied by the removal alone.
+   byte-identical to the branch base. **This DoD item, and the overall
+   slice, is not "done" until the follow-up PR (Scope item 6) has actually
+   merged, re-adding both entries** — matching Scope item 6's own "not an
+   acceptable end state" language exactly, not merely filing a tracked
+   issue that could go unresolved. A tracker issue/note is the interim
+   record between the two PRs, not the completion criterion itself.
 8. `test/telemetry-side-effects.test.js`'s and `test/validator-contract.
    test.js`'s existing fixtures are updated with `scope` tags (Scope items 7
    and 8) and the full corpus passes with no other fixture regressed.
