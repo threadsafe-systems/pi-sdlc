@@ -1,0 +1,89 @@
+{
+  "schemaVersion": 1,
+  "taskId": "t1",
+  "buildPlan": "docs/plans/2026-07-23-telemetry-emitter-dx-build.md",
+  "repoRoot": ".",
+  "ownedScenarios": [],
+  "checks": [
+    {
+      "id": "tests.task",
+      "argv": ["node", "--test", "test/telemetry-emitter.test.js"],
+      "timeoutMs": 60000,
+      "evidence": ["Task-scoped: every telemetry-emitter test, including the 12 new DX cases, passes"]
+    },
+    {
+      "id": "tests.full",
+      "argv": ["npm", "test"],
+      "timeoutMs": 300000,
+      "evidence": ["Full corpus green (417 tests) with no regression from the emitter change"]
+    },
+    {
+      "id": "static.lint",
+      "argv": ["npx", "biome", "check", "skills/sdlc/references/system-reference.md", "skills/sdlc/scripts/record-run-event.mjs", "skills/sdlc/scripts/telemetry.mjs", "test/telemetry-emitter.test.js", "docs/validation/telemetry-emitter-dx/t1.json"],
+      "timeoutMs": 120000,
+      "evidence": ["Touched files biome-clean; scoped vs npm run lint because main has 8 pre-existing unrelated errors from commit 7621fe8 (see build plan Assumptions)"]
+    },
+    {
+      "id": "standards.template-helper-exported",
+      "argv": ["grep", "-q", "export function renderEventTemplate", "skills/sdlc/scripts/telemetry.mjs"],
+      "evidence": ["Template derivation is one exported pure helper, not a per-call-site string (plan DoD 5)"]
+    },
+    {
+      "id": "standards.suggest-helper-exported",
+      "argv": ["grep", "-q", "export function suggestEvent", "skills/sdlc/scripts/telemetry.mjs"],
+      "evidence": ["Nearest-event suggestion is one exported pure helper (plan DoD 1)"]
+    },
+    {
+      "id": "standards.emitter-uses-shared-helpers",
+      "argv": ["grep", "-qE", "renderEventTemplate|suggestEvent", "skills/sdlc/scripts/record-run-event.mjs"],
+      "evidence": ["record-run-event.mjs consumes the shared helpers rather than reimplementing them (plan DoD 1, 2, 5)"]
+    },
+    {
+      "id": "standards.list-flag-present",
+      "argv": ["grep", "-q", "\"--list\"", "skills/sdlc/scripts/record-run-event.mjs"],
+      "evidence": ["--list is implemented (plan DoD 3)"]
+    },
+    {
+      "id": "standards.describe-flag-present",
+      "argv": ["grep", "-q", "\"--describe\"", "skills/sdlc/scripts/record-run-event.mjs"],
+      "evidence": ["--describe is implemented (plan DoD 4)"]
+    },
+    {
+      "id": "standards.scoped-stdout-contract-comment",
+      "argv": ["grep", "-q", "no \\*emission\\* invocation ever writes to stdout", "skills/sdlc/scripts/record-run-event.mjs"],
+      "evidence": ["Emitter file-header contract comment states the scoped no-stdout rule (plan DoD 7)"]
+    },
+    {
+      "id": "standards.system-reference-documents-flags",
+      "argv": ["grep", "-q", "describe <event>", "skills/sdlc/references/system-reference.md"],
+      "evidence": ["system-reference.md \u00a712 documents --list/--describe and the richer bail diagnostics (plan DoD 7)"]
+    },
+    {
+      "id": "patterns.diff",
+      "argv": ["git", "diff", "--check", "HEAD"],
+      "evidence": ["No whitespace-error banned patterns in the task diff"]
+    }
+  ],
+  "categories": {
+    "tests": {
+      "applicability": "required",
+      "checkIds": ["tests.task", "tests.full"]
+    },
+    "static": {
+      "applicability": "required",
+      "checkIds": ["static.lint"]
+    },
+    "scenarios": {
+      "applicability": "n/a",
+      "reason": "Reversible track: no Specification exists; T1 maps to approved Plan DoD items 1-7 per the build plan's T1 scope."
+    },
+    "standards": {
+      "applicability": "required",
+      "checkIds": ["standards.template-helper-exported", "standards.suggest-helper-exported", "standards.emitter-uses-shared-helpers", "standards.list-flag-present", "standards.describe-flag-present", "standards.scoped-stdout-contract-comment", "standards.system-reference-documents-flags"]
+    },
+    "bannedPatterns": {
+      "applicability": "required",
+      "checkIds": ["patterns.diff"]
+    }
+  }
+}

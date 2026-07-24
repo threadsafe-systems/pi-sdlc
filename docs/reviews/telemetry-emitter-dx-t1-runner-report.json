@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "taskId": "t1",
+  "manifest": "/home/neil/code/threadsafe/pi-sdlc.worktrees/feat-telemetry-emitter-dx/docs/validation/telemetry-emitter-dx/t1.json",
+  "repoRoot": "/home/neil/code/threadsafe/pi-sdlc.worktrees/feat-telemetry-emitter-dx",
+  "verdict": "ERROR",
+  "exitCode": 2,
+  "errors": [],
+  "manifestErrors": [
+    "/checks/2/evidence/0: evidence labels must be single-line strings (max 160)"
+  ],
+  "commands": [],
+  "categories": [],
+  "scenarios": []
+}

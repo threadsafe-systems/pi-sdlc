@@ -5,15 +5,18 @@
 // Usage: record-run-event.mjs <event> [--slug S] [--by WHO] [--payload JSON]
 //                             [--config DIR | --repo-root DIR]
 //
-// Contract (spec §3.1): nothing is ever written to stdout; diagnostics go to
-// stderr with the `sdlc-telemetry:` prefix; exit 0 on append or soft skip,
-// exit 2 on usage/validation/I/O failure. All validation happens before any
-// write, so no invalid record is ever attempted. No runtime deps (NF2).
+// Contract (spec §3.1): no *emission* invocation ever writes to stdout;
+// diagnostics go to stderr with the `sdlc-telemetry:` prefix; exit 0 on
+// append or soft skip, exit 2 on usage/validation/I/O failure. All
+// validation happens before any write, so no invalid record is ever
+// attempted. No runtime deps (NF2). `--list`/`--describe` are a distinct
+// informational invocation class: they print to stdout, never touch the run
+// store, and short-circuit before any run-identity or payload handling.
 
 import { closeSync, mkdirSync, openSync, writeSync } from "node:fs";
 import { dirname } from "node:path";
 import { inspectRoot } from "./lib.mjs";
-import { EVENT_SCHEMA_VERSION, KNOWN_EVENTS, MAX_EVENT_BYTES, BY_RE, resolveRunSlug, runEventsPath, validatePayload } from "./telemetry.mjs";
+import { EVENT_SCHEMA_VERSION, KNOWN_EVENTS, MAX_EVENT_BYTES, BY_RE, renderEventTemplate, resolveRunSlug, runEventsPath, suggestEvent, validatePayload } from "./telemetry.mjs";
 
 const PREFIX = "sdlc-telemetry:";
 
@@ -34,6 +37,29 @@ function skip(msg) {
 }
 
 const argv = process.argv.slice(2);
+
+// ---- informational invocations (--list / --describe) ---------------------
+// Short-circuit before any other parsing: these never resolve run identity,
+// never touch the run store, and are the one place this CLI writes stdout.
+function unknownEventMessage(name) {
+	const suggestion = suggestEvent(name);
+	const hint = suggestion ? `did you mean '${suggestion}'? ` : "";
+	return `unknown event type '${name}'. ${hint}known events: ${KNOWN_EVENTS.join(", ")}`;
+}
+
+if (argv.includes("--list")) {
+	process.stdout.write(`${KNOWN_EVENTS.join("\n")}\n`);
+	process.exit(0);
+}
+const describeIdx = argv.indexOf("--describe");
+if (describeIdx !== -1) {
+	const target = argv[describeIdx + 1];
+	if (target === undefined) bail("--describe requires an event name");
+	if (!KNOWN_EVENTS.includes(target)) bail(unknownEventMessage(target));
+	process.stdout.write(`${renderEventTemplate(target)}\n`);
+	process.exit(0);
+}
+
 let event = "";
 let slug;
 let by = "";
@@ -78,8 +104,8 @@ for (let i = 0; i < argv.length; i++) {
 }
 
 // ---- prevalidation (all before any write) --------------------------------
-if (!event) bail("usage: record-run-event <event> [--slug S] [--by WHO] [--payload JSON] [--config DIR|--repo-root DIR]");
-if (!KNOWN_EVENTS.includes(event)) bail(`unknown event type '${event}'. Known: ${KNOWN_EVENTS.join(", ")}`);
+if (!event) bail("usage: record-run-event <event> [--slug S] [--by WHO] [--payload JSON] [--config DIR|--repo-root DIR] | --list | --describe <event>");
+if (!KNOWN_EVENTS.includes(event)) bail(unknownEventMessage(event));
 
 const byValue = bySeen ? by : "agent";
 if (!BY_RE.test(byValue)) bail(`--by value '${byValue}' violates the grammar script:<name>|agent|human:<slug>`);
@@ -96,7 +122,7 @@ if (payloadSeen) {
 }
 
 const payloadIssues = validatePayload(event, payload);
-if (payloadIssues.length > 0) bail(`invalid payload for '${event}': ${payloadIssues.join("; ")}`);
+if (payloadIssues.length > 0) bail(`invalid payload for '${event}': ${payloadIssues.join("; ")}. expected: ${renderEventTemplate(event)}`);
 
 // ---- run-identity resolution ---------------------------------------------
 const rootResult = inspectRoot({ config: config || undefined, repoRoot: repoRoot || undefined });
