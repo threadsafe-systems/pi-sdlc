@@ -64,7 +64,16 @@
   test; DoD 9 didn't enumerate all four Spec-amendment sub-items Scope item 9
   already required) and 1 low (the public README's manifest-authoring
   section would stay silent on the new rules). All three verified directly
-  and incorporated (fix-wave commit, this commit).
+  and incorporated (fix-wave commit `484ef15`).
+- **Plan panel, round 9** (same two reviewers): gemini reports genuinely
+  clean. luna found 2 more: 1 medium (the `BREAKING CHANGE:` requirement said
+  "landing PR/commit" without specifying that only the PR title/body is
+  release-visible under this repo's squash workflow — an inner commit's
+  footer is deliberately ignored) and 1 low (a source-citation error: the
+  PV1-exclusion rationale I'd quoted lives in
+  `docs/specs/2026-07-16-config-versioning-migration.md`, not literally in
+  `check-schema-break.mjs` itself). Both verified directly and incorporated
+  (fix-wave commit, this commit).
 
 ## Objective
 
@@ -337,16 +346,26 @@ scenarios or not: a `"full"`-tagged check must be present regardless.
     (consistent with the existing "scenario mapped to non-required check"
     pointer, since Rule B is conceptually the same shape — a scenario mapped
     to a check that doesn't fulfil its evidentiary role).
-11. **The landing PR/commit carries a `BREAKING CHANGE:` footer** (this
-    repo's existing conventional-commits release signal, ADR 0012). Verified:
-    `check-schema-break.mjs`'s own comment explicitly and deliberately
-    excludes `task-validation-manifest.schema.json` from its automated guard
-    ("PV1... an independent frozen surface under ADR 0013/0014 with its own
-    version axis") — by prior design, PV1 breaks are not caught by dedicated
-    tooling the way config-schema breaks are; the general commit-footer
-    convention is the only release-channel signal this change gets, so it
-    must not be silently omitted. This is a Build-time requirement (the
-    commit itself), stated here so it isn't lost between Plan and PR.
+11. **The `BREAKING CHANGE:` signal must be in the release-visible PR
+    title/body, not merely an inner commit** (this repo's existing
+    conventional-commits release signal, ADR 0012). Verified precisely:
+    under this repo's squash-merge workflow, "inner branch commits are
+    deliberately ignored" for release purposes — the signal
+    semantic-release actually reads is the **PR title** (or a
+    `BREAKING CHANGE:`/`BREAKING-CHANGE:` line in the **PR body**), per
+    `docs/specs/2026-07-16-config-versioning-migration.md`'s "Signal source
+    (merge-mode aware)" paragraph — corrected citation: that explanatory
+    rationale ("PV1... an independent frozen surface under ADR 0013/0014
+    with its own version axis") lives in that Specification document, not
+    literally in `check-schema-break.mjs` itself, which only carries the
+    shorter `WATCHED_SCHEMAS` list and a generic comment (a misattribution
+    in an earlier draft of this Plan, now corrected). By prior design,
+    `check-schema-break.mjs`'s automated guard doesn't watch PV1 at all
+    (config-schema only) — so the PR-title/body footer is the *only*
+    release-channel signal this change gets, mechanically unenforced, and
+    must not be silently placed on an inner commit where it would be
+    discarded at squash. This is a PR-open-time requirement, not merely a
+    commit-authoring one — stated here so it isn't lost between Plan and PR.
 12. Compatibility note for **existing** manifests in this repo
     (`docs/validation/*/*.json`): the `scope` field does not exist before this
     change, so **no historical manifest declares it** — every manifest with
@@ -435,9 +454,10 @@ scenarios or not: a `"full"`-tagged check must be present regardless.
     co-occurs with a pre-existing error type (e.g. a dangling-check error) in
     one manifest, so the deterministic-ordering contract (Scope item 10’s
     pointer scheme) is verified, not merely documented.
-11. The landing PR/commit carries a `BREAKING CHANGE:` footer (Scope item 11)
-    — the only release-channel signal this change gets, since
-    `check-schema-break.mjs` deliberately excludes PV1 by prior design.
+11. The landing PR's **title or body** carries the `BREAKING CHANGE:` signal
+    (Scope item 11) — not only an inner commit, which would be discarded at
+    squash — the only release-channel signal this change gets, since
+    `check-schema-break.mjs` doesn't watch PV1 at all by prior design.
 12. Full test corpus green; touched files biome-clean; `schemaVersion` stays 1
     per the ratified ADR 0013 amendment.
 13. `README.md`'s manifest-authoring section (lines 84–107) is updated with a
