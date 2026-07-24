@@ -1,65 +1,63 @@
 {
- "state": "awaiting-ratification",
- "handoffId": "b0c7e688c3b0d123",
- "subject": "subject.diff (pi-sdlc 7621fe8 config hunk)",
- "floor": 2,
- "pool": [
-  "anthropic/claude-haiku-4-5"
- ],
- "roster": [
-  {
-   "model": "deepseek/deepseek-v4-flash",
-   "status": "completed",
-   "attempts": [
+  "state": "awaiting-ratification",
+  "handoffId": "b0c7e688c3b0d123",
+  "subject": "subject.diff (pi-sdlc 7621fe8 config hunk)",
+  "floor": 2,
+  "pool": ["anthropic/claude-haiku-4-5"],
+  "roster": [
     {
-     "attempt": 1,
-     "effectiveModel": "deepseek/deepseek-v4-flash",
-     "ms": 46539,
-     "kind": "verdict",
-     "reason": null,
-     "costUSD": 0.0012584936000000003
-    }
-   ],
-   "verdict": {
-    "verdict": "BLOCK",
-    "findings": [
-     {
-      "severity": "medium",
-      "title": "gemini-3.1-pro-preview availability issue applied inconsistently across phases",
-      "detail": "gemini-3.1-pro-preview is placed at 2nd preference in plan_review and spec_review (xhigh) but demoted to 7th in pr_review due to a 'known API-credit/429 availability issue' cited in the commit message. Availability failures (rate limits, credit exhaustion) are phase-agnostic — a 429 error will block the model the same way regardless of whether the phase runs 'rarely per effort' or on every PR. Placing the model at 2nd preference in two phases while demoting it in a third is inconsistent: the failure risk per invocation is identical. If the availability issue is significant enough to warrant demotion in pr_review, it warrants the same treatment in plan_review and spec_review unless a concrete mitigation (retry budget, fallback logic, quota reservation) is documented — which it is not. Resolve by either demoting gemini-3.1-pro-preview in plan_review/spec_review too, or documenting the specific mitigation that makes the risk acceptable there."
-     }
-    ]
-   }
-  },
-  {
-   "model": "zai/glm-5.2:low",
-   "status": "completed",
-   "attempts": [
+      "model": "deepseek/deepseek-v4-flash",
+      "status": "completed",
+      "attempts": [
+        {
+          "attempt": 1,
+          "effectiveModel": "deepseek/deepseek-v4-flash",
+          "ms": 46539,
+          "kind": "verdict",
+          "reason": null,
+          "costUSD": 0.0012584936000000003
+        }
+      ],
+      "verdict": {
+        "verdict": "BLOCK",
+        "findings": [
+          {
+            "severity": "medium",
+            "title": "gemini-3.1-pro-preview availability issue applied inconsistently across phases",
+            "detail": "gemini-3.1-pro-preview is placed at 2nd preference in plan_review and spec_review (xhigh) but demoted to 7th in pr_review due to a 'known API-credit/429 availability issue' cited in the commit message. Availability failures (rate limits, credit exhaustion) are phase-agnostic — a 429 error will block the model the same way regardless of whether the phase runs 'rarely per effort' or on every PR. Placing the model at 2nd preference in two phases while demoting it in a third is inconsistent: the failure risk per invocation is identical. If the availability issue is significant enough to warrant demotion in pr_review, it warrants the same treatment in plan_review and spec_review unless a concrete mitigation (retry budget, fallback logic, quota reservation) is documented — which it is not. Resolve by either demoting gemini-3.1-pro-preview in plan_review/spec_review too, or documenting the specific mitigation that makes the risk acceptable there."
+          }
+        ]
+      }
+    },
     {
-     "attempt": 1,
-     "effectiveModel": "zai/glm-5.2:low",
-     "ms": 109455,
-     "kind": "verdict",
-     "reason": null,
-     "costUSD": 0
+      "model": "zai/glm-5.2:low",
+      "status": "completed",
+      "attempts": [
+        {
+          "attempt": 1,
+          "effectiveModel": "zai/glm-5.2:low",
+          "ms": 109455,
+          "kind": "verdict",
+          "reason": null,
+          "costUSD": 0
+        }
+      ],
+      "verdict": {
+        "verdict": "BLOCK",
+        "findings": [
+          {
+            "severity": "high",
+            "title": "pr_review Bedrock fallback model id is corrupted and contradicts both the commit message and the inline $comment",
+            "detail": "The added pr_review prefer list contains amazon-bedrock/global.anthropic-opus-4-8:xhigh, but the prior committed value, the new $comment, and the commit body all describe this same entry as amazon-bedrock/global.anthropic.claude-opus-4-8 (Bedrock's dotted cross-region-inference id format). The new value drops both the '.' after 'anthropic' and the 'claude' token, yielding global.anthropic-opus-4-8, which is not a valid Bedrock model id and will almost certainly fail to resolve against live credentials in resolve-panel. That silently defeats the entire documented rationale for keeping the entry ('becomes a live distinct reviewer once the author identity moves to fable-5'), in a file whose whole purpose is exact model identity. It is also the same class of stray-character corruption the commit claims to be fixing elsewhere. The JSON value and the inline $comment must be reconciled before this lands."
+          },
+          {
+            "severity": "low",
+            "title": "gemini-3.1-pro-preview promoted in plan/spec while demoted in pr on the same availability grounds",
+            "detail": "The commit cites gemini's known credit/429 availability issue to justify demoting it to second-to-last in pr_review, yet simultaneously promotes it to #2 preference in both plan_review and spec_review. The stated rationale (rare phases tolerate a flaky model because resolve-panel falls through to the next preference) is defensible, but the $comment should note this explicitly so a future reader does not read the pr_review demotion as 'gemini is unreliable everywhere' and propagate it."
+          }
+        ]
+      }
     }
-   ],
-   "verdict": {
-    "verdict": "BLOCK",
-    "findings": [
-     {
-      "severity": "high",
-      "title": "pr_review Bedrock fallback model id is corrupted and contradicts both the commit message and the inline $comment",
-      "detail": "The added pr_review prefer list contains amazon-bedrock/global.anthropic-opus-4-8:xhigh, but the prior committed value, the new $comment, and the commit body all describe this same entry as amazon-bedrock/global.anthropic.claude-opus-4-8 (Bedrock's dotted cross-region-inference id format). The new value drops both the '.' after 'anthropic' and the 'claude' token, yielding global.anthropic-opus-4-8, which is not a valid Bedrock model id and will almost certainly fail to resolve against live credentials in resolve-panel. That silently defeats the entire documented rationale for keeping the entry ('becomes a live distinct reviewer once the author identity moves to fable-5'), in a file whose whole purpose is exact model identity. It is also the same class of stray-character corruption the commit claims to be fixing elsewhere. The JSON value and the inline $comment must be reconciled before this lands."
-     },
-     {
-      "severity": "low",
-      "title": "gemini-3.1-pro-preview promoted in plan/spec while demoted in pr on the same availability grounds",
-      "detail": "The commit cites gemini's known credit/429 availability issue to justify demoting it to second-to-last in pr_review, yet simultaneously promotes it to #2 preference in both plan_review and spec_review. The stated rationale (rare phases tolerate a flaky model because resolve-panel falls through to the next preference) is defensible, but the $comment should note this explicitly so a future reader does not read the pr_review demotion as 'gemini is unreliable everywhere' and propagate it."
-     }
-    ]
-   }
-  }
- ],
- "ratification": null
+  ],
+  "ratification": null
 }

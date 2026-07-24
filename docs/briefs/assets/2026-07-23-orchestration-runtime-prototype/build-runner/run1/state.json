@@ -1,61 +1,61 @@
 {
- "state": "failed-shortfall",
- "handoffId": "daaba90d68454cb7",
- "subject": "subject.diff (pi-sdlc 7621fe8 config hunk)",
- "floor": 2,
- "roster": [
-  {
-   "model": "anthropic/claude-haiku-4-5",
-   "status": "failed",
-   "attempts": [
+  "state": "failed-shortfall",
+  "handoffId": "daaba90d68454cb7",
+  "subject": "subject.diff (pi-sdlc 7621fe8 config hunk)",
+  "floor": 2,
+  "roster": [
     {
-     "attempt": 1,
-     "effectiveModel": "anthropic/claude-haiku-4-5",
-     "ms": 977,
-     "kind": "infra",
-     "reason": "unparseable verdict: Cannot read properties of null (reading '0')",
-     "costUSD": null,
-     "stderrTail": ""
+      "model": "anthropic/claude-haiku-4-5",
+      "status": "failed",
+      "attempts": [
+        {
+          "attempt": 1,
+          "effectiveModel": "anthropic/claude-haiku-4-5",
+          "ms": 977,
+          "kind": "infra",
+          "reason": "unparseable verdict: Cannot read properties of null (reading '0')",
+          "costUSD": null,
+          "stderrTail": ""
+        },
+        {
+          "attempt": 2,
+          "effectiveModel": "anthropic/claude-haiku-4-5",
+          "ms": 972,
+          "kind": "infra",
+          "reason": "unparseable verdict: Cannot read properties of null (reading '0')",
+          "costUSD": null,
+          "stderrTail": ""
+        }
+      ],
+      "verdict": null
     },
     {
-     "attempt": 2,
-     "effectiveModel": "anthropic/claude-haiku-4-5",
-     "ms": 972,
-     "kind": "infra",
-     "reason": "unparseable verdict: Cannot read properties of null (reading '0')",
-     "costUSD": null,
-     "stderrTail": ""
+      "model": "deepseek/deepseek-v4-flash",
+      "status": "completed",
+      "attempts": [
+        {
+          "attempt": 1,
+          "effectiveModel": "deepseek/no-such-model-xyz",
+          "ms": 976,
+          "kind": "infra",
+          "reason": "unparseable verdict: Cannot read properties of null (reading '0')",
+          "costUSD": null,
+          "stderrTail": "Warning: Model \"no-such-model-xyz\" not found for provider \"deepseek\". Using custom model id.\n"
+        },
+        {
+          "attempt": 2,
+          "effectiveModel": "deepseek/deepseek-v4-flash",
+          "ms": 31034,
+          "kind": "verdict",
+          "reason": null,
+          "costUSD": 0.0015115800000000002
+        }
+      ],
+      "verdict": {
+        "verdict": "PASS",
+        "findings": []
+      }
     }
-   ],
-   "verdict": null
-  },
-  {
-   "model": "deepseek/deepseek-v4-flash",
-   "status": "completed",
-   "attempts": [
-    {
-     "attempt": 1,
-     "effectiveModel": "deepseek/no-such-model-xyz",
-     "ms": 976,
-     "kind": "infra",
-     "reason": "unparseable verdict: Cannot read properties of null (reading '0')",
-     "costUSD": null,
-     "stderrTail": "Warning: Model \"no-such-model-xyz\" not found for provider \"deepseek\". Using custom model id.\n"
-    },
-    {
-     "attempt": 2,
-     "effectiveModel": "deepseek/deepseek-v4-flash",
-     "ms": 31034,
-     "kind": "verdict",
-     "reason": null,
-     "costUSD": 0.0015115800000000002
-    }
-   ],
-   "verdict": {
-    "verdict": "PASS",
-    "findings": []
-   }
-  }
- ],
- "ratification": null
+  ],
+  "ratification": null
 }
