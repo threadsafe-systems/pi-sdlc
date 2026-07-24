@@ -21,7 +21,7 @@
       "id": "static.lint",
       "argv": ["npx", "biome", "check", "skills/sdlc/references/system-reference.md", "skills/sdlc/scripts/record-run-event.mjs", "skills/sdlc/scripts/telemetry.mjs", "test/telemetry-emitter.test.js", "docs/validation/telemetry-emitter-dx/t1.json"],
       "timeoutMs": 120000,
-      "evidence": ["Touched files biome-clean; scoped vs npm run lint because main has 8 pre-existing unrelated errors from commit 7621fe8 (see build plan Assumptions)"]
+      "evidence": ["Touched files biome-clean; scoped vs npm run lint because main has 8 pre-existing unrelated errors from commit aa58163 (see build plan Assumptions)"]
     },
     {
       "id": "standards.template-helper-exported",

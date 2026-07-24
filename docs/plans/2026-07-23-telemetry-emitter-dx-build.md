@@ -64,8 +64,9 @@ task-scoped test file otherwise).
 **Assumptions (accrue here as Implement proceeds):**
 - `static.lint` in the T1 manifest scopes to the touched files (`npx biome
   check <touched files>`) rather than repo-wide `npm run lint`. Confirmed on
-  `main` before starting: 8 pre-existing biome errors from commit `7621fe8`
-  (panel-roster config redesign, 2026-07-21) predate and are unrelated to this
+  `main` before starting: 8 pre-existing biome errors from commit `aa58163`
+  (orchestration-runtime build-vs-borrow prototype evidence assets, #162,
+  2026-07-23) predate and are unrelated to this
   slice. Repairing unrelated repo debt inside a reversible telemetry-DX slice
   is out of scope per the Plan; the scoped check still proves this task's diff
   is clean without silently absorbing someone else's fix.

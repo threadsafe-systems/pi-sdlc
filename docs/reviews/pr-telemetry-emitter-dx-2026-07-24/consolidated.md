@@ -63,7 +63,7 @@ issues; one single-model finding.
      telemetry-DX slice and would bundle an unrelated fix into this PR. Filed
      as a follow-up concern rather than a drive-by fix, consistent with this
      PR's existing recorded discretionary call to leave the repo's
-     pre-existing unrelated lint debt (commit `7621fe8`) untouched.
+     pre-existing unrelated lint debt (commit `aa58163`) untouched.
 
 4. **Low — validator.md links to a deleted report path** (gpt-5.6-luna,
    deepseek-v4-pro, cross-model agreement). Leftover from an earlier loose-file
