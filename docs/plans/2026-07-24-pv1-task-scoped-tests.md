@@ -21,9 +21,8 @@
   single-valued field still forces dummy duplicate checks in the overlap
   case) + 2 high from luna (schema-only enforcement is not runtime
   enforcement; same-schemaVersion hides a breaking acceptance-rule change).
-  All three incorporated below; the schemaVersion finding also produced a
-  proposed ADR 0013 amendment, **pending your ratification** (flagged
-  in-line, not self-adjudicated).
+  All three incorporated below; the schemaVersion finding also produced an
+  ADR 0013 amendment, **ratified 2026-07-24 (human:neil)**.
 
 ## Objective
 
@@ -124,8 +123,8 @@ n/a`, is unaffected.
   bump") did not anticipate a rules-only tightening with no shape change at
   all. This is a genuine gap in ADR 0013, not just this plan, and is answered
   by a **proposed** ADR 0013 amendment (already drafted in
-  `docs/adr/0013-task-validation-manifest-pv1.md`, marked pending
-  ratification, not self-adjudicated): `schemaVersion` tracks manifest
+  `docs/adr/0013-task-validation-manifest-pv1.md`, ratified 2026-07-24):
+  `schemaVersion` tracks manifest
   *shape* (field/category presence, type, cardinality — what an old,
   unmodified manifest can and cannot satisfy no matter what rules run), while
   acceptance-*rule* strictness is tracked by the ordinary lifecycle (Plan +
@@ -133,10 +132,7 @@ n/a`, is unaffected.
   integer. Under that reading, `scope` being an optional field keeps
   `schemaVersion` at 1 correctly; the acceptance-rule change is real,
   breaking, and irreversible-classified regardless (Brainstorm Finding 1
-  already established that), just not schemaVersion-signalled. **This
-  amendment needs your explicit ratification before Build** — it changes how
-  a locked ADR is read, which is squarely a human-authority decision, not an
-  agent's to make alone.
+  already established that), just not schemaVersion-signalled.
 - **Track (Brainstorm Finding 1).** PV1/PV2 is consumed by every repo that has
   adopted the sdlc skill — this repo, and the co-owned dogfood repos
   `threadsafe/case` and `threadsafe/pi-notion` (both named in ADR 0027's
@@ -192,12 +188,9 @@ n/a`, is unaffected.
    (confirmed unnecessary per Rationale) — confirm in Build whether its
    "Checks" list needs a one-line note (likely not; it already reports every
    command by id regardless of `scope`).
-5. `docs/adr/0013-task-validation-manifest-pv1.md`: the proposed amendment
-   (drafted, pending your ratification) distinguishing shape-versioning from
-   acceptance-rule strictness — see Rationale. If ratified as-is, no further
-   edit needed; if you want different wording or a different resolution
-   (e.g. an actual schemaVersion bump instead), that supersedes this Scope
-   item and cascades into DoD item 6 and the compatibility note below.
+5. `docs/adr/0013-task-validation-manifest-pv1.md`: the ratified amendment
+   distinguishing shape-versioning from acceptance-rule strictness — see
+   Rationale. No further edit needed; `schemaVersion` stays 1.
 6. Compatibility note for **existing** manifests in this repo
    (`docs/validation/*/*.json`): the `scope` field does not exist before this
    change, so **no historical manifest declares it** — every manifest with
@@ -227,10 +220,8 @@ n/a`, is unaffected.
   classified against the new rules (the compatibility note's classification
   is uniform — none declare `scope` — so no per-file audit has anything to
   discover).
-- Any change to `schemaVersion` **unless the pending ADR 0013 amendment above
-  is rejected** — if you ratify the amendment as drafted, `schemaVersion`
-  stays 1 (an additive optional field); if you want a different resolution,
-  this item and the amendment both need revisiting before Build, not after.
+- Any change to `schemaVersion` (stays 1 per the ratified ADR 0013 amendment
+  — `scope` is an additive optional field).
 - Coordinating a simultaneous change to `threadsafe/case` or
   `threadsafe/pi-notion` beyond what ADR 0027's existing coordinated-clean-
   break policy already prescribes.
@@ -265,12 +256,10 @@ n/a`, is unaffected.
    field (array-valued) and both rules, including both degradations, for
    Build authors.
 7. Full test corpus green; touched files biome-clean; `schemaVersion` stays 1
-   **iff** the ADR 0013 amendment is ratified as drafted (see Scope item 5) —
-   otherwise this item is superseded by whatever resolution you choose.
+   per the ratified ADR 0013 amendment.
 8. A Specification exists (irreversible track) with falsifiable scenarios
-   covering DoD 1–6, reviewed by a plan panel (this doc, converged clean —
-   pending only the ADR ratification below) and a spec panel (the Spec doc),
-   both clean before Build.
+   covering DoD 1–6, reviewed by a plan panel (this doc, converged clean) and
+   a spec panel (the Spec doc), both clean before Build.
 
 ## Context for the next agent
 
@@ -286,10 +275,10 @@ n/a`, is unaffected.
   `scope` as a "simpler" alternative without re-reading this Plan's
   Rationale in full — every simplification attempted so far has had a real,
   reviewer-proven counter-example.
-- **Check whether the ADR 0013 amendment was ratified, and in what form**,
-  before starting Build — it changes whether `schemaVersion` bumps and is a
-  precondition this Plan explicitly could not resolve alone (see Scope item 5
-  and DoD item 7).
+- The ADR 0013 amendment is ratified (2026-07-24, human:neil): `schemaVersion`
+  tracks shape only, stays 1 for this change; acceptance-rule strictness is
+  lifecycle-governed, not version-signalled. Do not re-litigate this in Spec
+  or Build.
 - `docs/validation/*/*.json` under this repo are **uniformly pre-law**: none
   declare `scope` (the field didn't exist), so all fail Rule A once
   re-validated with `tests: required`. Unambiguous — no need to spot-check

@@ -33,8 +33,9 @@ silent on this case, and reading it broadly enough to cover it would also wrongl
 capture routine additive changes (a new *optional* field, present here, was
 always meant to stay within `schemaVersion 1`).
 
-Proposed resolution (pending owner ratification): **`schemaVersion` tracks
-manifest shape, not acceptance-rule strictness.** An `inspectManifest` rule change that tightens what counts as a
+Owner-adjudicated (2026-07-24, ratified in the pv1-task-scoped-tests Plan
+phase): **`schemaVersion` tracks manifest shape, not acceptance-rule
+strictness.** An `inspectManifest` rule change that tightens what counts as a
 valid manifest — with or without an accompanying optional-field addition — is
 real, potentially breaking, and irreversible (SKILL.md's own definition:
 changes what an already-committed manifest means), but that irreversibility is
