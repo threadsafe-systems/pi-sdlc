@@ -451,6 +451,44 @@ test("DX: --list/--describe never mutate an existing run store mid-run", () => {
 	}
 });
 
+test("DX-fix: malformed --payload JSON still carries the expected template (PR panel finding)", () => {
+	const root = tmp();
+	try {
+		const r = run(["gate.approved", "--repo-root", root, "--slug", "s", "--payload", "{bad"]);
+		assert.equal(r.code, 2);
+		assert.ok(r.stderr.includes("--payload is not valid JSON"), r.stderr);
+		assert.ok(r.stderr.includes(`expected: ${renderEventTemplate("gate.approved")}`), `stderr missing template: ${r.stderr}`);
+	} finally {
+		rmSync(root, { recursive: true, force: true });
+	}
+});
+
+test("DX-fix: a missing --payload value carries the expected template when the event is already known (PR panel finding)", () => {
+	const root = tmp();
+	try {
+		const r = run(["gate.approved", "--repo-root", root, "--slug", "s", "--payload"]);
+		assert.equal(r.code, 2);
+		assert.ok(r.stderr.includes("--payload requires a value"), r.stderr);
+		assert.ok(r.stderr.includes(`expected: ${renderEventTemplate("gate.approved")}`), `stderr missing template: ${r.stderr}`);
+	} finally {
+		rmSync(root, { recursive: true, force: true });
+	}
+});
+
+test("DX-fix: a missing --payload value with no prior event token degrades without a template (documented limitation)", () => {
+	const r = run(["--payload"]);
+	assert.equal(r.code, 2);
+	assert.ok(r.stderr.includes("--payload requires a value"), r.stderr);
+	assert.ok(!r.stderr.includes("expected:"), `unexpected template with no known event: ${r.stderr}`);
+});
+
+test("DX-fix: renderEventTemplate never crashes on inherited-property lookups (PR panel finding)", () => {
+	for (const poisoned of ["__proto__", "constructor", "toString", "hasOwnProperty"]) {
+		assert.equal(renderEventTemplate(poisoned), null, `renderEventTemplate('${poisoned}') must return null, not throw`);
+		assert.equal(suggestEvent(poisoned), null, `suggestEvent('${poisoned}') should find nothing close`);
+	}
+});
+
 test("DX: existing emission invocations remain byte-identical on stdout and exit code", () => {
 	const root = tmp();
 	try {

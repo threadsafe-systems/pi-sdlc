@@ -85,7 +85,15 @@ for (let i = 0; i < argv.length; i++) {
 		bySeen = true;
 		i++;
 	} else if (a === "--payload") {
-		payloadRaw = needVal("--payload", i);
+		const v = argv[i + 1];
+		if (v === undefined) {
+			// event may already be resolved (it typically precedes --payload); when
+			// it is, fold the expected template into the same one-bounce diagnostic
+			// rather than making a missing value a second, template-less bail.
+			const hint = event && KNOWN_EVENTS.includes(event) ? ` expected: ${renderEventTemplate(event)}` : "";
+			bail(`--payload requires a value.${hint}`);
+		}
+		payloadRaw = v;
 		payloadSeen = true;
 		i++;
 	} else if (a === "--config") {
@@ -115,7 +123,9 @@ if (payloadSeen) {
 	try {
 		payload = JSON.parse(payloadRaw);
 	} catch {
-		bail("--payload is not valid JSON");
+		// event is already validated known at this point (the unknown-event bail
+		// above runs first), so the template is always available here.
+		bail(`--payload is not valid JSON. expected: ${renderEventTemplate(event)}`);
 	}
 } else {
 	payload = {};

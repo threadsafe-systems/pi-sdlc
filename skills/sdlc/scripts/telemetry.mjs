@@ -148,9 +148,13 @@ function fieldTemplate(name, type) {
 // payload object and named in a trailing note. Returns null for an unknown
 // event (the caller decides how to report that).
 export function renderEventTemplate(event) {
+	// Object.hasOwn guards against inherited-property lookups (e.g. event ===
+	// "__proto__"/"constructor"/"toString"): a bracket lookup on those names
+	// resolves to an inherited object, not undefined, which would otherwise be
+	// treated as a (bogus) descriptor instead of "unknown event".
+	if (!Object.hasOwn(EVENT_PAYLOADS, event)) return null;
 	const required = EVENT_PAYLOADS[event];
-	if (!required) return null;
-	const optional = OPTIONAL_EVENT_PAYLOADS[event] ?? [];
+	const optional = Object.hasOwn(OPTIONAL_EVENT_PAYLOADS, event) ? OPTIONAL_EVENT_PAYLOADS[event] : [];
 	const fields = [...required, ...optional].map(([name, type]) => fieldTemplate(name, type));
 	const invocation = `${event} --payload '{${fields.join(",")}}'`;
 	if (optional.length === 0) return invocation;
