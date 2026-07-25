@@ -24,8 +24,12 @@ Until a first external adopter exists, config-schema shape breaks ship as a
 - Everyone else's escape hatch is the version pin (`__PI_SDLC_REF__` / a pinned
   `pi-sdlc` release keeps their config working on the release that wrote it).
 - Breaks still ride package majors and the ADR 0021 release guard
-  (`CONFIG_SCHEMA_VERSION` bump + a `BREAKING CHANGE:` footer — never the `!`
-  shorthand, which the repo's angular-preset semantic-release does not parse).
+  (`CONFIG_SCHEMA_VERSION` bump + a breaking signal). The repo now uses the
+  `conventionalcommits` semantic-release preset (moved off the angular preset),
+  so **both** a `type(scope)!:` / `type!:` PR title and a `BREAKING CHANGE:` /
+  `BREAKING-CHANGE:` PR-body footer are honoured breaking signals; a literal
+  `BREAKING CHANGE:` text string in the title is not (the title is parsed as a
+  header, where only `!` marks breaking).
 - Version diagnostics stay honest (FS11): the schema-older remedy names only
   paths that exist — re-run setup or pin — and never promises a migration.
 
