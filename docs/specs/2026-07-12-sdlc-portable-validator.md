@@ -59,9 +59,10 @@ docs/validation/<feature>/<task-id>.json
   "checks": [
     {
       "id": "tests.contract",
-      "argv": ["node", "--test", "test/validator-contract.test.js"],
+      "argv": ["npm", "test"],
       "timeoutMs": 120000,
-      "evidence": ["PV1 and PV3 contract scenarios"]
+      "scope": ["full", "task"],
+      "evidence": ["PV1 and PV3 scenarios; whole-suite regression net"]
     },
     {
       "id": "static.lint",
@@ -690,3 +691,73 @@ manifest; durable lifecycle-wide receipts beyond task validation; author-model
 selection; panel vendor invariants; tracker redesign; parallel command execution;
 shell-string commands; arbitrary-secret detection beyond protected environment
 values; or quality judgement.
+
+## 11. Amendment: task-scoped test declaration (`scope` field) — 2026-07-24
+
+> This section **extends** (does not overwrite) the PV1 contract above, on the
+> same pattern the ADR 0013 amendment uses for its base. Governing docs:
+> `docs/plans/2026-07-24-pv1-task-scoped-tests.md`,
+> `docs/specs/2026-07-24-pv1-task-scoped-tests.md` (approved 2026-07-25). It
+> names exactly the locations it supersedes; where a location is superseded,
+> the text here wins. `schemaVersion` stays `1` (shape change is additive; the
+> acceptance-rule tightening is lifecycle-governed per the ratified ADR 0013
+> amendment). This is a coordinated clean break with no migrator (ADR 0027).
+
+**(a) §1.2 `CommandCheck` type — superseded.** The type gains one optional
+member:
+
+```ts
+type CommandCheck = {
+  id: string;
+  argv: [string, ...string[]];
+  timeoutMs?: number;
+  scope?: ("full" | "task")[]; // non-empty, unique; added 2026-07-24
+  evidence: [string, ...string[]];
+};
+```
+
+**(b) §1.2 "No additional properties are allowed at any level in PV1 schema
+version 1" — superseded.** Read as: no additional properties beyond the
+additive optional `scope` member on each `checks[]` item.
+
+**(c) §1.2 worked-example manifest — superseded.** Its single `tests.contract`
+check does double duty (the sole `tests` check and the sole scenario evidence),
+so under the rules below it must be tagged `scope: ["full", "task"]` — corrected
+inline above. Correcting it necessarily diverges the example from the still-
+committed `docs/validation/portable-validator/pv-t1.json` and from all pre-law
+historical manifests; that divergence is the expected, ratified shape of the
+clean break, not a defect. The historical population is not reauthored.
+
+**(d) §1.3–1.5 field/scenario/category constraint prose — extended** with the
+`scope` field and two acceptance rules, enforced by `inspectManifest` directly
+(not only the JSON Schema file):
+
+- **`scope` (optional):** a non-empty array whose entries are each exactly
+  `"full"` or `"task"`, with no duplicates. Any other value is a manifest error
+  at `/checks/<i>/scope`. A shape-invalid `scope` counts as **absent**.
+- **Rule A (manifest-level):** when `categories.tests.applicability ===
+  "required"`, at least one check referenced by that category's `checkIds` must
+  have a `scope` including `"full"` (error at `/categories/tests`). A check
+  whose *name* merely looks like a full-suite check does not qualify — the
+  field carries the meaning; genuineness of the suite stays with the existing
+  Build human gate (§1.4).
+- **Rule B (scenario-level):** when `categories.scenarios.applicability ===
+  "required"`, for each owned scenario restrict its evidence to ids also in the
+  `tests` category's `checkIds`; if that set is non-empty, at least one must
+  have a `scope` including `"task"` (error at
+  `/categories/scenarios/evidence/<escaped-id>`).
+- **Degradations:** `tests: n/a` is exempt from both rules; a manifest with
+  zero owned scenarios is exempt from Rule B but still subject to Rule A. A
+  scenario evidenced only by non-`tests` categories does not trigger Rule B.
+- **Co-occurring errors:** Rules A/B always evaluate and **stack** with any
+  reference/shape errors rather than suppressing or being suppressed by them.
+- One check tagged `scope: ["full", "task"]` satisfies both rules with no
+  duplicate check.
+
+**(e) §2.5 error rule-order & pointer scheme — extended.** The three new error
+types use the pointers above (`/checks/<i>/scope`, `/categories/tests`,
+`/categories/scenarios/evidence/<escaped-id>`). Ordering is a single **pure
+lexicographic** sort over `(pointer, message)` — the same `sortAndFormat`
+mechanism every existing rule uses. The §2.5 "fixed rule order and pointer"
+list is a **rule-to-pointer catalog** (which rule emits which pointer string),
+**not** a display-order override; there is no non-lexicographic ordering.

@@ -1,0 +1,212 @@
+{
+  "schemaVersion": 1,
+  "taskId": "t1",
+  "manifest": "/home/neil/code/threadsafe/pi-sdlc.worktrees/feat-pv1-task-scoped-tests/docs/validation/pv1-task-scoped-tests/t1.json",
+  "repoRoot": "/home/neil/code/threadsafe/pi-sdlc.worktrees/feat-pv1-task-scoped-tests",
+  "verdict": "PASS",
+  "exitCode": 0,
+  "errors": [],
+  "manifestErrors": [],
+  "commands": [
+    {
+      "id": "tests.full",
+      "argv": [
+        "npm",
+        "test"
+      ],
+      "evidence": [
+        "whole-corpus regression net is green"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 9084,
+      "stdoutTail": "[...truncated; showing bounded tail...]\n✔ LT27: docs/retros/sdlc-lifecycle-telemetry/run.json and index.html exist (2.009208ms)\n✔ LT27: the dogfood run.json validates against the committed schema and hand-rolled validator (3.946947ms)\n✔ LT27: coverage markers honestly record the pre-instrumentation gap (partial coverage by design) (0.372347ms)\n✔ LT27: the committed dashboard renders all seven anchors for the dogfood run (0.210195ms)\n✔ LT1: valid emit appends one schema-conforming line, creating the store (69.989063ms)\n✔ LT1b: --by defaults to agent when omitted (58.834779ms)\n✔ LT2: bad inputs exit 2 and never touch the manifest (382.881478ms)\n✔ schema agreement: unknown event types remain valid for forward-compatible consumers (0.518402ms)\n✔ LT2b: a bad input against a non-existent store attempts no write (31.955162ms)\n✔ LT3: concurrent emitters produce N complete, non-interleaved lines (200.730456ms)\n✔ empty explicit identities do not fall through to another identity (80.802082ms)\n✔ LT4: --slug beats env beats branch mapping (135.960444ms)\n✔ LT5: unresolvable identity skips (exit 0, one warning, no write) (136.764982ms)\n✔ LT26: .gitignore ignores the run store (4.676144ms)\n✔ emitter: .sh wrapper delegates to .mjs identically (53.794093ms)\n✔ vocabulary: every known event has a payload descriptor (0.233502ms)\n✔ DX: unknown-event bail suggests the nearest known event and lists all (32.128768ms)\n✔ DX: garbled event input yields no suggestion (nothing close enough) (33.145116ms)\n✔ DX: invalid-payload bail carries the exact expected template (55.02772ms)\n✔ DX: expected-template payload for an event with an optional field annotates it (36.28387ms)\n✔ DX: renderEventTemplate is stable across calls and unknown for an unknown event (0.337537ms)\n✔ DX: --list prints the known-event vocabulary, never touches the run store, needs no identity (73.257474ms)\n✔ DX: --describe prints the template for a known event and exits 0 (59.873559ms)\n✔ DX: --describe on an unknown event exits 2 with a suggestion, no stdout (36.005443ms)\n✔ DX: bare --describe with no event name is a usage error, exit 2 (48.713559ms)\n✔ DX: suggestEvent finds close typos and returns null for nothing close (2.376573ms)\n✔ DX: --list/--describe never mutate an existing run store mid-run (123.850934ms)\n✔ DX-fix: malformed --payload JSON still carries the expected template (PR panel finding) (57.604896ms)\n✔ DX-fix: a missing --payload value carries the expected template when the event is already known (PR panel finding) (29.481587ms)\n✔ DX-fix: a missing --payload value with no prior event token degrades without a template (documented limitation) (33.647329ms)\n✔ DX-fix: renderEventTemplate never crashes on inherited-property lookups (PR panel finding) (0.458703ms)\n✔ DX: existing emission invocations remain byte-identical on stdout and exit code (87.005853ms)\n✔ LT11: harvest copies status.json + events.jsonl and emits panel.harvested (78.545044ms)\n✔ T1: --wave records a logical wave distinct from the round allocation label (59.885253ms)\n✔ T1: --wave must be a positive integer (63.74405ms)\n✔ LT11: --with-transcripts copies the transcripts/ subdirectory (58.47185ms)\n✔ LT12: a missing source directory exits 0 with both files missed (45.889977ms)\n✔ LT12: a partially-present source (status without events) reports one missed (60.311128ms)\n✔ harvest-panel: unknown phase and non-positive round exit 2 (154.121997ms)\n✔ harvest-panel.sh wrapper delegates to .mjs identically (42.062526ms)\n✔ LT20: full fixture renders all seven anchors with known-answer data bindings (4.866781ms)\n✔ T4: same-wave harvest rounds collapse into one wave section with each round as sub-detail (0.689997ms)\n✔ LT20: an empty-shell run.json fails to carry any pinned data binding (0.383586ms)\n✔ LT21: render-twice byte-identity and no generation-time values (0.978708ms)\n✔ LT21 (CLI): rendering the same --run input twice via the CLI is byte-identical (143.116035ms)\n✔ LT22: soft-data figures carry data-soft and visible attribution (0.556651ms)\n✔ LT22: a soft-less run.json renders coverage notices, not fabricated numbers (0.544769ms)\n✔ LT23: every coverage marker is rendered under #coverage (0.438615ms)\n✔ render-retro CLI: unreadable/unparseable/schema-invalid --run exits 1; usage errors exit 2 (245.293781ms)\n✔ render-retro CLI: default --out is index.html beside the input; --format json envelope (45.108112ms)\n✔ LT6: resolve-panel emits panel.resolved; stdout/exit byte-identical with/without --slug (281.5371ms)\n✔ LT7: ensure-panel-agent emits panel.agent_stamped; stdout/exit byte-identical (326.778684ms)\n✔ LT8: validate-task emits task.validated on PASS with and without --report (335.303036ms)\n✔ LT8: validate-task emits task.validated on FAIL (64.108909ms)\n✔ LT8: validate-task emits task.validated on an ERROR fixture whose manifest parses (56.134488ms)\n✔ LT8: an unparseable-manifest ERROR skips emission with the standard warning (35.941021ms)\n✔ LT9: unwritable run store degrades to a warning; primary output unaffected (184.801659ms)\n✔ nested --repo-root run stores are git-ignored too (gitignore anchoring) (5.029641ms)\n✔ LT10: check-lifecycle.mjs and .sh are untouched by FS5 side-effect emission (1.408153ms)\n✔ PV1: a valid JavaScript manifest runs only declared checks and passes (156.158467ms)\n✔ PV2: only declared argv run; an undeclared tool command never executes (346.582844ms)\n✔ PV3: schema and inspectManifest reject the mutation matrix before any command runs (133.266639ms)\n✔ PV4: command outcomes are complete and deterministic; runner continues after failures (87.316785ms)\n✔ PV4: a timeout is reported as FAIL with timedOut (1092.078863ms)\n✔ PV5: category applicability is exact; injected n/a shapes are rejected (124.467004ms)\n✔ PV6: scenario mapping gates the verdict (119.938584ms)\n✔ PV7: standards and banned patterns are commands, not judgement (184.019337ms)\n✔ PV8: evidence is bounded and secrets are redacted (117.789702ms)\n✔ PV8 unit: boundStream and redaction name-matching are precise (348.325145ms)\n✔ PV9: JSON/text/exit agree and JSON mode is order-independent (796.86717ms)\n✔ PV9: --report writes the exact JSON bytes atomically (200.397719ms)\n✔ PV9: --report outside the repo root is refused and clobbers nothing (214.5381ms)\n✔ PV10: generic validator law and generated agent are portable (0.84563ms)\n✔ PV11: receipt hash verification detects mutation of any stored file (7.018703ms)\n✔ PV11: a FAIL runner-report cannot ride under runnerVerdict PASS (1.421118ms)\n✔ parseArgs: recognises JSON anywhere and rejects bad flags (0.915728ms)\n✔ PV13: renderText is a faithful projection of the report (128.719823ms)\n✔ TST2: separate full and task checks satisfy Rule A and Rule B (0.214963ms)\n✔ TST1: a scope:[full] check satisfies Rule A (scenarios n/a) (0.124972ms)\n✔ TST3: a single scope:[full,task] check satisfies both rules with no duplicate (0.104011ms)\n✔ TST4: Rule A negative -- tests required with no full-tagged check (0.572697ms)\n✔ TST5: Rule B negative -- scenario cites a tests check but none task-tagged (0.547054ms)\n✔ TST6: tests:n/a is exempt from Rule A and Rule B (0.135621ms)\n✔ TST7: zero owned scenarios -- exempt from Rule B, still subject to Rule A (0.182824ms)\n✔ TST8: a static-only scenario does not trigger Rule B (0.104556ms)\n✔ TST9: an untagged check named tests.full does NOT satisfy Rule A (0.096537ms)\n✔ TST10: scope shape errors are reported at /checks/<i>/scope (0.237715ms)\n✔ TST11: golden multi-error ordering (scope-shape + Rule A + dangling check) (0.158584ms)\n✔ TST12: schema accepts optional scope and rejects malformed shapes (18.038969ms)\n✔ Rule B iterates owned scenarios only -- an unowned evidence key draws no Rule B error (0.217545ms)\n✔ scope enum error is emitted once per check, not per bad entry (0.132347ms)\nℹ tests 435\nℹ suites 0\nℹ pass 435\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 8868.411308\n",
+      "stderrTail": ""
+    },
+    {
+      "id": "tests.contract",
+      "argv": [
+        "node",
+        "--test",
+        "test/validator-contract.test.js"
+      ],
+      "evidence": [
+        "scope shape, Rule A, Rule B, degradations, golden ordering (TST1-TST12)"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 4203,
+      "stdoutTail": "✔ PV1: a valid JavaScript manifest runs only declared checks and passes (114.490288ms)\n✔ PV2: only declared argv run; an undeclared tool command never executes (288.628162ms)\n✔ PV3: schema and inspectManifest reject the mutation matrix before any command runs (136.396217ms)\n✔ PV4: command outcomes are complete and deterministic; runner continues after failures (84.823074ms)\n✔ PV4: a timeout is reported as FAIL with timedOut (1101.386678ms)\n✔ PV5: category applicability is exact; injected n/a shapes are rejected (143.081397ms)\n✔ PV6: scenario mapping gates the verdict (140.749948ms)\n✔ PV7: standards and banned patterns are commands, not judgement (172.828142ms)\n✔ PV8: evidence is bounded and secrets are redacted (137.532607ms)\n✔ PV8 unit: boundStream and redaction name-matching are precise (328.675384ms)\n✔ PV9: JSON/text/exit agree and JSON mode is order-independent (787.15489ms)\n✔ PV9: --report writes the exact JSON bytes atomically (207.353166ms)\n✔ PV9: --report outside the repo root is refused and clobbers nothing (198.432056ms)\n✔ PV10: generic validator law and generated agent are portable (0.797524ms)\n✔ PV11: receipt hash verification detects mutation of any stored file (3.211173ms)\n✔ PV11: a FAIL runner-report cannot ride under runnerVerdict PASS (1.016563ms)\n✔ parseArgs: recognises JSON anywhere and rejects bad flags (0.685075ms)\n✔ PV13: renderText is a faithful projection of the report (125.184395ms)\n✔ TST2: separate full and task checks satisfy Rule A and Rule B (0.208099ms)\n✔ TST1: a scope:[full] check satisfies Rule A (scenarios n/a) (0.119627ms)\n✔ TST3: a single scope:[full,task] check satisfies both rules with no duplicate (0.100923ms)\n✔ TST4: Rule A negative -- tests required with no full-tagged check (0.58316ms)\n✔ TST5: Rule B negative -- scenario cites a tests check but none task-tagged (0.54451ms)\n✔ TST6: tests:n/a is exempt from Rule A and Rule B (0.128806ms)\n✔ TST7: zero owned scenarios -- exempt from Rule B, still subject to Rule A (0.189923ms)\n✔ TST8: a static-only scenario does not trigger Rule B (0.114529ms)\n✔ TST9: an untagged check named tests.full does NOT satisfy Rule A (0.091586ms)\n✔ TST10: scope shape errors are reported at /checks/<i>/scope (0.230154ms)\n✔ TST11: golden multi-error ordering (scope-shape + Rule A + dangling check) (0.111139ms)\n✔ TST12: schema accepts optional scope and rejects malformed shapes (17.436046ms)\n✔ Rule B iterates owned scenarios only -- an unowned evidence key draws no Rule B error (0.203144ms)\n✔ scope enum error is emitted once per check, not per bad entry (0.159586ms)\nℹ tests 32\nℹ suites 0\nℹ pass 32\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 4147.702388\n",
+      "stderrTail": ""
+    },
+    {
+      "id": "tests.frozen",
+      "argv": [
+        "node",
+        "--test",
+        "test/frozen-surfaces.test.js"
+      ],
+      "evidence": [
+        "FROZEN array reopened to exactly two entries, ASD19 green (TST14)"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 161,
+      "stdoutTail": "✔ ASD19: frozen surfaces are byte-identical to the branch base (16.140368ms)\n✔ ASD19: FS8/FS9 check ids remain present in their frozen scripts (5.580864ms)\nℹ tests 2\nℹ suites 0\nℹ pass 2\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 110.821041\n",
+      "stderrTail": ""
+    },
+    {
+      "id": "static.lint",
+      "argv": [
+        "npx",
+        "biome",
+        "check",
+        "skills/sdlc/scripts/validate-task.mjs",
+        "skills/sdlc/schema/task-validation-manifest.schema.json",
+        "test/frozen-surfaces.test.js",
+        "test/validator-contract.test.js"
+      ],
+      "evidence": [
+        "touched surfaces are biome-clean"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 431,
+      "stdoutTail": "Checked 4 files in 24ms. No fixes applied.\n",
+      "stderrTail": ""
+    }
+  ],
+  "categories": [
+    {
+      "category": "tests",
+      "status": "PASS",
+      "checkIds": [
+        "tests.full",
+        "tests.contract",
+        "tests.frozen"
+      ]
+    },
+    {
+      "category": "static",
+      "status": "PASS",
+      "checkIds": [
+        "static.lint"
+      ]
+    },
+    {
+      "category": "scenarios",
+      "status": "PASS"
+    },
+    {
+      "category": "standards",
+      "status": "N/A",
+      "reason": "no extra governing standard beyond the declared lint check applies"
+    },
+    {
+      "category": "bannedPatterns",
+      "status": "N/A",
+      "reason": "no task-diff pattern prohibition beyond lint applies to this task"
+    }
+  ],
+  "scenarios": [
+    {
+      "scenarioId": "TST1",
+      "status": "PASS",
+      "checkIds": [
+        "tests.contract"
+      ]
+    },
+    {
+      "scenarioId": "TST10",
+      "status": "PASS",
+      "checkIds": [
+        "tests.contract"
+      ]
+    },
+    {
+      "scenarioId": "TST11",
+      "status": "PASS",
+      "checkIds": [
+        "tests.contract"
+      ]
+    },
+    {
+      "scenarioId": "TST12",
+      "status": "PASS",
+      "checkIds": [
+        "tests.contract"
+      ]
+    },
+    {
+      "scenarioId": "TST14",
+      "status": "PASS",
+      "checkIds": [
+        "tests.frozen"
+      ]
+    },
+    {
+      "scenarioId": "TST2",
+      "status": "PASS",
+      "checkIds": [
+        "tests.contract"
+      ]
+    },
+    {
+      "scenarioId": "TST3",
+      "status": "PASS",
+      "checkIds": [
+        "tests.contract"
+      ]
+    },
+    {
+      "scenarioId": "TST4",
+      "status": "PASS",
+      "checkIds": [
+        "tests.contract"
+      ]
+    },
+    {
+      "scenarioId": "TST5",
+      "status": "PASS",
+      "checkIds": [
+        "tests.contract"
+      ]
+    },
+    {
+      "scenarioId": "TST6",
+      "status": "PASS",
+      "checkIds": [
+        "tests.contract"
+      ]
+    },
+    {
+      "scenarioId": "TST7",
+      "status": "PASS",
+      "checkIds": [
+        "tests.contract"
+      ]
+    },
+    {
+      "scenarioId": "TST8",
+      "status": "PASS",
+      "checkIds": [
+        "tests.contract"
+      ]
+    },
+    {
+      "scenarioId": "TST9",
+      "status": "PASS",
+      "checkIds": [
+        "tests.contract"
+      ]
+    }
+  ]
+}

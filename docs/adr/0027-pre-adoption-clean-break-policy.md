@@ -61,3 +61,27 @@ config as a coordinated follow-up, pinning the pre-break release until it
 does. That coordinated re-author is the "equivalently honest forward path"
 this policy requires. The window still closes at the first genuinely external
 adopter.
+
+## Amendment (2026-07-24): scope extends to PV1 task-validation manifests
+
+This ADR's title and Decision are written narrowly — "config-schema shape
+breaks" — and the pv1-task-scoped-tests plan-review panel correctly found
+that citing it for a PV1 task-validation-manifest acceptance-rule tightening
+(a materially different committed artifact: `docs/validation/*/*.json`, not
+`.pi/sdlc/sdlc.config.json`) was a scope misapplication, not a covered case.
+
+Owner-adjudicated (2026-07-24, ratified in the pv1-task-scoped-tests Plan
+phase): **the same underlying rationale applies
+identically to PV1 manifests.** Every fact this policy was adjudicated on—
+pre-external-adoption, the whole affected population is this repo plus
+co-owned dogfood repos (`threadsafe/case`, `threadsafe/pi-notion`), all
+hand-authorable, and "a migration for a population of one [or a few
+co-owned repos] is ceremony with no beneficiary" — holds without
+modification for PV1 manifests. There is no principled reason a task-
+validation-manifest acceptance break should be governed differently than a
+config-schema break under identical adoption-population facts. Extending
+this ADR's **decision** (clean break, no migration tooling; coordinated
+clean break with no migrator for co-owned dogfood repos) to cover PV1
+manifests, alongside config schema, closes that gap without duplicating the
+policy in a second document. The window still closes, for both surfaces
+together, at the first genuinely external adopter of either.

@@ -41,6 +41,23 @@ objectives, rationale, check commands, and scenario ids per task. Its home route
 to the configured `paths.plans` as `<date>-<feat>-build.md`. This doc stays the
 authoritative record even when it is also projected to the tracker.
 
+When a task's checks (projected into its PV1 manifest during Implement) include
+`tests`-category commands, tag the **`scope`** role of the ones that carry a
+role: `"full"` for the check that runs the broad regression net (genuinely the
+whole relevant suite, not a task-narrowed selection) and `"task"` for the check
+whose argv names this task's specific tests — so the manifest satisfies the
+validator's **Rule A** (a required `tests` category needs a `"full"`-tagged
+check) and **Rule B** (a scenario's `tests`-category evidence needs a
+`"task"`-tagged check). One check that is both roles tags
+`scope: ["full", "task"]`; a `tests` check that carries neither role needs no
+tag. Degradations: a `tests: n/a` task is exempt from both rules, and a task
+with no owned scenarios is exempt from Rule B (but still needs a `"full"` check
+under Rule A). `scope` is data the existing Build human gate already reviews
+(PR-panel review of the committed manifest), made machine-checkable — not a new
+gate; the panel still judges whether a `"full"`-tagged check is genuinely the
+broad suite. Full contract: `references/phase-implement.md` (PV1 manifest) and
+`docs/specs/2026-07-12-sdlc-portable-validator.md` §11.
+
 **Dialogue discipline.** Build expects **zero blocking questions**
 (shared contract: `references/system-reference.md`,
 "Presenting questions to the human"). A genuinely blocking question here almost always means the Spec's

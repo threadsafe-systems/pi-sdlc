@@ -49,7 +49,7 @@ function baseManifest(overrides = {}) {
 		repoRoot: ".",
 		ownedScenarios: ["PV1"],
 		checks: [
-			{ id: "tests.ok", argv: ["node", "ok.mjs"], evidence: ["PV1"] },
+			{ id: "tests.ok", argv: ["node", "ok.mjs"], scope: ["full", "task"], evidence: ["PV1"] },
 			{ id: "static.ok", argv: ["node", "ok.mjs"], evidence: ["static"] },
 			{ id: "patterns.ok", argv: ["node", "ok.mjs"], evidence: ["patterns"] },
 		],
@@ -106,7 +106,7 @@ test("PV2: only declared argv run; an undeclared tool command never executes", (
 		// Now declare it and confirm it runs.
 		const withMarker = baseManifest({
 			checks: [
-				{ id: "tests.ok", argv: ["node", "ok.mjs"], evidence: ["PV1"] },
+				{ id: "tests.ok", argv: ["node", "ok.mjs"], scope: ["full", "task"], evidence: ["PV1"] },
 				{ id: "static.mark", argv: ["node", "marker.mjs", marker], evidence: ["marker"] },
 				{ id: "patterns.ok", argv: ["node", "ok.mjs"], evidence: ["patterns"] },
 			],
@@ -215,7 +215,7 @@ test("PV4: command outcomes are complete and deterministic; runner continues aft
 		const m = baseManifest({
 			ownedScenarios: ["PV1"],
 			checks: [
-				{ id: "tests.ok", argv: ["node", "ok.mjs"], evidence: ["PV1"] },
+				{ id: "tests.ok", argv: ["node", "ok.mjs"], scope: ["full", "task"], evidence: ["PV1"] },
 				{ id: "c.fail", argv: ["node", "fail.mjs"], evidence: ["x"] },
 				{ id: "c.missing", argv: ["this-binary-does-not-exist-xyz"], evidence: ["y"] },
 			],
@@ -247,7 +247,7 @@ test("PV4: a timeout is reported as FAIL with timedOut", () => {
 	try {
 		const m = baseManifest({
 			checks: [
-				{ id: "tests.ok", argv: ["node", "ok.mjs"], evidence: ["PV1"] },
+				{ id: "tests.ok", argv: ["node", "ok.mjs"], scope: ["full", "task"], evidence: ["PV1"] },
 				{ id: "slow", argv: ["node", "sleep.mjs"], timeoutMs: 1000, evidence: ["x"] },
 				{ id: "patterns.ok", argv: ["node", "ok.mjs"], evidence: ["p"] },
 			],
@@ -301,7 +301,7 @@ test("PV6: scenario mapping gates the verdict", () => {
 		const m = baseManifest({
 			ownedScenarios: ["PV1"],
 			checks: [
-				{ id: "tests.fail", argv: ["node", "fail.mjs"], evidence: ["PV1"] },
+				{ id: "tests.fail", argv: ["node", "fail.mjs"], scope: ["full", "task"], evidence: ["PV1"] },
 				{ id: "static.ok", argv: ["node", "ok.mjs"], evidence: ["s"] },
 				{ id: "patterns.ok", argv: ["node", "ok.mjs"], evidence: ["p"] },
 			],
@@ -329,7 +329,7 @@ test("PV7: standards and banned patterns are commands, not judgement", () => {
 		const m = baseManifest({
 			ownedScenarios: ["PV1"],
 			checks: [
-				{ id: "tests.ok", argv: ["node", "ok.mjs"], evidence: ["PV1"] },
+				{ id: "tests.ok", argv: ["node", "ok.mjs"], scope: ["full", "task"], evidence: ["PV1"] },
 				{ id: "static.ok", argv: ["node", "ok.mjs"], evidence: ["s"] },
 				{ id: "standards.fail", argv: ["node", "fail.mjs"], evidence: ["governing standard"] },
 				{ id: "patterns.ok", argv: ["node", "ok.mjs"], evidence: ["p"] },
@@ -359,7 +359,7 @@ test("PV8: evidence is bounded and secrets are redacted", () => {
 	try {
 		const m = baseManifest({
 			checks: [
-				{ id: "tests.lines", argv: ["node", "lines.mjs"], evidence: ["PV1"] },
+				{ id: "tests.lines", argv: ["node", "lines.mjs"], scope: ["full", "task"], evidence: ["PV1"] },
 				{ id: "static.secret", argv: ["node", "secret.mjs"], evidence: ["s"] },
 				{ id: "patterns.ok", argv: ["node", "ok.mjs"], evidence: ["p"] },
 			],
@@ -601,4 +601,277 @@ test("PV13: renderText is a faithful projection of the report", () => {
 	} finally {
 		rmSync(dir, { recursive: true, force: true });
 	}
+});
+
+// ---- Task-scoped test declaration: `scope` field, Rule A/B (TST1-TST12) ---
+// Spec: docs/specs/2026-07-24-pv1-task-scoped-tests.md. In-process inspectManifest
+// assertions (sub-millisecond); TST4/TST5 add a bounded temp-dir runManifest
+// corollary. TST14 (FROZEN array) is gated by test/frozen-surfaces.test.js.
+
+// A valid scoped manifest: a "full" regression check + a distinct "task" check
+// the owned scenario cites. Satisfies Rule A and Rule B.
+function scoped(overrides = {}) {
+	return {
+		schemaVersion: 1,
+		taskId: "pv-scope",
+		buildPlan: "bp.md",
+		repoRoot: ".",
+		ownedScenarios: ["PV1"],
+		checks: [
+			{ id: "tests.full", argv: ["node", "ok.mjs"], scope: ["full"], evidence: ["regression net"] },
+			{ id: "tests.spec", argv: ["node", "ok.mjs"], scope: ["task"], evidence: ["PV1"] },
+			{ id: "static.ok", argv: ["node", "ok.mjs"], evidence: ["static"] },
+			{ id: "patterns.ok", argv: ["node", "ok.mjs"], evidence: ["patterns"] },
+		],
+		categories: {
+			tests: { applicability: "required", checkIds: ["tests.full", "tests.spec"] },
+			static: { applicability: "required", checkIds: ["static.ok"] },
+			scenarios: { applicability: "required", evidence: { PV1: ["tests.spec"] } },
+			standards: { applicability: "n/a", reason: "no extra governing standard applies here" },
+			bannedPatterns: { applicability: "required", checkIds: ["patterns.ok"] },
+		},
+		...overrides,
+	};
+}
+
+test("TST2: separate full and task checks satisfy Rule A and Rule B", () => {
+	assert.deepEqual(inspectManifest(scoped()), []);
+});
+
+test("TST1: a scope:[full] check satisfies Rule A (scenarios n/a)", () => {
+	const m = scoped({
+		ownedScenarios: [],
+		checks: [
+			{ id: "tests.full", argv: ["node", "ok.mjs"], scope: ["full"], evidence: ["regression net"] },
+			{ id: "static.ok", argv: ["node", "ok.mjs"], evidence: ["static"] },
+			{ id: "patterns.ok", argv: ["node", "ok.mjs"], evidence: ["patterns"] },
+		],
+		categories: {
+			tests: { applicability: "required", checkIds: ["tests.full"] },
+			static: { applicability: "required", checkIds: ["static.ok"] },
+			scenarios: { applicability: "n/a", reason: "no owned scenarios in this task" },
+			standards: { applicability: "n/a", reason: "no extra governing standard applies here" },
+			bannedPatterns: { applicability: "required", checkIds: ["patterns.ok"] },
+		},
+	});
+	assert.deepEqual(inspectManifest(m), []);
+});
+
+test("TST3: a single scope:[full,task] check satisfies both rules with no duplicate", () => {
+	const m = scoped({
+		checks: [
+			{ id: "tests.both", argv: ["node", "ok.mjs"], scope: ["full", "task"], evidence: ["PV1"] },
+			{ id: "static.ok", argv: ["node", "ok.mjs"], evidence: ["static"] },
+			{ id: "patterns.ok", argv: ["node", "ok.mjs"], evidence: ["patterns"] },
+		],
+		categories: {
+			tests: { applicability: "required", checkIds: ["tests.both"] },
+			static: { applicability: "required", checkIds: ["static.ok"] },
+			scenarios: { applicability: "required", evidence: { PV1: ["tests.both"] } },
+			standards: { applicability: "n/a", reason: "no extra governing standard applies here" },
+			bannedPatterns: { applicability: "required", checkIds: ["patterns.ok"] },
+		},
+	});
+	assert.deepEqual(inspectManifest(m), []);
+});
+
+test("TST4: Rule A negative -- tests required with no full-tagged check", () => {
+	const m = scoped({
+		checks: [
+			{ id: "tests.spec", argv: ["node", "ok.mjs"], scope: ["task"], evidence: ["PV1"] },
+			{ id: "static.ok", argv: ["node", "ok.mjs"], evidence: ["static"] },
+			{ id: "patterns.ok", argv: ["node", "ok.mjs"], evidence: ["patterns"] },
+		],
+		categories: {
+			tests: { applicability: "required", checkIds: ["tests.spec"] },
+			static: { applicability: "required", checkIds: ["static.ok"] },
+			scenarios: { applicability: "required", evidence: { PV1: ["tests.spec"] } },
+			standards: { applicability: "n/a", reason: "no extra governing standard applies here" },
+			bannedPatterns: { applicability: "required", checkIds: ["patterns.ok"] },
+		},
+	});
+	const issues = inspectManifest(m);
+	assert.ok(issues.some((e) => e.startsWith("/categories/tests:") && e.includes("scope 'full'")));
+	// end-to-end corollary: verdict ERROR, zero commands executed
+	const dir = mkRepo();
+	try {
+		const report = runManifest({ manifestPath: writeManifest(dir, m), repoRoot: dir });
+		assert.equal(report.verdict, "ERROR");
+		assert.equal(report.exitCode, 2);
+		assert.equal(report.commands.length, 0);
+	} finally {
+		rmSync(dir, { recursive: true, force: true });
+	}
+});
+
+test("TST5: Rule B negative -- scenario cites a tests check but none task-tagged", () => {
+	const m = scoped({ categories: { ...scoped().categories, scenarios: { applicability: "required", evidence: { PV1: ["tests.full"] } } } });
+	const issues = inspectManifest(m);
+	assert.ok(issues.some((e) => e.startsWith("/categories/scenarios/evidence/PV1:") && e.includes("scope 'task'")));
+	const dir = mkRepo();
+	try {
+		const report = runManifest({ manifestPath: writeManifest(dir, m), repoRoot: dir });
+		assert.equal(report.verdict, "ERROR");
+		assert.equal(report.commands.length, 0);
+	} finally {
+		rmSync(dir, { recursive: true, force: true });
+	}
+});
+
+test("TST6: tests:n/a is exempt from Rule A and Rule B", () => {
+	const m = scoped({
+		ownedScenarios: [],
+		checks: [
+			{ id: "static.ok", argv: ["node", "ok.mjs"], evidence: ["static"] },
+			{ id: "patterns.ok", argv: ["node", "ok.mjs"], evidence: ["patterns"] },
+		],
+		categories: {
+			tests: { applicability: "n/a", reason: "no behavioural execution in this task" },
+			static: { applicability: "required", checkIds: ["static.ok"] },
+			scenarios: { applicability: "n/a", reason: "no owned scenarios in this task" },
+			standards: { applicability: "n/a", reason: "no extra governing standard applies here" },
+			bannedPatterns: { applicability: "required", checkIds: ["patterns.ok"] },
+		},
+	});
+	assert.deepEqual(inspectManifest(m), []);
+});
+
+test("TST7: zero owned scenarios -- exempt from Rule B, still subject to Rule A", () => {
+	const noFull = {
+		ownedScenarios: [],
+		checks: [
+			{ id: "tests.spec", argv: ["node", "ok.mjs"], scope: ["task"], evidence: ["net"] },
+			{ id: "static.ok", argv: ["node", "ok.mjs"], evidence: ["static"] },
+			{ id: "patterns.ok", argv: ["node", "ok.mjs"], evidence: ["patterns"] },
+		],
+		categories: {
+			tests: { applicability: "required", checkIds: ["tests.spec"] },
+			static: { applicability: "required", checkIds: ["static.ok"] },
+			scenarios: { applicability: "n/a", reason: "no owned scenarios in this task" },
+			standards: { applicability: "n/a", reason: "no extra governing standard applies here" },
+			bannedPatterns: { applicability: "required", checkIds: ["patterns.ok"] },
+		},
+	};
+	// Rule B never fires (no scenarios); Rule A still fires (no full check).
+	const issues = inspectManifest(scoped(noFull));
+	assert.ok(issues.some((e) => e.startsWith("/categories/tests:") && e.includes("scope 'full'")));
+	assert.ok(!issues.some((e) => e.startsWith("/categories/scenarios/evidence")));
+	// with a full check present, the same zero-scenario manifest is valid.
+	const withFull = scoped({ ...noFull, checks: [{ id: "tests.spec", argv: ["node", "ok.mjs"], scope: ["full"], evidence: ["net"] }, ...noFull.checks.slice(1)], categories: { ...noFull.categories } });
+	assert.deepEqual(inspectManifest(withFull), []);
+});
+
+test("TST8: a static-only scenario does not trigger Rule B", () => {
+	const m = scoped({
+		checks: [
+			{ id: "tests.full", argv: ["node", "ok.mjs"], scope: ["full"], evidence: ["regression net"] },
+			{ id: "static.ok", argv: ["node", "ok.mjs"], evidence: ["PV1"] },
+			{ id: "patterns.ok", argv: ["node", "ok.mjs"], evidence: ["patterns"] },
+		],
+		categories: {
+			tests: { applicability: "required", checkIds: ["tests.full"] },
+			static: { applicability: "required", checkIds: ["static.ok"] },
+			scenarios: { applicability: "required", evidence: { PV1: ["static.ok"] } },
+			standards: { applicability: "n/a", reason: "no extra governing standard applies here" },
+			bannedPatterns: { applicability: "required", checkIds: ["patterns.ok"] },
+		},
+	});
+	// Rule A satisfied by tests.full; Rule B vacuous (PV1 cites only a static check).
+	assert.deepEqual(inspectManifest(m), []);
+});
+
+test("TST9: an untagged check named tests.full does NOT satisfy Rule A", () => {
+	const m = scoped({
+		ownedScenarios: [],
+		checks: [
+			{ id: "tests.full", argv: ["node", "ok.mjs"], evidence: ["regression net"] },
+			{ id: "static.ok", argv: ["node", "ok.mjs"], evidence: ["static"] },
+			{ id: "patterns.ok", argv: ["node", "ok.mjs"], evidence: ["patterns"] },
+		],
+		categories: {
+			tests: { applicability: "required", checkIds: ["tests.full"] },
+			static: { applicability: "required", checkIds: ["static.ok"] },
+			scenarios: { applicability: "n/a", reason: "no owned scenarios in this task" },
+			standards: { applicability: "n/a", reason: "no extra governing standard applies here" },
+			bannedPatterns: { applicability: "required", checkIds: ["patterns.ok"] },
+		},
+	});
+	assert.ok(inspectManifest(m).some((e) => e.startsWith("/categories/tests:") && e.includes("scope 'full'")));
+});
+
+test("TST10: scope shape errors are reported at /checks/<i>/scope", () => {
+	const bad = [null, [], ["full", "full"], ["broad"], [1], "full"];
+	for (const value of bad) {
+		const m = scoped();
+		m.checks[2].scope = value; // static.ok, uninvolved in Rule A/B
+		const issues = inspectManifest(m);
+		const scopeErrors = issues.filter((e) => e.startsWith("/checks/2/scope"));
+		assert.equal(scopeErrors.length >= 1, true, `expected a /checks/2/scope error for ${JSON.stringify(value)}`);
+		assert.equal(issues.length, scopeErrors.length, `only the scope error should be present for ${JSON.stringify(value)}: ${JSON.stringify(issues)}`);
+	}
+});
+
+test("TST11: golden multi-error ordering (scope-shape + Rule A + dangling check)", () => {
+	const m = {
+		schemaVersion: 1,
+		taskId: "pv-golden",
+		buildPlan: "bp.md",
+		repoRoot: ".",
+		ownedScenarios: [],
+		checks: [
+			{ id: "tests.x", argv: ["node", "ok.mjs"], scope: ["bogus"], evidence: ["net"] },
+			{ id: "static.ok", argv: ["node", "ok.mjs"], evidence: ["static"] },
+			{ id: "patterns.ok", argv: ["node", "ok.mjs"], evidence: ["patterns"] },
+		],
+		categories: {
+			tests: { applicability: "required", checkIds: ["tests.x", "tests.missing"] },
+			static: { applicability: "required", checkIds: ["static.ok"] },
+			scenarios: { applicability: "n/a", reason: "no owned scenarios in this task" },
+			standards: { applicability: "n/a", reason: "no extra governing standard applies here" },
+			bannedPatterns: { applicability: "required", checkIds: ["patterns.ok"] },
+		},
+	};
+	// shape-invalid scope counts as absent for Rule A, which still fires and
+	// stacks with the dangling-check error; pure lexicographic (pointer,message).
+	assert.deepEqual(inspectManifest(m), ["/categories/tests: requires at least one referenced check tagged scope 'full'", "/categories/tests/checkIds/1: references undeclared check 'tests.missing'", "/checks/0/scope: scope entries must be 'full' or 'task'"]);
+});
+
+test("TST12: schema accepts optional scope and rejects malformed shapes", () => {
+	const ajv = new Ajv({ allErrors: true, strict: false });
+	const validate = ajv.compile(schema);
+	assert.equal(validate(scoped()), true); // scope present + omitted checks coexist
+	const check = (scope) => {
+		const m = scoped();
+		m.checks[2].scope = scope;
+		return validate(m);
+	};
+	assert.equal(check(["full", "task"]), true);
+	assert.equal(check([]), false); // empty
+	assert.equal(check(["full", "full"]), false); // not unique
+	assert.equal(check(["broad"]), false); // out of enum
+	assert.equal(check("full"), false); // not an array
+});
+
+// ---- PR-panel regressions: Rule B owned-only + scope error dedup -----------
+
+test("Rule B iterates owned scenarios only -- an unowned evidence key draws no Rule B error", () => {
+	const m = scoped({
+		categories: {
+			...scoped().categories,
+			scenarios: { applicability: "required", evidence: { PV1: ["tests.spec"], ZZ9: ["tests.full"] } },
+		},
+	});
+	const issues = inspectManifest(m);
+	// The unowned key is flagged as an unknown scenario...
+	assert.ok(issues.some((e) => e.includes("evidence maps unknown scenario 'ZZ9'")));
+	// ...but Rule B does NOT also fire against the nonexistent scenario.
+	assert.ok(!issues.some((e) => e.startsWith("/categories/scenarios/evidence/ZZ9:") && e.includes("scope 'task'")));
+});
+
+test("scope enum error is emitted once per check, not per bad entry", () => {
+	const m = scoped();
+	m.checks[2].scope = ["bogus", "wide"]; // static.ok, uninvolved in Rule A/B
+	const issues = inspectManifest(m);
+	const enumErrors = issues.filter((e) => e === "/checks/2/scope: scope entries must be 'full' or 'task'");
+	assert.equal(enumErrors.length, 1, `expected exactly one enum error, got ${enumErrors.length}: ${JSON.stringify(issues)}`);
 });

@@ -93,6 +93,30 @@ task. It names, as exact argv arrays, the task's checks across five categories �
 or `n/a` with a Build-approved reason, plus the mapping from each owned
 Specification scenario to the required checks that evidence it.
 
+Each check may carry an optional **`scope`** array (`("full" | "task")[]`,
+non-empty, unique) declaring its role, enforced by two `inspectManifest`
+acceptance rules:
+
+- **Rule A:** when the `tests` category is `required`, at least one referenced
+  check must be tagged `"full"` (the broad regression net is mechanically
+  guaranteed present, not inferred from a check's name).
+- **Rule B:** when `scenarios` is `required`, each owned scenario whose evidence
+  cites any `tests`-category check must cite at least one tagged `"task"` (the
+  task's specific test evidence is declared, so its exact argv/stdout lands in
+  the receipt for the PR panel to eyeball).
+
+A single check that is both the regression net and a task's evidence tags
+`scope: ["full", "task"]` and satisfies both rules with no duplicate. Degradations:
+`tests: n/a` is exempt from both rules; a manifest with zero owned scenarios is
+exempt from Rule B but still subject to Rule A; a scenario evidenced only by
+non-`tests` categories does not trigger Rule B. `scope` is **data reviewed by
+the existing Build human gate** (instantiated as PR-panel review of the committed
+manifest, per ADR 0013 / portable-validator Spec §1.4's "Human Build approval
+owns the semantic judgement") — it makes an already-governed judgement
+machine-checkable; it does not create or relocate an authority. See the base
+contract's 2026-07-24 amendment (`docs/specs/2026-07-12-sdlc-portable-validator.md`,
+§11).
+
 The **deterministic runner** (`scripts/validate-task.sh` → `validate-task.mjs`,
 surface PV2) — not the model — validates the manifest, executes only its declared
 argv with no shell, evaluates categories and scenarios, bounds and redacts command
