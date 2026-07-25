@@ -274,15 +274,16 @@ merge-base with `main`, mechanically blocking this slice's edits.
 `check-schema-break.mjs` does not watch PV1 by prior design (config-schema
 only), so the automated guard emits no signal for this change. Under this
 repo's squash-merge workflow inner commit footers are discarded, so the only
-release-channel signal is the **PR body**. The landing PR's body must carry a
-`BREAKING CHANGE:` (or `BREAKING-CHANGE:`) footer line. A `BREAKING CHANGE:`
-line placed in the PR **title** is release-inert: under this repo's
-`conventionalcommits` semantic-release preset (`.releaserc.json`) the title
-becomes the squash-commit subject/header, where breaking is signalled only by a
-note line in the body/footer — and the ratified commit-discipline avoids the
-`type(scope)!:` shorthand entirely, so the body footer is the required
-placement. This is a PR-open-time requirement, not merely a commit-authoring
-one.
+release-channel signal is the landing **PR title/body**, read by the
+`conventionalcommits` semantic-release preset (`.releaserc.json`). Under that
+preset — and this repo's `commit-lint` (`scripts/check-commit-messages.mjs`,
+which accepts the `!` marker) — two placements are valid breaking signals: a
+`type(scope)!:`/`type!:` marker in the **PR title**, or a
+`BREAKING CHANGE:`/`BREAKING-CHANGE:` footer line in the **PR body**. (A literal
+`BREAKING CHANGE:` *text string in the title* is NOT a signal — the title is
+parsed as a header, where only the `!` marker means breaking.) This change
+standardises on the **PR-body `BREAKING CHANGE:` footer**. This is a
+PR-open-time requirement, not merely a commit-authoring one.
 
 ## 11. `schemaVersion`, track, and the clean break
 
@@ -480,7 +481,7 @@ contradicts the array, or completion is claimed with the follow-up PR unmerged.
 `docs/specs/2026-07-12-sdlc-portable-validator.md` carries an explicit
 amendment section naming and superseding its `CommandCheck` type, its "no
 additional properties" line, its worked-example manifest, and its §1.3–1.5
-constraint prose, and extending its §2.5/§6 error rule-order & pointer scheme
+constraint prose, and extending its §2.5 error rule-order & pointer scheme
 to the three new error types with the lexicographic-ordering clarification
 (§5, §7).
 **Falsify:** the repo holds two silently-contradictory normative specs, or any
@@ -498,8 +499,10 @@ authority as a new/relocated gate.
 ### TST17 — release signal on the PR (DoD 11)
 The landing PR's **body** carries a `BREAKING CHANGE:` (or `BREAKING-CHANGE:`)
 footer line.
-**Falsify:** the signal appears only in the PR title (release-inert under the
-`conventionalcommits` preset) or only on an inner commit, or is absent.
+**Falsify:** the breaking signal is absent, or appears only on an inner commit,
+or appears only as a literal `BREAKING CHANGE:` *text string in the PR title* (a
+header, not a footer note — not a valid signal under the `conventionalcommits`
+preset).
 
 ### TST18 — `schemaVersion` and ADR amendments (DoD 12)
 Every produced manifest keeps `schemaVersion: 1`; the ADR 0013 shape-vs-rule
@@ -508,9 +511,10 @@ ratified-marked.
 **Falsify:** `schemaVersion` changes, or either ADR amendment is missing.
 
 ### TST19 — full regression, no paid/network calls (DoD 12)
-`npm test` and `npm run lint` pass; all new tests are offline in-process
-`inspectManifest`/Ajv assertions; no automated test invokes a model, network,
-or child-process suite as its gate.
+`npm test` and `npm run lint` pass; all new tests are offline and deterministic
+— apart from TST4/TST5's bounded temp-dir `runManifest`/CLI corollary (§12),
+they are in-process `inspectManifest`/Ajv assertions; no automated test invokes
+a model, network, or full external suite as its gate.
 **Falsify:** any regression, lint failure, or paid/network test call.
 
 ## 15. Context for Build

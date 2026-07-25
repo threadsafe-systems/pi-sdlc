@@ -16,14 +16,12 @@ Owner-selected roster (Neil): `anthropic/claude-fable-5:xhigh` + `openai-codex/g
 
 Floor of 2 distinct models met (fable-5 + glm-5.2).
 
-## Orchestrator identity caveat
+## Orchestrator identity
 
-Orchestrator identity for this session is not exposed by the runtime; the repo's
-`panels.authorDefault` is `anthropic/claude-fable-5`. If this session is in fact
-running as fable-5, then fable-5's review is not fully author-independent. The
-second reviewer (glm-5.2) is independent regardless, and the sole HIGH finding
-came from fable-5. Flagged to the owner (ceremony authority, who selected the
-roster) for a decision on whether to also seat luna once its provider recovers.
+Orchestrator (spec author + adjudicator) for this session is
+`anthropic/claude-opus-4-8` (confirmed by the owner). Both panellists
+(`claude-fable-5`, `glm-5.2`) are therefore distinct from the author — the
+panel is fully author-independent and the author-exclusion rule holds.
 
 ## Findings and adjudication (round 1)
 
@@ -49,9 +47,37 @@ the base-spec section mapping — reinforcing signal, both fixed.
 CLEAR coverage across the panel: A (both), B (glm), C (glm), D (glm), E (fable),
 F (glm), G (glm).
 
+## Round 2 (delta) — fable-5:xhigh + glm-5.2:xhigh @ commit `23ad6f6`
+
+Harvest: `.pi/sdlc/runs/pv1-task-scoped-tests/panels/spec_review-round3-2026-07-25`.
+**All eight round-1 findings independently CONFIRMED fixed** by both reviewers
+(fable-5 confirmed F1–F6/G1–G2; glm-5.2 confirmed F1–F6/G1). Three new/reopened
+findings, all verified and incorporated (fix-wave commit this round):
+
+| id | sev | source | finding | disposition |
+|---|---|---|---|---|
+| R2-1 | medium | glm-5.2 (NEW) | §10/TST17's F1 fix over-corrected: it claimed title-only signals are universally release-inert and that "the ratified commit-discipline avoids `!`". Ground-verified false — under the `conventionalcommits` preset a `type!:` PR **title** IS a breaking signal, and `scripts/check-commit-messages.mjs:9` accepts `!`; the avoid-`!` rationale traces to a now-stale angular-preset assumption (ADR 0027:27–28). | **Incorporated (corrected)** — §10 now states both placements (`!` title OR body footer) are valid under the preset + commit-lint, keeps only the true narrow claim (a literal `BREAKING CHANGE:` *text string in the title* is not a signal), and **standardises this change on the body footer**. TST17 falsify reworded. **The body-footer-only-vs-also-permit-`!` choice is escalated to the owner** (touches ratified commit-discipline; see note). |
+| R2-2 | medium | fable-5 REOPENED(F3) | TST19 still carried the universal "all new tests are offline in-process `inspectManifest`/Ajv assertions" claim the F3 fix removed elsewhere — contradicting TST4/TST5's sanctioned temp-dir `runManifest` corollary. | **Incorporated** — TST19 reworded to exempt TST4/TST5's bounded temp-dir corollary (§12). |
+| R2-3 | low | glm-5.2 REOPENED(G2) | TST15 still cited base-spec "§2.5/§6"; G2's round-1 fix edited §5 + §7 item 5 but missed TST15. | **Incorporated** — TST15 now cites §2.5 only. |
+
+## Owner escalation (open)
+
+**R2-1 policy question** — the 2026-07-17 ratified "avoid `type(scope)!:`
+shorthand" discipline rested on the repo then using the **angular** preset
+(which ignored `!`); the repo now uses **conventionalcommits** (`.releaserc.json`)
+which DOES honour `!`, and `commit-lint` accepts it. The spec currently requires
+the **PR-body `BREAKING CHANGE:` footer** (valid + unambiguous under either
+reading). Decision needed: keep body-footer-only, or also permit the `type!:`
+title? (A widening is a one-line spec change.) The stale memory should be
+updated once ratified.
+
 ## Outcome
 
-Round-1 fix wave applied to `docs/specs/2026-07-24-pv1-task-scoped-tests.md`
-(17 edits). No high or medium finding survives. Per workflow.md "trim the tail",
-the next step is a **delta re-dispatch of the two reviewers** confirming the
-fixes (or owner accept-without-redispatch) before the Spec gate closes.
+Round 2 confirms every round-1 fix and leaves **no high finding** surviving; two
+mediums + one low from round 2 are all incorporated. One owner decision (R2-1
+placement policy) is open before the Spec gate closes. Round 2 was NOT 100%
+re-litigation — it confirmed fixes in one line each and found only genuine
+residuals, so the workflow.md two-round-100%-incorporation smell does not apply.
+Per "trim the tail", once R2-1 is settled the residual is wording-only; a
+narrow delta re-confirm of the touched §10/TST17/TST19/TST15 (or owner
+accept-without-redispatch) closes the gate.
