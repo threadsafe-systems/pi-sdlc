@@ -1,3 +1,9 @@
+## [2.6.0](https://github.com/threadsafe-systems/pi-sdlc/compare/v2.5.0...v2.6.0) (2026-07-24)
+
+### Features
+
+* **telemetry:** self-correcting emitter DX (bail templates, --list, --describe) ([#164](https://github.com/threadsafe-systems/pi-sdlc/issues/164)) ([62a62f8](https://github.com/threadsafe-systems/pi-sdlc/commit/62a62f8fad05abf073b7818a7b3ebdee063ae9f0))
+
 ## [2.5.0](https://github.com/threadsafe-systems/pi-sdlc/compare/v2.4.0...v2.5.0) (2026-07-19)
 
 ### Features
