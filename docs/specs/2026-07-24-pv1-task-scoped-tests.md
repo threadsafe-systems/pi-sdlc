@@ -26,10 +26,11 @@ A PV1 manifest's `tests`-category checks today carry no declared semantic
 role: nothing distinguishes the broad regression net from a task's specific
 evidence, and no naming convention can reliably tell them apart. This slice
 adds an explicit, optional, array-valued per-check field `scope: ("full" |
-"task")[]` and two acceptance rules over it, so that (Rule A) a regression net
-is mechanically guaranteed present whenever tests are required, and (Rule B) a
-scenario's test evidence must include at least one check its author declared
-task-scoped.
+"task")[]` and two acceptance rules over it, so that (Rule A) a check
+*declared* as the regression net is mechanically guaranteed present whenever
+tests are required (its genuineness stays with the same human gate as the
+evidence mapping, §9), and (Rule B) a scenario's test evidence must include at
+least one check its author declared task-scoped.
 
 The change is **structural, not judgemental**. `task_validate` stays purely
 mechanistic (§9): it never checks that a declared task-scoped test actually
@@ -93,7 +94,7 @@ The schema file
 "uniqueItems": true}` on each `checks[]` item, purely additively, and keeps
 `additionalProperties: false` satisfied by naming the new property.
 
-## 2. Rule A — a regression net is mechanically present
+## 2. Rule A — a declared regression net is mechanically present
 
 **Rule A (manifest-level, unconditional whenever tests apply):** when
 `categories.tests.applicability === "required"`, at least one of the checks
@@ -105,6 +106,9 @@ includes `"full"`.
 - A check whose `id` merely *looks* like a full-suite check (e.g. literally
   named `tests.full`) but carries no `scope: [..."full"...]` does **not**
   satisfy Rule A. The field carries the meaning; the spelling never does.
+- Rule A guarantees a check is *declared* the regression net; whether its
+  `argv` genuinely runs a broad suite is **not** mechanically checked — that
+  stays with the same human gate that owns the evidence mapping (§9).
 - Only a manifest with `categories.tests.applicability === "n/a"` is exempt
   from Rule A.
 
@@ -134,6 +138,15 @@ those checks must have a `scope` array that includes `"task"`.
   category** — satisfies neither rule; it is invisible to both counts and is
   not itself an error. Errors arise only when a rule that *does* fire finds no
   qualifying tagged check.
+- **Evaluation under co-occurring errors.** Rule A and Rule B consider only
+  *declared* checks reachable through the relevant category's `checkIds`; a
+  check whose `scope` is shape-invalid counts as **absent** for both rules (it
+  contributes no valid `"full"`/`"task"` tag). Rules A/B always evaluate and
+  **stack** their errors with any co-occurring reference/shape errors rather
+  than suppressing or being suppressed by them — e.g. a required `tests`
+  category whose only check is both dangling and, once declared, untagged
+  yields both the dangling-check error and the Rule A error. The accumulated
+  errors are then ordered by §5's single lexicographic sort.
 
 ## 5. Error reporting: pointers and deterministic ordering
 
@@ -157,7 +170,7 @@ applicability/reference pointer (`/categories/<name>`), and the existing
 "scenario mapped to non-required check" pointer
 (`/categories/scenarios/evidence/<escaped-id>`) respectively.
 
-**Ordering clarification (binds the base spec's §2.5 / §6 prose, superseded by
+**Ordering clarification (binds the base spec's §2.5 prose, superseded by
 §7 here).** The base spec's "fixed rule order and pointer" list is a
 **rule-to-pointer catalog** — documentation of which rule emits which pointer
 string — **not** a display-order override. The only ordering rule, both within
@@ -172,9 +185,11 @@ explicitly so no future reader can reconstruct the earlier ambiguity.
 No change to `skills/sdlc/prompts/validator-task.prompt.md`'s mandate. The
 validator subagent stays a mechanistic checklist reporter; it does not judge
 whether a `"task"`-tagged check corresponds to the diff — that is the PR
-panel's job (§9). The validator's existing behaviour (report every command by
-`id`, verdict from the runner) already surfaces a task-scoped check's argv and
-stdout tail with no new mandate text.
+panel's job (§9). The task-scoped check's argv and stdout tail are captured in
+the runner's report — written to the receipt via the validator's existing
+`--report` invocation, not the validator's markdown summary (which reports only
+each check's `id`/status) — where the PR panel reads them. No new mandate text
+is needed.
 
 ## 7. Amendment to the portable-validator Specification (`2026-07-12`)
 
@@ -200,7 +215,7 @@ extend-not-overwrite pattern the ADR 0013 amendment uses for its base ADR:
    population is explicitly **not** reauthored (§13).
 4. **§1.3–1.5 constraint prose** — add the `scope` field constraint (§1.1),
    Rule A (§2), Rule B (§3), and the degradations (§4).
-5. **§2.5 / §6 error rule-order & pointer scheme** — extend to the three new
+5. **§2.5 error rule-order & pointer scheme** — extend to the three new
    error types (§5) and restate the ordering as pure lexicographic per §5's
    clarification.
 
@@ -240,13 +255,13 @@ merge-base with `main`, mechanically blocking this slice's edits.
   (array-valued, both tags allowed on one check), Rule A, Rule B, and both
   degradations, as Build manifest-authoring guidance.
 - The documentation cites the existing authority model without amending it:
-  ADR 0013 and the base Spec §1.1/§1.5 already make the scenario-evidence
+  ADR 0013 and the base Spec §1.1/§1.4 already make the scenario-evidence
   mapping Build-canonical and human-gated ("**Human Build approval owns the
   semantic judgement**"), instantiated today as PR-panel review of the
   committed manifest. `scope` adds machine-checkable **data** to a judgement
   that gate already governs; it creates no new decision point and moves none.
   A *mistagged* check is caught by the same human review that already catches a
-  *miswired* evidence mapping. No ADR 0013 or base-Spec §1.1/§1.5 authority
+  *miswired* evidence mapping. No ADR 0013 or base-Spec §1.1/§1.4 authority
   amendment is made (contrast §7, which amends manifest **shape**, not
   authority).
 - `README.md`'s manifest-authoring section (lines 84–107, currently silent on
@@ -258,10 +273,16 @@ merge-base with `main`, mechanically blocking this slice's edits.
 
 `check-schema-break.mjs` does not watch PV1 by prior design (config-schema
 only), so the automated guard emits no signal for this change. Under this
-repo's squash-merge workflow inner commit footers are discarded; the only
-release-channel signal is the **PR title or PR body**. The landing PR's title
-or body must carry the `BREAKING CHANGE:` (or `BREAKING-CHANGE:`) signal. This
-is a PR-open-time requirement, not merely a commit-authoring one.
+repo's squash-merge workflow inner commit footers are discarded, so the only
+release-channel signal is the **PR body**. The landing PR's body must carry a
+`BREAKING CHANGE:` (or `BREAKING-CHANGE:`) footer line. A `BREAKING CHANGE:`
+line placed in the PR **title** is release-inert: under this repo's
+`conventionalcommits` semantic-release preset (`.releaserc.json`) the title
+becomes the squash-commit subject/header, where breaking is signalled only by a
+note line in the body/footer — and the ratified commit-discipline avoids the
+`type(scope)!:` shorthand entirely, so the body footer is the required
+placement. This is a PR-open-time requirement, not merely a commit-authoring
+one.
 
 ## 11. `schemaVersion`, track, and the clean break
 
@@ -298,17 +319,18 @@ is a PR-open-time requirement, not merely a commit-authoring one.
   time, **before** any declared command is executed; they spawn no child
   process, make no network or model call, and touch no file. The PV2 execution,
   redaction, evidence-bounding, and exit contracts are untouched.
-- **Verification cost budget (proportionality).** Every verification scenario
-  in §14 is a pure, in-process `inspectManifest` (or Ajv-in-test) assertion on
-  an in-memory manifest object — no child-process spawn, no I/O, no network.
-  Each added test is sub-millisecond; the batch adds a bounded, negligible
-  increment to the existing `npm test` corpus and introduces **no** new
-  CI-gated or release-time expensive path. There is deliberately **no**
-  scenario that runs a full external suite as its own gate: the fixtures that
-  exercise "the full suite is also the task evidence" case assert on the
-  manifest's `scope` tags, not by actually running a suite. The corpus stays
-  within CI's existing time bound; no scenario here introduces an unbounded or
-  unpriced gate.
+- **Verification cost budget (proportionality).** The `scope`-shape and
+  Rule-A/Rule-B logic exercised by §14's scenarios is pure, in-process
+  `inspectManifest`/Ajv assertion on an in-memory manifest — no network, no
+  model call. The negative scenarios that additionally assert an end-to-end
+  *verdict* and *zero commands executed* (TST4, TST5) exercise the thin
+  `runManifest`/CLI wrapper on a temp-dir manifest: bounded local file I/O with
+  **no** task-command execution and no spawn beyond the existing PV3
+  CLI-fixture pattern already in the corpus. TST13 and TST19 are the existing
+  corpus-level `npm test`/`npm run lint` gate, unchanged in cost. No scenario
+  runs a full external suite as its own gate; the batch adds a bounded,
+  negligible increment and introduces **no** new CI-gated or release-time
+  expensive path.
 - **Determinism.** New error output is fully deterministic under
   `sortAndFormat`'s lexicographic order (§5) and is golden-testable.
 - **Formatting.** All touched files stay biome-clean.
@@ -325,7 +347,7 @@ is a PR-open-time requirement, not merely a commit-authoring one.
   clean-break extension. Only the base Spec's worked example (§7) and
   forward-facing guidance (§9) are corrected.
 - Any new, separate Build-time gate/ceremony/field for `scope`, and any ADR
-  0013 / base-Spec §1.1/§1.5 authority-model amendment (§9).
+  0013 / base-Spec §1.1/§1.4 authority-model amendment (§9).
 - Any change to `schemaVersion` (§11).
 - Coordinating simultaneous changes to `threadsafe/case` or
   `threadsafe/pi-notion` beyond what ADR 0027's existing policy prescribes.
@@ -336,11 +358,14 @@ is a PR-open-time requirement, not merely a commit-authoring one.
 
 ## 14. Verification scenarios (falsifiable; `TST<n>`)
 
-All scenarios below are offline, deterministic, in-process assertions unless
-noted. `TST1`–`TST12` and `TST19` run inside the existing `npm test` corpus at
-sub-millisecond cost per case (§12). `TST13`–`TST18` are artifact/process
-acceptance criteria verified by inspection at their named point in the
-lifecycle.
+All scenarios below are offline and deterministic. `TST1`–`TST3` and
+`TST6`–`TST12` assert on `inspectManifest`'s in-process output
+(sub-millisecond, no I/O). `TST4`/`TST5` primarily assert `inspectManifest`'s
+returned `manifestErrors`, with an end-to-end verdict/zero-command corollary via
+the `runManifest`/CLI wrapper on a temp-dir manifest (bounded local file I/O, no
+task-command spawn). `TST13` and `TST19` are the existing corpus-level
+`npm test`/`npm run lint` gate. `TST14`–`TST18` are artifact/process acceptance
+criteria verified by inspection at their named point in the lifecycle (§12).
 
 ### TST1 — Rule A satisfied by a `"full"` check
 A manifest with `tests: required` whose referenced check carries `scope:
@@ -363,16 +388,18 @@ check is required to pass.
 
 ### TST4 — Rule A negative (DoD 2)
 A manifest with `tests: required` whose referenced checks include **no**
-`"full"`-tagged check is a manifest error at pointer `/categories/tests`;
-verdict ERROR, zero commands executed.
+`"full"`-tagged check makes `inspectManifest` return a manifest error at pointer
+`/categories/tests` (asserted in-process on the returned `manifestErrors`);
+end-to-end this is verdict ERROR with zero commands executed.
 **Falsify:** the manifest passes, or the error is emitted at a different
 pointer, or a command runs.
 
 ### TST5 — Rule B negative (DoD 3)
 A manifest with `scenarios: required` where an owned scenario's evidence cites
 a `tests`-category check but **none** of those cited checks is `"task"`-tagged
-(e.g. cites only a `["full"]`-only check) is a manifest error at
-`/categories/scenarios/evidence/<escaped-id>` for that scenario; verdict ERROR.
+(e.g. cites only a `["full"]`-only check) makes `inspectManifest` return a
+manifest error at `/categories/scenarios/evidence/<escaped-id>` for that
+scenario (asserted in-process on `manifestErrors`); end-to-end verdict ERROR.
 **Falsify:** the manifest passes, or the error pointer is wrong, or a command
 runs.
 
@@ -413,9 +440,16 @@ emitted at a non-`/checks/<i>/scope` pointer.
 A single manifest carrying a `scope`-shape error, a Rule A error, and a
 pre-existing dangling-check error yields a `manifestErrors` array whose exact
 contents and order equal the pure lexicographic sort over `(pointer, message)`.
-The assertion is a byte-exact golden on the array.
+The golden pins the §4 co-occurring-error predicate: the shape-invalid `scope`
+counts as absent for Rule A, and the Rule A error stacks with (neither
+suppresses nor is suppressed by) the dangling-check error. The assertion is a
+byte-exact golden on the returned array.
 **Falsify:** the array order deviates from lexicographic `(pointer, message)`
-order, or a new-rule error is emitted through a non-`add()` path.
+order, or the co-occurring errors do not stack as the §4 predicate specifies.
+(That the new-rule errors route through `add()`/`sortAndFormat()` rather than a
+parallel reporter is a code-review property of §5/DoD 10, verified by
+inspection — a byte-identical string from any reporter yields the same array,
+so it is not gated by this golden.)
 
 ### TST12 — schema-layer permissiveness and rejection (DoD 1)
 Ajv (dev/test only) accepts a `checks[]` item with a valid `scope` array,
@@ -462,9 +496,10 @@ summary or link.
 authority as a new/relocated gate.
 
 ### TST17 — release signal on the PR (DoD 11)
-The landing PR's title or body carries a `BREAKING CHANGE:` (or
-`BREAKING-CHANGE:`) line.
-**Falsify:** the signal appears only on an inner commit, or is absent.
+The landing PR's **body** carries a `BREAKING CHANGE:` (or `BREAKING-CHANGE:`)
+footer line.
+**Falsify:** the signal appears only in the PR title (release-inert under the
+`conventionalcommits` preset) or only on an inner commit, or is absent.
 
 ### TST18 — `schemaVersion` and ADR amendments (DoD 12)
 Every produced manifest keeps `schemaVersion: 1`; the ADR 0013 shape-vs-rule
