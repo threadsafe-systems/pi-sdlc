@@ -72,13 +72,13 @@ together in one task.
 
 **Checks (manifest, dogfooding `scope`):**
 - `tests.full` `scope:["full"]` — `npm test` (the regression net, satisfies Rule A).
-- `tests.scope` `scope:["task"]` — `node --test test/validator-contract.test.js` (T1's new scenarios).
+- `tests.contract` `scope:["task"]` — `node --test test/validator-contract.test.js` (T1's new scenarios).
 - `tests.frozen` `scope:["task"]` — `node --test test/frozen-surfaces.test.js` (TST14, ASD19).
 - `static.lint` — `npx biome check` on the touched files.
 
 **Scenario ids:** TST1, TST2, TST3, TST4, TST5, TST6, TST7, TST8, TST9, TST10,
-TST11, TST12, TST14. Evidence: TST1–TST12 → `tests.scope`; TST14 → `tests.frozen`
-(TST12's schema-layer assertion co-runs in the same suite).
+TST11, TST12, TST14. Evidence: TST1–TST12 → `tests.contract`; TST14 →
+`tests.frozen` (TST12's schema-layer assertion co-runs in the same suite).
 
 ## T2 — fixture reconciliation, version guard, full corpus green
 

@@ -61,14 +61,25 @@ verdicts (large context); interrupted. sol found **one NEW medium**:
 |---|---|---|---|---|
 | P8 | medium | sol (NEW) | The build-plan Assumptions appendix still described the pre-P1 design ("T1's regression check is the contract suite tagged `[full,task]`, not `npm test`"), contradicting the P1-corrected t1.json (npm test = `[full]`, contract suite = `[task]`). PV1 declares the Build plan canonical, so the manifest disagreed with its approved source. | **Incorporated** — the Assumptions note now states T1's `[full]` net is `npm test` and the contract suite is the `[task]` check, flagged as the P1 correction; the T1 Checks section already said `npm test`. Doc reconciled with the manifest. |
 
-## Round 3 (narrow delta) — sol @ commit `<P8 fix>`
+## Round 3 (narrow delta) — sol @ commit `d031aab`
 
-Re-verify P8 resolved + fresh new-defect sweep (trim-the-tail: a single medium
-from one reviewer). Result recorded below on completion.
+sol ruled **P8 PARTIAL**: scope semantics agree (`npm test` = `[full]`, contract
+suite = `[task]`) but the build plan named the task check `tests.scope` while
+the manifest uses `tests.contract`. It also found **P9 (new medium)**.
 
-## Outcome
+| id | sev | source | finding | disposition |
+|---|---|---|---|---|
+| P8-residual | medium | sol | Build plan named the task check `tests.scope`; the committed manifest/receipt use `tests.contract` — canonical plan vs manifest id mismatch. | **Incorporated** — build plan `tests.scope` → `tests.contract` (Checks + scenario evidence), reconciling the id with the manifest. |
+| P9 | medium | sol (NEW) | This consolidated file's round-3 section prematurely asserted "Round 3 confirms P8" (with a `<P8 fix>` placeholder) before the verdict existed — the gate record falsely presented verification as complete. | **Incorporated** — section rewritten factually; the Outcome no longer asserts a round's result before it lands. Root cause: churn from pre-writing outcome prose in my own fix wave. |
 
-Round 1: 7 findings (1 high, 3 medium, 3 low) all incorporated. Round 2: all 7
-confirmed RESOLVED (sol + glm), 1 new medium (P8) incorporated. Round 3 confirms
-P8. No high or medium finding survives once round 3 is clean — then the gate
-closes and the PR opens.
+## Round 4 (narrow delta) — sol @ commit `<r4>`
+
+Confirms P8-residual + P9 resolved; result recorded on completion.
+
+## Outcome (current, not yet final)
+
+Round 1: 7 findings (1 high, 3 medium, 3 low) incorporated. Round 2: P1–P7
+confirmed RESOLVED (sol + glm); P8 (medium) incorporated. Round 3: P8 PARTIAL +
+P9 (medium) incorporated — both doc-consistency churn from the fix waves, not
+logic defects. The gate closes and the PR opens **only once a verification
+round records no surviving high/medium** (awaiting round 4).
