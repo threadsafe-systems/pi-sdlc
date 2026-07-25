@@ -1,11 +1,11 @@
 // ASD19 (explicit non-changes): the frozen surfaces are byte-identical to the
 // branch base. sdlc-status (FS8), check-lifecycle (FS9), lib.mjs +
-// sdlc.config.schema.json (config schemaVersion 3), resolve-panel, the PV2
-// runner wrapper (validate-task.sh) + receipt verifier (verify-task-receipt.mjs),
+// sdlc.config.schema.json (config schemaVersion 3), resolve-panel, the PV1/PV2
+// validator (schema + validate-task.mjs + validate-task.sh + verify-task-receipt),
 // the four reviewer prompts, and panel/ceremony law are untouched;
 // #91/#101/#102 scopes are not re-opened. The PV1 schema and validate-task.mjs
-// are DELIBERATELY reopened by docs/plans/2026-07-24-pv1-task-scoped-tests.md
-// (the `scope` field / Rule A/B slice); a post-merge follow-up PR re-adds them.
+// were reopened for the 2026-07-24 `scope`-field slice (PR #190) and are
+// re-frozen here by its post-merge follow-up.
 // Uses git to compare against the base.
 
 import assert from "node:assert/strict";
@@ -25,10 +25,10 @@ const FROZEN = [
 	"skills/sdlc/scripts/lib.mjs",
 	"skills/sdlc/schema/sdlc.config.schema.json",
 	"skills/sdlc/schema/sdlc.config.example.json",
-	// task-validation-manifest.schema.json + validate-task.mjs are reopened by
-	// the 2026-07-24 scope-field slice; re-added by the post-merge follow-up PR.
+	"skills/sdlc/schema/task-validation-manifest.schema.json",
 	"skills/sdlc/scripts/resolve-panel.mjs",
 	"skills/sdlc/scripts/resolve-panel.sh",
+	"skills/sdlc/scripts/validate-task.mjs",
 	"skills/sdlc/scripts/validate-task.sh",
 	"skills/sdlc/scripts/verify-task-receipt.mjs",
 	"skills/sdlc/prompts/adversary-plan.prompt.md",
