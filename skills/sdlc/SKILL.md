@@ -177,7 +177,12 @@ load-bearing contracts (before=block, after=warn), not optional enhancements; se
   0-byte-log rule, monitoring.
 - `gh-pr-review-comments` (global): atomic inline posting and thread replies.
 - `assets/tracker-ops.md` (project-local): GitHub sub-issue/blocking mutations and
-  board mechanics shared by map mode and tracker-backed build.
+  board mechanics shared by map mode and tracker-backed build — **any tracker/
+  board mutation** (issue creation, status changes, sub-issue/blocking edges,
+  frontier, claim) uses `scripts/tracker-ops.sh`, documented there; never hand-roll
+  `gh api graphql` or `gh project item-list | jq` for something it already covers.
+  This applies whenever the skill is loaded for any reason, not only full
+  lifecycle work — ad hoc tracker housekeeping is not an exemption.
 - `assets/agent-brief.md` (project-local): durability rules and template for any
   ticket, sub-issue, or hand-written follow-up issue body.
 
@@ -206,3 +211,6 @@ load-bearing contracts (before=block, after=warn), not optional enhancements; se
 - Treating generated `CONFIG.md` prose as authority over `sdlc.config.json`.
 - Claiming a phase, PR, or tracked effort "complete"/"PASS" without running the
   matching `check-completion.mjs` claim and it passing (a false summit).
+- Hand-rolling `gh api graphql` or `gh project item-list | jq` for a tracker/board
+  mutation `scripts/tracker-ops.sh` already covers (see Delegation) — including
+  during ad hoc tracker housekeeping outside a full lifecycle phase.
