@@ -1,11 +1,6 @@
-// Offline unit tests for tracker-ops.mjs (#82/#168). gh is an injected fake —
-// no real spawn, no network, fully deterministic, matching this repo's
-// offline-test convention (same shape as check-completion.test.js's fakeGh).
-// Includes coverage added by the PR-panel round-1 fix wave
-// (docs/reviews/pr-tracker-ops-helper-2026-07-24/consolidated.md): dead
-// --repo-root/--config, missing required-arg validation, --gh-cmd, blockedBy/
-// find-items pagination guards, partial-create-failure identity, explicit
-// Todo-on-create, and bulk set-status.
+// Offline unit tests for tracker-ops.mjs. gh is an injected fake — no real
+// spawn, no network, fully deterministic, matching this repo's offline-test
+// convention (same shape as check-completion.test.js's fakeGh).
 
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
@@ -150,7 +145,7 @@ test("create-epic: gh issue create failure short-circuits before any board mutat
 	rmSync(root, { recursive: true, force: true });
 });
 
-test("create-epic: partial failure after issue creation preserves created {number,url} and names the failed step (finding M1)", () => {
+test("create-epic: partial failure after issue creation preserves created {number,url} and names the failed step", () => {
 	const root = fixtureRoot();
 	const { gh } = fakeGhCreate({ createdNumber: 300, boardFailAt: "board-add" });
 	const r = opCreateEpicOrTask({ root, gh, tok: TOK, title: "t", body: "b", extraLabels: [], kind: "epic" });
@@ -222,7 +217,7 @@ test("frontier: refuses an incomplete subIssues page rather than silently trunca
 	rmSync(root, { recursive: true, force: true });
 });
 
-test("frontier: refuses an incomplete blockedBy page — an 11th+ open blocker must not be silently missed (finding M2)", () => {
+test("frontier: refuses an incomplete blockedBy page — an 11th+ open blocker must not be silently missed", () => {
 	const root = fixtureRoot();
 	const nodes = [frontierNode({ number: 9, blockedBy: { nodes: Array.from({ length: 50 }, (_, i) => ({ number: i, state: "CLOSED" })), pageInfo: { hasNextPage: true } } })];
 	const gh = () => ({ code: 0, stdout: JSON.stringify({ data: { repository: { issue: { subIssues: { nodes, pageInfo: { hasNextPage: false } } } } } }), stderr: "" });
@@ -332,7 +327,7 @@ test("find-items: --since joins updatedAt via a batched graphql query", () => {
 	rmSync(root, { recursive: true, force: true });
 });
 
-test("find-items: refuses a truncated result rather than silently under-reporting (finding M3)", () => {
+test("find-items: refuses a truncated result rather than silently under-reporting", () => {
 	const root = fixtureRoot();
 	const r = opFindItems({ root, gh: fakeItemList(SAMPLE_ITEMS, { totalCount: 5000 }), tok: TOK });
 	assert.equal(r.ok, false);
@@ -340,7 +335,7 @@ test("find-items: refuses a truncated result rather than silently under-reportin
 	rmSync(root, { recursive: true, force: true });
 });
 
-test("find-items: filters out items from a foreign repo on a multi-repo org board (finding M4)", () => {
+test("find-items: filters out items from a foreign repo on a multi-repo org board", () => {
 	const root = fixtureRoot();
 	const foreignCollision = { id: "PVTI_foreign", status: "Todo", labels: [], content: { number: 1, title: "Foreign repo's own #1", repository: "owner/other-repo" } };
 	const items = [...SAMPLE_ITEMS, foreignCollision];
@@ -402,7 +397,7 @@ test("set-status: neither --item nor --from-status is a usage-shaped failure", (
 	rmSync(root, { recursive: true, force: true });
 });
 
-test("set-status: bulk --from-status moves every matching item, mirroring this session's board-5 cleanup (finding M6)", () => {
+test("set-status: bulk --from-status moves every matching item", () => {
 	const root = fixtureRoot();
 	const { gh, editCalls } = fakeGhStatus();
 	const r = opSetStatus({ root, gh, tok: TOK, fromStatus: "Todo", status: "In Progress" });
@@ -461,7 +456,7 @@ test("main: dispatches find-items end to end", () => {
 	rmSync(root, { recursive: true, force: true });
 });
 
-test("main: --repo-root resolves the named repo even from an unrelated cwd (finding H1 — empty-string defaults previously beat inspectRoot's ?? chain)", () => {
+test("main: --repo-root resolves the named repo even from an unrelated cwd", () => {
 	const root = fixtureRoot();
 	const unrelatedCwd = mkdtempSync(join(tmpdir(), "sdlc-tracker-ops-unrelated-"));
 	const { result } = main(["find-items", "--repo-root", root, "--status", "Todo"], { cwd: unrelatedCwd, gh: fakeItemList(SAMPLE_ITEMS) });
@@ -478,7 +473,7 @@ test("main: unknown subcommand exits 2 via fail() (real subprocess — fail() ca
 	rmSync(root, { recursive: true, force: true });
 });
 
-test("main: create-epic missing --body exits 2 before any gh call (finding H2 — this is what created live issue #173 during review)", () => {
+test("main: create-epic missing --body exits 2 before any gh call", () => {
 	const root = fixtureRoot();
 	const r = spawnSync(process.execPath, [SCRIPT, "create-epic", "--title", "t", "--repo-root", root], { encoding: "utf8" });
 	assert.equal(r.status, 2);
@@ -502,7 +497,7 @@ test("main: --number rejects a non-integer value with a usage error, not a NaN g
 	rmSync(root, { recursive: true, force: true });
 });
 
-test("main: --parent 0 is rejected by needInt's positive floor, not silently treated as absent (round-2 finding: previously created a live unwired orphan task)", () => {
+test("main: --parent 0 is rejected by needInt's positive floor, not silently treated as absent", () => {
 	const root = fixtureRoot();
 	const r = spawnSync(process.execPath, [SCRIPT, "create-task", "--title", "t", "--body", "b", "--parent", "0", "--repo-root", root], { encoding: "utf8" });
 	assert.equal(r.status, 2);
@@ -510,7 +505,7 @@ test("main: --parent 0 is rejected by needInt's positive floor, not silently tre
 	rmSync(root, { recursive: true, force: true });
 });
 
-test("create-task: a bad --parent is looked up BEFORE the issue is created — no live orphan on a typo'd parent (round-2 finding)", () => {
+test("create-task: a bad --parent is looked up BEFORE the issue is created — no live orphan on a typo'd parent", () => {
 	const root = fixtureRoot();
 	const calls = [];
 	const gh = (_cwd, args) => {
@@ -526,7 +521,7 @@ test("create-task: a bad --parent is looked up BEFORE the issue is created — n
 	rmSync(root, { recursive: true, force: true });
 });
 
-test("find-items: repo-less (draft) board items are excluded, not passed through (round-2 finding: bulk set-status previously mutated unrelated drafts)", () => {
+test("find-items: repo-less (draft) board items are excluded, not passed through", () => {
 	const root = fixtureRoot();
 	const draft = { id: "PVTI_draft", status: "Todo", labels: [], content: { title: "a draft note" } }; // DraftIssue: no .number, no .repository
 	const items = [...SAMPLE_ITEMS, draft];
@@ -536,7 +531,7 @@ test("find-items: repo-less (draft) board items are excluded, not passed through
 	rmSync(root, { recursive: true, force: true });
 });
 
-test("find-items: an unparsable --since is a usage-shaped failure, not a silent empty result (round-2 finding)", () => {
+test("find-items: an unparsable --since is a usage-shaped failure, not a silent empty result", () => {
 	const root = fixtureRoot();
 	const gh = () => {
 		throw new Error("should not call gh");
@@ -547,7 +542,7 @@ test("find-items: an unparsable --since is a usage-shaped failure, not a silent 
 	rmSync(root, { recursive: true, force: true });
 });
 
-test("find-items: an unknown --status is a usage-shaped failure, not a silent empty result (round-2 finding)", () => {
+test("find-items: an unknown --status is a usage-shaped failure, not a silent empty result", () => {
 	const root = fixtureRoot();
 	const gh = () => {
 		throw new Error("should not call gh");
@@ -558,7 +553,7 @@ test("find-items: an unknown --status is a usage-shaped failure, not a silent em
 	rmSync(root, { recursive: true, force: true });
 });
 
-test("set-status: --item and --from-status together is rejected before any gh call, not silently resolved by --item winning (round-2 finding)", () => {
+test("set-status: --item and --from-status together is rejected before any gh call, not silently resolved by --item winning", () => {
 	const root = fixtureRoot();
 	const gh = () => {
 		throw new Error("should not call gh");
@@ -569,7 +564,7 @@ test("set-status: --item and --from-status together is rejected before any gh ca
 	rmSync(root, { recursive: true, force: true });
 });
 
-test("main: --format rejects an unknown value (finding L1)", () => {
+test("main: --format rejects an unknown value", () => {
 	const root = fixtureRoot();
 	const r = spawnSync(process.execPath, [SCRIPT, "find-items", "--format", "yaml", "--repo-root", root], { encoding: "utf8" });
 	assert.equal(r.status, 2);
@@ -577,7 +572,7 @@ test("main: --format rejects an unknown value (finding L1)", () => {
 	rmSync(root, { recursive: true, force: true });
 });
 
-test("main: --gh-cmd points the real spawn path at a fake executable (finding H3 — the build plan's binding contract)", () => {
+test("main: --gh-cmd points the real spawn path at a fake executable", () => {
 	const root = fixtureRoot();
 	const fakeGhDir = mkdtempSync(join(tmpdir(), "sdlc-tracker-ops-fakegh-"));
 	const fakeGhPath = join(fakeGhDir, "fake-gh.mjs");
@@ -602,7 +597,7 @@ process.exit(1);
 	rmSync(fakeGhDir, { recursive: true, force: true });
 });
 
-// ---- --repo/--owner/--project overrides (owner-adjudicated round-2 disputed finding) --------
+// ---- --repo/--owner/--project overrides -----------------------------------
 
 test("main: --repo overrides lookup-node's target repo instead of the configured tracker.repo", () => {
 	const root = fixtureRoot();

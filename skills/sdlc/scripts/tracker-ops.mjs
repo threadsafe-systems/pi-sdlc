@@ -1,11 +1,11 @@
 #!/usr/bin/env node
 // tracker-ops.mjs — scripted wrapper for the GitHub tracker mutations
-// documented in assets/tracker-ops.md (#82/#168). Every subcommand is a
-// thin, faithful wrapper around the recipes that file already specifies —
-// this is not a redesign, and every documented caveat (node-id-vs-number,
-// claim is best-effort not atomic, blockedBy/subIssues are connections)
-// still applies. Tokens (labelPrefix, tracker.repo, tracker.board) resolve
-// from the consumer's committed sdlc.config.json via readConfig.
+// documented in assets/tracker-ops.md. Every subcommand is a thin wrapper
+// around the recipes that file specifies; every caveat it documents
+// (node-id-vs-number, claim is best-effort not atomic, blockedBy/subIssues
+// are paginated connections) still applies. Tokens (labelPrefix,
+// tracker.repo, tracker.board) resolve from the consumer's committed
+// sdlc.config.json via readConfig.
 //
 // Usage: tracker-ops.mjs <subcommand> [options] [--repo-root DIR|--config DIR]
 //          [--gh-cmd CMD] [--format json|text]
@@ -24,17 +24,6 @@
 //   board-add --issue N [--repo owner/name] [--owner ORG] [--project N]
 //
 // Exit: 0 success, 1 operation failed (structured {ok:false,reason}), 2 usage/error.
-//
-// PR-panel round 1 (docs/reviews/pr-tracker-ops-helper-2026-07-24/) found
-// real defects fixed here: dead --repo-root/--config (empty-string beat
-// inspectRoot's ?? chain — a previously-documented repo gotcha), missing
-// required-arg validation (a repro created a live issue, #173, since
-// deleted), the binding --gh-cmd flag never implemented, blockedBy/
-// find-items pagination unguarded, partial-create-failure identity loss,
-// creation not explicitly setting Todo, and no bulk set-status. Round 2
-// (verification) closed a residual of the required-arg finding (--parent
-// 0/"" silently orphaned a task) and added --repo/--owner/--project
-// overrides per the owner's disputed-finding adjudication.
 
 import { spawnSync } from "node:child_process";
 import { resolve } from "node:path";
@@ -48,11 +37,11 @@ const USAGE = `usage: tracker-ops.mjs <subcommand> [options] [--repo-root DIR|--
 subcommands: ${SUBCOMMANDS.join(", ")}`;
 
 // ---- gh seam ---------------------------------------------------------------
-// Two independent injection points, deliberately: `--gh-cmd` (real spawnSync,
-// swappable executable — the build plan's binding contract, and what makes
-// manual/CLI exploration safe to point at a fake) and the JS-level
-// `main(argv,{gh})` parameter (same shape as check-completion.mjs, the
-// faster house-style unit-test seam). Neither supersedes the other.
+// Two independent injection points, deliberately: `--gh-cmd` swaps the real
+// spawned executable (so manual/CLI use can point at a fake instead of live
+// gh), and the JS-level `main(argv,{gh})` parameter swaps the whole gh
+// function (the faster unit-test seam, same shape as check-completion.mjs).
+// Neither supersedes the other.
 
 function makeDefaultGh(ghCmd) {
 	return (cwd, args) => {
@@ -149,13 +138,13 @@ function addSubIssue({ root, gh, issueNodeId, subIssueNodeId }) {
 	return parseJson(r, "addSubIssue mutation failed");
 }
 
-// created-issue identity (number/url) is preserved on every failure path
-// past createIssue so a caller never has to re-derive "what did I just
-// create" from a bare error (finding M1). A bad --parent is looked up
-// BEFORE createIssue so a typo'd parent never creates a live orphan issue
-// (round-2 finding, Fable) — parent is validated positive by needInt so
-// `parent !== undefined` (not truthiness) is what gates this branch
-// (round-2 finding: --parent 0/"" previously slipped past `if (parent)`).
+// A caller that hits a failure after the issue is created still gets its
+// {number,url} back (in `created`) plus the `failedStep`, so it never has
+// to re-derive "what did I just create" from a bare error. `--parent` is
+// looked up BEFORE the issue is created, so a bad parent fails without
+// leaving a live orphan; the branch is gated on `parent !== undefined` (not
+// truthiness) so a caller passing 0 gets an explicit failing lookup, never
+// a silent skip.
 function opCreateEpicOrTask({ root, gh, tok, title, body, extraLabels, parent, kind }) {
 	let parentNode;
 	if (parent !== undefined) {
@@ -173,9 +162,9 @@ function opCreateEpicOrTask({ root, gh, tok, title, body, extraLabels, parent, k
 	}
 	const added = boardAdd({ root, gh, boardNumber: tok.boardNumber, boardOwner: tok.boardOwner, repo: tok.repo, issue: created.number });
 	if (!added.ok) return { ok: false, reason: added.reason, failedStep: "board-add", created: { number: created.number, url: created.url } };
-	// Explicitly force Todo rather than assume item-add defaults it — that
-	// default is project-specific automation, not a documented GitHub
-	// guarantee (finding M5).
+	// Set Todo explicitly: `gh project item-add` does not guarantee a status,
+	// so a board without item-added automation would otherwise leave new
+	// items statusless.
 	const board = resolveBoard({ root, gh, boardNumber: tok.boardNumber, boardOwner: tok.boardOwner });
 	if (!board.ok) return { ok: false, reason: board.reason, failedStep: "resolve-board-for-todo", created: { number: created.number, url: created.url }, itemId: added.itemId };
 	const todo = setStatusByItemId({ root, gh, board, itemId: added.itemId, status: "Todo" });
@@ -195,9 +184,9 @@ function opAddBlockedBy({ root, gh, tok, issue, blocking }) {
 	return { ok: true, issue, blocking };
 }
 
-// Both connections this query walks (subIssues and the nested blockedBy)
-// are paginated and both are guarded — an unguarded blockedBy(first:10)
-// silently mis-cleared an 11th+ open blocker (finding M2).
+// Both connections this query walks — subIssues and the nested blockedBy —
+// are paginated; both are guarded below, because a blocker past the fetched
+// page would otherwise make a still-blocked child look ready.
 function opFrontier({ root, gh, tok, parent }) {
 	const query = "query($owner:String!,$repo:String!,$n:Int!){ repository(owner:$owner,name:$repo){ issue(number:$n){ subIssues(first:100){ nodes { number title state assignees(first:5){ nodes { login } } blockedBy(first:50){ nodes { number state } pageInfo { hasNextPage } } } pageInfo { hasNextPage } } } } }";
 	const r = gh(root, ["api", "graphql", "-f", `query=${query}`, "-f", `owner=${tok.owner}`, "-f", `repo=${tok.name}`, "-F", `n=${parent}`]);
@@ -224,13 +213,11 @@ function opClaim({ root, gh, tok, issue, login }) {
 	return { ok: true, claimed: true };
 }
 
-// Carries `repository` per item (finding M4 — a multi-repo org board makes
-// bare issue numbers ambiguous) and refuses a truncated result instead of
-// silently under-reporting (finding M3), matching frontier's honesty
-// convention. Scoped strictly to `tok.repo` — a repo-less (draft) board
-// item is EXCLUDED, not passed through: round-2 verification found the
-// original `repository === undefined` escape let bulk set-status mutate
-// unrelated draft items on a shared org board, defeating M4's own point.
+// Carries `repository` per item and scopes strictly to `tok.repo`: a bare
+// issue number is ambiguous on a multi-repo org board, and a repo-less
+// (draft) board item is EXCLUDED, not passed through — otherwise a bulk
+// set-status could mutate unrelated draft items on a shared board. Refuses
+// a truncated result rather than under-report, matching frontier.
 function opFindItems({ root, gh, tok, since, status, number, titleContains }) {
 	if (status !== undefined && !STATUS_OPTIONS.includes(status)) return { ok: false, reason: `unknown status ${JSON.stringify(status)}; known: ${STATUS_OPTIONS.join(", ")}` };
 	if (since !== undefined && Number.isNaN(Date.parse(since))) return { ok: false, reason: `--since is not a parsable date/time: ${JSON.stringify(since)}` };
@@ -266,9 +253,8 @@ function opFindItems({ root, gh, tok, since, status, number, titleContains }) {
 	return { ok: true, items };
 }
 
-// Single-item (--item) and bulk-by-filter (--from-status, matching the
-// Plan's promised "single-item and ... bulk-by-filter set" — finding M6)
-// both resolve through this one entry point.
+// Both the single-item (--item) and bulk-by-filter (--from-status) paths
+// resolve through this one entry point.
 function opSetStatus({ root, gh, tok, item, status, fromStatus, number, titleContains, since }) {
 	if (!STATUS_OPTIONS.includes(status)) return { ok: false, reason: `unknown status ${JSON.stringify(status)}; known: ${STATUS_OPTIONS.join(", ")}` };
 	if (item !== undefined && fromStatus !== undefined) return { ok: false, reason: "set-status: pass --item (single) or --from-status (bulk), not both — the combination silently ignored --from-status" };
@@ -310,11 +296,10 @@ function needVal(argv, i, name) {
 	return v;
 }
 
-// Every current caller (--parent/--issue/--blocking/--number) is a GitHub
-// issue number, always >=1 — floored here so `Number("")===0` or a
-// negative value fails usage instead of silently reading as falsy
-// downstream (round-2 finding: `--parent 0`/`--parent ""` created a live,
-// unwired orphan task because `if (parent)` treated 0 as "absent").
+// Every caller (--parent/--issue/--blocking/--number) is a GitHub issue
+// number, always >=1, so this rejects 0, negatives, and `Number("")===0` as
+// usage errors rather than letting them flow into a query as a
+// valid-looking integer.
 function needInt(argv, i, name) {
 	const raw = needVal(argv, i, name);
 	const n = Number(raw);
@@ -357,10 +342,9 @@ function parseArgs(argv) {
 	return { sub, opts };
 }
 
-// Required-option validation per subcommand — a missing value fails usage
-// (exit 2) before any gh call, rather than flowing an undefined into a
-// mutating gh invocation (finding H2; this is what created live issue #173
-// during review).
+// Required-option validation per subcommand: a missing value is a usage
+// error (exit 2) before any gh call, so an undefined can never flow into a
+// mutating gh invocation.
 function validateRequired(sub, opts) {
 	const need = (cond, message) => {
 		if (!cond) fail(`tracker-ops: ${sub}: ${message}`);
@@ -387,13 +371,11 @@ function validateRequired(sub, opts) {
 }
 
 // --repo/--owner/--project are optional per-call overrides of the
-// config-derived tokens, for lookup-node/find-items/set-status/board-add
-// only (create-epic/create-task/add-blocked-by/frontier/claim always
-// target this project's own configured tracker — no bullet in the Build
-// plan ever named overrides for those, and there's no use case for wiring
-// a sub-issue or blocking edge across repos). Config-derived resolution
-// stays the default; this adds an escape hatch without abandoning it
-// (owner-adjudicated, round-2 PR review — see consolidated-round2.md).
+// config-derived tokens, honored only by lookup-node/find-items/set-status/
+// board-add. The creation and edge-wiring subcommands
+// (create-epic/create-task/add-blocked-by/frontier/claim) always target
+// this project's own configured tracker. Config-derived resolution is the
+// default; these flags are an escape hatch, not required.
 function effectiveTargets(tok, opts) {
 	const repo = opts.repo ?? tok.repo;
 	const [owner, name] = repo.split("/");
