@@ -1,0 +1,120 @@
+{
+  "schemaVersion": 1,
+  "taskId": "t2",
+  "manifest": "/home/neil/code/threadsafe/pi-sdlc.worktrees/feat-pv1-task-scoped-tests/docs/validation/pv1-task-scoped-tests/t2.json",
+  "repoRoot": "/home/neil/code/threadsafe/pi-sdlc.worktrees/feat-pv1-task-scoped-tests",
+  "verdict": "PASS",
+  "exitCode": 0,
+  "errors": [],
+  "manifestErrors": [],
+  "commands": [
+    {
+      "id": "tests.full",
+      "argv": [
+        "npm",
+        "test"
+      ],
+      "evidence": [
+        "full corpus green with fixtures reconciled (TST13, TST19)"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 8137,
+      "stdoutTail": "[...truncated; showing bounded tail...]\n✔ structural coverage: ADR 0028 has an FS11 inventory entry and exists (1.973832ms)\n✔ structural coverage: every run-store/retro path named normatively by either SKILL.md has an inventory entry (0.559801ms)\n✔ LT27: docs/retros/sdlc-lifecycle-telemetry/run.json and index.html exist (0.74039ms)\n✔ LT27: the dogfood run.json validates against the committed schema and hand-rolled validator (4.068758ms)\n✔ LT27: coverage markers honestly record the pre-instrumentation gap (partial coverage by design) (0.354404ms)\n✔ LT27: the committed dashboard renders all seven anchors for the dogfood run (0.211904ms)\n✔ LT1: valid emit appends one schema-conforming line, creating the store (45.479293ms)\n✔ LT1b: --by defaults to agent when omitted (60.967149ms)\n✔ LT2: bad inputs exit 2 and never touch the manifest (392.65654ms)\n✔ schema agreement: unknown event types remain valid for forward-compatible consumers (0.4864ms)\n✔ LT2b: a bad input against a non-existent store attempts no write (54.679123ms)\n✔ LT3: concurrent emitters produce N complete, non-interleaved lines (195.687441ms)\n✔ empty explicit identities do not fall through to another identity (109.36149ms)\n✔ LT4: --slug beats env beats branch mapping (117.3994ms)\n✔ LT5: unresolvable identity skips (exit 0, one warning, no write) (142.035626ms)\n✔ LT26: .gitignore ignores the run store (4.041173ms)\n✔ emitter: .sh wrapper delegates to .mjs identically (57.420523ms)\n✔ vocabulary: every known event has a payload descriptor (0.16354ms)\n✔ DX: unknown-event bail suggests the nearest known event and lists all (35.771601ms)\n✔ DX: garbled event input yields no suggestion (nothing close enough) (36.49885ms)\n✔ DX: invalid-payload bail carries the exact expected template (59.221074ms)\n✔ DX: expected-template payload for an event with an optional field annotates it (34.704768ms)\n✔ DX: renderEventTemplate is stable across calls and unknown for an unknown event (0.114027ms)\n✔ DX: --list prints the known-event vocabulary, never touches the run store, needs no identity (56.706388ms)\n✔ DX: --describe prints the template for a known event and exits 0 (49.201187ms)\n✔ DX: --describe on an unknown event exits 2 with a suggestion, no stdout (37.796414ms)\n✔ DX: bare --describe with no event name is a usage error, exit 2 (60.731875ms)\n✔ DX: suggestEvent finds close typos and returns null for nothing close (2.90675ms)\n✔ DX: --list/--describe never mutate an existing run store mid-run (167.307256ms)\n✔ DX-fix: malformed --payload JSON still carries the expected template (PR panel finding) (51.300254ms)\n✔ DX-fix: a missing --payload value carries the expected template when the event is already known (PR panel finding) (59.908281ms)\n✔ DX-fix: a missing --payload value with no prior event token degrades without a template (documented limitation) (35.22114ms)\n✔ DX-fix: renderEventTemplate never crashes on inherited-property lookups (PR panel finding) (0.984345ms)\n✔ DX: existing emission invocations remain byte-identical on stdout and exit code (112.417904ms)\n✔ LT11: harvest copies status.json + events.jsonl and emits panel.harvested (72.539534ms)\n✔ T1: --wave records a logical wave distinct from the round allocation label (73.939689ms)\n✔ T1: --wave must be a positive integer (71.300252ms)\n✔ LT11: --with-transcripts copies the transcripts/ subdirectory (72.067717ms)\n✔ LT12: a missing source directory exits 0 with both files missed (42.222302ms)\n✔ LT12: a partially-present source (status without events) reports one missed (56.458309ms)\n✔ harvest-panel: unknown phase and non-positive round exit 2 (185.922849ms)\n✔ harvest-panel.sh wrapper delegates to .mjs identically (66.108039ms)\n✔ LT20: full fixture renders all seven anchors with known-answer data bindings (3.23022ms)\n✔ T4: same-wave harvest rounds collapse into one wave section with each round as sub-detail (0.330442ms)\n✔ LT20: an empty-shell run.json fails to carry any pinned data binding (0.186681ms)\n✔ LT21: render-twice byte-identity and no generation-time values (0.448083ms)\n✔ LT21 (CLI): rendering the same --run input twice via the CLI is byte-identical (129.820401ms)\n✔ LT22: soft-data figures carry data-soft and visible attribution (0.343587ms)\n✔ LT22: a soft-less run.json renders coverage notices, not fabricated numbers (0.198245ms)\n✔ LT23: every coverage marker is rendered under #coverage (1.25406ms)\n✔ render-retro CLI: unreadable/unparseable/schema-invalid --run exits 1; usage errors exit 2 (281.379714ms)\n✔ render-retro CLI: default --out is index.html beside the input; --format json envelope (44.425996ms)\n✔ LT6: resolve-panel emits panel.resolved; stdout/exit byte-identical with/without --slug (363.856181ms)\n✔ LT7: ensure-panel-agent emits panel.agent_stamped; stdout/exit byte-identical (289.452784ms)\n✔ LT8: validate-task emits task.validated on PASS with and without --report (346.853981ms)\n✔ LT8: validate-task emits task.validated on FAIL (95.220644ms)\n✔ LT8: validate-task emits task.validated on an ERROR fixture whose manifest parses (57.043241ms)\n✔ LT8: an unparseable-manifest ERROR skips emission with the standard warning (59.862033ms)\n✔ LT9: unwritable run store degrades to a warning; primary output unaffected (221.593517ms)\n✔ nested --repo-root run stores are git-ignored too (gitignore anchoring) (4.05599ms)\n✔ LT10: check-lifecycle.mjs and .sh are untouched by FS5 side-effect emission (1.486636ms)\n✔ PV1: a valid JavaScript manifest runs only declared checks and passes (168.051962ms)\n✔ PV2: only declared argv run; an undeclared tool command never executes (306.537915ms)\n✔ PV3: schema and inspectManifest reject the mutation matrix before any command runs (103.637458ms)\n✔ PV4: command outcomes are complete and deterministic; runner continues after failures (99.91835ms)\n✔ PV4: a timeout is reported as FAIL with timedOut (1083.730936ms)\n✔ PV5: category applicability is exact; injected n/a shapes are rejected (145.754381ms)\n✔ PV6: scenario mapping gates the verdict (125.379297ms)\n✔ PV7: standards and banned patterns are commands, not judgement (177.00755ms)\n✔ PV8: evidence is bounded and secrets are redacted (131.157502ms)\n✔ PV8 unit: boundStream and redaction name-matching are precise (350.833428ms)\n✔ PV9: JSON/text/exit agree and JSON mode is order-independent (824.629843ms)\n✔ PV9: --report writes the exact JSON bytes atomically (163.701447ms)\n✔ PV9: --report outside the repo root is refused and clobbers nothing (219.866262ms)\n✔ PV10: generic validator law and generated agent are portable (1.109067ms)\n✔ PV11: receipt hash verification detects mutation of any stored file (8.409905ms)\n✔ PV11: a FAIL runner-report cannot ride under runnerVerdict PASS (1.728708ms)\n✔ parseArgs: recognises JSON anywhere and rejects bad flags (1.135997ms)\n✔ PV13: renderText is a faithful projection of the report (146.321271ms)\n✔ TST2: separate full and task checks satisfy Rule A and Rule B (0.692351ms)\n✔ TST1: a scope:[full] check satisfies Rule A (scenarios n/a) (0.335614ms)\n✔ TST3: a single scope:[full,task] check satisfies both rules with no duplicate (0.266688ms)\n✔ TST4: Rule A negative -- tests required with no full-tagged check (1.978157ms)\n✔ TST5: Rule B negative -- scenario cites a tests check but none task-tagged (1.53136ms)\n✔ TST6: tests:n/a is exempt from Rule A and Rule B (0.351063ms)\n✔ TST7: zero owned scenarios -- exempt from Rule B, still subject to Rule A (0.437484ms)\n✔ TST8: a static-only scenario does not trigger Rule B (0.282954ms)\n✔ TST9: an untagged check named tests.full does NOT satisfy Rule A (0.248148ms)\n✔ TST10: scope shape errors are reported at /checks/<i>/scope (0.564865ms)\n✔ TST11: golden multi-error ordering (scope-shape + Rule A + dangling check) (0.35666ms)\n✔ TST12: schema accepts optional scope and rejects malformed shapes (38.858052ms)\nℹ tests 433\nℹ suites 0\nℹ pass 433\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 7917.053258\n",
+      "stderrTail": ""
+    },
+    {
+      "id": "static.lint",
+      "argv": [
+        "npm",
+        "run",
+        "lint"
+      ],
+      "evidence": [
+        "repository biome lint is clean (TST19)"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 349,
+      "stdoutTail": "\n> pi-sdlc@0.1.1 lint\n> biome check .\n\nChecked 159 files in 137ms. No fixes applied.\nFound 2 warnings.\nFound 1 info.\n",
+      "stderrTail": "docs/briefs/assets/2026-07-23-orchestration-runtime-prototype/build-runner/orchestrator.mjs:57:29 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━\n\n  i Template literals are preferred over string concatenation.\n  \n    55 │ };\n    56 │ const emit = (type, payload) => {\n  > 57 │ \tappendFileSync(eventsPath, JSON.stringify({ ts: new Date().toISOString(), type, payload }) + \"\\n\");\n       │ \t                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n    58 │ };\n    59 │ const ulid = () => randomBytes(8).toString(\"hex\");\n  \n  i Unsafe fix: Use a template literal.\n  \n     55  55 │   };\n     56  56 │   const emit = (type, payload) => {\n     57     │ - → appendFileSync(eventsPath,·JSON.stringify({·ts:·new·Date().toISOString(),·type,·payload·})·+·\"\\n\");\n         57 │ + → appendFileSync(eventsPath,·`${JSON.stringify({·ts:·new·Date().toISOString(),·type,·payload·})}\\n`);\n     58  58 │   };\n     59  59 │   const ulid = () => randomBytes(8).toString(\"hex\");\n  \n\ndocs/briefs/assets/2026-07-23-orchestration-runtime-prototype/borrow-taskflow/drive.mjs:56:58 lint/correctness/noUnusedFunctionParameters  FIXABLE  ━━━━━━━━━━\n\n  ! This parameter m is unused.\n  \n    54 │ \tconcurrency: 4,\n    55 │ \tphases: [\n  > 56 │ \t\t{ id: \"panel\", type: \"parallel\", branches: roster.map((m, i) => ({ task: reviewTask, agent: `reviewer-${i}` })), retry: { max: 1, backoffMs: 0 } },\n       │ \t\t                                                       ^\n    57 │ \t\t{ id: \"ratify\", type: \"approval\", task: \"Ratify PR-review panel result:\\n{steps.panel.output}\", dependsOn: [\"panel\"], final: true },\n    58 │ \t],\n  \n  i Unused parameters might be the result of an incomplete refactoring.\n  \n  i Unsafe fix: If this is intentional, prepend m with an underscore.\n  \n     54  54 │     concurrency: 4,\n     55  55 │     phases: [\n     56     │ - → → {·id:·\"panel\",·type:·\"parallel\",·branches:·roster.map((m,·i)·=>·({·task:·reviewTask,·agent:·`reviewer-${i}`·})),·retry:·{·max:·1,·backoffMs:·0·}·},\n         56 │ + → → {·id:·\"panel\",·type:·\"parallel\",·branches:·roster.map((_m,·i)·=>·({·task:·reviewTask,·agent:·`reviewer-${i}`·})),·retry:·{·max:·1,·backoffMs:·0·}·},\n     57  57 │       { id: \"ratify\", type: \"approval\", task: \"Ratify PR-review panel result:\\n{steps.panel.output}\", dependsOn: [\"panel\"], final: true },\n     58  58 │     ],\n  \n\ndocs/briefs/assets/2026-07-23-orchestration-runtime-prototype/build-runner/orchestrator.mjs:27:26 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━━━━\n\n  ! Several of these imports are unused.\n  \n    26 │ import { execFile, spawn } from \"node:child_process\";\n  > 27 │ import { appendFileSync, existsSync, mkdirSync, readFileSync, writeFileSync } from \"node:fs\";\n       │                          ^^^^^^^^^^\n    28 │ import { join, dirname } from \"node:path\";\n    29 │ import { fileURLToPath } from \"node:url\";\n  \n  i Unused imports might be the result of an incomplete refactoring.\n  \n  i Unsafe fix: Remove the unused imports.\n  \n    27 │ import·{·appendFileSync,·existsSync,·mkdirSync,·readFileSync,·writeFileSync·}·from·\"node:fs\";\n       │                          ------------                                                        \n\n"
+    },
+    {
+      "id": "standards.invariants",
+      "argv": [
+        "node",
+        "-e",
+        "const fs=require('fs');const t1=JSON.parse(fs.readFileSync('docs/validation/pv1-task-scoped-tests/t1.json','utf8')).schemaVersion===1;const t2=JSON.parse(fs.readFileSync('docs/validation/pv1-task-scoped-tests/t2.json','utf8')).schemaVersion===1;const sc=JSON.parse(fs.readFileSync('skills/sdlc/schema/task-validation-manifest.schema.json','utf8')).properties.schemaVersion.const===1;const a13=/ratif/i.test(fs.readFileSync('docs/adr/0013-task-validation-manifest-pv1.md','utf8'));const a27=/ratif/i.test(fs.readFileSync('docs/adr/0027-pre-adoption-clean-break-policy.md','utf8'));if(t1&&t2&&sc&&a13&&a27){process.exit(0)}console.error(JSON.stringify({t1,t2,sc,a13,a27}));process.exit(1)"
+      ],
+      "evidence": [
+        "schemaVersion stays 1 across slice manifests + schema; ADR 0013/0027 amendments present and ratified (TST18)"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 33,
+      "stdoutTail": "",
+      "stderrTail": ""
+    }
+  ],
+  "categories": [
+    {
+      "category": "tests",
+      "status": "PASS",
+      "checkIds": [
+        "tests.full"
+      ]
+    },
+    {
+      "category": "static",
+      "status": "PASS",
+      "checkIds": [
+        "static.lint"
+      ]
+    },
+    {
+      "category": "scenarios",
+      "status": "PASS"
+    },
+    {
+      "category": "standards",
+      "status": "PASS",
+      "checkIds": [
+        "standards.invariants"
+      ]
+    },
+    {
+      "category": "bannedPatterns",
+      "status": "N/A",
+      "reason": "no task-diff pattern prohibition beyond lint applies to this task"
+    }
+  ],
+  "scenarios": [
+    {
+      "scenarioId": "TST13",
+      "status": "PASS",
+      "checkIds": [
+        "tests.full"
+      ]
+    },
+    {
+      "scenarioId": "TST18",
+      "status": "PASS",
+      "checkIds": [
+        "standards.invariants"
+      ]
+    },
+    {
+      "scenarioId": "TST19",
+      "status": "PASS",
+      "checkIds": [
+        "tests.full"
+      ]
+    }
+  ]
+}

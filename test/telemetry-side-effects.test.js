@@ -192,7 +192,7 @@ function passManifest() {
 		buildPlan: "bp.md",
 		repoRoot: ".",
 		ownedScenarios: ["LT8"],
-		checks: [{ id: "tests.ok", argv: ["node", "ok.mjs"], evidence: ["LT8"] }],
+		checks: [{ id: "tests.ok", argv: ["node", "ok.mjs"], scope: ["full", "task"], evidence: ["LT8"] }],
 		categories: {
 			tests: { applicability: "required", checkIds: ["tests.ok"] },
 			static: { applicability: "n/a", reason: "no static checks needed for this fixture" },
@@ -207,7 +207,7 @@ function failManifest() {
 	return {
 		...passManifest(),
 		taskId: "lt8-fail",
-		checks: [{ id: "tests.bad", argv: ["node", "bad.mjs"], evidence: ["LT8"] }],
+		checks: [{ id: "tests.bad", argv: ["node", "bad.mjs"], scope: ["full", "task"], evidence: ["LT8"] }],
 		categories: { ...passManifest().categories, tests: { applicability: "required", checkIds: ["tests.bad"] }, scenarios: { applicability: "required", evidence: { LT8: ["tests.bad"] } } },
 	};
 }
