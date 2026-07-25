@@ -1,0 +1,74 @@
+{
+  "schemaVersion": 1,
+  "taskId": "t3",
+  "manifest": "/home/neil/code/threadsafe/pi-sdlc.worktrees/feat-pv1-task-scoped-tests/docs/validation/pv1-task-scoped-tests/t3.json",
+  "repoRoot": "/home/neil/code/threadsafe/pi-sdlc.worktrees/feat-pv1-task-scoped-tests",
+  "verdict": "PASS",
+  "exitCode": 0,
+  "errors": [],
+  "manifestErrors": [],
+  "commands": [
+    {
+      "id": "static.docs",
+      "argv": [
+        "node",
+        "-e",
+        "const fs=require('fs');const has=(f,s)=>fs.readFileSync(f,'utf8').includes(s);const base='docs/specs/2026-07-12-sdlc-portable-validator.md';const checks=[[base,'Amendment: task-scoped test declaration'],[base,'CommandCheck'],[base,'no additional properties'],[base,'worked-example manifest'],[base,'Rule A'],[base,'Rule B'],['skills/sdlc/references/phase-tasks.md','scope'],['skills/sdlc/references/phase-tasks.md','Rule A'],['skills/sdlc/references/phase-tasks.md','Rule B'],['skills/sdlc/references/phase-implement.md','scope'],['skills/sdlc/references/phase-implement.md','Rule A'],['skills/sdlc/references/phase-implement.md','Rule B'],['README.md','scope'],['README.md','regression net']];const bad=checks.filter(([f,s])=>!has(f,s));if(bad.length){console.error('missing:',JSON.stringify(bad));process.exit(1)}process.exit(0)"
+      ],
+      "evidence": [
+        "base-spec §11 amendment + phase-tasks/phase-implement + README document scope/Rule A/Rule B (TST15, TST16)"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 49,
+      "stdoutTail": "",
+      "stderrTail": ""
+    }
+  ],
+  "categories": [
+    {
+      "category": "tests",
+      "status": "N/A",
+      "reason": "docs-only task: no behavioural test execution to declare"
+    },
+    {
+      "category": "static",
+      "status": "PASS",
+      "checkIds": [
+        "static.docs"
+      ]
+    },
+    {
+      "category": "scenarios",
+      "status": "PASS"
+    },
+    {
+      "category": "standards",
+      "status": "N/A",
+      "reason": "no extra governing standard beyond the declared docs check applies"
+    },
+    {
+      "category": "bannedPatterns",
+      "status": "N/A",
+      "reason": "no task-diff pattern prohibition applies to this docs task"
+    }
+  ],
+  "scenarios": [
+    {
+      "scenarioId": "TST15",
+      "status": "PASS",
+      "checkIds": [
+        "static.docs"
+      ]
+    },
+    {
+      "scenarioId": "TST16",
+      "status": "PASS",
+      "checkIds": [
+        "static.docs"
+      ]
+    }
+  ]
+}

@@ -89,6 +89,16 @@ arrays across five categories (`tests`, `static`, `scenarios`, `standards`,
 `bannedPatterns`), each `required` or `n/a` with a Build-approved reason, plus
 the mapping from each owned spec scenario to the checks that evidence it.
 
+Each check may carry an optional **`scope`** array (`("full" | "task")[]`). Two
+rules apply: when the `tests` category is `required`, at least one referenced
+check must be tagged `"full"` (the regression net); and when `scenarios` is
+`required`, each owned scenario whose evidence cites a `tests`-category check
+must cite at least one tagged `"task"` (that task's specific tests). One check
+that serves both roles tags `scope: ["full", "task"]`. A manifest with no `scope`
+tags on its required `tests` checks is rejected — author them so the runner can
+tell the broad suite from a task's own evidence (see
+`docs/specs/2026-07-12-sdlc-portable-validator.md` §11).
+
 The deterministic runner executes it:
 
 ```bash
