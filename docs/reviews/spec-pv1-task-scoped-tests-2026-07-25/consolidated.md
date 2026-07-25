@@ -71,13 +71,22 @@ PR title OR a `BREAKING CHANGE:` body footer. The superseded 2026-07-17
 avoid-`!` discipline no longer applies; ADR 0027:27–28's stale angular-preset
 rationale line should be refreshed in a follow-up.
 
+## Round 3 (narrow delta) — glm-5.2:xhigh @ commit `9883b6b`
+
+Scope: strictly §10 + TST17 (the owner-ratified `!` widening). Harvest:
+`.pi/sdlc/runs/pv1-task-scoped-tests/panels/spec_review-round4-2026-07-25`.
+Verdict: **CONFIRMED R2-1** and **CLEAR §10/TST17** — the widened contract states
+exactly the two honoured breaking-signal forms (`type!:`/`type(scope)!:` title OR
+`BREAKING CHANGE:` body footer) with a sound two-directional TST17 falsify
+clause and no surviving false claim, ground-verified against `.releaserc.json`
+(conventionalcommits), `scripts/check-commit-messages.mjs:9` (accepts `!`), and
+the config-versioning Signal-source spec (lines 616–622, CV28). No new finding.
+
 ## Outcome
 
-Round 2 confirms every round-1 fix and leaves **no high finding** surviving; two
-mediums + one low from round 2 are all incorporated. One owner decision (R2-1
-placement policy) is open before the Spec gate closes. Round 2 was NOT 100%
-re-litigation — it confirmed fixes in one line each and found only genuine
-residuals, so the workflow.md two-round-100%-incorporation smell does not apply.
-Per "trim the tail", once R2-1 is settled the residual is wording-only; a
-narrow delta re-confirm of the touched §10/TST17/TST19/TST15 (or owner
-accept-without-redispatch) closes the gate.
+**The Spec panel has converged and reached its stop condition.** Across three
+rounds: round 1 (1 high, 2 med, 3 low) all incorporated; round 2 delta confirmed
+all eight and found 3 residuals (2 med, 1 low) all incorporated; round 3 narrow
+delta confirmed the owner-ratified `!` widening CLEAR. **No high or medium
+finding survives.** The panel gate condition is met; the only remaining seam is
+human design-gate approval by the owner to proceed to Build.
