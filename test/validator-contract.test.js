@@ -851,3 +851,27 @@ test("TST12: schema accepts optional scope and rejects malformed shapes", () => 
 	assert.equal(check(["broad"]), false); // out of enum
 	assert.equal(check("full"), false); // not an array
 });
+
+// ---- PR-panel regressions: Rule B owned-only + scope error dedup -----------
+
+test("Rule B iterates owned scenarios only -- an unowned evidence key draws no Rule B error", () => {
+	const m = scoped({
+		categories: {
+			...scoped().categories,
+			scenarios: { applicability: "required", evidence: { PV1: ["tests.spec"], ZZ9: ["tests.full"] } },
+		},
+	});
+	const issues = inspectManifest(m);
+	// The unowned key is flagged as an unknown scenario...
+	assert.ok(issues.some((e) => e.includes("evidence maps unknown scenario 'ZZ9'")));
+	// ...but Rule B does NOT also fire against the nonexistent scenario.
+	assert.ok(!issues.some((e) => e.startsWith("/categories/scenarios/evidence/ZZ9:") && e.includes("scope 'task'")));
+});
+
+test("scope enum error is emitted once per check, not per bad entry", () => {
+	const m = scoped();
+	m.checks[2].scope = ["bogus", "wide"]; // static.ok, uninvolved in Rule A/B
+	const issues = inspectManifest(m);
+	const enumErrors = issues.filter((e) => e === "/checks/2/scope: scope entries must be 'full' or 'task'");
+	assert.equal(enumErrors.length, 1, `expected exactly one enum error, got ${enumErrors.length}: ${JSON.stringify(issues)}`);
+});

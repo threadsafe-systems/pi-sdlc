@@ -2,11 +2,11 @@
   "schemaVersion": 1,
   "taskId": "t1",
   "manifestPath": "docs/validation/pv1-task-scoped-tests/t1.json",
-  "manifestSha256": "ec4000fabcc01499615fc675b05364a217931f1b06aaf8be87cda8dcd5ce59c9",
-  "runnerReportSha256": "49ddc9550646ef8e8f78d9bfb6a3a8c6982404bd2b06d4af829569f76a20c399",
+  "manifestSha256": "cb9007639015f5d0938b64660d7683f18b9b4238257da56e5a7871cfaf8826b9",
+  "runnerReportSha256": "212f0835cf1aabb19093d390f3a466d559a7d9ecda75ca38b2a1cf2d617613f7",
   "generatedAgentSha256": "ec3895ff8b685dc90b6ce2db27aa82b37d1abeea1612749d9b1377c42d69cbdd",
   "model": "anthropic/claude-haiku-4-5",
   "runnerVerdict": "PASS",
   "validatorVerdict": "PASS",
-  "createdAt": "2026-07-25T16:45:13Z"
+  "createdAt": "2026-07-25T17:42:47Z"
 }

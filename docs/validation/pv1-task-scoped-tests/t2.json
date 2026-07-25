@@ -23,9 +23,9 @@
       "argv": [
         "node",
         "-e",
-        "const fs=require('fs');const t1=JSON.parse(fs.readFileSync('docs/validation/pv1-task-scoped-tests/t1.json','utf8')).schemaVersion===1;const t2=JSON.parse(fs.readFileSync('docs/validation/pv1-task-scoped-tests/t2.json','utf8')).schemaVersion===1;const sc=JSON.parse(fs.readFileSync('skills/sdlc/schema/task-validation-manifest.schema.json','utf8')).properties.schemaVersion.const===1;const a13=/ratif/i.test(fs.readFileSync('docs/adr/0013-task-validation-manifest-pv1.md','utf8'));const a27=/ratif/i.test(fs.readFileSync('docs/adr/0027-pre-adoption-clean-break-policy.md','utf8'));if(t1&&t2&&sc&&a13&&a27){process.exit(0)}console.error(JSON.stringify({t1,t2,sc,a13,a27}));process.exit(1)"
+        "const fs=require('fs');const j=f=>JSON.parse(fs.readFileSync(f,'utf8'));const r=f=>fs.readFileSync(f,'utf8');const v=['docs/validation/pv1-task-scoped-tests/t1.json','docs/validation/pv1-task-scoped-tests/t2.json','docs/validation/pv1-task-scoped-tests/t3.json'].every(f=>j(f).schemaVersion===1);const sc=j('skills/sdlc/schema/task-validation-manifest.schema.json').properties.schemaVersion.const===1;const base=r('docs/specs/2026-07-12-sdlc-portable-validator.md').includes('## 11. Amendment: task-scoped test declaration');const a13=r('docs/adr/0013-task-validation-manifest-pv1.md').includes('## Amendment (2026-07-24): shape versioning is separate from acceptance-rule');const a27=r('docs/adr/0027-pre-adoption-clean-break-policy.md').includes('## Amendment (2026-07-24): scope extends to PV1 task-validation manifests');if(v&&sc&&base&&a13&&a27){process.exit(0)}console.error(JSON.stringify({v,sc,base,a13,a27}));process.exit(1)"
       ],
-      "evidence": ["schemaVersion stays 1 across slice manifests + schema; ADR 0013/0027 amendments present and ratified (TST18)"]
+      "evidence": ["every slice manifest (t1/t2/t3) + schema keeps schemaVersion 1; base-spec §11 + ADR 0013/0027 amendment sections present (TST18)"]
     }
   ],
   "categories": {

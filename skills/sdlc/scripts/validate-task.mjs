@@ -153,14 +153,25 @@ export function inspectManifest(raw, { repoRoot } = {}) {
 				const sp = `${at}/scope`;
 				if (!Array.isArray(c.scope) || c.scope.length === 0) add(sp, "scope must be a non-empty array of 'full'/'task'");
 				else {
+					// Errors dedupe per check (Spec §5 pins scope errors at the
+					// check-level pointer /checks/<i>/scope, not per entry), so
+					// `manifestErrors` never carries byte-identical duplicates.
 					const seenScope = new Set();
+					const seenDup = new Set();
 					let scopeOk = true;
+					let emittedEnum = false;
 					for (const s of c.scope) {
 						if (s !== "full" && s !== "task") {
-							add(sp, "scope entries must be 'full' or 'task'");
+							if (!emittedEnum) {
+								add(sp, "scope entries must be 'full' or 'task'");
+								emittedEnum = true;
+							}
 							scopeOk = false;
 						} else if (seenScope.has(s)) {
-							add(sp, `duplicate scope entry '${s}'`);
+							if (!seenDup.has(s)) {
+								add(sp, `duplicate scope entry '${s}'`);
+								seenDup.add(s);
+							}
 							scopeOk = false;
 						} else seenScope.add(s);
 					}
@@ -261,13 +272,17 @@ export function inspectManifest(raw, { repoRoot } = {}) {
 					}
 				}
 				// Rule B: an owned scenario whose evidence cites any tests-category
-				// check must cite at least one tagged scope "task" (Spec §3). Vacuous
+				// check must cite at least one tagged scope "task" (Spec §3). Iterates
+				// OWNED scenarios only (Spec §3 "per owned scenario") so an unowned
+				// evidence key -- already flagged as an unknown-scenario error -- never
+				// also draws a Rule B error at a nonexistent scenario pointer. Vacuous
 				// when no tests-category id is cited (Spec §4 degradation).
 				const testsCheckIdSet = new Set(testsCheckIds);
-				for (const [k, v] of Object.entries(sc.evidence)) {
+				for (const s of owned) {
+					const v = sc.evidence[s];
 					if (!Array.isArray(v)) continue;
 					const cited = v.filter((id) => testsCheckIdSet.has(id));
-					if (cited.length > 0 && !cited.some((id) => (scopeById.get(id) || []).includes("task"))) add(`${at}/evidence/${k}`, "cites a tests check but none tagged scope 'task'");
+					if (cited.length > 0 && !cited.some((id) => (scopeById.get(id) || []).includes("task"))) add(`${at}/evidence/${s}`, "cites a tests check but none tagged scope 'task'");
 				}
 			}
 		} else if (sc.applicability === "n/a") {

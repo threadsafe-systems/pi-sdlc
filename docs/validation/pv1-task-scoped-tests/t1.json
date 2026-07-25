@@ -6,10 +6,17 @@
   "ownedScenarios": ["TST1", "TST10", "TST11", "TST12", "TST14", "TST2", "TST3", "TST4", "TST5", "TST6", "TST7", "TST8", "TST9"],
   "checks": [
     {
+      "id": "tests.full",
+      "argv": ["npm", "test"],
+      "timeoutMs": 300000,
+      "scope": ["full"],
+      "evidence": ["whole-corpus regression net is green"]
+    },
+    {
       "id": "tests.contract",
       "argv": ["node", "--test", "test/validator-contract.test.js"],
       "timeoutMs": 120000,
-      "scope": ["full", "task"],
+      "scope": ["task"],
       "evidence": ["scope shape, Rule A, Rule B, degradations, golden ordering (TST1-TST12)"]
     },
     {
@@ -28,7 +35,7 @@
   "categories": {
     "tests": {
       "applicability": "required",
-      "checkIds": ["tests.contract", "tests.frozen"]
+      "checkIds": ["tests.full", "tests.contract", "tests.frozen"]
     },
     "static": {
       "applicability": "required",

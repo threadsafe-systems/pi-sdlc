@@ -59,10 +59,10 @@ docs/validation/<feature>/<task-id>.json
   "checks": [
     {
       "id": "tests.contract",
-      "argv": ["node", "--test", "test/validator-contract.test.js"],
+      "argv": ["npm", "test"],
       "timeoutMs": 120000,
       "scope": ["full", "task"],
-      "evidence": ["PV1 and PV3 contract scenarios"]
+      "evidence": ["PV1 and PV3 scenarios; whole-suite regression net"]
     },
     {
       "id": "static.lint",
