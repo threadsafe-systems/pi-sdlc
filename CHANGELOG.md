@@ -1,3 +1,18 @@
+## [3.0.0](https://github.com/threadsafe-systems/pi-sdlc/compare/v2.7.0...v3.0.0) (2026-07-25)
+
+### ⚠ BREAKING CHANGES
+
+* **validator:** PV1 manifests with a required tests category must now tag a
+check scope "full", and scenario test-evidence must include a scope "task"
+check; previously-valid manifests without scope tags become manifest-errors.
+This is a coordinated clean break with no migrator (ADR 0013 + ADR 0027).
+
+T1 receipt: docs/reviews/task-validate-pv1-task-scoped-tests-t1-2026-07-25 (PASS/PASS, verified).
+
+### Features
+
+* **validator:** PV1 task-scoped test declaration (scope field) ([#190](https://github.com/threadsafe-systems/pi-sdlc/issues/190)) ([4196f38](https://github.com/threadsafe-systems/pi-sdlc/commit/4196f389d1a78978bbc9dec01c757e1eaaff55dd)), closes [#164](https://github.com/threadsafe-systems/pi-sdlc/issues/164) [#186](https://github.com/threadsafe-systems/pi-sdlc/issues/186) [#187](https://github.com/threadsafe-systems/pi-sdlc/issues/187) [#188](https://github.com/threadsafe-systems/pi-sdlc/issues/188)
+
 ## [2.7.0](https://github.com/threadsafe-systems/pi-sdlc/compare/v2.6.0...v2.7.0) (2026-07-25)
 
 ### Features
