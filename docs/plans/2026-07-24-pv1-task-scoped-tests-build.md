@@ -162,3 +162,14 @@ that follow-up PR has merged. Track it as a tracker issue at PR-open time.
   debt; T2's `tests.full`/`npm test` still proves whole-corpus green.
 - T1's own validation receipt is produced after its code lands (cut-over §5.1
   pattern), so T1's manifest is the first validated under the new Rule A/B.
+- **Boundary refinement made during Implement (fixture coupling):** the
+  `validator-contract.test.js` `baseManifest()` + inline fixture tagging landed
+  in **T1** (not T2 as first drafted), because that file is the one T1 edits for
+  the new tests and its suite cannot pass otherwise. Consequently T1's `tests`
+  regression check is `node --test test/validator-contract.test.js` (the PV1
+  contract suite, tagged `scope:["full","task"]`), not `npm test` — the whole
+  corpus only goes green once T2 tags the `telemetry-side-effects.test.js`
+  fixtures, so `npm test` is **T2's** `tests.full` regression check. Between the
+  T1 and T2 commits `npm test` is intentionally red (telemetry-side-effects
+  untagged); it is green from T2 onward. All three task receipts are PASS/PASS
+  and verified (`docs/reviews/task-validate-pv1-task-scoped-tests-t{1,2,3}-2026-07-25/`).
