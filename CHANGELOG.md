@@ -1,3 +1,9 @@
+## [2.7.0](https://github.com/threadsafe-systems/pi-sdlc/compare/v2.6.0...v2.7.0) (2026-07-25)
+
+### Features
+
+* **sdlc:** tracker-ops helper ([#82](https://github.com/threadsafe-systems/pi-sdlc/issues/82)) ([7475a50](https://github.com/threadsafe-systems/pi-sdlc/commit/7475a50d6f5fa6dc2f0d9e1049cbfeda0aef09f5)), closes [#169](https://github.com/threadsafe-systems/pi-sdlc/issues/169) [#170](https://github.com/threadsafe-systems/pi-sdlc/issues/170) [#171](https://github.com/threadsafe-systems/pi-sdlc/issues/171)
+
 ## [2.6.0](https://github.com/threadsafe-systems/pi-sdlc/compare/v2.5.0...v2.6.0) (2026-07-24)
 
 ### Features
