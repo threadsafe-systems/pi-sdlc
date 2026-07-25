@@ -60,16 +60,16 @@ findings, all verified and incorporated (fix-wave commit this round):
 | R2-2 | medium | fable-5 REOPENED(F3) | TST19 still carried the universal "all new tests are offline in-process `inspectManifest`/Ajv assertions" claim the F3 fix removed elsewhere — contradicting TST4/TST5's sanctioned temp-dir `runManifest` corollary. | **Incorporated** — TST19 reworded to exempt TST4/TST5's bounded temp-dir corollary (§12). |
 | R2-3 | low | glm-5.2 REOPENED(G2) | TST15 still cited base-spec "§2.5/§6"; G2's round-1 fix edited §5 + §7 item 5 but missed TST15. | **Incorporated** — TST15 now cites §2.5 only. |
 
-## Owner escalation (open)
+## Owner escalation (RESOLVED 2026-07-25)
 
-**R2-1 policy question** — the 2026-07-17 ratified "avoid `type(scope)!:`
-shorthand" discipline rested on the repo then using the **angular** preset
-(which ignored `!`); the repo now uses **conventionalcommits** (`.releaserc.json`)
-which DOES honour `!`, and `commit-lint` accepts it. The spec currently requires
-the **PR-body `BREAKING CHANGE:` footer** (valid + unambiguous under either
-reading). Decision needed: keep body-footer-only, or also permit the `type!:`
-title? (A widening is a one-line spec change.) The stale memory should be
-updated once ratified.
+**R2-1 policy question** — the 2026-07-17 "avoid `type(scope)!:` shorthand"
+discipline rested on the repo then using the **angular** preset (which ignored
+`!`); the repo now uses **conventionalcommits** (`.releaserc.json`) which honours
+`!`, and `commit-lint` accepts it. **Owner decision (Neil, 2026-07-25): permit
+the `!` shorthand.** §10/TST17 widened to accept EITHER a `type(scope)!:`/`type!:`
+PR title OR a `BREAKING CHANGE:` body footer. The superseded 2026-07-17
+avoid-`!` discipline no longer applies; ADR 0027:27–28's stale angular-preset
+rationale line should be refreshed in a follow-up.
 
 ## Outcome
 

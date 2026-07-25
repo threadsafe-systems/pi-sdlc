@@ -281,9 +281,10 @@ which accepts the `!` marker) — two placements are valid breaking signals: a
 `type(scope)!:`/`type!:` marker in the **PR title**, or a
 `BREAKING CHANGE:`/`BREAKING-CHANGE:` footer line in the **PR body**. (A literal
 `BREAKING CHANGE:` *text string in the title* is NOT a signal — the title is
-parsed as a header, where only the `!` marker means breaking.) This change
-standardises on the **PR-body `BREAKING CHANGE:` footer**. This is a
-PR-open-time requirement, not merely a commit-authoring one.
+parsed as a header, where only the `!` marker means breaking.) **Either placement
+satisfies this change's release-signal requirement** (owner-ratified
+2026-07-25). This is a PR-open-time requirement, not merely a commit-authoring
+one.
 
 ## 11. `schemaVersion`, track, and the clean break
 
@@ -497,12 +498,12 @@ summary or link.
 authority as a new/relocated gate.
 
 ### TST17 — release signal on the PR (DoD 11)
-The landing PR's **body** carries a `BREAKING CHANGE:` (or `BREAKING-CHANGE:`)
-footer line.
-**Falsify:** the breaking signal is absent, or appears only on an inner commit,
-or appears only as a literal `BREAKING CHANGE:` *text string in the PR title* (a
-header, not a footer note — not a valid signal under the `conventionalcommits`
-preset).
+The landing PR carries a breaking signal in a form the `conventionalcommits`
+preset honours: either a `type(scope)!:`/`type!:` marker in the **PR title**, or
+a `BREAKING CHANGE:`/`BREAKING-CHANGE:` footer line in the **PR body**.
+**Falsify:** no breaking signal in either honoured form; or the only "signal" is
+a literal `BREAKING CHANGE:` *text string in the PR title* (a header, not a
+footer note) or an inner commit footer discarded at squash.
 
 ### TST18 — `schemaVersion` and ADR amendments (DoD 12)
 Every produced manifest keeps `schemaVersion: 1`; the ADR 0013 shape-vs-rule
