@@ -94,13 +94,18 @@ in the round-cap rule ("churn — restructure instead"). The structural fix is t
 rewrite: the gate record now states only what has happened, with no placeholder
 round and no assertion of an un-run verdict.
 
-## Outcome
+## Round 5 (final confirmation) — sol @ commit `cb111ec`
+
+**P9 RESOLVED** (the consolidated record now contains no placeholder round and no
+un-run verdict) and **NEW DEFECTS: none found** across the whole change.
+
+## Outcome — CONVERGED
 
 Round 1: 7 findings (1 high, 3 medium, 3 low) incorporated. Round 2: P1–P7
 RESOLVED (sol + glm); P8 (medium) incorporated. Round 3: P8-residual + P9
 (medium, both self-inflicted doc churn) incorporated. Round 4: P8-residual
-RESOLVED, no new defects. **No high or medium finding against the code, logic,
-design, manifests, or receipts survives.** The residual P9-class item is a
-self-referential property of this gate record's own prose, addressed structurally
-by removing forward-looking assertions. A final confirmation round is recorded
-below if run.
+RESOLVED, no new code defects. Round 5: P9 RESOLVED, no new defects. **No high or
+medium finding survives.** The substantive change converged at round 2 (P1–P7);
+rounds 3–5 cleared doc-consistency churn from the fix waves. The panel gate
+condition is met; the only remaining seams are the owner's merge authority and
+the mandatory post-merge follow-up PR re-adding the two `FROZEN` entries.
