@@ -49,8 +49,26 @@ cwd-sensitive spawn test (exit 2). Confirmed a flake (standalone `npm test` =
 435/435; the file passes 3/3 alone); T1 re-validated serially → PASS. Lesson:
 full-corpus task validators must not be dispatched in parallel.
 
+## Round 2 (delta verification) — opus-5 + sol + glm-5.2 @ commit `498e1c0`
+
+Harvest: `.pi/sdlc/runs/pv1-task-scoped-tests/panels/pr_review-round2-2026-07-25`.
+**sol and glm-5.2 both ruled all seven P1–P7 findings RESOLVED** against the
+committed blobs. glm-5.2: NEW DEFECTS none. opus-5 ran the full corpus (435
+green) + tracker/lifecycle verification but stalled before emitting structured
+verdicts (large context); interrupted. sol found **one NEW medium**:
+
+| id | sev | source | finding | disposition |
+|---|---|---|---|---|
+| P8 | medium | sol (NEW) | The build-plan Assumptions appendix still described the pre-P1 design ("T1's regression check is the contract suite tagged `[full,task]`, not `npm test`"), contradicting the P1-corrected t1.json (npm test = `[full]`, contract suite = `[task]`). PV1 declares the Build plan canonical, so the manifest disagreed with its approved source. | **Incorporated** — the Assumptions note now states T1's `[full]` net is `npm test` and the contract suite is the `[task]` check, flagged as the P1 correction; the T1 Checks section already said `npm test`. Doc reconciled with the manifest. |
+
+## Round 3 (narrow delta) — sol @ commit `<P8 fix>`
+
+Re-verify P8 resolved + fresh new-defect sweep (trim-the-tail: a single medium
+from one reviewer). Result recorded below on completion.
+
 ## Outcome
 
-No high or medium finding survives. Per phase-pr-review, a **delta verification
-pass** (re-dispatch the roster in verify mode against the fixes) confirms the
-high/medium fixes before the gate closes, or the owner accepts-without-redispatch.
+Round 1: 7 findings (1 high, 3 medium, 3 low) all incorporated. Round 2: all 7
+confirmed RESOLVED (sol + glm), 1 new medium (P8) incorporated. Round 3 confirms
+P8. No high or medium finding survives once round 3 is clean — then the gate
+closes and the PR opens.
