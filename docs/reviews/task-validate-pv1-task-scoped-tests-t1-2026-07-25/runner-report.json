@@ -1,0 +1,194 @@
+{
+  "schemaVersion": 1,
+  "taskId": "t1",
+  "manifest": "/home/neil/code/threadsafe/pi-sdlc.worktrees/feat-pv1-task-scoped-tests/docs/validation/pv1-task-scoped-tests/t1.json",
+  "repoRoot": "/home/neil/code/threadsafe/pi-sdlc.worktrees/feat-pv1-task-scoped-tests",
+  "verdict": "PASS",
+  "exitCode": 0,
+  "errors": [],
+  "manifestErrors": [],
+  "commands": [
+    {
+      "id": "tests.contract",
+      "argv": [
+        "node",
+        "--test",
+        "test/validator-contract.test.js"
+      ],
+      "evidence": [
+        "scope shape, Rule A, Rule B, degradations, golden ordering (TST1-TST12)"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 4778,
+      "stdoutTail": "✔ PV1: a valid JavaScript manifest runs only declared checks and passes (170.104193ms)\n✔ PV2: only declared argv run; an undeclared tool command never executes (308.643255ms)\n✔ PV3: schema and inspectManifest reject the mutation matrix before any command runs (146.900856ms)\n✔ PV4: command outcomes are complete and deterministic; runner continues after failures (121.04659ms)\n✔ PV4: a timeout is reported as FAIL with timedOut (1087.832725ms)\n✔ PV5: category applicability is exact; injected n/a shapes are rejected (183.092838ms)\n✔ PV6: scenario mapping gates the verdict (158.759904ms)\n✔ PV7: standards and banned patterns are commands, not judgement (153.82662ms)\n✔ PV8: evidence is bounded and secrets are redacted (167.931405ms)\n✔ PV8 unit: boundStream and redaction name-matching are precise (350.691102ms)\n✔ PV9: JSON/text/exit agree and JSON mode is order-independent (1001.983794ms)\n✔ PV9: --report writes the exact JSON bytes atomically (251.321132ms)\n✔ PV9: --report outside the repo root is refused and clobbers nothing (252.909834ms)\n✔ PV10: generic validator law and generated agent are portable (0.851605ms)\n✔ PV11: receipt hash verification detects mutation of any stored file (3.698465ms)\n✔ PV11: a FAIL runner-report cannot ride under runnerVerdict PASS (0.99756ms)\n✔ parseArgs: recognises JSON anywhere and rejects bad flags (0.762941ms)\n✔ PV13: renderText is a faithful projection of the report (151.978029ms)\n✔ TST2: separate full and task checks satisfy Rule A and Rule B (0.622632ms)\n✔ TST1: a scope:[full] check satisfies Rule A (scenarios n/a) (0.300345ms)\n✔ TST3: a single scope:[full,task] check satisfies both rules with no duplicate (0.231907ms)\n✔ TST4: Rule A negative -- tests required with no full-tagged check (1.619431ms)\n✔ TST5: Rule B negative -- scenario cites a tests check but none task-tagged (1.389002ms)\n✔ TST6: tests:n/a is exempt from Rule A and Rule B (0.384473ms)\n✔ TST7: zero owned scenarios -- exempt from Rule B, still subject to Rule A (0.488371ms)\n✔ TST8: a static-only scenario does not trigger Rule B (0.255817ms)\n✔ TST9: an untagged check named tests.full does NOT satisfy Rule A (0.260849ms)\n✔ TST10: scope shape errors are reported at /checks/<i>/scope (0.622439ms)\n✔ TST11: golden multi-error ordering (scope-shape + Rule A + dangling check) (0.306521ms)\n✔ TST12: schema accepts optional scope and rejects malformed shapes (41.907911ms)\nℹ tests 30\nℹ suites 0\nℹ pass 30\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 4710.769006\n",
+      "stderrTail": ""
+    },
+    {
+      "id": "tests.frozen",
+      "argv": [
+        "node",
+        "--test",
+        "test/frozen-surfaces.test.js"
+      ],
+      "evidence": [
+        "FROZEN array reopened to exactly two entries, ASD19 green (TST14)"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 143,
+      "stdoutTail": "✔ ASD19: frozen surfaces are byte-identical to the branch base (12.419292ms)\n✔ ASD19: FS8/FS9 check ids remain present in their frozen scripts (4.71849ms)\nℹ tests 2\nℹ suites 0\nℹ pass 2\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 95.761832\n",
+      "stderrTail": ""
+    },
+    {
+      "id": "static.lint",
+      "argv": [
+        "npx",
+        "biome",
+        "check",
+        "skills/sdlc/scripts/validate-task.mjs",
+        "skills/sdlc/schema/task-validation-manifest.schema.json",
+        "test/frozen-surfaces.test.js",
+        "test/validator-contract.test.js"
+      ],
+      "evidence": [
+        "touched surfaces are biome-clean"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 316,
+      "stdoutTail": "Checked 4 files in 43ms. No fixes applied.\n",
+      "stderrTail": ""
+    }
+  ],
+  "categories": [
+    {
+      "category": "tests",
+      "status": "PASS",
+      "checkIds": [
+        "tests.contract",
+        "tests.frozen"
+      ]
+    },
+    {
+      "category": "static",
+      "status": "PASS",
+      "checkIds": [
+        "static.lint"
+      ]
+    },
+    {
+      "category": "scenarios",
+      "status": "PASS"
+    },
+    {
+      "category": "standards",
+      "status": "N/A",
+      "reason": "no extra governing standard beyond the declared lint check applies"
+    },
+    {
+      "category": "bannedPatterns",
+      "status": "N/A",
+      "reason": "no task-diff pattern prohibition beyond lint applies to this task"
+    }
+  ],
+  "scenarios": [
+    {
+      "scenarioId": "TST1",
+      "status": "PASS",
+      "checkIds": [
+        "tests.contract"
+      ]
+    },
+    {
+      "scenarioId": "TST10",
+      "status": "PASS",
+      "checkIds": [
+        "tests.contract"
+      ]
+    },
+    {
+      "scenarioId": "TST11",
+      "status": "PASS",
+      "checkIds": [
+        "tests.contract"
+      ]
+    },
+    {
+      "scenarioId": "TST12",
+      "status": "PASS",
+      "checkIds": [
+        "tests.contract"
+      ]
+    },
+    {
+      "scenarioId": "TST14",
+      "status": "PASS",
+      "checkIds": [
+        "tests.frozen"
+      ]
+    },
+    {
+      "scenarioId": "TST2",
+      "status": "PASS",
+      "checkIds": [
+        "tests.contract"
+      ]
+    },
+    {
+      "scenarioId": "TST3",
+      "status": "PASS",
+      "checkIds": [
+        "tests.contract"
+      ]
+    },
+    {
+      "scenarioId": "TST4",
+      "status": "PASS",
+      "checkIds": [
+        "tests.contract"
+      ]
+    },
+    {
+      "scenarioId": "TST5",
+      "status": "PASS",
+      "checkIds": [
+        "tests.contract"
+      ]
+    },
+    {
+      "scenarioId": "TST6",
+      "status": "PASS",
+      "checkIds": [
+        "tests.contract"
+      ]
+    },
+    {
+      "scenarioId": "TST7",
+      "status": "PASS",
+      "checkIds": [
+        "tests.contract"
+      ]
+    },
+    {
+      "scenarioId": "TST8",
+      "status": "PASS",
+      "checkIds": [
+        "tests.contract"
+      ]
+    },
+    {
+      "scenarioId": "TST9",
+      "status": "PASS",
+      "checkIds": [
+        "tests.contract"
+      ]
+    }
+  ]
+}

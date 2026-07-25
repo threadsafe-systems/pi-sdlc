@@ -115,6 +115,7 @@ export function inspectManifest(raw, { repoRoot } = {}) {
 	// checks
 	const checkIds = new Set();
 	const declared = [];
+	const scopeById = new Map();
 	if (!Array.isArray(raw.checks) || raw.checks.length === 0) {
 		add("/checks", "must be a non-empty array");
 	} else {
@@ -124,7 +125,7 @@ export function inspectManifest(raw, { repoRoot } = {}) {
 				add(at, "must be an object");
 				return;
 			}
-			for (const k of Object.keys(c)) if (!["id", "argv", "timeoutMs", "evidence"].includes(k)) add(`${at}/${k}`, `unknown property '${k}'`);
+			for (const k of Object.keys(c)) if (!["id", "argv", "timeoutMs", "evidence", "scope"].includes(k)) add(`${at}/${k}`, `unknown property '${k}'`);
 			if (typeof c.id !== "string" || !ID_RE.test(c.id) || c.id.length > 80) add(`${at}/id`, "invalid check id");
 			else {
 				if (checkIds.has(c.id)) add(`${at}/id`, `duplicate check id '${c.id}'`);
@@ -145,6 +146,26 @@ export function inspectManifest(raw, { repoRoot } = {}) {
 					else if (seen.has(e)) add(`${at}/evidence/${j}`, "duplicate evidence label");
 					else seen.add(e);
 				});
+			}
+			// scope (optional): non-empty array of unique "full"/"task". A
+			// shape-invalid scope counts as absent for Rules A/B (Spec §4).
+			if (c.scope !== undefined) {
+				const sp = `${at}/scope`;
+				if (!Array.isArray(c.scope) || c.scope.length === 0) add(sp, "scope must be a non-empty array of 'full'/'task'");
+				else {
+					const seenScope = new Set();
+					let scopeOk = true;
+					for (const s of c.scope) {
+						if (s !== "full" && s !== "task") {
+							add(sp, "scope entries must be 'full' or 'task'");
+							scopeOk = false;
+						} else if (seenScope.has(s)) {
+							add(sp, `duplicate scope entry '${s}'`);
+							scopeOk = false;
+						} else seenScope.add(s);
+					}
+					if (scopeOk && typeof c.id === "string") scopeById.set(c.id, c.scope);
+				}
 			}
 		});
 	}
@@ -167,6 +188,8 @@ export function inspectManifest(raw, { repoRoot } = {}) {
 
 	// categories
 	const referencedByRequired = new Set();
+	let testsRequired = false;
+	const testsCheckIds = [];
 	if (!isPlainObject(raw.categories)) {
 		add("/categories", "must be an object with all five categories");
 	} else {
@@ -190,12 +213,23 @@ export function inspectManifest(raw, { repoRoot } = {}) {
 						else referencedByRequired.add(id);
 					});
 				}
+				if (name === "tests") {
+					testsRequired = true;
+					if (Array.isArray(cat.checkIds)) for (const id of cat.checkIds) if (checkIds.has(id)) testsCheckIds.push(id);
+				}
 			} else if (cat.applicability === "n/a") {
 				for (const k of Object.keys(cat)) if (!["applicability", "reason"].includes(k)) add(`${at}/${k}`, `unknown property '${k}'`);
 				if (typeof cat.reason !== "string" || !LABEL_RE.test(cat.reason) || cat.reason.length < 12) add(`${at}/reason`, "n/a category needs a single-line reason of at least 12 characters");
 			} else {
 				add(`${at}/applicability`, "must be 'required' or 'n/a'");
 			}
+		}
+
+		// Rule A: a required tests category must reference at least one check
+		// tagged scope "full" (the regression net, Spec §2). Stacks with any
+		// checkId errors; a shape-invalid scope counts as absent (Spec §4).
+		if (testsRequired && !testsCheckIds.some((id) => (scopeById.get(id) || []).includes("full"))) {
+			add("/categories/tests", "requires at least one referenced check tagged scope 'full'");
 		}
 
 		// scenarios category
@@ -225,6 +259,15 @@ export function inspectManifest(raw, { repoRoot } = {}) {
 						if (!checkIds.has(id)) add(`${at}/evidence/${k}`, `maps undeclared check '${id}'`);
 						else if (!referencedByRequired.has(id)) add(`${at}/evidence/${k}`, `maps check '${id}' not referenced by any required command category`);
 					}
+				}
+				// Rule B: an owned scenario whose evidence cites any tests-category
+				// check must cite at least one tagged scope "task" (Spec §3). Vacuous
+				// when no tests-category id is cited (Spec §4 degradation).
+				const testsCheckIdSet = new Set(testsCheckIds);
+				for (const [k, v] of Object.entries(sc.evidence)) {
+					if (!Array.isArray(v)) continue;
+					const cited = v.filter((id) => testsCheckIdSet.has(id));
+					if (cited.length > 0 && !cited.some((id) => (scopeById.get(id) || []).includes("task"))) add(`${at}/evidence/${k}`, "cites a tests check but none tagged scope 'task'");
 				}
 			}
 		} else if (sc.applicability === "n/a") {
