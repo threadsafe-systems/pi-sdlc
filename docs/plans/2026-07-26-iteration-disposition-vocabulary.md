@@ -5,6 +5,10 @@ Slice **S5** of the ratified design-phase change slate
 Brainstorm was a live dialogue on 2026-07-26; its ten ratified decisions are
 restated below as this Plan's provenance. Track: **irreversible**.
 
+**Rev 2** — incorporates all 12 findings of plan-panel round 1
+(`docs/reviews/plan-review-iteration-disposition-vocabulary-2026-07-26/consolidated.md`,
+ids `PLAN-R1-01`‥`-12`; 1 high, 7 medium, 4 low; 0 dismissed).
+
 ## Objective
 
 Give the lifecycle **one shared vocabulary for what happens to a finding, and to
@@ -59,13 +63,14 @@ rather than two parallel inventions.
 | D1 | **Shape A′**: glossary of *terms* in `system-reference.md`; mechanics stay in the phase references that already own them and cite the glossary. Rejected: moving panel mechanics out of `phase-pr-review.md` (would force relocating the working escalation/ratified-dismissal law at `phase-pr-review.md:196-215`). | brainstorm Q1/Q3 |
 | D2 | **Prompt option 1**: static tagging/delta law inline in the three adversary prompts; the per-round prior-findings **data** is pasted at dispatch. Rejected: dispatch-time append only (no artifact, orchestrator-discipline — the exact failure mode #174 documents). | brainstorm Q2/Q9 |
 | D3 | Amendment classes are **phase-neutral** — Plan, Spec, and Build plan — not Spec-only as R3-G3 proposed. | brainstorm Q4 |
-| D4 | Round cap fires **after round 4**, not #174 rec 1's round 3: if the 4th panel returns any high/medium, no round 5 is dispatched; the orchestrator presents a churn diagnosis and **the human** adjudicates iterate-vs-move-on. Deliberate amendment of rec 1, keeping `.pi/sdlc/workflow.md`'s proven semantics. | brainstorm Q5 |
+| D4 | Round cap fires **after round 4**, not round 3: if the 4th panel returns any high/medium, no round 5 is dispatched; the orchestrator presents a churn diagnosis and **the human** adjudicates. Recorded as a deliberate amendment of **both** #174 rec 1 **and R5's ratified S5 slate row** (and R3-G7's candidate), which both say round 3 — keeping `.pi/sdlc/workflow.md`'s proven round-4 semantics. The diagnosis carries **four bounded options**: (a) genuine rev-1 defects → keep going; (b) churn caused by our own fix waves → restructure rather than re-dispatch; (c) design flaw → backward transition; (d) ratified dismissal of the survivors. At `pr_review` specifically, "move on" is reachable **only** through (d): the cap never permits merging past a surviving high or medium, because a local rule may add gates and never weaken one. | brainstorm Q5; `PLAN-R1-03`, `PLAN-R1-11` |
 | D5 | **Prose-only plus a non-blocking artifact-inventory self-audit** at the churn/gate seam. #174 rec 3's mechanical check stays out (it would reopen frozen FS9 and impose a new failure mode on every consumer). | brainstorm Q6 |
 | D6 | Promotion set from `workflow.md`: delta-dispatch block · dismissal-posture / 100%-incorporation smell · round cap · trim-the-tail → promoted **and deleted locally**. PROPORTIONALITY, spec-authoring rules, identity discipline, artifact discipline, writing-comments → stay local. | brainstorm Q7 |
-| D7 | **Trim-the-tail is in**, recorded as a deliberate extension of R5's S5 row (it is not in R5's row nor in #174's recs; it is the same mechanism as the round cap and splitting them would reopen `phase-pr-review.md` §5 for one paragraph in a later slice). | brainstorm Q7 |
-| D8 | Carry destinations: next phase only (`CARRY-TO-SPEC` / `-BUILD` / `-IMPLEMENT`) **plus terminal `CARRY-TO-BACKLOG`** (a filed issue id) so PR-phase findings have a disposition other than dismissal. **No orphan carries**: every carry names its landing artifact or issue, and a receiving gate is not passable while a carry addressed to it is unlanded. Rejected: multi-hop carries (how spec-grade detail escapes review entirely). | brainstorm Q8 |
+| D7 | **Trim-the-tail is in**, recorded as a deliberate extension of R5's S5 row (it is not in R5's row nor in #174's recs; it is the same mechanism as the round cap and splitting them would reopen `phase-pr-review.md` §5 for one paragraph in a later slice). The configured **panel floor governs full review rounds only**; a trim-the-tail delta confirmation is an explicitly exempt **sub-floor dispatch**, recorded as such in that round's `consolidated.md`, so it is not a shortfall under `onShortfall: fail`. | brainstorm Q7; `PLAN-R1-04` |
+| D8 | Carry destinations: **the next phase in the effective configured sequence**, single-hop only — `CARRY-TO-SPEC` / `-BUILD` / `-IMPLEMENT` are the maximal-shape instances, and each phase reference states its own destination behind an *under your configuration* callout (under `shape.separateSpec: false` a merged design gate carries to Build, not to a Spec that does not exist; on the reversible track Spec is not a legal destination) — **plus terminal `CARRY-TO-BACKLOG`** (a filed issue id) so PR-phase findings have a disposition other than dismissal. **No orphan carries**: every carry names its landing artifact or issue, and a carry addressed to a phase blocks that phase's **gate where it has one, or its completion evidence where it does not** (Build has no gate of its own — `phase-tasks.md:81-83`). Rejected: multi-hop carries (how spec-grade detail escapes review entirely). | brainstorm Q8; `PLAN-R1-01`, `PLAN-R1-02` |
 | D9 | Prompt option 1 stands despite reopening three **frozen** surfaces; the branch removes them from `FROZEN` and a mandatory post-merge re-freeze PR follows (the #190 → #191 pattern). | brainstorm Q9 |
 | D10 | Brainstorm gate approved; enter Plan under `review.design: panel` on the irreversible track. | brainstorm Q10 |
+| D11 | **Finding identity**: the consolidation step mints ids, format `<panelPhase>-R<round>-<nn>`, unique within the run. The id is the within-run handle `REOPENED(<id>)` resolves against; the existing binds-forward dismissal bar continues to key on finding **class**, not id (`phase-pr-review.md:209-217`), so cross-session lookups are unaffected. | `PLAN-R1-06` |
 
 ### Relationship to adjacent work
 
@@ -86,16 +91,17 @@ rather than two parallel inventions.
 
 | # | Surface | Change |
 |---|---|---|
-| 1 | `skills/sdlc/references/system-reference.md` | New section **"Iteration & disposition"**: finding classes `NEW` / `REOPENED(<id>)` / `CARRY-TO-<dest>`; reopen evidence bar; disposition record shape (id, class, severity, disposition, one-line reason, landing site where applicable); carry destinations + no-orphan rule; ratified-decision collision; the three artifact-amendment classes (a/b/c). Terms only — no when/who mechanics. |
-| 2 | `skills/sdlc/references/phase-pr-review.md` §5 | Step 2 gains the **delta-dispatch obligation** (re-rounds carry prior findings + dispositions and scope the reviewer to the delta commit range). Steps 3–4 gain **tagging** (every consolidated row is `NEW` or `REOPENED(<id>)`), the **ratified-collision escalation**, the **dismissal-posture rule** (two consecutive waves at 100% incorporation is a reportable smell), and **trim-the-tail**. Step 5 gains the **round-4 cap**, the **churn diagnosis** (human-adjudicated, bounded options), and the **artifact-inventory self-audit**. |
-| 3 | `skills/sdlc/references/phase-plan.md` | §6 gains the amendment-class citation with Plan's class-(a) destination; §5 gains `CARRY-TO-SPEC` as a legal Plan-panel disposition. |
-| 4 | `skills/sdlc/references/phase-spec.md` | §6 gains **"Amending an approved Spec"** (classes a/b/c, citing the glossary); §5 gains `CARRY-TO-BUILD`. |
-| 5 | `skills/sdlc/references/phase-tasks.md` | §4 gains the **spec-gap log** obligation; §6 cites the amendment classes for the Build plan itself. |
+| 1 | `skills/sdlc/references/system-reference.md` | New section **"Iteration & disposition"**: finding classes `NEW` / `REOPENED(<id>)` / `CARRY-TO-<dest>`; reopen evidence bar; disposition record shape (id, class, severity, disposition, one-line reason, landing site where applicable); **id minting rule per D11**; carry destinations resolved against the effective configured sequence + no-orphan rule (gate *or* completion evidence); ratified-decision collision; the three artifact-amendment classes (a/b/c). Terms only — no when/who mechanics. |
+| 2 | `skills/sdlc/references/phase-pr-review.md` §5 | Step 2 gains the **delta-dispatch obligation** (re-rounds carry prior findings + dispositions and scope the reviewer to the delta commit range). Steps 3–4 gain **id minting** (D11), **tagging** (every consolidated row is `NEW` or `REOPENED(<id>)`), the **ratified-collision escalation**, the **dismissal-posture rule** (two consecutive waves at 100% incorporation is a reportable smell), and **trim-the-tail** with its explicit sub-floor exemption. Step 5 gains the **round-4 cap**, the **churn diagnosis** (human-adjudicated, four bounded options per D4, with the `pr_review` constraint that "move on" is reachable only by ratified dismissal), and the **artifact-inventory self-audit**. |
+| 3 | `skills/sdlc/references/phase-plan.md` | **§5** gains the amendment-class citation (amendment decides whether the gate re-runs) and `CARRY-TO-SPEC` as a legal Plan-panel disposition, behind an *under your configuration* callout for merged/reversible shapes; **§6** keeps only class (a)'s backward-transition pointer. |
+| 4 | `skills/sdlc/references/phase-spec.md` | **§5** gains **"Amending an approved Spec"** (classes a/b/c, citing the glossary), `CARRY-TO-BUILD`, and the **inbound** check: the Spec gate is not passable while a `CARRY-TO-SPEC` addressed to it is unlanded; **§6** keeps class (a)'s pointer. |
+| 5 | `skills/sdlc/references/phase-tasks.md` | §4 gains the **spec-gap log** obligation; §5 cites the amendment classes for the Build plan itself; **§8 (completion evidence)** carries the inbound-carry check, since Build has no gate (`phase-tasks.md:81-83`) — a build plan is not complete while a `CARRY-TO-BUILD` is unlanded in its spec-gap log. |
+| 5b | `skills/sdlc/references/phase-implement.md` | Inbound `CARRY-TO-IMPLEMENT` lands in the receiving task's checks or the Assumptions appendix; the task is not closeable while its carry is unlanded. (Added at review: the plan originally omitted the receiving phase entirely.) |
 | 6 | `skills/sdlc/templates/sdlc-tasks.md` | Spec-gap log section: one row per upstream gap — description, severity (blocker/minor), disposition (backward-transition / assumption-recorded / `CARRY-TO-IMPLEMENT`), landing site. |
 | 7 | `skills/sdlc/prompts/adversary-{plan,spec,review}.prompt.md` | Static **delta-round law**: rounds after the first are delta reviews; tag every finding `NEW` or `REOPENED(<prior-id>)`; a reopen requires new evidence absent when the finding was dispositioned; confirming a prior fix is one line, not re-litigation. Phase-appropriate carry destination named in each. |
 | 8 | `test/frozen-surfaces.test.js` | Remove the three reopened prompts from `FROZEN` (with the header comment updated to name this slice and its re-freeze follow-up), keeping `validator-task.prompt.md` frozen. |
-| 9 | `test/` (new + existing) | Scenarios asserting the glossary section exists with its terms, that each consuming reference cites rather than restates it, that the prompts carry the delta law, and that `workflow.md`'s promoted rules are gone. Exact scenario ids are the Spec's to fix. |
-| 10 | `.pi/sdlc/workflow.md` | Delete the four promoted rules (D6); keep the rest verbatim. |
+| 9 | `test/` (new + existing) | Scenarios asserting the glossary section exists with its terms, that each consuming reference **cites** it by name, and that the prompts carry the delta law. **Budget:** offline greps in the existing corpus style (`test/phase-references.test.js:4` — "Offline grep; no model calls"), **no new CI job or step**, whole-suite runtime delta target **< 2s**. **No permanent test asserts consumer `.pi/sdlc/workflow.md` content** — that surface is `consumer-integration` and its process text is locally owned; the promotion is proved once, in this slice's diff (DoD 6). Exact scenario ids are the Spec's to fix. |
+| 10 | `.pi/sdlc/workflow.md` | Delete the four promoted rules (D6); keep the other **six** verbatim (price-every-scenario · keep-spec-altitude · PROPORTIONALITY · identity discipline · artifact discipline · writing-comments). |
 | 11 | `.pi/sdlc/CONFIG.md` | Regenerate (currently stale vs `sdlc.config.json`) as its own `chore` commit on this branch. |
 
 ### Out
@@ -124,6 +130,11 @@ rather than two parallel inventions.
 4. `phase-pr-review.md` §5 can absorb ~5 additions without exceeding a
    reasonable reference size; if it cannot, the Spec may propose a §5
    sub-structure, which is a presentation change, not a scope change.
+5. Placing amendment law in §5 rather than §6 is the least-bad fit: the nine
+   headings are frozen by `test/phase-references.test.js:20-30`, §6 means
+   *backward* transition, and amendment's actual question is whether the gate
+   re-runs — a §5 question. If S7's comprehension work later wants a tenth
+   heading, that is S7's to propose, not this slice's.
 
 ## Definition of done
 
@@ -134,15 +145,20 @@ next full run's telemetry (rounds-to-converge, dismissal rate ≠ 0%, presence o
 per-round consolidated artifacts) is the first external evidence. No metric is
 claimed as met at merge.
 
-**Delivery DoD** — all falsifiable at merge:
+**Delivery DoD** — falsifiable at merge, except the one item explicitly marked
+review-judged (2a), which is called out rather than smuggled into the list:
 
 1. `system-reference.md` carries one "Iteration & disposition" section defining
    all six term groups (classes, reopen bar, record shape, carry destinations +
    no-orphan, ratified collision, amendment classes) and no when/who mechanics.
-2. Each of `phase-plan.md`, `phase-spec.md`, `phase-tasks.md`,
-   `phase-pr-review.md` cites that section by name and does not restate a
-   definition from it (a test asserts the citation; duplication is a review
-   judgement recorded in the Spec).
+2. **(mechanical)** Each of `phase-plan.md`, `phase-spec.md`, `phase-tasks.md`,
+   `phase-implement.md`, `phase-pr-review.md` cites that section **by name** —
+   asserted by test.
+   - **2a (review-judged, explicitly not mechanical):** none of those references
+     restates a glossary *definition*. The boundary: the six term groups'
+     defining sentences belong to the glossary; when/who/what-happens-next is
+     mechanics and belongs to the phase. Adjudicated at spec and PR review and
+     recorded there, not claimed as a merge-time check.
 3. `phase-pr-review.md` §5 states: the delta-dispatch obligation, per-row
    tagging, ratified-collision escalation, the dismissal-posture rule,
    trim-the-tail, the round-4 cap with human-adjudicated churn diagnosis, and
@@ -151,16 +167,23 @@ claimed as met at merge.
    phase's legal carry destinations; `validator-task.prompt.md` is unchanged.
 5. `templates/sdlc-tasks.md` carries the spec-gap log with all four columns.
 6. `.pi/sdlc/workflow.md` no longer contains the four promoted rules and still
-   contains the five retained ones, verbatim.
+   contains the **six** retained ones, verbatim — verified against this slice's
+   diff at review, not by a standing package test.
 7. `test/frozen-surfaces.test.js` no longer freezes the three reopened prompts,
    still freezes everything else, and its header names the re-freeze follow-up.
 8. The full test corpus passes and `biome` is clean on touched files.
 9. `.pi/sdlc/CONFIG.md` reports `current`.
 10. The nine-heading phase-reference contract (`test/phase-references.test.js`)
     still passes for all six references.
-11. This slice's own plan and spec panels are run **under the new vocabulary**
-    where it is already written — the dogfood dividend is observed and recorded
-    in the consolidated artifacts, not merely asserted.
+11. Every `consolidated.md` this slice commits (plan, spec, and PR panels) tags
+    **every** finding row `NEW` or `REOPENED(<id>)` with a run-scoped id per
+    D11, records a disposition and one-line reason per row, and carries the
+    round's artifact-inventory self-audit table. Falsifiable by reading the
+    committed artifacts; replaces the unfalsifiable "dividend observed" item
+    that round 1 struck out (`PLAN-R1-05`).
+12. Each inbound-carry obligation (items 4, 5, 5b) names the checkpoint it
+    blocks — gate where one exists, completion evidence or task close where
+    none does — and no destination in the glossary lacks one.
 
 ## Context for the next agent
 
@@ -176,6 +199,11 @@ claimed as met at merge.
   `panelPrecision` and #160's judge-training corpus computable without prose
   parsing). Deliberately not decided here — it is a schema question and would
   drag #160's event vocabulary in. Revisit when the checker slice is evidenced.
+- **Parked (pre-existing, found during round 1 verification)**:
+  `.github/workflows/ci.yml` declares **no `timeout-minutes` on any job or
+  step**, so the whole suite is unbounded. Not caused by and not fixed in this
+  slice — but it is the reason `PLAN-R1-08`'s budget is stated in the plan
+  rather than enforced in CI. Worth its own reversible-track slice.
 - **Parked**: the phantom whitespace-only rewrite of `.pi/sdlc/CONFIG.md`
   observed twice on 2026-07-26 between tool calls, not reproducible from
   `config-doc check`. Regeneration (item 11) is orthogonal to it; if it recurs
