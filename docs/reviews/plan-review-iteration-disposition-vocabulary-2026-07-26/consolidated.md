@@ -103,3 +103,62 @@ full round, a trim-the-tail single-reviewer delta, or to accept and gate.
 
 **Ratified-decision collisions (round 2):** none. No reviewer demanded reopening
 D1–D11; D12 was minted additively.
+
+---
+
+## Round 3 (delta, `bd19184..66d9520`) — 1 high, 3 medium, 1 low · incorporated 5, dismissed 0
+
+**The reopen bar worked as designed.** Two of gemini's three findings came back
+tagged `REOPENED(<prior-id>)` with new evidence that did not exist when the
+ancestor was dispositioned — namely rev3's own text. Neither was barred, and
+neither was a re-litigation: both identify defects *the rev3 fix introduced*.
+This is the first live evidence that the tag carries information rather than
+ceremony.
+
+**Gemini's acceptance-layer mislabel did not recur** after an explicit
+"READ-ONLY, expected to make NO file edits" line was added to the task text —
+recorded as the practical workaround for `PLAN`-phase dispatches.
+
+| id | origin | sev (adjudicated) | reviewer(s) | finding | disposition |
+|---|---|---|---|---|---|
+| PLAN-R3-01 | REOPENED(PLAN-R2-03) | **high** | gemini | D12 split "finding class" into three nouns, but the finding-record shape then omitted `defect class` entirely — so the binds-forward dismissal bar would key on a field nothing records | **incorporated** — `defect class` added to the record shape in scope item 1, with the reason stated (an unrecorded key cannot be looked up). Grade upheld high: it would silently break an existing working rule |
+| PLAN-R3-02 | REOPENED(PLAN-R2-02) + NEW | medium | **both** | The rev3 prompt surface said "carries addressed to **this phase**", which is empty for `adversary-plan` (no `CARRY-TO-PLAN` exists) and scopes `adversary-review` away from `-BUILD`/`-IMPLEMENT`/`-BACKLOG` — exactly the carries whose checkpoints are agent self-attested | **incorporated**, taking fable's broader fix over gemini's narrower one: the surface is now scoped **per prompt** — spec verifies inbound, review verifies *every carry minted anywhere in the run* (incl. backlog issue ids), plan carries none **and says so** |
+| PLAN-R3-03 | NEW | medium | fable-5 | DoD 3 and DoD 4 still enumerated rev2's deliverables, so rev3's own additions (backlog checkpoint, id minting, prompt carry surface) were verified by no DoD item | **incorporated** — and treated as structural: see the single-source rule below |
+| PLAN-R3-04 | NEW | medium | fable-5 (gemini raised the narrower half as low) | Term-group count inconsistent three ways: DoD 1 said "seven", enumerated eight, DoD 2a still said "six" | **incorporated** — resolved by removing the count entirely rather than picking a number (see single-source rule) |
+| PLAN-R3-05 | NEW | low | fable-5 | Assumption 4 still budgeted "~5 additions" to §5 against a scope row now carrying ten plus a §1 clause | **incorporated** — assumption restated at ten + one, with the growth acknowledged rather than hidden |
+
+### Churn diagnosis — the generator, not the instances
+
+**All five round-3 findings were introduced by rev3's own consistency sweep**,
+and every one of them is the same defect: *a hand-copied enumeration that drifted
+from its source*. Round 2 showed the same pattern (4 of 9). Patching the third
+instance would have guaranteed a fourth.
+
+Rev4 therefore removes the generator. The DoD no longer re-lists what a scope row
+defines — a **single-source rule** is stated at the head of the Delivery DoD, and
+items 1, 2a, 3 and 4 now verify *by reference* ("every term group enumerated in
+scope item 1", "every addition enumerated in scope item 2"). The counts that
+caused `PLAN-R3-04` no longer exist to drift. Wave shape: rev2 = patch, rev3 =
+consistency sweep, rev4 = de-duplication.
+
+### Dismissal posture — third consecutive wave at 100%
+
+Reported again, per the rule: 26 findings incorporated across three waves, 0
+dismissed. The owner was informed after wave 2 and elected to run a third full
+round. Assessment unchanged and stated plainly: no finding in any wave was
+reviewer overreach, and rounds 2 and 3 consisted almost entirely of defects the
+orchestrator's own fix waves introduced — which is an indictment of the author,
+not evidence of a compliant adjudicator. The convergence signal is that
+finding *severity* and *count* are both falling (12 → 9 → 5) while the defect
+class has narrowed to one, now structurally removed.
+
+### Artifact-inventory self-audit
+
+| Round | Reviewer outputs | Consolidated | `panel.dispatched` | `panel.consolidated` | Harvest |
+|---|---|---|---|---|---|
+| 1 | `round1-claude-fable-5.md`, `round1-gemini-3.1-pro-preview.md` | this file | emitted | emitted | `plan_review-round1-2026-07-26` |
+| 2 | `round2-claude-fable-5.md`, `round2-gemini-3.1-pro-preview.md` | this file | emitted | emitted | `plan_review-round2-2026-07-26` |
+| 3 | `round3-claude-fable-5.md`, `round3-gemini-3.1-pro-preview.md` | this file | emitted | emitted | `plan_review-round3-2026-07-26` |
+
+**Ratified-decision collisions (round 3):** none. Both reopens carried new
+evidence and neither demanded reopening D1–D12.

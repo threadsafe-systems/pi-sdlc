@@ -6,13 +6,17 @@ Brainstorm was a live dialogue on 2026-07-26; its ten ratified decisions (D1–D
 are restated below as this Plan's provenance, followed by the decisions minted at
 review (D11–D12). Track: **irreversible**.
 
-**Rev 3** — incorporates plan-panel round 1 (12 findings: 1 high, 7 medium, 4
-low) and round 2 (9 findings after cross-model dedup: 1 high, 4 medium, 4 low);
-0 dismissed in either wave. Record:
+**Rev 4** — incorporates plan-panel rounds 1 (12 findings), 2 (9) and 3 (5 after
+cross-model dedup: 1 high, 3 medium, 1 low); 0 dismissed in any wave. Record:
 `docs/reviews/plan-review-iteration-disposition-vocabulary-2026-07-26/consolidated.md`.
-Round 2 was a **restructure wave, not a patch wave**: four of its nine findings
-were defects rev2's own edits introduced (incomplete propagation), so rev3 is a
-whole-document consistency sweep rather than another set of local patches.
+
+The wave trend is 12 → 9 → 5, but the diagnosis matters more than the count:
+**all five round-3 findings were defects rev3's own consistency sweep
+introduced**, every one of them a hand-copied enumeration that drifted from its
+source. Rev4 therefore fixes the *generator* rather than the third instance —
+the DoD no longer re-lists what a scope row already defines (see the
+single-source rule under Delivery DoD). Rev2 was a patch wave, rev3 a
+consistency sweep, rev4 a de-duplication.
 
 ## Objective
 
@@ -102,14 +106,14 @@ rather than two parallel inventions.
 
 | # | Surface | Change |
 |---|---|---|
-| 1 | `skills/sdlc/references/system-reference.md` | New section **"Iteration & disposition"**: the two **origin tags** (`NEW`, `REOPENED(<id>)`); the **disposition** set (`incorporated`, `dismissed`, `CARRY-TO-<dest>`, `escalated`); **defect class** pointing at its existing meaning, not redefining it (D12); the reopen evidence bar; the finding-record shape (id, origin tag, severity, disposition, one-line reason, landing site where applicable) and the **id format** `<panelPhase>-R<round>-<nn>` with run-scoped uniqueness; carry destinations resolved against the effective configured sequence + the no-orphan rule with its four checkpoint kinds; ratified-decision collision; the three artifact-amendment classes (a/b/c). **Terms only** — who mints an id and when is §5's, not the glossary's. |
+| 1 | `skills/sdlc/references/system-reference.md` | New section **"Iteration & disposition"**: the two **origin tags** (`NEW`, `REOPENED(<id>)`); the **disposition** set (`incorporated`, `dismissed`, `CARRY-TO-<dest>`, `escalated`); **defect class** pointing at its existing meaning, not redefining it (D12); the reopen evidence bar; the finding-record shape (id, origin tag, **defect class**, severity, disposition, one-line reason, landing site where applicable) — `defect class` is a recorded field, not merely a referenced term, because the binds-forward dismissal bar keys on it (`phase-pr-review.md:209-217`) and an unrecorded key cannot be looked up — and the **id format** `<panelPhase>-R<round>-<nn>` with run-scoped uniqueness; carry destinations resolved against the effective configured sequence + the no-orphan rule with its four checkpoint kinds; ratified-decision collision; the three artifact-amendment classes (a/b/c). **Terms only** — who mints an id and when is §5's, not the glossary's. |
 | 2 | `skills/sdlc/references/phase-pr-review.md` §5 (and one bridging clause in §1) | Step 2 gains the **delta-dispatch obligation** (re-rounds carry prior findings + dispositions and scope the reviewer to the delta commit range). Steps 3–4 gain **id minting** (D11's mechanic half), **origin tagging** (every consolidated row is `NEW` or `REOPENED(<id>)`), the **ratified-collision escalation**, the **dismissal-posture rule** (two consecutive waves at 100% incorporation is a reportable smell), **trim-the-tail** with its explicit sub-floor exemption, and the **backlog checkpoint** (no PR gate passage while a `CARRY-TO-BACKLOG` lacks a filed issue id). Step 5 gains the **round-4 cap**, the **churn diagnosis** (human-adjudicated, four bounded options per D4, with the `pr_review` constraint that "move on" is reachable only by ratified dismissal), and the **artifact-inventory self-audit**. §1's "at the committed mode/floors, **never below them**" (`phase-pr-review.md:21`) gains the one clause that reconciles it with the sub-floor exemption: floors govern **full review rounds**, and a delta confirmation is not one. |
 | 3 | `skills/sdlc/references/phase-plan.md` | **§5** gains the amendment-class citation (amendment decides whether the gate re-runs) and `CARRY-TO-SPEC` as a legal Plan-panel disposition, behind an *under your configuration* callout for merged/reversible shapes; **§6** keeps only class (a)'s backward-transition pointer. |
 | 4 | `skills/sdlc/references/phase-spec.md` | **§5** gains **"Amending an approved Spec"** (classes a/b/c, citing the glossary), `CARRY-TO-BUILD`, and the **inbound** check: the Spec gate is not passable while a `CARRY-TO-SPEC` addressed to it is unlanded; **§6** keeps class (a)'s pointer. |
 | 5 | `skills/sdlc/references/phase-tasks.md` | §4 gains the **spec-gap log** obligation; **§8 (completion evidence)** carries *both* the inbound-carry check and the Build-plan amendment citation — not §5, whose entire content is that Build has **no gate** (`phase-tasks.md:81-83`), which would make the "does the gate re-run?" framing vacuous there. For a Build plan the amendment classes decide a different question, stated explicitly: whether the affected tasks' **approved checks / PV1 manifests need renewed approval** (class a), whether the change is a spec-gap log entry carried forward (class b), or whether it is a correction wave (class c). A build plan is not complete while a `CARRY-TO-BUILD` is unlanded in its spec-gap log. |
 | 5b | `skills/sdlc/references/phase-implement.md` | Inbound `CARRY-TO-IMPLEMENT` lands in the receiving task's checks or the Assumptions appendix; the task is not closeable while its carry is unlanded. (Added at review: the plan originally omitted the receiving phase entirely.) |
 | 6 | `skills/sdlc/templates/sdlc-tasks.md` | Spec-gap log section: one row per upstream gap — description, severity (blocker/minor), disposition (backward-transition / assumption-recorded / `CARRY-TO-IMPLEMENT`), landing site. |
-| 7 | `skills/sdlc/prompts/adversary-{plan,spec,review}.prompt.md` | Static **delta-round law**: rounds after the first are delta reviews; tag every finding `NEW` or `REOPENED(<prior-id>)`; a reopen requires new evidence absent when the finding was dispositioned; confirming a prior fix is one line, not re-litigation. Phase-appropriate carry destination named in each. **Plus an inbound-carry attack surface**: verify that every carry addressed to this phase has landed in its named artifact — without it the no-orphan rule is a dead letter at exactly the agent-run gates meant to enforce it, since reviewers cannot read phase references (`PLAN-R2-02`). |
+| 7 | `skills/sdlc/prompts/adversary-{plan,spec,review}.prompt.md` | Static **delta-round law**: rounds after the first are delta reviews; tag every finding `NEW` or `REOPENED(<prior-id>)`; a reopen requires new evidence absent when the finding was dispositioned; confirming a prior fix is one line, not re-litigation. Phase-appropriate carry destination named in each. **Plus a carry-landing attack surface, scoped per prompt** (an "inbound only" rule would be vacuous or misdirected in two of three): `adversary-spec` verifies every inbound `CARRY-TO-SPEC` has landed; `adversary-review` verifies that **every carry minted anywhere in this run** has landed in its named artifact — explicitly including a prior `CARRY-TO-BACKLOG` having its filed issue id recorded in `consolidated.md`, and `CARRY-TO-BUILD` / `-IMPLEMENT`, whose checkpoints are otherwise attested only by the same agent that owed them; `adversary-plan` carries **no** such surface, and says so, because no `CARRY-TO-PLAN` destination exists (D8) — recorded so a later reader sees a decision, not an omission. Without this the no-orphan rule is a dead letter at exactly the agent-run gates meant to enforce it, since reviewers cannot read phase references (`PLAN-R2-02`, `PLAN-R3-02`). |
 | 8 | `test/frozen-surfaces.test.js` | Remove the three reopened prompts from `FROZEN` (with the header comment updated to name this slice and its re-freeze follow-up), keeping `validator-task.prompt.md` frozen. |
 | 9 | `test/` (new + existing) | Scenarios asserting the glossary section exists with its terms, that each consuming reference **cites** it by name, and that the prompts carry the delta law. **Budget:** offline greps in the existing corpus style (`test/phase-references.test.js:4` — "Offline grep; no model calls"), **no new CI job or step**, whole-suite runtime delta target **< 2s**. **No permanent test asserts consumer `.pi/sdlc/workflow.md` content** — that surface is `consumer-integration` and its process text is locally owned; the promotion is proved once, in this slice's diff (DoD 6). Exact scenario ids are the Spec's to fix. |
 | 10 | `.pi/sdlc/workflow.md` | Delete the four promoted rules (D6); keep the other **six** verbatim (price-every-scenario · keep-spec-altitude · PROPORTIONALITY · identity discipline · artifact discipline · writing-comments). |
@@ -138,9 +142,12 @@ rather than two parallel inventions.
 3. Three hand-synced prompt sections will not drift within one slice; the
    existing near-identical "Output format (STRICT)" blocks across the same three
    prompts are the precedent that this is tolerable.
-4. `phase-pr-review.md` §5 can absorb ~5 additions without exceeding a
-   reasonable reference size; if it cannot, the Spec may propose a §5
-   sub-structure, which is a presentation change, not a scope change.
+4. `phase-pr-review.md` §5 can absorb the **ten** additions scope item 2
+   enumerates, plus the one §1 bridging clause, without exceeding a readable
+   reference size; if it cannot, the Spec may propose a §5 sub-structure, which
+   is a presentation change, not a scope change. (Rev1 assumed ~5; the count
+   grew across three review waves and the assumption is restated rather than
+   left stale — `PLAN-R3-05`.)
 5. Placing amendment law in §5 rather than §6 is the least-bad fit **for the
    gated phases**: the nine headings are frozen by
    `test/phase-references.test.js:20-30`, §6 means *backward* transition, and
@@ -160,27 +167,30 @@ per-round consolidated artifacts) is the first external evidence. No metric is
 claimed as met at merge.
 
 **Delivery DoD** — falsifiable at merge, except the one item explicitly marked
-review-judged (2a), which is called out rather than smuggled into the list:
+review-judged (2a), which is called out rather than smuggled into the list.
+
+> **Single-source rule (added rev4).** Where a DoD item verifies a deliverable,
+> it names the **scope row** that defines it rather than re-listing its contents.
+> Every one of round 3's five findings was a desynchronised hand-copied
+> enumeration (`PLAN-R3-01`‥`-05`); re-listing is the defect generator, so the
+> list is defined once, in Scope, and verified by reference here.
 
 1. `system-reference.md` carries one "Iteration & disposition" section defining
-   all seven term groups — origin tags, dispositions, the `defect class`
-   pointer, reopen bar, finding-record shape **including the id format**, carry
-   destinations + no-orphan, ratified collision, amendment classes — and no
-   when/who mechanics (id *minting* is §5's, per D11).
+   **every term group enumerated in scope item 1**, and no when/who mechanics
+   (id *minting* is §5's, per D11).
 2. **(mechanical)** Each of `phase-plan.md`, `phase-spec.md`, `phase-tasks.md`,
    `phase-implement.md`, `phase-pr-review.md` cites that section **by name** —
    asserted by test.
    - **2a (review-judged, explicitly not mechanical):** none of those references
-     restates a glossary *definition*. The boundary: the six term groups'
-     defining sentences belong to the glossary; when/who/what-happens-next is
-     mechanics and belongs to the phase. Adjudicated at spec and PR review and
-     recorded there, not claimed as a merge-time check.
-3. `phase-pr-review.md` §5 states: the delta-dispatch obligation, per-row
-   tagging, ratified-collision escalation, the dismissal-posture rule,
-   trim-the-tail, the round-4 cap with human-adjudicated churn diagnosis, and
-   the artifact-inventory self-audit.
-4. The three adversary prompts each carry the static delta-round law and their
-   phase's legal carry destinations; `validator-task.prompt.md` is unchanged.
+     restates a glossary *definition*. The boundary: the defining sentences of
+     the term groups in scope item 1 belong to the glossary; when/who/
+     what-happens-next is mechanics and belongs to the phase. Adjudicated at
+     spec and PR review and recorded there, not claimed as a merge-time check.
+3. `phase-pr-review.md` §5 states **every addition enumerated in scope item 2**,
+   and §1 carries that row's bridging clause.
+4. The three adversary prompts each carry **every addition enumerated in scope
+   item 7**, including the per-prompt carry-landing surfaces;
+   `validator-task.prompt.md` is unchanged.
 5. `templates/sdlc-tasks.md` carries the spec-gap log with all four columns.
 6. `.pi/sdlc/workflow.md` no longer contains the four promoted rules and still
    contains the **six** retained ones, verbatim — verified against this slice's
@@ -205,7 +215,12 @@ review-judged (2a), which is called out rather than smuggled into the list:
     scope rows, assumptions, and DoD agree on section placement (§5 for gated
     phases, §8 for Build), on the consumer list, and on D12's three nouns. This
     is the item round 2 existed to catch (`PLAN-R2-04`); it is checked by
-    reading the document, not by a test.
+    reading the document, not by a test. **Rev4 additionally removes the
+    generator of that contradiction class** — no DoD item re-lists a scope row's
+    contents (`PLAN-R3-03`).
+14. The finding-record shape includes `defect class`, so the binds-forward
+    dismissal bar has a recorded field to key on rather than a term it can only
+    reference (`PLAN-R3-01`).
 
 ## Context for the next agent
 
