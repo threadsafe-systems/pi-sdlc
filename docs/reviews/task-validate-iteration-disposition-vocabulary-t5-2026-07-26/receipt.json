@@ -2,11 +2,11 @@
   "schemaVersion": 1,
   "taskId": "t5",
   "manifestPath": "docs/validation/iteration-disposition-vocabulary/t5.json",
-  "manifestSha256": "1ed8fcc88c4e0c4b752c19e8b7215328d516b78fad1612ef34e4d0a72790cb0d",
-  "runnerReportSha256": "bd91c523001e830270b38616ea19488f353dda43c6b9ebbd71642e64d8c82c1e",
+  "manifestSha256": "8f7270417d0d6643b4c245e37605d24069460ce6a04e7d26f532999b5c9f93f6",
+  "runnerReportSha256": "e18a8648c20ddf85d44d8e2a0445b4bc236251993cf47aeffcb2d26384098235",
   "generatedAgentSha256": "ec3895ff8b685dc90b6ce2db27aa82b37d1abeea1612749d9b1377c42d69cbdd",
   "model": "anthropic/claude-haiku-4-5",
   "runnerVerdict": "PASS",
   "validatorVerdict": "PASS",
-  "createdAt": "2026-07-26T19:34:52Z"
+  "createdAt": "2026-07-26T19:44:48Z"
 }
