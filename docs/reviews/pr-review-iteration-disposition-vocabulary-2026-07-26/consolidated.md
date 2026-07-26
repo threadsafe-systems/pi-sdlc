@@ -75,7 +75,7 @@ incorporated fixes hold.
 
 ---
 
-## Round 2 (delta confirmation, `04be242..fc34276`) — 1 high, 2 low · incorporated 3, dismissed 0
+## Round 2 (delta confirmation, `04be242..fc34276`) — 1 high, 1 low · incorporated 2, dismissed 0
 
 **Dispatch:** all three panelists re-dispatched with the round-1 table and a
 scoped seven-item confirmation list. The delta instruction asked reviewers to
@@ -100,6 +100,39 @@ verdicts; no re-litigated findings.
 
 ### Convergence
 
-7 round-1 → 2 round-2, both incorporated. The high band fired on a
-procedure/formality finding (uncommitted artifact) rather than a design defect.
-Round 3 (trim-the-tail) confirms no surviving defect.
+7 round-1 → 2 round-2 → 1 round-3, all three incorporated. The high band
+fired only on procedure/formality (uncommitted artifact); the medium band was
+empty across all three rounds. Round 3 (trim-the-tail, sub-floor) confirms: no
+surviving defect.
+
+---
+
+## Round 3 (trim-the-tail confirmation, `fc34276..d453366`) — 1 low · incorporated 1, dismissed 0
+
+**Sub-floor dispatch** under the floor-governs-full-rounds rule: one reviewer
+(`deepseek-v4-pro:high`) confirms the full cumulative state. Recorded as the
+exemption requires.
+
+| id | class | origin | sev | reviewer | finding | disposition |
+|---|---|---|---|---|---|---|
+| PR-R3-01 | count drift | NEW | low | deepseek | Round-2 header declared "1 high, 2 low · incorporated 3" but the table has exactly 2 rows (1 high, 1 low) — the count is off by one. Same defect class as PR-R2-02 | **incorporated** — header corrected to "1 high, 1 low · incorporated 2". Seven occurrences of count drift across this slice's plan, spec, and PR consolidated artifacts |
+
+All nine prior findings and all four inspection scenarios confirmed clear:
+IDV18 (navigability), IDV20 (consumer validity), IDV21 (workflow.md diff),
+IDV22 (no duplicated definition). Zero surviving defects.
+
+### Artifact-inventory self-audit
+
+| Wave | Reviewer outputs | Consolidated | `panel.dispatched` | `panel.consolidated` |
+|---|---|---|---|---|
+| 1 | `output-0.log` (sol), `output-1.log` (luna), `output-2.log` (deepseek) | this file | emitted | emitted |
+| 2 | `output-0.log` (sol), `output-1.log` (luna), `output-2.log` (deepseek) | this file | emitted | emitted |
+| 3 | single-agent dispatch (deepseek) | this file | emitted | emitted |
+
+### Carry audit (no-orphan rule)
+
+The build plan's original `CARRY-TO-IMPLEMENT` for IDV18/IDV20/IDV22 was
+rerouted to `assumption-recorded` at round 1 (PR-R1-03). Confirmed at round 2
+(PR-R2-01) and round 3 (trim-the-tail) that this PR consolidated artifact
+itself records their verdict — the PR-gate checkpoint is satisfied: IDV18, 20,
+21, and 22 are each confirmed above. No undischarged carry remains.
