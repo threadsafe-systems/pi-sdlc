@@ -433,6 +433,60 @@ test("IDV19: the frozen list drops exactly the three reopened prompts and names 
 	assert.match(header, /iteration\s*&\s*disposition|S5/i, "the header does not name the slice that reopened them");
 });
 
+// --- Cross-cutting: citations, budget, amendment markers (T6) ----------------
+
+const CITING_REFERENCES = ["plan", "spec", "tasks", "implement", "pr-review"];
+
+test("IDV4: every phase reference the vocabulary binds cites the glossary by name", () => {
+	for (const slug of CITING_REFERENCES) {
+		const body = reference(slug).replace(/\s+/g, " ");
+		assert.ok(body.includes(`"${GLOSSARY_TITLE}"`), `phase-${slug}.md does not cite the glossary section by name`);
+		assert.match(body, /system-reference\.md/, `phase-${slug}.md names the section but not the reference that owns it`);
+	}
+});
+
+test("IDV17: this slice's scenarios make no model call and no network call", () => {
+	const source = readFileSync(join(here, "iteration-disposition.test.js"), "utf8");
+	for (const specifier of [...source.matchAll(/^import .*? from "([^"]+)";$/gm)].map((m) => m[1])) {
+		assert.ok(specifier.startsWith("node:"), `only node builtins may be imported here; found ${specifier}`);
+	}
+	// Reaching the network or a model needs a module this file does not import, a
+	// dynamic load of one, a subprocess, or global fetch. Strings and comments are
+	// blanked first so the guard cannot trip over its own vocabulary.
+	const code = source
+		.replace(/^\s*\/\/.*$/gm, "")
+		.replace(/"[^"]*"/g, '""')
+		.replace(/`[^`]*`/g, "``");
+	for (const banned of [/\bfetch\s*\(/, /\bimport\s*\(/, /\brequire\s*\(/, /\bexecSync\s*\(/, /\bspawn\s*\(/]) {
+		assert.doesNotMatch(code, banned, `a scenario must not reach past the working tree and local git: ${banned}`);
+	}
+	// Local git subprocesses are permitted (N2), and only those.
+	const spawned = [...source.matchAll(/execFileSync\("([^"]+)"/g)].map((m) => m[1]);
+	assert.deepEqual([...new Set(spawned)], ["git"], "local git is the only permitted subprocess");
+});
+
+test("IDV32: every amendment record in the Spec is named by an in-place marker in the Plan", () => {
+	const spec = readFileSync(join(repo, "docs", "specs", "2026-07-26-iteration-disposition-vocabulary.md"), "utf8");
+	const plan = readFileSync(join(repo, "docs", "plans", "2026-07-26-iteration-disposition-vocabulary.md"), "utf8");
+	const records = [...spec.matchAll(/^### (A\d+) — /gm)].map((m) => m[1]);
+	assert.ok(records.length > 0, "test premise broken: the Spec records no amendments");
+	// Markers wrap across lines in tables and prose, so match on flattened text.
+	const markers = [...plan.replace(/\s+/g, " ").matchAll(/\*\*AMENDED[^*]*\*\*/g)].map((m) => m[0]);
+	assert.ok(markers.length > 0, "test premise broken: the Plan carries no in-place markers");
+	for (const record of records) {
+		const named = markers.filter((line) => new RegExp(`\\b${record}\\b`).test(line));
+		assert.ok(named.length > 0, `no Plan surface carries an in-place marker naming ${record}`);
+	}
+	// A marker that names no record leaves its surface undiscoverable from the
+	// Spec, which is the failure IDV32 exists to catch.
+	for (const marker of markers) {
+		assert.ok(
+			records.some((record) => new RegExp(`\\b${record}\\b`).test(marker)),
+			`an AMENDED marker names no amendment record: ${marker.trim()}`,
+		);
+	}
+});
+
 test("IDV31: the finding-class alias sits at the binds-forward paragraph", () => {
 	const bindsForward = paragraphContaining(prReviewGateSeam, "binds forward");
 	assert.ok(bindsForward, "the binds-forward paragraph is not in §5");
