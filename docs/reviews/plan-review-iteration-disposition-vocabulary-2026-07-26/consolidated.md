@@ -162,3 +162,90 @@ class has narrowed to one, now structurally removed.
 
 **Ratified-decision collisions (round 3):** none. Both reopens carried new
 evidence and neither demanded reopening D1–D12.
+
+---
+
+## Round 4 (trim-the-tail confirmation, `66d9520..848b995`) — 1 medium, 1 low · incorporated 2, dismissed 0
+
+**Sub-floor dispatch** under D7's exemption: one reviewer (`claude-fable-5:xhigh`)
+rather than the configured floor of 2, because round 3's surviving substance came
+from that reviewer and a full round to chase a confirmation would be
+disproportionate. Recorded here as the exemption requires; **not** a shortfall
+under `onShortfall: fail`, which governs full review rounds.
+
+**All five round-3 findings confirmed FIXED**, each in one line — the trim-the-
+tail shape working as intended.
+
+**The reviewer independently validated the structural claim under hardest
+scrutiny:** verification-by-reference does *not* make any DoD item unfalsifiable
+("DoD 1/3/4 each still fail iff the named artifact lacks an element the
+referenced scope row enumerates"), and it judged the removed redundancy to have
+had **negative** yield — "it generated 9 drift findings across two rounds and
+caught nothing."
+
+| id | origin | sev | reviewer | finding | disposition |
+|---|---|---|---|---|---|
+| PLAN-R4-01 | NEW | medium | fable-5 | The single-source rule is violated by the same commit that adds it (DoD 14 re-lists a scope-item-1 field) and does not cover **cardinalities**, which survive in DoD 5, DoD 6 and rev4's own assumption 4 — so the generator is narrowed, not removed, while DoD 13 claims otherwise | **incorporated** — DoD 14 folded into DoD 1's reference and deleted; DoD 5/6 converted to references; assumption 4's count explicitly marked *derived — re-check, do not trust*; DoD 13's claim narrowed to the enumeration-drift subclass, with unguarded classes named rather than claimed closed |
+| PLAN-R4-02 | NEW | low | fable-5 | The rev-header said "every one" of round 3's findings was enumeration drift; `PLAN-R3-02` was a scoping-logic defect fixed by instance, not by generator | **incorporated** — header narrowed to four of five, with R3-02 named as instance-fixed and its unguarded class pointed at assumption 3 |
+
+Both findings are the same species: **this plan overclaiming the completeness of
+its own fix.** Neither is a design defect; both were incorporated verbatim.
+
+### The round-4 cap fired — churn diagnosis (D4)
+
+A medium arrived at round 4, so under D4 **no round 5 is dispatched** and the
+diagnosis goes to the human owner, who adjudicates. Diagnosis, against D4's four
+bounded options:
+
+- **(a) genuine rev-1 defects, keep going** — rejected. Nothing found after round
+  1 was a rev-1 design defect; rounds 2–4 found defects introduced by the
+  preceding fix wave.
+- **(b) churn from our own fix waves, restructure** — *this was the diagnosis at
+  rounds 2 and 3, and it was acted on* (rev3 sweep, rev4 de-duplication). Round
+  4's yield fell to two findings, both about overclaiming rather than mechanism,
+  which is the signature of a converging restructure rather than a spiralling
+  one.
+- **(c) design flaw, backward transition** — rejected. Zero findings across four
+  rounds attacked D1–D12 or the slice's shape; both reopens were about wording
+  of fixes, and every round returned `CLEAR: D` (no ratified decision
+  contradicted).
+- **(d) ratified dismissal of survivors** — not needed: nothing survives
+  unincorporated.
+
+**Orchestrator recommendation to the owner: approve the plan gate at rev5.**
+Evidence: severity trend 12 → 9 → 5 → 2 with the high-severity band empty since
+round 3; the last wave's findings were self-criticism of claim strength, not
+defects in the design; and the remaining risk (three hand-synced prompt sections,
+assumption 3) is explicitly named rather than closed, making it visible to the
+Spec panel — the next adversarial gate — rather than resolved by more Plan
+rounds.
+
+### Dismissal posture — four consecutive waves at 100%
+
+28 findings, 0 dismissals, reported for the third time. The reviewer's own
+round-4 judgement ("the lost redundancy … caught nothing") is the first
+independent evidence in this run that the adjudicator's incorporations were
+substantive rather than compliant — it argued *against* a previously incorporated
+structure on yield grounds, which a rubber-stamping loop would not produce.
+
+### Artifact-inventory self-audit
+
+| Round | Reviewer outputs | Consolidated | `panel.dispatched` | `panel.consolidated` | Harvest |
+|---|---|---|---|---|---|
+| 1 | `round1-claude-fable-5.md`, `round1-gemini-3.1-pro-preview.md` | this file | emitted | emitted | `plan_review-round1-2026-07-26` |
+| 2 | `round2-claude-fable-5.md`, `round2-gemini-3.1-pro-preview.md` | this file | emitted | emitted | `plan_review-round2-2026-07-26` |
+| 3 | `round3-claude-fable-5.md`, `round3-gemini-3.1-pro-preview.md` | this file | emitted | emitted | `plan_review-round3-2026-07-26` |
+| 4 | `round4-claude-fable-5.md` (sub-floor) | this file | emitted | emitted | `plan_review-round4-2026-07-26` |
+
+**Ratified-decision collisions (round 4):** none.
+
+### Dispatch-layer note for the Spec phase
+
+The subagent acceptance layer marked a read-only reviewer `failed` for "completed
+without making edits" in rounds 2 and 4 (gemini, then fable), in both parallel and
+single-agent dispatch, despite `acceptance: attested`. Adding an explicit
+"READ-ONLY, expected to make NO file edits" line suppressed it in round 3's
+parallel dispatch but not in round 4's single dispatch. In every case the verdict
+was complete and was recovered from the run's `output-*.log`; no replacement was
+ever dispatched, per `phase-pr-review.md` §5. Worth a `CARRY-TO-BACKLOG` once the
+vocabulary this slice defines actually exists to carry it.

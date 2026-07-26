@@ -6,14 +6,21 @@ Brainstorm was a live dialogue on 2026-07-26; its ten ratified decisions (D1–D
 are restated below as this Plan's provenance, followed by the decisions minted at
 review (D11–D12). Track: **irreversible**.
 
-**Rev 4** — incorporates plan-panel rounds 1 (12 findings), 2 (9) and 3 (5 after
-cross-model dedup: 1 high, 3 medium, 1 low); 0 dismissed in any wave. Record:
+**Rev 5** — incorporates plan-panel rounds 1 (12 findings), 2 (9), 3 (5) and the
+round-4 trim-the-tail confirmation (2: 1 medium, 1 low, both about this plan
+overclaiming its own fix); 0 dismissed in any wave. **The round-4 cap fired**:
+a medium arrived at round 4, so no round 5 is dispatched and the churn diagnosis
+went to the owner. Record:
 `docs/reviews/plan-review-iteration-disposition-vocabulary-2026-07-26/consolidated.md`.
 
 The wave trend is 12 → 9 → 5, but the diagnosis matters more than the count:
 **all five round-3 findings were defects rev3's own consistency sweep
-introduced**, every one of them a hand-copied enumeration that drifted from its
-source. Rev4 therefore fixes the *generator* rather than the third instance —
+introduced**, and **four of the five** were the same mechanism: a hand-copied
+enumeration that drifted from its source. (The fifth, `PLAN-R3-02`, was a
+scoping-logic defect — one uniform rule applied to three heterogeneous prompts —
+and is fixed by instance, not by generator; nothing structural guards its class,
+which assumption 3 already names as a hand-sync risk.) Rev4 therefore fixes the
+*generator* of the four rather than the third instance —
 the DoD no longer re-lists what a scope row already defines (see the
 single-source rule under Delivery DoD). Rev2 was a patch wave, rev3 a
 consistency sweep, rev4 a de-duplication.
@@ -143,7 +150,8 @@ rather than two parallel inventions.
    existing near-identical "Output format (STRICT)" blocks across the same three
    prompts are the precedent that this is tolerable.
 4. `phase-pr-review.md` §5 can absorb the **ten** additions scope item 2
-   enumerates, plus the one §1 bridging clause, without exceeding a readable
+   enumerates (*derived count — re-check against scope item 2, do not trust this
+   number*), plus the one §1 bridging clause, without exceeding a readable
    reference size; if it cannot, the Spec may propose a §5 sub-structure, which
    is a presentation change, not a scope change. (Rev1 assumed ~5; the count
    grew across three review waves and the assumption is restated rather than
@@ -169,11 +177,14 @@ claimed as met at merge.
 **Delivery DoD** — falsifiable at merge, except the one item explicitly marked
 review-judged (2a), which is called out rather than smuggled into the list.
 
-> **Single-source rule (added rev4).** Where a DoD item verifies a deliverable,
-> it names the **scope row** that defines it rather than re-listing its contents.
-> Every one of round 3's five findings was a desynchronised hand-copied
-> enumeration (`PLAN-R3-01`‥`-05`); re-listing is the defect generator, so the
-> list is defined once, in Scope, and verified by reference here.
+> **Single-source rule (added rev4, narrowed rev5).** Where a DoD item verifies a
+> deliverable, it names the **scope row** that defines it rather than re-listing
+> its contents or its cardinality. Four of round 3's five findings were
+> desynchronised hand-copied enumerations; re-listing is that defect's generator,
+> so each list is defined once, in Scope, and verified by reference here. Where a
+> number is deliberately restated because the number itself is the point —
+> assumption 4's size estimate — it is marked **derived** so a reader knows to
+> re-check it against its source rather than trusting it (`PLAN-R4-01`).
 
 1. `system-reference.md` carries one "Iteration & disposition" section defining
    **every term group enumerated in scope item 1**, and no when/who mechanics
@@ -191,10 +202,11 @@ review-judged (2a), which is called out rather than smuggled into the list.
 4. The three adversary prompts each carry **every addition enumerated in scope
    item 7**, including the per-prompt carry-landing surfaces;
    `validator-task.prompt.md` is unchanged.
-5. `templates/sdlc-tasks.md` carries the spec-gap log with all four columns.
-6. `.pi/sdlc/workflow.md` no longer contains the four promoted rules and still
-   contains the **six** retained ones, verbatim — verified against this slice's
-   diff at review, not by a standing package test.
+5. `templates/sdlc-tasks.md` carries the spec-gap log with every column
+   enumerated in scope item 6.
+6. `.pi/sdlc/workflow.md` no longer contains the rules D6 promotes and still
+   contains the ones scope item 10 lists as retained, verbatim — verified
+   against this slice's diff at review, not by a standing package test.
 7. `test/frozen-surfaces.test.js` no longer freezes the three reopened prompts,
    still freezes everything else, and its header names the re-freeze follow-up.
 8. The full test corpus passes and `biome` is clean on touched files.
@@ -216,11 +228,11 @@ review-judged (2a), which is called out rather than smuggled into the list.
     phases, §8 for Build), on the consumer list, and on D12's three nouns. This
     is the item round 2 existed to catch (`PLAN-R2-04`); it is checked by
     reading the document, not by a test. **Rev4 additionally removes the
-    generator of that contradiction class** — no DoD item re-lists a scope row's
-    contents (`PLAN-R3-03`).
-14. The finding-record shape includes `defect class`, so the binds-forward
-    dismissal bar has a recorded field to key on rather than a term it can only
-    reference (`PLAN-R3-01`).
+    generator of the enumeration-drift subclass** — no DoD item re-lists a scope
+    row's contents or cardinality, except where explicitly marked derived
+    (`PLAN-R3-03`, narrowed by `PLAN-R4-01`). Defect classes with no structural
+    guard — notably the three hand-synced prompt sections (assumption 3) — are
+    named rather than claimed closed.
 
 ## Context for the next agent
 
