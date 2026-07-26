@@ -75,9 +75,31 @@ incorporated fixes hold.
 
 ---
 
-## Round 2 (delta confirmation, TBD)
+## Round 2 (delta confirmation, `04be242..fc34276`) — 1 high, 2 low · incorporated 3, dismissed 0
 
-Dispatch: all three panelists re-dispatched with this round-1 table scoped to
-the `04be242` delta. Every prior-round finding tagged; the delta instruction
-was "confirm each incorporated fix, do not re-litigate — unless the fix
-introduces a new defect or leaves the old one partially addressed."
+**Dispatch:** all three panelists re-dispatched with the round-1 table and a
+scoped seven-item confirmation list. The delta instruction asked reviewers to
+confirm each fix, not re-litigate.
+
+| id | class | origin | sev | reviewer(s) | finding | disposition |
+|---|---|---|---|---|---|---|
+| PR-R2-01 | routing error | NEW | high | sol | The round-1 consolidated artifact existed only as an untracked working-tree file — `04be242` committed reviewer outputs and the PR body but omitted `consolidated.md` | **incorporated** — file committed at `fc34276`. The seven dispositions, carry audit, and round inventory are now durable |
+| PR-R2-02 | count drift | NEW | low | **all three** | Inserting the new assumption 3 left the subsequent numbering as `1, 2, 3, 4, 4, 5` — two items labelled "4." | **incorporated** — renumbered to `1, 2, 3, 4, 5, 6`. No cross-reference keys off these numbers, so cosmetic, but the exact defect this slice has flagged four times in its own reviews |
+
+All seven round-1 fixes confirmed holding: PR-R1-01 ✓ (SPLIT removed, SPEC-R3-01
+incorporated), PR-R1-02 ✓ (59 rows classed, 10 distinct), PR-R1-03 ✓ (routed
+through Implement), PR-R1-04 ✓ (CARRY-TO-BUILD), PR-R1-05/06 ✓ (glossary
+citations), PR-R1-07 ✓ (IDV24 standing test).
+
+### Cross-model signal
+
+All three reviewers converged on the duplicate assumption numbering (count
+drift). sol additionally flagged the uncommitted consolidated artifact — a
+genunine procedure gap (the file existed but was never staged). No contradictory
+verdicts; no re-litigated findings.
+
+### Convergence
+
+7 round-1 → 2 round-2, both incorporated. The high band fired on a
+procedure/formality finding (uncommitted artifact) rather than a design defect.
+Round 3 (trim-the-tail) confirms no surviving defect.
