@@ -135,3 +135,46 @@ guarded by IDV32.
 **Ratified-decision collisions (round 2):** none. A3 and A4 amend locked Plan
 scope, but as recorded class-(b) amendments with owner-visible markers — not as
 absorbed findings.
+
+---
+
+## Round 3 (trim-the-tail confirmation, `be21293..7feaa15`) — 2 medium · incorporated 1, partially dismissed 1 (pending ratification)
+
+**Sub-floor dispatch** under D7: one reviewer (`gpt-5.6-luna:xhigh`) against a
+floor of 2, recorded as the exemption requires. Wave 3, harvest label 5.
+
+**Eleven of twelve round-2 findings confirmed CLEAR**, each with a file:line
+citation, plus explicit CLEARs on coverage completeness and on the judgement
+call that deleting the totals lost no verification signal.
+
+| id | origin | sev | finding | disposition |
+|---|---|---|---|---|
+| SPEC-R3-01 | REOPENED(SPEC-R2-06) | medium | "A1's Plan marker still does not point downstream": Plan row 6 allegedly carries `AMENDED, class (b), 2026-07-26` with no pointer to the Spec record, and IDV32 only requires the Plan to contain *some* matching marker | **SPLIT — partially incorporated, partially dismissed (dismissal proposed, awaiting owner ratification).** **Incorporated:** IDV32 was genuinely weak; it now requires *every Plan surface an amendment touches* to carry an adjacent marker naming *that specific record*, so a marker elsewhere cannot satisfy the gate. **Proposed dismissal:** the factual claim is **false** — Plan row 6 does point downstream (`Full disposition record: docs/specs/2026-07-26-iteration-disposition-vocabulary.md §1 (A1)`, same row, second cell); the reviewer read only the first table cell. Verified at `docs/plans/2026-07-26-iteration-disposition-vocabulary.md:123` |
+| SPEC-R3-02 | NEW | medium | §1's preamble still said "**Both** are class (b)" after A3 and A4 were added — four records under a two-record cardinality | **incorporated** — the cardinality is **deleted**, not corrected. Fourth occurrence of the hand-maintained-count drift class in this run (`PLAN-R3-04`, `SPEC-R1-02`, `SPEC-R2-11`, now this); every remaining count in either document has been removed rather than fixed |
+
+### Dismissal posture — the streak breaks at six
+
+Six consecutive waves ran at 100% incorporation (57 findings, 0 dismissals) and
+were reported as a smell each time. Wave 7 produces the first **proposed
+dismissal**: `SPEC-R3-01`'s evidence half, dismissed because the cited text
+demonstrably exists. Per the escalation contract this is a proposed dismissal of
+a **medium** finding and therefore requires **human ratification** — it is
+escalated pre-adjudicated rather than actioned. The finding's structural half was
+incorporated regardless, so nothing about the reviewer's concern is lost if the
+dismissal is refused.
+
+### Convergence
+
+17 → 12 → 2 findings, with the high band empty since round 2 and eleven of twelve
+prior findings independently confirmed fixed. Both round-3 findings are
+bookkeeping rather than mechanism.
+
+### Artifact-inventory self-audit
+
+| Wave | Reviewer outputs | Consolidated | `panel.dispatched` | `panel.consolidated` | Harvest label(s) |
+|---|---|---|---|---|---|
+| 1 | `round1-claude-fable-5.md`, `round1-gemini-3.1-pro-preview.md` | this file | emitted | emitted | `spec_review-round1` |
+| 2 | `round2-gemini-3.1-pro-preview.md`, `round2-gpt-5.6-luna.md` (fable: no verdict, twice) | this file | emitted (×2) | emitted | `-round2`, `-round3`, `-round4` |
+| 3 | `round3-gpt-5.6-luna.md` (sub-floor) | this file | emitted | emitted | `-round5` |
+
+**Ratified-decision collisions (round 3):** none.

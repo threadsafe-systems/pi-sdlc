@@ -19,10 +19,12 @@ scenarios. It does not re-argue the Plan's decisions D1–D12.
 
 ## 1. Amendments to the approved Plan
 
-Both are **class (b)** — refining an unfrozen, unmerged shape — recorded here
-*and* marked in the Plan itself, because C4(b) requires amendment **in place**
-and a record that lives only downstream leaves the approved artifact lying to its
-next reader (`SPEC-R1-05`).
+Every amendment below is **class (b)** — refining an unfrozen, unmerged shape —
+recorded here *and* marked in the Plan itself, because C4(b) requires amendment
+**in place** and a record that lives only downstream leaves the approved artifact
+lying to its next reader (`SPEC-R1-05`). No count is stated: the records are
+A1‥A*n* below and a hand-maintained cardinality has drifted four times in this
+run (`SPEC-R3-02`).
 
 ### A1 — scope item 6 folded into scope item 5
 
@@ -301,7 +303,7 @@ it by reading the diff; deliberately leaves no standing test).
 | **IDV29** | mechanical | `phase-implement.md` §5 states the `review.tasks: off` fallback routing the carry obligation to the PR panel's carry-landing surface. | absent — in which case the claim "no configuration leaves the carry unchecked" is false (`SPEC-R2-07`) |
 | **IDV30** | mechanical | The existing "**Only** … escalate" sentence at `phase-pr-review.md:205-207` is itself amended to admit ratified-decision collisions as a third case. | a collision rule is appended elsewhere while the "Only" sentence stands unchanged — the contradiction `SPEC-R1-06` identified, surviving (`SPEC-R2-08`) |
 | **IDV31** | mechanical | The `finding class` ↔ `defect class` alias sentence appears **at the binds-forward paragraph** (`phase-pr-review.md:209-217`), not merely somewhere in §5. | the alias exists only in the glossary or elsewhere in §5 (`SPEC-R2-09`) |
-| **IDV32** | mechanical | For every amendment record `A<n>` in this Spec's §1, the Plan contains a matching in-place `AMENDED, class (b)` marker naming it. | any amendment discoverable only downstream — the C4(b) rule ungated (`SPEC-R2-06`) |
+| **IDV32** | mechanical | For every amendment record `A<n>` in this Spec's §1, **every Plan surface that amendment touches** carries an adjacent marker naming **that specific record** (`AMENDED, class (b) … A<n>`). | any amended surface lacking its own marker, or a marker naming no record — a marker elsewhere in the Plan must not satisfy the gate (`SPEC-R2-06`, strengthened per `SPEC-R3-01`) |
 | **IDV13** | mechanical | `phase-pr-review.md` states the backlog checkpoint. | absent |
 | **IDV14** | mechanical | `phase-tasks.md` §4 specifies the spec-gap log with all four columns, **their exact allowed values** (severity `blocker`\|`minor`; disposition `backward-transition`\|`assumption-recorded`\|`CARRY-TO-IMPLEMENT`), the explicit-"none" rule, and the inbound-carry source; **`templates/sdlc-tasks.md` is byte-identical to the branch base**. | a column missing, an enum value absent or extended, source omitted, or the template modified (`SPEC-R2-10`) |
 | **IDV15** | mechanical | Each of the three adversary prompts contains the delta-round law and its C6 clause; `adversary-plan` states the explicit "no `CARRY-TO-PLAN`"; `validator-task.prompt.md` is byte-identical to the branch base. | any prompt lacks its clause, or the validator prompt changed |
