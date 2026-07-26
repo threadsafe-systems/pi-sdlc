@@ -27,6 +27,11 @@ D. Contradictions: with the plan, with locked decisions, or internal to the spec
 E. Framework reality: does the spec's design compose correctly with how the framework actually behaves (concurrency, ordering, lifecycle, persistence, error paths)?
 F. Non-functional requirements: are performance, durability, security, and compatibility requirements stated and each tied to a scenario?
 G. Honesty sweep: any sentence that claims more than the mechanism it builds.
+H. Carry landing: every `CARRY-TO-SPEC` minted at the plan gate must have landed in this spec, at the landing site its record names. Flag any carry that has not landed, or that landed somewhere other than the site its record names.
+
+## Delta rounds
+
+Round 1 reviews the whole spec. **Every round after the first is a delta review.** The caller gives you the prior rounds' findings and their dispositions, and your review is scoped to the delta since the previous round. Tag every finding `NEW`, or `REOPENED(<prior-id>)` when you re-raise an already-dispositioned finding by its id. A reopen is legal only when you cite evidence that did not exist, or was not available, when that finding was dispositioned; otherwise do not re-raise it. Confirming a prior fix is one line, not a re-litigation.
 
 ## Output format (STRICT: markdown only, findings only, no preamble, no conclusion)
 
@@ -34,10 +39,11 @@ G. Honesty sweep: any sentence that claims more than the mechanism it builds.
 
 - severity: high | medium | low
 - confidence: high | medium (drop anything lower; do not speculate)
+- origin: NEW | REOPENED(<prior-id>)
 - location: <spec section, or doc/file:line>
 - defect: <one or two sentences: the concrete problem>
 - evidence: <what you verified: quoted spec text, file:line in the repo, or framework file:line at the pinned version>
 - impact: <why it matters: what freezes wrong, what test cannot gate, what claim is false>
 - fix: <one sentence: the minimal spec change>
 
-Rank most-severe first. For each attack surface A to G where you found nothing, emit one line: `CLEAR: <letter> — <one-line reason>`. Prefer a few high-confidence, evidence-backed findings over a long speculative list. Every finding must be concrete enough that the spec author could act on it without asking you anything.
+Rank most-severe first. For each attack surface A to H where you found nothing, emit one line: `CLEAR: <letter> — <one-line reason>`. Prefer a few high-confidence, evidence-backed findings over a long speculative list. Every finding must be concrete enough that the spec author could act on it without asking you anything.

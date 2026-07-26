@@ -360,6 +360,79 @@ test("IDV27: assumption-recorded routes to the existing Assumptions appendix", (
 	assert.match(body, /rather\s+than\s+opening\s+a\s+second\s+ledger/i, "the no-duplicate-ledger rule is absent");
 });
 
+// --- C6/C7: reviewer prompts and the frozen list (T5) ------------------------
+
+const promptDir = join(repo, "skills", "sdlc", "prompts");
+const ADVERSARY_PROMPTS = ["plan", "spec", "review"];
+
+function prompt(slug) {
+	return readFileSync(join(promptDir, `adversary-${slug}.prompt.md`), "utf8");
+}
+
+/** The prompt's STRICT output-format section: its heading to the next `## `. */
+function outputFormat(body) {
+	const lines = body.split("\n");
+	const start = lines.findIndex((line) => line.startsWith("## Output format"));
+	if (start === -1) return null;
+	let end = lines.length;
+	for (let i = start + 1; i < lines.length; i++) {
+		if (lines[i].startsWith("## ")) {
+			end = i;
+			break;
+		}
+	}
+	return lines.slice(start, end).join("\n");
+}
+
+// The C6 carry-landing clause, scoped per prompt: uniform wording would be
+// vacuous for the plan reviewer and misdirected for the other two.
+const CARRY_CLAUSE = {
+	plan: /no\s+`CARRY-TO-PLAN`\s+destination\s+exists/i,
+	spec: /every\s+`CARRY-TO-SPEC`[\s\S]{0,120}?landed/i,
+	review: /every\s+carry\s+minted\s+anywhere\s+in\s+this\s+run/i,
+};
+
+test("IDV15: every adversary prompt carries the delta-round law and its C6 carry clause", () => {
+	for (const slug of ADVERSARY_PROMPTS) {
+		const body = prompt(slug).replace(/\s+/g, " ");
+		assert.match(body, /every\s+round\s+after\s+the\s+first\s+is\s+a\s+delta\s+review/i, `adversary-${slug} lacks the delta-round law`);
+		assert.match(body, /`REOPENED\(<prior-id>\)`/, `adversary-${slug} does not ask for a REOPENED tag`);
+		assert.match(body, /evidence\s+that\s+did\s+not\s+exist/i, `adversary-${slug} states no reopen evidence bar`);
+		assert.match(body, CARRY_CLAUSE[slug], `adversary-${slug} lacks its scoped carry-landing clause`);
+	}
+});
+
+test("IDV15: validator-task.prompt.md is byte-identical to the branch base", () => {
+	const changed = execFileSync("git", ["-C", repo, "diff", "--name-only", baseRef(), "--", "skills/sdlc/prompts/validator-task.prompt.md"], { encoding: "utf8" }).trim();
+	assert.equal(changed, "", "the task validator is a checklist executor, not a panel reviewer; C6 does not touch it");
+});
+
+test("IDV28: every adversary prompt's STRICT output format declares an origin field", () => {
+	for (const slug of ADVERSARY_PROMPTS) {
+		const format = outputFormat(prompt(slug));
+		assert.ok(format, `adversary-${slug} has no output-format section`);
+		assert.match(format, /^- origin: /m, `adversary-${slug}'s closed field list has no home for the origin tag`);
+	}
+});
+
+test("IDV16: no script, schema, or workflow file differs from the branch base (N1)", () => {
+	const changed = execFileSync("git", ["-C", repo, "diff", "--name-only", baseRef(), "--", "skills/sdlc/scripts", "skills/sdlc/schema", ".github/workflows"], { encoding: "utf8" }).trim();
+	assert.equal(changed, "", `this slice is prose-only; runtime surfaces changed:\n${changed}`);
+});
+
+test("IDV19: the frozen list drops exactly the three reopened prompts and names the re-freeze follow-up", () => {
+	const path = "test/frozen-surfaces.test.js";
+	const frozenEntries = (body) => [...body.matchAll(/^\t"([^"]+)",$/gm)].map((m) => m[1]);
+	const current = frozenEntries(readFileSync(join(repo, path), "utf8"));
+	const reopened = ADVERSARY_PROMPTS.map((slug) => `skills/sdlc/prompts/adversary-${slug}.prompt.md`);
+	const expected = frozenEntries(baseFile(path)).filter((entry) => !reopened.includes(entry));
+	assert.deepEqual(current, expected, "the frozen list must drop the three reopened prompts and retain every other entry");
+	assert.ok(current.includes("skills/sdlc/prompts/validator-task.prompt.md"), "validator-task.prompt.md must stay frozen");
+	const header = readFileSync(join(repo, path), "utf8").split("\n\n")[0];
+	assert.match(header, /re-freeze/i, "the header does not name the mandatory post-merge re-freeze follow-up");
+	assert.match(header, /iteration\s*&\s*disposition|S5/i, "the header does not name the slice that reopened them");
+});
+
 test("IDV31: the finding-class alias sits at the binds-forward paragraph", () => {
 	const bindsForward = paragraphContaining(prReviewGateSeam, "binds forward");
 	assert.ok(bindsForward, "the binds-forward paragraph is not in §5");

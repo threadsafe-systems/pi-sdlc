@@ -2,10 +2,16 @@
 // branch base. sdlc-status (FS8), check-lifecycle (FS9), lib.mjs +
 // sdlc.config.schema.json (config schemaVersion 3), resolve-panel, the PV1/PV2
 // validator (schema + validate-task.mjs + validate-task.sh + verify-task-receipt),
-// the four reviewer prompts, and panel/ceremony law are untouched;
+// the task validator prompt, and panel/ceremony law are untouched;
 // #91/#101/#102 scopes are not re-opened. The PV1 schema and validate-task.mjs
 // were reopened for the 2026-07-24 `scope`-field slice (PR #190) and are
 // re-frozen here by its post-merge follow-up.
+//
+// The three adversary prompts (plan, spec, review) are reopened for the
+// 2026-07-26 iteration & disposition vocabulary slice (S5, epic #199): a
+// reviewer subagent has none of the skill loaded, so every rule it must obey
+// has to be inline in its prompt. A post-merge re-freeze PR (track:none) puts
+// them back in this list — mandatory, not optional, the #190 -> #191 pattern.
 // Uses git to compare against the base.
 
 import assert from "node:assert/strict";
@@ -31,9 +37,6 @@ const FROZEN = [
 	"skills/sdlc/scripts/validate-task.mjs",
 	"skills/sdlc/scripts/validate-task.sh",
 	"skills/sdlc/scripts/verify-task-receipt.mjs",
-	"skills/sdlc/prompts/adversary-plan.prompt.md",
-	"skills/sdlc/prompts/adversary-spec.prompt.md",
-	"skills/sdlc/prompts/adversary-review.prompt.md",
 	"skills/sdlc/prompts/validator-task.prompt.md",
 ];
 
