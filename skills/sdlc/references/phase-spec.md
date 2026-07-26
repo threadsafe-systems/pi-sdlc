@@ -85,11 +85,34 @@ When a panel runs it follows the shared panel run-shape owned by
 reviewer prompt is `prompts/adversary-spec.prompt.md`. Reviewers are grounded
 in the code and must cite `file:line` for any framework claim.
 
+**Amending an approved Specification.** Which of the three amendment classes
+defined in `references/system-reference.md`, "Iteration & disposition", a change
+falls into decides whether this gate re-runs. Class **(a)** touches a shape
+already frozen, merged, or bound to: a backward transition, and the gate re-runs
+(§6). Class **(b)** refines this Specification while it is still unfrozen and
+unmerged: amend it in place, recording the trigger, the class, the disposition
+and the author — no new panel; where a later phase authors the amendment, this
+artifact still carries an in-place marker naming that record. Class **(c)**, a
+reviewer-grade contradiction surfacing later, is handled as a normal fix wave.
+
+**Inbound carries block this gate.** Before the Spec gate passes, verify that
+every `CARRY-TO-SPEC` minted at Plan has landed here, at the landing site its
+record names. An undischarged carry blocks the gate — the no-orphan rule of
+`references/system-reference.md`, "Iteration & disposition".
+
+> **Under your configuration:** a spec-panel finding that is valid but belongs to
+> decomposition takes the disposition `CARRY-TO-BUILD`, recorded with its landing
+> site — the build plan's spec-gap log. That destination is the next phase in the
+> *effective configured sequence*, so read that sequence from current
+> `CONFIG.md` (or authoritative `sdlc.config.json`) rather than assuming it.
+
 ## 6. Refusal and backward-transition behaviour
 
 Standalone `sdlc:spec` refuses-with-redirect when adopted and no committed plan
 exists. Backward transition to Plan or Brainstorm is always allowed when the Spec
-reveals an upstream flaw.
+reveals an upstream flaw. A class **(a)** amendment (§5) resolves here: it touches
+a shape already frozen, merged, or bound to, so it is a backward transition and
+the gate re-runs.
 
 ## 7. After-hook order and warning semantics
 

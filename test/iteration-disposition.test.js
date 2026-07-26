@@ -51,6 +51,23 @@ function numberedSection(body, n) {
 	return lines.slice(start, end).join("\n");
 }
 
+/** Maximal runs of `>` blockquote lines, joined per block with newlines collapsed. */
+function calloutBlocks(section) {
+	const blocks = [];
+	let current = null;
+	for (const line of section.split("\n")) {
+		if (/^\s*>/.test(line)) {
+			current ??= [];
+			current.push(line);
+		} else if (current) {
+			blocks.push(current.join(" ").replace(/\s+/g, " "));
+			current = null;
+		}
+	}
+	if (current) blocks.push(current.join(" ").replace(/\s+/g, " "));
+	return blocks;
+}
+
 /** The blank-line-delimited paragraph containing `needle`, newlines collapsed. */
 function paragraphContaining(body, needle) {
 	const para = body.split(/\n\s*\n/).find((block) => block.includes(needle));
@@ -207,6 +224,46 @@ test("IDV30: the existing 'Only … escalate' sentence is itself amended, not le
 	const escalation = paragraphContaining(prReviewGateSeam, "Only three cases escalate");
 	assert.ok(escalation, "the amended escalation sentence is not in §5");
 	assert.match(escalation, /contradicts\s+an\s+owner-ratified\s+decision/i, "the amended sentence does not admit ratified-decision collisions");
+});
+
+// --- C3: carry dispositions, callout form (T3) -------------------------------
+
+// The outbound (reference, section, token) triples of the Spec's C3 table.
+// `CARRY-TO-BACKLOG` is deliberately absent: it is terminal and universally
+// available, so wrapping it in a configuration callout would be misleading.
+const CONDITIONAL_OUTBOUND = [
+	{ slug: "plan", section: 5, token: "CARRY-TO-SPEC" },
+	{ slug: "spec", section: 5, token: "CARRY-TO-BUILD" },
+	{ slug: "tasks", section: 8, token: "CARRY-TO-IMPLEMENT" },
+];
+
+test("IDV11: every conditional outbound carry statement sits inside an 'under your configuration' callout", () => {
+	for (const { slug, section, token } of CONDITIONAL_OUTBOUND) {
+		const body = numberedSection(reference(slug), section);
+		assert.ok(body, `phase-${slug}.md §${section} not found`);
+		const mentions = body.split("\n").filter((line) => line.includes(token));
+		// Existence of all four outbound statements is IDV26's assertion; this one
+		// is about their form. The two Plan/Spec destinations are pinned here too
+		// so the form check cannot pass vacuously for the phases it governs.
+		if (slug !== "tasks") assert.ok(mentions.length > 0, `phase-${slug}.md §${section} states no ${token} disposition`);
+		const inCallouts = calloutBlocks(body)
+			.filter((block) => /under your configuration/i.test(block))
+			.join(" ");
+		for (const line of mentions) {
+			const text = line
+				.replace(/^\s*>?\s?/, "")
+				.replace(/\s+/g, " ")
+				.trim();
+			assert.ok(inCallouts.includes(text), `phase-${slug}.md §${section}: ${token} stated outside a configuration callout:\n  ${text}`);
+		}
+	}
+});
+
+test("IDV11: CARRY-TO-BACKLOG is stated unconditionally, never wrapped in a callout", () => {
+	const body = numberedSection(reference("pr-review"), 5);
+	const wrapped = calloutBlocks(body).filter((block) => block.includes("CARRY-TO-BACKLOG"));
+	assert.deepEqual(wrapped, [], "CARRY-TO-BACKLOG is terminal and universal; a configuration callout would be misleading");
+	assert.ok(body.includes("CARRY-TO-BACKLOG"), "test premise broken: CARRY-TO-BACKLOG is absent from phase-pr-review.md §5");
 });
 
 test("IDV31: the finding-class alias sits at the binds-forward paragraph", () => {
