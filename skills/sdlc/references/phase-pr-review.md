@@ -19,6 +19,9 @@ clean opening. It runs two ways:
   small fixed panel default and offers an **optional, skippable grounding prompt**
   for existing design material, disclosing grounded-vs-diff-only; adopted it runs
   the committed `pr_review` gate at the committed mode/floors, never below them.
+  Those floors govern **full review rounds**: a trim-the-tail confirmation (§5)
+  re-dispatches one reviewer against a delta and is an exempt sub-floor dispatch,
+  not a round below the floor.
 
 ## 2. Entry conditions and authoritative upstream inputs
 
@@ -169,6 +172,15 @@ hand-copy a prompt per model.
    shortfall and continues. Never substitute an unconfigured model or treat an
    infra failure as a reviewer verdict.
 
+   **Delta dispatch.** The first round reviews the whole artifact; **every round
+   after the first is a delta review**. Carry the prior rounds' findings *and
+   their dispositions* into the reviewer task as a table, and scope the review to
+   the delta commit range since the previous round. Confirming a prior fix is one
+   line, not a re-litigation. The vocabulary those tables use — origin tags,
+   dispositions, finding ids — is defined once in
+   `references/system-reference.md`, "Iteration & disposition"; this section says
+   only who applies it and when.
+
    **Harvest-at-dispatch (FS13).** Immediately after dispatching any design or PR
    panel, record `panel.dispatched` and preserve the panel's artifacts with
    `scripts/harvest-panel.sh --phase <panelPhase> --round <n> --from <asyncDir>`,
@@ -187,7 +199,12 @@ hand-copy a prompt per model.
    label↔wave mapping is recorded in the wave's `consolidated.md`.
 
 3. **Consolidate**: collapse duplicates into one issue, keep cross-model agreement
-   as signal, preserve genuine disagreement.
+   as signal, preserve genuine disagreement. Consolidation also **mints each
+   finding's id** — `<PREFIX>-R<round>-<nn>`, unique within the run, the prefix
+   read off the panel phase by the glossary's closed mapping — and **tags each
+   consolidated row's origin**, `NEW` or `REOPENED(<id>)`. A reopen that fails the
+   glossary's evidence bar takes the disposition `barred`, recorded like any
+   other; it is not silently dropped and not re-argued.
 4. **Adjudicate**: for every high or medium finding, either incorporate it or
    record a one-line reason for dismissal. Disclose the orchestrating model in the
    consolidated file. Disputed high or medium findings are decided by the project's
@@ -202,11 +219,13 @@ hand-copy a prompt per model.
    **pre-adjudicated** as ratify/amend decisions — each escalated finding
    carries its id, a one-line gist, the reviewers who raised it (cross-model
    agreement is signal), and the agent's recommended disposition with its
-   reason. Only **proposed dismissals of high or medium findings** — plus
-   anything touching a previously human-ratified residual-risk boundary —
-   escalate; incorporating a finding is agreement and needs no permission.
-   Overflow past the cap usually means incorporate the cheap ones rather than
-   argue them. A **human-ratified dismissal binds forward**: record it in
+   reason. Only three cases escalate: **proposed dismissals of high or medium
+   findings**, anything touching a previously human-ratified residual-risk
+   boundary, and any finding that **contradicts an owner-ratified decision** —
+   which goes to the owner to decide and is never absorbed into the artifact nor
+   silently dismissed. Incorporating a finding is agreement and needs no
+   permission. Overflow past the cap usually means incorporate the cheap ones
+   rather than argue them. A **human-ratified dismissal binds forward**: record it in
    `consolidated.md` with its human-ratified attribution and do not re-litigate
    the same finding class in later waves or later sessions unless new evidence
    emerges. The cross-session half of that rule needs a lookup, not memory:
@@ -214,10 +233,49 @@ hand-copy a prompt per model.
    reviews home** (e.g. grep `<paths.reviews>/pr-*/consolidated.md` for
    `ratif` — the broad stem, because records predating this attribution
    convention word ratification differently) and treat any hit on the same
-   finding class as already adjudicated unless new evidence has emerged.
+   finding class as already adjudicated unless new evidence has emerged. The
+   **finding class** this rule keys on and the `defect class` of
+   `references/system-reference.md`, "Iteration & disposition", are two names for
+   one concept.
+
+   **Dismissal posture.** Dismissal is a real verdict, and a panel is not right
+   about everything: **two consecutive waves at 100% incorporation** is a
+   reportable smell, and the adjudicator says so to the human rather than
+   recording it as diligence. Propose dismissals, with one-line reasons, for
+   findings that would only be incorporated to avoid the argument.
+
+   **Trim the tail.** When a round yields no highs and at most one medium from a
+   single reviewer, fix it and re-dispatch **only that reviewer** for a delta
+   confirmation — or offer the human accept-without-re-dispatch. Do not run a
+   full multi-reviewer round to chase one medium.
+
+   **Sub-floor exemption.** The configured floor governs **full review rounds**.
+   A trim-the-tail confirmation is an exempt sub-floor dispatch, recorded as such
+   in that wave's `consolidated.md`, and is **not** a shortfall under
+   `review.onShortfall`.
+
+   **Backlog checkpoint.** `CARRY-TO-BACKLOG` is this phase's outbound carry: the
+   terminal destination for a finding that is valid but outside this change. The
+   PR gate is not passable while any `CARRY-TO-BACKLOG` lacks a filed issue id
+   recorded in `consolidated.md`. The PR gate is also the **inbound** checkpoint
+   for every carry minted anywhere in this run, whatever phase minted it: the
+   panel verifies each has landed at its named destination before the gate passes.
 5. **Stop** when no high or medium finding survives adjudication. Low findings are
    recorded, not blocking. Termination is measured against surviving findings, so a
    ruthless panel that always emits nits still converges.
+
+   **Round cap.** If the **4th** round still returns any high or medium finding,
+   no 5th round is dispatched. Diagnose instead, and put the diagnosis to the
+   human, who adjudicates between four bounded options: (a) genuine rev-1 defects
+   — continue; (b) churn generated by our own fix waves — restructure rather than
+   re-dispatch; (c) a design flaw — backward transition; (d) ratified dismissal of
+   the survivors. At `pr_review`, (d) is the only route to "move on", and the cap
+   never permits merging past a surviving high or medium finding.
+
+   **Artifact-inventory self-audit.** The diagnosis, and each gate presentation,
+   states the per-round inventory: round *n* ↔ its `consolidated.md` ↔ its
+   `panel.dispatched`/`panel.consolidated` events ↔ its harvest label.
+   Non-blocking — visibility, not enforcement.
 
 Save panel artifacts under `<configured paths.reviews>/<phase>-<feat>-<date>/`: one
 file per model, the shared `prompt.md`, and a `consolidated.md` carrying the

@@ -32,6 +32,31 @@ function baseFile(path) {
 
 const systemReference = readFileSync(join(refDir, "system-reference.md"), "utf8");
 
+function reference(slug) {
+	return readFileSync(join(refDir, `phase-${slug}.md`), "utf8");
+}
+
+/** A numbered `## <n>. …` section body, heading included, up to the next `## `. */
+function numberedSection(body, n) {
+	const lines = body.split("\n");
+	const start = lines.findIndex((line) => line.startsWith(`## ${n}. `));
+	if (start === -1) return null;
+	let end = lines.length;
+	for (let i = start + 1; i < lines.length; i++) {
+		if (lines[i].startsWith("## ")) {
+			end = i;
+			break;
+		}
+	}
+	return lines.slice(start, end).join("\n");
+}
+
+/** The blank-line-delimited paragraph containing `needle`, newlines collapsed. */
+function paragraphContaining(body, needle) {
+	const para = body.split(/\n\s*\n/).find((block) => block.includes(needle));
+	return para ? para.replace(/\s+/g, " ") : null;
+}
+
 /** The glossary section body: its heading through the next `## ` heading or EOF. */
 function glossarySection(body) {
 	const lines = body.split("\n");
@@ -116,4 +141,77 @@ test("IDV25: the glossary section is at most 60 lines", () => {
 	const section = glossarySection(systemReference);
 	assert.ok(section, "glossary section not found");
 	assert.ok(section.length <= 60, `glossary is ${section.length} lines, budget is 60`);
+});
+
+// --- C2: the panel run-shape (T2) -------------------------------------------
+
+const prReview = reference("pr-review");
+const prReviewGateSeam = numberedSection(prReview, 5);
+const prReviewPurpose = numberedSection(prReview, 1);
+
+/** Every row of the Spec's C2 table, keyed by its distinctive phrase. */
+const C2_ROWS = {
+	"1 delta-dispatch obligation": /every\s+round\s+after\s+the\s+first\s+is\s+a\s+delta\s+review/i,
+	"2 id minting": /mints\s+each\s+finding's\s+id/i,
+	"3 origin tagging": /`NEW`\s+or\s+`REOPENED\(<id>\)`/,
+	"4 ratified-collision escalation": /contradicts\s+an\s+owner-ratified\s+decision/i,
+	"5 amended 'Only … escalate' sentence": /Only\s+three\s+cases\s+escalate/i,
+	"6 dismissal posture": /two\s+consecutive\s+waves\s+at\s+100%\s+incorporation/i,
+	"7 trim-the-tail": /re-dispatch\s+\*\*only\s+that\s+reviewer\*\*/i,
+	"8 sub-floor exemption": /exempt\s+sub-floor\s+dispatch/i,
+	"9 backlog checkpoint": /lacks\s+a\s+filed\s+issue\s+id/i,
+	"10 round-4 cap": /no\s+5th\s+round\s+is\s+dispatched/i,
+	"11 churn diagnosis": /four\s+bounded\s+options/i,
+	"12 artifact-inventory self-audit": /artifact-inventory\s+self-audit/i,
+	"13 finding-class alias": /two\s+names\s+for\s+one\s+concept/i,
+};
+
+test("IDV5: phase-pr-review.md §5 contains every row of the C2 table", () => {
+	assert.ok(prReviewGateSeam, "phase-pr-review.md §5 not found");
+	for (const [label, re] of Object.entries(C2_ROWS)) {
+		assert.match(prReviewGateSeam, re, `§5 missing C2 row: ${label}`);
+	}
+});
+
+test("IDV6: phase-pr-review.md §1 carries the floors-govern-full-rounds clause", () => {
+	assert.ok(prReviewPurpose, "phase-pr-review.md §1 not found");
+	assert.match(prReviewPurpose.replace(/\s+/g, " "), /floors\s+govern\s+\*\*full\s+review\s+rounds\*\*/i, "§1 does not define floors as governing full review rounds");
+});
+
+test("IDV7: the round cap names round 4 and lists exactly four bounded options", () => {
+	const cap = paragraphContaining(prReviewGateSeam, "Round cap");
+	assert.ok(cap, "round-cap paragraph not found in §5");
+	assert.match(cap, /\*\*4th\*\*\s+round/i, "the cap does not name the 4th round");
+	for (const option of ["(a)", "(b)", "(c)", "(d)"]) {
+		assert.ok(cap.includes(option), `round cap missing option ${option}`);
+	}
+	assert.ok(!cap.includes("(e)"), "round cap lists more than four options");
+});
+
+test("IDV8: at pr_review, moving on requires a ratified dismissal and never permits merging past a survivor", () => {
+	const cap = paragraphContaining(prReviewGateSeam, "Round cap");
+	assert.ok(cap, "round-cap paragraph not found in §5");
+	assert.match(cap, /at\s+`pr_review`,\s+\(d\)\s+is\s+the\s+only\s+route\s+to\s+"move\s+on"/i, 'the pr_review "move on" restriction is absent');
+	assert.match(cap, /never\s+permits\s+merging\s+past\s+a\s+surviving\s+high\s+or\s+medium/i, "the cap does not forbid merging past a survivor");
+});
+
+test("IDV13: phase-pr-review.md states the backlog checkpoint", () => {
+	assert.match(prReviewGateSeam.replace(/\s+/g, " "), /PR\s+gate\s+is\s+not\s+passable\s+while\s+any\s+`CARRY-TO-BACKLOG`\s+lacks\s+a\s+filed\s+issue\s+id/i, "the backlog checkpoint is absent from §5");
+});
+
+test("IDV30: the existing 'Only … escalate' sentence is itself amended, not left standing", () => {
+	const base = baseFile("skills/sdlc/references/phase-pr-review.md").replace(/\s+/g, " ");
+	const originalSentence = "Only **proposed dismissals of high or medium findings** — plus anything touching a previously human-ratified residual-risk boundary — escalate";
+	assert.ok(base.includes(originalSentence), "test premise broken: the original sentence is not in the branch base");
+	assert.ok(!prReview.replace(/\s+/g, " ").includes(originalSentence), "the original 'Only … escalate' sentence still stands unamended beside the new collision rule");
+	const escalation = paragraphContaining(prReviewGateSeam, "Only three cases escalate");
+	assert.ok(escalation, "the amended escalation sentence is not in §5");
+	assert.match(escalation, /contradicts\s+an\s+owner-ratified\s+decision/i, "the amended sentence does not admit ratified-decision collisions");
+});
+
+test("IDV31: the finding-class alias sits at the binds-forward paragraph", () => {
+	const bindsForward = paragraphContaining(prReviewGateSeam, "binds forward");
+	assert.ok(bindsForward, "the binds-forward paragraph is not in §5");
+	assert.match(bindsForward, /two\s+names\s+for\s+one\s+concept/i, "the alias sentence is not at the binds-forward paragraph");
+	assert.match(bindsForward, /defect\s+class/i, "the alias sentence does not name `defect class`");
 });
