@@ -85,15 +85,13 @@ When a panel runs it follows the shared panel run-shape owned by
 reviewer prompt is `prompts/adversary-spec.prompt.md`. Reviewers are grounded
 in the code and must cite `file:line` for any framework claim.
 
-**Amending an approved Specification.** Which of the three amendment classes
-defined in `references/system-reference.md`, "Iteration & disposition", a change
-falls into decides whether this gate re-runs. Class **(a)** touches a shape
-already frozen, merged, or bound to: a backward transition, and the gate re-runs
-(§6). Class **(b)** refines this Specification while it is still unfrozen and
-unmerged: amend it in place, recording the trigger, the class, the disposition
-and the author — no new panel; where a later phase authors the amendment, this
-artifact still carries an in-place marker naming that record. Class **(c)**, a
-reviewer-grade contradiction surfacing later, is handled as a normal fix wave.
+**Amending an approved Specification.** Classify the change under the three
+classes in `references/system-reference.md`, "Iteration & disposition"; that
+glossary owns their definitions. Here, class **(a)** takes the backward
+transition at §6; class **(b)** is amended in place in this Specification,
+recording the trigger, class, disposition and author, with an in-place marker
+here when a later phase owns its full record; and class **(c)** starts a normal
+fix wave.
 
 **Inbound carries block this gate.** Before the Spec gate passes, verify that
 every `CARRY-TO-SPEC` minted at Plan has landed here, at the landing site its

@@ -78,22 +78,18 @@ consolidate → adjudicate → stop) owned by `references/phase-pr-review.md`,
 "Panels". The reviewer prompt is `prompts/adversary-plan.prompt.md` via the
 `plan_review` phase; never hand-copy a prompt per model.
 
-**Amending an approved plan.** Which of the three amendment classes defined in
-`references/system-reference.md`, "Iteration & disposition", a change falls into
-decides whether this gate re-runs. Class **(a)** touches a shape already frozen,
-merged, or bound to: a backward transition, and the gate re-runs (§6). Class
-**(b)** refines this plan while it is still unfrozen and unmerged: amend it in
-place, recording the trigger, the class, the disposition and the author — no new
-panel. Class **(c)**, a reviewer-grade contradiction surfacing later, is handled
-as a normal fix wave.
+**Amending an approved plan.** Classify the change under the three classes in
+`references/system-reference.md`, "Iteration & disposition"; that glossary owns
+their definitions. Here, class **(a)** takes the backward transition at §6; class
+**(b)** is amended in place in this Plan, recording the trigger, class,
+disposition and author; and class **(c)** starts a normal fix wave.
 
-> **Under your configuration:** a plan-panel finding that is valid but belongs to
-> the next design artifact takes the disposition `CARRY-TO-SPEC`, recorded with
-> its landing site. That destination exists only where the effective configured
-> sequence has a separate Spec: under `shape.separateSpec: false` the merged
-> design artifact is the landing site, and on the reversible track Spec is not a
-> legal destination at all. Read the effective track and `shape.separateSpec`
-> from current `CONFIG.md` (or authoritative `sdlc.config.json`).
+> **Under your configuration:** `CARRY-TO-SPEC` is legal only where the effective
+> configured sequence has a separate Spec; record its landing site there. Without
+> a separate Spec — including the reversible track — the next design artifact is
+> Build, so use `CARRY-TO-BUILD` and name the build plan's spec-gap log as its
+> landing site. Read the effective track and `shape.separateSpec` from current
+> `CONFIG.md` (or authoritative `sdlc.config.json`).
 
 Plan has no inbound carry to verify: it is the first artifact-bearing phase, so
 no `CARRY-TO-PLAN` destination exists.

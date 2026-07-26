@@ -136,7 +136,7 @@ specifies.
 | Description | Severity | Disposition | Landing site |
 |---|---|---|---|
 | The Spec fixes each contract's *placement* but not its exact wording; §5's scenarios assert distinctive phrases, so the implementer chooses phrasing that satisfies them. | minor | assumption-recorded | Assumptions appendix, below |
-| IDV18/IDV20/IDV22 are inspection scenarios with no standing test; nothing in Implement can close them. | minor | `CARRY-TO-IMPLEMENT` | PR-panel review (recorded in this slice's PR consolidated artifact) |
+| IDV18/IDV20/IDV22 are inspection scenarios with no standing test; their required PR-panel read is a planned verification activity, not a deficiency Implement must resolve. | minor | assumption-recorded | Assumptions appendix, below |
 
 No blocker-severity gaps. The Spec was reviewed over three waves and its
 contracts are implementable as written.
@@ -151,7 +151,10 @@ contracts are implementable as written.
    Consequence: tasks touch a shared test file, so they must not run
    concurrently *in the same worktree*; the sequencing above already serialises
    T6, and T2/T3/T5 append to disjoint sections.
-3. `npm test` is the `"full"`-scoped check for every task; the single-file run is
+3. IDV18, IDV20 and IDV22 are deliberately carried in the PR panel's inspection
+   remit; they create no `CARRY-TO-IMPLEMENT` entry because that disposition must
+   land at Implement, not skip directly to the PR gate.
+4. `npm test` is the `"full"`-scoped check for every task; the single-file run is
    the `"task"`-scoped check (PV1 Rules A and B).
 4. Full-corpus task validators must not be dispatched in parallel — a prior run
    flaked `check-references.test.js` (cwd-sensitive spawn) with three concurrent

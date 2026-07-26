@@ -128,15 +128,14 @@ gate, so completion evidence is where the no-orphan rule of
 `references/system-reference.md`, "Iteration & disposition", is checked here.
 Next transition is **Implement** (`references/phase-implement.md`).
 
-**Amending an approved breakdown.** Class **(a)** touches a shape already
-frozen, merged, or bound to: a backward transition (§6). Class **(b)** refines
-this still-unfrozen, unmerged breakdown: amend it in place, recording the
-trigger, the class, the disposition and the author — and where the amendment
-touches an already-approved task's checks or its PV1 manifest, that task's
-approval is **renewed**, never assumed to carry over. Class **(c)**, a
-reviewer-grade contradiction surfacing later, is handled as a normal fix wave.
-Build has no gate, so the question an amendment answers here is renewed task
-approval rather than a re-run gate.
+**Amending an approved breakdown.** Classify the change under the three
+classes in `references/system-reference.md`, "Iteration & disposition"; that
+glossary owns their definitions. Here, class **(a)** takes the backward
+transition at §6; class **(b)** is amended in place in this breakdown, recording
+the trigger, class, disposition and author, and renews approval when it touches
+an already-approved task's checks or PV1 manifest; and class **(c)** starts a
+normal fix wave. Build has no gate, so this phase's amendment question is
+renewed task approval rather than a re-run gate.
 
 > **Under your configuration:** a deficiency this phase cannot resolve, and that
 > the next phase must, takes the disposition `CARRY-TO-IMPLEMENT` in the spec gap

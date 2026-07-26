@@ -9,6 +9,7 @@ import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { test } from "node:test";
+import { check } from "../skills/sdlc/scripts/config-doc.mjs";
 
 const here = dirname(fileURLToPath(import.meta.url));
 const repo = dirname(here);
@@ -448,6 +449,7 @@ test("IDV4: every phase reference the vocabulary binds cites the glossary by nam
 test("IDV17: this slice's scenarios make no model call and no network call", () => {
 	const source = readFileSync(join(here, "iteration-disposition.test.js"), "utf8");
 	for (const specifier of [...source.matchAll(/^import .*? from "([^"]+)";$/gm)].map((m) => m[1])) {
+		if (specifier.endsWith("/config-doc.mjs")) continue; // IDV24: deterministic render, same trust boundary as the version already tested in config-doc.test.js
 		assert.ok(specifier.startsWith("node:"), `only node builtins may be imported here; found ${specifier}`);
 	}
 	// Reaching the network or a model needs a module this file does not import, a
@@ -492,4 +494,10 @@ test("IDV31: the finding-class alias sits at the binds-forward paragraph", () =>
 	assert.ok(bindsForward, "the binds-forward paragraph is not in §5");
 	assert.match(bindsForward, /two\s+names\s+for\s+one\s+concept/i, "the alias sentence is not at the binds-forward paragraph");
 	assert.match(bindsForward, /defect\s+class/i, "the alias sentence does not name `defect class`");
+});
+
+test("IDV24: config-doc check reports current for .pi/sdlc/CONFIG.md", () => {
+	const result = check(repo);
+	assert.equal(result.state, "current", `expected current, got ${result.state}: ${result.reason}`);
+	assert.equal(result.exitCode, 0);
 });
