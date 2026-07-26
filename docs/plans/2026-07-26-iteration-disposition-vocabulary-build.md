@@ -156,10 +156,10 @@ contracts are implementable as written.
    land at Implement, not skip directly to the PR gate.
 4. `npm test` is the `"full"`-scoped check for every task; the single-file run is
    the `"task"`-scoped check (PV1 Rules A and B).
-4. Full-corpus task validators must not be dispatched in parallel — a prior run
+5. Full-corpus task validators must not be dispatched in parallel — a prior run
    flaked `check-references.test.js` (cwd-sensitive spawn) with three concurrent
    `npm test` invocations. Validators run serially.
-5. **`npx biome check .` is red on the branch base.** Three pre-existing
+6. **`npx biome check .` is red on the branch base.** Three pre-existing
    `FIXABLE` findings sit in `docs/briefs/assets/2026-07-23-orchestration-runtime-prototype/`
    (spike sources committed with the #162 prototype brief), unrelated to this
    slice. Each task's PV1 `static` check is therefore scoped to the surfaces that
