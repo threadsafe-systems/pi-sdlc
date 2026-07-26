@@ -65,3 +65,73 @@ making edits" a **third time** this run, despite `acceptance: attested` and an
 explicit READ-ONLY instruction. Verdict complete and recovered from
 `output-1.log`; no replacement dispatched (`phase-pr-review.md` §5). Still a
 `CARRY-TO-BACKLOG` candidate once this slice ships.
+
+---
+
+## Round 2 (delta, `c0e8d22..be21293`) — 3 high, 9 medium · incorporated 12, dismissed 0
+
+**Reviewer roster changed mid-wave.** `anthropic/claude-fable-5:xhigh` was the
+resolved panelist and **infra-failed twice without returning a verdict**:
+attempt 1 produced 124KB of tool output (directory listings, whole files) and no
+findings; attempt 2, under a tightened effort-budget brief, produced 3.9KB that
+was the acceptance-report **template echoed back**. Under `phase-pr-review.md`
+§5 that is an infra failure, not a verdict — retried once, then replaced with
+`openai-codex/gpt-5.6-luna:xhigh`, the next untried credentialed candidate. The
+failed model does **not** count against the floor; the wave met `panelSize: 2`
+with gemini + luna.
+
+> **Harvest label ↔ wave divergence** (recorded per the harvest rule): all three
+> dispatches belong to **wave 2**; harvest labels are `spec_review-round2`
+> (failed dispatch), `-round3` (retry), `-round4` (replacement), because a label
+> may not overwrite a prior snapshot. `meta.json` carries both numbers.
+
+**A caution recorded against the orchestrator:** `resolve-panel` prints only
+enough models to meet the floor, so its two-line output is *not* the candidate
+pool. Reading it as exhaustion would have triggered `onShortfall: fail` and an
+unnecessary human interrupt; `gpt-5.6-luna`, `glm-5.2`, `deepseek-v4-pro` and
+`claude-opus-4-8` were all credentialed and untried.
+
+| id | origin | sev (adjudicated) | reviewer(s) | finding | disposition |
+|---|---|---|---|---|---|
+| SPEC-R2-01 | NEW | **high** | **both** (luna high, gemini medium) | Rev2 changed the Plan's **locked** vocabulary without a recorded amendment: `barred` widened D12's four-value disposition set, and the id format moved from `<panelPhase>-` to `<PREFIX>-`. `barred` was justified in an *assumption* — and an assumption cannot override locked scope | **incorporated** — formalised as Plan amendments **A3** (prefix mapping) and **A4** (`barred`), both with in-place markers on Plan D11, D12 and scope item 1. Grade upheld high: the slice's own amendment discipline was being bypassed by its author |
+| SPEC-R2-02 | NEW | **high** | luna | `CARRY-TO-IMPLEMENT` had **no outbound minting owner**: C5 permitted it as a spec-gap disposition while C3 gave `phase-tasks.md` no outbound column — a legal disposition no phase could emit | **incorporated** — `phase-tasks.md` §8 is now the outbound owner, and IDV26 gates it |
+| SPEC-R2-03 | NEW | **high** | gemini | `CARRY-TO-BACKLOG`'s outbound statement was ungated: IDV26 covered only Spec/Plan, IDV13 covered the *checkpoint*, not the minting statement | **incorporated** — IDV26 now gates **all four** outbound statements |
+| SPEC-R2-04 | REOPENED(SPEC-R1-05) | medium | gemini | The Spec claimed A2 was "marked in the Plan itself"; Plan row 11 and DoD 9 carried **no** `AMENDED` marker — so the Spec asserted something false and re-committed the very violation `SPEC-R1-05` fixed | **incorporated** — markers added to row 11 and DoD 9. Legitimate reopen: the evidence (rev2's text) did not exist at disposition time |
+| SPEC-R2-05 | NEW | medium | luna | A1 folded scope item 6 away, but the Plan **Objective** still directed readers to `templates/sdlc-tasks.md` | **incorporated** — Objective pointer amended in place |
+| SPEC-R2-06 | NEW | medium | **both** | C4(b)'s in-place-marker rule was gated by nothing; IDV2/IDV9 only assert the classes appear | **incorporated** — new **IDV32** mechanically asserts that every `A<n>` in Spec §1 has a matching Plan marker |
+| SPEC-R2-07 | NEW | medium | **both** | The `review.tasks: off` fallback was specified in C3 but asserted by no scenario, so "no configuration leaves the carry unchecked" was unenforced | **incorporated** — new **IDV29** |
+| SPEC-R2-08 | NEW | medium | luna | C2 row 5 required *amending* the existing "Only … escalate" sentence, but IDV5 only checks a phrase exists somewhere in §5 — an implementation could append a third rule and leave the contradiction standing | **incorporated** — new **IDV30**, anchored at `phase-pr-review.md:205-207` |
+| SPEC-R2-09 | NEW | medium | luna | The `finding class` alias was required *at the binds-forward paragraph* but gated only as "somewhere in §5" | **incorporated** — new **IDV31**, anchored at `:209-217` |
+| SPEC-R2-10 | NEW | medium | luna | C5 froze enum values (`blocker`\|`minor`; three dispositions) that IDV14 never asserted — an arbitrary-valued log would pass | **incorporated** — IDV14 now asserts the exact enums |
+| SPEC-R2-11 | NEW | medium | luna | Coverage arithmetic false (labels give 24/3/1, the summary claimed 23/4/1), and "every contract has ≥1 mechanical scenario" was false — C8 has only the diff-inspection IDV21 | **incorporated** structurally: **all totals deleted**, replaced by a per-contract coverage table, with C8's mechanical-free status stated plainly as a ratified decision (`PLAN-R1-07`). Third occurrence of the counting-drift class in this run |
+| SPEC-R2-12 | NEW | medium | luna | N5's universal "nothing a consumer repo has committed becomes invalid" is unfalsifiable and contradicts the Plan's own exclusion of consumer repos | **incorporated** — N5 bounded to this repository's named paths; IDV20 rewritten to match |
+
+### Cross-model signal
+
+Three findings were raised independently by both reviewers (`SPEC-R2-01`, `-06`,
+`-07`), with one severity disagreement recorded rather than smoothed
+(`SPEC-R2-01`: luna high, gemini medium — adjudicated high).
+
+### Convergence note
+
+Round 2's twelve findings cluster into two classes: **(i) the author bypassing
+the slice's own amendment discipline** (`-01`, `-04`, `-05`) and **(ii) contract
+clauses shipped without a gating scenario** (`-02`, `-03`, `-06`, `-07`, `-08`,
+`-09`, `-10`). Class (ii) is round 1's dominant pattern recurring, which is why
+rev3 adds five scenarios rather than prose. Class (i) is now structurally
+guarded by IDV32.
+
+### Dismissal posture — sixth consecutive wave at 100%
+
+57 findings across six waves, 0 dismissals. Reported per the rule.
+
+### Artifact-inventory self-audit
+
+| Wave | Reviewer outputs | Consolidated | `panel.dispatched` | `panel.consolidated` | Harvest label(s) |
+|---|---|---|---|---|---|
+| 1 | `round1-claude-fable-5.md`, `round1-gemini-3.1-pro-preview.md` | this file | emitted | emitted | `spec_review-round1` |
+| 2 | `round2-gemini-3.1-pro-preview.md`, `round2-gpt-5.6-luna.md` (fable: no verdict, twice) | this file | emitted (×2: original + replacement) | emitted | `spec_review-round2`, `-round3`, `-round4` |
+
+**Ratified-decision collisions (round 2):** none. A3 and A4 amend locked Plan
+scope, but as recorded class-(b) amendments with owner-visible markers — not as
+absorbed findings.

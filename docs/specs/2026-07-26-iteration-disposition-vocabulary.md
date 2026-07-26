@@ -4,8 +4,11 @@ Upstream: `docs/plans/2026-07-26-iteration-disposition-vocabulary.md` rev5
 (approved 2026-07-26). Track: **irreversible**. Slice S5 of the ratified slate in
 `docs/briefs/2026-07-26-design-phase-r5-synthesis.md`.
 
-**Rev 2** — incorporates all 17 findings of spec-panel round 1 (1 high, 14
-medium, 2 low; 0 dismissed):
+**Rev 3** — incorporates spec-panel round 1 (17 findings) and round 2 (12 after
+cross-model dedup: 3 high, 9 medium); 0 dismissed in either wave. Round 2's
+reviewer roster changed mid-wave: `claude-fable-5` infra-failed twice without a
+verdict and was replaced by `openai-codex/gpt-5.6-luna:xhigh` per
+`phase-pr-review.md` §5's dispatch-recovery rule. Record:
 `docs/reviews/spec-review-iteration-disposition-vocabulary-2026-07-26/consolidated.md`.
 Rewritten whole rather than patched: three of round 1's findings were
 enumeration/pointer drift, the defect class this run has regenerated in every
@@ -42,6 +45,34 @@ next reader (`SPEC-R1-05`).
 | **Class** | (b) — no deliverable changes; the Spec gains the contract and scenario it was missing. |
 | **Disposition** | The obligation is already satisfied; it is now gated by **IDV24**, and N1's wording is narrowed to exclude it. |
 | **Author** | Orchestrator, Spec phase, 2026-07-26. |
+
+### A3 — id format gains a closed prefix mapping
+
+| | |
+|---|---|
+| **Trigger** | Round-1 finding `SPEC-R1-08`, formalised after round 2 (`SPEC-R2-01`) noted it changed locked Plan scope without a record. |
+| **Finding** | Plan D11 and scope item 1 locked the id format as `<panelPhase>-R<round>-<nn>`. The framework's panel-phase tokens are `plan_review`/`spec_review`/`pr_review`/`task_validate`, so the prefix was underivable and `REOPENED(<id>)` resolution was not reproducible across sessions. |
+| **Class** | (b) — the id shape is unfrozen and unmerged; the mapping makes an existing field derivable rather than changing its role. |
+| **Disposition** | `<PREFIX>-R<round>-<nn>` with the closed mapping in §2. |
+| **In-place marker** | Plan D11 and scope item 1. |
+| **Author** | Orchestrator, Spec phase, 2026-07-26. |
+
+### A4 — `barred` added to the disposition set
+
+| | |
+|---|---|
+| **Trigger** | Round-1 finding `SPEC-R1-09`; round 2 (`SPEC-R2-01`, high, raised independently by both reviewers) established that justifying it in an *assumption* was not sufficient — an assumption cannot override locked Plan scope. |
+| **Finding** | Plan D12 and scope item 1 locked a four-value disposition set. A reopen failing the evidence bar is a named outcome with no legal value in it, so the mandatory disposition field had nothing to record. |
+| **Class** | (b) — purely additive: no committed artifact uses the four-value set, so nothing is retrofitted. `barred` is distinct from `dismissed` because it is a mechanical consequence of the evidence rule, not a human-ratified verdict. |
+| **Disposition** | Five-value set in §2. |
+| **In-place marker** | Plan D12 and scope item 1. |
+| **Author** | Orchestrator, Spec phase, 2026-07-26. |
+
+> **Amendment hygiene.** A1's fold also required correcting the Plan's
+> **Objective** pointer (which still named `templates/sdlc-tasks.md`) and A2's
+> row-11 marker, both missing from rev2 and found by round 2 (`SPEC-R2-04`,
+> `SPEC-R2-05`). Every amendment recorded here now has a matching in-place
+> marker, mechanically asserted by **IDV32**.
 
 ## 2. Vocabulary (normative)
 
@@ -137,7 +168,7 @@ review rounds**, reconciling it with row 8.
 |---|---|---|---|---|
 | `phase-plan.md` | §5 | `CARRY-TO-SPEC` | — (no `CARRY-TO-PLAN` exists) | — |
 | `phase-spec.md` | §5 | `CARRY-TO-BUILD` | `CARRY-TO-SPEC` | the Spec **gate** |
-| `phase-tasks.md` | §8 | — | `CARRY-TO-BUILD` | build-plan **completion evidence** (Build has no gate — `phase-tasks.md:83-86`) |
+| `phase-tasks.md` | §8 | **`CARRY-TO-IMPLEMENT`** (minted as a spec-gap log disposition, C5) | `CARRY-TO-BUILD` | build-plan **completion evidence** (Build has no gate — `phase-tasks.md:83-86`) |
 | `phase-implement.md` | **§4** (landing) + **§5** (block) | — | `CARRY-TO-IMPLEMENT` | **task close** at the per-task validator seam |
 | `phase-pr-review.md` | §5 | `CARRY-TO-BACKLOG` | every carry minted in the run | the **PR gate**, pending a filed issue id |
 
@@ -155,9 +186,12 @@ review rounds**, reconciling it with row 8.
   reversible track Spec is not a legal destination). `CARRY-TO-BACKLOG` is
   terminal and universally available, so a callout would be misleading
   (`SPEC-R1-16`).
-- **Outbound statements are gated** by IDV26 — rev1 gated only the callout
-  *form*, which a spec with zero outbound statements satisfied vacuously
-  (`SPEC-R1-01`).
+- **Every outbound statement is gated** by IDV26 — all four, not two: rev1 gated
+  only the callout *form* (vacuous with zero statements, `SPEC-R1-01`), and rev2
+  still omitted `CARRY-TO-IMPLEMENT` and `CARRY-TO-BACKLOG` (`SPEC-R2-02`,
+  `SPEC-R2-03`). `CARRY-TO-IMPLEMENT` previously had **no minting owner at all**:
+  C5 permitted it as a spec-gap disposition while C3 gave `phase-tasks.md` no
+  outbound column — a legal disposition no phase could emit.
 
 ### C4 — Amendment classes (phase-neutral, D3)
 
@@ -242,7 +276,7 @@ is proved once, in this slice's diff.
 | N2 | **Test budget.** New scenarios make **no model calls and no network calls**; local `git` subprocesses are permitted, matching the corpus (`test/frozen-surfaces.test.js:44-48` uses `execFileSync("git", …)`). Whole-suite runtime delta target ~2s, **advisory** — no measurement procedure is specified, so it is not claimed as a gate (`SPEC-R1-03`). | IDV17 |
 | N3 | **Reference size.** Glossary ≤ 60 lines (mechanical); `phase-pr-review.md` §5 remains navigable after the C2 additions (inspection). | IDV25, IDV18 |
 | N4 | **Frozen-surface integrity.** Every frozen surface except the three named prompts is byte-identical to the branch base. | IDV19 |
-| N5 | **No consumer breakage.** A repo upgrading to this release gains prose obligations only; nothing it has committed becomes invalid. | IDV20 (inspection) |
+| N5 | **No consumer breakage — bounded claim.** Within **this repository's** committed artifacts (`docs/plans/*`, `docs/specs/*`, `docs/reviews/*/consolidated.md`, `.pi/sdlc/*`), nothing becomes invalid under the new prose. Consumer repos are **out of scope** by the Plan's own boundary, so no claim is made about them (`SPEC-R2-12` — rev2's universal claim was unfalsifiable and contradicted that boundary). | IDV20 (inspection, bounded) |
 
 ## 5. Verification scenarios
 
@@ -264,26 +298,47 @@ it by reading the diff; deliberately leaves no standing test).
 | **IDV10** | mechanical | §6 of those three contains a class-(a) pointer and **no** class-(b)/(c) definition. | §6 defines forward amendment |
 | **IDV11** | mechanical | Every outbound carry statement **except `CARRY-TO-BACKLOG`** sits within an "under your configuration" callout. | any conditional destination stated unconditionally, or backlog wrapped in a callout |
 | **IDV12** | mechanical | The four inbound checkpoints of C3 each appear in their named reference **and section**, including `phase-implement.md` §4 landing + §5 block. | any missing or in the wrong section |
+| **IDV29** | mechanical | `phase-implement.md` §5 states the `review.tasks: off` fallback routing the carry obligation to the PR panel's carry-landing surface. | absent — in which case the claim "no configuration leaves the carry unchecked" is false (`SPEC-R2-07`) |
+| **IDV30** | mechanical | The existing "**Only** … escalate" sentence at `phase-pr-review.md:205-207` is itself amended to admit ratified-decision collisions as a third case. | a collision rule is appended elsewhere while the "Only" sentence stands unchanged — the contradiction `SPEC-R1-06` identified, surviving (`SPEC-R2-08`) |
+| **IDV31** | mechanical | The `finding class` ↔ `defect class` alias sentence appears **at the binds-forward paragraph** (`phase-pr-review.md:209-217`), not merely somewhere in §5. | the alias exists only in the glossary or elsewhere in §5 (`SPEC-R2-09`) |
+| **IDV32** | mechanical | For every amendment record `A<n>` in this Spec's §1, the Plan contains a matching in-place `AMENDED, class (b)` marker naming it. | any amendment discoverable only downstream — the C4(b) rule ungated (`SPEC-R2-06`) |
 | **IDV13** | mechanical | `phase-pr-review.md` states the backlog checkpoint. | absent |
-| **IDV14** | mechanical | `phase-tasks.md` §4 specifies the spec-gap log with all four columns, the explicit-"none" rule, and the inbound-carry source; **`templates/sdlc-tasks.md` is byte-identical to the branch base**. | a column missing, source omitted, or the template modified |
+| **IDV14** | mechanical | `phase-tasks.md` §4 specifies the spec-gap log with all four columns, **their exact allowed values** (severity `blocker`\|`minor`; disposition `backward-transition`\|`assumption-recorded`\|`CARRY-TO-IMPLEMENT`), the explicit-"none" rule, and the inbound-carry source; **`templates/sdlc-tasks.md` is byte-identical to the branch base**. | a column missing, an enum value absent or extended, source omitted, or the template modified (`SPEC-R2-10`) |
 | **IDV15** | mechanical | Each of the three adversary prompts contains the delta-round law and its C6 clause; `adversary-plan` states the explicit "no `CARRY-TO-PLAN`"; `validator-task.prompt.md` is byte-identical to the branch base. | any prompt lacks its clause, or the validator prompt changed |
 | **IDV16** | mechanical | No file under `skills/sdlc/scripts/`, `skills/sdlc/schema/`, or `.github/workflows/` differs from the branch base. | any differs (N1) |
 | **IDV17** | mechanical | The full corpus passes; new scenarios make no model call and no network call. | any new test calls a model or the network (N2) |
 | **IDV18** | inspection (spec + PR panel) | `phase-pr-review.md` §5 remains navigable after the C2 additions. | panel judges it unnavigable (N3) |
 | **IDV19** | mechanical | `frozen-surfaces.test.js` passes with the three prompts removed and every other entry retained; its header names the re-freeze follow-up. | any other frozen file differs, or the header lacks the note (N4) |
-| **IDV20** | inspection (PR panel) | Nothing a consumer repo has committed becomes invalid under the new prose. | panel identifies a breaking obligation (N5) |
+| **IDV20** | inspection (PR panel) | No artifact committed **in this repository** at the named N5 paths becomes invalid under the new prose. | panel identifies a committed artifact at those paths that the new obligations invalidate (N5) |
 | **IDV21** | diff-inspection (PR panel) | `.pi/sdlc/workflow.md` contains none of the four promoted rules and all six retained ones. | any promoted rule survives, or a retained rule is lost (C8 — deliberately no standing test) |
 | **IDV22** | inspection (PR panel) | No phase reference restates a glossary *definition* (Plan DoD 2a). | panel finds a duplicated definition |
 | **IDV23** | mechanical | `test/phase-references.test.js` still passes for all six references. | any reference breaks the heading contract |
 | **IDV24** | mechanical | `config-doc check` reports `current` for `.pi/sdlc/CONFIG.md`. | reports `stale`/`missing`/`error` (A2, Plan DoD 9) |
 | **IDV25** | mechanical | The glossary section is ≤ 60 lines. | 61+ lines (N3) |
-| **IDV26** | mechanical | `phase-plan.md` §5 contains `CARRY-TO-SPEC` and `phase-spec.md` §5 contains `CARRY-TO-BUILD`. | either outbound statement absent (`SPEC-R1-01`) |
+| **IDV26** | mechanical | **All four** outbound statements exist at their C3 homes: `CARRY-TO-SPEC` in `phase-plan.md` §5, `CARRY-TO-BUILD` in `phase-spec.md` §5, `CARRY-TO-IMPLEMENT` in `phase-tasks.md` §8, `CARRY-TO-BACKLOG` in `phase-pr-review.md` §5. | any outbound statement absent (`SPEC-R1-01`, `SPEC-R2-02`, `SPEC-R2-03`) |
 | **IDV27** | mechanical | `phase-tasks.md` states that `assumption-recorded` entries route to the existing Assumptions appendix. | absent, or specifies a duplicate ledger |
 | **IDV28** | mechanical | Each of the three prompts' STRICT output formats includes an `origin:` field. | any lacks it (`SPEC-R1-12`) |
 
-**Coverage: 23 mechanical, 4 inspection, 1 diff-inspection = 28.** Counted from
-the table's own kind labels. Every contract C1–C8 has ≥1 mechanical scenario;
-every NFR N1–N5 is bound.
+### Coverage
+
+**No totals are stated.** A hand-maintained count of this table has drifted three
+times in this run (`PLAN-R3-04`, `SPEC-R1-02`, `SPEC-R2-11`); the kind labels in
+the rows are the only source, and coverage is asserted per contract instead:
+
+| Contract | Gating scenarios |
+|---|---|
+| C1 glossary | IDV1, IDV2, IDV3, IDV25 |
+| C2 panel run-shape | IDV5, IDV6, IDV7, IDV8, IDV13, IDV30, IDV31, IDV18 (inspection) |
+| C3 carry dispositions | IDV11, IDV12, IDV26, IDV29 |
+| C4 amendment classes | IDV9, IDV10, IDV32 |
+| C5 spec-gap log | IDV14, IDV27 |
+| C6 reviewer prompts | IDV15, IDV28 |
+| C7 frozen surfaces | IDV16, IDV19 |
+| C8 consumer `workflow.md` | **IDV21 only — deliberately diff-inspection, no standing test.** This is the one contract with no mechanical scenario, by ratified decision (`PLAN-R1-07`): a package test asserting consumer process text would invert the gate/process authority rule. Stated plainly rather than hidden behind a coverage claim (`SPEC-R2-11`). |
+| glossary citations | IDV4 |
+| corpus integrity | IDV17, IDV23, IDV24 |
+
+Every NFR N1–N5 is bound (see §4).
 
 ## 6. Out of scope
 
@@ -304,4 +359,6 @@ post-merge re-freeze PR is its own track:none change.
    panel judges otherwise (IDV18), a §5 sub-structure is a presentation change
    needing no Plan amendment.
 4. Adding `barred` as a fifth disposition is additive: no committed artifact
-   currently uses the four-value set, so nothing is retrofitted.
+   currently uses the four-value set, so nothing is retrofitted. Recorded as
+   Plan amendment **A4**, not left as an assumption — an assumption cannot
+   override locked Plan scope (`SPEC-R2-01`).
