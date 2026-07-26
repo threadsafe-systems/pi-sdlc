@@ -156,6 +156,13 @@ contracts are implementable as written.
 4. Full-corpus task validators must not be dispatched in parallel — a prior run
    flaked `check-references.test.js` (cwd-sensitive spawn) with three concurrent
    `npm test` invocations. Validators run serially.
+5. **`npx biome check .` is red on the branch base.** Three pre-existing
+   `FIXABLE` findings sit in `docs/briefs/assets/2026-07-23-orchestration-runtime-prototype/`
+   (spike sources committed with the #162 prototype brief), unrelated to this
+   slice. Each task's PV1 `static` check is therefore scoped to the surfaces that
+   task touches, which is what DoD 8's "biome clean" can honestly mean here; the
+   base debt is left for its own `track:none` change, the #166 pattern. Recorded
+   during T1 (2026-07-26).
 
 ## Tracker
 

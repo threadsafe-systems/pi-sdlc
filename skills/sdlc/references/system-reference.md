@@ -409,3 +409,62 @@ priorities, or external state only the human knows. A question about what the
 code, config, or docs currently do means the reading was skipped — read first,
 using the degraded research fallbacks above when richer tooling is missing.
 
+## 15. Iteration & disposition
+
+The vocabulary for findings as they cross gates. Three **disjoint kinds**, never
+conflated: an *origin tag* says where a finding came from this round, a
+*disposition* says what was decided about it, a *defect class* says what kind of
+defect it is. Terms only — who mints an id, when a panel re-dispatches, and what
+a gate does are mechanics, owned by `references/phase-*.md`.
+
+**Origin tags.** `NEW` — raised for the first time this round.
+`REOPENED(<id>)` — re-raising an already-dispositioned finding, naming it.
+
+**Reopen evidence bar.** `REOPENED(<id>)` is legal only when the finding cites
+evidence that did not exist, or was not available, when `<id>` was
+dispositioned. A reopen failing the bar takes disposition `barred`.
+
+**Dispositions** — five values, exhaustive:
+
+| Value | Meaning |
+|---|---|
+| `incorporated` | the artifact changed to satisfy the finding |
+| `dismissed` | a human-ratified verdict that the finding does not hold |
+| `barred` | a reopen that failed the evidence bar — a mechanical consequence of that rule, not a ratified verdict |
+| `CARRY-TO-<dest>` | valid, but belongs to a later phase; moved there with a landing site |
+| `escalated` | put to the owner to decide, rather than settled in-phase |
+
+**Defect class.** The free-text semantic category of a defect (for example
+"objective contradiction"). Pre-existing; this vocabulary records it and does
+not redefine it. `references/phase-pr-review.md` §5 calls the same concept
+**finding class** — the two names are aliases for one concept.
+
+**Finding record shape.** Every consolidated finding row carries: `id`, origin
+tag, defect class, severity, disposition, a one-line reason, and — when the
+disposition is a carry — its **landing site**.
+
+**Id format.** `<PREFIX>-R<round>-<nn>`, unique within the run, with `<PREFIX>`
+from this closed mapping off the panel phase: `plan_review` → `PLAN`,
+`spec_review` → `SPEC`, `pr_review` → `PR`, `task_validate` → `TASK`. The id is
+the handle `REOPENED(<id>)` resolves against; it is **not** the binds-forward
+key — that stays the defect class.
+
+**Carry destinations.** `CARRY-TO-SPEC`, `CARRY-TO-BUILD`,
+`CARRY-TO-IMPLEMENT`, `CARRY-TO-BACKLOG`.
+
+**No-orphan rule.** A carry is discharged only once it has landed at its named
+destination, verified at one of four checkpoint kinds: the **Spec gate**, the
+build plan's **completion evidence**, **task close** at the per-task validator
+seam, and the **PR gate** — where a `CARRY-TO-BACKLOG` lands as a filed issue id.
+
+**Ratified-decision collision.** A finding contradicting an owner-ratified
+decision is **escalated to the owner**: never absorbed, never silently
+dismissed.
+
+**Amendment classes.** (a) touches a shape already frozen, merged, or bound to →
+backward transition, and the gate re-runs. (b) refines an unfrozen shape
+pre-merge → amend it in place, recording trigger, class, disposition and author;
+no new panel. Where a *later* phase authors the amendment, the full record may
+live in that phase's artifact only if the amended artifact carries an **in-place
+marker** naming that record. (c) a reviewer-grade contradiction found later →
+a normal fix wave.
