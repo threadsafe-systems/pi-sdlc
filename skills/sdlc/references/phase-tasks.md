@@ -75,6 +75,23 @@ it at claim time. The build-plan doc also carries an **"Assumptions"
 appendix** — the accrual home Implement appends discretionary calls to as
 tasks complete (`references/phase-implement.md`).
 
+**Spec gap log.** The build-plan doc carries a **Spec gap log**: one row per
+upstream deficiency, whether found during decomposition or **carried inbound
+from Spec** as a `CARRY-TO-BUILD`. Four columns, with exactly these values:
+
+| Column | Contents |
+|---|---|
+| description | the deficiency, in one line |
+| severity | `blocker` \| `minor` |
+| disposition | `backward-transition` \| `assumption-recorded` \| `CARRY-TO-IMPLEMENT` |
+| landing site | where that disposition discharges |
+
+An empty log is written as an explicit "none", **never omitted** — an absent log
+and a clean decomposition are otherwise indistinguishable. `assumption-recorded`
+**routes the entry to the existing "Assumptions" appendix** above, rather than
+opening a second ledger. The vocabulary is
+`references/system-reference.md`, "Iteration & disposition".
+
 > **Under your configuration:** the artifact home uses committed `paths.plans`;
 > do not hardcode `docs/plans`.
 
@@ -92,7 +109,9 @@ is validated downstream, per-task, during Implement.
 Standalone `sdlc:tasks` refuses-with-redirect when its committed scenario/id
 upstream is absent, in any adoption state, emitting no fabricated ids or check
 tables. Backward transition to Spec/Plan is always allowed when decomposition
-reveals an upstream gap.
+reveals an upstream gap. A class **(a)** amendment (§8) resolves here: it touches
+a shape already frozen, merged, or bound to, so it is a backward transition to
+the phase that owns that shape, whose gate re-runs.
 
 ## 7. After-hook order and warning semantics
 
@@ -102,7 +121,28 @@ first, then `*`. A failed `after` hook **warns** (recorded, never blocking).
 ## 8. Completion evidence and next transition
 
 Completion evidence is the committed build-plan doc (and, above threshold, its
-tracker projection). Next transition is **Implement** (`references/phase-implement.md`).
+tracker projection), **plus a discharged carry ledger**: every `CARRY-TO-BUILD`
+minted at Spec has landed in this build plan — in the spec gap log, in a task, or
+in the Assumptions appendix — at the landing site its record names. Build has no
+gate, so completion evidence is where the no-orphan rule of
+`references/system-reference.md`, "Iteration & disposition", is checked here.
+Next transition is **Implement** (`references/phase-implement.md`).
+
+**Amending an approved breakdown.** Class **(a)** touches a shape already
+frozen, merged, or bound to: a backward transition (§6). Class **(b)** refines
+this still-unfrozen, unmerged breakdown: amend it in place, recording the
+trigger, the class, the disposition and the author — and where the amendment
+touches an already-approved task's checks or its PV1 manifest, that task's
+approval is **renewed**, never assumed to carry over. Class **(c)**, a
+reviewer-grade contradiction surfacing later, is handled as a normal fix wave.
+Build has no gate, so the question an amendment answers here is renewed task
+approval rather than a re-run gate.
+
+> **Under your configuration:** a deficiency this phase cannot resolve, and that
+> the next phase must, takes the disposition `CARRY-TO-IMPLEMENT` in the spec gap
+> log, recorded with its landing site. Implement is the next phase in the
+> *effective configured sequence*, so read that sequence from current
+> `CONFIG.md` (or authoritative `sdlc.config.json`) rather than assuming it.
 
 ## 9. Advanced-mode pointers — tracker-backed Build (epic + sub-issues + board)
 

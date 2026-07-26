@@ -1,0 +1,108 @@
+{
+  "schemaVersion": 1,
+  "taskId": "t4",
+  "buildPlan": "docs/plans/2026-07-26-iteration-disposition-vocabulary-build.md",
+  "repoRoot": ".",
+  "ownedScenarios": [
+    "IDV10",
+    "IDV12",
+    "IDV14",
+    "IDV26",
+    "IDV27",
+    "IDV29",
+    "IDV9"
+  ],
+  "checks": [
+    {
+      "id": "tests.full",
+      "argv": [
+        "npm",
+        "test"
+      ],
+      "timeoutMs": 300000,
+      "scope": [
+        "full"
+      ],
+      "evidence": [
+        "whole-corpus regression net is green"
+      ]
+    },
+    {
+      "id": "tests.task",
+      "argv": [
+        "node",
+        "--test",
+        "test/iteration-disposition.test.js"
+      ],
+      "timeoutMs": 120000,
+      "scope": [
+        "task"
+      ],
+      "evidence": [
+        "amendment-class homes, carry checkpoints, spec-gap log, tasks:off fallback (IDV9/10/12/14/26/27/29)"
+      ]
+    },
+    {
+      "id": "static.lint",
+      "argv": [
+        "npx",
+        "biome",
+        "check",
+        "test/iteration-disposition.test.js"
+      ],
+      "timeoutMs": 120000,
+      "evidence": [
+        "the task's only lintable surface is biome-clean"
+      ]
+    }
+  ],
+  "categories": {
+    "tests": {
+      "applicability": "required",
+      "checkIds": [
+        "tests.full",
+        "tests.task"
+      ]
+    },
+    "static": {
+      "applicability": "required",
+      "checkIds": [
+        "static.lint"
+      ]
+    },
+    "scenarios": {
+      "applicability": "required",
+      "evidence": {
+        "IDV9": [
+          "tests.task"
+        ],
+        "IDV10": [
+          "tests.task"
+        ],
+        "IDV12": [
+          "tests.task"
+        ],
+        "IDV14": [
+          "tests.task"
+        ],
+        "IDV26": [
+          "tests.task"
+        ],
+        "IDV27": [
+          "tests.task"
+        ],
+        "IDV29": [
+          "tests.task"
+        ]
+      }
+    },
+    "standards": {
+      "applicability": "n/a",
+      "reason": "no governing standard beyond the declared lint check applies to a prose-only reference section"
+    },
+    "bannedPatterns": {
+      "applicability": "n/a",
+      "reason": "no task-diff pattern prohibition beyond lint applies to this task"
+    }
+  }
+}

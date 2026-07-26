@@ -266,6 +266,100 @@ test("IDV11: CARRY-TO-BACKLOG is stated unconditionally, never wrapped in a call
 	assert.ok(body.includes("CARRY-TO-BACKLOG"), "test premise broken: CARRY-TO-BACKLOG is absent from phase-pr-review.md §5");
 });
 
+// --- C3/C4/C5: amendment classes, checkpoints, spec-gap log (T4) -------------
+
+// Where each amendment-class statement lives, per the Spec's C4 placement table.
+const AMENDMENT_HOMES = [
+	{ slug: "plan", section: 5 },
+	{ slug: "spec", section: 5 },
+	{ slug: "tasks", section: 8 },
+];
+
+test("IDV9: the three amendment classes appear at their C4 homes", () => {
+	for (const { slug, section } of AMENDMENT_HOMES) {
+		const body = numberedSection(reference(slug), section);
+		assert.ok(body, `phase-${slug}.md §${section} not found`);
+		for (const cls of ["(a)", "(b)", "(c)"]) {
+			assert.ok(body.includes(`**${cls}**`), `phase-${slug}.md §${section} does not state amendment class ${cls}`);
+		}
+	}
+});
+
+test("IDV10: §6 of those three carries a class-(a) pointer and defines no forward amendment", () => {
+	for (const { slug } of AMENDMENT_HOMES) {
+		const body = numberedSection(reference(slug), 6);
+		assert.ok(body, `phase-${slug}.md §6 not found`);
+		assert.match(body, /class\s+\*\*\(a\)\*\*/, `phase-${slug}.md §6 lacks the class-(a) pointer`);
+		for (const cls of ["(b)", "(c)"]) {
+			assert.ok(!body.includes(cls), `phase-${slug}.md §6 defines forward-amendment class ${cls}; §6 means the opposite`);
+		}
+	}
+});
+
+test("IDV26: all four outbound carry statements exist at their C3 homes", () => {
+	const homes = [
+		{ slug: "plan", section: 5, token: "CARRY-TO-SPEC" },
+		{ slug: "spec", section: 5, token: "CARRY-TO-BUILD" },
+		{ slug: "tasks", section: 8, token: "CARRY-TO-IMPLEMENT" },
+		{ slug: "pr-review", section: 5, token: "CARRY-TO-BACKLOG" },
+	];
+	for (const { slug, section, token } of homes) {
+		const body = numberedSection(reference(slug), section);
+		assert.ok(body, `phase-${slug}.md §${section} not found`);
+		assert.ok(body.includes(token), `phase-${slug}.md §${section} mints no ${token} — a disposition no phase can emit`);
+	}
+});
+
+test("IDV12: the four inbound carry checkpoints appear in their named reference and section", () => {
+	const checkpoints = [
+		{ slug: "spec", section: 5, token: "CARRY-TO-SPEC", blocks: /blocks\s+the\s+gate/i },
+		{ slug: "tasks", section: 8, token: "CARRY-TO-BUILD", blocks: /completion\s+evidence/i },
+		{ slug: "implement", section: 5, token: "CARRY-TO-IMPLEMENT", blocks: /does\s+not\s+close/i },
+		{ slug: "pr-review", section: 5, token: "every carry minted anywhere in this run", blocks: /before\s+the\s+gate\s+passes/i },
+	];
+	for (const { slug, section, token, blocks } of checkpoints) {
+		const body = numberedSection(reference(slug), section);
+		assert.ok(body, `phase-${slug}.md §${section} not found`);
+		const flat = body.replace(/\s+/g, " ");
+		assert.ok(flat.includes(token), `phase-${slug}.md §${section} states no inbound checkpoint for ${token}`);
+		assert.match(flat, blocks, `phase-${slug}.md §${section} names the carry but blocks nothing on it`);
+	}
+	// The landing site is §4, distinct from the §5 block (SPEC-R1-13).
+	assert.match(numberedSection(reference("implement"), 4), /CARRY-TO-IMPLEMENT/, "phase-implement.md §4 has no carry landing beside the Assumptions appendix");
+});
+
+test("IDV29: phase-implement.md §5 states the review.tasks: off fallback", () => {
+	const body = numberedSection(reference("implement"), 5).replace(/\s+/g, " ");
+	assert.match(body, /`review\.tasks: off`/, "the fallback does not name `review.tasks: off`");
+	assert.match(body, /no\s+configuration\s+leaves\s+a\s+carry\s+unchecked/i, "the fallback does not route the obligation to the PR panel");
+});
+
+test("IDV14: phase-tasks.md §4 specifies the spec-gap log with its exact columns and enums", () => {
+	const body = numberedSection(reference("tasks"), 4);
+	assert.ok(body, "phase-tasks.md §4 not found");
+	const flat = body.replace(/\s+/g, " ");
+	assert.match(flat, /Spec\s+gap\s+log/i, "§4 does not specify a spec gap log");
+	for (const column of ["description", "severity", "disposition", "landing site"]) {
+		assert.ok(flat.includes(column), `spec gap log missing column: ${column}`);
+	}
+	for (const value of ["`blocker`", "`minor`", "`backward-transition`", "`assumption-recorded`", "`CARRY-TO-IMPLEMENT`"]) {
+		assert.ok(flat.includes(value), `spec gap log missing enum value: ${value}`);
+	}
+	assert.match(flat, /carried\s+inbound\s+from\s+Spec/i, "the log's inbound-carry source is omitted");
+	assert.match(flat, /never\s+omitted/i, 'the explicit-"none" rule is absent');
+});
+
+test("IDV14: templates/sdlc-tasks.md is byte-identical to the branch base", () => {
+	const changed = execFileSync("git", ["-C", repo, "diff", "--name-only", baseRef(), "--", "templates/sdlc-tasks.md"], { encoding: "utf8" }).trim();
+	assert.equal(changed, "", "the standalone-entrypoint router is a thin router; the spec-gap log belongs to phase-tasks.md §4");
+});
+
+test("IDV27: assumption-recorded routes to the existing Assumptions appendix", () => {
+	const body = numberedSection(reference("tasks"), 4).replace(/\s+/g, " ");
+	assert.match(body, /`assumption-recorded`\s+\*\*routes\s+the\s+entry\s+to\s+the\s+existing/i, "assumption-recorded does not route to the existing appendix");
+	assert.match(body, /rather\s+than\s+opening\s+a\s+second\s+ledger/i, "the no-duplicate-ledger rule is absent");
+});
+
 test("IDV31: the finding-class alias sits at the binds-forward paragraph", () => {
 	const bindsForward = paragraphContaining(prReviewGateSeam, "binds forward");
 	assert.ok(bindsForward, "the binds-forward paragraph is not in §5");
