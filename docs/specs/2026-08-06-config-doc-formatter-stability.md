@@ -48,12 +48,13 @@ Changed:
 - `.pi/sdlc/CONFIG.md`: v2 sentinel, fingerprint, generator identity, and adaptive `panels` value span.
 - `docs/specs/2026-07-18-sdlc-agent-self-documentation.md`: rev-3 §§12–14 amendment.
 - `test/config-doc.test.js`: v2 identity, adaptive spans, legacy recognition/regeneration, and regression witnesses.
+- `test/fixtures/config-doc/v1-valid-config.md`: new byte-pinned v1 baseline render for CDFS7.
 
 Unchanged:
 
 - `config-doc.sh` and all CLI syntax.
 - `sdlc.config.json` and config schema.
-- `CURRENT_CONFIG_SCHEMA_VERSION` and every FS8/FS9 frozen surface.
+- `CONFIG_SCHEMA_VERSION` and every FS8/FS9 frozen surface.
 - JSON output schemaVersion 1 for `config-doc check`.
 - `canonicalJson`, fingerprint algorithm shape, sentinel grammar, and collision matrix.
 

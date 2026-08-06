@@ -10,8 +10,10 @@ Orchestrator: `anthropic/claude-opus-5`
 | --- | ---: | --- | --- | --- |
 | 1 | 1 | `claude-fable-5` | `round1-claude-fable-5.md` | 1 medium, 1 low |
 | 1 | 1 | `gemini-3.1-pro-preview` | `round1-gemini-3.1-pro-preview.md` | 1 high |
+| 2 | 2 | `claude-fable-5` | `round2-claude-fable-5.md` | 2 low |
+| 2 | 2 | `gemini-3.1-pro-preview` | `round2-gemini-3.1-pro-preview.md` | clear |
 
-Telemetry: `panel.dispatched{round:1,wave:1}` → harvest round 1 → this `panel.consolidated` record.
+Telemetry: each `panel.dispatched{round:n,wave:n}` has its matching harvest and `panel.consolidated` record.
 
 ## Round 1 findings
 
@@ -23,4 +25,19 @@ Telemetry: `panel.dispatched{round:1,wave:1}` → harvest round 1 → this `pane
 
 **Counts:** 1 high, 1 medium, 1 low. Incorporated 3; dismissed 0; barred 0; carries 0.
 
-Both reviewers' CLEAR claims were checked against the source. No inbound carry exists. A full delta round is required because the first wave contained high/medium findings.
+Both reviewers' CLEAR claims were checked against the source. No inbound carry exists. A full delta round was required because the first wave contained high/medium findings.
+
+## Round 2 findings
+
+Every round-1 disposition was confirmed incorporated.
+
+| id | severity | origin | defect | disposition |
+| --- | --- | --- | --- | --- |
+| `SPEC-R2-01` | low | NEW | Changed-surface inventory omitted the newly pinned v1 fixture | **incorporated** — fixture path added to §4 |
+| `SPEC-R2-02` | low | NEW | Unchanged-surface list named nonexistent `CURRENT_CONFIG_SCHEMA_VERSION` | **incorporated** — corrected to the real `CONFIG_SCHEMA_VERSION` |
+
+**Round-2 counts:** 0 high, 0 medium, 2 low. Incorporated 2; dismissed 0; barred 0; carries 0.
+
+## Stop condition
+
+No high or medium finding survives adjudication. Low findings are incorporated and do not require another round. No carry exists. The Specification is ready for human approval.
