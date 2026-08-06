@@ -12,6 +12,8 @@ Target: `docs/specs/2026-08-06-diff-scoped-test-premises.md` rev 1 at
 | --- | ---: | --- | --- | --- |
 | 1 | 1 | `claude-fable-5` | `round1-claude-fable-5.md` | `panel.dispatched{round:1,wave:1}` + `panel.harvested{round:1,wave:1}` |
 | 1 | 1 | `gemini-3.1-pro-preview` | `round1-gemini-3.1-pro-preview.md` | same workflow/harvest |
+| 2 | 2 | `claude-fable-5` | `round2-claude-fable-5.md` | `panel.dispatched{round:2,wave:2}` + `panel.harvested{round:2,wave:2}` |
+| 2 | 2 | `gemini-3.1-pro-preview` | `round2-gemini-3.1-pro-preview.md` | same workflow/harvest |
 
 The async workflow's `status.json` held both reviewer outputs. The mechanical
 harvester persisted the workflow status/events/meta; the two markdown artifacts
@@ -100,9 +102,40 @@ stale exemption fails; every reason remains mandatory and non-empty.
 - No formal `CARRY-TO-SPEC` appears in the Plan-panel consolidated record; §1's
   no-orphan claim remains correct.
 
+## Round 2 (delta `1c8a706..442668d`)
+
+Both reviewers confirmed `SPEC-R1-01` through `SPEC-R1-08` discharged. No
+`REOPENED` tags.
+
+| id | severity | origin | reviewer(s) | defect | disposition |
+| --- | --- | --- | --- | --- | --- |
+| `SPEC-R2-01` | medium | NEW | fable-5 | IDV17's revised empty-set regex assertion has no mutation witness; a rotted regex passes forever | **incorporated** |
+| `SPEC-R2-02` | low | NEW | fable-5 | C4.1 mislabels DSP4-DSP6 as C1-law scenarios although C4.5 correctly assigns C1 to DSP1-DSP3 | **incorporated** |
+| `SPEC-R2-03` | low | NEW | fable-5 | "declaration of" over-claims a regex that matches function declarations but not arrow assignment declarations | **incorporated** |
+
+Gemini returned CLEAR A-H with no findings. **Counts:** 0 high, 1 medium, 2
+low. Incorporated 3; dismissed 0; barred 0; carries 0.
+
+### `SPEC-R2-01` — negative assertion made non-vacuous
+
+C5.1 now requires the line-471 subprocess regex to be hoisted and exercised
+against an in-memory `execFileSync("fixture"` sample assembled from split tokens
+before it asserts the real source returns `[]`. New DSP16 gates both halves and
+the C5 trace now includes it.
+
+### `SPEC-R2-02` and `-03` — prose narrowed to mechanism
+
+C4.1 now assigns DSP1-DSP3 to the C1 law and DSP4-DSP7 to the guard. C4.2 now
+says "call to or **function declaration** of" `baseRef`/`baseFile`, matching the
+normative regex without claiming arrow-assignment coverage.
+
 ## Dismissal posture
 
-Round 1 incorporated 8/8 findings. This is the first 100%-incorporation wave, so
-it does not trigger the two-consecutive-wave disclosure threshold. Every finding
-was checked against source or executed regex behaviour before incorporation;
-none was absorbed merely because a reviewer proposed it.
+Rounds 1 and 2 both incorporated 100% of findings (8/8, then 3/3). This triggers
+the two-consecutive-wave disclosure threshold and is reported rather than filed
+as diligence. Each finding was independently checked against source or executed
+regex behaviour. Round 2 also had genuine cross-model disagreement — Gemini was
+clean while Fable found the three delta defects — but every Fable claim verified.
+Because round 2 has no high and one medium from one reviewer, the trim-the-tail
+rule applies: after rev 3, re-dispatch only Fable for a sub-floor delta
+confirmation.

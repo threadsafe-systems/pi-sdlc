@@ -4,8 +4,9 @@ Upstream: `docs/plans/2026-08-06-diff-scoped-test-premises.md` rev 4,
 approved by Neil on 2026-08-06 after the round-3 churn restructure. Track:
 **irreversible**. Resolves #208.
 
-**Rev 2** — incorporates spec-panel round 1 (2 high, 2 medium, 4 low after
-cross-model deduplication; 0 dismissed). Record:
+**Rev 3** — incorporates spec-panel round 1 (2 high, 2 medium, 4 low after
+cross-model deduplication) and delta round 2 (1 medium, 2 low); 0 dismissed.
+Record:
 `docs/reviews/spec-review-diff-scoped-test-premises-2026-08-06/consolidated.md`.
 
 This Spec fixes the normative law, pi-sdlc's local enforcement contract, the
@@ -86,8 +87,8 @@ second skill reference.
 
 ### C4.1 — home, sweep and result shape
 
-A new `test/diff-scoped-premises.test.js` owns both the guard and the standing
-C1-law scenarios DSP1-DSP6; it is the mechanical witness named by the #192
+A new `test/diff-scoped-premises.test.js` owns the C1-law scenarios DSP1-DSP3
+and guard scenarios DSP4-DSP7; it is the mechanical witness named by the #192
 handoff. It recursively scans all executable test source below `test/` whose
 extension is `.js`, `.mjs`, or `.cjs`. At the grounded commit `7710509`, that is 60 of the 74 files below
 `test/`; the other 14 are six JSON and eight Markdown fixtures, not executable
@@ -106,7 +107,8 @@ mandatory and non-empty.
 The detector is textual and deliberately narrower than the semantic law. It
 reports three syntactic shapes:
 
-1. a call to or declaration of a helper named `baseRef` or `baseFile`;
+1. a call to or function declaration of a helper named `baseRef` or
+   `baseFile`;
 2. an actual `execFileSync`, `spawnSync`, or `runProcess` git argv containing
    the `merge-base` operation; or
 3. one of those git argvs containing `show` or `diff` followed in that same argv
@@ -270,6 +272,9 @@ in that file after C5.2-C5.4. Amend IDV17's source-inventory expectation from
 uses no subprocess; also amend the file header from "shells out to local git"
 to "no subprocess or network calls". The source-inspection regex at today's
 line 471 remains useful data for proving the empty set and needs no import.
+Hoist that regex to a local constant and prove it non-vacuous with an in-memory
+sample assembled from split tokens that represents `execFileSync("fixture"`;
+the regex must report `fixture` before the real-source empty-set assertion runs.
 
 ### C5.2 — convert IDV3 to a literal current-tree invariant
 
@@ -369,6 +374,7 @@ untrusted input, and changes no persisted schema.
 | DSP13 | `CONTRIBUTING.md` contains all four C3 obligations and names `test/frozen-surfaces.test.js`. | Any local contributor rule is absent. |
 | DSP14 | Issue #192 contains the §7/C1-linked handoff naming DSP3 and the premise-durability law before the Spec gate closes. | The comment is absent, points elsewhere, or names no mechanical witness. |
 | DSP15 | Full `npm test` passes; touched surfaces pass Biome; `config-doc.mjs check` reports `current`; ASD19 passes with no `FROZEN` change. | Any command fails or a frozen path changes. |
+| DSP16 | IDV17's hoisted subprocess regex reports `fixture` from a split-token in-memory sample, then reports an empty set over the real file. | The mutation sample is not reported, the real file reports any executable, or the check can pass with a rotted regex. |
 
 ## 10. Outcome traceability
 
@@ -377,7 +383,7 @@ untrusted input, and changes no persisted schema.
 | adopter-facing law and implement pointer | C1-C2 | DSP1-DSP3 |
 | local contributing rule | C3 | DSP13 |
 | executed low-noise guard and reasoned exemptions | C4 | DSP4-DSP7, DSP12 |
-| four expired premises discharged | C5 | DSP8-DSP11 |
+| four expired premises discharged and IDV17 kept non-vacuous | C5 | DSP8-DSP11, DSP16 |
 | S1 carry landed durably | §7 | DSP3, DSP14 |
 | performance/offline compatibility | §8 N1-N4 | DSP4-DSP6, DSP12 |
 | suite, config companion and frozen surfaces | §8 N5 | DSP15 |
