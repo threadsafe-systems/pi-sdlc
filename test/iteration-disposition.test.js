@@ -21,6 +21,14 @@ function reference(slug) {
 	return readFileSync(join(refDir, `phase-${slug}.md`), "utf8");
 }
 
+function importSpecifiers(source) {
+	return [...source.matchAll(/^import\b[\s\S]*?;$/gm)].map((statement) => {
+		const specifier = statement[0].match(/\bfrom\s+["']([^"']+)["']|^import\s+["']([^"']+)["']/m);
+		assert.ok(specifier, `cannot parse static import: ${statement[0]}`);
+		return specifier[1] ?? specifier[2];
+	});
+}
+
 /** A numbered `## <n>. …` section body, heading included, up to the next `## `. */
 function numberedSection(body, n) {
 	const lines = body.split("\n");
@@ -368,7 +376,7 @@ test("IDV14: templates/sdlc-tasks.md remains a thin current-tree router", () => 
 			if (!line.trimStart().startsWith("|") || index + 1 >= lines.length) return false;
 			const cells = tableCells(line);
 			const separator = tableCells(lines[index + 1]);
-			const isHeader = separator.length === cells.length && separator.every((cell) => /^:?-{3,}:?$/.test(cell));
+			const isHeader = separator.length === cells.length && separator.every((cell) => /^:?-+:?$/.test(cell));
 			return isHeader && ["description", "severity", "disposition", "landing site"].every((column) => cells.includes(column));
 		});
 	};
@@ -379,6 +387,8 @@ test("IDV14: templates/sdlc-tasks.md remains a thin current-tree router", () => 
 	assert.equal(hasSpecGapColumns(dataRow), false, "a prose data row is not a Markdown table header");
 	const mutated = `${body}\n| description | severity | disposition | landing site |\n| --- | --- | --- | --- |`;
 	assert.equal(hasSpecGapColumns(mutated), true, "the forbidden-table check must remain non-vacuous");
+	const shortSeparator = `${body}\n| description | severity | disposition | landing site |\n| - | - | - | - |`;
+	assert.equal(hasSpecGapColumns(shortSeparator), true, "a short valid Markdown separator must still identify the forbidden header");
 });
 
 test("IDV27: assumption-recorded routes to the existing Assumptions appendix", () => {
@@ -445,13 +455,23 @@ test("IDV28: every adversary prompt's STRICT output format declares an origin fi
 
 test("IDV33: retired checks name their present enforcement owners", () => {
 	const source = readFileSync(join(here, "iteration-disposition.test.js"), "utf8");
-	const frozenOwner = source.match(/\/\/ validator-task\.prompt\.md[\s\S]{0,180}?diff guard\./)?.[0];
-	const nonChangeOwner = source.match(/\/\/ Non-change obligations[\s\S]{0,140}?current-tree behaviour\./)?.[0];
-	assert.ok(frozenOwner, "the validator prompt retirement does not name the FROZEN-list owner");
-	assert.ok(nonChangeOwner, "the non-change retirement does not name the standing diff guard");
+	const lines = source.split("\n");
+	const commentBlock = (needle) => {
+		const start = lines.findIndex((line) => line.startsWith("//") && line.includes(needle));
+		assert.notEqual(start, -1, `ownership comment is missing: ${needle}`);
+		let end = start;
+		while (end + 1 < lines.length && lines[end + 1].startsWith("//")) end++;
+		return lines.slice(start, end + 1).join("\n");
+	};
+	const frozenOwner = commentBlock("validator-task.prompt.md");
+	const nonChangeOwner = commentBlock("Non-change obligations");
+	assert.match(frozenOwner, /FROZEN[\s\S]*diff guard/i, "the validator prompt comment does not name the FROZEN-list owner");
+	assert.match(nonChangeOwner, /frozen-surfaces[\s\S]*current-tree behaviour/i, "the non-change comment does not name the standing diff guard");
+	const processHistory = /\b(?:Plan|panel|PR|removed|retired)\b/i;
 	for (const comment of [frozenOwner, nonChangeOwner]) {
-		assert.doesNotMatch(comment, /\b(?:Plan|panel|PR|removed|retired)\b/i, "ownership comments must describe present enforcement, not process history");
+		assert.doesNotMatch(comment, processHistory, "ownership comments must describe present enforcement, not process history");
 	}
+	assert.match(`${frozenOwner}\n// Retired by the PR.`, processHistory, "appended process history must remain detectable");
 });
 
 // IDV19 was written diff-scoped, asserting the S5 branch DROPPED these three
@@ -486,7 +506,9 @@ test("IDV4: every phase reference the vocabulary binds cites the glossary by nam
 test("IDV17: this scenario corpus makes no subprocess, model, or network call", () => {
 	const source = readFileSync(join(here, "iteration-disposition.test.js"), "utf8");
 	const prohibitedBuiltins = new Set(["node:child_process", "node:http", "node:http2", "node:https", "node:net", "node:dgram", "node:dns", "node:tls"]);
-	for (const specifier of [...source.matchAll(/^import .*? from "([^"]+)";$/gm)].map((m) => m[1])) {
+	assert.deepEqual(importSpecifiers('import {\n\texecFile as run\n} from "node:child_process";'), ["node:child_process"], "multiline imports must remain visible");
+	assert.deepEqual(importSpecifiers('import "node:https";'), ["node:https"], "side-effect imports must remain visible");
+	for (const specifier of importSpecifiers(source)) {
 		if (specifier.endsWith("/config-doc.mjs")) continue;
 		assert.ok(specifier.startsWith("node:"), `only node builtins may be imported here; found ${specifier}`);
 		assert.equal(prohibitedBuiltins.has(specifier), false, `scenario corpus imports a subprocess or network builtin: ${specifier}`);

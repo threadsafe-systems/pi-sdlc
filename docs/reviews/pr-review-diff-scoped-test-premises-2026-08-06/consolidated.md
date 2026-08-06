@@ -12,6 +12,9 @@ Target: branch diff `2aa5a89..3e81a25`, irreversible track. Orchestrator:
 | 1 | 1 | `claude-fable-5` | `round1-claude-fable-5.md` | `panel.dispatched{round:1,wave:1}` + `panel.harvested{round:1,wave:1}` |
 | 1 | 1 | `gpt-5.6-sol` | `round1-gpt-5.6-sol.md` | same workflow/harvest |
 | 1 | 1 | `gpt-5.6-luna` | `round1-gpt-5.6-luna.md` | same workflow/harvest |
+| 2 | 2 | `claude-fable-5` | `round2-claude-fable-5.md` | `panel.dispatched{round:2,wave:2}` + `panel.harvested{round:2,wave:2}` |
+| 2 | 2 | `gpt-5.6-sol` | `round2-gpt-5.6-sol.md` | same workflow/harvest |
+| 2 | 2 | `gpt-5.6-luna` | `round2-gpt-5.6-luna.md` | same workflow/harvest |
 
 All three children completed with model verdicts. Each artifact carries the
 harness's turn-budget wrap-up caveat (`Output may be partial`); findings and
@@ -96,6 +99,55 @@ IDV14 now treats a row as a header only when the next row is a same-width
 Markdown separator and normalized cells equal the four required names. A prose
 data-row mutation stays clean; the forbidden header mutation still fails.
 
+## Round 2 (delta `3e81a25..5856f15`)
+
+Every round-1 disposition was confirmed or legally reopened with new mutation
+evidence. No high finding.
+
+| id | severity | origin | reviewer(s) | defect | disposition |
+| --- | --- | --- | --- | --- | --- |
+| `PR-R2-01` | medium | `REOPENED(PR-R1-05)` | all | Law inversion coverage remains phrase-specific, and the positive-law predicate doubles as duplication detection so a nearby inversion phrase can mask a full duplicate | **incorporated** |
+| `PR-R2-02` | medium | `REOPENED(PR-R1-03)` | all | Both import guards parse only single-line `import … from`; multiline and side-effect prohibited imports evade them, including aliased subprocess calls | **incorporated** |
+| `PR-R2-03` | medium | `REOPENED(PR-R1-04)` | sol | DSP5 never exercises `runProcess` through the direct `show`/`diff` branch | **incorporated** |
+| `PR-R2-04` | medium | `REOPENED(PR-R1-06)` | sol | DSP14 still accepts a token-only comment that neither instructs preservation nor proves a real link | **incorporated** |
+| `PR-R2-05` | medium | `REOPENED(PR-R1-01)` | sol | IDV33 truncates each ownership comment at the expected period, so forbidden history appended afterward is not inspected | **incorporated** |
+| `PR-R2-06` | medium | NEW | fable-5 | Proposed PR body still claims 518/29 tests after the refreshed branch now runs 519/30 | **incorporated** |
+| `PR-R2-07` | low | `REOPENED(PR-R1-08)` | fable-5 | IDV14 requires three dashes, allowing a valid one-dash Markdown delimiter row to evade the forbidden-header check | **incorporated** |
+
+**Counts:** 6 medium, 1 low. Incorporated 7; dismissed 0; barred 0;
+carries 0.
+
+### `PR-R2-01` — positive relation and inversion are separate predicates
+
+`statesMovingPinnedLaw` now detects duplication from the positive expiry and
+current-tree/pinned relationships alone. `lawIssues` separately rejects common
+negation around the premise, expiry, and route (`false that`, `cannot`, `won't`,
+`no longer`, `does not ever`, `do not assert`). DSP3 exercises premise-prefix,
+expiry, and route inversions; an inversion mention can no longer mask a duplicate
+in another reference.
+
+### `PR-R2-02` — complete static-import statements
+
+Both files enumerate `^import …;` statements across line breaks and extract
+`from` or side-effect specifiers. Multiline/aliased and `import "node:https"`
+forms therefore reach the prohibited-builtin checks. IDV17's call-shape bans
+remain defense in depth rather than its import parser's substitute.
+
+### `PR-R2-03` to `-05` — residual witnesses closed
+
+- DSP5 adds a `runProcess(["git", "show", "origin/main:path"])` positive.
+- DSP14 now requires one comment to contain `phase-spec.md`, the exact
+  `must preserve the premise-durability law` instruction, bold `**DSP3**`, and
+  the full HTTPS Spec verification-scenarios link.
+- IDV33 extracts the entire contiguous comment block before checking ownership
+  and forbidden history, so appended comment text stays in scope.
+
+### `PR-R2-06` / `-07` — publication evidence and Markdown grammar
+
+The proposed PR body now reports 519/30 tests. IDV14 accepts one-or-more dash
+separator cells, with a dedicated short-separator mutation; prose rows remain
+clean.
+
 ## Carry and frozen-surface checkpoints
 
 No `CARRY-TO-BUILD`, `CARRY-TO-IMPLEMENT`, or `CARRY-TO-BACKLOG` was minted.
@@ -104,7 +156,8 @@ by T2's strengthened `static.handoff`. ASD19 passes and no FROZEN path changes.
 
 ## Dismissal posture
 
-Round 1 incorporated 8/8 findings. That continues the already-disclosed
-100%-incorporation smell from the Spec panel; it is not labelled diligence.
-Every finding was reproduced or checked against source before incorporation,
-and no reviewer recommendation was actioned solely to avoid disagreement.
+Rounds 1 and 2 incorporated every finding (8/8, then 7/7). That continues the
+already-disclosed 100%-incorporation smell from the Spec panel; it is not
+labelled diligence. Every finding was reproduced or checked against source
+before incorporation, and no reviewer recommendation was actioned solely to
+avoid disagreement.

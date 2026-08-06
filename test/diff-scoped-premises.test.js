@@ -60,16 +60,30 @@ function numberedSection(body, number) {
 
 function statesMovingPinnedLaw(section) {
 	const movingExpires = /premise[\s\S]{0,100}\bmoving ref\b[\s\S]{0,40}\bexpire\w*\b/i.test(section);
-	const inverted = /\bmoving ref\b[\s\S]{0,30}\b(?:never|not)\s+expire\w*\b/i.test(section);
-	const pinnedRoute = /\bcurrent tree\b[\s\S]{0,50}\bpinned immutable commit\b/i.test(section);
-	return movingExpires && !inverted && pinnedRoute;
+	const pinnedRoute = /\bassert[\s\S]{0,30}\bcurrent tree\b[\s\S]{0,50}\bpinned immutable commit\b/i.test(section);
+	return movingExpires && pinnedRoute;
+}
+
+function invertsMovingPinnedLaw(section) {
+	const premiseDenied = /\b(?:false that|cannot be true that)\b[\s\S]{0,50}\bpremise\b[\s\S]{0,100}\bmoving ref\b/i.test(section);
+	const expiryDenied = /\bmoving ref\b[\s\S]{0,35}\b(?:never|not|cannot|can't|won't|no longer|does not ever)\b[\s\S]{0,20}\bexpire\w*\b/i.test(section);
+	const routeDenied = /\b(?:do not|don't|must not|never)\s+assert\b[\s\S]{0,40}\bcurrent tree\b/i.test(section);
+	return premiseDenied || expiryDenied || routeDenied;
 }
 
 function lawIssues(section) {
 	const issues = [];
-	if (!statesMovingPinnedLaw(section)) issues.push("moving-ref expiry and pinned-current-tree route");
+	if (!statesMovingPinnedLaw(section) || invertsMovingPinnedLaw(section)) issues.push("moving-ref expiry and pinned-current-tree route");
 	if (!/non-change claim[\s\S]{0,100}falsifiable only by a diff[\s\S]{0,120}standing diff guard/i.test(section)) issues.push("non-change route");
 	return issues;
+}
+
+function importSpecifiers(source) {
+	return [...source.matchAll(/^import\b[\s\S]*?;$/gm)].map((statement) => {
+		const specifier = statement[0].match(/\bfrom\s+["']([^"']+)["']|^import\s+["']([^"']+)["']/m);
+		assert.ok(specifier, `cannot parse static import: ${statement[0]}`);
+		return specifier[1] ?? specifier[2];
+	});
 }
 
 const specReference = readFileSync(join(referenceRoot, "phase-spec.md"), "utf8");
@@ -100,8 +114,16 @@ test("DSP3: every concept anchor and semantic direction is load-bearing", () => 
 		assert.notEqual(mutated, specActivity, `the mutation did not remove ${anchor}`);
 		assert.notEqual(lawIssues(mutated).length, 0, `removing ${anchor} must break the law check`);
 	}
-	const inverted = specActivity.replace("moving ref expires", "moving ref never expires");
-	assert.notEqual(lawIssues(inverted).length, 0, "inverting expiry semantics must break the law check");
+	for (const inverted of [
+		specActivity.replace("moving ref expires", "moving ref cannot expire"),
+		specActivity.replace("moving ref expires", "moving ref won't expire"),
+		specActivity.replace("moving ref expires", "moving ref no longer expires"),
+		specActivity.replace("moving ref expires", "moving ref does not ever expire"),
+		specActivity.replace(/A\s+premise/, "It is false that a premise"),
+		specActivity.replace("assert the current tree", "do not assert the current tree"),
+	]) {
+		assert.notEqual(lawIssues(inverted).length, 0, "inverting either semantic direction must break the law check");
+	}
 	const duplicated = `${implementActivity}\nA premise anchored to a moving ref expires; assert the current tree or a pinned immutable commit.`;
 	assert.equal(statesMovingPinnedLaw(duplicated), true, "the duplication probe must reproduce the forbidden law shape");
 });
@@ -125,6 +147,7 @@ test("DSP5: every detector variant is non-vacuous and named negatives stay clean
 		[`${exec}("git", ["merge-base", "HEAD", "main"])`, "git merge-base invocation"],
 		[`${spawn}("git", ["merge-base", "HEAD", "origin/main"])`, "git merge-base invocation"],
 		[`${run}(["git", "merge-base", "HEAD", "main"])`, "git merge-base invocation"],
+		[`${run}(["git", "show", "origin/main:path"])`, "git show/diff with inline moving ref"],
 		[`${exec}("git", ["show", "main:path"])`, "git show/diff with inline moving ref"],
 		[`${spawn}("git", ["diff", "origin/main"])`, "git show/diff with inline moving ref"],
 	];
@@ -160,7 +183,9 @@ test("DSP7: detector hits equal the reasoned exemption map exactly", () => {
 test("DSP12/DSP13: the guard stays offline and contributor policy states every local rule", () => {
 	const source = readFileSync(join(here, "diff-scoped-premises.test.js"), "utf8");
 	const prohibitedBuiltins = new Set(["node:child_process", "node:http", "node:http2", "node:https", "node:net", "node:dgram", "node:dns", "node:tls"]);
-	for (const specifier of [...source.matchAll(/^import .*? from "([^"]+)";$/gm)].map((match) => match[1])) {
+	assert.deepEqual(importSpecifiers('import {\n\tget\n} from "node:https";'), ["node:https"], "multiline imports must remain visible");
+	assert.deepEqual(importSpecifiers('import "node:net";'), ["node:net"], "side-effect imports must remain visible");
+	for (const specifier of importSpecifiers(source)) {
 		assert.ok(specifier.startsWith("node:"), `guard imports a non-builtin interface: ${specifier}`);
 		assert.equal(prohibitedBuiltins.has(specifier), false, `guard imports a subprocess or network builtin: ${specifier}`);
 	}
