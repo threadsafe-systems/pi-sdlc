@@ -1,4 +1,4 @@
-## Validation: t2
+### Validation: t2
 
 - manifest: `docs/validation/diff-scoped-test-premises/t2.json`
 - runner: PASS — exit 0
@@ -9,4 +9,4 @@
 
 ### Verdict: PASS
 
-Runner exit and report agree (0/PASS). The performance observer's 1000ms self-probe passed and measured 89.83ms. The static handoff check confirmed issue #192 contains the DSP3 witness.
+Runner exit and report agree (0/PASS). The strengthened detector variants, semantic-law witness, offline import boundary, same-comment DSP14 handoff, and all integration checks pass.

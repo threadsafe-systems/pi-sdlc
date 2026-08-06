@@ -2,11 +2,11 @@
   "schemaVersion": 1,
   "taskId": "t2",
   "manifestPath": "docs/validation/diff-scoped-test-premises/t2.json",
-  "manifestSha256": "0180c9ede6d01da5180ae1b57bed4297615feb30a7fb36c0fec7a6bf62ebf849",
-  "runnerReportSha256": "5be5b1652b1e5258a68c78b31866742c56753d5ac8e4fda468fd840d373111a4",
+  "manifestSha256": "05ec3cb681554d6cc3c5b1feb3ab2a9044ad8a3f76201bbac03b69b862521fae",
+  "runnerReportSha256": "3ce201caac5c83380d0064b3c78244f917d334c9309fbb580d7c391734f691c1",
   "generatedAgentSha256": "ec3895ff8b685dc90b6ce2db27aa82b37d1abeea1612749d9b1377c42d69cbdd",
   "model": "anthropic/claude-haiku-4-5",
   "runnerVerdict": "PASS",
   "validatorVerdict": "PASS",
-  "createdAt": "2026-08-06T11:44:56Z"
+  "createdAt": "2026-08-06T12:05:52Z"
 }

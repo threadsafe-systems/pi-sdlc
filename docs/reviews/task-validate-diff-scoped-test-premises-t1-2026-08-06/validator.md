@@ -8,3 +8,5 @@
 - scenarios: DSP8=PASS, DSP9=PASS, DSP10=PASS, DSP11=PASS, DSP16=PASS
 
 ### Verdict: PASS
+
+The full suite passed 519 tests; the task corpus passed 30 tests. IDV33 mechanically witnesses DSP11's two present-enforcement comments and process-history prohibition. Runner exit and report agree (0/PASS).
