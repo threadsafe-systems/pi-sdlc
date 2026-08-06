@@ -44,7 +44,7 @@ No contradiction remains after rejecting two issue-listed alternatives: strippin
 
 1. Every key-reference value is enclosed by a backtick delimiter longer than any run inside that value.
 2. Rendered content contains the byte-exact `JSON.stringify` value; no content sanitization occurs.
-3. The current `panels.$comment` renders without a one-backtick outer delimiter around its embedded `` `pi --list-models` `` content; applying the known space-deletion mutation cannot reproduce the former malformed generated line.
+3. The current `panels.$comment` renders without a one-backtick outer delimiter around its embedded `` `pi --list-models` `` content, preserves the original space before that embedded span text, and cannot equal the recorded historical malformed single-delimiter output.
 4. Values containing one-, two-, and three-backtick runs produce valid deterministic delimiters and render byte-identically on repetition.
 5. New renders carry `v2`, and fingerprints include `v2`.
 6. A well-formed `v1` sentinel remains recognized; an on-disk v1 companion classifies stale and `write` regenerates it to v2 without `--force`.
@@ -60,3 +60,12 @@ No contradiction remains after rejecting two issue-listed alternatives: strippin
 - Normative amendment target: `docs/specs/2026-07-18-sdlc-agent-self-documentation.md` §§12–14 plus its revision header. Record rev 3; do not leave the §12 v1 envelope example stale.
 - Issue #177 describes two bugs; only formatter stability remains. Do not reintroduce a separate bug-1 CI slice.
 - No carry is minted. The Specification must price all verification scenarios and preserve the exact-value/no-dependency boundaries.
+
+## Amendments
+
+### A1 — formatter regression witness wording
+
+- Trigger: `SPEC-R1-02` found that literal application of a space-deletion transform could always mutate bytes even inside a valid code span, so Plan DoD 3's original mutation phrasing was not a valid falsifier.
+- Class: **(c), normal fix wave**.
+- Disposition: **incorporated**. DoD 3 now requires exact space preservation and inequality with the recorded historical malformed output; the Specification owns the executable witness.
+- Author: orchestrator, during Spec panel adjudication on 2026-08-06.

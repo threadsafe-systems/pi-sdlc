@@ -1,6 +1,7 @@
 # Specification: formatter-stable CONFIG.md value spans
 
-- Date: 2026-08-06 (rev 1)
+- Date: 2026-08-06 (rev 2)
+- Revision history: rev 1 pre-panel draft. **rev 2 incorporates every round-1 finding**: the original Specification is amended in this phase rather than deferred; CDFS4 records an observable malformed-output witness; CDFS7 pins a baseline v1 fixture; CDFS9 drops an unobservable flap claim. Plan amendment A1 corrects its related mutation wording.
 - Plan: `docs/plans/2026-08-06-config-doc-formatter-stability.md` rev 2, approved by Neil.
 - Track: **irreversible**.
 - Issue: #177.
@@ -23,7 +24,7 @@ Unchanged: configuration schemaVersion 3, CLI commands/exits/envelopes, check/wr
 - A well-formed v1 sentinel remains recognized generated output. Relative to the v2 expected render it is stale; `write` regenerates it to v2 without `--force`.
 - Unsupported/malformed sentinels remain collisions.
 
-The original self-documentation Specification is amended to rev 3 during implementation: its §12 envelope example names v2; §13 names v2 current and `{v1,v2}` supported while preserving the version lifecycle; §14 requires adaptive code spans for exact key values. Its revision history cites #177, this Specification, and its human-approved gate.
+The original self-documentation Specification is amended in this Spec revision to rev 3: its §12 envelope example names v2; §13 names v2 current and `{v1,v2}` supported while preserving the version lifecycle; §14 requires adaptive code spans for exact key values. Its revision history cites #177 and this Specification's gate. The rev-3 text participates in this same Spec panel and becomes approved only when this gate is human-approved.
 
 ## 3. Adaptive code-span contract
 
@@ -74,12 +75,12 @@ All scenarios are local, deterministic, and make no network/model calls.
 | CDFS1 | mechanical | Given values with no backtick, render the key reference. | Value delimiter length is 1 and exact previous list shape remains. | Ordinary values change shape/content. | focused corpus <1s |
 | CDFS2 | mechanical | Given values containing maximal runs of 1, 2, and 3 backticks, render each. | Delimiter lengths are 2, 3, and 4 respectively; no equal-length delimiter occurs inside. | Any collision, escaping, or wrong length. | focused corpus <1s |
 | CDFS3 | mechanical | Given scalar/array/object values including spaces, quotes, and backticks, extract the adaptive span. | Interior bytes equal `JSON.stringify` exactly. | Content is stripped, escaped, padded, or normalized. | focused corpus <1s |
-| CDFS4 | regression | Given this repo's real `panels.$comment`, render CONFIG.md. | Outer delimiter is longer than the embedded `` `pi --list-models` `` run; the former malformed single-delimiter shape is absent. | A one-backtick outer span encloses the embedded run or the value changes. | focused corpus <1s |
+| CDFS4 | regression | Given this repo's real `panels.$comment`, render CONFIG.md and compare its `panels` line with the recorded historical malformed witness: one-backtick outer delimiters plus the deleted space in `re-check with\`pi --list-models\``. | Outer delimiter is longer than the embedded run; the original `with ` space remains; rendered line differs from the malformed witness. | Single outer delimiter, deleted space, changed value, or equality with the malformed witness. | focused corpus <1s |
 | CDFS5 | mechanical | Given one config, call render twice and write twice. | Render bytes match; second write is retained and byte-identical. | Nondeterminism or rewrite. | focused corpus <1s |
 | CDFS6 | mechanical | Given the current config, render/fingerprint/sentinel. | Sentinel and generator identity are v2; fingerprint equals v2+NUL+canonical JSON and differs from v1. | v1 identity remains current or formula drifts. | focused corpus <1s |
-| CDFS7 | compatibility | Given a well-formed recognized v1 companion under the current config, run check then write. | check reports stale/1; write reports regenerated/0 and emits v2 without `--force`. | collision/refusal, force required, or v1 remains. | focused corpus <1s |
+| CDFS7 | compatibility | Given `test/fixtures/config-doc/v1-valid-config.md`, captured byte-for-byte from baseline `c3fd2a1`'s v1 renderer for `VALID_CONFIG`, run check then write. | check reports stale/1; write reports regenerated/0 and emits v2 without `--force`. | collision/refusal, force required, or v1 remains. | focused corpus <1s |
 | CDFS8 | collision | Given a well-formed unsupported v3 sentinel, run check/write without force. | check reports collision error/2; write refuses/3 without mutation. | Unsupported output is silently overwritten. | focused corpus <1s |
-| CDFS9 | dogfood | Regenerate this repo's `.pi/sdlc/CONFIG.md`, then check. | v2 file is committed and check reports current/0. | Missing/stale/error or working-tree flap. | focused command <1s |
+| CDFS9 | dogfood | Regenerate this repo's `.pi/sdlc/CONFIG.md`, then check. | v2 file is committed and check reports current/0. | Missing, stale, or error. | focused command <1s |
 | CDFS10 | regression | Run existing config-doc state/collision/symlink/setup tests after updating the one literal v1 assertion to current-version semantics. | All behavior remains green. | Any unrelated state/interface regression. | full `npm test` externally killed at 30s |
 | CDFS11 | structural | Inspect changed runtime imports and package manifests. | Node builtins only; no new dependency or formatter/parser. | New runtime/dev formatter authority or network path. | static check <1s |
 | CDFS12 | amendment | Inspect the original Specification rev-3 header and §§12–14. | v2 envelope/current version, v1+v2 support, adaptive span contract, #177 authority all agree. | Any stale v1-current statement or orphan amendment. | static check <1s |
@@ -88,10 +89,17 @@ All scenarios are local, deterministic, and make no network/model calls.
 
 - CDFS2 must mutate a correct delimiter to one equal to an interior run and observe failure.
 - CDFS3 must mutate one interior byte and observe failure.
-- CDFS7 must use a real v1 sentinel/body, not a mocked boolean.
+- CDFS7 must copy the pinned baseline-render fixture into a temporary repo; a hand-assembled sentinel or mocked recognition boolean is not evidence.
 - CDFS9 must run `config-doc check` against the committed-path companion.
 - CDFS10's 30-second ceiling is enforced outside the test process so a hung suite cannot self-report success.
 
 ## 7. Acceptance and carry ledger
 
 No inbound `CARRY-TO-SPEC` exists. No carry is minted. Every Plan DoD item maps to CDFS1–CDFS12; decomposition belongs to the Build plan after this gate.
+
+### A1 — round-1 panel correction
+
+- Trigger: `SPEC-R1-01` through `SPEC-R1-03`.
+- Class: **(c), normal fix wave**.
+- Disposition: **incorporated** in rev 2 and Plan amendment A1.
+- Author: orchestrator, 2026-08-06.
