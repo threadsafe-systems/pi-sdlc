@@ -54,3 +54,23 @@ F1–F7 all **RESOLVED**, including re-running lint and the failing-test attribu
 | id | severity | reviewer | finding | disposition |
 |---|---|---|---|---|
 | F8 | low | deepseek-v4-pro | The PR body's opening paragraph still said the ignore entry "is unanchored" in the present tense, contradicting the anchored `.gitignore`; the correction was recorded only in the assumptions section. | **Incorporated.** Opening paragraph rewritten. The same stale sentence in the first commit's message was reworded by rebase, so the squashed history will not carry a claim its own diff contradicts. |
+
+## Round 3
+
+Resolved: `zai/glm-5.2:xhigh` — the third distinct model, completing the panel
+floor of 3. It reviewed the whole diff (it had not seen rounds 1-2), confirmed
+F1-F3 and F5-F7 resolved, and reopened two.
+
+No high or medium findings in any round.
+
+| id | severity | reviewer | finding | disposition |
+|---|---|---|---|---|
+| F9 | low | glm-5.2 | REOPENED(F4): the PR body's `483 pass / 29 fail` does not reproduce — four runs gave `475 pass / 37 fail`. | **Dismissed, with the underlying cause fixed in the record.** `483/29` is deterministic in a quiescent checkout, verified at both the base commit `21cb0c3` and at HEAD. The reviewer's `475/37` is real but is an artifact of a mutating test (F11): the extra 8 failures are exactly the tests that read `skills/sdlc/schema/sdlc.config.example.json`, which was absent from the working tree when it measured. The reviewer was right that the number did not reproduce for it, and right that no earlier round re-derived the total. |
+| F10 | low | glm-5.2 | REOPENED(F8): the first commit's message claimed the ignore entry "is anchored" while that commit's own diff adds the unanchored form; the promised rebase reword had introduced the contradiction rather than removing it. | **Incorporated.** The message no longer describes the anchoring at all, which belongs to the later commit that performs it. Verified with `git show <sha>:.gitignore` against `git log -1 --format=%b <sha>` for every commit on the branch. |
+| F11 | medium | orchestrator (raised while adjudicating F9) | `test/setup-bundle.test.js:155-171` renames a tracked, shipped file (`skills/sdlc/schema/sdlc.config.example.json`) out of the real repository, replaces it with a directory, and restores it in `finally`. The `finally` covers assertion failure but not interruption or a concurrent `npm test`, so a killed or overlapping run leaves the repository with a deleted tracked file and 8 dependent tests failing thereafter. | **Recorded, not fixed here.** Confirmed by direct observation: this branch's working tree was found with that file deleted after the panel's concurrent runs, and two concurrent `npm test` runs reproduce degraded counts (482/30 vs 483/29 solo). Fixing it is a code change to the test suite and out of scope for a `track: none` diff; it wants its own PR. |
+
+## Verdict
+
+Three distinct reviewers, eleven findings, zero high, one medium (F11, raised by
+the orchestrator and deliberately deferred with a recorded reason). Ten
+incorporated, one dismissed with evidence. No finding survives unaddressed.

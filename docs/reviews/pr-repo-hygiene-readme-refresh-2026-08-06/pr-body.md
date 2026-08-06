@@ -74,12 +74,13 @@ exempt as a `track: none` change.
 ## Verification
 
 - `npm test` — 512 tests, 483 pass, 29 fail, identical on the base commit
-  (`21cb0c3`); this diff touches no code and no tests. The 29 are a macOS-only
-  environment artifact: `/var` is a symlink to `/private/var`, so the
-  root-containment checks reject `os.tmpdir()` fixture roots. It spans more than
-  one script — 8 failures come from `check-lifecycle.test.js` and 5 from
-  `setup-v3.test.js`, same root cause, different callers. Linux CI is green on
-  the same commit.
+  (`21cb0c3`); this diff touches no code and no tests. Reproduce it in a
+  **quiescent checkout**: a concurrent run degrades the count, because the suite
+  mutates the repository (see Residual risk). The 29 are a macOS-only environment
+  artifact: `/var` is a symlink to `/private/var`, so the root-containment checks
+  reject `os.tmpdir()` fixture roots. It spans more than one script — 8 failures
+  come from `check-lifecycle.test.js` and 5 from `setup-v3.test.js`, same root
+  cause, different callers. Linux CI is green on the same commit.
 - `npm run lint` — 2 warnings, 1 info, all pre-existing in `docs/briefs/assets/`
   and unchanged by this PR.
 - `check-references.mjs` — pass.
@@ -96,6 +97,16 @@ bundle is a behaviour change and is deliberately out of scope for a `track: none
 diff; it wants its own PR. The README now also tells adopters to ignore the
 telemetry run store themselves, which setup likewise does not provision.
 
+Separately, and found while adjudicating a review finding rather than caused by
+this change: `test/setup-bundle.test.js:155-171` renames a tracked shipped file
+(`skills/sdlc/schema/sdlc.config.example.json`) out of the real repository,
+replaces it with a directory, and restores it in `finally`. That covers an
+assertion failure but not an interrupted or concurrent run, either of which
+leaves the working tree with a deleted tracked file and 8 dependent tests failing
+from then on. This branch was found in exactly that state after the panel's
+concurrent runs, which is what made a reviewer measure 475/37 instead of 483/29.
+Fixing it changes the test suite and is out of scope here.
+
 ## Review
 
 Three distinct reviewers, reached across three dispatch rounds because provider
@@ -107,7 +118,14 @@ availability kept thinning the panel (`onShortfall: fail`, panelSize 3).
 - **Round 2** — `deepseek-v4-pro` returned and independently verified all seven
   round-1 fixes as resolved; `claude-opus-4-8` failed (no Bedrock credentials).
   One new low finding, incorporated.
-- **Round 3** — `glm-5.2`, to reach the panel floor of three distinct models.
+- **Round 3** — `glm-5.2` returned, completing the floor of three distinct
+  models. It confirmed six fixes and reopened two: one commit message that still
+  contradicted its own diff (incorporated), and one verification count that did
+  not reproduce for it (dismissed with evidence — the number is deterministic in
+  a quiescent checkout, and the reviewer's environment had been corrupted by the
+  mutating test recorded above).
 
-Artifacts and the full disposition table:
+Eleven findings across three rounds: zero high, one medium (raised by the
+orchestrator, deliberately deferred with a recorded reason), ten incorporated,
+one dismissed with evidence. Artifacts and the full disposition table:
 `docs/reviews/pr-repo-hygiene-readme-refresh-2026-08-06/consolidated.md`.
