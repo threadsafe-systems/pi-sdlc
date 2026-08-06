@@ -13,6 +13,8 @@
 | 1 | 2 | `gemini-3.1-pro-preview` | `panels/plan_review-round2-2026-08-06/` | same wave; separate `asyncDir`, so a separate destination label |
 | 2 | 3 | `claude-fable-5` | `panels/plan_review-round3-2026-08-06/` | `panel.dispatched{round 2, wave 2}` |
 | 2 | 4 | `gemini-3.1-pro-preview` | `panels/plan_review-round4-2026-08-06/` | same wave, separate label |
+| 3 | 5 | `claude-fable-5` | `panels/plan_review-round5-2026-08-06/` | `panel.dispatched{round 3, wave 3}` |
+| 3 | 6 | `gemini-3.1-pro-preview` | `panels/plan_review-round6-2026-08-06/` | same wave, separate label |
 
 Two destination labels for one logical wave: this harness's `subagent` tool takes
 one agent per call, so a two-model panel is two async runs with two `asyncDir`s,
@@ -152,11 +154,96 @@ single mechanism for every non-fixed occurrence (`-03`); the dead helpers at
 that S1 may re-anchor but not delete (`-05`); and DoD 3's cost budget is widened
 to cover both new tests (`-06`).
 
+## Round 3 (delta, `bcba627..8091fc8`) — findings
+
+Both reviewers confirmed all six round-2 findings discharged. No `REOPENED` tags.
+
+| id | severity | origin | reviewer | gist | disposition |
+|---|---|---|---|---|---|
+| `PLAN-R3-01` | high | NEW | fable-5 | The measured file set (45 top-level `*.js`) is not the enforced one (`test/` = **74** files); `test/e2e/harness.mjs:250,290` runs `git init -b main` | **incorporated** |
+| `PLAN-R3-02` | high | NEW | fable-5 | The detector concept is frozen without its pattern set, and the definition contradicts the measurement — the sanctioned guard passes refs via a loop variable, so its argv names no moving ref | **incorporated** |
+| `PLAN-R3-03` | medium | NEW | fable-5 | The baseline row is unreproducible: rev 2's documented tokens match **6** files, not 7; `telemetry-emitter` is mischaracterised as git-stub source | **incorporated** |
+| `PLAN-R3-04` | medium | NEW | fable-5 | "Every genuine occurrence is a call-shape match" is false at occurrence granularity — `disposition-ledger.test.js:53,57` reads `main:<path>` through a variable | **incorporated** |
+| `PLAN-R3-05` | high | NEW | gemini | `telemetry-emitter.test.js:288` (`rev-parse HEAD`) is an uninventoried false positive | **DISMISSED** — see below |
+
+**Counts:** 3 high, 2 medium, 0 low. **Incorporated 4, dismissed 1.**
+
+### `PLAN-R3-05` — dismissed (high), with a partial incorporation
+
+The finding asserts the Plan "explicitly defines `HEAD` as a moving ref". It does
+not. Rev 3's anchor table lists `merge-base HEAD main`, `main:<path>` and
+`origin/main`; `HEAD` appears only *inside* the first example string, as part of
+a merge-base invocation against the main line. The reviewer generalised an
+example into a definition.
+
+The substance is also wrong. `test/telemetry-emitter.test.js:288` is
+`execFileSync("git", ["-C", detached, "rev-parse", "HEAD"])` against a temp repo
+the test built four lines earlier (`gitRepo({ branch: "work" })`, :286) in order
+to detach it and assert the telemetry emitter skips on detached HEAD. That reads
+the fixture's own tip — the thing under test — not the main line. It cannot
+expire at merge, because no merge changes it. Verified by reading `:286-294`.
+
+**Partially incorporated:** the misreading was invited by a table that showed
+`HEAD` inside an example without saying it is not itself an anchor. Rev 4's
+anchor table gains an explicit row — *a fixture repo's own `HEAD` → does not
+expire* — so the next reader cannot make the same inference.
+
+This is the round's one dismissal and it is recorded as a real verdict, not an
+oversight: cross-model agreement was absent (fable-5 did not raise it), the
+claim was checked against the file rather than against the reviewer's summary,
+and the fix it proposed would have added a false exemption that weakened the
+guard.
+
+### `PLAN-R3-01` to `-04` — incorporated as one restructure, not four patches
+
+All four verified independently:
+
+- `git ls-tree -r --name-only bcba627 -- test/ | wc -l` → **74**; top-level
+  `*.js` → **45**. `test/e2e/harness.mjs:250,290` confirmed.
+- `test/frozen-surfaces.test.js:49-51` confirmed: `for (const ref of ["main",
+  "origin/main"]) … execFileSync("git", ["-C", repo, "merge-base", "HEAD", ref])`
+  — argv names `merge-base`, no moving ref.
+- `git grep -lE "merge-base|origin/main|main:|baseRef\(|baseFile\(" bcba627 --
+  'test/*.js' | wc -l` → **6**, and the same grep over
+  `test/telemetry-emitter.test.js` → no match. The rev-3 table's "7" came from a
+  probe regex including quoted `"main"`, which rev 2 never documented.
+- `test/disposition-ledger.test.js:53,57` confirmed: `"main:skills/sdlc/SKILL.md"`
+  enters `refs`, consumed by `execFileSync("git", […, "show", ref])`.
+
+`PLAN-R3-02` is the diagnostic one and it is why these are one fix rather than
+four. It shows the rev-3 *definition* and the rev-3 *measurement* describe
+different things, and that no reader can reconstruct the regex that produced
+"3 matched, 0 false". Patching the definition again would produce a fourth gap.
+
+## Churn diagnosis (round 3, ahead of the round cap)
+
+The round cap fires at round 4. This diagnosis is raised at round 3 because the
+evidence is already unambiguous and dispatching a fourth round against a Plan
+known to be at the wrong altitude is precisely the re-dispatch-instead-of-
+restructure failure the cap exists to prevent.
+
+| wave | Plan froze | panel found |
+|---|---|---|
+| 1 | a token ban, never executed | fires on 3 unnamed files |
+| 2 | a broadened token set, never executed as specified | fires on a 4th (test *titles*) |
+| 3 | a measurement whose pattern set was never stated | baseline unreproducible; definition ≠ measurement |
+
+One mechanism, three instances: **the Plan was specifying an executable artifact
+in prose.** Prose cannot be run, so each round the panel correctly found the gap
+between description and behaviour.
+
+Against the cap's four bounded options this is **(b) — churn generated by our
+own fix waves; restructure rather than re-dispatch.** Rev 4 moves the detector's
+pattern set, swept file set, and inventory out of the Plan and into the Spec as
+deliverables that must be produced by execution, with a DoD item making a
+described-but-unrun matcher a gate failure. Put to the owner at the gate.
+
 ## Dismissal-posture disclosure
 
-**Two consecutive waves at 100% incorporation (4/4, then 6/6).** Per
-`phase-pr-review.md` §5 this is a reportable smell and is reported to the owner
-rather than recorded as diligence.
+**Waves 1 and 2 ran at 100% incorporation (4/4, then 6/6); wave 3 did not
+(4/5, one high dismissed).** Per `phase-pr-review.md` §5 the two-wave streak is
+a reportable smell and was reported to the owner rather than recorded as
+diligence.
 
 The adjudicator's read: this is not reviewer over-reach being waved through —
 every finding was independently re-verified against the tree before

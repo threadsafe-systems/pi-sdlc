@@ -5,18 +5,23 @@ that adopters bind to behaviourally, so it takes the same track prose-only S5
 took). Brainstorm was a live dialogue on 2026-08-06; its four ratified decisions
 are restated below as this Plan's provenance.
 
-**Rev 3** — incorporates plan-panel round 2 (6 findings: 1 high, 4 medium, 1
-low; 0 dismissed). Record:
+**Rev 4** — incorporates plan-panel round 3 (5 findings: 3 high, 2 medium; 4
+incorporated, **1 high dismissed**). Record:
 `docs/reviews/plan-review-diff-scoped-test-premises-2026-08-06/consolidated.md`.
 
-Round 1's high (`PLAN-R1-01`) was that rev 1 froze a detection pattern **without
-ever running it**. Rev 2 ran it and inventoried three exempt files — and round 2
-found rev 2 had done the same thing again with its own broadened pattern set
-(`PLAN-R2-01`: `main:` fires 13 times on a fourth file, all test *titles*).
-Two waves of the same defect class is a generator, not two incidents, so rev 3
-fixes the generator: **the detector matches the call shape, not the token.**
-Both reviewers proposed adding another exemption; neither proposed this. Rev 2
-was a patch wave; rev 3 is a restructure.
+Rounds 1, 2 and 3 each found the *same* defect class in the artifact the
+previous round produced: a detector frozen in prose without being executed as
+specified (rev 1 a token ban, rev 2 a broadened token set, rev 3 a measurement
+whose pattern set was never stated). Three waves of one mechanism is a
+generator. Rev 4 therefore changes **altitude**, not wording: this Plan states
+the law and the obligation, and hands the detector's pattern set, swept file
+set, and resulting inventory to the Spec as deliverables that must be produced
+by **execution** — real source and real output pasted in, not described. See
+"Why this Plan stops specifying the detector" below.
+
+Revs 2 and 3 were patch waves against a Plan operating at the wrong altitude;
+rev 4 is the restructure. The round-3 diagnosis and the four bounded options
+were put to the owner at the gate.
 
 ## Objective
 
@@ -36,14 +41,16 @@ Concretely, at the end of this slice:
    is the only test permitted to assert against a **moving** ref, and every
    other reach for one is either a bug or an entry in the meta-test's reasoned
    exemption list.
-3. A meta-test enforces (2) mechanically. It flags a **git invocation whose
-   argument list names a moving ref** — the call shape, not the bare token — in
-   any file under `test/` outside its exemption list. It assembles its patterns
-   **non-literally** so it never matches its own source, and proves itself
+3. A meta-test enforces (2) mechanically. **This Plan fixes the obligation, not
+   the implementation** — the matcher's pattern set, the exact file set it
+   sweeps, and the resulting exemption inventory are Spec deliverables, produced
+   by running it (see the Rationale). The obligation: it flags a moving-ref read
+   in any swept file outside its exemption list; it assembles its patterns
+   **non-literally** so it never matches its own source; it proves itself
    non-vacuous by an **inline mutation** of an in-memory string rather than an
    on-disk fixture (a fixture would plant matching source in the directory being
-   swept). Its exemption list has **two** entries, each carrying its reason in
-   the source; the list is the standing audit.
+   swept); and every exemption carries its reason in the source, so the list is
+   the standing audit.
 4. The four surviving expired premises in `test/iteration-disposition.test.js`
    are discharged: two converted to the content invariants they always were, two
    retired with a recorded reason.
@@ -89,37 +96,59 @@ So the operative rule is a **routing** rule, not a conversion rule:
 > sanctioned, permanently-maintained diff surface — and nowhere else. Everything
 > a scenario file asserts must be true of the current tree alone.
 
-### The refinement the panel forced: moving ref vs pinned commit, matched by call shape
+### Why this Plan stops specifying the detector (rounds 1-3, one generator)
 
-Rev 1 said "base-relative assertions belong only in the diff guard" and proposed
-to enforce it by banning the tokens outright. Round 1 ran that scan against
-HEAD — which rev 1 never did — and it fired on three files outside the guard.
-Rev 2 inventoried those three and broadened the token set; round 2 then ran
-*that* set and found a fourth file, `test/tracker-ops.test.js`, where `main:`
-appears 13 times in `test("main: …")` **titles**. Same defect class, second
-wave. The token is the wrong thing to match.
+Three consecutive panel waves found one defect class, each time in the artifact
+the previous wave produced:
 
-Every genuine occurrence is a **git subprocess invocation whose argument list
-names a moving ref**. Test titles, git-stub source strings, and comments are
-never that. Matching the call shape instead of the token, measured over all 45
-files under `test/` at `bcba627`:
-
-| detector | files matched | false positives |
+| wave | what the Plan froze | what running it showed |
 |---|---|---|
-| bare token (rev 2) | 7 | 4 — `tracker-ops` (test titles), `telemetry-collect`, `telemetry-collect-soft`, `telemetry-emitter` (git stub source) |
-| call shape (rev 3) | 3 | **0** |
+| 1 | a token ban, never executed | fired on 3 files the Plan never named |
+| 2 | a *broadened* token set, never executed as specified | fired on a 4th, `test/tracker-ops.test.js`, where `main:` is 13 `test("main: …")` **titles** |
+| 3 | a *measurement* ("7→3 files, 0 false positives") whose pattern set was never stated | the baseline is unreproducible from the Plan's own text — rev 2's documented tokens match **6** files, not 7 — and the prose definition does not describe what was actually measured |
 
-The three real matches, and the exemption list that follows from them:
+The third wave is the diagnostic one. Rev 3 defined the detector as *"a git
+invocation whose argument list names a moving ref"*, but the sanctioned guard
+itself passes its refs through a loop variable
+(`test/frozen-surfaces.test.js:49-51`: `for (const ref of ["main", "origin/main"])
+… execFileSync("git", ["-C", repo, "merge-base", "HEAD", ref])`). Its argv names
+`merge-base` and no moving ref at all. So the definition and the measurement
+disagree, and no reader can reconstruct the regex that produced 3/0.
 
-| file | what it actually does | disposition |
-|---|---|---|
-| `test/frozen-surfaces.test.js` | the standing diff guard — the one place a moving-ref read is correct | **exemption 1**, by definition |
-| `test/disposition-ledger.test.js:52` | a **real** `git merge-base HEAD main` call — but only as a *fallback* behind a pinned baseline commit (`d528b979`, :50) | **exemption 2**, with reason — see below |
-| `test/iteration-disposition.test.js:21-31` | the `baseRef`/`baseFile` helpers | **no exemption needed** — they become dead code under D4 and are deleted with it (`PLAN-R2-04`) |
+The generator is not three mistakes. It is that **a Plan was specifying an
+executable artifact in prose**. Prose descriptions of a matcher cannot be run,
+so every round the panel correctly found the gap between the description and
+any behaviour it might have. Patching the description a fourth time would
+produce a fourth gap.
 
-So the exemption list shrinks from rev 2's five-and-growing to **two**, both
-principled. That is the test that the restructure is right: a guard whose
-exemption list grows every round is theatre.
+**So rev 4 changes altitude rather than wording.** This Plan now states the law
+and the obligation; the detector's pattern set, the exact file set it sweeps,
+and the resulting inventory become **Spec deliverables that must be produced by
+execution** — the Spec carries the matcher's real source and its real output
+pasted in, not a claim about them. A Plan that makes no measurement claim cannot
+make an unverifiable one.
+
+What the corpus has already taught us, which the Spec must design against
+(evidence, not specification):
+
+- Bare tokens over-match badly: test titles (`tracker-ops.test.js`) and git-stub
+  source strings (`telemetry-collect.test.js:123`) are not anchors.
+- Refs reach git through **variables** in the same function, not only as argv
+  literals — `frozen-surfaces.test.js:49-51`, and
+  `disposition-ledger.test.js:53,57` where `"main:skills/sdlc/SKILL.md"` is
+  pushed into `refs` and consumed by `execFileSync("git", […, "show", ref])`.
+  Any matcher must handle this or declare honestly that it does not.
+- `test/` is **74 files at `bcba627`**, not the 45 top-level `*.js` —
+  `test/e2e/*.mjs` contains real git invocations naming `main`
+  (`test/e2e/harness.mjs:250,290`, `git init -q -b main`), which are sandbox
+  *creation*, not base reads. The Spec must state which set it sweeps.
+- Bare `HEAD` is **not** a moving ref for this purpose: `rev-parse HEAD` on a
+  throwaway fixture repo (`telemetry-emitter.test.js:288`) reads the fixture's
+  own tip, not the main line. A matcher keying on `HEAD` would be wrong.
+
+The exemption list stays the mechanism, and stays short by construction — a
+guard whose exemption list grows every round is theatre — but its contents are
+an output of running the matcher, not an input asserted here.
 
 `disposition-ledger.test.js` is not a false positive to wave through — it is the
 **worked example of the correct pattern**, and it already carries a comment from
@@ -130,18 +159,19 @@ never generalised (`test/disposition-ledger.test.js:48-49`):
 > baseline commit is pinned
 
 That sharpens the law. The defect was never "reads git history"; it is **reading
-a ref whose identity changes when the branch merges**:
+a ref whose identity changes when this branch merges**:
 
 | anchor | example | expires at merge? |
 |---|---|---|
-| moving ref | `merge-base HEAD main`, `main:<path>`, `origin/main` | **yes** — this is the whole defect class |
+| moving ref | `merge-base` against the main line, `main:<path>`, `origin/main` | **yes** — this is the whole defect class |
 | pinned commit | `d528b979:<path>` | no — a SHA is a constant |
+| a fixture repo's own `HEAD` | `rev-parse HEAD` on a temp repo the test just built | no — it names the thing under test, not the main line |
 | current tree | `readFileSync(...)` | no |
 
 So the exemption for `disposition-ledger.test.js` is principled, not ad hoc.
-Each exemption carries its reason in the meta-test source, which makes the
-exemption list itself the standing audit: a new file invoking git against a
-moving ref fails until someone either fixes it or justifies it in writing.
+Each exemption carries its reason in the guard's source, which makes the
+exemption list itself the standing audit: a new file reading a moving ref fails
+until someone either fixes it or justifies it in writing.
 
 This immediately explains the corpus: `IDV15` was redundant from birth (its
 surface was already in `FROZEN`, so `ASD19` asserted the same thing, standing),
@@ -157,8 +187,9 @@ invariants lazily expressed as diffs, and they convert cleanly.
 - `skills/sdlc/references/phase-spec.md` §4 — the general law (adopter-facing).
 - `skills/sdlc/references/phase-implement.md` §4 — one-line cross-reference.
 - `CONTRIBUTING.md` — a new section naming pi-sdlc's diff guard and the rule.
-- A meta-test enforcing the rule across `test/`, carrying the two exemptions
-  inventoried above with a reason each.
+- A meta-test enforcing the rule, with an exemption list whose every entry
+  carries a reason. Its pattern set, swept file set, and inventory are specified
+  and **measured** at Spec time, not asserted here.
 - `test/iteration-disposition.test.js` — disposition of `IDV3`, `IDV14`,
   `IDV15`, `IDV16` per the table below, **and deletion of the `baseRef`/`baseFile`
   helpers at :20-33**, which D4 leaves as dead code that would otherwise trip
@@ -176,12 +207,13 @@ invariants lazily expressed as diffs, and they convert cleanly.
   surface consumer and any change there would need its own re-freeze dance.)
 - **Rewriting `disposition-ledger.test.js`.** It is already correct (pinned
   anchor with a guarded fallback); it is exempted with a reason, not touched.
-- **The git-stub and test-title files** (`telemetry-collect*`, `telemetry-emitter`,
-  `tracker-ops`). Under the call-shape detector they are not matches at all, so
-  they need neither a fix nor an exemption.
+- **Fixing the git-stub, test-title, and sandbox-creation files**
+  (`telemetry-collect*`, `telemetry-emitter`, `tracker-ops`, `test/e2e/harness.mjs`).
+  None reads a moving ref as a premise; whether each needs an exemption entry
+  depends on the matcher the Spec lands, and is decided there.
 - **A semantic audit for expired premises the textual sweep cannot see.** The
   meta-test is the mechanical audit and is honest about its reach
-  (assumption 3); a semantic pass is not scheduled.
+  (assumption 4); a semantic pass is not scheduled.
 - **S1's spec-skeleton vocabulary.** This slice states the law in today's prose;
   expressing it in `mechanical`/`inspection`/`carried` terms is S1's job (see
   Context for the next agent).
@@ -214,25 +246,27 @@ invariants lazily expressed as diffs, and they convert cleanly.
 2. **Local rule stated once.** `CONTRIBUTING.md` names `test/frozen-surfaces.test.js`
    as the only test permitted to assert against a moving ref, and states the
    moving-ref-vs-pinned-commit distinction.
-3. **Rule enforced mechanically.** A meta-test fails when any file under `test/`
-   outside its exemption list contains a **git invocation whose argument list
-   names a moving ref**; its patterns are assembled non-literally so it never
-   matches its own source; every exemption carries a one-line reason in the
-   source; and it is proven non-vacuous by an **inline mutation** (scanning a
-   synthetic in-memory string), never by an on-disk fixture under `test/`.
-   Matching the call shape rather than the bare token is load-bearing, not
-   cosmetic: measured at `bcba627` it is the difference between 7 matched files
-   (4 of them false) and 3 (none false).
+3. **Rule enforced mechanically, and the guard's own numbers are executed, not
+   asserted.** A meta-test fails when a swept file outside its exemption list
+   reads a moving ref; its patterns are assembled non-literally so it never
+   matches its own source; every exemption carries a one-line reason; and it is
+   proven non-vacuous by an **inline mutation** (scanning a synthetic in-memory
+   string), never by an on-disk fixture under `test/`.
+   **The Spec states the matcher's pattern set and its swept file set, and
+   carries that matcher's real output over the real corpus — command and result
+   pasted in.** A described-but-unrun matcher does not satisfy this DoD item;
+   that is the rounds-1-to-3 defect and it is now a gate condition.
    **Cost budget — covers this test and the DoD 6 scenario together
    (`PLAN-R2-06`):** both run inside the existing `npm test` corpus, read each
-   file once with no subprocess, network, or model call, and must stay under 1s
-   wall combined — a rounding error against the suite's current runtime. No new
+   swept file once with no subprocess, network, or model call, and must stay
+   under 1s wall combined — a rounding error against the suite's current
+   runtime (trivially satisfiable even over all 74 files under `test/`). No new
    CI job, no new workflow, no `timeout-minutes` change.
 4. **The four discharged** exactly per the disposition table, each converted
    assertion proven non-vacuous and each retirement carrying its recorded
    reason.
 5. **Every occurrence is dispositioned, and the suite is green** — for each
-   matched occurrence under `test/`, exactly one of: brought in scope and fixed;
+   occurrence the landed matcher reports, exactly one of: brought in scope and fixed;
    or **entered in the exemption list**, whose recorded reason is either a
    standing justification or a filed issue id for work deferred out of this
    slice. The exemption list is the single mechanism for every non-fixed
@@ -263,17 +297,20 @@ invariants lazily expressed as diffs, and they convert cleanly.
    `docs/briefs/assets/2026-07-23-orchestration-runtime-prototype/`), so static
    checks are scoped to touched surfaces — carried forward from the S5 build
    plan, unchanged.
-3. The exemption inventory is complete **as of `bcba627`**, produced by running
-   the rev-3 call-shape detector over all 45 files under `test/`, not predicted
-   (`PLAN-R1-01`, `PLAN-R2-01` — the same mistake twice). A file added between
-   now and implement surfaces as a new failure, which is the guard working.
-4. The meta-test's detection is textual (source scanning), not semantic. It
-   catches the observed copy-paste mechanism, not an adversary: a moving-ref
-   read assembled dynamically, or reached through a helper in another module,
-   evades it. The guard is a ratchet against recurrence, not a proof. Matching
-   the call shape narrows what it catches to real git invocations — a
-   deliberate trade of theoretical reach for zero false positives, since a
-   guard that cries wolf gets exempted into uselessness.
+3. **This Plan asserts no inventory and no measurement.** Rounds 1-3 each
+   falsified one (`PLAN-R1-01`, `PLAN-R2-01`, `PLAN-R3-01`/`-02`/`-03`); the
+   inventory is now an output the Spec produces by execution. The only claim
+   made here is that the corpus evidence quoted in the Rationale was read at
+   `8091fc8` and is reproducible by the commands recorded beside it.
+4. The guard's detection is textual (source scanning), not semantic, and its
+   reach is narrower than the law it enforces. Known evasion classes, named
+   honestly: a ref assembled dynamically; a ref reached through a helper in
+   another module; and — demonstrated in this very corpus — a ref passed through
+   a **variable in the same function** (`test/frozen-surfaces.test.js:49-51`,
+   `test/disposition-ledger.test.js:53,57`). The guard is a ratchet against the
+   observed copy-paste mechanism, not a proof, and buying reach at the cost of
+   false positives is the wrong trade: a guard that cries wolf gets exempted
+   into uselessness.
 5. S1 will rewrite `phase-spec.md` §4. This slice's prose will need absorbing
    rather than preserving verbatim; that is accepted, not a defect — which is
    why DoD 6 guards the law's *presence*, not its wording.
