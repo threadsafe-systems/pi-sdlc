@@ -1,0 +1,95 @@
+{
+  "schemaVersion": 1,
+  "taskId": "t2",
+  "buildPlan": "docs/plans/2026-08-06-diff-scoped-test-premises-build.md",
+  "repoRoot": ".",
+  "ownedScenarios": ["DSP1", "DSP2", "DSP3", "DSP4", "DSP5", "DSP6", "DSP7", "DSP12", "DSP13", "DSP14", "DSP15"],
+  "checks": [
+    {
+      "id": "tests.full",
+      "argv": ["npm", "test"],
+      "timeoutMs": 300000,
+      "scope": ["full"],
+      "evidence": ["whole-corpus regression net passes with the durable-premise law and detector"]
+    },
+    {
+      "id": "tests.task",
+      "argv": ["node", "--test", "test/diff-scoped-premises.test.js"],
+      "timeoutMs": 120000,
+      "scope": ["task"],
+      "evidence": ["law ownership, anchor mutation, recursive detector, self-match, exemptions, offline operation, and contributor policy pass"]
+    },
+    {
+      "id": "tests.frozen",
+      "argv": ["node", "--test", "test/frozen-surfaces.test.js"],
+      "timeoutMs": 120000,
+      "evidence": ["ASD19 confirms every frozen surface remains byte-identical to the branch base"]
+    },
+    {
+      "id": "tests.performance",
+      "argv": [
+        "node",
+        "-e",
+        "const {spawnSync}=require(\"node:child_process\"); const verdict=(status,ms)=>status!==0?(status??1):(ms>=1000?1:0); if(verdict(0,1000)!==1) process.exit(2); const start=performance.now(); const result=spawnSync(process.execPath,[\"--test\",\"test/diff-scoped-premises.test.js\"],{stdio:\"inherit\"}); const elapsed=performance.now()-start; console.error(`wall ${elapsed.toFixed(2)}ms`); process.exit(verdict(result.status,elapsed))"
+      ],
+      "timeoutMs": 120000,
+      "evidence": ["external observer self-probes the threshold branch and enforces sub-second detector-test wall time"]
+    },
+    {
+      "id": "static.lint",
+      "argv": ["npx", "biome", "check", "test/diff-scoped-premises.test.js"],
+      "timeoutMs": 120000,
+      "evidence": ["the new JavaScript detector/test surface is Biome-clean"]
+    },
+    {
+      "id": "static.config",
+      "argv": ["node", "skills/sdlc/scripts/config-doc.mjs", "check", "--repo-root", ".", "--format", "text"],
+      "timeoutMs": 120000,
+      "evidence": ["the generated config companion remains current"]
+    },
+    {
+      "id": "static.handoff",
+      "argv": [
+        "node",
+        "-e",
+        "const {execFileSync}=require(\"node:child_process\"); const issue=JSON.parse(execFileSync(\"gh\",[\"issue\",\"view\",\"192\",\"--repo\",\"threadsafe-systems/pi-sdlc\",\"--json\",\"comments\"],{encoding:\"utf8\"})); const required=[\"phase-spec.md\",\"must preserve the premise-durability law\",\"**DSP3**\",\"https://github.com/threadsafe-systems/pi-sdlc/blob/fix/diff-scoped-test-premises/docs/specs/2026-08-06-diff-scoped-test-premises.md#9-verification-scenarios\"]; if(!issue.comments.some(({body})=>required.every((token)=>body.includes(token)))) process.exit(1)"
+      ],
+      "timeoutMs": 120000,
+      "evidence": ["one issue-192 comment carries the preservation instruction, bold DSP3 witness, and full linked Spec URL"]
+    }
+  ],
+  "categories": {
+    "tests": {
+      "applicability": "required",
+      "checkIds": ["tests.full", "tests.task", "tests.frozen", "tests.performance"]
+    },
+    "static": {
+      "applicability": "required",
+      "checkIds": ["static.lint", "static.config", "static.handoff"]
+    },
+    "scenarios": {
+      "applicability": "required",
+      "evidence": {
+        "DSP1": ["tests.task"],
+        "DSP2": ["tests.task"],
+        "DSP3": ["tests.task"],
+        "DSP4": ["tests.task"],
+        "DSP5": ["tests.task"],
+        "DSP6": ["tests.task"],
+        "DSP7": ["tests.task"],
+        "DSP12": ["tests.task", "tests.performance", "static.lint"],
+        "DSP13": ["tests.task"],
+        "DSP14": ["static.handoff"],
+        "DSP15": ["tests.full", "tests.task", "tests.frozen", "static.lint", "static.config"]
+      }
+    },
+    "standards": {
+      "applicability": "n/a",
+      "reason": "the task test and lint check mechanically cover the applicable guidance, contributor, and JavaScript standards"
+    },
+    "bannedPatterns": {
+      "applicability": "n/a",
+      "reason": "the detector test itself owns the moving-ref pattern ban, exact exemptions, and self-match protection"
+    }
+  }
+}

@@ -26,6 +26,18 @@ message. A non-conventional commit or PR title fails the check and blocks the
 merge. Fix commit messages with `git commit --amend` / `git rebase -i` and
 update the PR title in the GitHub UI.
 
+## Durable scenario premises
+
+Scenario tests assert current-tree invariants or use pinned immutable commits;
+their premises must remain meaningful after merge. A non-change claim is
+falsifiable only against its authoring diff and belongs in the `FROZEN` list
+owned by `test/frozen-surfaces.test.js`, pi-sdlc's standing diff guard.
+
+That guard is the only test permitted to use a moving ref without further
+justification. Every other detector hit must be fixed or carried in the durable-
+premise guard's reasoned exemption map with a non-empty explanation of its
+present behaviour.
+
 ## Releases
 
 Merging to `main` runs the `release` workflow: it computes the next semantic
