@@ -47,6 +47,14 @@ When `<TRACK>` is `reversible`, ground review constraints in the plan and
 build-plan documents; a Specification does not exist on this track and must
 not be demanded.
 
+## Carry landing (mandatory check)
+
+**Every carry minted anywhere in this run must have landed** at the destination its record names. Check each one and report an undischarged carry as a finding: a `CARRY-TO-BACKLOG` needs a filed issue id, and `CARRY-TO-BUILD` / `CARRY-TO-IMPLEMENT` need their landing sites in the build plan and the branch — their own checkpoints are otherwise attested only by the agent that owed them, and are not checked at all where per-task validation is switched off. You are the last gate that sees all of them.
+
+## Delta rounds
+
+Round 1 reviews the whole diff. **Every round after the first is a delta review.** The caller gives you the prior rounds' findings and their dispositions, and your review is scoped to the delta since the previous round. Tag every finding `NEW`, or `REOPENED(<prior-id>)` when you re-raise an already-dispositioned finding by its id. A reopen is legal only when you cite evidence that did not exist, or was not available, when that finding was dispositioned; otherwise do not re-raise it. Confirming a prior fix is one line, not a re-litigation.
+
 ## Output format (STRICT)
 
 Return ONLY a markdown list of findings, nothing else. For each finding:
@@ -55,6 +63,7 @@ Return ONLY a markdown list of findings, nothing else. For each finding:
 
 - severity: high | medium | low
 - confidence: high | medium (drop anything lower)
+- origin: NEW | REOPENED(<prior-id>)
 - file: <repo-relative path>
 - line: <line number or range in the NEW file, best effort; say "approx" if unsure>
 - problem: <one or two sentences: the concrete defect>

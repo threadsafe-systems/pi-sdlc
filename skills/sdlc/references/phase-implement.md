@@ -63,6 +63,11 @@ contract (`references/system-reference.md`,
   copied into the PR body's **"Assumptions & discretionary calls"** section at
   PR preparation, where the panel reads them as review input
   (`references/phase-pr-review.md`).
+- A **`CARRY-TO-IMPLEMENT`** carried in from Build lands here too, beside those
+  assumptions: record where it discharged — the commit, task or test that answers
+  it — against the build-plan entry that minted it. The vocabulary is
+  `references/system-reference.md`, "Iteration & disposition"; §5 owns the
+  checkpoint that blocks on it.
 
 ## 5. Invariant gate/approval seam — the per-task validator
 
@@ -126,7 +131,20 @@ the validator cannot invent a command, weaken a check, or decide applicability.
 Under `subagent`, the validator subagent (`prompts/validator-task.prompt.md`) runs
 the runner, confirms exit and report verdict agree, and reports each result; under
 `self` the implementer runs the runner directly. A nonzero runner result blocks
-task completion; a task is not done until the runner returns PASS. Each task stores
+task completion; a task is not done until the runner returns PASS.
+
+**Carry checkpoint.** A task **does not close** while a `CARRY-TO-IMPLEMENT`
+addressed to it is undischarged: the per-task validator seam is where the
+no-orphan rule bites in this phase.
+
+> **Under your configuration:** under `review.tasks: off` there is no PASS gate
+> at all, so this checkpoint has nowhere to bite. The obligation then falls to
+> the PR panel's carry-landing surface, which verifies every carry minted
+> anywhere in the run — so no configuration leaves a carry unchecked. Read the
+> effective `review.tasks` from current `CONFIG.md` (or authoritative
+> `sdlc.config.json`).
+
+Each task stores
 a runtime receipt (manifest copy, runner report, hashes, verdicts, plus the
 generated-agent copy and model under `subagent`) under
 `docs/reviews/task-validate-<feature>-<task-id>-<date>/`, verifiable with

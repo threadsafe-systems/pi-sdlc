@@ -85,11 +85,32 @@ When a panel runs it follows the shared panel run-shape owned by
 reviewer prompt is `prompts/adversary-spec.prompt.md`. Reviewers are grounded
 in the code and must cite `file:line` for any framework claim.
 
+**Amending an approved Specification.** Classify the change under the three
+classes in `references/system-reference.md`, "Iteration & disposition"; that
+glossary owns their definitions. Here, class **(a)** takes the backward
+transition at §6; class **(b)** is amended in place in this Specification,
+recording the trigger, class, disposition and author, with an in-place marker
+here when a later phase owns its full record; and class **(c)** starts a normal
+fix wave.
+
+**Inbound carries block this gate.** Before the Spec gate passes, verify that
+every `CARRY-TO-SPEC` minted at Plan has landed here, at the landing site its
+record names. An undischarged carry blocks the gate — the no-orphan rule of
+`references/system-reference.md`, "Iteration & disposition".
+
+> **Under your configuration:** a spec-panel finding that is valid but belongs to
+> decomposition takes the disposition `CARRY-TO-BUILD`, recorded with its landing
+> site — the build plan's spec-gap log. That destination is the next phase in the
+> *effective configured sequence*, so read that sequence from current
+> `CONFIG.md` (or authoritative `sdlc.config.json`) rather than assuming it.
+
 ## 6. Refusal and backward-transition behaviour
 
 Standalone `sdlc:spec` refuses-with-redirect when adopted and no committed plan
 exists. Backward transition to Plan or Brainstorm is always allowed when the Spec
-reveals an upstream flaw.
+reveals an upstream flaw. A class **(a)** amendment (§5) resolves here: it touches
+a shape already frozen, merged, or bound to, so it is a backward transition and
+the gate re-runs.
 
 ## 7. After-hook order and warning semantics
 

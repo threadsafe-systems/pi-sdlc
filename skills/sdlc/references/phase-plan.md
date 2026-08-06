@@ -78,10 +78,28 @@ consolidate → adjudicate → stop) owned by `references/phase-pr-review.md`,
 "Panels". The reviewer prompt is `prompts/adversary-plan.prompt.md` via the
 `plan_review` phase; never hand-copy a prompt per model.
 
+**Amending an approved plan.** Classify the change under the three classes in
+`references/system-reference.md`, "Iteration & disposition"; that glossary owns
+their definitions. Here, class **(a)** takes the backward transition at §6; class
+**(b)** is amended in place in this Plan, recording the trigger, class,
+disposition and author; and class **(c)** starts a normal fix wave.
+
+> **Under your configuration:** `CARRY-TO-SPEC` is legal only where the effective
+> configured sequence has a separate Spec; record its landing site there. Without
+> a separate Spec — including the reversible track — the next design artifact is
+> Build, so use `CARRY-TO-BUILD` and name the build plan's spec-gap log as its
+> landing site. Read the effective track and `shape.separateSpec` from current
+> `CONFIG.md` (or authoritative `sdlc.config.json`).
+
+Plan has no inbound carry to verify: it is the first artifact-bearing phase, so
+no `CARRY-TO-PLAN` destination exists.
+
 ## 6. Refusal and backward-transition behaviour
 
 Plan does not refuse on upstream grounds. Backward transition to Brainstorm is
-always allowed when planning reveals the design is unsound.
+always allowed when planning reveals the design is unsound. A class **(a)**
+amendment (§5) resolves here: it touches a shape already frozen, merged, or bound
+to, so it is a backward transition and the gate re-runs.
 
 ## 7. After-hook order and warning semantics
 

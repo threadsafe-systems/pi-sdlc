@@ -21,12 +21,19 @@ D. Locked decisions: does the plan re-open or contradict a settled decision with
 E. Missing risks and dependencies: what will bite during spec or implementation that the plan does not name (ordering, migration, cross-component coupling, irreversible shapes that should force the irreversible track)?
 F. Track classification: if the plan claims the reversible fast path, does anything it touches actually freeze a shape (contract, schema, interface, wire format) that should force the irreversible track?
 
+**Carry landing: none applies here, by decision.** Plan is the first artifact-bearing phase, so no `CARRY-TO-PLAN` destination exists and there is no inbound carry for you to verify. This is a decision, not an omission: do not invent one, and do not report its absence as a finding.
+
+## Delta rounds
+
+Round 1 reviews the whole plan. **Every round after the first is a delta review.** The caller gives you the prior rounds' findings and their dispositions, and your review is scoped to the delta since the previous round. Tag every finding `NEW`, or `REOPENED(<prior-id>)` when you re-raise an already-dispositioned finding by its id. A reopen is legal only when you cite evidence that did not exist, or was not available, when that finding was dispositioned; otherwise do not re-raise it. Confirming a prior fix is one line, not a re-litigation.
+
 ## Output format (STRICT: markdown only, findings only, no preamble, no conclusion)
 
 ### <short title>
 
 - severity: high | medium | low
 - confidence: high | medium (drop anything lower; do not speculate)
+- origin: NEW | REOPENED(<prior-id>)
 - location: <plan section or line>
 - defect: <one or two sentences: the concrete problem>
 - evidence: <what you verified: quoted plan text, or file:line in the repo>
