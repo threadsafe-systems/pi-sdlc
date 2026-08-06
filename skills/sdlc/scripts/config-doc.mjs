@@ -19,11 +19,11 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { inspectConfig } from "./lib.mjs";
 
-export const CURRENT_SENTINEL_VERSION = "v1";
+export const CURRENT_SENTINEL_VERSION = "v2";
 // Every render-format version ever shipped in a released pi-sdlc stays here so a
 // correctly-generated companion from any prior release remains recognized. A
 // version leaves this set only at a package major boundary (Spec §13).
-export const SUPPORTED_SENTINEL_VERSIONS = new Set(["v1"]);
+export const SUPPORTED_SENTINEL_VERSIONS = new Set(["v1", "v2"]);
 
 const COMPANION_REL = join(".pi", "sdlc", "CONFIG.md");
 const CONFIG_REL = join(".pi", "sdlc", "sdlc.config.json");
@@ -142,13 +142,19 @@ const KEY_REFERENCE = {
 	panels: "The panel roster (authorDefault + per-phase prefer/panelSize). Resolved live against credentials by resolve-panel.",
 };
 
+function codeSpan(value) {
+	const maxRun = Math.max(0, ...(value.match(/`+/g) ?? []).map((run) => run.length));
+	const delimiter = "`".repeat(maxRun + 1);
+	return `${delimiter}${value}${delimiter}`;
+}
+
 function keyReference(config) {
 	const lines = ["## Configuration keys (JSON order)", ""];
 	for (const key of Object.keys(config)) {
 		// Full current value (no truncation): Spec §14 requires each persisted key's
 		// complete current value in the generated reference.
 		const value = JSON.stringify(config[key]);
-		lines.push(`- **\`${key}\`** = \`${value}\``);
+		lines.push(`- **\`${key}\`** = ${codeSpan(value)}`);
 		lines.push(`  - ${KEY_REFERENCE[key] ?? "Persisted config key; see sdlc.config.json and the schema."}`);
 	}
 	lines.push("");

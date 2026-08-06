@@ -10,11 +10,12 @@ import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { test } from "node:test";
-import { check, CURRENT_SENTINEL_VERSION, fingerprint, parseSentinel, render, sentinelLine, write } from "../skills/sdlc/scripts/config-doc.mjs";
+import { check, CURRENT_SENTINEL_VERSION, fingerprint, parseSentinel, render, sentinelLine, SUPPORTED_SENTINEL_VERSIONS, write } from "../skills/sdlc/scripts/config-doc.mjs";
 
 const here = dirname(fileURLToPath(import.meta.url));
 const repo = dirname(here);
 const CLI = join(repo, "skills", "sdlc", "scripts", "config-doc.mjs");
+const V1_FIXTURE = join(here, "fixtures", "config-doc", "v1-valid-config.md");
 
 const VALID_CONFIG = {
 	schemaVersion: 3,
@@ -51,11 +52,94 @@ const runCli = (args, root) => {
 		return { status: e.status, stdout: e.stdout ?? "" };
 	}
 };
+const keyLine = (body, key) => body.split("\n").find((line) => line.startsWith(`- **\`${key}\`** = `));
+const withPanelComment = (comment) => {
+	const config = structuredClone(VALID_CONFIG);
+	config.panels.$comment = comment;
+	return config;
+};
 
 // ---- ASD6: deterministic render + full §14 content ------------------------
 
 test("ASD6: render is deterministic and byte-identical across runs", () => {
 	assert.equal(render(VALID_CONFIG), render(VALID_CONFIG));
+});
+
+test("CDFS1/CDFS2/CDFS3: value spans use max-run-plus-one delimiters and preserve exact JSON", () => {
+	for (const [comment, delimiter] of [
+		["plain", "`"],
+		["one ` run", "``"],
+		["one ` and two `` runs", "```"],
+		["one `, two ``, and three ``` runs", "````"],
+	]) {
+		const config = withPanelComment(comment);
+		const serialized = JSON.stringify(config.panels);
+		assert.equal(keyLine(render(config), "panels"), `- **\`panels\`** = ${delimiter}${serialized}${delimiter}`);
+	}
+});
+
+test("CDFS2: a delimiter equal to an interior run is rejected by the exact-span witness", () => {
+	const config = withPanelComment("two `` backticks");
+	const serialized = JSON.stringify(config.panels);
+	const invalid = `- **\`panels\`** = \`\`${serialized}\`\``;
+	assert.notEqual(keyLine(render(config), "panels"), invalid);
+});
+
+test("CDFS3: mutating one serialized byte breaks exact value preservation", () => {
+	const config = withPanelComment("one ` run");
+	const serialized = JSON.stringify(config.panels);
+	const line = keyLine(render(config), "panels");
+	assert.ok(line.includes(serialized));
+	assert.equal(line.includes(serialized.replace("one", "won")), false);
+});
+
+test("CDFS4: the real panels comment cannot reproduce the recorded malformed v1 line", () => {
+	const config = JSON.parse(readFileSync(join(repo, ".pi", "sdlc", "sdlc.config.json"), "utf8"));
+	const serialized = JSON.stringify(config.panels);
+	const line = keyLine(render(config), "panels");
+	const malformed = `- **\`panels\`** = \`${serialized.replace("re-check with `pi --list-models`", "re-check with`pi --list-models`")}\``;
+	assert.match(line, /^- \*\*`panels`\*\* = ``/);
+	assert.ok(line.includes("re-check with `pi --list-models`"));
+	assert.notEqual(line, malformed);
+});
+
+test("CDFS9: repository companion is the current v2 render", () => {
+	const report = check(repo);
+	assert.equal(report.state, "current");
+	assert.equal(report.exitCode, 0);
+	assert.equal(report.sentinel.version, "v2");
+});
+
+test("CDFS6/CDFS7/CDFS8: v2 is current, v1 regenerates, and unsupported v3 is refused", () => {
+	assert.equal(CURRENT_SENTINEL_VERSION, "v2");
+	assert.deepEqual([...SUPPORTED_SENTINEL_VERSIONS], ["v1", "v2"]);
+
+	const legacyBody = readFileSync(V1_FIXTURE, "utf8");
+	assert.match(legacyBody, /^<!-- pi-sdlc:config-doc v1 fingerprint=47b61fe4fedb58813e24f74942d39f9a1b3bbf119c81d44ecf5f1abce6f79c82 -->/);
+	const legacy = fixture();
+	writeFileSync(companion(legacy), legacyBody);
+	assert.equal(check(legacy).state, "stale");
+	assert.equal(write(legacy).action, "regenerated");
+	assert.equal(parseSentinel(readFileSync(companion(legacy), "utf8")).version, "v2");
+
+	const unsupported = fixture();
+	const v3 = readFileSync(V1_FIXTURE, "utf8").replace("config-doc v1", "config-doc v3");
+	writeFileSync(companion(unsupported), v3);
+	assert.equal(check(unsupported).state, "error");
+	assert.equal(write(unsupported).action, "refused");
+	assert.equal(readFileSync(companion(unsupported), "utf8"), v3);
+});
+
+test("CDFS11: config-doc keeps its builtin-only runtime boundary", () => {
+	const source = readFileSync(CLI, "utf8");
+	const specifiers = [...source.matchAll(/^import .* from "([^"]+)";$/gm)].map((match) => match[1]);
+	assert.deepEqual(specifiers, ["node:crypto", "node:fs", "node:path", "node:url", "./lib.mjs"]);
+	const packageJson = JSON.parse(readFileSync(join(repo, "package.json"), "utf8"));
+	const packages = [...Object.keys(packageJson.dependencies ?? {}), ...Object.keys(packageJson.devDependencies ?? {})];
+	assert.deepEqual(
+		packages.filter((name) => /(?:markdown|prettier|remark)/i.test(name)),
+		[],
+	);
 });
 
 test("ASD6: write twice is byte-identical (retained)", () => {
@@ -71,7 +155,7 @@ test("ASD6: write twice is byte-identical (retained)", () => {
 test("ASD6: rendered CONFIG.md carries all §14 sections and every schemaVersion-3 key in JSON order", () => {
 	const body = render(VALID_CONFIG);
 	// §14 ordered sections
-	assert.match(body, /^<!-- pi-sdlc:config-doc v1 fingerprint=[0-9a-f]{64} -->$/m); // 1 sentinel
+	assert.match(body, new RegExp(`^<!-- pi-sdlc:config-doc ${CURRENT_SENTINEL_VERSION} fingerprint=[0-9a-f]{64} -->$`, "m")); // 1 sentinel
 	assert.match(body, /Generated file — do not hand-edit/); // 2 warning
 	assert.match(body, /## Effective lifecycle shape/); // 3 behaviour-first
 	assert.match(body, /## Configuration keys \(JSON order\)/); // 4 key reference
