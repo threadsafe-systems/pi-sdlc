@@ -9,4 +9,4 @@
 
 ### Verdict: PASS
 
-Runner exit and report agree (0/PASS). Verb-independent duplication, `not true` inversion, exact static-import allowlist mutations, and the complete external verification set pass.
+Runner exit and report agree (0/PASS). Order-independent duplicate detection, exact module-prelude enforcement, all reported bypass mutations, and the complete external verification set pass.
