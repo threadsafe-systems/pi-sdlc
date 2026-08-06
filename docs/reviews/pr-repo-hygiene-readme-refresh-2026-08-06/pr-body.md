@@ -16,8 +16,9 @@ prior panels flagged the same hazard from opposite directions — `pr-review-sdl
 provenance) and `pr-pv1-task-scoped-tests-2026-07-25` (P7: opening a PR from the
 stale blob would have failed `check-lifecycle` and replayed a spent
 `BREAKING CHANGE` footer). P7 was closed by rewriting the file rather than
-untracking it, so the hazard was still live. The ignore entry is unanchored to
-cover a fixture consumer root nested under this repository.
+untracking it, so the hazard was still live. The ignore entry is anchored to the
+repository root, so the panel snapshots at `docs/reviews/<dir>/pr-body.md` stay
+committable evidence.
 
 **README covers four shipped surfaces it previously omitted.** The README was
 last touched on 2026-07-25 and described a single skill plus the phase machine.
@@ -97,10 +98,16 @@ telemetry run store themselves, which setup likewise does not provision.
 
 ## Review
 
-PR panel, round 1 — 3 reviewers resolved, 1 returned (both `openai-codex` models
-failed on provider usage limits, a panel shortfall under `onShortfall: fail`).
-The reviewer that landed raised 3 medium and 4 low findings, no highs; **all
-seven were incorporated**, including the anchoring defect above and two false
-README claims (the emitter's fail-soft behaviour, and the run store being
-git-ignored for consumers). Round 2 refills the shortfall as a delta review.
-Artifacts: `docs/reviews/pr-repo-hygiene-readme-refresh-2026-08-06/`.
+Three distinct reviewers, reached across three dispatch rounds because provider
+availability kept thinning the panel (`onShortfall: fail`, panelSize 3).
+
+- **Round 1** — `claude-fable-5` returned; both `openai-codex` models failed on
+  usage limits. 3 medium + 4 low, no highs; **all seven incorporated**, including
+  a real defect in this PR's own ignore rule and two false README claims.
+- **Round 2** — `deepseek-v4-pro` returned and independently verified all seven
+  round-1 fixes as resolved; `claude-opus-4-8` failed (no Bedrock credentials).
+  One new low finding, incorporated.
+- **Round 3** — `glm-5.2`, to reach the panel floor of three distinct models.
+
+Artifacts and the full disposition table:
+`docs/reviews/pr-repo-hygiene-readme-refresh-2026-08-06/consolidated.md`.
