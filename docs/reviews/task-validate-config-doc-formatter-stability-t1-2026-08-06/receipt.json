@@ -3,10 +3,10 @@
   "taskId": "t1",
   "manifestPath": "docs/validation/config-doc-formatter-stability/t1.json",
   "manifestSha256": "6051003ce6e4be337f15fdd08cdc1ba5b6324a59de8e6d998625fa49e50090a5",
-  "runnerReportSha256": "03f0d97ba1ec00fc9b5f9048d71ea0c13f1c32d85c6a92ccfdd68ff1cf8d2e27",
+  "runnerReportSha256": "c10413a63cd3e3d3fa962ce7b490f5c94d2634958eb8931808ef7ff1896c0872",
   "generatedAgentSha256": "ec3895ff8b685dc90b6ce2db27aa82b37d1abeea1612749d9b1377c42d69cbdd",
   "model": "anthropic/claude-haiku-4-5",
   "runnerVerdict": "PASS",
   "validatorVerdict": "PASS",
-  "createdAt": "2026-08-06T14:51:50Z"
+  "createdAt": "2026-08-06T15:02:08Z"
 }

@@ -1,4 +1,4 @@
-## Validation: T1
+### Validation: T1
 
 - manifest: `docs/validation/config-doc-formatter-stability/t1.json`
 - runner: PASS — exit 0
@@ -7,6 +7,6 @@
 - categories: tests=PASS, static=PASS, scenarios=PASS, standards=N/A, bannedPatterns=N/A
 - scenarios: CDFS1=PASS, CDFS2=PASS, CDFS3=PASS, CDFS4=PASS, CDFS5=PASS, CDFS6=PASS, CDFS7=PASS, CDFS8=PASS, CDFS9=PASS, CDFS10=PASS, CDFS11=PASS
 
-## Verdict: PASS
+### Verdict: PASS
 
-Runner exit and report agree (0/PASS). The full fixture SHA pin, 150,000-run overflow witness, adaptive spans, current v2 companion, and every declared check pass.
+Independent inspection confirms the report names the canonical validation manifest, exit/verdict agree, and every check and owned scenario passes. The focused corpus mechanically pins the full v1 fixture SHA and exact 150,000-run rendered line.

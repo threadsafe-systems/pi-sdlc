@@ -9,4 +9,4 @@
 
 ### Verdict: PASS
 
-Runner exit and report agree (0/PASS). Rev-3 approval consistency, the current v2 companion, and every declared check pass after PR hardening.
+Independent inspection confirms the report names the canonical validation manifest, exit/verdict agree, CDFS12 passes, and rev-3/current-v2 evidence is present.
