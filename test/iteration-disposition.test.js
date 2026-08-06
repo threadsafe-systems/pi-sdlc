@@ -1,10 +1,8 @@
 // Scenarios for the cross-gate iteration & disposition vocabulary (S5).
 // Spec: docs/specs/2026-07-26-iteration-disposition-vocabulary.md.
-// Offline: reads the working tree and shells out to local git only — no model
-// calls and no network calls (N2/IDV17).
+// Offline: reads the working tree only; no subprocess, model, or network calls.
 
 import assert from "node:assert/strict";
-import { execFileSync } from "node:child_process";
 import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -16,20 +14,6 @@ const repo = dirname(here);
 const refDir = join(repo, "skills", "sdlc", "references");
 
 const GLOSSARY_TITLE = "Iteration & disposition";
-
-/** The merge-base with the main line; `main` may not exist locally in CI. */
-function baseRef() {
-	for (const ref of ["main", "origin/main"]) {
-		try {
-			return execFileSync("git", ["-C", repo, "merge-base", "HEAD", ref], { encoding: "utf8" }).trim();
-		} catch {}
-	}
-	throw new Error("cannot resolve the main-line base ref (main / origin/main)");
-}
-
-function baseFile(path) {
-	return execFileSync("git", ["-C", repo, "show", `${baseRef()}:${path}`], { encoding: "utf8" });
-}
 
 const systemReference = readFileSync(join(refDir, "system-reference.md"), "utf8");
 
@@ -145,14 +129,32 @@ test("IDV2 (non-vacuous): a glossary stripped of the alias fails its own check",
 	assert.doesNotMatch(mutated, /finding\s+class/i);
 });
 
-test("IDV3: §1–§14 numbering in system-reference.md is unchanged from the branch base", () => {
-	const path = "skills/sdlc/references/system-reference.md";
+test("IDV3: system-reference.md keeps the standing §1–§14 heading contract", () => {
+	const expected = [
+		"1. Purpose",
+		"2. Kernel — invariant guarantees and the two tracks",
+		"3. Adoption & readiness",
+		"4. Tracks, phases, transitions, gates, refusal",
+		"5. Public composition inventory (FS11 taxonomy)",
+		"6. Configuration & extension surfaces",
+		"7. Artifacts & durable evidence",
+		"8. Normal full-lifecycle operation and the six standalone entrypoints",
+		"9. Advanced modes",
+		"10. Operational troubleshooting and the source-inspection boundary",
+		"11. Next-read routing (authority map)",
+		"12. Lifecycle telemetry (FS13)",
+		"13. Stall detection and self-resume",
+		"14. Presenting questions to the human",
+	];
 	const numbered = (body) =>
 		body
 			.split("\n")
 			.filter((line) => /^## \d+\. /.test(line))
-			.filter((line) => Number.parseInt(line.slice(3), 10) <= 14);
-	assert.deepEqual(numbered(systemReference), numbered(baseFile(path)), "a pre-existing §1–§14 heading was renumbered or retitled");
+			.filter((line) => Number.parseInt(line.slice(3), 10) <= 14)
+			.map((line) => line.slice(3));
+	assert.deepEqual(numbered(systemReference), expected, "a standing §1–§14 heading was deleted, renumbered, or retitled");
+	const mutated = systemReference.replace("## 1. Purpose", "## 1. Changed");
+	assert.notDeepEqual(numbered(mutated), expected, "the heading contract must fail when a heading changes");
 });
 
 test("IDV25: the glossary section is at most 60 lines", () => {
@@ -351,9 +353,20 @@ test("IDV14: phase-tasks.md §4 specifies the spec-gap log with its exact column
 	assert.match(flat, /never\s+omitted/i, 'the explicit-"none" rule is absent');
 });
 
-test("IDV14: templates/sdlc-tasks.md is byte-identical to the branch base", () => {
-	const changed = execFileSync("git", ["-C", repo, "diff", "--name-only", baseRef(), "--", "templates/sdlc-tasks.md"], { encoding: "utf8" }).trim();
-	assert.equal(changed, "", "the standalone-entrypoint router is a thin router; the spec-gap log belongs to phase-tasks.md §4");
+test("IDV14: templates/sdlc-tasks.md remains a thin current-tree router", () => {
+	const template = readFileSync(join(repo, "templates", "sdlc-tasks.md"), "utf8");
+	const body = template.replace(/^---\n[\s\S]*?\n---\n/, "");
+	const hasSpecGapColumns = (text) =>
+		text.split("\n").some((line) => {
+			if (!line.trimStart().startsWith("|")) return false;
+			const normalized = line.toLowerCase();
+			return ["description", "severity", "disposition", "landing site"].every((column) => normalized.includes(column));
+		});
+	assert.match(body, /Thin router/, "the standalone entrypoint no longer identifies itself as a thin router");
+	assert.doesNotMatch(body, /Spec gap log/i, "the standalone router must not restate the Spec gap log");
+	assert.equal(hasSpecGapColumns(body), false, "the standalone router must not carry the Spec gap table columns");
+	const mutated = `${body}\n| description | severity | disposition | landing site |\n| --- | --- | --- | --- |`;
+	assert.equal(hasSpecGapColumns(mutated), true, "the forbidden-table check must remain non-vacuous");
 });
 
 test("IDV27: assumption-recorded routes to the existing Assumptions appendix", () => {
@@ -404,10 +417,8 @@ test("IDV15: every adversary prompt carries the delta-round law and its C6 carry
 	}
 });
 
-test("IDV15: validator-task.prompt.md is byte-identical to the branch base", () => {
-	const changed = execFileSync("git", ["-C", repo, "diff", "--name-only", baseRef(), "--", "skills/sdlc/prompts/validator-task.prompt.md"], { encoding: "utf8" }).trim();
-	assert.equal(changed, "", "the task validator is a checklist executor, not a panel reviewer; C6 does not touch it");
-});
+// validator-task.prompt.md is protected by test/frozen-surfaces.test.js's
+// FROZEN list; this corpus does not duplicate that diff guard.
 
 test("IDV28: every adversary prompt's STRICT output format declares an origin field", () => {
 	for (const slug of ADVERSARY_PROMPTS) {
@@ -417,10 +428,8 @@ test("IDV28: every adversary prompt's STRICT output format declares an origin fi
 	}
 });
 
-test("IDV16: no script, schema, or workflow file differs from the branch base (N1)", () => {
-	const changed = execFileSync("git", ["-C", repo, "diff", "--name-only", baseRef(), "--", "skills/sdlc/scripts", "skills/sdlc/schema", ".github/workflows"], { encoding: "utf8" }).trim();
-	assert.equal(changed, "", `this slice is prose-only; runtime surfaces changed:\n${changed}`);
-});
+// Non-change obligations are enforced by test/frozen-surfaces.test.js;
+// standing scenarios assert current-tree behaviour.
 
 // IDV19 was written diff-scoped, asserting the S5 branch DROPPED these three
 // entries. The post-merge re-freeze discharged that; the durable obligation is
@@ -451,25 +460,25 @@ test("IDV4: every phase reference the vocabulary binds cites the glossary by nam
 	}
 });
 
-test("IDV17: this slice's scenarios make no model call and no network call", () => {
+test("IDV17: this scenario corpus makes no subprocess, model, or network call", () => {
 	const source = readFileSync(join(here, "iteration-disposition.test.js"), "utf8");
 	for (const specifier of [...source.matchAll(/^import .*? from "([^"]+)";$/gm)].map((m) => m[1])) {
-		if (specifier.endsWith("/config-doc.mjs")) continue; // IDV24: deterministic render, same trust boundary as the version already tested in config-doc.test.js
+		if (specifier.endsWith("/config-doc.mjs")) continue;
 		assert.ok(specifier.startsWith("node:"), `only node builtins may be imported here; found ${specifier}`);
 	}
-	// Reaching the network or a model needs a module this file does not import, a
-	// dynamic load of one, a subprocess, or global fetch. Strings and comments are
-	// blanked first so the guard cannot trip over its own vocabulary.
 	const code = source
 		.replace(/^\s*\/\/.*$/gm, "")
 		.replace(/"[^"]*"/g, '""')
 		.replace(/`[^`]*`/g, "``");
 	for (const banned of [/\bfetch\s*\(/, /\bimport\s*\(/, /\brequire\s*\(/, /\bexecSync\s*\(/, /\bspawn\s*\(/]) {
-		assert.doesNotMatch(code, banned, `a scenario must not reach past the working tree and local git: ${banned}`);
+		assert.doesNotMatch(code, banned, `a scenario must not reach beyond the working tree: ${banned}`);
 	}
-	// Local git subprocesses are permitted (N2), and only those.
-	const spawned = [...source.matchAll(/execFileSync\("([^"]+)"/g)].map((m) => m[1]);
-	assert.deepEqual([...new Set(spawned)], ["git"], "local git is the only permitted subprocess");
+
+	const subprocessPatternSource = String.raw`execFileSync\("([^"]+)"`;
+	const subprocesses = (body) => [...body.matchAll(new RegExp(subprocessPatternSource, "g"))].map((match) => match[1]);
+	const synthetic = `${["exec", "File", "Sync"].join("")}("fixture"`;
+	assert.deepEqual(subprocesses(synthetic), ["fixture"], "the subprocess inventory pattern must remain non-vacuous");
+	assert.deepEqual([...new Set(subprocesses(source))], [], "the scenario corpus must not execute a subprocess");
 });
 
 test("IDV32: every amendment record in the Spec is named by an in-place marker in the Plan", () => {
