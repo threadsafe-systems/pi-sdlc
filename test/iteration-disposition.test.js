@@ -21,12 +21,9 @@ function reference(slug) {
 	return readFileSync(join(refDir, `phase-${slug}.md`), "utf8");
 }
 
-function importSpecifiers(source) {
-	return [...source.matchAll(/^import\b[\s\S]*?;$/gm)].map((statement) => {
-		const specifier = statement[0].match(/\bfrom\s+["']([^"']+)["']|^import\s+["']([^"']+)["']/m);
-		assert.ok(specifier, `cannot parse static import: ${statement[0]}`);
-		return specifier[1] ?? specifier[2];
-	});
+function assertExactImports(source, expected) {
+	const imports = source.split("\n").filter((line) => /^import\b/.test(line));
+	assert.deepEqual(imports, expected, "static imports must remain the exact local-only allowlist");
 }
 
 /** A numbered `## <n>. …` section body, heading included, up to the next `## `. */
@@ -456,22 +453,26 @@ test("IDV28: every adversary prompt's STRICT output format declares an origin fi
 test("IDV33: retired checks name their present enforcement owners", () => {
 	const source = readFileSync(join(here, "iteration-disposition.test.js"), "utf8");
 	const lines = source.split("\n");
-	const commentBlock = (needle) => {
-		const start = lines.findIndex((line) => line.startsWith("//") && line.includes(needle));
-		assert.notEqual(start, -1, `ownership comment is missing: ${needle}`);
-		let end = start;
-		while (end + 1 < lines.length && lines[end + 1].startsWith("//")) end++;
-		return lines.slice(start, end + 1).join("\n");
+	const commentBlock = (bodyLines, needle) => {
+		const needleLine = bodyLines.findIndex((line) => line.startsWith("//") && line.includes(needle));
+		assert.notEqual(needleLine, -1, `ownership comment is missing: ${needle}`);
+		let start = needleLine;
+		while (start > 0 && bodyLines[start - 1].startsWith("//")) start--;
+		let end = needleLine;
+		while (end + 1 < bodyLines.length && bodyLines[end + 1].startsWith("//")) end++;
+		return bodyLines.slice(start, end + 1).join("\n");
 	};
-	const frozenOwner = commentBlock("validator-task.prompt.md");
-	const nonChangeOwner = commentBlock("Non-change obligations");
+	const frozenOwner = commentBlock(lines, "validator-task.prompt.md");
+	const nonChangeOwner = commentBlock(lines, "Non-change obligations");
 	assert.match(frozenOwner, /FROZEN[\s\S]*diff guard/i, "the validator prompt comment does not name the FROZEN-list owner");
 	assert.match(nonChangeOwner, /frozen-surfaces[\s\S]*current-tree behaviour/i, "the non-change comment does not name the standing diff guard");
 	const processHistory = /\b(?:Plan|panel|PR|removed|retired)\b/i;
 	for (const comment of [frozenOwner, nonChangeOwner]) {
 		assert.doesNotMatch(comment, processHistory, "ownership comments must describe present enforcement, not process history");
 	}
-	assert.match(`${frozenOwner}\n// Retired by the PR.`, processHistory, "appended process history must remain detectable");
+	for (const mutation of [source.replace("// validator-task.prompt.md", "// Retired by the PR.\n// validator-task.prompt.md"), source.replace("// FROZEN list;", "// FROZEN list;\n// Retired by the PR.")]) {
+		assert.match(commentBlock(mutation.split("\n"), "validator-task.prompt.md"), processHistory, "process history anywhere in the ownership block must remain detectable");
+	}
 });
 
 // IDV19 was written diff-scoped, asserting the S5 branch DROPPED these three
@@ -505,13 +506,10 @@ test("IDV4: every phase reference the vocabulary binds cites the glossary by nam
 
 test("IDV17: this scenario corpus makes no subprocess, model, or network call", () => {
 	const source = readFileSync(join(here, "iteration-disposition.test.js"), "utf8");
-	const prohibitedBuiltins = new Set(["node:child_process", "node:http", "node:http2", "node:https", "node:net", "node:dgram", "node:dns", "node:tls"]);
-	assert.deepEqual(importSpecifiers('import {\n\texecFile as run\n} from "node:child_process";'), ["node:child_process"], "multiline imports must remain visible");
-	assert.deepEqual(importSpecifiers('import "node:https";'), ["node:https"], "side-effect imports must remain visible");
-	for (const specifier of importSpecifiers(source)) {
-		if (specifier.endsWith("/config-doc.mjs")) continue;
-		assert.ok(specifier.startsWith("node:"), `only node builtins may be imported here; found ${specifier}`);
-		assert.equal(prohibitedBuiltins.has(specifier), false, `scenario corpus imports a subprocess or network builtin: ${specifier}`);
+	const allowedImports = ['import assert from "node:assert/strict";', 'import { readFileSync } from "node:fs";', 'import { dirname, join } from "node:path";', 'import { fileURLToPath } from "node:url";', 'import { test } from "node:test";', 'import { check } from "../skills/sdlc/scripts/config-doc.mjs";'];
+	assertExactImports(source, allowedImports);
+	for (const mutation of ['import "node:https"', 'import { execFile as run } from "node:child_process"; // comment', 'import {\n\t// from "node:fs"\n\texecFile as run\n} from "node:child_process";']) {
+		assert.throws(() => assertExactImports(`${source}\n${mutation}`, allowedImports), `prohibited import must disturb the exact allowlist: ${mutation}`);
 	}
 	const code = source
 		.replace(/^\s*\/\/.*$/gm, "")

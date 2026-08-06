@@ -1,6 +1,6 @@
 # PR-panel adjudication — diff-scoped test premises
 
-Target: branch diff `2aa5a89..3e81a25`, irreversible track. Orchestrator:
+Target: branch from `2aa5a89`; each delta wave below records its exact end, irreversible track. Orchestrator:
 `anthropic/claude-opus-5`. Reviewers:
 `anthropic/claude-fable-5:xhigh`, `openai-codex/gpt-5.6-sol:xhigh`, and
 `openai-codex/gpt-5.6-luna:xhigh`.
@@ -15,11 +15,13 @@ Target: branch diff `2aa5a89..3e81a25`, irreversible track. Orchestrator:
 | 2 | 2 | `claude-fable-5` | `round2-claude-fable-5.md` | `panel.dispatched{round:2,wave:2}` + `panel.harvested{round:2,wave:2}` |
 | 2 | 2 | `gpt-5.6-sol` | `round2-gpt-5.6-sol.md` | same workflow/harvest |
 | 2 | 2 | `gpt-5.6-luna` | `round2-gpt-5.6-luna.md` | same workflow/harvest |
+| 3 | 3 | `claude-fable-5` | `round3-claude-fable-5.md` | `panel.dispatched{round:3,wave:3}` + `panel.harvested{round:3,wave:3}` |
+| 3 | 3 | `gpt-5.6-sol` | `round3-gpt-5.6-sol.md` | same workflow/harvest |
+| 3 | 3 | `gpt-5.6-luna` | `round3-gpt-5.6-luna.md` | same workflow/harvest |
 
-All three children completed with model verdicts. Each artifact carries the
-harness's turn-budget wrap-up caveat (`Output may be partial`); findings and
-CLEARs are recorded as the returned verdicts, not as claims of exhaustive
-coverage.
+All children completed with model verdicts. Harness turn-budget caveats are
+preserved where returned; round-2 Luna returned no caveat. Findings and CLEARs
+are recorded as model verdicts, not as claims of exhaustive coverage.
 
 ## Round 1 findings
 
@@ -148,6 +150,45 @@ The proposed PR body now reports 519/30 tests. IDV14 accepts one-or-more dash
 separator cells, with a dedicated short-separator mutation; prose rows remain
 clean.
 
+## Round 3 (delta `5856f15..b35248b`)
+
+Every round-2 disposition was replayed. Three defect classes were legally
+reopened with evidence against the round-2 fix; one record-honesty defect was
+new. No high finding.
+
+| id | severity | origin | reviewer(s) | defect | disposition |
+| --- | --- | --- | --- | --- | --- |
+| `PR-R3-01` | medium | `REOPENED(PR-R2-01)` | all | Duplication detection requires literal `assert`, while inversion detection misses `not true that` | **incorporated** |
+| `PR-R3-02` | medium | `REOPENED(PR-R2-02)` | all | Regex import parsing misses semicolonless/trailing-comment declarations and can select a fake `from` inside a comment | **incorporated by restructuring** |
+| `PR-R3-03` | medium | `REOPENED(PR-R2-05)` | fable-5 | The ownership-block extractor walks down only, omitting contiguous history above the needle | **incorporated** |
+| `PR-R3-04` | low | NEW | fable-5 | The inventory overstates caveat coverage and its target range is stale | **incorporated** |
+
+**Counts:** 3 medium, 1 low. Incorporated 4; dismissed 0; barred 0;
+carries 0.
+
+### `PR-R3-01` — verb-independent duplication and added negation replay
+
+The cross-reference duplicate predicate now requires only the ordered concepts
+`moving ref` → expiry and `current tree` → `pinned immutable commit`; it no
+longer chooses a prose verb. DSP3 replays `assert`, `use`, `rely on`, and
+`check against`. The canonical-law inversion check additionally rejects
+`not true that`, with a direct mutation witness.
+
+### `PR-R3-02` — parser removed, exact import contract substituted
+
+Both scenario files now compare every line beginning with static `import`
+against an exact local-only allowlist. Multiline, side-effect, semicolonless,
+trailing-comment, aliased, and comment-spoof forms all disturb that equality;
+the tests replay the reported shapes. This removes the regex-parser generator
+rather than adding another import grammar branch.
+
+### `PR-R3-03` / `-04` — complete blocks and honest inventory
+
+IDV33 walks backward and forward over the maximal contiguous ownership-comment
+block and runs both prepended and appended history mutations through the actual
+extractor. The inventory now uses a base-relative target, lists wave 3, and
+scopes the harness-caveat statement to artifacts that actually returned it.
+
 ## Carry and frozen-surface checkpoints
 
 No `CARRY-TO-BUILD`, `CARRY-TO-IMPLEMENT`, or `CARRY-TO-BACKLOG` was minted.
@@ -156,7 +197,7 @@ by T2's strengthened `static.handoff`. ASD19 passes and no FROZEN path changes.
 
 ## Dismissal posture
 
-Rounds 1 and 2 incorporated every finding (8/8, then 7/7). That continues the
+Rounds 1–3 incorporated every finding (8/8, 7/7, then 4/4). That continues the
 already-disclosed 100%-incorporation smell from the Spec panel; it is not
 labelled diligence. Every finding was reproduced or checked against source
 before incorporation, and no reviewer recommendation was actioned solely to
