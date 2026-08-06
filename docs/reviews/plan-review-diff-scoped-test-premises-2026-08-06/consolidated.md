@@ -11,6 +11,8 @@
 |---|---|---|---|---|
 | 1 | 1 | `claude-fable-5` | `panels/plan_review-round1-2026-08-06/` | `panel.dispatched{round 1, wave 1}` |
 | 1 | 2 | `gemini-3.1-pro-preview` | `panels/plan_review-round2-2026-08-06/` | same wave; separate `asyncDir`, so a separate destination label |
+| 2 | 3 | `claude-fable-5` | `panels/plan_review-round3-2026-08-06/` | `panel.dispatched{round 2, wave 2}` |
+| 2 | 4 | `gemini-3.1-pro-preview` | `panels/plan_review-round4-2026-08-06/` | same wave, separate label |
 
 Two destination labels for one logical wave: this harness's `subagent` tool takes
 one agent per call, so a two-model panel is two async runs with two `asyncDir`s,
@@ -100,11 +102,80 @@ assembly (so no self-exemption is needed at all) and an **inline mutation**
 proof rather than an on-disk fixture under `test/` — the fixture route would
 plant forbidden tokens in the very directory being swept.
 
+## Round 2 (delta, `5eb2567..bcba627`) — findings
+
+Both reviewers confirmed all four round-1 findings discharged, in one line each,
+without re-litigation. No `REOPENED` tags were raised.
+
+| id | severity | origin | reviewers | gist | disposition |
+|---|---|---|---|---|---|
+| `PLAN-R2-01` | high | NEW | **both** | Rev 2's broadened token set fires 13 times on a fourth uninventoried file (`tracker-ops.test.js`), all test *titles* — rev 1's defect class, reintroduced by rev 1's fix | incorporated **by restructure**, not by the proposed fix |
+| `PLAN-R2-02` | medium | NEW | fable-5 | Rev 2 dropped rev 1's explicit exclusion of the diff guard without adding it to the exemption list, so the guard fails its own meta-test | incorporated |
+| `PLAN-R2-03` | medium | NEW | gemini | DoD 5's escalation branch leaves the occurrence matching and unexempted, contradicting "the meta-test passes" | incorporated |
+| `PLAN-R2-04` | medium | NEW | gemini | The `baseRef`/`baseFile` helper definitions have no disposition; D4 leaves them dead code that still trips the guard | incorporated |
+| `PLAN-R2-05` | medium | NEW | gemini | DoD 6 wants a wording-independent check; no textual scenario can deliver one without an anchor policy the Plan never states | incorporated |
+| `PLAN-R2-06` | low | NEW | gemini | The DoD 6 scenario carries no cost budget, though round 1 imposed one on the meta-test | incorporated |
+
+**Counts:** 1 high, 4 medium, 1 low. **Incorporated 6, dismissed 0.**
+
+### `PLAN-R2-01` — incorporated, but not as either reviewer proposed
+
+Verified: `test/tracker-ops.test.js` carries 13 `main:` matches, every one a
+`test("main: …")` title. Both reviewers proposed the same fix — add a fourth
+exemption (or hand-scope the `main:` token). **Both were rejected in favour of a
+structural fix**, because the finding's real content is that this is the *second*
+wave of one defect class: a detection pattern frozen without being run as
+specified. Two instances of one mechanism is a generator, and patching the third
+instance would invite a fourth.
+
+Every genuine occurrence is a git subprocess invocation whose argument list
+names a moving ref; test titles, stub source, and comments never are. Measured
+over all 45 files under `test/` at `bcba627` before adopting it:
+
+| detector | files matched | false positives |
+|---|---|---|
+| bare token (rev 2) | 7 | 4 |
+| call shape (rev 3) | 3 | 0 |
+
+This also dissolves `PLAN-R2-02` — the exemption list is now explicit and
+short (the guard itself, plus `disposition-ledger.test.js`'s pinned-anchor
+fallback) — and it retires rev 2's two telemetry-stub exemptions, which the
+call-shape detector never matches. Rev 2 was a patch wave; rev 3 is a
+restructure that removes the generator, the same move S5's rev 4 made.
+
+### `PLAN-R2-03` through `PLAN-R2-06`
+
+All four verified and incorporated as written: the exemption list becomes the
+single mechanism for every non-fixed occurrence (`-03`); the dead helpers at
+`test/iteration-disposition.test.js:20-33` are added to Scope In for deletion
+(`-04`); DoD 6 gains an explicit concept-token anchor policy with an instruction
+that S1 may re-anchor but not delete (`-05`); and DoD 3's cost budget is widened
+to cover both new tests (`-06`).
+
+## Dismissal-posture disclosure
+
+**Two consecutive waves at 100% incorporation (4/4, then 6/6).** Per
+`phase-pr-review.md` §5 this is a reportable smell and is reported to the owner
+rather than recorded as diligence.
+
+The adjudicator's read: this is not reviewer over-reach being waved through —
+every finding was independently re-verified against the tree before
+incorporation, and one (`PLAN-R2-01`) had its *proposed fix* rejected. It is
+evidence that revs 1 and 2 were under-baked, and specifically that the same
+authoring mistake — specifying a detector without executing it — was made
+twice. The correct response is the rev-3 restructure rather than a third patch
+wave, and the fact that the panel found the second instance rather than the
+author is itself the finding worth carrying to the owner.
+
 ## Escalations to the human
 
-None. No dismissal of a high or medium finding is proposed, no finding touches a
-previously human-ratified residual-risk boundary, and none contradicts an
-owner-ratified decision (D1-D4 are untouched; both reviewers emitted `CLEAR: D`).
+None of the three escalating cases applies: no dismissal of a high or medium
+finding is proposed, no finding touches a previously human-ratified
+residual-risk boundary, and none contradicts an owner-ratified decision (D1-D4
+untouched; both reviewers emitted `CLEAR: D` in both rounds).
+
+The 100%-incorporation smell above is disclosed to the owner at the gate, as
+the dismissal posture requires — it is a disclosure, not an escalation.
 
 ## Cross-session ratified-dismissal check
 
