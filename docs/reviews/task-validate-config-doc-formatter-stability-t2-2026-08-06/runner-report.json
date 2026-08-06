@@ -1,0 +1,131 @@
+{
+  "schemaVersion": 1,
+  "taskId": "t2",
+  "manifest": "/home/neil/code/threadsafe/pi-sdlc.worktrees/fix-config-doc-inline-code/docs/validation/config-doc-formatter-stability/t2.json",
+  "repoRoot": "/home/neil/code/threadsafe/pi-sdlc.worktrees/fix-config-doc-inline-code",
+  "verdict": "PASS",
+  "exitCode": 0,
+  "errors": [],
+  "manifestErrors": [],
+  "commands": [
+    {
+      "id": "tests.full",
+      "argv": [
+        "npm",
+        "test"
+      ],
+      "evidence": [
+        "whole-corpus regression net completes within the approved external timeout"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 8023,
+      "stdoutTail": "[...truncated; showing bounded tail...]\n✔ LT22: a soft-less run.json renders coverage notices, not fabricated numbers (0.204872ms)\n✔ LT23: every coverage marker is rendered under #coverage (0.213963ms)\n✔ render-retro CLI: unreadable/unparseable/schema-invalid --run exits 1; usage errors exit 2 (218.696014ms)\n✔ render-retro CLI: default --out is index.html beside the input; --format json envelope (46.573144ms)\n✔ LT6: resolve-panel emits panel.resolved; stdout/exit byte-identical with/without --slug (188.695954ms)\n✔ LT7: ensure-panel-agent emits panel.agent_stamped; stdout/exit byte-identical (201.352645ms)\n✔ LT8: validate-task emits task.validated on PASS with and without --report (447.990664ms)\n✔ LT8: validate-task emits task.validated on FAIL (89.449214ms)\n✔ LT8: validate-task emits task.validated on an ERROR fixture whose manifest parses (46.279021ms)\n✔ LT8: an unparseable-manifest ERROR skips emission with the standard warning (62.550229ms)\n✔ LT9: unwritable run store degrades to a warning; primary output unaffected (256.09726ms)\n✔ nested --repo-root run stores are git-ignored too (gitignore anchoring) (5.331009ms)\n✔ LT10: check-lifecycle.mjs and .sh are untouched by FS5 side-effect emission (1.382375ms)\n✔ lookup-node: returns nodeId/number/title on success (2.998439ms)\n✔ lookup-node: not found -> ok:false (0.493101ms)\n✔ lookup-node: gh failure -> structured ok:false, never throws (0.391724ms)\n✔ create-epic: creates, looks up node, boards, sets Todo explicitly — returns {number,nodeId,itemId,url} (1.302188ms)\n✔ create-task: with --parent wires addSubIssue before boarding (0.655669ms)\n✔ create-epic: gh issue create failure short-circuits before any board mutation (0.741418ms)\n✔ create-epic: partial failure after issue creation preserves created {number,url} and names the failed step (0.453078ms)\n✔ create-epic: failure at the explicit Todo-set step also preserves created identity (0.408794ms)\n✔ add-blocked-by: wires the dependency edge (0.609558ms)\n✔ frontier: open + unassigned + unblocked (or no blockers) children only (0.736292ms)\n✔ frontier: refuses an incomplete subIssues page rather than silently truncating (0.410754ms)\n✔ frontier: refuses an incomplete blockedBy page — an 11th+ open blocker must not be silently missed (0.451216ms)\n✔ claim: unclaimed issue gets assigned (0.457115ms)\n✔ claim: already-assigned issue is not re-claimed (best-effort, not atomic) (0.366317ms)\n✔ find-items: filters by number (0.564559ms)\n✔ find-items: filters by status (0.340334ms)\n✔ find-items: filters by title-contains (case-insensitive) (0.349054ms)\n✔ find-items: --since joins updatedAt via a batched graphql query (0.510849ms)\n✔ find-items: refuses a truncated result rather than silently under-reporting (0.315699ms)\n✔ find-items: filters out items from a foreign repo on a multi-repo org board (0.444602ms)\n✔ set-status: by item id directly (0.592749ms)\n✔ set-status: by issue number resolves the item id first (0.424816ms)\n✔ set-status: unknown status rejected before any gh call (0.285558ms)\n✔ set-status: neither --item nor --from-status is a usage-shaped failure (0.369911ms)\n✔ set-status: bulk --from-status moves every matching item (0.419553ms)\n✔ set-status: bulk --from-status reports partial progress on a mid-batch failure (0.442741ms)\n✔ board-add: adds by issue number, builds the URL from tracker.repo (0.340389ms)\n✔ main: dispatches find-items end to end (1.435954ms)\n✔ main: --repo-root resolves the named repo even from an unrelated cwd (0.529349ms)\n✔ main: unknown subcommand exits 2 via fail() (real subprocess — fail() calls process.exit) (34.2953ms)\n✔ main: create-epic missing --body exits 2 before any gh call (35.153736ms)\n✔ main: create-task missing --parent exits 2 before any gh call (39.423136ms)\n✔ main: --number rejects a non-integer value with a usage error, not a NaN graphql variable (37.903328ms)\n✔ main: --parent 0 is rejected by needInt's positive floor, not silently treated as absent (39.202872ms)\n✔ create-task: a bad --parent is looked up BEFORE the issue is created — no live orphan on a typo'd parent (0.57875ms)\n✔ find-items: repo-less (draft) board items are excluded, not passed through (0.445135ms)\n✔ find-items: an unparsable --since is a usage-shaped failure, not a silent empty result (0.923224ms)\n✔ find-items: an unknown --status is a usage-shaped failure, not a silent empty result (0.365786ms)\n✔ set-status: --item and --from-status together is rejected before any gh call, not silently resolved by --item winning (0.38655ms)\n✔ main: --format rejects an unknown value (37.357238ms)\n✔ main: --gh-cmd points the real spawn path at a fake executable (119.16248ms)\n✔ main: --repo overrides lookup-node's target repo instead of the configured tracker.repo (1.415333ms)\n✔ main: --repo malformed value is a usage error before any gh call (90.686232ms)\n✔ main: --owner/--project override find-items' target board instead of the configured tracker.board (1.411708ms)\n✔ main: config-derived resolution is unchanged when no override flags are given (defaults preserved) (2.743496ms)\n✔ board-add: --repo/--owner/--project override the target board and URL repo (0.595694ms)\n✔ PV1: a valid JavaScript manifest runs only declared checks and passes (194.953735ms)\n✔ PV2: only declared argv run; an undeclared tool command never executes (223.257103ms)\n✔ PV3: schema and inspectManifest reject the mutation matrix before any command runs (98.739359ms)\n✔ PV4: command outcomes are complete and deterministic; runner continues after failures (78.705031ms)\n✔ PV4: a timeout is reported as FAIL with timedOut (1084.538841ms)\n✔ PV5: category applicability is exact; injected n/a shapes are rejected (131.238205ms)\n✔ PV6: scenario mapping gates the verdict (171.953687ms)\n✔ PV7: standards and banned patterns are commands, not judgement (234.346612ms)\n✔ PV8: evidence is bounded and secrets are redacted (171.427839ms)\n✔ PV8 unit: boundStream and redaction name-matching are precise (401.843001ms)\n✔ PV9: JSON/text/exit agree and JSON mode is order-independent (1073.899244ms)\n✔ PV9: --report writes the exact JSON bytes atomically (262.311577ms)\n✔ PV9: --report outside the repo root is refused and clobbers nothing (237.078729ms)\n✔ PV10: generic validator law and generated agent are portable (0.997802ms)\n✔ PV11: receipt hash verification detects mutation of any stored file (6.77667ms)\n✔ PV11: a FAIL runner-report cannot ride under runnerVerdict PASS (1.088935ms)\n✔ parseArgs: recognises JSON anywhere and rejects bad flags (0.798529ms)\n✔ PV13: renderText is a faithful projection of the report (167.147259ms)\n✔ TST2: separate full and task checks satisfy Rule A and Rule B (0.277661ms)\n✔ TST1: a scope:[full] check satisfies Rule A (scenarios n/a) (0.139532ms)\n✔ TST3: a single scope:[full,task] check satisfies both rules with no duplicate (0.103863ms)\n✔ TST4: Rule A negative -- tests required with no full-tagged check (0.684292ms)\n✔ TST5: Rule B negative -- scenario cites a tests check but none task-tagged (0.617114ms)\n✔ TST6: tests:n/a is exempt from Rule A and Rule B (0.132355ms)\n✔ TST7: zero owned scenarios -- exempt from Rule B, still subject to Rule A (0.187563ms)\n✔ TST8: a static-only scenario does not trigger Rule B (0.157356ms)\n✔ TST9: an untagged check named tests.full does NOT satisfy Rule A (0.110996ms)\n✔ TST10: scope shape errors are reported at /checks/<i>/scope (0.228566ms)\n✔ TST11: golden multi-error ordering (scope-shape + Rule A + dangling check) (0.128269ms)\n✔ TST12: schema accepts optional scope and rejects malformed shapes (17.875484ms)\n✔ Rule B iterates owned scenarios only -- an unowned evidence key draws no Rule B error (0.211087ms)\n✔ scope enum error is emitted once per check, not per bad entry (0.126386ms)\nℹ tests 527\nℹ suites 0\nℹ pass 527\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 7833.817736\n",
+      "stderrTail": ""
+    },
+    {
+      "id": "tests.task",
+      "argv": [
+        "node",
+        "--test",
+        "test/config-doc.test.js",
+        "test/iteration-disposition.test.js"
+      ],
+      "evidence": [
+        "dogfood companion and normative rev-3 amendment are current and internally consistent"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 299,
+      "stdoutTail": "✔ ASD6: render is deterministic and byte-identical across runs (3.037237ms)\n✔ CDFS1/CDFS2/CDFS3: value spans use max-run-plus-one delimiters and preserve exact JSON (1.482937ms)\n✔ CDFS2: a delimiter equal to an interior run is rejected by the exact-span witness (0.469288ms)\n✔ CDFS3: mutating one serialized byte breaks exact value preservation (0.499894ms)\n✔ CDFS4: the real panels comment cannot reproduce the recorded malformed v1 line (1.177258ms)\n✔ CDFS9: repository companion is the current v2 render (3.021393ms)\n✔ CDFS6/CDFS7/CDFS8: v2 is current, v1 regenerates, and unsupported v3 is refused (4.852865ms)\n✔ CDFS12: rev-3 normative text and the approved formatter Spec agree (1.962486ms)\n✔ CDFS11: config-doc keeps its builtin-only runtime boundary (0.823704ms)\n✔ ASD6: write twice is byte-identical (retained) (1.957285ms)\n✔ ASD6: rendered CONFIG.md carries all §14 sections and every schemaVersion-3 key in JSON order (0.743758ms)\n✔ ASD8: CONFIG.md declares JSON authority, warning, fingerprint identity, guidance, and pointer (0.433066ms)\n✔ ASD7: byte-matching current file is retained (1.459066ms)\n✔ ASD7: a recognized stale / body-edited companion is regenerated (2.181891ms)\n✔ ASD7: an unrecognized collision is refused (exit 3) without --force and forced (exit 0) with it (1.885662ms)\n✔ ASD7 (CLI): refused write exits 3 (83.057212ms)\n✔ ASD9: check returns current / missing / stale / error for the four inputs (7.580772ms)\n✔ ASD9: check detects a body edit and a render-format mismatch as stale (2.901908ms)\n✔ ASD9: check mutates nothing in any state (4.472118ms)\n✔ ASD6/sentinel: sentinelLine round-trips through parseSentinel as recognized (0.309128ms)\n✔ panel floors: render surfaces per-track resolved floors incl task_validate=1 and per-phase overrides (§14) (0.315535ms)\n✔ panel floors: task_validate resolves to 1 and per-track override applies when no per-phase panelSize (0.528522ms)\n✔ symlink safety: a symlinked companion is never followed (check error / write refused) (2.275056ms)\n✔ symlink safety: a DANGLING symlink is refused, never created through the link (1.228424ms)\n✔ IDV1: system-reference.md contains exactly one 'Iteration & disposition' section (1.663224ms)\n✔ IDV2: the glossary defines every term group, the alias, and the prefix mapping (1.441909ms)\n✔ IDV2 (non-vacuous): a glossary stripped of the alias fails its own check (0.558856ms)\n✔ IDV3: system-reference.md keeps the standing §1–§14 heading contract (1.794339ms)\n✔ IDV25: the glossary section is at most 60 lines (0.301199ms)\n✔ IDV5: phase-pr-review.md §5 contains every row of the C2 table (0.831195ms)\n✔ IDV6: phase-pr-review.md §1 carries the floors-govern-full-rounds clause (0.381376ms)\n✔ IDV7: the round cap names round 4 and lists exactly four bounded options (0.420055ms)\n✔ IDV8: at pr_review, moving on requires a ratified dismissal and never permits merging past a survivor (0.668969ms)\n✔ IDV13: phase-pr-review.md states the backlog checkpoint (0.813432ms)\n✔ IDV30: the existing 'Only … escalate' sentence is itself amended, not left standing (0.832777ms)\n✔ IDV11: every conditional outbound carry statement sits inside an 'under your configuration' callout (1.273647ms)\n✔ IDV11: CARRY-TO-BACKLOG is stated unconditionally, never wrapped in a callout (0.483084ms)\n✔ IDV9: the three amendment classes appear at their C4 homes (1.296518ms)\n✔ IDV10: §6 of those three carries a class-(a) pointer and defines no forward amendment (0.671021ms)\n✔ IDV26: all four outbound carry statements exist at their C3 homes (0.560945ms)\n✔ IDV12: the four inbound carry checkpoints appear in their named reference and section (1.654554ms)\n✔ IDV29: phase-implement.md §5 states the review.tasks: off fallback (0.456498ms)\n✔ IDV14: phase-tasks.md §4 specifies the spec-gap log with its exact columns and enums (0.589857ms)\n✔ IDV14: templates/sdlc-tasks.md remains a thin current-tree router (0.920304ms)\n✔ IDV27: assumption-recorded routes to the existing Assumptions appendix (0.59745ms)\n✔ IDV15: every adversary prompt carries the delta-round law and its C6 carry clause (1.475055ms)\n✔ IDV28: every adversary prompt's STRICT output format declares an origin field (1.52011ms)\n✔ IDV33: retired checks name their present enforcement owners (1.026671ms)\n✔ IDV19: the three reopened adversary prompts are frozen again (0.292712ms)\n✔ IDV4: every phase reference the vocabulary binds cites the glossary by name (0.808982ms)\n✔ IDV17: this scenario corpus makes no subprocess, model, or network call (2.170259ms)\n✔ IDV32: every amendment record in the Spec is named by an in-place marker in the Plan (0.827666ms)\n✔ IDV31: the finding-class alias sits at the binds-forward paragraph (0.142071ms)\n✔ IDV24: config-doc check reports current for .pi/sdlc/CONFIG.md (2.376568ms)\nℹ tests 54\nℹ suites 0\nℹ pass 54\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 257.832874\n",
+      "stderrTail": ""
+    },
+    {
+      "id": "static.lint",
+      "argv": [
+        "npx",
+        "biome",
+        "check",
+        "skills/sdlc/scripts/config-doc.mjs",
+        "test/config-doc.test.js"
+      ],
+      "evidence": [
+        "runtime and focused tests remain biome-clean"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 409,
+      "stdoutTail": "Checked 2 files in 22ms. No fixes applied.\n",
+      "stderrTail": ""
+    },
+    {
+      "id": "static.config",
+      "argv": [
+        "node",
+        "skills/sdlc/scripts/config-doc.mjs",
+        "check",
+        "--repo-root",
+        ".",
+        "--format",
+        "json"
+      ],
+      "evidence": [
+        "repository-owned CONFIG.md is byte-identical to the v2 expected render"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 76,
+      "stdoutTail": "{\n  \"schemaVersion\": 1,\n  \"path\": \".pi/sdlc/CONFIG.md\",\n  \"state\": \"current\",\n  \"exitCode\": 0,\n  \"sentinel\": {\n    \"present\": true,\n    \"wellFormed\": true,\n    \"version\": \"v2\",\n    \"recognized\": true,\n    \"fingerprint\": \"e6a981eeba06f8f0231bd26fc9ee1945aac5606358d7110d408fdb5449ccda9d\"\n  },\n  \"expectedFingerprint\": \"e6a981eeba06f8f0231bd26fc9ee1945aac5606358d7110d408fdb5449ccda9d\",\n  \"reason\": \"companion matches the current expected render\"\n}\n",
+      "stderrTail": ""
+    }
+  ],
+  "categories": [
+    {
+      "category": "tests",
+      "status": "PASS",
+      "checkIds": [
+        "tests.full",
+        "tests.task"
+      ]
+    },
+    {
+      "category": "static",
+      "status": "PASS",
+      "checkIds": [
+        "static.lint",
+        "static.config"
+      ]
+    },
+    {
+      "category": "scenarios",
+      "status": "PASS"
+    },
+    {
+      "category": "standards",
+      "status": "N/A",
+      "reason": "the approved normative amendment is checked structurally in the focused test corpus"
+    },
+    {
+      "category": "bannedPatterns",
+      "status": "N/A",
+      "reason": "manual generated-file edits and stale v1-current prose are rejected by focused and current-state checks"
+    }
+  ],
+  "scenarios": [
+    {
+      "scenarioId": "CDFS12",
+      "status": "PASS",
+      "checkIds": [
+        "tests.task"
+      ]
+    }
+  ]
+}
