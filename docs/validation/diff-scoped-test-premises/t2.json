@@ -49,9 +49,13 @@
     },
     {
       "id": "static.handoff",
-      "argv": ["node", "-e", "const {execFileSync}=require(\"node:child_process\"); const out=execFileSync(\"gh\",[\"issue\",\"view\",\"192\",\"--repo\",\"threadsafe-systems/pi-sdlc\",\"--json\",\"comments\",\"--jq\",\".comments[].body\"],{encoding:\"utf8\"}); if(!out.includes(\"DSP3\")) process.exit(1)"],
+      "argv": [
+        "node",
+        "-e",
+        "const {execFileSync}=require(\"node:child_process\"); const issue=JSON.parse(execFileSync(\"gh\",[\"issue\",\"view\",\"192\",\"--repo\",\"threadsafe-systems/pi-sdlc\",\"--json\",\"comments\"],{encoding:\"utf8\"})); const required=[\"DSP3\",\"premise-durability\",\"docs/specs/2026-08-06-diff-scoped-test-premises.md\"]; if(!issue.comments.some(({body})=>required.every((token)=>body.includes(token)))) process.exit(1)"
+      ],
       "timeoutMs": 120000,
-      "evidence": ["issue 192 carries the durable S1 handoff naming the DSP3 witness"]
+      "evidence": ["one issue-192 comment carries the DSP3 witness, premise-durability law, and linked Spec path"]
     }
   ],
   "categories": {

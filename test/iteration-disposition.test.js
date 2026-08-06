@@ -356,15 +356,27 @@ test("IDV14: phase-tasks.md §4 specifies the spec-gap log with its exact column
 test("IDV14: templates/sdlc-tasks.md remains a thin current-tree router", () => {
 	const template = readFileSync(join(repo, "templates", "sdlc-tasks.md"), "utf8");
 	const body = template.replace(/^---\n[\s\S]*?\n---\n/, "");
-	const hasSpecGapColumns = (text) =>
-		text.split("\n").some((line) => {
-			if (!line.trimStart().startsWith("|")) return false;
-			const normalized = line.toLowerCase();
-			return ["description", "severity", "disposition", "landing site"].every((column) => normalized.includes(column));
+	const tableCells = (line) =>
+		line
+			.trim()
+			.replace(/^\||\|$/g, "")
+			.split("|")
+			.map((cell) => cell.trim().toLowerCase());
+	const hasSpecGapColumns = (text) => {
+		const lines = text.split("\n");
+		return lines.some((line, index) => {
+			if (!line.trimStart().startsWith("|") || index + 1 >= lines.length) return false;
+			const cells = tableCells(line);
+			const separator = tableCells(lines[index + 1]);
+			const isHeader = separator.length === cells.length && separator.every((cell) => /^:?-{3,}:?$/.test(cell));
+			return isHeader && ["description", "severity", "disposition", "landing site"].every((column) => cells.includes(column));
 		});
+	};
 	assert.match(body, /Thin router/, "the standalone entrypoint no longer identifies itself as a thin router");
 	assert.doesNotMatch(body, /Spec gap log/i, "the standalone router must not restate the Spec gap log");
 	assert.equal(hasSpecGapColumns(body), false, "the standalone router must not carry the Spec gap table columns");
+	const dataRow = `${body}\n| prose mentions description, severity, disposition, and landing site |`;
+	assert.equal(hasSpecGapColumns(dataRow), false, "a prose data row is not a Markdown table header");
 	const mutated = `${body}\n| description | severity | disposition | landing site |\n| --- | --- | --- | --- |`;
 	assert.equal(hasSpecGapColumns(mutated), true, "the forbidden-table check must remain non-vacuous");
 });
@@ -431,6 +443,17 @@ test("IDV28: every adversary prompt's STRICT output format declares an origin fi
 // Non-change obligations are enforced by test/frozen-surfaces.test.js;
 // standing scenarios assert current-tree behaviour.
 
+test("IDV33: retired checks name their present enforcement owners", () => {
+	const source = readFileSync(join(here, "iteration-disposition.test.js"), "utf8");
+	const frozenOwner = source.match(/\/\/ validator-task\.prompt\.md[\s\S]{0,180}?diff guard\./)?.[0];
+	const nonChangeOwner = source.match(/\/\/ Non-change obligations[\s\S]{0,140}?current-tree behaviour\./)?.[0];
+	assert.ok(frozenOwner, "the validator prompt retirement does not name the FROZEN-list owner");
+	assert.ok(nonChangeOwner, "the non-change retirement does not name the standing diff guard");
+	for (const comment of [frozenOwner, nonChangeOwner]) {
+		assert.doesNotMatch(comment, /\b(?:Plan|panel|PR|removed|retired)\b/i, "ownership comments must describe present enforcement, not process history");
+	}
+});
+
 // IDV19 was written diff-scoped, asserting the S5 branch DROPPED these three
 // entries. The post-merge re-freeze discharged that; the durable obligation is
 // the opposite one, so the scenario is restated as the standing guard rather
@@ -462,15 +485,17 @@ test("IDV4: every phase reference the vocabulary binds cites the glossary by nam
 
 test("IDV17: this scenario corpus makes no subprocess, model, or network call", () => {
 	const source = readFileSync(join(here, "iteration-disposition.test.js"), "utf8");
+	const prohibitedBuiltins = new Set(["node:child_process", "node:http", "node:http2", "node:https", "node:net", "node:dgram", "node:dns", "node:tls"]);
 	for (const specifier of [...source.matchAll(/^import .*? from "([^"]+)";$/gm)].map((m) => m[1])) {
 		if (specifier.endsWith("/config-doc.mjs")) continue;
 		assert.ok(specifier.startsWith("node:"), `only node builtins may be imported here; found ${specifier}`);
+		assert.equal(prohibitedBuiltins.has(specifier), false, `scenario corpus imports a subprocess or network builtin: ${specifier}`);
 	}
 	const code = source
 		.replace(/^\s*\/\/.*$/gm, "")
 		.replace(/"[^"]*"/g, '""')
 		.replace(/`[^`]*`/g, "``");
-	for (const banned of [/\bfetch\s*\(/, /\bimport\s*\(/, /\brequire\s*\(/, /\bexecSync\s*\(/, /\bspawn\s*\(/]) {
+	for (const banned of [/\bfetch\s*\(/, /\bimport\s*\(/, /\brequire\s*\(/, /\bexecFileSync\s*\(/, /\bexecSync\s*\(/, /\bspawnSync\s*\(/, /\bspawn\s*\(/]) {
 		assert.doesNotMatch(code, banned, `a scenario must not reach beyond the working tree: ${banned}`);
 	}
 

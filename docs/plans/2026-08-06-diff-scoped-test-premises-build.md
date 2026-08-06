@@ -87,8 +87,9 @@ graph LR
   - `node -e 'const {spawnSync}=require("node:child_process"); const verdict=(status,ms)=>status!==0?(status??1):(ms>=1000?1:0); if(verdict(0,1000)!==1) process.exit(2); const start=performance.now(); const result=spawnSync(process.execPath,["--test","test/diff-scoped-premises.test.js"],{stdio:"inherit"}); const elapsed=performance.now()-start; console.error(`wall ${elapsed.toFixed(2)}ms`); process.exit(verdict(result.status,elapsed))'`
     (`tests`; review-time N2 enforcement with a synthetic threshold probe, not
     an in-suite timing assertion);
-  - `node -e 'const {execFileSync}=require("node:child_process"); const out=execFileSync("gh",["issue","view","192","--repo","threadsafe-systems/pi-sdlc","--json","comments","--jq",".comments[].body"],{encoding:"utf8"}); if(!out.includes("DSP3")) process.exit(1)'`
-    (`static`; DSP14's durable handoff witness, shell-free exact argv in PV1).
+  - `node -e 'const {execFileSync}=require("node:child_process"); const issue=JSON.parse(execFileSync("gh",["issue","view","192","--repo","threadsafe-systems/pi-sdlc","--json","comments"],{encoding:"utf8"})); const required=["DSP3","premise-durability","docs/specs/2026-08-06-diff-scoped-test-premises.md"]; if(!issue.comments.some(({body})=>required.every((token)=>body.includes(token)))) process.exit(1)'`
+    (`static`; DSP14's durable handoff witness, shell-free exact argv in PV1;
+    every required token must occur in the same comment).
 - **Definition of done:** all eleven owned scenarios pass; the detector reports
   exactly the two exempt files with non-empty reasons; measured test time is
   under one second; no frozen surface changed; the task's PV1 manifest and
@@ -120,7 +121,8 @@ contract or leaving an implementation decision unowned.
 - **Class:** (b), an unfrozen pre-merge check refinement. Scenario ownership and
   acceptance semantics do not change.
 - **Disposition:** replace the pipe with the exact `node -e` argv recorded in T2,
-  which invokes `gh` directly and exits nonzero when no comment contains `DSP3`.
+  which invokes `gh` directly and exits nonzero unless one comment contains
+  `DSP3`, the `premise-durability` law, and this Spec's linked path.
 - **Author:** orchestrator, Implement phase, 2026-08-06.
 - **Renewed approval:** the amended check is committed in T2's PV1 manifest and
   must pass the deterministic runner, independent validator, and PR panel.

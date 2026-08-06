@@ -114,8 +114,11 @@ Both reviewers confirmed `SPEC-R1-01` through `SPEC-R1-08` discharged. No
 | `SPEC-R2-02` | low | NEW | fable-5 | C4.1 mislabels DSP4-DSP6 as C1-law scenarios although C4.5 correctly assigns C1 to DSP1-DSP3 | **incorporated** |
 | `SPEC-R2-03` | low | NEW | fable-5 | "declaration of" over-claims a regex that matches function declarations but not arrow assignment declarations | **incorporated** |
 
-Gemini returned CLEAR A-H with no findings. **Counts:** 0 high, 1 medium, 2
-low. Incorporated 3; dismissed 0; barred 0; carries 0.
+Gemini returned CLEAR A-H with no findings. Its artifact, like Fable's, carries
+the harness's turn-budget wrap-up caveat (`Output may be partial`); the CLEARs
+are recorded as the verdict returned, not as proof that every possible probe was
+completed. **Counts:** 0 high, 1 medium, 2 low. Incorporated 3; dismissed 0;
+barred 0; carries 0.
 
 ### `SPEC-R2-01` — negative assertion made non-vacuous
 
@@ -151,7 +154,9 @@ API to implementation.
 
 All three waves incorporated 100% of findings (8/8, 3/3, 1/1). The disclosure
 threshold remains triggered and is reported rather than filed as diligence.
-Each claim was checked against source or executed regex behaviour; round 2 had
-genuine cross-model disagreement (Gemini clean, Fable three findings), and the
-round-3 low demonstrated another executable state hazard rather than style
-feedback. No finding was dismissed.
+Each claim was checked against source or executed regex behaviour. Round 2's
+returned verdicts disagreed (Gemini CLEAR, Fable three findings), but both
+artifacts carry the harness's partial-output caveat, so that disagreement is not
+overstated as evidence of exhaustive independent passes. The round-3 low
+demonstrated another executable state hazard rather than style feedback. No
+finding was dismissed.

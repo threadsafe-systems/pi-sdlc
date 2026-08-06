@@ -58,15 +58,18 @@ function numberedSection(body, number) {
 	return lines.slice(start, next === -1 ? lines.length : next).join("\n");
 }
 
+function statesMovingPinnedLaw(section) {
+	const movingExpires = /premise[\s\S]{0,100}\bmoving ref\b[\s\S]{0,40}\bexpire\w*\b/i.test(section);
+	const inverted = /\bmoving ref\b[\s\S]{0,30}\b(?:never|not)\s+expire\w*\b/i.test(section);
+	const pinnedRoute = /\bcurrent tree\b[\s\S]{0,50}\bpinned immutable commit\b/i.test(section);
+	return movingExpires && !inverted && pinnedRoute;
+}
+
 function lawIssues(section) {
-	const required = [
-		["moving", /\bmoving\b/i],
-		["expire", /\bexpire\w*\b/i],
-		["pinned", /\bpinned\b/i],
-		["non-change route", /non-change[\s\S]*standing diff guard/i],
-		["current-tree route", /current tree/i],
-	];
-	return required.filter(([, pattern]) => !pattern.test(section)).map(([label]) => label);
+	const issues = [];
+	if (!statesMovingPinnedLaw(section)) issues.push("moving-ref expiry and pinned-current-tree route");
+	if (!/non-change claim[\s\S]{0,100}falsifiable only by a diff[\s\S]{0,120}standing diff guard/i.test(section)) issues.push("non-change route");
+	return issues;
 }
 
 const specReference = readFileSync(join(referenceRoot, "phase-spec.md"), "utf8");
@@ -80,46 +83,53 @@ test("DSP1: phase-spec §4 owns the single durable-premise law", () => {
 	for (const entry of readdirSync(referenceRoot, { withFileTypes: true })) {
 		if (!entry.isFile() || !entry.name.endsWith(".md") || entry.name === "phase-spec.md") continue;
 		const body = readFileSync(join(referenceRoot, entry.name), "utf8");
-		assert.notEqual(lawIssues(body).length, 0, `${entry.name} duplicates the complete durable-premise law`);
+		assert.equal(statesMovingPinnedLaw(body), false, `${entry.name} duplicates the moving-ref-versus-pinned law`);
 	}
 });
 
 test("DSP2: phase-implement §4 points to the law without restating it", () => {
 	assert.match(implementActivity, /phase-spec\.md[\s\S]*§4/i);
 	assert.match(implementActivity, /standing diff guard/i);
-	assert.notEqual(lawIssues(implementActivity).length, 0, "the implementation pointer must not duplicate the complete law");
+	assert.equal(statesMovingPinnedLaw(implementActivity), false, "the implementation pointer must not restate the moving-ref-versus-pinned law");
 });
 
-test("DSP3: every concept anchor is load-bearing", () => {
+test("DSP3: every concept anchor and semantic direction is load-bearing", () => {
 	for (const anchor of [/\bmoving\b/i, /\bexpire\w*\b/i, /\bpinned\b/i]) {
 		assert.match(specActivity, anchor, `the baseline law does not contain ${anchor}`);
 		const mutated = specActivity.replace(anchor, "removed");
 		assert.notEqual(mutated, specActivity, `the mutation did not remove ${anchor}`);
 		assert.notEqual(lawIssues(mutated).length, 0, `removing ${anchor} must break the law check`);
 	}
+	const inverted = specActivity.replace("moving ref expires", "moving ref never expires");
+	assert.notEqual(lawIssues(inverted).length, 0, "inverting expiry semantics must break the law check");
+	const duplicated = `${implementActivity}\nA premise anchored to a moving ref expires; assert the current tree or a pinned immutable commit.`;
+	assert.equal(statesMovingPinnedLaw(duplicated), true, "the duplication probe must reproduce the forbidden law shape");
 });
 
-test("DSP4: the detector recursively enumerates executable test source", () => {
+test("DSP4: the detector recursively enumerates every required source extension", () => {
+	assert.deepEqual([...SOURCE_EXTENSIONS].sort(), [".cjs", ".js", ".mjs"], "the required extension vocabulary drifted");
 	const files = sourceFiles(testRoot).map((path) => relative(repo, path));
 	assert.ok(files.includes("test/e2e/harness.mjs"), "the recursive sweep omitted the nested e2e harness");
 	assert.ok(files.includes("test/diff-scoped-premises.test.js"), "the detector does not scan itself");
-	assert.ok(
-		files.every((path) => SOURCE_EXTENSIONS.has(extname(path))),
-		"the sweep admitted a non-source fixture",
-	);
 });
 
-test("DSP5: every detector branch is non-vacuous and named negatives stay clean", () => {
+test("DSP5: every detector variant is non-vacuous and named negatives stay clean", () => {
 	const exec = token("exec", "File", "Sync");
+	const spawn = token("spawn", "Sync");
 	const run = token("run", "Process");
-	const helper = token("ba", "se", "Ref");
+	const refHelper = token("ba", "se", "Ref");
+	const fileHelper = token("ba", "se", "File");
 	const positives = [
-		[`function ${helper}() {}`, "base helper"],
+		[`function ${refHelper}() {}`, "base helper"],
+		[`${fileHelper}("path")`, "base helper"],
 		[`${exec}("git", ["merge-base", "HEAD", "main"])`, "git merge-base invocation"],
+		[`${spawn}("git", ["merge-base", "HEAD", "origin/main"])`, "git merge-base invocation"],
+		[`${run}(["git", "merge-base", "HEAD", "main"])`, "git merge-base invocation"],
 		[`${exec}("git", ["show", "main:path"])`, "git show/diff with inline moving ref"],
+		[`${spawn}("git", ["diff", "origin/main"])`, "git show/diff with inline moving ref"],
 	];
-	for (const [source, reason] of positives) assert.ok(matches(source).includes(reason), `${reason} branch is vacuous`);
-	for (const source of ['readFileSync("current")', `${exec}("git", ["rev-parse", "HEAD"])`, `${run}(["git", "init", "-b", "main"])`, `${exec}("git", args); log("merge-base")`]) {
+	for (const [source, reason] of positives) assert.ok(matches(source).includes(reason), `${reason} variant is vacuous: ${source}`);
+	for (const source of ['readFileSync("current")', `${exec}("git", ["rev-parse", "HEAD"])`, `${exec}("git", ["show", "HEAD:path"])`, `${spawn}("git", ["diff", "HEAD"])`, `${run}(["git", "init", "-b", "main"])`, `${exec}("git", args); log("merge-base")`]) {
 		assert.deepEqual(matches(source), [], `named negative was reported: ${source}`);
 	}
 });
@@ -149,7 +159,12 @@ test("DSP7: detector hits equal the reasoned exemption map exactly", () => {
 
 test("DSP12/DSP13: the guard stays offline and contributor policy states every local rule", () => {
 	const source = readFileSync(join(here, "diff-scoped-premises.test.js"), "utf8");
-	const offlinePatterns = [new RegExp(token("node:child", "_process")), new RegExp(`\\b${token("fe", "tch")}\\s*\\(`), new RegExp(`\\b${token("im", "port")}\\s*\\(`)];
+	const prohibitedBuiltins = new Set(["node:child_process", "node:http", "node:http2", "node:https", "node:net", "node:dgram", "node:dns", "node:tls"]);
+	for (const specifier of [...source.matchAll(/^import .*? from "([^"]+)";$/gm)].map((match) => match[1])) {
+		assert.ok(specifier.startsWith("node:"), `guard imports a non-builtin interface: ${specifier}`);
+		assert.equal(prohibitedBuiltins.has(specifier), false, `guard imports a subprocess or network builtin: ${specifier}`);
+	}
+	const offlinePatterns = [new RegExp(`\\b${token("fe", "tch")}\\s*\\(`), new RegExp(`\\b${token("im", "port")}\\s*\\(`)];
 	for (const pattern of offlinePatterns) assert.doesNotMatch(source, pattern, `the guard must stay local and offline: ${pattern}`);
 	const contributing = readFileSync(join(repo, "CONTRIBUTING.md"), "utf8");
 	for (const pattern of [/Durable scenario premises/i, /current-tree/i, /pinned immutable/i, /test\/frozen-surfaces\.test\.js/, /`FROZEN`/, /reasoned exemption/i]) {
