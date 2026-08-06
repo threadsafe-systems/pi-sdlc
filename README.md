@@ -6,12 +6,27 @@ change enters the codebase: **brainstorm → plan → spec → build → impleme
 with per-phase adversarial review panels, a per-task validator, worktree
 discipline, and optional GitHub tracker-backed builds.
 
+The package ships two skills — `sdlc`, the lifecycle itself, and `sdlc-retro`,
+the post-mortem pipeline over the lifecycle telemetry `sdlc` emits — plus a set
+of standalone prompt commands.
+
 
 ## Install
 
-pi discovers the skill via its git package metadata (`package.json`'s
-`"pi": {"skills": ["./skills"]}`). Clone under pi's git skill path, or add
-`threadsafe-systems/pi-sdlc` to your pi packages, then invoke `/skill:sdlc`.
+pi discovers the package via its git package metadata (`package.json`'s
+`"pi": {"skills": ["./skills"], "prompts": ["./templates"]}`). Clone under pi's
+git skill path, or add `threadsafe-systems/pi-sdlc` to your pi packages, then
+invoke `/skill:sdlc`.
+
+### Standalone entrypoints
+
+`templates/` exports one prompt command per lifecycle phase, so a session can
+enter mid-lifecycle instead of replaying the router: `/sdlc-brainstorm`,
+`/sdlc-plan`, `/sdlc-spec`, `/sdlc-tasks` (the Build phase), `/sdlc-implement`,
+and `/sdlc-pr-review`. Each is a thin router into the same phase reference the
+full lifecycle uses, so the phase's gates, hooks, and refusal conditions are
+identical either way — entering at a phase is not a licence to skip the ones
+before it. `/setup-sdlc` is the adoption scaffolder.
 
 ## Configure a project
 
@@ -74,6 +89,11 @@ scripts/ensure-panel-agent.sh pr_review          # skill-relative in pi
 scripts/resolve-panel.sh pr_review --author <vendor> --emit-tasks <agent>
 ```
 
+Every `scripts/…` path in this README and throughout the skill resolves against
+the **loaded skill directory**, never the repository root — the skill has no
+fixed install path, so it may not name one. Headless callers invoke the `.mjs`
+sibling of any `.sh` as `node <skill-dir>/scripts/<name>.mjs`.
+
 `resolve-panel` reconciles the merged config's `panels` preference against live
 credentials and prints a ready-to-paste `subagent` `tasks: [...]` array (one task
 per resolved model, per-task `model` override). The full process law is in
@@ -120,6 +140,61 @@ own tools. There is no unconditional TypeScript check and no assumed
 compatibility but must adopt the manifest/runner contract (run the runner, report
 its results) before use; a stale override that still greps for `tsc`/
 `CONTRIBUTORS` no longer reflects the generic law.
+
+## Tracker-backed builds
+
+A `tracker` block in `sdlc.config.json` (a `repo`, and a `board` number/URL)
+unlocks two optional modes: Brainstorm **map mode**, where an oversized or foggy
+effort becomes a map issue with decision tickets, and the Build **epic/sub-issue/
+board** mode, where an approved build plan is projected into a tracked epic. The
+projection fires at the task count set by `shape.publishToTracker` (`"never"`
+disables it). The committed plan stays the source of truth; the tracker is its
+projection.
+
+Every tracker or board mutation — issue creation, status changes, sub-issue and
+blocking edges, frontier, claim — goes through one helper, whose subcommands
+cover the GraphQL and Projects-v2 calls the mode needs:
+
+```bash
+scripts/tracker-ops.sh frontier --parent <epic-issue> --format json
+scripts/tracker-ops.sh set-status --item <issue-number> --status "In Progress"
+```
+
+The mechanics and the label vocabulary are documented in
+`skills/sdlc/assets/tracker-ops.md`.
+
+## Lifecycle telemetry and retros
+
+An instrumented run keeps a durable manifest of its own lifecycle at
+`.pi/sdlc/runs/<slug>/events.jsonl` — run start, phase entry and exit, human gate
+approvals, panel dispatch and consolidation, task validation, PR events. The run
+store is git-ignored: raw material stays local.
+
+```bash
+scripts/record-run-event.sh --list                 # the event vocabulary
+scripts/record-run-event.sh --describe phase.entered   # that event's payload
+scripts/record-run-event.sh phase.entered --slug <slug> --payload '{...}'
+scripts/harvest-panel.sh --phase pr_review --round 1 --from <subagent-dir>
+```
+
+Emission is fail-soft: an unresolvable run identity or an unwritable store
+degrades to a single stderr warning and never changes lifecycle behaviour.
+Emission never writes to stdout; only the two informational flags do.
+
+The `sdlc-retro` skill is the post-mortem half. It collects the run store into a
+distilled, schema-valid record and renders it as one self-contained HTML
+dashboard — phase timing, cost, panel precision, human wait, and rework:
+
+```bash
+scripts/collect-run.sh --slug <slug>               # -> docs/retros/<slug>/run.json
+scripts/render-retro.sh --run docs/retros/<slug>/run.json
+```
+
+Unlike the run store, the distilled record and its dashboard are meant to be
+committed. `collect-run` takes injectable `--git-cmd`/`--gh-cmd`/`--llm-cmd`
+seams; `--no-llm` drops the LLM seam entirely, and `run.json` still validates —
+with narratives, steering classification, and panel precision reported as absent
+rather than guessed.
 
 ## Adoption bundle and lifecycle checking
 
