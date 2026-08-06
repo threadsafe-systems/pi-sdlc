@@ -217,10 +217,11 @@ test("IDV13: phase-pr-review.md states the backlog checkpoint", () => {
 	assert.match(prReviewGateSeam.replace(/\s+/g, " "), /PR\s+gate\s+is\s+not\s+passable\s+while\s+any\s+`CARRY-TO-BACKLOG`\s+lacks\s+a\s+filed\s+issue\s+id/i, "the backlog checkpoint is absent from §5");
 });
 
+// Originally asserted the pre-amendment sentence was present in the branch
+// base — a premise that expires on merge, and did: it turned main red. The
+// durable invariant is that the superseded sentence never returns.
 test("IDV30: the existing 'Only … escalate' sentence is itself amended, not left standing", () => {
-	const base = baseFile("skills/sdlc/references/phase-pr-review.md").replace(/\s+/g, " ");
 	const originalSentence = "Only **proposed dismissals of high or medium findings** — plus anything touching a previously human-ratified residual-risk boundary — escalate";
-	assert.ok(base.includes(originalSentence), "test premise broken: the original sentence is not in the branch base");
 	assert.ok(!prReview.replace(/\s+/g, " ").includes(originalSentence), "the original 'Only … escalate' sentence still stands unamended beside the new collision rule");
 	const escalation = paragraphContaining(prReviewGateSeam, "Only three cases escalate");
 	assert.ok(escalation, "the amended escalation sentence is not in §5");
@@ -421,16 +422,20 @@ test("IDV16: no script, schema, or workflow file differs from the branch base (N
 	assert.equal(changed, "", `this slice is prose-only; runtime surfaces changed:\n${changed}`);
 });
 
-test("IDV19: the frozen list drops exactly the three reopened prompts and names the re-freeze follow-up", () => {
+// IDV19 was written diff-scoped, asserting the S5 branch DROPPED these three
+// entries. The post-merge re-freeze discharged that; the durable obligation is
+// the opposite one, so the scenario is restated as the standing guard rather
+// than deleted.
+test("IDV19: the three reopened adversary prompts are frozen again", () => {
 	const path = "test/frozen-surfaces.test.js";
-	const frozenEntries = (body) => [...body.matchAll(/^\t"([^"]+)",$/gm)].map((m) => m[1]);
-	const current = frozenEntries(readFileSync(join(repo, path), "utf8"));
-	const reopened = ADVERSARY_PROMPTS.map((slug) => `skills/sdlc/prompts/adversary-${slug}.prompt.md`);
-	const expected = frozenEntries(baseFile(path)).filter((entry) => !reopened.includes(entry));
-	assert.deepEqual(current, expected, "the frozen list must drop the three reopened prompts and retain every other entry");
-	assert.ok(current.includes("skills/sdlc/prompts/validator-task.prompt.md"), "validator-task.prompt.md must stay frozen");
-	const header = readFileSync(join(repo, path), "utf8").split("\n\n")[0];
-	assert.match(header, /re-freeze/i, "the header does not name the mandatory post-merge re-freeze follow-up");
+	const body = readFileSync(join(repo, path), "utf8");
+	const frozen = [...body.matchAll(/^\t"([^"]+)",$/gm)].map((m) => m[1]);
+	for (const slug of ADVERSARY_PROMPTS) {
+		assert.ok(frozen.includes(`skills/sdlc/prompts/adversary-${slug}.prompt.md`), `adversary-${slug}.prompt.md was reopened for S5 and must be re-frozen`);
+	}
+	assert.ok(frozen.includes("skills/sdlc/prompts/validator-task.prompt.md"), "validator-task.prompt.md must stay frozen");
+	const header = body.split("\n\n")[0];
+	assert.match(header, /re-frozen/i, "the header does not record that the reopened prompts were re-frozen");
 	assert.match(header, /iteration\s*&\s*disposition|S5/i, "the header does not name the slice that reopened them");
 });
 
