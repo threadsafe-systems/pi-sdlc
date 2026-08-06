@@ -4,9 +4,9 @@ Upstream: `docs/plans/2026-08-06-diff-scoped-test-premises.md` rev 4,
 approved by Neil on 2026-08-06 after the round-3 churn restructure. Track:
 **irreversible**. Resolves #208.
 
-**Rev 3** — incorporates spec-panel round 1 (2 high, 2 medium, 4 low after
-cross-model deduplication) and delta round 2 (1 medium, 2 low); 0 dismissed.
-Record:
+**Rev 4** — incorporates spec-panel round 1 (2 high, 2 medium, 4 low after
+cross-model deduplication), delta round 2 (1 medium, 2 low), and trim-the-tail
+delta confirmation round 3 (1 low); 0 dismissed. Record:
 `docs/reviews/spec-review-diff-scoped-test-premises-2026-08-06/consolidated.md`.
 
 This Spec fixes the normative law, pi-sdlc's local enforcement contract, the
@@ -272,9 +272,13 @@ in that file after C5.2-C5.4. Amend IDV17's source-inventory expectation from
 uses no subprocess; also amend the file header from "shells out to local git"
 to "no subprocess or network calls". The source-inspection regex at today's
 line 471 remains useful data for proving the empty set and needs no import.
-Hoist that regex to a local constant and prove it non-vacuous with an in-memory
-sample assembled from split tokens that represents `execFileSync("fixture"`;
-the regex must report `fixture` before the real-source empty-set assertion runs.
+Hoist that regex's **source** to a local constant and expose one projection
+function that constructs a fresh global `RegExp` on every call. Use that same
+fresh-state function for both inputs: first prove it non-vacuous with an
+in-memory sample assembled from split tokens that represents
+`execFileSync("fixture"`, then assert the real source returns the empty set.
+Neither call may share a mutable `/g` instance or inherit a non-zero
+`lastIndex`.
 
 ### C5.2 — convert IDV3 to a literal current-tree invariant
 
@@ -344,7 +348,7 @@ mechanical witness.
 ## 8. Non-functional requirements
 
 | id | requirement | gate |
-|---|---|---|
+| --- | --- | --- |
 | N1 | The guard and DSP3 read local files only: no child process, network, model, shell, or new CI workflow. | DSP12 |
 | N2 | `node --test test/diff-scoped-premises.test.js` completes in under 1 second wall time as a review-time measurement, not an in-suite timing assertion. | DSP12 |
 | N3 | All 60 current executable test sources are in scope recursively; future `.js`/`.mjs`/`.cjs` files join automatically. | DSP4 |
@@ -358,7 +362,7 @@ untrusted input, and changes no persisted schema.
 ## 9. Verification scenarios
 
 | id | pass | fail |
-|---|---|---|
+| --- | --- | --- |
 | DSP1 | `phase-spec.md` §4 contains exactly one premise-durability law and its `moving`, `expire`, `pinned` anchors. | Any anchor or either routing rule is absent, or the law is duplicated elsewhere in references. |
 | DSP2 | `phase-implement.md` §4 points to the Spec law and standing guard without restating moving-vs-pinned semantics. | No pointer/route exists, or a second normative copy exists. |
 | DSP3 | An in-memory mutation deleting each of `moving`, `expire`, and `pinned` independently makes the C1 check fail. | The law check survives removal of any anchor. |
@@ -374,12 +378,12 @@ untrusted input, and changes no persisted schema.
 | DSP13 | `CONTRIBUTING.md` contains all four C3 obligations and names `test/frozen-surfaces.test.js`. | Any local contributor rule is absent. |
 | DSP14 | Issue #192 contains the §7/C1-linked handoff naming DSP3 and the premise-durability law before the Spec gate closes. | The comment is absent, points elsewhere, or names no mechanical witness. |
 | DSP15 | Full `npm test` passes; touched surfaces pass Biome; `config-doc.mjs check` reports `current`; ASD19 passes with no `FROZEN` change. | Any command fails or a frozen path changes. |
-| DSP16 | IDV17's hoisted subprocess regex reports `fixture` from a split-token in-memory sample, then reports an empty set over the real file. | The mutation sample is not reported, the real file reports any executable, or the check can pass with a rotted regex. |
+| DSP16 | IDV17's shared projection function creates a fresh global regex per call, reports `fixture` from a split-token in-memory sample, then reports an empty set over the real file. | Calls share mutable regex state/non-zero `lastIndex`, the mutation sample is not reported, the real file reports any executable, or the check can pass with a rotted regex. |
 
 ## 10. Outcome traceability
 
 | Plan outcome / DoD | Contract | Scenarios |
-|---|---|---|
+| --- | --- | --- |
 | adopter-facing law and implement pointer | C1-C2 | DSP1-DSP3 |
 | local contributing rule | C3 | DSP13 |
 | executed low-noise guard and reasoned exemptions | C4 | DSP4-DSP7, DSP12 |

@@ -14,6 +14,7 @@ Target: `docs/specs/2026-08-06-diff-scoped-test-premises.md` rev 1 at
 | 1 | 1 | `gemini-3.1-pro-preview` | `round1-gemini-3.1-pro-preview.md` | same workflow/harvest |
 | 2 | 2 | `claude-fable-5` | `round2-claude-fable-5.md` | `panel.dispatched{round:2,wave:2}` + `panel.harvested{round:2,wave:2}` |
 | 2 | 2 | `gemini-3.1-pro-preview` | `round2-gemini-3.1-pro-preview.md` | same workflow/harvest |
+| 3 | 3 | `claude-fable-5` | `round3-claude-fable-5.md` | `panel.dispatched{round:3,wave:3}` + `panel.harvested{round:3,wave:3}`; trim-the-tail sub-floor |
 
 The async workflow's `status.json` held both reviewer outputs. The mechanical
 harvester persisted the workflow status/events/meta; the two markdown artifacts
@@ -129,13 +130,28 @@ C4.1 now assigns DSP1-DSP3 to the C1 law and DSP4-DSP7 to the guard. C4.2 now
 says "call to or **function declaration** of" `baseRef`/`baseFile`, matching the
 normative regex without claiming arrow-assignment coverage.
 
+## Round 3 (trim-the-tail delta `442668d..0ef749a`)
+
+Fable confirmed `SPEC-R2-01` through `SPEC-R2-03` discharged. No `REOPENED` tags.
+
+| id | severity | origin | reviewer | defect | disposition |
+| --- | --- | --- | --- | --- | --- |
+| `SPEC-R3-01` | low | NEW | fable-5 | C5.1 hoists a mutable global regex but does not require fresh state/reset between the mutation witness and real-source scan | **incorporated** |
+
+**Counts:** 0 high, 0 medium, 1 low. Incorporated 1; dismissed 0; barred 0;
+carries 0.
+
+C5.1 now hoists the regex **source**, not a shared `/g` instance, and requires
+one projection function to construct a fresh global regex per call for both the
+sample and real source. DSP16 fails on shared state or non-zero `lastIndex`.
+This mirrors C4.2's explicit state-reset discipline without leaving the chosen
+API to implementation.
+
 ## Dismissal posture
 
-Rounds 1 and 2 both incorporated 100% of findings (8/8, then 3/3). This triggers
-the two-consecutive-wave disclosure threshold and is reported rather than filed
-as diligence. Each finding was independently checked against source or executed
-regex behaviour. Round 2 also had genuine cross-model disagreement — Gemini was
-clean while Fable found the three delta defects — but every Fable claim verified.
-Because round 2 has no high and one medium from one reviewer, the trim-the-tail
-rule applies: after rev 3, re-dispatch only Fable for a sub-floor delta
-confirmation.
+All three waves incorporated 100% of findings (8/8, 3/3, 1/1). The disclosure
+threshold remains triggered and is reported rather than filed as diligence.
+Each claim was checked against source or executed regex behaviour; round 2 had
+genuine cross-model disagreement (Gemini clean, Fable three findings), and the
+round-3 low demonstrated another executable state hazard rather than style
+feedback. No finding was dismissed.
