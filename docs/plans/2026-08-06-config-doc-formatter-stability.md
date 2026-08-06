@@ -1,0 +1,59 @@
+# Plan: formatter-stable generated CONFIG.md values
+
+## Objective
+
+Close #177's remaining generator defect: render every persisted configuration value into valid, formatter-stable Markdown without altering the value, then regenerate this repository's `.pi/sdlc/CONFIG.md` under a new recognized render-format version.
+
+## Rationale
+
+`keyReference()` currently wraps raw `JSON.stringify` output in a one-backtick code span. The `panels.$comment` value itself contains backticks, so the generated Markdown has ambiguous delimiters and a formatter removes adjacent whitespace. That makes the generated companion flap dirty and makes `config-doc check` report stale after formatting.
+
+The agreed design keeps the compact JSON-order list and exact values. A code-span renderer chooses a delimiter one backtick longer than the longest contiguous backtick run in the serialized value. Valid schema values serialize to JSON whose first and last characters are not backticks, so no CommonMark boundary padding is required. The render-format identity moves from `v1` to `v2`; `v1` remains recognized so existing generated companions are safely stale/regenerated rather than treated as consumer collisions.
+
+No contradiction remains after rejecting two issue-listed alternatives: stripping/sanitizing backticks would change the complete-current-value contract, while backslash escaping inside a code span does not reliably escape its delimiter.
+
+## Scope
+
+### In
+
+- Add one deterministic adaptive code-span helper in `config-doc.mjs` and use it for every JSON-order key value.
+- Set `CURRENT_SENTINEL_VERSION` to `v2` and retain both `v1` and `v2` in `SUPPORTED_SENTINEL_VERSIONS`.
+- Amend the original self-documentation Specification's §§13–14 for the v2 rendering contract.
+- Add focused tests for nested backticks, contiguous backtick runs, exact value preservation, deterministic rendering, v1 recognition/staleness, v2 identity, and the known formatter-mangling regression.
+- Regenerate and commit this repository's `.pi/sdlc/CONFIG.md` with the v2 sentinel/fingerprint.
+
+### Out
+
+- Changing `sdlc.config.json`, config schema version, readiness states, startup behavior, collision behavior, or command interfaces.
+- Adding a runtime Markdown parser/formatter dependency.
+- Stripping, escaping, or otherwise changing persisted values.
+- Adding a new CI gate for stale companions. The existing IDV24 standing scenario already requires this repository's companion to be current; #177 bug 1 is currently resolved.
+- Reformatting unrelated Markdown.
+
+## Assumptions
+
+1. `JSON.stringify` of every schema-valid persisted top-level value returns a JSON token whose boundary characters are not backticks.
+2. CommonMark code spans accept a delimiter longer than every contiguous backtick run in their content.
+3. Formatter stability is proven mechanically by delimiter validity, exact serialized-value containment, the known historical mutation's absence, and byte-identical repeated render/write/check behavior—not by introducing one formatter as a runtime authority.
+4. The change is irreversible because the sentinel/render-format identity is a consumer-bound generated-file contract.
+
+## Definition of done
+
+1. Every key-reference value is enclosed by a backtick delimiter longer than any run inside that value.
+2. Rendered content contains the byte-exact `JSON.stringify` value; no content sanitization occurs.
+3. The current `panels.$comment` renders without the malformed ``re-check with `pi --list-models` `` one-delimiter shape and survives the known whitespace-mangling regression check.
+4. Values containing one-, two-, and three-backtick runs produce valid deterministic delimiters and render byte-identically on repetition.
+5. New renders carry `v2`, and fingerprints include `v2`.
+6. A well-formed `v1` sentinel remains recognized; an on-disk v1 companion classifies stale and `write` regenerates it to v2 without `--force`.
+7. `.pi/sdlc/CONFIG.md` is regenerated to v2 and `config-doc check` reports `current`.
+8. Existing render/write/check state, collision, symlink, and setup integration tests remain green.
+9. Focused tests complete in under one second; the full repository suite remains within its existing normal CI budget.
+10. No runtime dependency or public CLI/config/readiness shape changes.
+
+## Context for the next agent
+
+- Primary implementation: `skills/sdlc/scripts/config-doc.mjs`, especially `keyReference`, `CURRENT_SENTINEL_VERSION`, and `SUPPORTED_SENTINEL_VERSIONS`.
+- Primary tests: `test/config-doc.test.js`; standing current-companion check: IDV24 in `test/iteration-disposition.test.js`.
+- Normative amendment target: `docs/specs/2026-07-18-sdlc-agent-self-documentation.md` §§13–14.
+- Issue #177 describes two bugs; only formatter stability remains. Do not reintroduce a separate bug-1 CI slice.
+- No carry is minted. The Specification must price all verification scenarios and preserve the exact-value/no-dependency boundaries.
