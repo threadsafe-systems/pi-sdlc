@@ -132,6 +132,13 @@ contract or leaving an implementation decision unowned.
 
 ## Tracker projection
 
-`shape.publishToTracker` is 2 and this breakdown has exactly 2 tasks, so it
-publishes one epic plus two native sub-issues on board 5. T2 is blocked by T1.
-The committed build plan remains authoritative if tracker text drifts.
+`shape.publishToTracker` is 2 and this breakdown has exactly 2 tasks, so it is
+published on board 5:
+
+- Epic [#210](https://github.com/threadsafe-systems/pi-sdlc/issues/210)
+- T1 [#211](https://github.com/threadsafe-systems/pi-sdlc/issues/211)
+- T2 [#212](https://github.com/threadsafe-systems/pi-sdlc/issues/212), natively
+  blocked by #211
+
+`tracker-ops frontier --parent 210` returns only #211. The committed build plan
+remains authoritative if tracker text drifts.
