@@ -103,6 +103,8 @@ None.
 2. The 30-second external full-suite timeout is comfortably above the observed 3–6 second baseline.
 3. T1 captures the v1 fixture before changing renderer constants; if capture order is violated, stop and recover the bytes from commit `c3fd2a1` rather than synthesize them.
 4. `writing-comments` governs implementation comments: only provenance/invariant explanations, never process narration.
+5. This branch is stacked on PR #213 until that independently reviewed prerequisite merges; #213 removes the merge-expiring IDV premises that otherwise make any later runtime slice's full suite fail by construction.
+6. The linked worktree required `npm ci`; the reported dependency audit findings pre-exist this slice and are outside #177.
 
 ## Amendments
 
