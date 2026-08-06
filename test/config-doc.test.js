@@ -16,6 +16,8 @@ const here = dirname(fileURLToPath(import.meta.url));
 const repo = dirname(here);
 const CLI = join(repo, "skills", "sdlc", "scripts", "config-doc.mjs");
 const V1_FIXTURE = join(here, "fixtures", "config-doc", "v1-valid-config.md");
+const ORIGINAL_SPEC = join(repo, "docs", "specs", "2026-07-18-sdlc-agent-self-documentation.md");
+const FORMAT_SPEC = join(repo, "docs", "specs", "2026-08-06-config-doc-formatter-stability.md");
 
 const VALID_CONFIG = {
 	schemaVersion: 3,
@@ -128,6 +130,18 @@ test("CDFS6/CDFS7/CDFS8: v2 is current, v1 regenerates, and unsupported v3 is re
 	assert.equal(check(unsupported).state, "error");
 	assert.equal(write(unsupported).action, "refused");
 	assert.equal(readFileSync(companion(unsupported), "utf8"), v3);
+});
+
+test("CDFS12: rev-3 normative text and the approved formatter Spec agree", () => {
+	const original = readFileSync(ORIGINAL_SPEC, "utf8");
+	const format = readFileSync(FORMAT_SPEC, "utf8");
+	assert.match(original, /Date: 2026-08-06 \(rev 3 amendment\)/);
+	assert.match(original, /CURRENT_SENTINEL_VERSION = "v2"/);
+	assert.match(original, /SUPPORTED_SENTINEL_VERSIONS[\s\S]{0,160}`\{"v1",\s*"v2"\}` now/);
+	assert.match(original, /one backtick longer than its longest[\s\S]{0,80}contiguous backtick run/);
+	assert.match(original, /rev 3[\s\S]{0,300}approved by Neil/i);
+	assert.doesNotMatch(original, /CURRENT_SENTINEL_VERSION = "v1"/);
+	assert.match(format, /Spec gate: \*\*approved\*\* by Neil/);
 });
 
 test("CDFS11: config-doc keeps its builtin-only runtime boundary", () => {

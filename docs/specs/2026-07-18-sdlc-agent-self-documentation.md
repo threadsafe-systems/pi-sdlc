@@ -14,9 +14,9 @@
   **rev 3 amends the generated companion format for #177** under
   `docs/specs/2026-08-06-config-doc-formatter-stability.md`: §12's example and
   §13's current/supported identity move to v2 while v1 stays recognized; §14's
-  complete-current-value row uses adaptive CommonMark code spans. Rev 3
-  participates in that Specification's panel and becomes approved with its
-  human gate.
+  complete-current-value row uses adaptive CommonMark code spans. Rev 3 was
+  approved by Neil on 2026-08-06 after that Specification's two-round,
+  two-model panel reached its stop condition.
 - Plan: `docs/plans/2026-07-18-sdlc-agent-self-documentation.md` rev 2
   (approved 2026-07-18); spec handover
   `docs/briefs/2026-07-18-sdlc-agent-self-documentation-spec-handover.md`.

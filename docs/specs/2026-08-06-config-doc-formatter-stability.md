@@ -3,6 +3,7 @@
 - Date: 2026-08-06 (rev 2)
 - Revision history: rev 1 pre-panel draft. **rev 2 incorporates every round-1 finding**: the original Specification is amended in this phase rather than deferred; CDFS4 records an observable malformed-output witness; CDFS7 pins a baseline v1 fixture; CDFS9 drops an unobservable flap claim. Plan amendment A1 corrects its related mutation wording.
 - Plan: `docs/plans/2026-08-06-config-doc-formatter-stability.md` rev 2, approved by Neil.
+- Spec gate: **approved** by Neil on 2026-08-06 after the two-model panel reached its stop condition at rev 2.
 - Track: **irreversible**.
 - Issue: #177.
 - Scenario ids: `CDFS<n>`.
@@ -24,7 +25,7 @@ Unchanged: configuration schemaVersion 3, CLI commands/exits/envelopes, check/wr
 - A well-formed v1 sentinel remains recognized generated output. Relative to the v2 expected render it is stale; `write` regenerates it to v2 without `--force`.
 - Unsupported/malformed sentinels remain collisions.
 
-The original self-documentation Specification is amended in this Spec revision to rev 3: its §12 envelope example names v2; §13 names v2 current and `{v1,v2}` supported while preserving the version lifecycle; §14 requires adaptive code spans for exact key values. Its revision history cites #177 and this Specification's gate. The rev-3 text participates in this same Spec panel and becomes approved only when this gate is human-approved.
+The original self-documentation Specification is amended in this Spec revision to rev 3: its §12 envelope example names v2; §13 names v2 current and `{v1,v2}` supported while preserving the version lifecycle; §14 requires adaptive code spans for exact key values. Its revision history cites #177 and this Specification's approved gate.
 
 ## 3. Adaptive code-span contract
 
