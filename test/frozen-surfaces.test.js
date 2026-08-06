@@ -7,11 +7,11 @@
 // were reopened for the 2026-07-24 `scope`-field slice (PR #190) and are
 // re-frozen here by its post-merge follow-up.
 //
-// The three adversary prompts (plan, spec, review) are reopened for the
-// 2026-07-26 iteration & disposition vocabulary slice (S5, epic #199): a
-// reviewer subagent has none of the skill loaded, so every rule it must obey
-// has to be inline in its prompt. A post-merge re-freeze PR (track:none) puts
-// them back in this list — mandatory, not optional, the #190 -> #191 pattern.
+// The three adversary prompts (plan, spec, review) were reopened for the
+// 2026-07-26 iteration & disposition vocabulary slice (S5, epic #199, PR #206)
+// — a reviewer subagent has none of the skill loaded, so every rule it must
+// obey has to be inline in its prompt — and are re-frozen here by its
+// post-merge follow-up.
 // Uses git to compare against the base.
 
 import assert from "node:assert/strict";
@@ -37,6 +37,9 @@ const FROZEN = [
 	"skills/sdlc/scripts/validate-task.mjs",
 	"skills/sdlc/scripts/validate-task.sh",
 	"skills/sdlc/scripts/verify-task-receipt.mjs",
+	"skills/sdlc/prompts/adversary-plan.prompt.md",
+	"skills/sdlc/prompts/adversary-spec.prompt.md",
+	"skills/sdlc/prompts/adversary-review.prompt.md",
 	"skills/sdlc/prompts/validator-task.prompt.md",
 ];
 
