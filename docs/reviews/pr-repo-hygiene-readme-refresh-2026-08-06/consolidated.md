@@ -35,3 +35,22 @@ commands, the tracker section against the config schema, SP1 on the new README,
 `check-references`, and that CI's lifecycle check reads `$GITHUB_EVENT_PATH`
 rather than the now-untracked file — so the untracking breaks no gate. The
 reviewer independently judged the `track: none` declaration honest for this diff.
+
+## Round 2
+
+Resolved manually against live credentials after round 1's shortfall:
+`amazon-bedrock/global.anthropic.claude-opus-4-8:xhigh` and
+`deepseek/deepseek-v4-pro:xhigh`.
+
+Returned: **1 of 2**. The Bedrock reviewer failed with `No API key found for
+amazon-bedrock` — it is in the committed roster but has no live credential on
+this machine, which `resolve-panel`'s reconciliation would have caught had the
+orchestrator gone through it instead of picking from the roster by hand.
+
+`deepseek-v4-pro` reviewed the whole diff (it had not seen round 1) and verified
+each round-1 fix independently against the working tree and the scripts:
+F1–F7 all **RESOLVED**, including re-running lint and the failing-test attribution.
+
+| id | severity | reviewer | finding | disposition |
+|---|---|---|---|---|
+| F8 | low | deepseek-v4-pro | The PR body's opening paragraph still said the ignore entry "is unanchored" in the present tense, contradicting the anchored `.gitignore`; the correction was recorded only in the assumptions section. | **Incorporated.** Opening paragraph rewritten. The same stale sentence in the first commit's message was reworded by rebase, so the squashed history will not carry a claim its own diff contradicts. |
