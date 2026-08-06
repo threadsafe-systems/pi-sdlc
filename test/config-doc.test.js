@@ -5,6 +5,7 @@
 
 import assert from "node:assert/strict";
 import { execFileSync } from "node:child_process";
+import { createHash } from "node:crypto";
 import { existsSync, mkdirSync, mkdtempSync, readFileSync, statSync, symlinkSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
@@ -16,6 +17,7 @@ const here = dirname(fileURLToPath(import.meta.url));
 const repo = dirname(here);
 const CLI = join(repo, "skills", "sdlc", "scripts", "config-doc.mjs");
 const V1_FIXTURE = join(here, "fixtures", "config-doc", "v1-valid-config.md");
+const V1_FIXTURE_SHA256 = "1af2ec94ecad30a6e6bdec3c4684d0ae0ca14f3678bc898a2682a6043ae4f46e";
 const ORIGINAL_SPEC = join(repo, "docs", "specs", "2026-07-18-sdlc-agent-self-documentation.md");
 const FORMAT_SPEC = join(repo, "docs", "specs", "2026-08-06-config-doc-formatter-stability.md");
 
@@ -87,6 +89,11 @@ test("CDFS2: a delimiter equal to an interior run is rejected by the exact-span 
 	assert.notEqual(keyLine(render(config), "panels"), invalid);
 });
 
+test("CDFS2: many separated backtick runs do not overflow delimiter selection", () => {
+	const config = withPanelComment("`a".repeat(150_000));
+	assert.match(keyLine(render(config), "panels"), /^- \*\*`panels`\*\* = ``/);
+});
+
 test("CDFS3: mutating one serialized byte breaks exact value preservation", () => {
 	const config = withPanelComment("one ` run");
 	const serialized = JSON.stringify(config.panels);
@@ -117,6 +124,7 @@ test("CDFS6/CDFS7/CDFS8: v2 is current, v1 regenerates, and unsupported v3 is re
 	assert.deepEqual([...SUPPORTED_SENTINEL_VERSIONS], ["v1", "v2"]);
 
 	const legacyBody = readFileSync(V1_FIXTURE, "utf8");
+	assert.equal(createHash("sha256").update(legacyBody).digest("hex"), V1_FIXTURE_SHA256);
 	assert.match(legacyBody, /^<!-- pi-sdlc:config-doc v1 fingerprint=47b61fe4fedb58813e24f74942d39f9a1b3bbf119c81d44ecf5f1abce6f79c82 -->/);
 	const legacy = fixture();
 	writeFileSync(companion(legacy), legacyBody);

@@ -143,8 +143,10 @@ const KEY_REFERENCE = {
 };
 
 function codeSpan(value) {
-	const maxRun = Math.max(0, ...(value.match(/`+/g) ?? []).map((run) => run.length));
+	let maxRun = 0;
+	for (const run of value.matchAll(/`+/g)) maxRun = Math.max(maxRun, run[0].length);
 	const delimiter = "`".repeat(maxRun + 1);
+	// JSON tokens never start or end with backticks or spaces, so CommonMark needs no boundary padding.
 	return `${delimiter}${value}${delimiter}`;
 }
 

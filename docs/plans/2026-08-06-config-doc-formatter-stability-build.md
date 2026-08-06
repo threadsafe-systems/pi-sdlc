@@ -34,7 +34,7 @@ Implement the adaptive code-span and v2 compatibility contract together with the
 
 - Helper is deterministic, local to `config-doc.mjs`, and preserves `JSON.stringify` bytes.
 - Existing state/collision/symlink/setup tests are unchanged in intent.
-- The v1 fixture is provenance-commented by test code, not hand-edited after capture.
+- The v1 fixture's complete byte content is pinned by a SHA-256 assertion; its baseline provenance remains in the governing Spec rather than a process-history code comment.
 - No dependency or unrelated render surface changes.
 
 ### PV1 projection
@@ -114,3 +114,10 @@ None.
 - Class: **(c), normal fix wave**.
 - Disposition: **incorporated**. CDFS9 and companion regeneration move to T1; T1 gains `static.config`. T2 retains CDFS12 normative approval closure. The dependency remains because T2's tests consume T1's runtime.
 - Author: orchestrator during T1 implementation, 2026-08-06.
+
+### A2 — fixture evidence and large-input hardening
+
+- Trigger: PR round-1 findings showed that CDFS7 pinned only the fixture sentinel, not its full bytes, and that spreading all backtick runs into `Math.max` could exceed V8's argument limit.
+- Class: **(c), normal fix wave**.
+- Disposition: **incorporated**. The focused test pins the complete fixture SHA-256 and exercises 150,000 separated runs; the renderer computes the maximum iteratively. The earlier provenance-comment requirement is replaced with a mechanical hash because implementation comments must not cite process artifacts.
+- Author: orchestrator during PR adjudication, 2026-08-06.
