@@ -4,6 +4,10 @@ Upstream: `docs/plans/2026-08-06-diff-scoped-test-premises.md` rev 4,
 approved by Neil on 2026-08-06 after the round-3 churn restructure. Track:
 **irreversible**. Resolves #208.
 
+**Rev 2** — incorporates spec-panel round 1 (2 high, 2 medium, 4 low after
+cross-model deduplication; 0 dismissed). Record:
+`docs/reviews/spec-review-diff-scoped-test-premises-2026-08-06/consolidated.md`.
+
 This Spec fixes the normative law, pi-sdlc's local enforcement contract, the
 matcher that was deliberately left executable rather than prose-defined in the
 Plan, and the falsifiable scenarios. It does not reopen Plan decisions D1-D4.
@@ -82,16 +86,18 @@ second skill reference.
 
 ### C4.1 — home, sweep and result shape
 
-A new `test/diff-scoped-premises.test.js` owns the guard. It recursively scans
-all executable test source below `test/` whose extension is `.js`, `.mjs`, or
-`.cjs`. At the grounded commit `7710509`, that is 60 of the 74 files below
+A new `test/diff-scoped-premises.test.js` owns both the guard and the standing
+C1-law scenarios DSP1-DSP6; it is the mechanical witness named by the #192
+handoff. It recursively scans all executable test source below `test/` whose
+extension is `.js`, `.mjs`, or `.cjs`. At the grounded commit `7710509`, that is 60 of the 74 files below
 `test/`; the other 14 are six JSON and eight Markdown fixtures, not executable
 test source. New matching source files join the sweep automatically; no count is
 hard-coded in the test.
 
 The detector returns a file-relative inventory with one or more reasons per
-file. The test fails when a reported file is neither fixed nor present in the
-closed exemption map. An exemption is file-scoped because all reported
+file. After in-scope fixes, the reported file-key set must equal the closed
+exemption map's key set exactly: an unexempted hit **or a stale exemption that
+no longer reports** fails. An exemption is file-scoped because all reported
 occurrences in each exempt file serve the same present behaviour; its reason is
 mandatory and non-empty.
 
@@ -100,17 +106,18 @@ mandatory and non-empty.
 The detector is textual and deliberately narrower than the semantic law. It
 reports three syntactic shapes:
 
-1. a call to a helper named `baseRef` or `baseFile`;
+1. a call to or declaration of a helper named `baseRef` or `baseFile`;
 2. an actual `execFileSync`, `spawnSync`, or `runProcess` git argv containing
    the `merge-base` operation; or
 3. one of those git argvs containing `show` or `diff` followed in that same argv
    by an inline literal `main`, `origin/main`, `main:<path>`, or
    `origin/main:<path>`.
 
-The git argv regex stops at the first closing array bracket. It therefore does
-not combine an unrelated git invocation with a moving-ref token elsewhere in
-the file. The detector fragments its own tokens before joining them, so its
-source does not report itself.
+Each git branch first requires a **literal argv array** at the call site, then
+stops at that array's first closing bracket. A variable argv is deliberately not
+a match. Therefore the regex cannot bridge from a variable-argv git invocation
+into an unrelated moving-ref token later in the file. The detector fragments
+its own tokens before joining them, so its source does not report itself.
 
 The exact executable prototype below was run to produce §5. Its detector core
 is normative; implementation may change module/test scaffolding but not the
@@ -127,9 +134,10 @@ const SOURCE_EXTENSIONS = new Set([".js", ".mjs", ".cjs"]);
 
 const token = (...parts) => parts.join("");
 const escape = (value) => value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-const invokers = [token("exec", "File", "Sync"), token("spawn", "Sync"), token("run", "Process")];
-const invoker = `(?:${invokers.map(escape).join("|")})`;
-const gitStart = `${invoker}\\s*\\(\\s*(?:\\[\\s*)?["']${token("g", "it")}["']`;
+const processInvokers = [token("exec", "File", "Sync"), token("spawn", "Sync")];
+const processGitStart = `(?:${processInvokers.map(escape).join("|")})\\s*\\(\\s*["']${token("g", "it")}["']\\s*,\\s*\\[`;
+const runProcessGitStart = `${escape(token("run", "Process"))}\\s*\\(\\s*\\[\\s*["']${token("g", "it")}["']`;
+const gitStart = `(?:${processGitStart}|${runProcessGitStart})`;
 const argvTail = "[^\\]]*";
 const historyRead = token("merge", "-", "base");
 const contentReads = [token("sh", "ow"), token("di", "ff")];
@@ -211,11 +219,13 @@ from the executed inventory.
 
 ### C4.5 — non-vacuity and self-match
 
-The new test constructs, from split tokens, one in-memory source sample for each
-C4.2 branch and proves each is reported. It then mutates each sample to a
-current-tree or fixture-HEAD equivalent and proves it is not reported. No
-matching fixture is written below `test/`. The test also scans its own source and
-asserts no match before exemptions are applied.
+Within `test/diff-scoped-premises.test.js`, named test cases DSP5 and DSP6
+construct, from split tokens, one in-memory source sample for each C4.2 branch
+and prove each is reported. They then mutate each sample to a current-tree or
+fixture-HEAD equivalent and prove it is not reported. No matching fixture is
+written below `test/`. DSP6 also scans its own source and asserts no match before
+exemptions are applied. DSP1-DSP3 in that same file own the C1 law and mutation
+checks; there is no unidentified second test file.
 
 ## 5. Executed detector inventory
 
@@ -255,13 +265,17 @@ The process timing includes Node startup; the in-suite scan has no process spawn
 
 From `test/iteration-disposition.test.js` remove the `node:child_process` import,
 `baseRef`, and `baseFile`. No remaining executable use of `execFileSync` exists
-in that file after C5.2-C5.4; the source-inspection regex at today's line 471 is
-just data and needs no import.
+in that file after C5.2-C5.4. Amend IDV17's source-inventory expectation from
+`["git"]` to `[]`, with an assertion message stating that the scenario corpus
+uses no subprocess; also amend the file header from "shells out to local git"
+to "no subprocess or network calls". The source-inspection regex at today's
+line 471 remains useful data for proving the empty set and needs no import.
 
 ### C5.2 — convert IDV3 to a literal current-tree invariant
 
 IDV3 compares the current `system-reference.md` numbered headings §1-§14 with
-this exact literal array:
+this exact literal array. Its local `numbered` projection strips the Markdown
+`##` prefix (`line.slice(3)`) before comparison:
 
 ```text
 1. Purpose
@@ -327,7 +341,7 @@ mechanical witness.
 | id | requirement | gate |
 |---|---|---|
 | N1 | The guard and DSP3 read local files only: no child process, network, model, shell, or new CI workflow. | DSP12 |
-| N2 | The guard plus DSP3 complete in under 1 second wall time in one local test process. | DSP12 |
+| N2 | `node --test test/diff-scoped-premises.test.js` completes in under 1 second wall time as a review-time measurement, not an in-suite timing assertion. | DSP12 |
 | N3 | All 60 current executable test sources are in scope recursively; future `.js`/`.mjs`/`.cjs` files join automatically. | DSP4 |
 | N4 | Detector source does not report itself and test fixtures do not plant a reportable token below `test/`. | DSP5-DSP6 |
 | N5 | No frozen surface changes; no post-merge re-freeze PR is owed. | DSP15 |
@@ -346,14 +360,14 @@ untrusted input, and changes no persisted schema.
 | DSP4 | Recursive enumeration covers every `.js`, `.mjs`, and `.cjs` below `test/`, including `test/e2e/harness.mjs`; the implementation hard-codes no file count. | A matching extension is omitted or a fixed count is required. |
 | DSP5 | Each C4.2 positive in-memory sample reports its expected reason; current-tree and fixture-HEAD negatives do not. | Any pattern branch is vacuous or either named negative reports. |
 | DSP6 | The detector scans its own source before exemptions and reports no reason; no on-disk mutation fixture exists. | Self-source reports or a reportable fixture is planted under `test/`. |
-| DSP7 | Before C5, the executed inventory equals §5; after C5 it contains only the two C4.4 files, and both have non-empty reasons. | A current hit is unlisted, `iteration-disposition.test.js` remains, or an exemption lacks a reason. |
+| DSP7 | Before C5, the executed inventory equals §5; after C5 its file-key set equals the two-key C4.4 exemption map exactly, and both reasons are non-empty. | A current hit is unlisted, `iteration-disposition.test.js` remains, an exemption lacks a reason, or a stale exemption no longer reports. |
 | DSP8 | IDV3's current-tree headings equal C5.2's literal §1-§14 array. | Any heading is deleted, renumbered, or retitled. |
 | DSP9 | Mutating one literal heading in memory causes the IDV3 helper/assertion to fail. | IDV3 can pass without enforcing the literal array. |
 | DSP10 | The converted IDV14 accepts today's thin router and rejects an in-memory body containing the four-column Spec-gap table. | It reads git history, rejects the legitimate front-matter `description`, or accepts the forbidden table. |
 | DSP11 | The diff-scoped duplicate IDV15 and IDV16 are absent; the remaining source identifies the `FROZEN` list and standing diff guard as present owners without process-history comments. | Either test remains, ownership is unrecorded, or comments narrate plans/reviews/removal. |
-| DSP12 | The two new tests import no child-process/network API and complete together under 1 second in the normal test process. | Either uses an external interface or the combined wall time is ≥1 second. |
+| DSP12 | `test/diff-scoped-premises.test.js` imports no child-process/network API, and review-time command `node --test test/diff-scoped-premises.test.js` completes under 1 second; no in-suite timing assertion is added. | The file uses an external interface or the measured command wall time is ≥1 second. |
 | DSP13 | `CONTRIBUTING.md` contains all four C3 obligations and names `test/frozen-surfaces.test.js`. | Any local contributor rule is absent. |
-| DSP14 | Issue #192 contains the C5-linked handoff naming DSP3 and the premise-durability law before the Spec gate closes. | The comment is absent, points elsewhere, or names no mechanical witness. |
+| DSP14 | Issue #192 contains the §7/C1-linked handoff naming DSP3 and the premise-durability law before the Spec gate closes. | The comment is absent, points elsewhere, or names no mechanical witness. |
 | DSP15 | Full `npm test` passes; touched surfaces pass Biome; `config-doc.mjs check` reports `current`; ASD19 passes with no `FROZEN` change. | Any command fails or a frozen path changes. |
 
 ## 10. Outcome traceability
