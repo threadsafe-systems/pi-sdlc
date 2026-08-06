@@ -91,7 +91,8 @@ test("CDFS2: a delimiter equal to an interior run is rejected by the exact-span 
 
 test("CDFS2: many separated backtick runs do not overflow delimiter selection", () => {
 	const config = withPanelComment("`a".repeat(150_000));
-	assert.match(keyLine(render(config), "panels"), /^- \*\*`panels`\*\* = ``/);
+	const serialized = JSON.stringify(config.panels);
+	assert.equal(keyLine(render(config), "panels"), `- **\`panels\`** = \`\`${serialized}\`\``);
 });
 
 test("CDFS3: mutating one serialized byte breaks exact value preservation", () => {

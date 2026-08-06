@@ -10,6 +10,9 @@ Orchestrator: `anthropic/claude-opus-5`.
 | 1 | 1 | `claude-fable-5` | `round1-claude-fable-5.md` | `panel.dispatched{round:1,wave:1}` + matching harvest |
 | 1 | 1 | `gpt-5.6-sol` | `round1-gpt-5.6-sol.md` | same workflow/harvest |
 | 1 | 1 | `gpt-5.6-luna` | `round1-gpt-5.6-luna.md` | same workflow/harvest |
+| 2 | 2 | `claude-fable-5` | `round2-claude-fable-5.md` | `panel.dispatched{round:2,wave:2}` + matching harvest |
+| 2 | 2 | `gpt-5.6-sol` | `round2-gpt-5.6-sol.md` | same workflow/harvest |
+| 2 | 2 | `gpt-5.6-luna` | `round2-gpt-5.6-luna.md` | same workflow/harvest |
 
 ## Round 1 findings
 
@@ -40,6 +43,17 @@ The helper states the present JSON-token boundary invariant that makes no-paddin
 
 No carry was minted. Both receipts verified before dispatch. No ASD19-frozen surface is touched. PR #213's head is an ancestor of this branch and its delta is excluded from this review; this PR stays stacked until #213 lands.
 
+## Round 2 findings
+
+Every round-1 disposition was confirmed incorporated; no finding was legally reopened.
+
+| id | severity | origin | reviewer(s) | defect | disposition |
+| --- | --- | --- | --- | --- | --- |
+| `PR-R2-01` | low | NEW | fable-5 | large-run witness checks only a two-backtick prefix and would accept an over-long delimiter | **incorporated** — assertion now equals the complete serialized line with exactly two delimiters |
+| `PR-R2-02` | low | NEW | sol | refreshed T1 runner report named the review-directory manifest while the receipt names the canonical validation manifest | **incorporated** — final deterministic rerun uses the canonical `docs/validation/.../t1.json`; receipt/report path agreement is checked before publication |
+
+**Round-2 counts:** 0 high, 0 medium, 2 low. Incorporated 2; dismissed 0; barred 0; carries 0.
+
 ## Stop status
 
-Round 1 requires a full delta round because two medium findings were incorporated. No dismissal is proposed.
+No high or medium finding survives adjudication. Low findings are incorporated without another round. No dismissal or carry exists.
