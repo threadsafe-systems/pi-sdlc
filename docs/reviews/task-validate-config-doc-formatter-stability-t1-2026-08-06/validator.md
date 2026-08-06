@@ -9,4 +9,4 @@
 
 ## Verdict: PASS
 
-Runner exit and report agree (0/PASS). The pinned v1 fixture, adaptive spans, v2 compatibility, current repository companion, full suite, focused suite, and static checks pass.
+Runner exit and report agree (0/PASS). The full fixture SHA pin, 150,000-run overflow witness, adaptive spans, current v2 companion, and every declared check pass.

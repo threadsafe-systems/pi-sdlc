@@ -9,4 +9,4 @@
 
 ### Verdict: PASS
 
-Runner exit and report agree (0/PASS). Rev-3 approval consistency, the current v2 companion, full and focused suites, and static checks pass.
+Runner exit and report agree (0/PASS). Rev-3 approval consistency, the current v2 companion, and every declared check pass after PR hardening.
