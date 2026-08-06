@@ -314,11 +314,13 @@ state present enforcement ownership only.
 
 ## 7. S1 handoff contract
 
-The implement phase posts a comment on issue #192 stating that S1's rewrite of
+The Spec phase posts a comment on issue #192 stating that S1's rewrite of
 `phase-spec.md` §4 must preserve the premise-durability law, and linking this
 Spec. The comment names the standing test scenario DSP3 as the mechanical
 witness. The issue comment is the durable handoff; the branch-local test is the
 mechanical witness.
+
+**Landed:** [issue #192 comment 5202737602](https://github.com/threadsafe-systems/pi-sdlc/issues/192#issuecomment-5202737602), 2026-08-06.
 
 ## 8. Non-functional requirements
 
