@@ -1,3 +1,9 @@
+## [3.1.0](https://github.com/threadsafe-systems/pi-sdlc/compare/v3.0.0...v3.1.0) (2026-08-06)
+
+### Features
+
+* **sdlc:** cross-gate iteration & disposition vocabulary (S5) ([#206](https://github.com/threadsafe-systems/pi-sdlc/issues/206)) ([21cb0c3](https://github.com/threadsafe-systems/pi-sdlc/commit/21cb0c31b8842f18b95ae6ee0fab19120cc53d3f))
+
 ## [3.0.0](https://github.com/threadsafe-systems/pi-sdlc/compare/v2.7.0...v3.0.0) (2026-07-25)
 
 ### ⚠ BREAKING CHANGES
