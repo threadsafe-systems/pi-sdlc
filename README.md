@@ -89,9 +89,10 @@ scripts/ensure-panel-agent.sh pr_review          # skill-relative in pi
 scripts/resolve-panel.sh pr_review --author <vendor> --emit-tasks <agent>
 ```
 
-Every `scripts/…` path in this README and throughout the skill resolves against
-the **loaded skill directory**, never the repository root — the skill has no
-fixed install path, so it may not name one. Headless callers invoke the `.mjs`
+Every `scripts/…` path in this README and throughout the skills resolves against
+the **loaded skill's own directory**, never the repository root — a skill has no
+fixed install path, so it may not name one. Commands belong to whichever of the
+two skills the surrounding section is about. Headless callers invoke the `.mjs`
 sibling of any `.sh` as `node <skill-dir>/scripts/<name>.mjs`.
 
 `resolve-panel` reconciles the merged config's `panels` preference against live
@@ -168,7 +169,8 @@ The mechanics and the label vocabulary are documented in
 An instrumented run keeps a durable manifest of its own lifecycle at
 `.pi/sdlc/runs/<slug>/events.jsonl` — run start, phase entry and exit, human gate
 approvals, panel dispatch and consolidation, task validation, PR events. The run
-store is git-ignored: raw material stays local.
+store is raw local material, not evidence to commit — adoption does not write an
+ignore rule for it, so add `**/.pi/sdlc/runs/` to your own `.gitignore`.
 
 ```bash
 scripts/record-run-event.sh --list                 # the event vocabulary
@@ -177,13 +179,16 @@ scripts/record-run-event.sh phase.entered --slug <slug> --payload '{...}'
 scripts/harvest-panel.sh --phase pr_review --round 1 --from <subagent-dir>
 ```
 
-Emission is fail-soft: an unresolvable run identity or an unwritable store
-degrades to a single stderr warning and never changes lifecycle behaviour.
-Emission never writes to stdout; only the two informational flags do.
+A run whose identity will not resolve is a soft skip, and emission writes nothing
+to stdout except under the two informational flags — but the standalone emitter
+exits 2 on an I/O failure, so a caller running it under `set -e` should expect
+that. (The in-process emitter the phases themselves use is fail-soft on I/O
+instead; `references/system-reference.md` §12 owns the full contract.)
 
 The `sdlc-retro` skill is the post-mortem half. It collects the run store into a
 distilled, schema-valid record and renders it as one self-contained HTML
-dashboard — phase timing, cost, panel precision, human wait, and rework:
+dashboard — phase timing, cost, panel precision, human wait, and rework. These
+two commands resolve against the `sdlc-retro` skill, not `sdlc`:
 
 ```bash
 scripts/collect-run.sh --slug <slug>               # -> docs/retros/<slug>/run.json
@@ -192,9 +197,8 @@ scripts/render-retro.sh --run docs/retros/<slug>/run.json
 
 Unlike the run store, the distilled record and its dashboard are meant to be
 committed. `collect-run` takes injectable `--git-cmd`/`--gh-cmd`/`--llm-cmd`
-seams; `--no-llm` drops the LLM seam entirely, and `run.json` still validates —
-with narratives, steering classification, and panel precision reported as absent
-rather than guessed.
+seams, and `--no-llm` drops the LLM seam while still producing a valid
+`run.json`. That skill's `SKILL.md` owns the pipeline's contract.
 
 ## Adoption bundle and lifecycle checking
 
