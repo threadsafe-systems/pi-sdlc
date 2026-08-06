@@ -9,4 +9,4 @@
 
 ### Verdict: PASS
 
-The full suite passed 519 tests; the task corpus passed 30 tests. IDV33 mechanically witnesses DSP11's two present-enforcement comments and process-history prohibition. Runner exit and report agree (0/PASS).
+Runner exit and report agree (0/PASS). The full suite passed 519 tests and the task corpus passed 30, including multiline/side-effect import visibility, whole-comment ownership checks, and short Markdown separator coverage.

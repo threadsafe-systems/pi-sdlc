@@ -3,10 +3,10 @@
   "taskId": "t1",
   "manifestPath": "docs/validation/diff-scoped-test-premises/t1.json",
   "manifestSha256": "477c7e697d3b24fcff201005192de9f8167e36fd89fc5116963351f181561444",
-  "runnerReportSha256": "5dfb65c1d000feab6d531ef15df334eb4a2fc7922f15868f94ec305c9cfc30ab",
+  "runnerReportSha256": "ee067f8e613ef1f52d3ace5754cfbc632066d7604943553d3cb138418e3cc1b3",
   "generatedAgentSha256": "ec3895ff8b685dc90b6ce2db27aa82b37d1abeea1612749d9b1377c42d69cbdd",
   "model": "anthropic/claude-haiku-4-5",
   "runnerVerdict": "PASS",
   "validatorVerdict": "PASS",
-  "createdAt": "2026-08-06T12:03:52Z"
+  "createdAt": "2026-08-06T12:21:40Z"
 }

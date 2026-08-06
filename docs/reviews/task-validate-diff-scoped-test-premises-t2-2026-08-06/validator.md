@@ -9,4 +9,4 @@
 
 ### Verdict: PASS
 
-Runner exit and report agree (0/PASS). The strengthened detector variants, semantic-law witness, offline import boundary, same-comment DSP14 handoff, and all integration checks pass.
+Runner exit and report agree (0/PASS). Semantic inversion/duplication probes, all detector variants, multiline/side-effect import visibility, and the complete same-comment S1 handoff check pass.

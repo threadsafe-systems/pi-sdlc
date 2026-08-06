@@ -52,10 +52,10 @@
       "argv": [
         "node",
         "-e",
-        "const {execFileSync}=require(\"node:child_process\"); const issue=JSON.parse(execFileSync(\"gh\",[\"issue\",\"view\",\"192\",\"--repo\",\"threadsafe-systems/pi-sdlc\",\"--json\",\"comments\"],{encoding:\"utf8\"})); const required=[\"DSP3\",\"premise-durability\",\"docs/specs/2026-08-06-diff-scoped-test-premises.md\"]; if(!issue.comments.some(({body})=>required.every((token)=>body.includes(token)))) process.exit(1)"
+        "const {execFileSync}=require(\"node:child_process\"); const issue=JSON.parse(execFileSync(\"gh\",[\"issue\",\"view\",\"192\",\"--repo\",\"threadsafe-systems/pi-sdlc\",\"--json\",\"comments\"],{encoding:\"utf8\"})); const required=[\"phase-spec.md\",\"must preserve the premise-durability law\",\"**DSP3**\",\"https://github.com/threadsafe-systems/pi-sdlc/blob/fix/diff-scoped-test-premises/docs/specs/2026-08-06-diff-scoped-test-premises.md#9-verification-scenarios\"]; if(!issue.comments.some(({body})=>required.every((token)=>body.includes(token)))) process.exit(1)"
       ],
       "timeoutMs": 120000,
-      "evidence": ["one issue-192 comment carries the DSP3 witness, premise-durability law, and linked Spec path"]
+      "evidence": ["one issue-192 comment carries the preservation instruction, bold DSP3 witness, and full linked Spec URL"]
     }
   ],
   "categories": {
