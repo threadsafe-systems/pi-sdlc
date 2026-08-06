@@ -22,8 +22,16 @@ function reference(slug) {
 }
 
 function assertExactImports(source, expected) {
-	const imports = source.split("\n").filter((line) => /^import\b/.test(line));
-	assert.deepEqual(imports, expected, "static imports must remain the exact local-only allowlist");
+	const prelude = `${expected.join("\n")}\n\n`;
+	const preludeStart = source.indexOf(prelude);
+	assert.notEqual(preludeStart, -1, "static module declarations must remain one exact local-only prelude");
+	assert.equal(source.indexOf(prelude, preludeStart + 1), -1, "the module prelude must appear exactly once");
+	const loadKeyword = ["im", "port"].join("");
+	const exposeKeyword = ["ex", "port"].join("");
+	const safeMeta = new RegExp(`\\b${loadKeyword}\\.meta\\b`, "g");
+	const outsidePrelude = `${source.slice(0, preludeStart)}${source.slice(preludeStart + prelude.length)}`.replace(safeMeta, "");
+	const moduleKeyword = new RegExp(`\\b(?:${loadKeyword}|${exposeKeyword})\\b`);
+	assert.doesNotMatch(outsidePrelude, moduleKeyword, "no static or dynamic module load may appear outside the allowlisted prelude");
 }
 
 /** A numbered `## <n>. …` section body, heading included, up to the next `## `. */
@@ -454,12 +462,12 @@ test("IDV33: retired checks name their present enforcement owners", () => {
 	const source = readFileSync(join(here, "iteration-disposition.test.js"), "utf8");
 	const lines = source.split("\n");
 	const commentBlock = (bodyLines, needle) => {
-		const needleLine = bodyLines.findIndex((line) => line.startsWith("//") && line.includes(needle));
+		const needleLine = bodyLines.findIndex((line) => line.trimStart().startsWith("//") && line.includes(needle));
 		assert.notEqual(needleLine, -1, `ownership comment is missing: ${needle}`);
 		let start = needleLine;
-		while (start > 0 && bodyLines[start - 1].startsWith("//")) start--;
+		while (start > 0 && bodyLines[start - 1].trimStart().startsWith("//")) start--;
 		let end = needleLine;
-		while (end + 1 < bodyLines.length && bodyLines[end + 1].startsWith("//")) end++;
+		while (end + 1 < bodyLines.length && bodyLines[end + 1].trimStart().startsWith("//")) end++;
 		return bodyLines.slice(start, end + 1).join("\n");
 	};
 	const frozenOwner = commentBlock(lines, "validator-task.prompt.md");
@@ -470,7 +478,7 @@ test("IDV33: retired checks name their present enforcement owners", () => {
 	for (const comment of [frozenOwner, nonChangeOwner]) {
 		assert.doesNotMatch(comment, processHistory, "ownership comments must describe present enforcement, not process history");
 	}
-	for (const mutation of [source.replace("// validator-task.prompt.md", "// Retired by the PR.\n// validator-task.prompt.md"), source.replace("// FROZEN list;", "// FROZEN list;\n// Retired by the PR.")]) {
+	for (const mutation of [source.replace("// validator-task.prompt.md", "// Retired by the PR.\n// validator-task.prompt.md"), source.replace("// FROZEN list;", "// FROZEN list;\n\t// Retired by the PR.")]) {
 		assert.match(commentBlock(mutation.split("\n"), "validator-task.prompt.md"), processHistory, "process history anywhere in the ownership block must remain detectable");
 	}
 });
@@ -506,16 +514,31 @@ test("IDV4: every phase reference the vocabulary binds cites the glossary by nam
 
 test("IDV17: this scenario corpus makes no subprocess, model, or network call", () => {
 	const source = readFileSync(join(here, "iteration-disposition.test.js"), "utf8");
-	const allowedImports = ['import assert from "node:assert/strict";', 'import { readFileSync } from "node:fs";', 'import { dirname, join } from "node:path";', 'import { fileURLToPath } from "node:url";', 'import { test } from "node:test";', 'import { check } from "../skills/sdlc/scripts/config-doc.mjs";'];
+	const staticLoad = ["im", "port"].join("");
+	const staticExpose = ["ex", "port"].join("");
+	const allowedImports = [
+		`${staticLoad} assert from "node:assert/strict";`,
+		`${staticLoad} { readFileSync } from "node:fs";`,
+		`${staticLoad} { dirname, join } from "node:path";`,
+		`${staticLoad} { fileURLToPath } from "node:url";`,
+		`${staticLoad} { test } from "node:test";`,
+		`${staticLoad} { check } from "../skills/sdlc/scripts/config-doc.mjs";`,
+	];
 	assertExactImports(source, allowedImports);
-	for (const mutation of ['import "node:https"', 'import { execFile as run } from "node:child_process"; // comment', 'import {\n\t// from "node:fs"\n\texecFile as run\n} from "node:child_process";']) {
-		assert.throws(() => assertExactImports(`${source}\n${mutation}`, allowedImports), `prohibited import must disturb the exact allowlist: ${mutation}`);
+	for (const mutation of [
+		`${staticLoad} "node:https"`,
+		`\t${staticLoad} { execFile as run } from "node:child_process";`,
+		`/* preload */ ${staticLoad} { execFile as run } from "node:child_process";`,
+		`${staticExpose} * from "./helper.mjs";`,
+		`${staticLoad} {\n\t// from "node:fs"\n\texecFile as run\n} from "node:child_process";`,
+	]) {
+		assert.throws(() => assertExactImports(`${source}\n${mutation}`, allowedImports), `prohibited module load must disturb the exact prelude: ${mutation}`);
 	}
 	const code = source
 		.replace(/^\s*\/\/.*$/gm, "")
 		.replace(/"[^"]*"/g, '""')
 		.replace(/`[^`]*`/g, "``");
-	for (const banned of [/\bfetch\s*\(/, /\bimport\s*\(/, /\brequire\s*\(/, /\bexecFileSync\s*\(/, /\bexecSync\s*\(/, /\bspawnSync\s*\(/, /\bspawn\s*\(/]) {
+	for (const banned of [/\bfetch\s*\(/, new RegExp(`\\b${staticLoad}\\s*\\(`), /\brequire\s*\(/, /\bexecFileSync\s*\(/, /\bexecSync\s*\(/, /\bspawnSync\s*\(/, /\bspawn\s*\(/]) {
 		assert.doesNotMatch(code, banned, `a scenario must not reach beyond the working tree: ${banned}`);
 	}
 

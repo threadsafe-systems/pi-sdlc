@@ -18,6 +18,9 @@ Target: branch from `2aa5a89`; each delta wave below records its exact end, irre
 | 3 | 3 | `claude-fable-5` | `round3-claude-fable-5.md` | `panel.dispatched{round:3,wave:3}` + `panel.harvested{round:3,wave:3}` |
 | 3 | 3 | `gpt-5.6-sol` | `round3-gpt-5.6-sol.md` | same workflow/harvest |
 | 3 | 3 | `gpt-5.6-luna` | `round3-gpt-5.6-luna.md` | same workflow/harvest |
+| 4 | 4 | `claude-fable-5` | `round4-claude-fable-5.md` | `panel.dispatched{round:4,wave:4}` + `panel.harvested{round:4,wave:4}` |
+| 4 | 4 | `gpt-5.6-sol` | `round4-gpt-5.6-sol.md` | same workflow/harvest |
+| 4 | 4 | `gpt-5.6-luna` | `round4-gpt-5.6-luna.md` | same workflow/harvest |
 
 All children completed with model verdicts. Harness turn-budget caveats are
 preserved where returned; round-2 Luna returned no caveat. Findings and CLEARs
@@ -189,6 +192,36 @@ block and runs both prepended and appended history mutations through the actual
 extractor. The inventory now uses a base-relative target, lists wave 3, and
 scopes the harness-caveat statement to artifacts that actually returned it.
 
+## Round 4 — round-cap checkpoint (delta `c0c7ecc..fd03110`)
+
+Luna returned clear. Fable and Sol reproduced two recurring generators; Fable
+also found one low instance of the same column-anchoring class. Neil ratified
+bounded option **(b), fix-wave churn: restructure rather than re-dispatch**.
+
+| id | severity | origin | reviewer(s) | defect | disposition |
+| --- | --- | --- | --- | --- | --- |
+| `PR-R4-01` | medium | `REOPENED(PR-R3-01)` | sol | Equivalent law duplication with `pinned immutable commit` before `current tree` evades the order-sensitive predicate | **incorporated by ratified restructure** |
+| `PR-R4-02` | medium | `REOPENED(PR-R3-02)` | fable-5, sol | Column-zero import allowlisting admits indented/comment-prefixed static imports and `export … from` re-exports | **incorporated by ratified restructure** |
+| `PR-R4-03` | low | NEW | fable-5 | Ownership-block contiguity ignores indentation-prefixed `//` lines | **incorporated by ratified restructure** |
+
+**Counts:** 2 medium, 1 low. Incorporated 3; dismissed 0; barred 0;
+carries 0.
+
+The shared diagnosis is fix-wave churn in hand-rolled text models, not a defect
+in shipped phase guidance. The ratified terminal restructure:
+
+1. makes all five duplicate-law concepts order-independent and replays the
+   reversed-alternative report;
+2. requires one exact byte-identical local-only module prelude, removes it, and
+   rejects every static or dynamic module-load keyword outside it—including the
+   indented, comment-prefixed, re-export, and earlier mutation shapes—without
+   parsing JavaScript grammar; and
+3. defines comment contiguity after leading-whitespace normalization and sends
+   an indented-history mutation through the real extractor.
+
+No fifth panel dispatch occurs under the round-cap law. The selected restructure
+incorporates every survivor, so no high or medium finding remains.
+
 ## Carry and frozen-surface checkpoints
 
 No `CARRY-TO-BUILD`, `CARRY-TO-IMPLEMENT`, or `CARRY-TO-BACKLOG` was minted.
@@ -197,8 +230,8 @@ by T2's strengthened `static.handoff`. ASD19 passes and no FROZEN path changes.
 
 ## Dismissal posture
 
-Rounds 1–3 incorporated every finding (8/8, 7/7, then 4/4). That continues the
-already-disclosed 100%-incorporation smell from the Spec panel; it is not
-labelled diligence. Every finding was reproduced or checked against source
+Rounds 1–4 incorporated every finding (8/8, 7/7, 4/4, then 3/3 under Neil's
+ratified option-(b) restructure). That continues the already-disclosed
+100%-incorporation smell from the Spec panel; it is not labelled diligence. Every finding was reproduced or checked against source
 before incorporation, and no reviewer recommendation was actioned solely to
 avoid disagreement.

@@ -59,9 +59,7 @@ function numberedSection(body, number) {
 }
 
 function statesMovingPinnedLaw(section) {
-	const movingExpires = /premise[\s\S]{0,100}\bmoving ref\b[\s\S]{0,40}\bexpire\w*\b/i.test(section);
-	const pinnedRoute = /\bcurrent tree\b[\s\S]{0,50}\bpinned immutable commit\b/i.test(section);
-	return movingExpires && pinnedRoute;
+	return [/\bpremise\b/i, /\bmoving ref\b/i, /\bexpire\w*\b/i, /\bcurrent tree\b/i, /\bpinned immutable commit\b/i].every((anchor) => anchor.test(section));
 }
 
 function invertsMovingPinnedLaw(section) {
@@ -79,8 +77,16 @@ function lawIssues(section) {
 }
 
 function assertExactImports(source, expected) {
-	const imports = source.split("\n").filter((line) => /^import\b/.test(line));
-	assert.deepEqual(imports, expected, "static imports must remain the exact local-only allowlist");
+	const prelude = `${expected.join("\n")}\n\n`;
+	const preludeStart = source.indexOf(prelude);
+	assert.notEqual(preludeStart, -1, "static module declarations must remain one exact local-only prelude");
+	assert.equal(source.indexOf(prelude, preludeStart + 1), -1, "the module prelude must appear exactly once");
+	const loadKeyword = ["im", "port"].join("");
+	const exposeKeyword = ["ex", "port"].join("");
+	const safeMeta = new RegExp(`\\b${loadKeyword}\\.meta\\b`, "g");
+	const outsidePrelude = `${source.slice(0, preludeStart)}${source.slice(preludeStart + prelude.length)}`.replace(safeMeta, "");
+	const moduleKeyword = new RegExp(`\\b(?:${loadKeyword}|${exposeKeyword})\\b`);
+	assert.doesNotMatch(outsidePrelude, moduleKeyword, "no static or dynamic module load may appear outside the allowlisted prelude");
 }
 
 const specReference = readFileSync(join(referenceRoot, "phase-spec.md"), "utf8");
@@ -122,9 +128,9 @@ test("DSP3: every concept anchor and semantic direction is load-bearing", () => 
 	]) {
 		assert.notEqual(lawIssues(inverted).length, 0, "inverting either semantic direction must break the law check");
 	}
-	for (const route of ["assert", "use", "rely on", "check against"]) {
-		const duplicated = `${implementActivity}\nA premise anchored to a moving ref expires; ${route} the current tree or a pinned immutable commit.`;
-		assert.equal(statesMovingPinnedLaw(duplicated), true, `the ${route} duplication probe must reproduce the forbidden law shape`);
+	for (const route of ["assert the current tree or a pinned immutable commit", "use the current tree or a pinned immutable commit", "rely on the current tree or a pinned immutable commit", "check against the current tree or a pinned immutable commit", "rely on a pinned immutable commit or the current tree"]) {
+		const duplicated = `${implementActivity}\nA premise anchored to a moving ref expires; ${route}.`;
+		assert.equal(statesMovingPinnedLaw(duplicated), true, `the '${route}' duplication probe must reproduce the forbidden law shape`);
 	}
 });
 
@@ -182,10 +188,18 @@ test("DSP7: detector hits equal the reasoned exemption map exactly", () => {
 
 test("DSP12/DSP13: the guard stays offline and contributor policy states every local rule", () => {
 	const source = readFileSync(join(here, "diff-scoped-premises.test.js"), "utf8");
-	const allowedImports = ['import assert from "node:assert/strict";', 'import { readFileSync, readdirSync } from "node:fs";', 'import { dirname, extname, join, relative } from "node:path";', 'import { fileURLToPath } from "node:url";', 'import { test } from "node:test";'];
+	const staticLoad = ["im", "port"].join("");
+	const staticExpose = ["ex", "port"].join("");
+	const allowedImports = [`${staticLoad} assert from "node:assert/strict";`, `${staticLoad} { readFileSync, readdirSync } from "node:fs";`, `${staticLoad} { dirname, extname, join, relative } from "node:path";`, `${staticLoad} { fileURLToPath } from "node:url";`, `${staticLoad} { test } from "node:test";`];
 	assertExactImports(source, allowedImports);
-	for (const mutation of ['import "node:https"', 'import { execFileSync as run } from "node:child_process"; // comment', 'import {\n\t// from "node:fs"\n\texecFileSync\n} from "node:child_process";']) {
-		assert.throws(() => assertExactImports(`${source}\n${mutation}`, allowedImports), `prohibited import must disturb the exact allowlist: ${mutation}`);
+	for (const mutation of [
+		`${staticLoad} "node:https"`,
+		`\t${staticLoad} { execFileSync as run } from "node:child_process";`,
+		`/* preload */ ${staticLoad} { execFileSync as run } from "node:child_process";`,
+		`${staticExpose} * from "./helper.mjs";`,
+		`${staticLoad} {\n\t// from "node:fs"\n\texecFileSync\n} from "node:child_process";`,
+	]) {
+		assert.throws(() => assertExactImports(`${source}\n${mutation}`, allowedImports), `prohibited module load must disturb the exact prelude: ${mutation}`);
 	}
 	const offlinePatterns = [new RegExp(`\\b${token("fe", "tch")}\\s*\\(`), new RegExp(`\\b${token("im", "port")}\\s*\\(`)];
 	for (const pattern of offlinePatterns) assert.doesNotMatch(source, pattern, `the guard must stay local and offline: ${pattern}`);
