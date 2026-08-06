@@ -4,9 +4,11 @@ Upstream: `docs/plans/2026-08-06-diff-scoped-test-premises.md` rev 4,
 approved by Neil on 2026-08-06 after the round-3 churn restructure. Track:
 **irreversible**. Resolves #208.
 
-**Rev 4** — incorporates spec-panel round 1 (2 high, 2 medium, 4 low after
+**Rev 5** — incorporates spec-panel round 1 (2 high, 2 medium, 4 low after
 cross-model deduplication), delta round 2 (1 medium, 2 low), and trim-the-tail
-delta confirmation round 3 (1 low); 0 dismissed. Record:
+delta confirmation round 3 (1 low); 0 dismissed. Implement-phase class-(b)
+amendment A1 makes the review-time performance check fail mechanically when the
+one-second budget is exceeded. Record:
 `docs/reviews/spec-review-diff-scoped-test-premises-2026-08-06/consolidated.md`.
 
 This Spec fixes the normative law, pi-sdlc's local enforcement contract, the
@@ -15,10 +17,22 @@ Plan, and the falsifiable scenarios. It does not reopen Plan decisions D1-D4.
 
 ## 1. Plan amendments and inbound carries
 
-There are no amendments to the approved Plan and no formal `CARRY-TO-SPEC`
-records to land. The Plan's detector handoff is not a carry disposition; it is a
-named Spec deliverable and lands in §4 with executed output in §5. The S1
-handoff lands in §7 and scenario DSP14.
+There are no formal `CARRY-TO-SPEC` records to land. The Plan's detector
+handoff is not a carry disposition; it is a named Spec deliverable and lands in
+§4 with executed output in §5. The S1 handoff lands in §7 and scenario DSP14.
+
+### A1 — performance observer exits on budget breach
+
+- **Trigger:** Implement projected the review-time `/usr/bin/time` command into
+  PV1 and found that it exits 0 even when wall time exceeds one second; the
+  scenario mapping would therefore report DSP12 PASS without enforcing its
+  threshold.
+- **Class:** (b), an unfrozen pre-merge verification refinement. The one-second
+  requirement, test target, and in-suite prohibition do not change.
+- **Disposition:** N2/DSP12 use an external `node -e` observer that spawns the
+  named test, measures `performance.now()`, propagates test failure, and exits 1
+  at `>=1000ms`. The timing assertion stays outside the test corpus.
+- **Author:** orchestrator, Implement phase, 2026-08-06.
 
 ## 2. Normative vocabulary
 
@@ -350,7 +364,7 @@ mechanical witness.
 | id | requirement | gate |
 | --- | --- | --- |
 | N1 | The guard and DSP3 read local files only: no child process, network, model, shell, or new CI workflow. | DSP12 |
-| N2 | `node --test test/diff-scoped-premises.test.js` completes in under 1 second wall time as a review-time measurement, not an in-suite timing assertion. | DSP12 |
+| N2 | A review-time `node -e` observer runs `node --test test/diff-scoped-premises.test.js`, propagates test failure, and exits 1 when measured wall time is ≥1 second; no in-suite timing assertion exists. | DSP12 |
 | N3 | All 60 current executable test sources are in scope recursively; future `.js`/`.mjs`/`.cjs` files join automatically. | DSP4 |
 | N4 | Detector source does not report itself and test fixtures do not plant a reportable token below `test/`. | DSP5-DSP6 |
 | N5 | No frozen surface changes; no post-merge re-freeze PR is owed. | DSP15 |
@@ -374,7 +388,7 @@ untrusted input, and changes no persisted schema.
 | DSP9 | Mutating one literal heading in memory causes the IDV3 helper/assertion to fail. | IDV3 can pass without enforcing the literal array. |
 | DSP10 | The converted IDV14 accepts today's thin router and rejects an in-memory body containing the four-column Spec-gap table. | It reads git history, rejects the legitimate front-matter `description`, or accepts the forbidden table. |
 | DSP11 | The diff-scoped duplicate IDV15 and IDV16 are absent; the remaining source identifies the `FROZEN` list and standing diff guard as present owners without process-history comments. | Either test remains, ownership is unrecorded, or comments narrate plans/reviews/removal. |
-| DSP12 | `test/diff-scoped-premises.test.js` imports no child-process/network API, and review-time command `node --test test/diff-scoped-premises.test.js` completes under 1 second; no in-suite timing assertion is added. | The file uses an external interface or the measured command wall time is ≥1 second. |
+| DSP12 | `test/diff-scoped-premises.test.js` imports no child-process/network API; the A1 review-time observer exits 0 below one second and fails a synthetic ≥1-second threshold probe; no in-suite timing assertion is added. | The file uses an external interface, the observer does not propagate test failure/budget breach, or an in-suite timing assertion is added. |
 | DSP13 | `CONTRIBUTING.md` contains all four C3 obligations and names `test/frozen-surfaces.test.js`. | Any local contributor rule is absent. |
 | DSP14 | Issue #192 contains the §7/C1-linked handoff naming DSP3 and the premise-durability law before the Spec gate closes. | The comment is absent, points elsewhere, or names no mechanical witness. |
 | DSP15 | Full `npm test` passes; touched surfaces pass Biome; `config-doc.mjs check` reports `current`; ASD19 passes with no `FROZEN` change. | Any command fails or a frozen path changes. |

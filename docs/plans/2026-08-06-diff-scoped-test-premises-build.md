@@ -84,10 +84,11 @@ graph LR
   - `node skills/sdlc/scripts/config-doc.mjs check --repo-root . --format text`
     (`static`);
   - `node --test test/frozen-surfaces.test.js` (`tests`);
-  - `/usr/bin/time -p node --test test/diff-scoped-premises.test.js`
-    (`tests`; review-time N2 measurement, not an in-suite timing assertion);
-  - `gh issue view 192 --repo threadsafe-systems/pi-sdlc --json comments --jq '.comments[].body' | grep -F 'DSP3'`
-    (`static`; DSP14's durable handoff witness).
+  - `node -e 'const {spawnSync}=require("node:child_process"); const verdict=(status,ms)=>status!==0?(status??1):(ms>=1000?1:0); if(verdict(0,1000)!==1) process.exit(2); const start=performance.now(); const result=spawnSync(process.execPath,["--test","test/diff-scoped-premises.test.js"],{stdio:"inherit"}); const elapsed=performance.now()-start; console.error(`wall ${elapsed.toFixed(2)}ms`); process.exit(verdict(result.status,elapsed))'`
+    (`tests`; review-time N2 enforcement with a synthetic threshold probe, not
+    an in-suite timing assertion);
+  - `node -e 'const {execFileSync}=require("node:child_process"); const out=execFileSync("gh",["issue","view","192","--repo","threadsafe-systems/pi-sdlc","--json","comments","--jq",".comments[].body"],{encoding:"utf8"}); if(!out.includes("DSP3")) process.exit(1)'`
+    (`static`; DSP14's durable handoff witness, shell-free exact argv in PV1).
 - **Definition of done:** all eleven owned scenarios pass; the detector reports
   exactly the two exempt files with non-empty reasons; measured test time is
   under one second; no frozen surface changed; the task's PV1 manifest and
@@ -108,6 +109,34 @@ T1 and is the integration frontier.
 **None.** The approved Spec has no `CARRY-TO-BUILD`, and decomposition found no
 upstream deficiency. The two tasks cover every scenario without inventing a
 contract or leaving an implementation decision unowned.
+
+## Implement-phase amendments
+
+### A1 — make T2's DSP14 check PV1-portable
+
+- **Trigger:** the approved Build check used a shell pipe (`gh … | grep`), but
+  PV1 executes exact argv without a shell; the pipeline cannot be represented as
+  one deterministic check.
+- **Class:** (b), an unfrozen pre-merge check refinement. Scenario ownership and
+  acceptance semantics do not change.
+- **Disposition:** replace the pipe with the exact `node -e` argv recorded in T2,
+  which invokes `gh` directly and exits nonzero when no comment contains `DSP3`.
+- **Author:** orchestrator, Implement phase, 2026-08-06.
+- **Renewed approval:** the amended check is committed in T2's PV1 manifest and
+  must pass the deterministic runner, independent validator, and PR panel.
+
+### A2 — make the one-second budget fail mechanically
+
+- **Trigger:** projecting `/usr/bin/time` into PV1 exposed that it reports elapsed
+  time but exits 0 even when the Spec's one-second limit is exceeded, allowing a
+  false PASS.
+- **Class:** (b), paired with Spec amendment A1; the requirement is unchanged.
+- **Disposition:** replace it with the exact external `node -e` observer recorded
+  in T2. Its pure verdict function is probed at 1000ms before it runs the test;
+  it propagates test failures and exits 1 on a measured budget breach.
+- **Author:** orchestrator, Implement phase, 2026-08-06.
+- **Renewed approval:** the amended exact argv must pass T2's runner, independent
+  validator, and PR panel.
 
 ## Assumptions
 

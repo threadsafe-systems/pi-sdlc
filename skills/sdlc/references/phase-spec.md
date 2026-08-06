@@ -47,6 +47,13 @@ Produce the Spec doc: **contracts, interfaces, surface area, functional and
 non-functional requirements, and falsifiable verification scenarios with stable
 ids**. Its home routes to the configured `paths.specs`.
 
+**Premise durability.** A scenario must remain falsifiable after merge. A
+premise anchored to a moving ref expires when the authoring branch becomes the
+main line; assert the current tree or a pinned immutable commit instead. A
+non-change claim is falsifiable only by a diff, so route it to the consumer
+repository's standing diff guard rather than encoding a base-relative assertion
+in a per-slice scenario test.
+
 **Dialogue discipline.** Ask per the shared contract
 (`references/system-reference.md`, "Presenting questions to the human") and
 Plan's draft-first rule, with Spec's delta:

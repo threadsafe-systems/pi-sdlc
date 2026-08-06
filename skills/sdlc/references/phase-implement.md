@@ -44,7 +44,8 @@ and announce-on-fire audit trail in `references/system-reference.md`, "Hooks".
 
 Produce code and tests on the feature branch (worktree or checkout per the
 project's hooks/workflow). Each task's checks are whatever its approved Build task
-declared.
+declared. When writing scenario checks, apply `phase-spec.md` §4's
+premise-durability rule and route non-change claims to the standing diff guard.
 
 **Dialogue discipline.** Implement lowers the interrupt surface of the shared
 contract (`references/system-reference.md`,
