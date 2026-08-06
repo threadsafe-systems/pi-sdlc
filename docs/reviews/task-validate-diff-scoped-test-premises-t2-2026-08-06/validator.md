@@ -9,4 +9,4 @@
 
 ### Verdict: PASS
 
-Runner exit and report agree (0/PASS). Semantic inversion/duplication probes, all detector variants, multiline/side-effect import visibility, and the complete same-comment S1 handoff check pass.
+Runner exit and report agree (0/PASS). Verb-independent duplication, `not true` inversion, exact static-import allowlist mutations, and the complete external verification set pass.

@@ -9,4 +9,4 @@
 
 ### Verdict: PASS
 
-Runner exit and report agree (0/PASS). The full suite passed 519 tests and the task corpus passed 30, including multiline/side-effect import visibility, whole-comment ownership checks, and short Markdown separator coverage.
+Runner exit and report agree (0/PASS). The full suite passed 519 tests and the task corpus passed 30. The exact-import contract and bidirectional ownership-comment extraction pass with mutation witnesses.
