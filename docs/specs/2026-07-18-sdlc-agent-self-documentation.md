@@ -1,6 +1,6 @@
 # Specification: agent self-documentation for pi-sdlc
 
-- Date: 2026-07-18 (rev 2)
+- Date: 2026-08-06 (rev 3 amendment)
 - Revision history: rev 1 pre-panel draft. **rev 2 incorporates every spec-panel
   finding** (1 high, 6 medium, 3 low) —
   `docs/reviews/spec-review-sdlc-agent-self-documentation-2026-07-18/consolidated.md`:
@@ -11,6 +11,12 @@
   version lifecycle, `canonicalJson`, glob constraints, and the redundant
   version check are pinned (§§13/16); the SKILL ceiling gains a Build
   backward-transition escape (§§4/21); ASD20 is made landing-order conditional.
+  **rev 3 amends the generated companion format for #177** under
+  `docs/specs/2026-08-06-config-doc-formatter-stability.md`: §12's example and
+  §13's current/supported identity move to v2 while v1 stays recognized; §14's
+  complete-current-value row uses adaptive CommonMark code spans. Rev 3 was
+  approved by Neil on 2026-08-06 after that Specification's two-round,
+  two-model panel reached its stop condition.
 - Plan: `docs/plans/2026-07-18-sdlc-agent-self-documentation.md` rev 2
   (approved 2026-07-18); spec handover
   `docs/briefs/2026-07-18-sdlc-agent-self-documentation-spec-handover.md`.
@@ -375,7 +381,7 @@ branch deterministically. The JSON envelope
   "state": "current|missing|stale|error",
   "exitCode": 0,
   "path": ".pi/sdlc/CONFIG.md",
-  "sentinel": { "present": true, "wellFormed": true, "version": "v1",
+  "sentinel": { "present": true, "wellFormed": true, "version": "v2",
                 "recognized": true, "fingerprint": "<hex>" },
   "expectedFingerprint": "<hex>",
   "reason": "<bounded diagnostic>"
@@ -392,14 +398,14 @@ existing runner idiom (`sdlc-status`, `check-references`).
 package-owned HTML comment:
 
 ```
-<!-- pi-sdlc:config-doc v1 fingerprint=<64-hex> -->
+<!-- pi-sdlc:config-doc v2 fingerprint=<64-hex> -->
 ```
 
 Grammar: literal prefix `<!-- pi-sdlc:config-doc`, a version token matching
 `v[0-9]+`, a single space, `fingerprint=` followed by 64 lowercase hex chars,
-then `-->`. `CURRENT_SENTINEL_VERSION = "v1"`. The package also carries
-`SUPPORTED_SENTINEL_VERSIONS` (the set of all package-issued versions; `{"v1"}`
-now) used solely for the recognition boundary.
+then `-->`. `CURRENT_SENTINEL_VERSION = "v2"`. The package also carries
+`SUPPORTED_SENTINEL_VERSIONS` (the set of all package-issued versions; `{"v1",
+"v2"}` now) used solely for the recognition boundary.
 
 **Sentinel-version lifecycle (normative).** `SUPPORTED_SENTINEL_VERSIONS` must
 include every render-format version ever shipped in a released pi-sdlc, so a
@@ -458,7 +464,10 @@ A generated `CONFIG.md` contains, in order:
 4. **JSON-order key reference** — every persisted key in the config's JSON
    order: current value, what it makes the agent do, legal alternatives, and
    where an override changes the effective result. Covers every accepted
-   schemaVersion-3 key;
+   schemaVersion-3 key. Each complete `JSON.stringify` value is enclosed in a
+   CommonMark code-span delimiter one backtick longer than its longest
+   contiguous backtick run, with no escaping, stripping, padding, or
+   normalization;
 5. **fingerprint + generator-format identity** (mirrors the sentinel) sufficient
    for deterministic freshness checking;
 6. **regeneration and check instructions** (the exact `config-doc.sh write` /
