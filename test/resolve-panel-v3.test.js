@@ -162,7 +162,6 @@ test("ICA16: onShortfall fail exits 1 below floor", () => {
 	assert.match(stderr, /FAILED to reach distinct-model minPanel/);
 });
 
-// M1 (PR panel): task_validate refuses any tasks mode except subagent.
 test("ICA14: review.tasks self refuses task_validate (only subagent resolves)", () => {
 	const { status, stderr } = run(fixture({ review: { tasks: "self" } }), "task_validate");
 	assert.equal(status, 1);
@@ -176,7 +175,6 @@ test("ICA24: separateSpec false precedes the human/off refusal for spec_review",
 	assert.match(stderr, /no spec gate \(shape.separateSpec is false\)/);
 });
 
-// rpi-t1: cross-provider model identity collapsing (issue #80 gap 2).
 const AWS_ENV = { AWS_ACCESS_KEY_ID: "stub", AWS_SECRET_ACCESS_KEY: "stub" };
 
 test("rpi-t1: Bedrock-hosted Claude collapses to the direct-API identity for author-exclusion", () => {

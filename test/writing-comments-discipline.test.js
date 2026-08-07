@@ -6,6 +6,7 @@ const read = (path) => readFileSync(new URL(`../${path}`, import.meta.url), "utf
 const implement = read("skills/sdlc/references/phase-implement.md");
 const tasks = read("skills/sdlc/references/phase-tasks.md");
 const reviewPrompt = read("skills/sdlc/prompts/adversary-review.prompt.md");
+const workflow = read(".pi/sdlc/workflow.md");
 
 const sharedObligations = [/process (?:history|provenance)/i, /absent, removed, or future/i, /contracts, invariants, or non-obvious rationale/i, /restat(?:e|ing) what the\s+code says/i, /stale\s+without this file\s+changing/i];
 
@@ -43,4 +44,9 @@ test("Every normal PR reviewer enforces the same reader-now obligations", () => 
 test("Code-prose findings use impact severity and are not dismissed as style", () => {
 	assert.match(reviewPrompt, /severity[\s\S]{0,200}(?:reader|maintenance|caller|behavioral) (?:harm|impact)/i);
 	assert.match(reviewPrompt, /not (?:mere )?(?:style|bikeshedding)/i);
+});
+
+test("The package law does not depend on an external comment-writing skill", () => {
+	assert.doesNotMatch(workflow, /writ+ing-comments|global[^\n]*comment/i);
+	assert.doesNotMatch(implement, /writ+ing-comments|global[^\n]*comment/i);
 });

@@ -338,9 +338,9 @@ export function warnTelemetry(msg) {
 	process.stderr.write(`${TELEMETRY_PREFIX} ${msg}\n`);
 }
 
-// §3.3 FS5 side-effect emission: best-effort emission for the frozen FS5 CLIs
-// (resolve-panel, ensure-panel-agent, validate-task; later harvest-panel,
-// lt-t3). Resolves run identity and appends one manifest line, but NEVER
+// Best-effort side-effect emission for resolve-panel, ensure-panel-agent,
+// validate-task, and harvest-panel. Resolves run identity and appends one
+// manifest line, but NEVER
 // throws and NEVER exits the process — any failure (unresolvable identity,
 // invalid payload, oversized line, I/O error) degrades to a single
 // `sdlc-telemetry:`-prefixed stderr warning while the caller's primary

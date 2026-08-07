@@ -53,15 +53,14 @@ test("LT27: the dogfood run.json validates against the committed schema and hand
 test("LT27: coverage markers honestly record the pre-instrumentation gap (partial coverage by design)", () => {
 	const run = readRun();
 	const markers = run.coverage.map((c) => c.marker);
-	// this feature's manifest only exists from the point the emitter (lt-t1)
-	// landed partway through implement — phase.entered/gate.approved events
-	// from brainstorm/plan/spec/build were never recorded, and no LLM seam was
-	// used for this real one-time collection (author's choice, spec §build).
+	// The manifest starts when emission became available. Earlier phases were
+	// never instrumented, so their empty spans and rollups are honest coverage,
+	// not a collection failure.
 	assert.ok(markers.length > 0, "an honest dogfood run names at least one coverage gap");
 	assert.ok(markers.includes("soft.absent"), "no LLM seam was used for the real dogfood collection");
 	// the hard section must never claim phase data it doesn't have: no
 	// fabricated phase spans or by-phase rollups for the uninstrumented period.
-	assert.deepEqual(run.hard.phases, [], "phase spans are honestly empty (phase.entered was never recorded pre-lt-t2)");
+	assert.deepEqual(run.hard.phases, [], "phase spans are honestly empty because phase.entered was not yet recorded");
 	assert.deepEqual(run.hard.rollups.byPhase, [], "by-phase rollups are honestly empty for the same reason");
 	// hard totals and by-model rollups, by contrast, ARE measured (from the
 	// correlated session and git diff stats) and must be present.

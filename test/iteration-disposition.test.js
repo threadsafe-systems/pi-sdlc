@@ -1,5 +1,4 @@
-// Scenarios for the cross-gate iteration & disposition vocabulary (S5).
-// Spec: docs/specs/2026-07-26-iteration-disposition-vocabulary.md.
+// Scenarios for the cross-gate iteration and disposition vocabulary.
 // Offline: reads the working tree only; no subprocess, model, or network calls.
 
 import assert from "node:assert/strict";

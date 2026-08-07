@@ -1,17 +1,9 @@
-// ASD19 (explicit non-changes): the frozen surfaces are byte-identical to the
-// branch base. sdlc-status (FS8), check-lifecycle (FS9), lib.mjs +
-// sdlc.config.schema.json (config schemaVersion 3), resolve-panel, the PV1/PV2
-// validator (schema + validate-task.mjs + validate-task.sh + verify-task-receipt),
-// the task validator prompt, and panel/ceremony law are untouched;
-// #91/#101/#102 scopes are not re-opened. The PV1 schema and validate-task.mjs
-// were reopened for the 2026-07-24 `scope`-field slice (PR #190) and are
-// re-frozen here by its post-merge follow-up.
-//
-// The three adversary prompts (plan, spec, review) were reopened for the
-// 2026-07-26 iteration & disposition vocabulary slice (S5, epic #199, PR #206)
-// — a reviewer subagent has none of the skill loaded, so every rule it must
-// obey has to be inline in its prompt — and are re-frozen here by its
-// post-merge follow-up.
+// ASD19 protects contract surfaces that must remain byte-identical to the branch
+// base: readiness/lifecycle scripts, config and validation contracts, panel
+// resolution, plan/spec reviewer prompts, the task validator prompt, and shared
+// panel law. The PR reviewer prompt is governed by the focused code-prose
+// contract while absent from this list. Reviewer prompts carry their rules inline
+// because reviewer subagents do not inherit the lifecycle skill.
 // Uses git to compare against the base.
 
 import assert from "node:assert/strict";
