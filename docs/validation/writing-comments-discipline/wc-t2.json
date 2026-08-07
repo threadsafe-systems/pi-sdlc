@@ -1,0 +1,57 @@
+{
+  "schemaVersion": 1,
+  "taskId": "wc-t2",
+  "buildPlan": "docs/plans/2026-08-07-writing-comments-discipline-build.md",
+  "repoRoot": ".",
+  "ownedScenarios": [],
+  "checks": [
+    {
+      "id": "tests.full",
+      "argv": ["npm", "test"],
+      "timeoutMs": 30000,
+      "scope": ["full"],
+      "evidence": ["whole-corpus regression net completes within the approved timeout"]
+    },
+    {
+      "id": "tests.task",
+      "argv": ["node", "--test", "test/writing-comments-discipline.test.js"],
+      "timeoutMs": 3000,
+      "scope": ["task"],
+      "evidence": ["normal-reviewer attack surface, author-reviewer parity, and impact-based severity"]
+    },
+    {
+      "id": "static.lint",
+      "argv": ["npx", "biome", "check", "test/writing-comments-discipline.test.js", "test/frozen-surfaces.test.js"],
+      "timeoutMs": 10000,
+      "evidence": ["focused and frozen-surface tests are Biome-clean"]
+    },
+    {
+      "id": "standards.frozen",
+      "argv": ["node", "--test", "test/frozen-surfaces.test.js"],
+      "timeoutMs": 5000,
+      "evidence": ["only the deliberately changed PR prompt is reopened"]
+    }
+  ],
+  "categories": {
+    "tests": {
+      "applicability": "required",
+      "checkIds": ["tests.full", "tests.task"]
+    },
+    "static": {
+      "applicability": "required",
+      "checkIds": ["static.lint"]
+    },
+    "scenarios": {
+      "applicability": "n/a",
+      "reason": "the approved reversible Plan has no Specification scenario ledger"
+    },
+    "standards": {
+      "applicability": "required",
+      "checkIds": ["standards.frozen"]
+    },
+    "bannedPatterns": {
+      "applicability": "n/a",
+      "reason": "a generic process-provenance scanner is explicitly outside the approved scope"
+    }
+  }
+}

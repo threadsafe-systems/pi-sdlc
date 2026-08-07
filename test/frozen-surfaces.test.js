@@ -39,7 +39,6 @@ const FROZEN = [
 	"skills/sdlc/scripts/verify-task-receipt.mjs",
 	"skills/sdlc/prompts/adversary-plan.prompt.md",
 	"skills/sdlc/prompts/adversary-spec.prompt.md",
-	"skills/sdlc/prompts/adversary-review.prompt.md",
 	"skills/sdlc/prompts/validator-task.prompt.md",
 ];
 
