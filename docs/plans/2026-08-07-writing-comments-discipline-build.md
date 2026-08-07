@@ -168,3 +168,10 @@ These are programme-level carries, not Build deficiencies and not `CARRY-TO-IMPL
 - Class: **(c), normal fix wave**.
 - Disposition: **incorporated**. `wc-t2` owns the generated PR-agent golden and temporarily reconciles IDV19 with the deliberate review-prompt reopening. The task-focused command expands to the writing, extraction, and iteration-disposition corpora; the manifest is renewed before revalidation. The mandatory post-merge re-freeze restores both the prompt's FROZEN entry and IDV19's standing all-three assertion.
 - Scope unchanged: no runtime behavior, role, floor, phase, or scanner is added.
+
+### A2 — preserve reference-inventory signature during baseline cleanup
+
+- Trigger: the first committed `wc-t3` run showed that removing process provenance from `check-completion.mjs` also removed the exact package assertion consumed by the normative-reference inventory.
+- Class: **(c), normal fix wave**.
+- Disposition: **incorporated**. The reader-now header retains the package-owned `machine-checked` signature while replacing the historical finding citation with present live-GitHub semantics. No inventory schema or target changes.
+- Scope and checks unchanged.

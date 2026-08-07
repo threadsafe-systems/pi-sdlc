@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// check-completion.mjs — verify a completion claim against live GitHub state.
+// check-completion.mjs — machine-checked completion claims against live GitHub state.
 //
 // Unlike check-lifecycle.mjs (deliberately read-only/offline/deterministic),
 // this script's checks are inherently live: PR existence, merge state, and
