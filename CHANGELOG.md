@@ -1,3 +1,10 @@
+## [3.1.1](https://github.com/threadsafe-systems/pi-sdlc/compare/v3.1.0...v3.1.1) (2026-08-07)
+
+### Bug Fixes
+
+* **config-doc:** make generated values formatter-stable ([#217](https://github.com/threadsafe-systems/pi-sdlc/issues/217)) ([5d952a5](https://github.com/threadsafe-systems/pi-sdlc/commit/5d952a5b1a9d7928ad19af20c992283fbb3f8385))
+* **test:** eliminate merge-expiring scenario premises ([#213](https://github.com/threadsafe-systems/pi-sdlc/issues/213)) ([b0ae533](https://github.com/threadsafe-systems/pi-sdlc/commit/b0ae5339031b1334d5bd96d232e71b8fb47c05ce)), closes [#208](https://github.com/threadsafe-systems/pi-sdlc/issues/208)
+
 ## [3.1.0](https://github.com/threadsafe-systems/pi-sdlc/compare/v3.0.0...v3.1.0) (2026-08-06)
 
 ### Features
