@@ -1,9 +1,13 @@
 # Build plan: proactive code-prose discipline
 
-Status: approved derivation  
-Track: reversible  
-Plan: `docs/plans/2026-08-07-writing-comments-discipline.md`  
-Issue: #176  
+Status: approved derivation
+
+Track: reversible
+
+Plan: `docs/plans/2026-08-07-writing-comments-discipline.md`
+
+Issue: #176
+
 Run slug: `writing-comments-discipline`
 
 ## 1. Build objective

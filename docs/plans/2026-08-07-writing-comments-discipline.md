@@ -1,8 +1,11 @@
 # Plan: proactive code-prose discipline
 
-Status: approved at Plan gate  
-Track: reversible  
-Issue: #176  
+Status: approved at Plan gate
+
+Track: reversible
+
+Issue: #176
+
 Run slug: `writing-comments-discipline`
 
 ## 1. Problem
