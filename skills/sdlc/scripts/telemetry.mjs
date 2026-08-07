@@ -2,9 +2,8 @@
 // vocabulary, envelope/payload validators (hand-rolled, no runtime deps per
 // NF2), run-identity resolution (§3.2), and run-store path helpers (§2).
 //
-// Consumed by the emitter (record-run-event.mjs), the FS5 side-effect emitters
-// (resolve-panel/ensure-panel-agent/validate-task, lt-t2), and the collector
-// (collect-run, lt-t4). The committed schema
+// Consumed by the emitter, CLI side-effect emitters, panel harvester, and retro
+// collector. The committed schema
 // skills/sdlc-retro/schema/event.schema.json mirrors this file field-for-field.
 
 import { execFileSync } from "node:child_process";

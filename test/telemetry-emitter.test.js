@@ -1,4 +1,4 @@
-// FS13 emitter tests (lt-t1): the record-run-event CLI, run-identity
+// FS13 emitter tests: the record-run-event CLI, run-identity
 // resolution, the shared event validator, and the run-store .gitignore entry.
 // Scenarios LT1-LT5 (emitter) and LT26 (.gitignore). Offline/deterministic
 // (NF1): only local git, no network, no model calls.

@@ -1,13 +1,9 @@
 #!/usr/bin/env node
-// collect-run.mjs — the sdlc-retro post-mortem collector (spec §6). lt-t4
-// built the hard, deterministic pipeline; lt-t5 (this revision) adds the LLM
-// seam, soft data (narratives/steering/panelPrecision), the NF4 redaction/
-// n-gram-containment pipeline, raw/ snapshotting of every non-manifest input,
-// and --from-raw exclusive replay (spec §6.2/§6.4). Joins the FS13 run
-// manifest, harvested panel artifacts, correlated pi session transcripts,
-// discovered review directories, and injectable git/gh/llm seams into a
-// schema-valid run.json (spec §7) with pinned derived-measure formulas
-// (§6.3), uniform absence encoding, and the closed v1 coverage-marker set.
+// collect-run.mjs — the sdlc-retro post-mortem collector (spec §6). Combines the FS13
+// manifest, panel artifacts, session transcripts, review directories, and
+// injectable git/gh/LLM seams into schema-valid run.json. It derives pinned
+// hard measures, attributed soft data, NF4-redacted raw snapshots, uniform
+// absence markers, and deterministic --from-raw replay (spec §6–§7).
 //
 // Usage: collect-run.mjs --slug S [--out FILE] [--format text|json]
 //                        [--from-raw] [--llm-cmd CMD | --no-llm]
@@ -504,7 +500,7 @@ export function githubCheck(ghCmd, root, branch, noGithub) {
 	if (noGithub) return { markers: [{ marker: "github.skipped" }] };
 	try {
 		const out = execFileSync(ghCmd, ["pr", "list", "--head", branch, "--json", "number"], { cwd: root, encoding: "utf8", stdio: ["ignore", "pipe", "pipe"] });
-		JSON.parse(out); // validated but not yet materialized into run.json (no v1 schema slot)
+		JSON.parse(out); // v1 validates the provider response but stores no GitHub PR field
 		return { markers: [] };
 	} catch (err) {
 		return { markers: [{ marker: "github.error", detail: String(err?.message || err).slice(0, 200) }] };

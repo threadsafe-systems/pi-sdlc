@@ -1,8 +1,7 @@
-// sdlc-retro collector core tests (lt-t4): manifest/panel/session/git/github
-// adapters, derived hard measures, run.json v1 schema validity. Scenarios
-// LT13 (hard portion), LT14, LT15, LT16. Offline/deterministic (NF1): git/gh
-// are always injected fakes, no network, no model calls (the LLM seam is
-// lt-t5's addition and does not exist yet in this file's collector).
+// sdlc-retro collector core tests: manifest/panel/session/git/github adapters,
+// derived hard measures, and run.json v1 schema validity. Scenarios LT13
+// (hard portion), LT14, LT15, LT16. Offline/deterministic (NF1): git and gh
+// are injected fakes; no network or model calls.
 
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
@@ -156,8 +155,8 @@ process.exit(1);
 		assert.deepEqual(runJson.hard.rework, { artifactRevised: 1, phaseBackward: 1, fixWave: 1 });
 		assert.equal(runJson.hard.totals.tokens, 170);
 		assert.ok(Math.abs(runJson.hard.totals.cost - 0.65) < 1e-9);
-		// no --llm-cmd was passed: lt-t5 default is soft.absent (never invoke an
-		// unconfigured LLM binary), so this is the only marker expected here.
+		// Without --llm-cmd, the collector records soft.absent rather than invoking
+		// an unconfigured LLM binary.
 		assert.deepEqual(runJson.coverage, [{ marker: "soft.absent" }]);
 	} finally {
 		rmSync(root, { recursive: true, force: true });
@@ -328,7 +327,7 @@ test("LT15: review-dir discovery matches both <phase>-<slug>-<date> and <phase>-
 	}
 });
 
-test("T2/PR-fix: a review-<x> slug does not collide with slug <x> over one -review- directory", () => {
+test("a review-<x> slug does not collide with slug <x> over one -review- directory", () => {
 	const root = tmp();
 	try {
 		// one physical directory that both slug 'foo' (infix form) and slug

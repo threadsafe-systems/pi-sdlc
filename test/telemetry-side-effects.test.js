@@ -1,4 +1,4 @@
-// FS5 side-effect emission tests (lt-t2): additive --slug handling + post-success
+// FS5 side-effect emission tests: additive --slug handling + post-success
 // telemetry emission on resolve-panel, ensure-panel-agent, and validate-task,
 // with frozen stdout/exit contracts (NF3) and check-lifecycle left untouched
 // (FS9). Scenarios LT6-LT10. Offline/deterministic (NF1): no network calls.

@@ -1,4 +1,4 @@
-// sdlc-retro renderer tests (lt-t6): the single-scroll dashboard's seven
+// sdlc-retro renderer tests: the single-scroll dashboard's seven
 // anchored sections, pinned per-section data bindings, no-external-reference
 // contract, render-twice byte-identity, soft-data flagging/attribution, and
 // coverage rendering. Scenarios LT20-LT23. Offline/deterministic (NF1):

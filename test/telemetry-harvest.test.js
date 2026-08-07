@@ -1,4 +1,4 @@
-// FS13 harvest-panel tests (lt-t3): copying pi-subagents lifecycle artifacts
+// FS13 harvest-panel tests: copying pi-subagents lifecycle artifacts
 // from an async run directory into the run store, with honest missed[]
 // coverage on partial/missing sources. Scenarios LT11-LT12. Offline (NF1).
 

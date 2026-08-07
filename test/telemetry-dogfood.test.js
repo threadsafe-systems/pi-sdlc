@@ -1,9 +1,7 @@
-// Dogfood retro tests (lt-t8, scenario LT27): the committed
-// docs/retros/sdlc-lifecycle-telemetry/run.json and index.html exist, the
+// Dogfood retro scenario LT27: the committed run.json and index.html exist,
 // run.json validates against the committed schema, and its coverage markers
-// honestly record the pre-instrumentation gap (partial coverage by design —
-// this feature's own run was only partway instrumented when the emitter
-// first existed). Offline (NF1): reads only the committed artifacts.
+// represent the intentionally partial source record. Offline (NF1): reads only
+// the committed artifacts.
 
 import assert from "node:assert/strict";
 import { existsSync, readFileSync } from "node:fs";
@@ -60,7 +58,7 @@ test("LT27: coverage markers honestly record the pre-instrumentation gap (partia
 	assert.ok(markers.includes("soft.absent"), "no LLM seam was used for the real dogfood collection");
 	// the hard section must never claim phase data it doesn't have: no
 	// fabricated phase spans or by-phase rollups for the uninstrumented period.
-	assert.deepEqual(run.hard.phases, [], "phase spans are honestly empty because phase.entered was not yet recorded");
+	assert.deepEqual(run.hard.phases, [], "phase spans are empty when the source record has no phase.entered events");
 	assert.deepEqual(run.hard.rollups.byPhase, [], "by-phase rollups are honestly empty for the same reason");
 	// hard totals and by-model rollups, by contrast, ARE measured (from the
 	// correlated session and git diff stats) and must be present.

@@ -113,7 +113,7 @@ test("OH5: malformed hook flags exit 2", () => {
 	}
 });
 
-test("PR-fix: value-taking flags accept values that begin with '-' (e.g. --announce '--foo')", () => {
+test("value-taking flags accept values that begin with '-' (e.g. --announce '--foo')", () => {
 	const dir = mkTemp();
 	try {
 		const r = setup(dir, ["--prefix", "x", "--label-prefix", "y", "--announce", "--foo bar"]);

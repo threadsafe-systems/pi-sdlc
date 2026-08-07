@@ -113,9 +113,11 @@ The invariant seam is per-task validation selected by `review.tasks`:
 
 **Code-prose checkpoint.** Under `subagent` or `self`, the implementer completes
 §4's pass and returns the exact handoff line `Code-prose pass: complete` before
-dispatching or running the deterministic task validator. The parent blocks at
-that line; it is evidence that the pass ran, not proof that its judgement was
-correct. Under `review.tasks: off`, the same pass and handoff occur before
+the deterministic task validator starts. Under `subagent`, the parent blocks at
+that line and only then dispatches the validator; under `self`, the implementer
+returns the line before running the validator directly. The line is evidence
+that the pass ran, not proof that its judgement was correct. Under
+`review.tasks: off`, the same pass and handoff occur before
 committing or declaring the task complete. Standalone Implement performs them
 before declaring implementation complete. The handoff is never source text,
 manifest/receipt data, or a committed artifact, and it does not make the

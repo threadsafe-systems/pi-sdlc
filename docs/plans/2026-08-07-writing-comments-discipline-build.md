@@ -170,7 +170,7 @@ These are programme-level carries, not Build deficiencies and not `CARRY-TO-IMPL
 
 - Trigger: the first committed `wc-t2` deterministic run failed the full suite because changing the package prompt also invalidates its stamped golden projection and IDV19's standing assertion that all three S5 prompts are currently frozen.
 - Class: **(c), normal fix wave**.
-- Disposition: **incorporated**. `wc-t2` owns the generated PR-agent golden and temporarily reconciles IDV19 with the deliberate review-prompt reopening. The task-focused command expands to the writing, extraction, and iteration-disposition corpora; the manifest is renewed before revalidation. The mandatory post-merge re-freeze restores both the prompt's FROZEN entry and IDV19's standing all-three assertion.
+- Disposition: **incorporated**. `wc-t2` owns the generated PR-agent golden and temporarily reconciles IDV19 with the deliberate review-prompt reopening. The task-focused command expands to the writing, extraction, and iteration-disposition corpora; the manifest is renewed before revalidation. Mandatory post-merge follow-up #222 restores both the prompt's FROZEN entry and IDV19's standing all-three assertion.
 - Scope unchanged: no runtime behavior, role, floor, phase, or scanner is added.
 
 ### A2 — preserve reference-inventory signature during baseline cleanup

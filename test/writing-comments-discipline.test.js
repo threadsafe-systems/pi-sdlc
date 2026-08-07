@@ -23,7 +23,9 @@ test("Implement permits executable directives without exempting their prose", ()
 
 test("Implement blocks validation or closure until the exact task attestation", () => {
 	assert.match(implement, /Code-prose pass: complete/);
-	assert.match(implement, /before\s+(?:dispatching|running)[\s\S]{0,30}deterministic (?:task )?validator/i);
+	assert.match(implement, /before[\s\S]{0,30}deterministic (?:task )?validator starts/i);
+	assert.match(implement, /under `subagent`[\s\S]{0,200}parent[\s\S]{0,80}dispatches the validator/i);
+	assert.match(implement, /under `self`[\s\S]{0,200}implementer[\s\S]{0,80}running the validator directly/i);
 	assert.match(implement, /review\.tasks: off[\s\S]{0,300}before\s+(?:commit|committing|task completion|declaring the task complete)/i);
 	assert.match(implement, /standalone[\s\S]{0,200}before declaring (?:Implement|implementation) complete/i);
 });
@@ -47,6 +49,7 @@ test("Code-prose findings use impact severity and are not dismissed as style", (
 });
 
 test("The package law does not depend on an external comment-writing skill", () => {
-	assert.doesNotMatch(workflow, /writ+ing-comments|global[^\n]*comment/i);
-	assert.doesNotMatch(implement, /writ+ing-comments|global[^\n]*comment/i);
+	for (const surface of [workflow, implement, tasks, reviewPrompt]) {
+		assert.doesNotMatch(surface, /writ+ing-comments|global[^\n]*comment/i);
+	}
 });

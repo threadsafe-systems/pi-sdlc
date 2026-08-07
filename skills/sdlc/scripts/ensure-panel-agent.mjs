@@ -11,7 +11,7 @@
 // Usage: ensure-panel-agent.mjs <phase> [--dir DIR] [--tools CSV] [--force]
 //          [--slug S] [--config DIR | --repo-root DIR]
 //
-// --slug is additive (FS13 lt-t2): on success, emits panel.agent_stamped to
+// --slug is additive (FS13): on success, emits panel.agent_stamped to
 // the resolved run's manifest (fail-soft; never alters stdout or exit code).
 
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";

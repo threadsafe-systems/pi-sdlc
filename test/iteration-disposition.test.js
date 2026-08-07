@@ -477,8 +477,14 @@ test("IDV33: retired checks name their present enforcement owners", () => {
 	for (const comment of [frozenOwner, nonChangeOwner]) {
 		assert.doesNotMatch(comment, processHistory, "ownership comments must describe present enforcement, not process history");
 	}
-	for (const mutation of [source.replace("// validator-task.prompt.md", "// Retired by the PR.\n// validator-task.prompt.md"), source.replace("// FROZEN list;", "// FROZEN list;\n\t// Retired by the PR.")]) {
-		assert.match(commentBlock(mutation.split("\n"), "validator-task.prompt.md"), processHistory, "process history anywhere in the ownership block must remain detectable");
+	const validatorOwnerLine = lines.findIndex((line) => line.trimStart().startsWith("//") && line.includes("validator-task.prompt.md"));
+	const mutateValidatorOwner = (offset) => {
+		const mutation = [...lines];
+		mutation.splice(validatorOwnerLine + offset, 0, "// Retired by the PR.");
+		return mutation;
+	};
+	for (const mutation of [mutateValidatorOwner(0), mutateValidatorOwner(1)]) {
+		assert.match(commentBlock(mutation, "validator-task.prompt.md"), processHistory, "process history anywhere in the ownership block must remain detectable");
 	}
 });
 
@@ -489,6 +495,7 @@ test("IDV19: the frozen list contains every unchanged adversary prompt", () => {
 	for (const slug of ["plan", "spec"]) {
 		assert.ok(frozen.includes(`skills/sdlc/prompts/adversary-${slug}.prompt.md`), `adversary-${slug}.prompt.md must stay frozen`);
 	}
+	assert.ok(!frozen.includes("skills/sdlc/prompts/adversary-review.prompt.md"), "the changed review prompt is outside this branch's frozen set");
 	assert.ok(frozen.includes("skills/sdlc/prompts/validator-task.prompt.md"), "validator-task.prompt.md must stay frozen");
 });
 

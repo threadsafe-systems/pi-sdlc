@@ -89,14 +89,11 @@ test("ASD20: setup-sdlc.mjs carries the config-doc write call site", () => {
 	assert.match(setupSource, /id: "config-doc"/, "setup must report the config-doc asset");
 });
 
-test("ASD20 (landing-order conditional): any already-landed telemetry call sites are preserved", () => {
-	// This stream owns nothing in telemetry.mjs. If the telemetry stream (lt-t2)
-	// has already landed its record-run-event call sites in setup-sdlc.mjs, they
-	// must coexist with the config-doc write call site. Until it lands, there are
-	// none to preserve — the config-doc site is asserted above unconditionally.
+test("ASD20: optional telemetry and config-doc call sites coexist", () => {
+	assert.match(setupSource, /writeConfigDoc\(root/, "the config-doc call site is always present");
 	if (setupSource.includes("record-run-event")) {
-		assert.match(setupSource, /writeConfigDoc\(root/, "both call sites must coexist after a merge");
+		assert.match(setupSource, /writeConfigDoc\(root/, "telemetry does not displace the config-doc call site");
 	} else {
-		assert.ok(true, "telemetry call sites not yet landed in this branch");
+		assert.ok(true, "this fixture has no telemetry call site");
 	}
 });

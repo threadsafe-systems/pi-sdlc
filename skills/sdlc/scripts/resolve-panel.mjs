@@ -6,7 +6,7 @@
 //          [--track irreversible|reversible] [--emit-tasks <agent>]
 //          [--slug S] [--config DIR|--repo-root DIR]
 //
-// --slug is additive (FS13 lt-t2): on success, emits panel.resolved to the
+// --slug is additive (FS13): on success, emits panel.resolved to the
 // resolved run's manifest (fail-soft; never alters stdout or exit code).
 
 import { execFileSync } from "node:child_process";
