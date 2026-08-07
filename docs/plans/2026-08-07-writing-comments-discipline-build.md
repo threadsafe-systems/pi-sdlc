@@ -76,6 +76,8 @@ The sequence is deliberate: the reviewer parity contract depends on the canonica
 - `skills/sdlc/prompts/adversary-review.prompt.md`
 - `test/writing-comments-discipline.test.js`
 - `test/frozen-surfaces.test.js` (temporary deliberate reopening of the changed prompt)
+- `test/iteration-disposition.test.js` (temporary reconciliation of the standing re-freeze guard)
+- `test/fixtures/golden/pr_review.agent.md` (stamped prompt projection)
 - `docs/validation/writing-comments-discipline/wc-t2.json`
 
 **Work:**
@@ -96,8 +98,8 @@ The sequence is deliberate: the reviewer parity contract depends on the canonica
 **Checks:**
 
 - `npm test` (`scope: full`, ≤30 s)
-- `node --test test/writing-comments-discipline.test.js` (`scope: task`, ≤3 s)
-- `npx biome check test/writing-comments-discipline.test.js` (≤10 s)
+- `node --test test/writing-comments-discipline.test.js test/extraction.test.js test/iteration-disposition.test.js` (`scope: task`, ≤5 s)
+- `npx biome check test/writing-comments-discipline.test.js test/iteration-disposition.test.js test/frozen-surfaces.test.js` (≤10 s)
 - `node --test test/frozen-surfaces.test.js` (≤5 s)
 
 **PV1 categories:** `tests: required`; `static: required`; `scenarios: n/a`; `standards: required` (frozen-surface protocol); `bannedPatterns: n/a`.
@@ -160,4 +162,9 @@ These are programme-level carries, not Build deficiencies and not `CARRY-TO-IMPL
 
 ## 8. Amendments
 
-None at initial derivation.
+### A1 — prompt projections and standing re-freeze guard
+
+- Trigger: the first committed `wc-t2` deterministic run failed the full suite because changing the package prompt also invalidates its stamped golden projection and IDV19's standing assertion that all three S5 prompts are currently frozen.
+- Class: **(c), normal fix wave**.
+- Disposition: **incorporated**. `wc-t2` owns the generated PR-agent golden and temporarily reconciles IDV19 with the deliberate review-prompt reopening. The task-focused command expands to the writing, extraction, and iteration-disposition corpora; the manifest is renewed before revalidation. The mandatory post-merge re-freeze restores both the prompt's FROZEN entry and IDV19's standing all-three assertion.
+- Scope unchanged: no runtime behavior, role, floor, phase, or scanner is added.

@@ -14,16 +14,16 @@
     },
     {
       "id": "tests.task",
-      "argv": ["node", "--test", "test/writing-comments-discipline.test.js"],
-      "timeoutMs": 3000,
+      "argv": ["node", "--test", "test/writing-comments-discipline.test.js", "test/extraction.test.js", "test/iteration-disposition.test.js"],
+      "timeoutMs": 5000,
       "scope": ["task"],
-      "evidence": ["normal-reviewer attack surface, author-reviewer parity, and impact-based severity"]
+      "evidence": ["normal-reviewer attack surface, stamped projection, author-reviewer parity, frozen-list reconciliation, and impact-based severity"]
     },
     {
       "id": "static.lint",
-      "argv": ["npx", "biome", "check", "test/writing-comments-discipline.test.js", "test/frozen-surfaces.test.js"],
+      "argv": ["npx", "biome", "check", "test/writing-comments-discipline.test.js", "test/iteration-disposition.test.js", "test/frozen-surfaces.test.js"],
       "timeoutMs": 10000,
-      "evidence": ["focused and frozen-surface tests are Biome-clean"]
+      "evidence": ["focused, iteration-disposition, and frozen-surface tests are Biome-clean"]
     },
     {
       "id": "standards.frozen",

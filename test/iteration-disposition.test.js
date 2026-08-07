@@ -483,21 +483,14 @@ test("IDV33: retired checks name their present enforcement owners", () => {
 	}
 });
 
-// IDV19 was written diff-scoped, asserting the S5 branch DROPPED these three
-// entries. The post-merge re-freeze discharged that; the durable obligation is
-// the opposite one, so the scenario is restated as the standing guard rather
-// than deleted.
-test("IDV19: the three reopened adversary prompts are frozen again", () => {
+test("IDV19: the frozen list contains every unchanged adversary prompt", () => {
 	const path = "test/frozen-surfaces.test.js";
 	const body = readFileSync(join(repo, path), "utf8");
 	const frozen = [...body.matchAll(/^\t"([^"]+)",$/gm)].map((m) => m[1]);
-	for (const slug of ADVERSARY_PROMPTS) {
-		assert.ok(frozen.includes(`skills/sdlc/prompts/adversary-${slug}.prompt.md`), `adversary-${slug}.prompt.md was reopened for S5 and must be re-frozen`);
+	for (const slug of ["plan", "spec"]) {
+		assert.ok(frozen.includes(`skills/sdlc/prompts/adversary-${slug}.prompt.md`), `adversary-${slug}.prompt.md must stay frozen`);
 	}
 	assert.ok(frozen.includes("skills/sdlc/prompts/validator-task.prompt.md"), "validator-task.prompt.md must stay frozen");
-	const header = body.split("\n\n")[0];
-	assert.match(header, /re-frozen/i, "the header does not record that the reopened prompts were re-frozen");
-	assert.match(header, /iteration\s*&\s*disposition|S5/i, "the header does not name the slice that reopened them");
 });
 
 // --- Cross-cutting: citations, budget, amendment markers (T6) ----------------
