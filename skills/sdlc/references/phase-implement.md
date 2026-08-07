@@ -47,6 +47,36 @@ project's hooks/workflow). Each task's checks are whatever its approved Build ta
 declared. When writing scenario checks, apply `phase-spec.md` §4's
 premise-durability rule and route non-change claims to the standing diff guard.
 
+### Code-prose pass (comment-last)
+
+Implementation separates executable behavior from reader-facing prose. Until
+behavior is mechanically green, defer reader-facing comments and docstrings;
+then perform one deliberate code-prose pass before task validation or closure.
+Machine-consumed or type-affecting comment forms — compiler, lint, coverage, and
+generation directives, plus semantically active docstrings — are executable
+infrastructure and may be authored inline. Their human-facing prose remains in
+the final code-prose pass.
+
+The pass applies five laws:
+
+1. **Serve the reader of the code now.** A reader needs no Plan, issue, review,
+   or session history to understand the prose.
+2. **Keep process history and provenance out of code.** Findings, rounds,
+   reviewer identities, issue numbers, task/slice labels and Plan sections
+   belong in version control and review artifacts.
+3. **Do not narrate anything absent, removed, or future.** State present
+   caller-facing behavior when it creates an obligation; omit roadmaps,
+   tombstones and apologies.
+4. **Explain contracts, invariants, or non-obvious rationale.** Delete prose
+   that is merely restating what the code says.
+5. **Apply the staleness test.** If prose can become stale without this file
+   changing, it is already wrong.
+
+Test names are authored with their tests rather than deferred. The final pass
+must audit every changed test name as a standalone behavioral claim. A local
+Specification scenario id may remain as a traceability tag only when the rest
+of the name explains the behavior without that id.
+
 **Dialogue discipline.** Implement lowers the interrupt surface of the shared
 contract (`references/system-reference.md`,
 "Presenting questions to the human") to near zero:
@@ -80,6 +110,16 @@ The invariant seam is per-task validation selected by `review.tasks`:
   dispatch; `resolve-panel task_validate` refuses).
 - `off`: per-task validation is skipped entirely — no manifest, runner, receipt,
   or PASS gate is required.
+
+**Code-prose checkpoint.** Under `subagent` or `self`, the implementer completes
+§4's pass and returns the exact handoff line `Code-prose pass: complete` before
+dispatching or running the deterministic task validator. The parent blocks at
+that line; it is evidence that the pass ran, not proof that its judgement was
+correct. Under `review.tasks: off`, the same pass and handoff occur before
+committing or declaring the task complete. Standalone Implement performs them
+before declaring implementation complete. The handoff is never source text,
+manifest/receipt data, or a committed artifact, and it does not make the
+deterministic validator a prose judge.
 
 > **Under your configuration:** read the effective `review.tasks` value from
 > current `CONFIG.md` (or authoritative `sdlc.config.json`); never assume
