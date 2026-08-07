@@ -1,0 +1,56 @@
+{
+  "schemaVersion": 1,
+  "taskId": "wc-t3",
+  "buildPlan": "docs/plans/2026-08-07-writing-comments-discipline-build.md",
+  "repoRoot": ".",
+  "ownedScenarios": [],
+  "checks": [
+    {
+      "id": "tests.full-task",
+      "argv": ["npm", "test"],
+      "timeoutMs": 30000,
+      "scope": ["full", "task"],
+      "evidence": ["whole-corpus regression net includes the focused code-prose, prompt projection, baseline cleanup, reference, and frozen-surface contracts"]
+    },
+    {
+      "id": "static.lint",
+      "argv": ["npx", "biome", "check", "."],
+      "timeoutMs": 15000,
+      "evidence": ["the completed repository tree is Biome-clean"]
+    },
+    {
+      "id": "standards.references",
+      "argv": ["node", "skills/sdlc/scripts/check-references.mjs"],
+      "timeoutMs": 5000,
+      "evidence": ["public-reference inventory remains structurally complete"]
+    },
+    {
+      "id": "standards.frozen",
+      "argv": ["node", "--test", "test/frozen-surfaces.test.js"],
+      "timeoutMs": 5000,
+      "evidence": ["frozen surfaces remain byte-identical except for the deliberately reopened PR prompt"]
+    }
+  ],
+  "categories": {
+    "tests": {
+      "applicability": "required",
+      "checkIds": ["tests.full-task"]
+    },
+    "static": {
+      "applicability": "required",
+      "checkIds": ["static.lint"]
+    },
+    "scenarios": {
+      "applicability": "n/a",
+      "reason": "the approved reversible Plan has no Specification scenario ledger"
+    },
+    "standards": {
+      "applicability": "required",
+      "checkIds": ["standards.references", "standards.frozen"]
+    },
+    "bannedPatterns": {
+      "applicability": "n/a",
+      "reason": "the bounded audit is a one-time reader judgement, not a shipped generic scanner"
+    }
+  }
+}
