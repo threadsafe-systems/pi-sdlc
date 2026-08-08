@@ -8,9 +8,9 @@
     {
       "id": "tests.full",
       "argv": ["npm", "test"],
-      "timeoutMs": 300000,
+      "timeoutMs": 30000,
       "scope": ["full"],
-      "evidence": ["whole-corpus regression net is green with the complete M1-M8 contract suite in place"]
+      "evidence": ["SAS10: whole-corpus regression net is green with the complete M1-M8 contract suite in place, inside SAS10's 30-second budget (this check's timeout enforces it)"]
     },
     {
       "id": "tests.task",
@@ -36,7 +36,7 @@
       "id": "lifecycle.declaration",
       "argv": ["bash", "skills/sdlc/scripts/check-lifecycle.sh", "--track", "irreversible", "--slug", "spec-artifact-skeleton"],
       "timeoutMs": 120000,
-      "evidence": ["SAS4: the run's lifecycle declaration (track irreversible, slug spec-artifact-skeleton) passes the FS9 checker"]
+      "evidence": ["SAS10: the run's lifecycle declaration (track irreversible, slug spec-artifact-skeleton) passes the FS9 checker"]
     },
     {
       "id": "static.lint",
