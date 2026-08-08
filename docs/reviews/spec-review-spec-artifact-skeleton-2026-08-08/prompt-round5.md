@@ -5,6 +5,7 @@ with two `pi-sdlc-spec-review` children and per-task model overrides
 (`google/gemini-3.1-pro-preview`, `openai-codex/gpt-5.6-luna`), thinking LOW.
 Output-sourcing law for this round: child session transcripts directly (the round-4
 status-payload corruption incident); the aggregated payload is not trusted.
+Children: `6f7c9c88` (gemini), `89fcd4e3` (luna).
 
 ## Task (identical for both children)
 
