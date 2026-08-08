@@ -175,3 +175,7 @@ durability, not gaps.
 
 `shape.publishToTracker` is 2 and this breakdown has 5 tasks, so it publishes:
 one epic plus five sub-issues on board 5, per `assets/tracker-ops.md`.
+
+Published 2026-08-08: epic **#225**; tasks **#226** (T1), **#227** (T2),
+**#228** (T3), **#229** (T4), **#230** (T5), serial blocked-by chain 227←226, 228←227, 229←228, 230←229
+(each task blocked by its predecessor).
