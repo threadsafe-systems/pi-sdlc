@@ -132,3 +132,40 @@ All 6 incorporated, 0 dismissed. Six distinct fixes. Recurring defect class name
 - Round 1: 13 findings (5 high / 8 medium) — 13 incorporated, 0 dismissed. Spec rev 1 → rev 2.
 - Round 2: 9 findings (3 high / 6 medium; 1 reopened, 8 new) — 9 incorporated, 0 dismissed; all 13 round-1 fixes verified by both reviewers. Spec rev 2 → rev 3.
 - Round 3: 6 findings (4 medium / 2 low; 2 reopened, 4 new) — 6 incorporated, 0 dismissed; one panel disagreement (R2-06) resolved by direct line read. Spec rev 3 → rev 4.
+
+## Round 4 (wave 4) — capped convergence check on rev 4
+
+Both reviewers read rev 4 at 310 lines (committed `1af8348`). gemini ran 112 s, luna ran long; both confirmed all six round-3 fixes landed before raising new findings.
+
+### Verification of round-3 fixes
+
+Both reviewers: SPEC-R3-01..06 landed. luna additionally re-verified L1/L2 byte-for-byte against `adversary-spec.prompt.md:32-49` and confirmed removing the pre-C5 prompt entry from `test/frozen-surfaces.test.js` yields L3 exactly.
+
+### Process incident — corrupted delivery payload (adjudication record)
+
+The orchestrator's first read of round 4 used an aggregated `action=status` payload. That payload was a corrupted rendering of the children's outputs: it carried five findings citing structure that exists in **no revision** of the spec — `### M9`/`### M10` marker sections, a 388-line file, a SAS11 premise about "rev 2 kind/evidence rows", a SAS12 "M10 verifies F1 source" claim, and AM rows in `phase-tasks.md` (a file this spec never touches). Verified against revs 1–4 via `git log -S` and direct reads: none of that text ever existed. The provisional ruling (5/5 dismissed as non-grounded) was then overturned when the actual child transcripts were recovered from `~/.pi/agent/sessions/.../7de9a482` and `.../5de73589` — the true outputs are the three grounded findings below, with accurate line citations. The corrupted payload is preserved at `round4-corrupted-status-payload.md` as evidence of the failure mode. **Law applied:** panel outputs are sourced from child transcripts / saved output files, never from aggregated status payloads.
+
+### Findings (true outputs, from child transcripts)
+
+1. **SPEC-R4-01 — M2 does not enforce C2's immediate §4 insertion or paragraph intactness** (luna, `REOPENED(SPEC-R3-03)`, medium, high confidence). C2 (`:71`) mandates "inserted immediately after §4's first paragraph" and "existing paragraphs stay intact and in order"; rev-4 M2 asserted only non-adjacent placement ("after ... before") and paragraph *beginnings*, and SAS2's When–Then overclaimed "intact". A body-rewrite of §4's existing paragraphs (first sentence kept) or an interleaved paragraph would have passed M2.
+2. **SPEC-R4-02 — verification scenarios out of sync with the rev-4 M-definitions** (gemini, `NEW`, medium, high confidence). SAS2 omitted M2's named anchor paragraphs; SAS6 omitted the pinned list **L3** that M6 checks equality against; SAS7 claimed literal assertions (`["plan", "spec", "review"]`, `validator-task.prompt.md`) that M7 left implicit — the round-2/3 overclaim defect class, recreated in the rev-4 delta.
+3. **SPEC-R4-03 — M2 omits C2's mandated "anything missing is a spec defect" sentence** (gemini, `NEW`, low, high confidence). C2's signature fixes that literal sentence in the §4 rules paragraph; rev-4 M2 asserted only the four rule sentences and the pointer, leaving the mandated sentence unfalsifiable.
+
+### Adjudication (orchestrator, rev 5)
+
+All three genuine; 3/3 incorporated:
+
+1. **M2 adjacency + intactness routing** (01): M2 now asserts the rules paragraph sits *immediately* after §4's first paragraph (adjacency — no paragraph may sit between), each existing anchor paragraph still begins with its anchor sentence, and states explicitly that M2 asserts adjacency/beginnings/order only — full byte-intactness of the three existing paragraphs' bodies is a diff-shape claim verified at the PR gate by SAS9 (premise durability: no mechanical assertion against a moving base). SAS9's §4 entry now spells the shape out: exactly one inserted paragraph, every existing §4 line untouched — "this is where C2's 'existing paragraphs stay intact' precondition is verified". SAS2's When–Then rewritten to match M2 exactly (no overclaim); its falsify covers interleaved paragraphs and altered anchor sentences.
+2. **Scenario/M-definition re-sync** (02): SAS2 names the three anchor paragraphs (as M2 does); SAS6's When–Then now states equality with pinned list **L3** exactly; M7 expanded to enumerate every literal assertion SAS7 claims (the literal `["plan", "spec", "review"]` constant, the two unfiltered sibling loops, the surviving `validator-task.prompt.md` assertion) — the overclaim direction closed by strengthening M7, not weakening SAS7.
+3. **Mandated sentence asserted** (03): M2 and SAS2 now assert the literal sentence `anything missing is a spec defect` inside the rules paragraph; SAS2's falsify covers its deletion.
+
+### Dismissal posture
+
+3 incorporated / 0 dismissed. SPEC-R4-01 is the round's headline: a lawful reopen catching that rev 4's M2 fix satisfied the *letter* of R3-03 (placement anchors) while still under-enforcing C2's own signature (immediacy, intactness). The reopen was evidence-perfect — it cited `:71` vs `:128` vs `:225-226` accurately. The delivery-corruption incident is the round's process lesson and is now standing law for panel output sourcing.
+
+### Round map
+
+- Round 1: 13 findings (5 high / 8 medium) — 13 incorporated, 0 dismissed. Spec rev 1 → rev 2.
+- Round 2: 9 findings (3 high / 6 medium; 1 reopened, 8 new) — 9 incorporated, 0 dismissed; all 13 round-1 fixes verified by both reviewers. Spec rev 2 → rev 3.
+- Round 3: 6 findings (4 medium / 2 low; 2 reopened, 4 new) — 6 incorporated, 0 dismissed; one panel disagreement (R2-06) resolved by direct line read. Spec rev 3 → rev 4.
+- Round 4: 3 findings (2 medium / 1 low; 1 reopened, 2 new) — 3 incorporated, 0 dismissed; delivery-corruption incident recorded and law updated. Spec rev 4 → rev 5.
