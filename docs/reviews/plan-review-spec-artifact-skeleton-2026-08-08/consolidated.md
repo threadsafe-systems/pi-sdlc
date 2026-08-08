@@ -1,4 +1,4 @@
-# Plan panel — consolidated adjudication (round 1)
+# Plan panel — consolidated adjudication (rounds 1–2)
 
 - Run: `spec-artifact-skeleton` (map #192, slice S1)
 - Track: irreversible
@@ -10,7 +10,7 @@
 
 `resolve-panel` was invoked with `--author anthropic/claude-fable-5` (the configured `authorDefault`) before the orchestrator verified its live identity. The session is actually running `maas-qwen/qwen3.8-max`, which does not appear in the plan_review roster at all, so no self-review occurred and panel composition is valid under either author identity; the only effect of the wrong author flag was excluding `claude-fable-5` from round 1's candidate pool. Round 2 and all later record-keeping use the verified identity.
 
-## Findings
+## Findings — round 1
 
 | id | sev | origin | raised by | title | disposition |
 |---|---|---|---|---|---|
