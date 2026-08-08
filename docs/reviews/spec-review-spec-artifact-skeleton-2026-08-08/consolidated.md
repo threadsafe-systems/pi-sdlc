@@ -48,6 +48,49 @@ All 13 incorporated, 0 dismissed. Twelve distinct fixes (SPEC-R1-02/04 share a r
 
 13 incorporated / 0 dismissed because every finding was evidence-backed against the plan text, the premise-durability law, or the spec's own internal consistency — no finding was stylistic or speculative. SPEC-R1-11 was the author's arithmetic slip, caught by a reviewer after the author's own self-check missed one site; recorded for honesty.
 
+## Round 2 (wave 2) — delta review of rev 2
+
+Target: rev 2 at `1aaf4b1`. Scope: verification of the 13 round-1 dispositions plus `NEW`/`REOPENED` findings per the prompt's Delta rounds contract.
+
+### Verification of round-1 fixes
+
+- gemini: 12 of 13 confirmed; **SPEC-R1-08 REOPENED** (its rev-2 fix introduced a field-count contradiction — see SPEC-R2-01).
+- luna: 13 of 13 confirmed (with independent line-number evidence per finding).
+
+### Findings
+
+| id | reviewer | sev/conf | origin | location | defect (one line) | disposition |
+|---|---|---|---|---|---|---|
+| SPEC-R2-01 | gemini | high/high | REOPENED(SPEC-R1-08) | C4, C7 (M5), SAS5 | M5/SAS5 require "all ten fields" but C4's row has exactly 9 (matches the schema's 9 required keys, `additionalProperties: false`) — unbuildable contradiction | **incorporated** |
+| SPEC-R2-02 | gemini | med/high | NEW | C7 (Gated by) | C7's gating list includes SAS8, which has no C7 marker set (it routes to the standing ASD19 diff guard); M8 maps to SAS11 | **incorporated** |
+| SPEC-R2-03 | gemini | med/high | NEW | C1 (kind labels) | "the label names that point/destination" is impossible — labels are the three literal strings; the scenario body names the point/destination (as SAS9/SAS14 dogfood) | **incorporated** |
+| SPEC-R2-04 | luna | med/high | NEW | C7/M3, SAS3 | M3 asserts anchor presence only; C3's signature/postconditions require anchors to name their component and cite the skeleton path — a nameless anchor would pass | **incorporated** |
+| SPEC-R2-05 | luna | high/high | NEW | C3/C7/M3, SAS3 | C3's precondition declares the `## Delta rounds` section byte-stable, but M3 protects only headings/anchors/output-format — round mechanics could change with all tests passing | **incorporated** |
+| SPEC-R2-06 | luna | med/high | NEW | C1/C7/M1, SAS1 | M1 checks global marker presence/order but not section-locality or section-set exactness — markers moved into one section or an extra section pass | **incorporated** |
+| SPEC-R2-07 | luna | med/high | NEW | C4/C7/M5 | Same root cause as SPEC-R2-01: no defined tenth field; schema requires exactly 9 keys with optional `verification` only | **incorporated** (fix merged with SPEC-R2-01) |
+| SPEC-R2-08 | luna | med/high | NEW | C4/C7/M5, SAS5 | Row match + 81-row count leaves the other 80 rows unconstrained; `check-references` does no baseline comparison, so "no other row changed" is mechanically unprovable | **incorporated** (routed to SAS9 diff inspection, see adjudication) |
+| SPEC-R2-09 | luna | high/high | NEW | SAS10 | `bash skills/sdlc/scripts/check-lifecycle.sh` with no arguments exits 2 (`exactly one declaration source group is required`) — verified live; DoD-7 scenario cannot pass as written | **incorporated** |
+
+CLEAR (gemini): A, B, E, F, G, H. CLEAR (luna): D, F, H.
+
+### Adjudication (orchestrator, rev 3)
+
+All 9 incorporated, 0 dismissed. Eight distinct fixes (SPEC-R2-01/07 share the reopened root cause). Every evidence claim verified by the orchestrator before ruling: field count parsed from C4's literal JSON, schema `required` array read, `check-lifecycle.sh` run live in both forms, SAS8/SAS9/M3 texts re-read.
+
+1. **M5 field count corrected** (01+07): "all nine fields exactly" — every schema-required key with C4's values, schema forbids extra keys — plus the explicit assertion that the optional `verification` key is absent. The rev-2 "ten" was an authoring slip introduced while expanding M5 to satisfy SPEC-R1-08; the reopening was legitimate under the Delta rounds contract (the contradiction did not exist until rev 2).
+2. **C7 gating list corrected** (02): `SAS1–SAS7` (marker sets M1–M7) + SAS11 (marker set M8) + SAS10 (suite sweep); explicit note that SAS8/SAS9 gate C5 and the PR diff, not C7.
+3. **Kind-label wording corrected** (03): "the scenario names that point/destination in its body, the label stays the literal `inspection`/`carried`" — the skeleton now states what its own SAS9/SAS14 dogfooding already does.
+4. **M3 asserts anchor content** (04): each anchor must contain its component name and the literal path `references/spec-artifact-skeleton.md`; the four anchors together must name all five components.
+5. **Delta rounds protected** (05): M3 gains a byte-identity assertion for the `## Delta rounds` section against an embedded literal block; SAS3's falsify gains "editing any Delta-rounds line". The round mechanics that produced this very review are now mechanically frozen by the spec they reviewed.
+6. **M1 section-locality** (06): exact section set (no extras), each marker/placeholder inside its owning section; SAS1's falsify extended accordingly.
+7. **No-other-row invariant rerouted** (08): M5 drops the mechanically unprovable claim (row match + 81-row count only); C4's invariant stands, gated by SAS9's PR-gate diff inspection — the same premise-durability routing the spec already applies to every other non-change claim (SAS8, SAS9's fixture/template claims). C4's `Gated by` now names the split: SAS5 mechanical half, SAS9 inspection half. Ratio unchanged (SAS9 was already inspection).
+8. **Lifecycle invocation fixed** (09): SAS10 now specifies `check-lifecycle.sh --track irreversible --slug spec-artifact-skeleton` and records that the current spec-stage `artifact.build` failure is expected until the Build phase lands — so the scenario is honest about time-of-check.
+
+### Dismissal posture
+
+9 incorporated / 0 dismissed. SPEC-R2-01/07 is the second arithmetic slip in this panel's history (SPEC-R1-11 was the first), both author-introduced and reviewer-caught; recorded for honesty. SPEC-R2-05 is the round's best catch: a byte-stability precondition with no matching mechanical protection — exactly the reference-never-trust gap the skeleton exists to prevent.
+
 ### Round map
 
 - Round 1: 13 findings (5 high / 8 medium) — 13 incorporated, 0 dismissed. Spec rev 1 → rev 2.
+- Round 2: 9 findings (3 high / 6 medium; 1 reopened, 8 new) — 9 incorporated, 0 dismissed; all 13 round-1 fixes verified by both reviewers. Spec rev 2 → rev 3.

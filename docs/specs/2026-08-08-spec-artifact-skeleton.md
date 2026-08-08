@@ -1,6 +1,6 @@
 # Specification: Spec artifact skeleton (S1)
 
-Status: rev 2 — amended after spec-panel round 1 (SPEC-R1-01..12 all incorporated; adjudication in `docs/reviews/spec-review-spec-artifact-skeleton-2026-08-08/consolidated.md`)
+Status: rev 3 — amended after spec-panel round 2 (round 1: SPEC-R1-01..13 all incorporated; round 2: SPEC-R2-01..09 all incorporated — see `docs/reviews/spec-review-spec-artifact-skeleton-2026-08-08/consolidated.md`)
 Track: irreversible (freezes the specification artifact shape — a public surface later slices and consumers bind to)
 Run slug: `spec-artifact-skeleton`
 Map: #192 (design-phase craft), slice S1
@@ -57,7 +57,7 @@ None: the Plan minted no `CARRY-TO-SPEC` (plan, "Context for the next agent": "N
 - Signature/shape: one markdown reference file, H1 exactly `# Spec artifact skeleton`, containing five sections in this order with these exact fill-in blocks:
   1. `## Vocabulary` — table header exactly `| Term | Definition | Binds to |`, fill-in row `| <term> | <one-sentence definition> | <identifier or file> |`, plus the binding-rule sentence (mirrors C2 rule 1).
   2. `## Contracts` — fill-in block: `### <interface name>` with bullet rows `- Signature/shape:`, `- Preconditions:`, `- Postconditions:`, `- Invariants:`, `- Error semantics:` (precedence when several fire, or "at most one error possible"), `- Gated by:` (scenario ids); plus the binding-rule sentence (mirrors C2 rule 2) and the explicit note that interfaces mentioned only as unchanged context get no block and must not be silently re-described.
-  3. `## Scenario kind labels` — defines exactly three labels, `mechanical` (a runner/argv check can decide it), `inspection` (a human or panel decides it at a named decision point — the label names that point), `carried` (deferred to a later phase — the label names the destination); states the one-label-per-scenario rule and that the mechanical/total ratio must be readable off the spec (mirrors C2 rule 3).
+  3. `## Scenario kind labels` — defines exactly three labels, `mechanical` (a runner/argv check can decide it), `inspection` (a human or panel decides it at a named decision point — the scenario names that point in its body, the label stays the literal `inspection`), `carried` (deferred to a later phase — the scenario names the destination in its body, the label stays the literal `carried`); states the one-label-per-scenario rule and that the mechanical/total ratio must be readable off the spec (mirrors C2 rule 3).
   4. `## Non-functional requirements` — table header exactly `| Characteristic (ISO 25010) | Stimulus/condition | Response measure | Binding |`; the Binding cell is a scenario id present in the spec's scenario list or the literal `unbound — accepted at gate` with a reason (mirrors C2 rule 4).
   5. `## Scenario form` — three named parts on separate lines: `Given:` (state/fixture; `Given: none` permitted and expected for pure-function scenarios), `When–Then:` (behaviour + outcome), `Falsify:` (what would show the scenario failing). No keyword parser, no step definitions.
 - Preconditions: none (new file).
@@ -101,7 +101,7 @@ None: the Plan minted no `CARRY-TO-SPEC` (plan, "Context for the next agent": "N
 - Postconditions: `check-references` passes with the new file present (row resolves, discovery is inverse-complete).
 - Invariants: no other row changes; `schemaVersion` stays 1.
 - Error semantics: missing row → `check-references` fails inverse completeness for the new file; malformed row → schema validation fails. At most one cause per failure line.
-- Gated by: SAS5.
+- Gated by: SAS5 (mechanical half: the new row's shape and the row count), SAS9 (inspection half: the no-other-row-changed invariant, as a non-change claim inspected at the PR-gate diff — the standing premise-durability routing, same as SAS8/SAS9's other non-change claims).
 
 ### C5 — `test/frozen-surfaces.test.js` unfreeze
 
@@ -126,9 +126,9 @@ None: the Plan minted no `CARRY-TO-SPEC` (plan, "Context for the next agent": "N
 - Signature/shape: one new test file (name chosen at Build), pure offline string assertions over the markdown/test surfaces, asserting exactly:
   - M1: C1's H1 and all literal markers of the five components (section headers, table headers, bullet labels, the three kind-label names, the unbound marker, the three scenario-form labels), the five section headers in the fixed order, and every literal fill-in placeholder of C1 (`<term>`, `<one-sentence definition>`, `<identifier or file>`, `<interface name>`, the fill-in table row).
   - M2: C2's four canonical rule sentences and the skeleton pointer, in `phase-spec.md`.
-  - M3: C3's structural protection — exactly eight attack-surface headings `A.` through `H.` in order and no letter beyond H; the anchors present inside the B, C, D, F surface paragraphs (after each letter heading, before the next); the output-format section from `## Output format` to end-of-file byte-identical to a literal expected block the test embeds (the current closed contract: title/severity/confidence/origin/location/defect/evidence/impact/fix fields, the `CLEAR: <letter>` line, and the ranking instructions).
+  - M3: C3's structural protection — exactly eight attack-surface headings `A.` through `H.` in order and no letter beyond H; the four anchors present inside the B, C, D, F surface paragraphs (after each letter heading, before the next), each anchor containing its component name and the literal skeleton path `references/spec-artifact-skeleton.md`, and the four anchors together naming all five skeleton components (Vocabulary, Contracts, Scenario kind labels, Non-functional requirements, Scenario form); the `## Delta rounds` section byte-identical to a literal expected block the test embeds (C3's byte-stability precondition covers it, so the protection must too); the output-format section from `## Output format` to end-of-file byte-identical to a literal expected block the test embeds (the current closed contract: title/severity/confidence/origin/location/defect/evidence/impact/fix fields, the `CLEAR: <letter>` line, and the ranking instructions).
   - M4: none of C2's four canonical rule sentences — the exact strings fixed there — appears anywhere in the prompt as a contiguous substring (the reference-never-restate law).
-  - M5: C4's row matches all ten fields exactly, and the inventory contains exactly 81 rows (no other row changed).
+  - M5: C4's row matches all nine fields exactly (every schema-required key present with C4's values; the schema forbids additional keys), the optional `verification` key is absent from it, and the inventory contains exactly 81 rows. The "no other row changed" invariant is not mechanically provable without a baseline and routes to SAS9's PR-gate diff inspection (C4's gating split).
   - M6: C5's membership contract (16 entries, spec prompt absent, every other frozen path present).
   - M7: C6's minimality (IDV19 exempts only `"spec"`; constant and sibling loops untouched).
   - M8: SAS11's pair — the skeleton contains no `Cucumber`, `Behat`, or `Gherkin` substring at all, and its scenario-form section contains the literal sentence "No keyword parser, no step definitions."
@@ -136,7 +136,7 @@ None: the Plan minted no `CARRY-TO-SPEC` (plan, "Context for the next agent": "N
 - Postconditions: the suite is deterministic, offline, budget < 1 s; every marker assertion names the file and marker it checks.
 - Invariants: no network, no new dependency, no snapshot tooling.
 - Error semantics: each marker set fails independently with a message naming file + marker; co-occurring failures report independently (no precedence — parallel assertions).
-- Gated by: SAS1–SAS8 (each scenario's mechanical half is one marker set), SAS10, SAS11.
+- Gated by: SAS1–SAS7 (each scenario's mechanical half is one marker set, M1–M7), SAS11 (its mechanical half is marker set M8), SAS10 (the DoD-7 sweep runs the whole suite). SAS8 and SAS9 gate C5 and the PR diff respectively, not C7.
 
 ## Functional requirements
 
@@ -165,8 +165,8 @@ Ratio: 10 mechanical / 3 inspection / 1 carried = 14 total (71% mechanical). The
 ### SAS1 — the skeleton ships five components as literal fill-in blocks `(mechanical)`
 
 Given: branch HEAD with C1 landed.
-When–Then: the contract tests' M1 set passes — the skeleton exists with H1 `# Spec artifact skeleton`; the five component headers (`## Vocabulary`, `## Contracts`, `## Scenario kind labels`, `## Non-functional requirements`, `## Scenario form`) appear in that fixed order; every literal marker is present (the two table headers; bullet labels `- Preconditions:`, `- Postconditions:`, `- Invariants:`, `- Error semantics:`, `- Gated by:`; the three kind-label names; the unbound marker; `Given:`, `When–Then:`, `Falsify:`); and every literal fill-in placeholder of C1 is present (`<term>`, `<one-sentence definition>`, `<identifier or file>`, `<interface name>`, the fill-in table row) — proving a fill-in scaffold, not an empty or reordered document.
-Falsify: removing any marker or placeholder, or reordering the sections, fails the corresponding M1 assertion.
+When–Then: the contract tests' M1 set passes — the skeleton exists with H1 `# Spec artifact skeleton`; its complete section set is exactly those five component sections, each component's markers and placeholders appearing inside its own section (between its header and the next); the five component headers (`## Vocabulary`, `## Contracts`, `## Scenario kind labels`, `## Non-functional requirements`, `## Scenario form`) appear in that fixed order; every literal marker is present (the two table headers; bullet labels `- Preconditions:`, `- Postconditions:`, `- Invariants:`, `- Error semantics:`, `- Gated by:`; the three kind-label names; the unbound marker; `Given:`, `When–Then:`, `Falsify:`); and every literal fill-in placeholder of C1 is present (`<term>`, `<one-sentence definition>`, `<identifier or file>`, `<interface name>`, the fill-in table row) — proving a fill-in scaffold, not an empty or reordered document.
+Falsify: removing any marker or placeholder, reordering the sections, adding any extra section, or moving a marker or placeholder out of its owning section fails the corresponding M1 assertion.
 
 ### SAS2 — §4 carries the four binding rules and the pointer `(mechanical)`
 
@@ -177,8 +177,8 @@ Falsify: deleting any rule sentence, either clause, or the pointer fails M2.
 ### SAS3 — the prompt's structure is protected, anchors placed inside B/C/D/F `(mechanical)`
 
 Given: branch HEAD with C3 landed (unfreeze per AM1 in force).
-When–Then: M3 passes — the prompt contains exactly eight attack-surface headings `A.` through `H.` in order and no letter beyond H; the four anchors appear inside the B, C, D, F surface paragraphs (after each letter heading, before the next); the output-format section from `## Output format` to end-of-file is byte-identical to the literal expected block the test embeds.
-Falsify: removing an anchor, adding a ninth letter, placing an anchor outside B/C/D/F, or editing any output-format line fails M3.
+When–Then: M3 passes — the prompt contains exactly eight attack-surface headings `A.` through `H.` in order and no letter beyond H; the four anchors appear inside the B, C, D, F surface paragraphs (after each letter heading, before the next), each naming its component and citing `references/spec-artifact-skeleton.md`, together naming all five skeleton components; the `## Delta rounds` section is byte-identical to the literal expected block the test embeds; the output-format section from `## Output format` to end-of-file is byte-identical to the literal expected block the test embeds.
+Falsify: removing an anchor, stripping a component name or the skeleton path from an anchor, adding a ninth letter, placing an anchor outside B/C/D/F, editing any Delta-rounds line, or editing any output-format line fails M3.
 
 ### SAS4 — the prompt references, never restates `(mechanical)`
 
@@ -189,8 +189,8 @@ Falsify: copying any canonical sentence, or any contiguous span of one, into the
 ### SAS5 — the skeleton is FS11-discoverable `(mechanical)`
 
 Given: branch HEAD with C1 and C4 landed.
-When–Then: M5 passes (the row matches all ten fields of C4 exactly, and the inventory contains exactly 81 rows) and `node skills/sdlc/scripts/check-references.mjs` exits 0 — the discovery root `skills/sdlc/references/*.md` is inverse-complete with the new file present.
-Falsify: dropping the row makes `check-references` fail inverse completeness; a semantically wrong but schema-valid row, or any change to another row, fails M5.
+When–Then: M5 passes (the row matches all nine fields of C4 exactly, the optional `verification` key is absent, and the inventory contains exactly 81 rows) and `node skills/sdlc/scripts/check-references.mjs` exits 0 — the discovery root `skills/sdlc/references/*.md` is inverse-complete with the new file present.
+Falsify: dropping the row makes `check-references` fail inverse completeness; a semantically wrong but schema-valid row, an unexpected extra key, or a missing required key fails M5; any change to another row fails C4's invariant via SAS9's diff inspection.
 
 ### SAS6 — the unfreeze removes exactly one frozen entry `(mechanical)`
 
@@ -219,8 +219,8 @@ Falsify: any hunk outside the permitted list fails this scenario at the PR gate.
 ### SAS10 — corpus green, offline, inside budget; full DoD-7 sweep `(mechanical)`
 
 Given: branch HEAD with all contracts landed; no network.
-When–Then: `npm test` passes under a 30-second external timeout (#177 precedent); the new contract-test file runs in under 1 s; `biome check` over the changed files is clean; `node skills/sdlc/scripts/check-references.mjs` exits 0; `bash skills/sdlc/scripts/check-lifecycle.sh` exits 0 (plan DoD 7).
-Falsify: any failing test, a > 30 s run, a biome finding on a changed file, or a failing inventory/lifecycle check fails this scenario.
+When–Then: `npm test` passes under a 30-second external timeout (#177 precedent); the new contract-test file runs in under 1 s; `biome check` over the changed files is clean; `node skills/sdlc/scripts/check-references.mjs` exits 0; `bash skills/sdlc/scripts/check-lifecycle.sh --track irreversible --slug spec-artifact-skeleton` exits 0 (plan DoD 7; the checker requires exactly one declaration-source group, so the bare invocation is invalid — at DoD-7 time the build document exists and the track/slug form resolves). The current spec-stage failure (`artifact.build: no committed build document`) is expected until the Build phase lands and is not a spec defect.
+Falsify: any failing test, a > 30 s run, a biome finding on a changed file, a failing inventory check, or the lifecycle check failing with those arguments once the build document exists, fails this scenario.
 
 ### SAS11 — the skeleton mandates no tooling `(mechanical)`
 
