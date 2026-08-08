@@ -1,0 +1,53 @@
+{
+  "schemaVersion": 1,
+  "taskId": "t2",
+  "buildPlan": "docs/plans/2026-08-08-spec-artifact-skeleton-build.md",
+  "repoRoot": ".",
+  "ownedScenarios": ["SAS2"],
+  "checks": [
+    {
+      "id": "tests.full",
+      "argv": ["npm", "test"],
+      "timeoutMs": 300000,
+      "scope": ["full"],
+      "evidence": ["whole-corpus regression net is green"]
+    },
+    {
+      "id": "tests.task",
+      "argv": ["node", "--test", "test/spec-artifact-skeleton.test.js"],
+      "timeoutMs": 120000,
+      "scope": ["task"],
+      "evidence": ["M2 phase-spec §4 binding rules (SAS2): numbered rules 1-4 verbatim in order, defect sentence, skeleton pointer, anchor beginnings/order/adjacency"]
+    },
+    {
+      "id": "static.lint",
+      "argv": ["npx", "biome", "check", "test/spec-artifact-skeleton.test.js"],
+      "timeoutMs": 120000,
+      "evidence": ["the task's lintable surfaces are biome-clean (phase-spec.md is markdown, not a biome target)"]
+    }
+  ],
+  "categories": {
+    "tests": {
+      "applicability": "required",
+      "checkIds": ["tests.full", "tests.task"]
+    },
+    "static": {
+      "applicability": "required",
+      "checkIds": ["static.lint"]
+    },
+    "scenarios": {
+      "applicability": "required",
+      "evidence": {
+        "SAS2": ["tests.task"]
+      }
+    },
+    "standards": {
+      "applicability": "n/a",
+      "reason": "no governing standard beyond the declared checks applies to a prose insertion plus contract-test assertions"
+    },
+    "bannedPatterns": {
+      "applicability": "n/a",
+      "reason": "no task-diff pattern prohibition beyond lint applies to this task"
+    }
+  }
+}
