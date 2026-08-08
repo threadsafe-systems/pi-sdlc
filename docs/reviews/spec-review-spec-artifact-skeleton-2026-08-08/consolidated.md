@@ -169,3 +169,26 @@ All three genuine; 3/3 incorporated:
 - Round 2: 9 findings (3 high / 6 medium; 1 reopened, 8 new) — 9 incorporated, 0 dismissed; all 13 round-1 fixes verified by both reviewers. Spec rev 2 → rev 3.
 - Round 3: 6 findings (4 medium / 2 low; 2 reopened, 4 new) — 6 incorporated, 0 dismissed; one panel disagreement (R2-06) resolved by direct line read. Spec rev 3 → rev 4.
 - Round 4: 3 findings (2 medium / 1 low; 1 reopened, 2 new) — 3 incorporated, 0 dismissed; delivery-corruption incident recorded and law updated. Spec rev 4 → rev 5.
+- Round 5: 3 findings (2 medium / 1 low; all new) — 3 incorporated, 0 dismissed. Spec rev 5 → rev 6.
+
+## Round 5 (wave 5) — delta review of rev 5
+
+Outputs sourced from child session transcripts (`6f7c9c88`, `89fcd4e3`) per the round-4 incident law — the aggregated payload was not consulted. Both reviewers confirmed all three rev-5 fixes landed (gemini with line citations `:128/:225/:249/:133`; luna `:71/:128/:225-227/:267`).
+
+### Findings
+
+1. **SPEC-R5-01 — C2's intactness precondition omits §4's first paragraph** (gemini, `NEW`, medium, high confidence). C2 enumerated only the three anchor paragraphs as "stay intact", while SAS9 (correctly, after rev 5) enforces "every existing §4 line untouched" — which includes the first paragraph. An implementer reading C2 literally could assume modifying the first paragraph is legal, then fail SAS9.
+2. **SPEC-R5-02 — M2 does not assert C2's "numbered" requirement** (gemini, `NEW`, low, high confidence). C2's signature fixes the four rule sentences "numbered, verbatim"; rev-5 M2 asserted only their presence, leaving an unnumbered rendering mechanically unfalsified.
+3. **SPEC-R5-03 — C2's declared gates omit SAS9** (luna, `NEW`, medium, high confidence). Rev 5 routed full §4 intactness to SAS9's PR-gate inspection, but C2 still declared `Gated by: SAS2, SAS4` — the contract's own gate list no longer covered one of its explicit preconditions.
+
+### Adjudication (orchestrator, rev 6)
+
+All three genuine; 3/3 incorporated — each a sync obligation created by rev 5's routing decisions, exactly the defect class a delta panel exists to catch:
+
+1. **First paragraph enumerated** (01): C2's precondition now lists four current paragraphs — "the first paragraph beginning `Produce the Spec doc:`, Premise durability, Dialogue discipline, configuration callout". SAS9's "every existing §4 line untouched" already covers it; M2's intactness-routing wording updated from "those three existing paragraphs" to "§4's existing paragraphs" so rev 6 carries no fresh desync of its own.
+2. **Numbering asserted** (02): M2 now asserts the rule sentences render as a numbered list — each sentence's line beginning with its literal `1.`/`2.`/`3.`/`4.` marker in order; SAS2's When–Then and falsify extended to the numbering markers.
+3. **Gate list closed** (03): C2 now declares `Gated by: SAS2, SAS4, SAS9` — its precondition's verification split (mechanical M2 half + PR-gate SAS9 half) is fully traceable from the contract itself.
+
+### Dismissal posture
+
+3 incorporated / 0 dismissed. No structural defects remain — round 5's findings are all contract-traceability sync against rev 5's own routing decisions. The panel is now in wording-hygiene territory; per the ratified escalation valve (genuine findings continuing beyond round 5), the next round is owner-gated rather than automatic.
