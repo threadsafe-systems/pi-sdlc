@@ -1,6 +1,6 @@
 # Specification: Spec artifact skeleton (S1)
 
-Status: rev 1 — awaiting spec panel
+Status: rev 2 — amended after spec-panel round 1 (SPEC-R1-01..12 all incorporated; adjudication in `docs/reviews/spec-review-spec-artifact-skeleton-2026-08-08/consolidated.md`)
 Track: irreversible (freezes the specification artifact shape — a public surface later slices and consumers bind to)
 Run slug: `spec-artifact-skeleton`
 Map: #192 (design-phase craft), slice S1
@@ -70,8 +70,8 @@ None: the Plan minted no `CARRY-TO-SPEC` (plan, "Context for the next agent": "N
 
 - Signature/shape: one new paragraph inserted immediately after §4's first paragraph ("Produce the Spec doc…"), before "Premise durability". It points at the skeleton and fixes four canonical rule sentences, numbered, verbatim:
   1. "every coined term used two or more times in the body appears in the Vocabulary table, and every term in the table appears in the body"
-  2. "every interface this change introduces or modifies has a Contracts block"
-  3. "every scenario carries exactly one kind label"
+  2. "every interface this change introduces or modifies has a Contracts block (interfaces mentioned only as unchanged context do not, and must not be silently re-described)"
+  3. "every scenario carries exactly one kind label and the mechanical/total ratio is readable off the spec"
   4. "every NFR has a response measure and a binding scenario id, or the literal marker `unbound — accepted at gate` with a reason"
   followed by: anything missing is a spec defect, and the pointer `references/spec-artifact-skeleton.md`.
 - Preconditions: §4 exists and its current paragraphs (Premise durability, Dialogue discipline, configuration callout) stay intact and in order.
@@ -82,13 +82,13 @@ None: the Plan minted no `CARRY-TO-SPEC` (plan, "Context for the next agent": "N
 
 ### C3 — `skills/sdlc/prompts/adversary-spec.prompt.md` skeleton-awareness anchors
 
-- Signature/shape: additive sentences inside four existing lettered attack surfaces; no new letter, no renumbering, no output-contract change:
-  - **B (Verification scenarios):** anchor asking whether every scenario carries exactly one kind label per `references/spec-artifact-skeleton.md` (`mechanical` / `inspection` / `carried` — inspection naming its decision point, carried its destination), and whether every scenario block carries the three-part form (`Given:` / `When–Then:` / `Falsify:`).
-  - **C (Contracts and interfaces):** anchor asking whether every interface the spec introduces or modifies has a Contracts block per `references/spec-artifact-skeleton.md` (signature/shape, preconditions, postconditions, invariants, error semantics incl. precedence, gating scenario ids), flagging any empty cell; interfaces mentioned only as unchanged context must not be silently re-described.
-  - **D (Contradictions):** term-precision anchor asking whether every coined term used two or more times in the body appears in the spec's Vocabulary table bound to an identifier or file, and every table term appears in the body.
-  - **F (Non-functional requirements):** anchor asking whether each NFR row carries characteristic, stimulus/condition, response measure, and a binding scenario id — or the explicit unbound marker with a reason — per `references/spec-artifact-skeleton.md`.
+- Signature/shape: additive sentences inside four existing lettered attack surfaces; no new letter, no renumbering, no output-contract change. Each anchor NAMES its component, instructs the reviewer to verify the spec against the component's definition in `references/spec-artifact-skeleton.md`, and cites that path — no anchor restates any rule logic (the reference-never-restate law, plan In #3):
+  - **B (Verification scenarios):** anchor: every scenario is checked for its kind label and the three-part scenario form per `references/spec-artifact-skeleton.md`.
+  - **C (Contracts and interfaces):** anchor: every interface the spec introduces or modifies is checked for a Contracts block per `references/spec-artifact-skeleton.md`; empty cells are flagged.
+  - **D (Contradictions):** anchor: term precision is checked against the spec's Vocabulary table per `references/spec-artifact-skeleton.md`.
+  - **F (Non-functional requirements):** anchor: every non-functional requirement is checked for its measure and binding per `references/spec-artifact-skeleton.md`.
 - Preconditions: the file is unfrozen per AM1; the existing A–H letter set, the Delta rounds section, and the STRICT output format (including the `CLEAR: <letter>` line contract) are byte-stable.
-- Postconditions: the prompt names all five skeleton components and cites the skeleton path; it never contains the four canonical rule sentences of C2 verbatim (anchors are question-form, distinct text).
+- Postconditions: the prompt names all five skeleton components and cites the skeleton path; none of C2's four canonical rule sentences appears in it as a contiguous substring (M4's exact matching semantics).
 - Invariants: reference, never restate — the skeleton and §4 own the rule definitions; the prompt owns only the checking instruction.
 - Error semantics: a missing anchor fails SAS3; a restated rule sentence fails SAS4. Independent assertions. The prompt is package-default only: consumer overrides resolve first by design and are out of scope (plan, Out).
 - Gated by: SAS3, SAS4.
@@ -124,18 +124,19 @@ None: the Plan minted no `CARRY-TO-SPEC` (plan, "Context for the next agent": "N
 ### C7 — contract tests
 
 - Signature/shape: one new test file (name chosen at Build), pure offline string assertions over the markdown/test surfaces, asserting exactly:
-  - M1: C1's H1 and all literal markers of the five components (section headers, table headers, bullet labels, the three kind-label names, the unbound marker, the three scenario-form labels).
+  - M1: C1's H1 and all literal markers of the five components (section headers, table headers, bullet labels, the three kind-label names, the unbound marker, the three scenario-form labels), the five section headers in the fixed order, and every literal fill-in placeholder of C1 (`<term>`, `<one-sentence definition>`, `<identifier or file>`, `<interface name>`, the fill-in table row).
   - M2: C2's four canonical rule sentences and the skeleton pointer, in `phase-spec.md`.
-  - M3: C3's anchor presence — all five component names + the skeleton path in the prompt; the A–H letter set present; the STRICT output-format header and the `CLEAR:` line contract unchanged.
-  - M4: C2's four canonical rule sentences are absent from the prompt (the reference-never-restate law).
-  - M5: C4's row is present with those exact `id`/`target`/`assertion` values.
+  - M3: C3's structural protection — exactly eight attack-surface headings `A.` through `H.` in order and no letter beyond H; the anchors present inside the B, C, D, F surface paragraphs (after each letter heading, before the next); the output-format section from `## Output format` to end-of-file byte-identical to a literal expected block the test embeds (the current closed contract: title/severity/confidence/origin/location/defect/evidence/impact/fix fields, the `CLEAR: <letter>` line, and the ranking instructions).
+  - M4: none of C2's four canonical rule sentences — the exact strings fixed there — appears anywhere in the prompt as a contiguous substring (the reference-never-restate law).
+  - M5: C4's row matches all ten fields exactly, and the inventory contains exactly 81 rows (no other row changed).
   - M6: C5's membership contract (16 entries, spec prompt absent, every other frozen path present).
   - M7: C6's minimality (IDV19 exempts only `"spec"`; constant and sibling loops untouched).
+  - M8: SAS11's pair — the skeleton contains no `Cucumber`, `Behat`, or `Gherkin` substring at all, and its scenario-form section contains the literal sentence "No keyword parser, no step definitions."
 - Preconditions: C1–C6 landed.
 - Postconditions: the suite is deterministic, offline, budget < 1 s; every marker assertion names the file and marker it checks.
 - Invariants: no network, no new dependency, no snapshot tooling.
 - Error semantics: each marker set fails independently with a message naming file + marker; co-occurring failures report independently (no precedence — parallel assertions).
-- Gated by: SAS1–SAS7 (each scenario's mechanical half is one marker set), SAS10.
+- Gated by: SAS1–SAS8 (each scenario's mechanical half is one marker set), SAS10, SAS11.
 
 ## Functional requirements
 
@@ -152,44 +153,44 @@ None: the Plan minted no `CARRY-TO-SPEC` (plan, "Context for the next agent": "N
 | Characteristic (ISO 25010) | Stimulus/condition | Response measure | Binding |
 |---|---|---|---|
 | Performance efficiency | Full test corpus run offline (CI equivalent) | Completes green under a 30-second external timeout (#177 precedent); contract tests < 1 s | SAS10 |
-| Compatibility | Any frozen surface diffed against the branch base | Byte-identical for all 17 remaining frozen entries + `templates/sdlc-spec.md`; only the AM1-class surfaces differ | SAS8, SAS9 |
+| Compatibility | Any frozen surface diffed against the branch base | Byte-identical for all 16 remaining frozen entries; the PR diff contains only the permitted change classes (`templates/sdlc-spec.md`, `test/fixtures/consumer/`, `package.json`, lockfile all untouched) | SAS8, SAS9 |
 | Maintainability | A reviewer or future slice reads the spec-review prompt | The prompt references the skeleton, never restates the four canonical rule sentences | SAS4 |
 | Portability | A consumer adopts the skeleton in any language/toolchain | No runtime assertion machinery, Gherkin-family tooling, or new dependency anywhere in the slice | SAS10, SAS11 |
-| Maintainability (future slices) | S2/S6 reuse the skeleton pattern (plan assumption 2) | Future-slice quality — this slice's evidence is that the shape is a generic `references/<skeleton>.md` with no spec-only content, inspected at the spec gate | unbound — accepted at gate |
+| Maintainability (future slices) | S2/S6 reuse the skeleton pattern (plan assumption 2) | Future-slice quality — this slice's evidence is that the shape is a generic `references/<skeleton>.md` with no spec-only content, inspected at the spec gate | unbound — accepted at gate — reason: only verifiable when S2/S6 land; self-demonstrated here by keeping the skeleton spec-generic |
 
 ## Verification scenarios
 
-Ratio: 11 mechanical / 2 inspection / 0 carried = 13 total (85% mechanical).
+Ratio: 10 mechanical / 3 inspection / 1 carried = 14 total (71% mechanical). The mechanical ratio fell deliberately in rev 2: round-1 adjudication moved base-relative non-change claims out of mechanical scenarios and into a PR-gate diff inspection (SAS9) under the premise-durability law (`phase-spec.md` §4; `CONTRIBUTING.md` "Durable scenario premises") — honesty over ratio, which is exactly what kind labels are for.
 
 ### SAS1 — the skeleton ships five components as literal fill-in blocks `(mechanical)`
 
 Given: branch HEAD with C1 landed.
-When–Then: the contract tests' M1 set passes — the skeleton exists with H1 `# Spec artifact skeleton` and every literal marker of the five components (headers `## Vocabulary`, `## Contracts`, `## Scenario kind labels`, `## Non-functional requirements`, `## Scenario form`; the two table headers; bullet labels `- Preconditions:`, `- Postconditions:`, `- Invariants:`, `- Error semantics:`, `- Gated by:`; the three kind-label names; the unbound marker; `Given:`, `When–Then:`, `Falsify:`).
-Falsify: removing any marker fails the corresponding M1 assertion.
+When–Then: the contract tests' M1 set passes — the skeleton exists with H1 `# Spec artifact skeleton`; the five component headers (`## Vocabulary`, `## Contracts`, `## Scenario kind labels`, `## Non-functional requirements`, `## Scenario form`) appear in that fixed order; every literal marker is present (the two table headers; bullet labels `- Preconditions:`, `- Postconditions:`, `- Invariants:`, `- Error semantics:`, `- Gated by:`; the three kind-label names; the unbound marker; `Given:`, `When–Then:`, `Falsify:`); and every literal fill-in placeholder of C1 is present (`<term>`, `<one-sentence definition>`, `<identifier or file>`, `<interface name>`, the fill-in table row) — proving a fill-in scaffold, not an empty or reordered document.
+Falsify: removing any marker or placeholder, or reordering the sections, fails the corresponding M1 assertion.
 
 ### SAS2 — §4 carries the four binding rules and the pointer `(mechanical)`
 
 Given: branch HEAD with C2 landed.
-When–Then: M2 passes — all four canonical rule sentences and the `references/spec-artifact-skeleton.md` pointer appear in `phase-spec.md` §4, inserted after the first paragraph with the existing paragraphs intact and in order.
-Falsify: deleting any rule sentence or the pointer fails M2.
+When–Then: M2 passes — all four canonical rule sentences, including the unchanged-context clause in rule 2 and the ratio clause in rule 3, and the `references/spec-artifact-skeleton.md` pointer appear in `phase-spec.md` §4, inserted after the first paragraph with the existing paragraphs intact and in order.
+Falsify: deleting any rule sentence, either clause, or the pointer fails M2.
 
-### SAS3 — the prompt anchors all five components without touching the output contract `(mechanical)`
+### SAS3 — the prompt's structure is protected, anchors placed inside B/C/D/F `(mechanical)`
 
 Given: branch HEAD with C3 landed (unfreeze per AM1 in force).
-When–Then: M3 passes — the prompt contains all five component names and the skeleton path; the lettered surfaces remain exactly A through H; the STRICT output-format header and the `CLEAR: <letter>` line contract are byte-stable.
-Falsify: removing an anchor fails M3; adding a letter or editing the output contract also fails M3.
+When–Then: M3 passes — the prompt contains exactly eight attack-surface headings `A.` through `H.` in order and no letter beyond H; the four anchors appear inside the B, C, D, F surface paragraphs (after each letter heading, before the next); the output-format section from `## Output format` to end-of-file is byte-identical to the literal expected block the test embeds.
+Falsify: removing an anchor, adding a ninth letter, placing an anchor outside B/C/D/F, or editing any output-format line fails M3.
 
 ### SAS4 — the prompt references, never restates `(mechanical)`
 
 Given: branch HEAD with C2 and C3 landed.
-When–Then: M4 passes — none of the four canonical rule sentences of C2 appears verbatim anywhere in the prompt.
-Falsify: copying any canonical sentence into the prompt fails M4.
+When–Then: M4 passes — none of C2's four canonical rule sentences appears anywhere in the prompt as a contiguous substring (exact matching semantics; the anchors of C3 are distinct text that name components and cite the skeleton path).
+Falsify: copying any canonical sentence, or any contiguous span of one, into the prompt fails M4.
 
 ### SAS5 — the skeleton is FS11-discoverable `(mechanical)`
 
 Given: branch HEAD with C1 and C4 landed.
-When–Then: M5 passes (the row carries the exact `id`/`target`/`assertion` values of C4) and `node skills/sdlc/scripts/check-references.mjs` exits 0 — the discovery root `skills/sdlc/references/*.md` is inverse-complete with the new file present.
-Falsify: dropping the row makes `check-references` fail inverse completeness for the new file.
+When–Then: M5 passes (the row matches all ten fields of C4 exactly, and the inventory contains exactly 81 rows) and `node skills/sdlc/scripts/check-references.mjs` exits 0 — the discovery root `skills/sdlc/references/*.md` is inverse-complete with the new file present.
+Falsify: dropping the row makes `check-references` fail inverse completeness; a semantically wrong but schema-valid row, or any change to another row, fails M5.
 
 ### SAS6 — the unfreeze removes exactly one frozen entry `(mechanical)`
 
@@ -200,8 +201,8 @@ Falsify: removing or reordering any further entry fails M6.
 ### SAS7 — the IDV19 reconciliation is minimal `(mechanical)`
 
 Given: branch HEAD with C6 landed.
-When–Then: M7 passes — the IDV19 test exempts only `"spec"`; the `ADVERSARY_PROMPTS` constant, the two sibling loops, and the `validator-task.prompt.md` assertion are byte-stable relative to the branch base.
-Falsify: touching the constant or a sibling loop fails M7.
+When–Then: M7 passes — the IDV19 test's loop is the only filtered use of `ADVERSARY_PROMPTS` (exempting exactly `"spec"`); the constant is asserted as the literal `["plan", "spec", "review"]`, the two sibling loops iterate unfiltered, and the `validator-task.prompt.md` assertion remains — all as literal content assertions, durable after merge.
+Falsify: touching the constant, filtering a sibling loop, or broadening the exemption fails M7.
 
 ### SAS8 — all other frozen surfaces stay byte-identical `(mechanical)`
 
@@ -209,23 +210,23 @@ Given: branch HEAD with C5 landed.
 When–Then: the standing ASD19 diff guard (`test/frozen-surfaces.test.js`) passes against the reduced `FROZEN` list — every remaining frozen surface is byte-identical to the branch base. Non-change claim, so per `phase-spec.md` §4 premise durability it routes to the standing diff guard rather than a base-relative scenario test.
 Falsify: any diff in a remaining frozen path fails ASD19.
 
-### SAS9 — `templates/sdlc-spec.md` is unchanged `(mechanical)`
+### SAS9 — the PR diff contains only the permitted change classes `(inspection)`
 
-Given: branch HEAD.
-When–Then: `git diff` of `templates/sdlc-spec.md` against the branch base is empty (plan scope: the template stays a pure standalone-entrypoint router).
-Falsify: any edit to the template produces a non-empty diff.
+Given: the branch's full diff at the **PR gate**.
+When–Then: the panel confirms every diff hunk falls inside the plan's permitted change classes (assumption 4): the new skeleton file, `phase-spec.md` §4, the deliberately-unfrozen prompt, the inventory row, the two named test changes, and the new contract-test file — and nothing else. In particular `templates/sdlc-spec.md` is unchanged, everything under `test/fixtures/consumer/` is byte-identical (plan A3 strict boundary), and `package.json` plus the lockfile carry no dependency change. Non-change claims, so per the premise-durability law they are inspected against the authoring diff here rather than encoded as base-relative scenario tests (none of these surfaces is in the standing FROZEN guard, and adding them is out of scope).
+Falsify: any hunk outside the permitted list fails this scenario at the PR gate.
 
-### SAS10 — corpus green, offline, inside budget; no new dependency `(mechanical)`
+### SAS10 — corpus green, offline, inside budget; full DoD-7 sweep `(mechanical)`
 
 Given: branch HEAD with all contracts landed; no network.
-When–Then: `npm test` passes under a 30-second external timeout (#177 precedent); the new contract-test file runs in under 1 s; `package.json` and the lockfile are unchanged against the branch base.
-Falsify: any failing test, a > 30 s run, or a dependency diff fails this scenario.
+When–Then: `npm test` passes under a 30-second external timeout (#177 precedent); the new contract-test file runs in under 1 s; `biome check` over the changed files is clean; `node skills/sdlc/scripts/check-references.mjs` exits 0; `bash skills/sdlc/scripts/check-lifecycle.sh` exits 0 (plan DoD 7).
+Falsify: any failing test, a > 30 s run, a biome finding on a changed file, or a failing inventory/lifecycle check fails this scenario.
 
 ### SAS11 — the skeleton mandates no tooling `(mechanical)`
 
 Given: branch HEAD with C1 landed.
-When–Then: the contract tests assert (i) the skeleton contains no Cucumber/Behat/Gherkin vocabulary at all, and (ii) the scenario-form section carries the positive rejection sentence "No keyword parser, no step definitions."
-Falsify: introducing any of the denied tool names, or deleting the rejection sentence, fails the assertion.
+When–Then: the M8 assertions pass — (i) the skeleton contains no Cucumber/Behat/Gherkin vocabulary at all, and (ii) the scenario-form section carries the positive rejection sentence "No keyword parser, no step definitions."
+Falsify: introducing any of the denied tool names, or deleting the rejection sentence, fails M8.
 
 ### SAS12 — gap traceability and guidance-not-prevention `(inspection)`
 
@@ -239,12 +240,19 @@ Given: this spec's Amendments (AM3) and the PR description.
 When–Then: at the **PR gate**, both surfaces name the track-none re-freeze, its orchestrator owner, and its two components (restore the `FROZEN` entry; restore IDV19's full assertion), and state that slice completion depends on it merging.
 Falsify: a PR description missing any of those elements fails this scenario; the gate does not pass until recorded.
 
+### SAS14 — the re-freeze actually merges before the slice is complete `(carried)`
+
+Given: the merged S1 PR, with AM3 recorded.
+When–Then: the orchestrator files and executes the track-none re-freeze follow-up — re-add `adversary-spec.prompt.md` to the `FROZEN` array and restore IDV19's unfiltered loop — and the slice is **not complete until that follow-up PR merges**. Destination: post-merge track-none follow-up, orchestrator-owned (plan DoD 9, In #5).
+Falsify: a merged S1 with no merged re-freeze means the slice is incomplete — ASD19 and IDV19 stay weakened while the suite is green.
+
 ## Assumptions
 
 1. The skeleton lives under `references/` and `templates/sdlc-spec.md` stays a pure router — owner-ratified in Brainstorm, restated by the approved plan (assumption 1).
 2. Enforcement rides the package-default prompt only; consumer overrides are consumer law and out of scope (plan, Out).
-3. The contract tests' file name is a Build decision; this spec fixes only the assertion inventory (M1–M7).
+3. The contract tests' file name is a Build decision; this spec fixes only the assertion inventory (M1–M8).
 4. Round mechanics of the spec panel (delta rounds, NEW/REOPENED tags) already exist in the prompt and are untouched by this slice.
+5. Contract tests compare against self-contained literal expectations (embedded blocks, literal content, fixed counts), never against a moving branch base — the premise-durability law (`CONTRIBUTING.md` "Durable scenario premises") routes base-relative non-change claims to the standing FROZEN guard or to SAS9's PR-gate inspection.
 
 ## Out of scope (restated from the approved plan)
 
