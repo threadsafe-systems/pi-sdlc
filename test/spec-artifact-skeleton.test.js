@@ -111,3 +111,62 @@ test("M5: inventory row matches C4's nine fields exactly", () => {
 	});
 	assert.ok(!("verification" in row), "normative-references.json: row reference.spec-artifact-skeleton must not carry the optional verification key");
 });
+
+// ---- M2: phase-spec.md §4 binding rules (C2) -----------------------------
+
+const phaseSpec = readFileSync(join(repo, "skills/sdlc/references/phase-spec.md"), "utf8");
+
+function section4(source) {
+	const head = source.match(/^## 4\. /m);
+	assert.ok(head, "phase-spec.md: heading '## 4.' not found");
+	const rest = source.slice(source.indexOf("\n", head.index) + 1);
+	const next = rest.match(/^## /m);
+	return next ? rest.slice(0, next.index) : rest;
+}
+
+const s4 = section4(phaseSpec);
+
+test("M2: §4's first paragraph still begins 'Produce the Spec doc:'", () => {
+	assert.ok(s4.trimStart().startsWith("Produce the Spec doc:"), "phase-spec.md §4: first paragraph must still begin 'Produce the Spec doc:'");
+});
+
+test("M2: the numbered binding rules sit between §4's first paragraph and Premise durability", () => {
+	const premiseIdx = s4.indexOf("**Premise durability.**");
+	assert.ok(premiseIdx > 0, "phase-spec.md §4: '**Premise durability.**' paragraph not found");
+	const region = s4.slice(s4.indexOf("Produce the Spec doc:"), premiseIdx);
+	const ruleLines = CANONICAL.map((sentence, i) => `${i + 1}. ${sentence}`);
+	let cursor = 0;
+	for (const line of ruleLines) {
+		const idx = region.indexOf(line);
+		assert.ok(idx !== -1, `phase-spec.md §4: numbered binding rule missing: ${JSON.stringify(line.slice(0, 40))}...`);
+		assert.ok(idx > cursor, `phase-spec.md §4: binding rule out of order: ${JSON.stringify(line.slice(0, 40))}...`);
+		cursor = idx;
+	}
+	const defectIdx = region.indexOf("anything missing is a spec defect");
+	assert.ok(defectIdx !== -1, "phase-spec.md §4: literal 'anything missing is a spec defect' missing");
+	assert.ok(defectIdx > cursor, "phase-spec.md §4: 'anything missing is a spec defect' must follow the four numbered rules");
+	const pointerIdx = region.indexOf("references/spec-artifact-skeleton.md");
+	assert.ok(pointerIdx !== -1, "phase-spec.md §4: skeleton pointer 'references/spec-artifact-skeleton.md' missing");
+	assert.ok(pointerIdx > defectIdx, "phase-spec.md §4: skeleton pointer must follow the defect sentence");
+});
+
+test("M2: the numbered rules open their own lines", () => {
+	const lines = s4.split("\n");
+	for (let i = 0; i < CANONICAL.length; i++) {
+		const wanted = `${i + 1}. ${CANONICAL[i]}`;
+		assert.ok(lines.includes(wanted), `phase-spec.md §4: rule ${i + 1} must open its own line verbatim`);
+	}
+});
+
+test("M2: Premise durability, Dialogue discipline, configuration callout follow in order", () => {
+	const anchors = ["**Premise durability.**", "**Dialogue discipline.**", "> **Under your configuration:**"];
+	let cursor = 0;
+	for (const anchor of anchors) {
+		const idx = s4.indexOf(anchor);
+		assert.ok(idx !== -1, `phase-spec.md §4: anchor missing: ${anchor}`);
+		assert.ok(idx > cursor, `phase-spec.md §4: anchor out of order: ${anchor}`);
+		// Each anchor still opens its paragraph: preceded by a blank line.
+		assert.ok(idx >= 2 && s4.slice(idx - 2, idx) === "\n\n", `phase-spec.md §4: anchor must still begin its paragraph: ${anchor}`);
+		cursor = idx;
+	}
+});

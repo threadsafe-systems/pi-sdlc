@@ -47,6 +47,17 @@ Produce the Spec doc: **contracts, interfaces, surface area, functional and
 non-functional requirements, and falsifiable verification scenarios with stable
 ids**. Its home routes to the configured `paths.specs`.
 
+Author the Spec against the fixed skeleton: fill in every block, delete none
+of the markers. The binding rules:
+
+1. every coined term used two or more times in the body appears in the Vocabulary table, and every term in the table appears in the body
+2. every interface this change introduces or modifies has a Contracts block (interfaces mentioned only as unchanged context do not, and must not be silently re-described)
+3. every scenario carries exactly one kind label and the mechanical/total ratio is readable off the spec
+4. every NFR has a response measure and a binding scenario id, or the literal marker `unbound — accepted at gate` with a reason
+
+The gate refuses a Spec with gaps — anything missing is a spec defect. The
+skeleton `references/spec-artifact-skeleton.md` pins the complete shape.
+
 **Premise durability.** A scenario must remain falsifiable after merge. A
 premise anchored to a moving ref expires when the authoring branch becomes the
 main line; assert the current tree or a pinned immutable commit instead. A
