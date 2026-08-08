@@ -76,6 +76,7 @@ test("M1: kind-label markers are section-local", () => {
 
 test("M1: NFR markers are section-local", () => {
 	inSectionOnly("| Characteristic (ISO 25010) | Stimulus/condition | Response measure | Binding |", "Non-functional requirements");
+	inSectionOnly("| <characteristic> | <stimulus or condition> | <measurable response> | <scenario id, or `unbound — accepted at gate` with a reason> |", "Non-functional requirements");
 	inSectionOnly("unbound — accepted at gate", "Non-functional requirements");
 });
 
@@ -130,24 +131,29 @@ test("M2: §4's first paragraph still begins 'Produce the Spec doc:'", () => {
 	assert.ok(s4.trimStart().startsWith("Produce the Spec doc:"), "phase-spec.md §4: first paragraph must still begin 'Produce the Spec doc:'");
 });
 
-test("M2: the numbered binding rules sit between §4's first paragraph and Premise durability", () => {
-	const premiseIdx = s4.indexOf("**Premise durability.**");
-	assert.ok(premiseIdx > 0, "phase-spec.md §4: '**Premise durability.**' paragraph not found");
-	const region = s4.slice(s4.indexOf("Produce the Spec doc:"), premiseIdx);
-	const ruleLines = CANONICAL.map((sentence, i) => `${i + 1}. ${sentence}`);
-	let cursor = 0;
-	for (const line of ruleLines) {
-		const idx = region.indexOf(line);
-		assert.ok(idx !== -1, `phase-spec.md §4: numbered binding rule missing: ${JSON.stringify(line.slice(0, 40))}...`);
-		assert.ok(idx > cursor, `phase-spec.md §4: binding rule out of order: ${JSON.stringify(line.slice(0, 40))}...`);
-		cursor = idx;
-	}
-	const defectIdx = region.indexOf("anything missing is a spec defect");
-	assert.ok(defectIdx !== -1, "phase-spec.md §4: literal 'anything missing is a spec defect' missing");
-	assert.ok(defectIdx > cursor, "phase-spec.md §4: 'anything missing is a spec defect' must follow the four numbered rules");
-	const pointerIdx = region.indexOf("references/spec-artifact-skeleton.md");
-	assert.ok(pointerIdx !== -1, "phase-spec.md §4: skeleton pointer 'references/spec-artifact-skeleton.md' missing");
-	assert.ok(pointerIdx > defectIdx, "phase-spec.md §4: skeleton pointer must follow the defect sentence");
+test("M2: the inserted block sits immediately after §4's first paragraph (adjacency, C2/SAS2)", () => {
+	// C2/SAS2's "paragraph" reads as the contiguous inserted region — C2
+	// renders the rules as a numbered list, so one literal markdown paragraph
+	// is impossible. Enforced shape: §4's blank-line-separated blocks are,
+	// contiguously and in order — first paragraph, rules lead-in, the four
+	// numbered rule lines, defect sentence + pointer, Premise durability.
+	// Any paragraph inserted between consecutive pairs fails this.
+	const blocks = s4
+		.split(/\n\s*\n/)
+		.map((b) => b.trim())
+		.filter(Boolean);
+	const firstIdx = blocks.findIndex((b) => b.startsWith("Produce the Spec doc:"));
+	assert.ok(firstIdx !== -1, "phase-spec.md §4: first paragraph block not found");
+	const lead = blocks[firstIdx + 1];
+	assert.ok(lead?.startsWith("Author the Spec against the fixed skeleton"), "phase-spec.md §4: the rules lead-in must be the block immediately after the first paragraph");
+	const list = blocks[firstIdx + 2];
+	assert.equal(list, CANONICAL.map((sentence, i) => `${i + 1}. ${sentence}`).join("\n"), "phase-spec.md §4: the block after the lead-in must be exactly the four numbered rule lines");
+	const closing = blocks[firstIdx + 3];
+	assert.ok(closing?.startsWith("The gate refuses"), "phase-spec.md §4: the defect sentence block must immediately follow the numbered rules");
+	assert.ok(closing.includes("anything missing is a spec defect"), "phase-spec.md §4: literal 'anything missing is a spec defect' missing");
+	assert.ok(closing.includes("references/spec-artifact-skeleton.md"), "phase-spec.md §4: skeleton pointer 'references/spec-artifact-skeleton.md' missing");
+	const premise = blocks[firstIdx + 4];
+	assert.ok(premise?.startsWith("**Premise durability.**"), "phase-spec.md §4: Premise durability must immediately follow the inserted block");
 });
 
 test("M2: the numbered rules open their own lines", () => {
@@ -269,6 +275,8 @@ test("M6: the FROZEN array equals C7's pinned list L3 exactly", () => {
 	// C5's membership contract: exactly L3's 16 entries, in L3's order —
 	// adversary-spec.prompt.md absent, every other frozen path present and
 	// unreordered. Removing or reordering any further entry must fail this.
+	// Window-scoped (AM4): this test pins the unfrozen window's shape; the
+	// AM3 re-freeze deletes it when the FROZEN entry is restored.
 	const body = readFileSync(join(repo, "test/frozen-surfaces.test.js"), "utf8");
 	const frozen = [...body.matchAll(/^\t"([^"]+)",$/gm)].map((m) => m[1]);
 	assert.deepEqual(frozen, L3, "FROZEN array drifted from C7's pinned list L3");
@@ -280,6 +288,8 @@ test("M7: the IDV19 reconciliation is minimal and complete", () => {
 	// ADVERSARY_PROMPTS, the constant is intact, the sibling loops are
 	// unfiltered, the validator-task assertion remains, and the comment
 	// names AM1, AM3 and the re-freeze obligation.
+	// Window-scoped (AM4): this test pins the unfrozen window's shape; the
+	// AM3 re-freeze deletes it when IDV19's unfiltered loop is restored.
 	const body = readFileSync(join(repo, "test/iteration-disposition.test.js"), "utf8");
 	assert.ok(body.includes('const ADVERSARY_PROMPTS = ["plan", "spec", "review"];'), "ADVERSARY_PROMPTS must stay the literal three-slug constant");
 	const filtered = [...body.matchAll(/ADVERSARY_PROMPTS\.filter/g)];

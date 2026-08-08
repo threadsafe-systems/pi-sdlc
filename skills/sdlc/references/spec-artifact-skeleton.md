@@ -1,9 +1,12 @@
 # Spec artifact skeleton
 
-The fixed shape for sdlc Spec docs (`docs/specs/<date>-<feat>.md`). Fill in
-every block below; delete none of the markers. A Spec that omits a required
-piece is defective at authoring time — the Spec gate refuses it, not the
-reviewer's patience.
+The fixed shape for sdlc Spec docs (under the configured `paths.specs`,
+default `docs/specs/<date>-<feat>.md`). Fill in every block below; delete none
+of the markers. A block that legitimately has zero entries — no coined terms,
+no changed interfaces, no NFRs — keeps its header and markers and carries one
+`none — <one-line reason>` entry where entries would go: a zero state is
+declared, never silent. A Spec that omits a required piece is defective at
+authoring time — the Spec gate refuses it, not the reviewer's patience.
 
 ## Vocabulary
 

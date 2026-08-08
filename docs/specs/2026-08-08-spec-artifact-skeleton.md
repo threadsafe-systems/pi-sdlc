@@ -28,9 +28,20 @@ Author: orchestrator (`maas-qwen/qwen3.8-max`)
 
 ### AM3 — mandatory post-merge re-freeze (orchestrator-owned)
 
-- What: a track-none follow-up that re-adds `adversary-spec.prompt.md` to the `FROZEN` array and restores IDV19's full assertion.
+- What: a track-none follow-up with three components: (1) re-add `adversary-spec.prompt.md` to the `FROZEN` array, (2) restore IDV19's full assertion (the unfiltered `ADVERSARY_PROMPTS` loop, filter and exemption comment removed), and (3) remove the window-scoped M6/M7 contract tests (AM4).
 - Owner: the **orchestrator** session, not the implementing agent (whose session ends at PR creation). Precedent: S5 (#206 → re-freeze #207), writing-comments (#223 → #224).
 - Obligation record: this section and the PR description. Slice completion depends on the re-freeze merging.
+
+### AM4 — M6/M7 are window-scoped; the re-freeze removes them (PR-panel adjudication A1, 2026-08-08)
+
+- What: M6 (FROZEN equals L3) and M7 (IDV19 minimality) pin the **unfrozen window's** shape — their subject is the temporary state AM1/AM2 create. After AM3's first two components land, M6 sees 17 FROZEN entries and M7 sees no filter, so the re-freeze cannot leave the corpus green unless it also removes M6/M7. The re-freeze PR therefore deletes those two tests (component 3 of AM3); nothing replaces them, because ASD19 (with the entry re-added) and IDV19 (restored) are again the standing guards, exactly as pre-slice.
+- Class: lifecycle clarification of C7's marker set — M1–M5 and M8 remain permanent; M6/M7 expire with the window they police.
+- Authority: PR-review round-1 adjudication A1 (docs/reviews/pr-review-spec-artifact-skeleton-2026-08-08/adjudication.md).
+
+### AM5 — SAS9 gains the validation-evidence change classes (PR-panel adjudication A3, 2026-08-08)
+
+- What: SAS9's permitted diff list originally covered only the seven production/test surfaces and cited a build-plan assumption that does not define change classes. The slice's PV1 receipts (`docs/validation/spec-artifact-skeleton/*.json`, `docs/reviews/task-validate-spec-artifact-skeleton-*/`) and PR-phase review artifacts (`docs/reviews/pr-review-spec-artifact-skeleton-*/`) are committed, plan-mandated verification evidence — SAS9 now enumerates them explicitly and drops the dangling citation.
+- Authority: PR-review round-1 adjudication A3.
 
 ### Inbound carries
 
@@ -264,7 +275,7 @@ Falsify: any diff in a remaining frozen path fails ASD19.
 ### SAS9 — the PR diff contains only the permitted change classes `(inspection)`
 
 Given: the branch's full diff at the **PR gate**.
-When–Then: the panel confirms every diff hunk falls inside the plan's permitted change classes (assumption 4): the new skeleton file, `phase-spec.md` §4 (exactly one inserted paragraph; every existing §4 line untouched — this is where C2's "current paragraphs stay intact" precondition is verified), the deliberately-unfrozen prompt, the inventory row, the two named test changes, and the new contract-test file — and nothing else. In particular `templates/sdlc-spec.md` is unchanged, everything under `test/fixtures/consumer/` is byte-identical (plan A3 strict boundary), and `package.json` plus the lockfile carry no dependency change. Non-change claims, so per the premise-durability law they are inspected against the authoring diff here rather than encoded as base-relative scenario tests (none of these surfaces is in the standing FROZEN guard, and adding them is out of scope).
+When–Then: the panel confirms every diff hunk falls inside the permitted change classes: the new skeleton file, `phase-spec.md` §4 (the contiguous inserted block — intro sentence, numbered rules, defect sentence, pointer; every existing §4 line untouched — this is where C2's "current paragraphs stay intact" precondition is verified), the deliberately-unfrozen prompt, the inventory row, the two named test changes, the new contract-test file, and the slice's committed verification evidence — the PV1 manifests under `docs/validation/spec-artifact-skeleton/`, the task receipt bundles under `docs/reviews/task-validate-spec-artifact-skeleton-*/`, and the PR-phase review artifacts under `docs/reviews/pr-review-spec-artifact-skeleton-*/` — and nothing else. In particular `templates/sdlc-spec.md` is unchanged, everything under `test/fixtures/consumer/` is byte-identical (plan A3 strict boundary), and `package.json` plus the lockfile carry no dependency change. Non-change claims, so per the premise-durability law they are inspected against the authoring diff here rather than encoded as base-relative scenario tests (none of these surfaces is in the standing FROZEN guard, and adding them is out of scope).
 Falsify: any hunk outside the permitted list fails this scenario at the PR gate.
 
 ### SAS10 — corpus green, offline, inside budget; full DoD-7 sweep `(mechanical)`
@@ -288,13 +299,13 @@ Falsify: a gap with an empty or missing component, or any component that reads a
 ### SAS13 — the re-freeze obligation is recorded where the lifecycle can find it `(inspection)`
 
 Given: this spec's Amendments (AM3) and the PR description.
-When–Then: at the **PR gate**, both surfaces name the track-none re-freeze, its orchestrator owner, and its two components (restore the `FROZEN` entry; restore IDV19's full assertion), and state that slice completion depends on it merging.
+When–Then: at the **PR gate**, both surfaces name the track-none re-freeze, its orchestrator owner, and its three components (restore the `FROZEN` entry; restore IDV19's full assertion; remove the window-scoped M6/M7 contract tests per AM4), and state that slice completion depends on it merging.
 Falsify: a PR description missing any of those elements fails this scenario; the gate does not pass until recorded.
 
 ### SAS14 — the re-freeze actually merges before the slice is complete `(carried)`
 
 Given: the merged S1 PR, with AM3 recorded.
-When–Then: the orchestrator files and executes the track-none re-freeze follow-up — re-add `adversary-spec.prompt.md` to the `FROZEN` array and restore IDV19's unfiltered loop — and the slice is **not complete until that follow-up PR merges**. Destination: post-merge track-none follow-up, orchestrator-owned (plan DoD 9, In #5).
+When–Then: the orchestrator files and executes the track-none re-freeze follow-up — re-add `adversary-spec.prompt.md` to the `FROZEN` array, restore IDV19's unfiltered loop, and remove the window-scoped M6/M7 contract tests (AM4) — and the slice is **not complete until that follow-up PR merges**. Destination: post-merge track-none follow-up, orchestrator-owned (plan DoD 9, In #5).
 Falsify: a merged S1 with no merged re-freeze means the slice is incomplete — ASD19 and IDV19 stay weakened while the suite is green.
 
 ## Assumptions
