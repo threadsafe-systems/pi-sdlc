@@ -293,3 +293,13 @@ test("M7: the IDV19 reconciliation is minimal and complete", () => {
 	assert.match(idv19, /AM3/, "IDV19's comment must name AM3");
 	assert.match(idv19, /re-freeze/, "IDV19's comment must name the re-freeze obligation");
 });
+
+test("M8: the skeleton rejects keyword-parser machinery by name", () => {
+	// SAS11's pair: no Cucumber/Behat/Gherkin vocabulary anywhere in the
+	// skeleton, and the scenario-form section carries the positive rejection
+	// sentence. The skeleton is framework-neutral fill-in structure only.
+	for (const banned of ["Cucumber", "Behat", "Gherkin"]) {
+		assert.ok(!skeleton.includes(banned), `spec-artifact-skeleton.md must not mention ${banned}`);
+	}
+	assert.ok(sections["Scenario form"].includes("No keyword parser, no step definitions."), "Scenario form section must carry the literal rejection sentence");
+});

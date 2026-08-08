@@ -1,0 +1,75 @@
+{
+  "schemaVersion": 1,
+  "taskId": "t5",
+  "buildPlan": "docs/plans/2026-08-08-spec-artifact-skeleton-build.md",
+  "repoRoot": ".",
+  "ownedScenarios": ["SAS4", "SAS8", "SAS10", "SAS11"],
+  "checks": [
+    {
+      "id": "tests.full",
+      "argv": ["npm", "test"],
+      "timeoutMs": 300000,
+      "scope": ["full"],
+      "evidence": ["whole-corpus regression net is green with the complete M1-M8 contract suite in place"]
+    },
+    {
+      "id": "tests.task",
+      "argv": ["node", "--test", "test/spec-artifact-skeleton.test.js"],
+      "timeoutMs": 120000,
+      "scope": ["task"],
+      "evidence": ["M8 (SAS11): no Cucumber/Behat/Gherkin vocabulary in the skeleton, positive rejection sentence present", "full M1-M8 suite green: every mechanical scenario's test evidence is task-scoped"]
+    },
+    {
+      "id": "tests.frozen",
+      "argv": ["node", "--test", "test/frozen-surfaces.test.js"],
+      "timeoutMs": 120000,
+      "scope": ["task"],
+      "evidence": ["SAS8: ASD19 diff guard runs task-scoped \u2014 every remaining frozen surface byte-identical to the branch base"]
+    },
+    {
+      "id": "refs.inventory",
+      "argv": ["node", "skills/sdlc/scripts/check-references.mjs"],
+      "timeoutMs": 120000,
+      "evidence": ["SAS8/SAS10: every discovered public artifact (skeleton doc included) has an inventory row; no dangling references"]
+    },
+    {
+      "id": "lifecycle.declaration",
+      "argv": ["bash", "skills/sdlc/scripts/check-lifecycle.sh", "--track", "irreversible", "--slug", "spec-artifact-skeleton"],
+      "timeoutMs": 120000,
+      "evidence": ["SAS4: the run's lifecycle declaration (track irreversible, slug spec-artifact-skeleton) passes the FS9 checker"]
+    },
+    {
+      "id": "static.lint",
+      "argv": ["npx", "biome", "check", "test/spec-artifact-skeleton.test.js"],
+      "timeoutMs": 120000,
+      "evidence": ["the task's lintable surfaces are biome-clean"]
+    }
+  ],
+  "categories": {
+    "tests": {
+      "applicability": "required",
+      "checkIds": ["tests.full", "tests.task", "tests.frozen"]
+    },
+    "static": {
+      "applicability": "required",
+      "checkIds": ["static.lint", "refs.inventory", "lifecycle.declaration"]
+    },
+    "scenarios": {
+      "applicability": "required",
+      "evidence": {
+        "SAS4": ["tests.task"],
+        "SAS8": ["tests.frozen"],
+        "SAS10": ["tests.full", "tests.task", "refs.inventory", "lifecycle.declaration", "static.lint"],
+        "SAS11": ["tests.task"]
+      }
+    },
+    "standards": {
+      "applicability": "n/a",
+      "reason": "no governing standard beyond the declared checks applies to this verification-sweep task"
+    },
+    "bannedPatterns": {
+      "applicability": "n/a",
+      "reason": "no task-diff pattern prohibition beyond lint applies to this task"
+    }
+  }
+}
