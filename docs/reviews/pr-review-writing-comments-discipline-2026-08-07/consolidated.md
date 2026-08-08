@@ -71,3 +71,17 @@ No finding was dismissed.
 ### Round-cap diagnosis
 
 The round-4 tail is fix-wave churn in a newly introduced coherence assertion and its header, not disagreement about the feature design. The owner's standing instruction for this delivery explicitly authorises unbounded review cycles until the panel is satisfied, selecting the system-reference option to continue delta review. Round 5 receives only this two-line behavioral/prose fix wave.
+
+## Round 5 — terminal verification
+
+Delta: `51c00a9..18dc0c7`
+
+Reviewers: `deepseek/deepseek-v4-pro:xhigh`, `moonshotai/kimi-k3:xhigh`, `google/gemini-3.1-pro-preview:xhigh`.
+
+All three reviewers independently confirmed WC-R4-01 and WC-R4-02 resolved. Each reported:
+
+- no high-severity findings;
+- no medium-severity findings;
+- no low-severity findings.
+
+The panel is satisfied. No finding from any round survives.
