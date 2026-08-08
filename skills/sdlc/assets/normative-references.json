@@ -141,7 +141,7 @@
     {
       "id": "script.tracker-ops",
       "source": "skills/sdlc/scripts/tracker-ops.mjs",
-      "assertion": "tracker-ops.mjs — scripted wrapper for the GitHub tracker mutations",
+      "assertion": "tracker-ops.mjs \u2014 scripted wrapper for the GitHub tracker mutations",
       "targetKind": "file",
       "ownership": "package",
       "required": true,
@@ -152,7 +152,7 @@
     {
       "id": "script.tracker-ops-wrapper",
       "source": "skills/sdlc/scripts/tracker-ops.sh",
-      "assertion": "tracker-ops.sh — thin entry point for the sdlc tracker-ops helper.",
+      "assertion": "tracker-ops.sh \u2014 thin entry point for the sdlc tracker-ops helper.",
       "targetKind": "command",
       "ownership": "package",
       "required": true,
@@ -345,6 +345,17 @@
       "required": true,
       "resolution": "package",
       "target": "skills/sdlc/references/phase-spec.md",
+      "class": "package-public"
+    },
+    {
+      "id": "reference.spec-artifact-skeleton",
+      "source": "skills/sdlc/references/spec-artifact-skeleton.md",
+      "assertion": "# Spec artifact skeleton",
+      "targetKind": "file",
+      "ownership": "package",
+      "required": true,
+      "resolution": "package",
+      "target": "skills/sdlc/references/spec-artifact-skeleton.md",
       "class": "package-public"
     },
     {
