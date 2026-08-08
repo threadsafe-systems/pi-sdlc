@@ -1,6 +1,6 @@
 # Plan: Spec artifact skeleton (S1)
 
-Status: rev 2 — amended after plan-panel round 1 (PLAN-R1-01..07 all incorporated; adjudication in `docs/reviews/plan-review-spec-artifact-skeleton-2026-08-08/consolidated.md`)
+Status: rev 3 — amended after plan-panel round 2 (PLAN-R2-01..05 all incorporated; adjudication in `docs/reviews/plan-review-spec-artifact-skeleton-2026-08-08/consolidated.md`)
 
 Track: irreversible — freezes the specification artifact shape (a public surface later slices and consumers bind to)
 
@@ -29,16 +29,19 @@ The map #192 R5 synthesis ratified S1 as the second slice (after S5, which shipp
    - `## Non-functional requirements` — one row per carried NFR: characteristic (ISO 25010 label) → stimulus/condition → response measure → binding scenario id, or the literal `unbound — accepted at gate` with a reason (G5).
    - Three-part scenario form on separate lines — `Given:` (state/fixture; `Given: none` permitted) / `When–Then:` (behaviour+outcome) / `Falsify:` (existing) (G6).
 2. **`skills/sdlc/references/phase-spec.md` §4** — a short prose addition stating the binding rules and pointing to the skeleton: every coined term used ≥2× in the body appears in the Vocabulary table (and every table term appears in the body); every interface this change introduces or modifies has a Contracts block (interfaces mentioned only as unchanged context do not, and must not be silently re-described); every scenario carries exactly one kind label and the mechanical/total ratio is readable off the spec; every NFR has a measure + scenario id or the explicit `unbound` marker — anything missing is a spec defect.
-3. **`skills/sdlc/prompts/adversary-spec.prompt.md`** — add attack surfaces that name the skeleton's five components and require checking them against `references/spec-artifact-skeleton.md` (reference, never restate — the skeleton stays the single source of truth). The file is on the FS19 frozen list; it is unfrozen by removing it from the frozen array under the deliberate-change precedent set by S5, and the unfreeze is recorded in the Amendments section of the spec this plan spawns.
-4. **FS11 inventory row** — the new reference gains its `assets/normative-references.json` row (checked by `check-references.mjs`), without which the slice cannot pass its own lifecycle checks.
-5. **Contract tests** proving the authoring surface (skeleton + `phase-spec.md` §4 + prompt attack surfaces) retains the binding rules and that the skeleton contains the three-part scenario form as literal fill-in blocks. Pure offline string assertions over markdown files; budget < 1 s, no network.
+3. **`skills/sdlc/prompts/adversary-spec.prompt.md`** — extend the existing lettered attack surfaces (A–H) with skeleton-awareness checks: the prompt names the five skeleton components as check targets and references `references/spec-artifact-skeleton.md` for their definitions. No new attack-surface letter, no change to the output contract (the closed A–H CLEAR-line wording stays), no round-mechanics change. The binding-rule definitions themselves live only in the skeleton and `phase-spec.md` §4 — the prompt references, never restates. The file is on the FS19 frozen list; it is unfrozen by removing it from the frozen array under the deliberate-change precedent set by S5, and the unfreeze is recorded in the Amendments section of the spec this plan spawns.
+4. **IDV19 reconciliation** — `test/iteration-disposition.test.js` (which asserts every adversary prompt stays in the frozen list) is temporarily reconciled to exempt the deliberately-unfrozen spec prompt, and restored by the re-freeze.
+5. **Mandatory post-merge re-freeze** — a track-none follow-up immediately after merge re-adds `adversary-spec.prompt.md` to the frozen array and restores IDV19's full assertion (S5 precedent: #206 + re-freeze #207). Slice completion depends on that follow-up merging.
+6. **FS11 inventory row** — the new reference gains its `assets/normative-references.json` row (checked by `check-references.mjs`), without which the slice cannot pass its own lifecycle checks.
+7. **Contract tests** proving the authoring surface retains the binding rules and that the skeleton contains the three-part scenario form as literal fill-in blocks: `phase-spec.md` §4 carries the rule text, the skeleton carries the five components, and the prompt carries the five component anchors plus the skeleton-path reference. Pure offline string assertions over markdown files; budget < 1 s, no network.
 
 ### Out
 
 - R3-G7 (spec re-rounds / delta re-review / NEW-REOPENED escalation) — rides S5's already-shipped iteration/disposition vocabulary; no new prose here.
 - R3-G8 (diagram change-class rule) and R3-G9 (IA front-matter + `lint.mjs` advisory use) — routed to S7 (comprehension seam).
 - R3-G10 (estimator counts into `ceremony.recommended`) and R3-G11 (verification-technique dial) — routed to #158's build stream.
-- Any change to the re-round mechanics of `prompts/adversary-spec.prompt.md` (R3-G7 territory); the only permitted prompt change is the skeleton-awareness attack surfaces of In-scope item 3.
+- Any change to the re-round mechanics of `prompts/adversary-spec.prompt.md` (R3-G7 territory); the only permitted prompt change is skeleton-awareness within the existing lettered attack surfaces.
+- Consumer prompt overrides: enforcement is bounded to the package-default prompt. Overrides resolve first by design (`ensure-panel-agent.mjs`) and are consumer law; migrating existing overrides is the consumer's own lifecycle work. The `test/fixtures/consumer/` override fixtures stay untouched unless a test demands otherwise.
 - Any runtime assertion machinery, Gherkin syntax, step definitions, Cucumber-family tooling, or new tooling mandate.
 - Changing `templates/sdlc-spec.md` (stays a pure standalone-entrypoint router; the skeleton is referenced from `phase-spec.md` §4, not restated there).
 - Any new gate, dial, panel role, configuration value, or schema change.
@@ -47,24 +50,25 @@ The map #192 R5 synthesis ratified S1 as the second slice (after S5, which shipp
 
 1. The skeleton lives under `references/` (authoring guidance) and is referenced from `phase-spec.md` §4, keeping `templates/sdlc-spec.md` a pure router — owner-ratified in Brainstorm (option a).
 2. S2 (Plan skeleton) and S6 (Build craft) will follow the same `references/<skeleton>.md` pattern, so S1 should establish a clean, reusable shape rather than a spec-only hack.
-3. The binding rules are prose law authored once in `phase-spec.md` §4 (and mirrored in the skeleton), enforced by the spec panel through the updated `adversary-spec.prompt.md` attack surfaces — not by a new mechanical checker. The contract tests prove the rules are present in the guidance, not that a spec satisfies them.
-4. Frozen-surface discipline governs production authoring prose: the changed authoring surfaces are `phase-spec.md` and the new `references/spec-artifact-skeleton.md`. Contract tests, the inventory row, and the deliberate `adversary-spec.prompt.md` change with its FS19 unfreeze are additional, named permitted change classes; every other frozen script/prompt/schema stays byte-identical.
+3. The binding rules are prose law authored once in `phase-spec.md` §4 (and mirrored in the skeleton), enforced by the spec panel through skeleton-awareness anchors inside the prompt's existing lettered attack surfaces — not by a new mechanical checker. The contract tests prove the rules are present in the guidance and anchored in the prompt, not that a spec satisfies them.
+4. Frozen-surface discipline governs production authoring prose: the changed authoring surfaces are `phase-spec.md` and the new `references/spec-artifact-skeleton.md`. Contract tests, the inventory row, the deliberate `adversary-spec.prompt.md` change with its FS19 unfreeze, the temporary IDV19 reconciliation, and the post-merge re-freeze are additional, named permitted change classes; every other frozen script/prompt/schema stays byte-identical.
 5. The existing `#38` surface-name archaeology and canonical scenario-key design are out of scope (carried by #178), matching the writing-comments slice.
 
 ## Definition of done
 
 1. `skills/sdlc/references/spec-artifact-skeleton.md` exists and contains the five skeleton components (Vocabulary, Contracts, scenario-kind labels, NFR table, three-part scenario form) as literal fill-in blocks.
 2. `skills/sdlc/references/phase-spec.md` §4 states the binding rules (coined-term↔table, interface↔block, one-kind-label, NFR measure-or-unbound) and points to the skeleton.
-3. Contract tests assert the rules are present in all three surfaces (`phase-spec.md` §4, the skeleton, the prompt attack surfaces) and that the skeleton contains the three-part scenario form (`Given:` / `When–Then:` / `Falsify:`) as literal fill-in blocks.
+3. Contract tests assert the rule text is present in `phase-spec.md` §4, the five components are present in the skeleton as literal fill-in blocks (including the three-part scenario form `Given:` / `When–Then:` / `Falsify:`), and the prompt contains anchors naming all five components plus a reference to the skeleton path — not restated rule definitions.
 4. The five gaps are each traceable to a non-empty skeleton component by id (G1→Vocabulary, G2→Contracts, G4→kind labels, G5→NFR table, G6→scenario form).
-5. All frozen surfaces are byte-identical to the branch base (ASD19) except the deliberate unfreeze of `prompts/adversary-spec.prompt.md`, which is removed from the frozen array and whose only diff is the skeleton-awareness attack surfaces.
+5. All frozen surfaces are byte-identical to the branch base (ASD19) except the deliberate unfreeze of `prompts/adversary-spec.prompt.md` (removed from the frozen array; its only diff is skeleton-awareness within the existing lettered surfaces) and the paired temporary IDV19 reconciliation; both are restored by the mandatory post-merge re-freeze.
 6. `templates/sdlc-spec.md` is unchanged.
 7. Full test corpus passes (`npm test`, offline, under a 30-second external timeout — matching the #177 precedent); `biome check` over changed files is clean; the reference inventory (`check-references.mjs`) and lifecycle checks pass.
 8. No new dependency, public API, schema, dial, gate, or configuration change.
+9. The track-none re-freeze follow-up is filed immediately after merge, and this slice is not complete until it merges.
 
 ## Context for the next agent
 
-- Primary authoring target: **new** `skills/sdlc/references/spec-artifact-skeleton.md`; edit `skills/sdlc/references/phase-spec.md` §4 and the `adversary-spec.prompt.md` attack surfaces; add the `normative-references.json` inventory row and unfreeze the prompt in `test/frozen-surfaces.test.js` (record both in the spec's Amendments).
+- Primary authoring target: **new** `skills/sdlc/references/spec-artifact-skeleton.md`; extend the existing lettered attack surfaces in `skills/sdlc/prompts/adversary-spec.prompt.md`; edit `skills/sdlc/references/phase-spec.md` §4; add the `normative-references.json` inventory row; unfreeze the prompt in `test/frozen-surfaces.test.js` with the paired IDV19 reconciliation in `test/iteration-disposition.test.js` (record all of it in the spec's Amendments); file the track-none re-freeze follow-up immediately after merge.
 - The R3 brief `docs/briefs/2026-07-26-design-phase-r3-spec.md` is the authority for each gap's exact candidate change and done-means — read the G1/G2/G4/G5/G6 rows before writing.
 - The R5 synthesis `docs/briefs/2026-07-26-design-phase-r5-synthesis.md` row 58 is S1's ratified scope.
 - A real spec showcasing the skeleton is not required in this slice (dogfooding the skeleton on a future spec is a later concern); the skeleton + `phase-spec.md` §4 + tests are the deliverable.
@@ -78,4 +82,11 @@ The map #192 R5 synthesis ratified S1 as the second slice (after S5, which shipp
 - Trigger: plan-panel round 1 (gemini-3.1-pro-preview + gpt-5.6-luna) returned 3 high / 4 medium findings; all incorporated, none dismissed.
 - Class: **(c), normal fix wave**.
 - Disposition: **incorporated** — see `docs/reviews/plan-review-spec-artifact-skeleton-2026-08-08/consolidated.md`. The single substantive scope change is PLAN-R1-01: `adversary-spec.prompt.md` moves from Out to In (skeleton-awareness attack surfaces only, unfrozen under the FS19 precedent), because enforcement is intrinsic to S1's ratified purpose of closing the author/reviewer asymmetry. Recorded for owner ratification at the Plan gate.
+- Author: orchestrator (`maas-qwen/qwen3.8-max`), during plan-panel adjudication on 2026-08-08.
+
+### A2 — plan rev 3: incorporate plan-panel round 2
+
+- Trigger: round-2 delta review confirmed all seven rev-2 fixes and raised five new findings (3 high / 2 medium), all downstream consequences of the A1 unfreeze; all incorporated, none dismissed.
+- Class: **(c), normal fix wave**.
+- Disposition: **incorporated** — see `docs/reviews/plan-review-spec-artifact-skeleton-2026-08-08/consolidated.md` (round 2). Key mechanics added: prompt change limited to extending the existing A–H attack surfaces (no new letter, no output-contract change); contract tests assert component anchors + skeleton-path reference in the prompt, never restated rules; temporary IDV19 reconciliation in `test/iteration-disposition.test.js`; mandatory track-none post-merge re-freeze (S5 precedent #206+#207) that slice completion depends on; enforcement bounded to the package-default prompt with consumer overrides out of scope.
 - Author: orchestrator (`maas-qwen/qwen3.8-max`), during plan-panel adjudication on 2026-08-08.
