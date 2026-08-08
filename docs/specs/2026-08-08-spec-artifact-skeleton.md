@@ -1,6 +1,6 @@
 # Specification: Spec artifact skeleton (S1)
 
-Status: rev 3 — amended after spec-panel round 2 (round 1: SPEC-R1-01..13 all incorporated; round 2: SPEC-R2-01..09 all incorporated — see `docs/reviews/spec-review-spec-artifact-skeleton-2026-08-08/consolidated.md`)
+Status: rev 4 — amended after spec-panel round 3 (round 1: SPEC-R1-01..13; round 2: SPEC-R2-01..09; round 3: SPEC-R3-01..06 — all incorporated; see `docs/reviews/spec-review-spec-artifact-skeleton-2026-08-08/consolidated.md`)
 Track: irreversible (freezes the specification artifact shape — a public surface later slices and consumers bind to)
 Run slug: `spec-artifact-skeleton`
 Map: #192 (design-phase craft), slice S1
@@ -55,10 +55,10 @@ None: the Plan minted no `CARRY-TO-SPEC` (plan, "Context for the next agent": "N
 ### C1 — `skills/sdlc/references/spec-artifact-skeleton.md` (new file)
 
 - Signature/shape: one markdown reference file, H1 exactly `# Spec artifact skeleton`, containing five sections in this order with these exact fill-in blocks:
-  1. `## Vocabulary` — table header exactly `| Term | Definition | Binds to |`, fill-in row `| <term> | <one-sentence definition> | <identifier or file> |`, plus the binding-rule sentence (mirrors C2 rule 1).
-  2. `## Contracts` — fill-in block: `### <interface name>` with bullet rows `- Signature/shape:`, `- Preconditions:`, `- Postconditions:`, `- Invariants:`, `- Error semantics:` (precedence when several fire, or "at most one error possible"), `- Gated by:` (scenario ids); plus the binding-rule sentence (mirrors C2 rule 2) and the explicit note that interfaces mentioned only as unchanged context get no block and must not be silently re-described.
-  3. `## Scenario kind labels` — defines exactly three labels, `mechanical` (a runner/argv check can decide it), `inspection` (a human or panel decides it at a named decision point — the scenario names that point in its body, the label stays the literal `inspection`), `carried` (deferred to a later phase — the scenario names the destination in its body, the label stays the literal `carried`); states the one-label-per-scenario rule and that the mechanical/total ratio must be readable off the spec (mirrors C2 rule 3).
-  4. `## Non-functional requirements` — table header exactly `| Characteristic (ISO 25010) | Stimulus/condition | Response measure | Binding |`; the Binding cell is a scenario id present in the spec's scenario list or the literal `unbound — accepted at gate` with a reason (mirrors C2 rule 4).
+  1. `## Vocabulary` — table header exactly `| Term | Definition | Binds to |`, fill-in row `| <term> | <one-sentence definition> | <identifier or file> |`, plus the binding-rule sentence — C2's exact canonical sentence 1.
+  2. `## Contracts` — fill-in block: `### <interface name>` with bullet rows `- Signature/shape:`, `- Preconditions:`, `- Postconditions:`, `- Invariants:`, `- Error semantics:` (precedence when several fire, or "at most one error possible"), `- Gated by:` (scenario ids); plus the binding-rule sentence — C2's exact canonical sentence 2 (whose parenthetical is itself the explicit note that interfaces mentioned only as unchanged context get no block and must not be silently re-described).
+  3. `## Scenario kind labels` — defines exactly three labels, `mechanical` (a runner/argv check can decide it), `inspection` (a human or panel decides it at a named decision point — the scenario names that point in its body, the label stays the literal `inspection`), `carried` (deferred to a later phase — the scenario names the destination in its body, the label stays the literal `carried`); states the one-label-per-scenario rule and that the mechanical/total ratio must be readable off the spec — C2's exact canonical sentence 3.
+  4. `## Non-functional requirements` — table header exactly `| Characteristic (ISO 25010) | Stimulus/condition | Response measure | Binding |`; the Binding cell is a scenario id present in the spec's scenario list or the literal `unbound — accepted at gate` with a reason — C2's exact canonical sentence 4.
   5. `## Scenario form` — three named parts on separate lines: `Given:` (state/fixture; `Given: none` permitted and expected for pure-function scenarios), `When–Then:` (behaviour + outcome), `Falsify:` (what would show the scenario failing). No keyword parser, no step definitions.
 - Preconditions: none (new file).
 - Postconditions: the file exists at that path with those literal markers; every component is a non-empty fill-in scaffold (authoring guidance), not process narrative; the file is discoverable by FS11 (paired with C4).
@@ -124,14 +124,65 @@ None: the Plan minted no `CARRY-TO-SPEC` (plan, "Context for the next agent": "N
 ### C7 — contract tests
 
 - Signature/shape: one new test file (name chosen at Build), pure offline string assertions over the markdown/test surfaces, asserting exactly:
-  - M1: C1's H1 and all literal markers of the five components (section headers, table headers, bullet labels, the three kind-label names, the unbound marker, the three scenario-form labels), the five section headers in the fixed order, and every literal fill-in placeholder of C1 (`<term>`, `<one-sentence definition>`, `<identifier or file>`, `<interface name>`, the fill-in table row).
-  - M2: C2's four canonical rule sentences and the skeleton pointer, in `phase-spec.md`.
-  - M3: C3's structural protection — exactly eight attack-surface headings `A.` through `H.` in order and no letter beyond H; the four anchors present inside the B, C, D, F surface paragraphs (after each letter heading, before the next), each anchor containing its component name and the literal skeleton path `references/spec-artifact-skeleton.md`, and the four anchors together naming all five skeleton components (Vocabulary, Contracts, Scenario kind labels, Non-functional requirements, Scenario form); the `## Delta rounds` section byte-identical to a literal expected block the test embeds (C3's byte-stability precondition covers it, so the protection must too); the output-format section from `## Output format` to end-of-file byte-identical to a literal expected block the test embeds (the current closed contract: title/severity/confidence/origin/location/defect/evidence/impact/fix fields, the `CLEAR: <letter>` line, and the ranking instructions).
+  - M1: C1's H1 and all literal markers of the five components (section headers, table headers, bullet labels, the three kind-label names, the unbound marker, the three scenario-form labels); the five section headers in the fixed order, and the file's complete section set exactly those five sections — no extras — with every marker and placeholder appearing only between its owning section header and the next; C2's four canonical rule sentences present in the skeleton, each inside its owning section (Vocabulary→1, Contracts→2, Scenario kind labels→3, Non-functional requirements→4); and every literal fill-in placeholder of C1 (`<term>`, `<one-sentence definition>`, `<identifier or file>`, `<interface name>`, the fill-in table row).
+  - M2: in `phase-spec.md` §4 — the first paragraph still begins `Produce the Spec doc:`; C2's four canonical rule sentences and the skeleton pointer appear in one paragraph after that first paragraph and before the paragraph beginning `**Premise durability.**`; and the paragraphs beginning `**Premise durability.**`, `**Dialogue discipline.**`, and `> **Under your configuration:**` follow, in that order — all literal anchor assertions, durable after merge.
+  - M3: C3's structural protection — exactly eight attack-surface headings `A.` through `H.` in order and no letter beyond H; the four anchors present inside the B, C, D, F surface paragraphs (after each letter heading, before the next), each anchor containing its component name and the literal skeleton path `references/spec-artifact-skeleton.md`, and the four anchors together naming all five skeleton components (Vocabulary, Contracts, Scenario kind labels, Non-functional requirements, Scenario form); the `## Delta rounds` section — from its heading to the `## Output format` heading, trailing blank lines normalized — byte-identical to literal block **L1** pinned under C7 (C3's byte-stability precondition covers it, so the protection must too, and assumption 5 requires the expectation to be self-contained rather than left to whatever block the test chooses to embed); the output-format section from `## Output format` to end-of-file (trailing newline normalized) byte-identical to literal block **L2** pinned under C7 (the current closed contract: title/severity/confidence/origin/location/defect/evidence/impact/fix fields, the `CLEAR: <letter>` line, and the ranking instructions).
   - M4: none of C2's four canonical rule sentences — the exact strings fixed there — appears anywhere in the prompt as a contiguous substring (the reference-never-restate law).
   - M5: C4's row matches all nine fields exactly (every schema-required key present with C4's values; the schema forbids additional keys), the optional `verification` key is absent from it, and the inventory contains exactly 81 rows. The "no other row changed" invariant is not mechanically provable without a baseline and routes to SAS9's PR-gate diff inspection (C4's gating split).
-  - M6: C5's membership contract (16 entries, spec prompt absent, every other frozen path present).
-  - M7: C6's minimality (IDV19 exempts only `"spec"`; constant and sibling loops untouched).
+  - M6: C5's membership contract — the `FROZEN` array holds exactly the 16 entries of C7's pinned list **L3**, in L3's exact order (the pre-slice list minus `adversary-spec.prompt.md`): the spec prompt is absent and every other frozen path present and unreordered.
+  - M7: C6's minimality (IDV19 exempts only `"spec"`; constant and sibling loops untouched) plus the accompanying comment's presence — it names AM1 and AM3 and the re-freeze obligation (literal content assertion).
   - M8: SAS11's pair — the skeleton contains no `Cucumber`, `Behat`, or `Gherkin` substring at all, and its scenario-form section contains the literal sentence "No keyword parser, no step definitions."
+
+**Pinned literal blocks (M3, M6).** Self-contained expectations per assumption 5 — the Build test embeds exactly these bytes, so a tampered embed cannot pass its own contract.
+
+L1 — the prompt's `## Delta rounds` section:
+
+```
+## Delta rounds
+
+Round 1 reviews the whole spec. **Every round after the first is a delta review.** The caller gives you the prior rounds' findings and their dispositions, and your review is scoped to the delta since the previous round. Tag every finding `NEW`, or `REOPENED(<prior-id>)` when you re-raise an already-dispositioned finding by its id. A reopen is legal only when you cite evidence that did not exist, or was not available, when that finding was dispositioned; otherwise do not re-raise it. Confirming a prior fix is one line, not a re-litigation.
+```
+
+L2 — the prompt's output-format section, `## Output format` to end-of-file:
+
+```
+## Output format (STRICT: markdown only, findings only, no preamble, no conclusion)
+
+### <short title>
+
+- severity: high | medium | low
+- confidence: high | medium (drop anything lower; do not speculate)
+- origin: NEW | REOPENED(<prior-id>)
+- location: <spec section, or doc/file:line>
+- defect: <one or two sentences: the concrete problem>
+- evidence: <what you verified: quoted spec text, file:line in the repo, or framework file:line at the pinned version>
+- impact: <why it matters: what freezes wrong, what test cannot gate, what claim is false>
+- fix: <one sentence: the minimal spec change>
+
+Rank most-severe first. For each attack surface A to H where you found nothing, emit one line: `CLEAR: <letter> — <one-line reason>`. Prefer a few high-confidence, evidence-backed findings over a long speculative list. Every finding must be concrete enough that the spec author could act on it without asking you anything.
+```
+
+L3 — the expected post-unfreeze `FROZEN` array, in exact order:
+
+```
+skills/sdlc/scripts/sdlc-status.mjs
+skills/sdlc/scripts/sdlc-status.sh
+skills/sdlc/scripts/check-lifecycle.mjs
+skills/sdlc/scripts/check-lifecycle.sh
+skills/sdlc/scripts/lib.mjs
+skills/sdlc/schema/sdlc.config.schema.json
+skills/sdlc/schema/sdlc.config.example.json
+skills/sdlc/schema/task-validation-manifest.schema.json
+skills/sdlc/scripts/resolve-panel.mjs
+skills/sdlc/scripts/resolve-panel.sh
+skills/sdlc/scripts/validate-task.mjs
+skills/sdlc/scripts/validate-task.sh
+skills/sdlc/scripts/verify-task-receipt.mjs
+skills/sdlc/prompts/adversary-plan.prompt.md
+skills/sdlc/prompts/adversary-review.prompt.md
+skills/sdlc/prompts/validator-task.prompt.md
+```
+
 - Preconditions: C1–C6 landed.
 - Postconditions: the suite is deterministic, offline, budget < 1 s; every marker assertion names the file and marker it checks.
 - Invariants: no network, no new dependency, no snapshot tooling.
@@ -165,19 +216,19 @@ Ratio: 10 mechanical / 3 inspection / 1 carried = 14 total (71% mechanical). The
 ### SAS1 — the skeleton ships five components as literal fill-in blocks `(mechanical)`
 
 Given: branch HEAD with C1 landed.
-When–Then: the contract tests' M1 set passes — the skeleton exists with H1 `# Spec artifact skeleton`; its complete section set is exactly those five component sections, each component's markers and placeholders appearing inside its own section (between its header and the next); the five component headers (`## Vocabulary`, `## Contracts`, `## Scenario kind labels`, `## Non-functional requirements`, `## Scenario form`) appear in that fixed order; every literal marker is present (the two table headers; bullet labels `- Preconditions:`, `- Postconditions:`, `- Invariants:`, `- Error semantics:`, `- Gated by:`; the three kind-label names; the unbound marker; `Given:`, `When–Then:`, `Falsify:`); and every literal fill-in placeholder of C1 is present (`<term>`, `<one-sentence definition>`, `<identifier or file>`, `<interface name>`, the fill-in table row) — proving a fill-in scaffold, not an empty or reordered document.
+When–Then: the contract tests' M1 set passes — the skeleton exists with H1 `# Spec artifact skeleton`; its complete section set is exactly those five component sections, each component's markers and placeholders appearing inside its own section (between its header and the next); the five component headers (`## Vocabulary`, `## Contracts`, `## Scenario kind labels`, `## Non-functional requirements`, `## Scenario form`) appear in that fixed order; every literal marker is present (the two table headers; bullet labels `- Preconditions:`, `- Postconditions:`, `- Invariants:`, `- Error semantics:`, `- Gated by:`; the three kind-label names; the unbound marker; `Given:`, `When–Then:`, `Falsify:`); C2's four canonical rule sentences, each inside its owning section; and every literal fill-in placeholder of C1 is present (`<term>`, `<one-sentence definition>`, `<identifier or file>`, `<interface name>`, the fill-in table row) — proving a fill-in scaffold, not an empty or reordered document.
 Falsify: removing any marker or placeholder, reordering the sections, adding any extra section, or moving a marker or placeholder out of its owning section fails the corresponding M1 assertion.
 
 ### SAS2 — §4 carries the four binding rules and the pointer `(mechanical)`
 
 Given: branch HEAD with C2 landed.
 When–Then: M2 passes — all four canonical rule sentences, including the unchanged-context clause in rule 2 and the ratio clause in rule 3, and the `references/spec-artifact-skeleton.md` pointer appear in `phase-spec.md` §4, inserted after the first paragraph with the existing paragraphs intact and in order.
-Falsify: deleting any rule sentence, either clause, or the pointer fails M2.
+Falsify: deleting any rule sentence, either clause, or the pointer fails M2; so does placing the rules paragraph anywhere but between §4's first paragraph and `**Premise durability.**`, or deleting, reordering, or altering any of §4's existing anchor paragraphs.
 
 ### SAS3 — the prompt's structure is protected, anchors placed inside B/C/D/F `(mechanical)`
 
 Given: branch HEAD with C3 landed (unfreeze per AM1 in force).
-When–Then: M3 passes — the prompt contains exactly eight attack-surface headings `A.` through `H.` in order and no letter beyond H; the four anchors appear inside the B, C, D, F surface paragraphs (after each letter heading, before the next), each naming its component and citing `references/spec-artifact-skeleton.md`, together naming all five skeleton components; the `## Delta rounds` section is byte-identical to the literal expected block the test embeds; the output-format section from `## Output format` to end-of-file is byte-identical to the literal expected block the test embeds.
+When–Then: M3 passes — the prompt contains exactly eight attack-surface headings `A.` through `H.` in order and no letter beyond H; the four anchors appear inside the B, C, D, F surface paragraphs (after each letter heading, before the next), each naming its component and citing `references/spec-artifact-skeleton.md`, together naming all five skeleton components; the `## Delta rounds` section is byte-identical to literal block **L1** pinned at C7; the output-format section from `## Output format` to end-of-file is byte-identical to literal block **L2** pinned at C7.
 Falsify: removing an anchor, stripping a component name or the skeleton path from an anchor, adding a ninth letter, placing an anchor outside B/C/D/F, editing any Delta-rounds line, or editing any output-format line fails M3.
 
 ### SAS4 — the prompt references, never restates `(mechanical)`
@@ -201,8 +252,8 @@ Falsify: removing or reordering any further entry fails M6.
 ### SAS7 — the IDV19 reconciliation is minimal `(mechanical)`
 
 Given: branch HEAD with C6 landed.
-When–Then: M7 passes — the IDV19 test's loop is the only filtered use of `ADVERSARY_PROMPTS` (exempting exactly `"spec"`); the constant is asserted as the literal `["plan", "spec", "review"]`, the two sibling loops iterate unfiltered, and the `validator-task.prompt.md` assertion remains — all as literal content assertions, durable after merge.
-Falsify: touching the constant, filtering a sibling loop, or broadening the exemption fails M7.
+When–Then: M7 passes — the IDV19 test's loop is the only filtered use of `ADVERSARY_PROMPTS` (exempting exactly `"spec"`); the constant is asserted as the literal `["plan", "spec", "review"]`, the two sibling loops iterate unfiltered, the `validator-task.prompt.md` assertion remains, and the accompanying comment names AM1 and AM3 and the re-freeze obligation — all as literal content assertions, durable after merge.
+Falsify: touching the constant, filtering a sibling loop, broadening the exemption, or deleting or hollowing the AM1/AM3 comment fails M7.
 
 ### SAS8 — all other frozen surfaces stay byte-identical `(mechanical)`
 
