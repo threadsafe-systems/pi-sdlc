@@ -6,7 +6,7 @@
 	"manifestPath": "docs/validation/spec-artifact-skeleton/t1.json",
 	"manifestSha256": "9b2d10b6b44d77e014f0d7e593699830cd6294a63f62dff7fad4a9d9f29cff25",
 	"runnerReportSha256": "f401869a683f28e57a353f188d6b3f867248b6033dddb996353b79b69c0494ed",
-	"generatedAgentSha256": "ec3895ff8b685dc90b6ce2db27aa82b37d1abeea1612749d9b1377c42d69cbdd",
+	"generatedAgentSha256": "979025830b6277eb006c893dc0376b81bf65b9a03bb67b39d0c1dee294f9a1f8",
 	"runnerVerdict": "PASS",
 	"validatorVerdict": "PASS"
 }
