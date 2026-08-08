@@ -1,8 +1,7 @@
 // ASD19 protects contract surfaces that must remain byte-identical to the branch
-// base: readiness/lifecycle scripts, config and validation contracts, unchanged
-// panel and validator surfaces, and shared panel law. The bounded exclusion set
-// is asserted as one coherent unit below. Reviewer prompts carry their rules
-// inline because reviewer subagents do not inherit the lifecycle skill.
+// base: readiness/lifecycle scripts and shared law, config/validation contracts,
+// unchanged panel and validator commands, receipt verification, and plan/spec/task
+// validator prompts. The bounded exclusion set moves as one coherent unit.
 // Uses git to compare against the base.
 
 import assert from "node:assert/strict";
@@ -33,6 +32,11 @@ const FROZEN = [
 
 const BOUNDED_EXCLUSIONS = ["skills/sdlc/prompts/adversary-review.prompt.md", "skills/sdlc/scripts/resolve-panel.mjs", "skills/sdlc/scripts/validate-task.mjs"];
 
+function exclusionSetIsCoherent(frozen) {
+	const frozenCount = BOUNDED_EXCLUSIONS.filter((path) => frozen.includes(path)).length;
+	return frozenCount === 0 || frozenCount === BOUNDED_EXCLUSIONS.length;
+}
+
 function baseRef() {
 	// The branch base: the merge-base with the main line. In CI `main` may not be a
 	// local branch (only origin/main is fetched), so try both refs.
@@ -51,7 +55,10 @@ test("ASD19: frozen surfaces are byte-identical to the branch base", () => {
 });
 
 test("ASD19: the bounded exclusion set remains coherent", () => {
-	for (const path of BOUNDED_EXCLUSIONS) assert.ok(!FROZEN.includes(path), `${path} cannot enter FROZEN independently`);
+	for (let count = 0; count <= BOUNDED_EXCLUSIONS.length; count++) {
+		assert.equal(exclusionSetIsCoherent(BOUNDED_EXCLUSIONS.slice(0, count)), count === 0 || count === BOUNDED_EXCLUSIONS.length, `${count}/${BOUNDED_EXCLUSIONS.length} frozen`);
+	}
+	assert.ok(exclusionSetIsCoherent(FROZEN), "the live frozen set contains either none or all bounded exclusions");
 });
 
 test("ASD19: FS8/FS9 check ids remain present in their frozen scripts", () => {

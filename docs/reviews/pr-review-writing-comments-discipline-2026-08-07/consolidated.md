@@ -52,3 +52,22 @@ All three reviewers confirmed WC-R2-01 and WC-R2-02 resolved. No high or medium 
 | WC-R3-03 | low | NEW | The setup-config-doc file header still claimed telemetry-preservation coverage after deletion of the vacuous coexistence test. | **incorporated** — the header now names only the active setup/config-doc contracts. |
 
 No finding was dismissed. Round 4 receives only this fix-wave delta.
+
+## Round 4
+
+Delta: `491b35e..51c00a9`
+
+Reviewers: `deepseek/deepseek-v4-pro:xhigh`, `moonshotai/kimi-k3:xhigh`, `google/gemini-3.1-pro-preview:xhigh`.
+
+All three reviewers confirmed WC-R3-01/02/03 resolved. One reviewer found a medium regression in the coherence assertion; another found a low header omission.
+
+| ID | Severity | Origin | Finding | Disposition |
+|---|---|---|---|---|
+| WC-R4-01 | medium | NEW | The “coherent” assertion accepted only the all-excluded state, so mandatory follow-up #222 restoring all three surfaces together would still fail. | **incorporated** — the assertion now accepts exactly zero or all three paths in `FROZEN`, rejecting only partial restoration. |
+| WC-R4-02 | low | NEW | The concise frozen-surfaces header no longer accounted for the protected reviewer prompts and receipt verifier. | **incorporated** — the present-state inventory now names readiness/shared law, contracts, panel/validator commands, receipt verification, and plan/spec/task-validator prompts. |
+
+No finding was dismissed.
+
+### Round-cap diagnosis
+
+The round-4 tail is fix-wave churn in a newly introduced coherence assertion and its header, not disagreement about the feature design. The owner's standing instruction for this delivery explicitly authorises unbounded review cycles until the panel is satisfied, selecting the system-reference option to continue delta review. Round 5 receives only this two-line behavioral/prose fix wave.
