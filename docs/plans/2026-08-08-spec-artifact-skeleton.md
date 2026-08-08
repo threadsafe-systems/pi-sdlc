@@ -1,6 +1,6 @@
 # Plan: Spec artifact skeleton (S1)
 
-Status: rev 4 — amended after plan-panel round 3 (PLAN-R3-01..02 all incorporated; adjudication in `docs/reviews/plan-review-spec-artifact-skeleton-2026-08-08/consolidated.md`)
+Status: rev 4 — **APPROVED by owner (2026-08-08), including the PLAN-R1-01 scope extension (adversary-spec.prompt.md unfreeze)**. Plan-panel rounds 1–4: 14 findings, 14 incorporated, 0 dismissed (adjudication in `docs/reviews/plan-review-spec-artifact-skeleton-2026-08-08/consolidated.md`)
 
 Track: irreversible — freezes the specification artifact shape (a public surface later slices and consumers bind to)
 
