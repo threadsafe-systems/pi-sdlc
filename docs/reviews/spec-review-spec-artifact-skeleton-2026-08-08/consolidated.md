@@ -192,3 +192,21 @@ All three genuine; 3/3 incorporated — each a sync obligation created by rev 5'
 ### Dismissal posture
 
 3 incorporated / 0 dismissed. No structural defects remain — round 5's findings are all contract-traceability sync against rev 5's own routing decisions. The panel is now in wording-hygiene territory; per the ratified escalation valve (genuine findings continuing beyond round 5), the next round is owner-gated rather than automatic.
+
+## Panel closed (owner decision, 2026-08-08)
+
+Owner decision: close at rev 6 after round 5 — no round 6. The cap policy's escalation
+valve was exercised in reverse: instead of spending the frontier budget on a sixth round,
+the owner closed the panel on the current artifact.
+
+**Final tally:** 5 rounds, 34 findings, 34 incorporated, 0 dismissed. Rounds 4-5 findings
+were fix-created sync obligations (the tail), not structural defects; no structural finding
+survived round 2. Residual tail risk accepted by the owner: rev 6's normative-wording delta
+(numbered-list assertion, C2 precondition/gate-list sync) was not panel-rechecked; the
+implementation gate's contract tests (C7's M1-M8) execute the same assertions mechanically,
+so a surviving sync defect in the spec text fails implementation rather than shipping.
+
+**Ledger:** rounds 1-2 unlabeled/relabeled; SPEC-R1-01..13, SPEC-R2-01..09, SPEC-R3-01..06,
+SPEC-R4-01..03 (true outputs; the corrupted-payload five-finding set is void),
+SPEC-R5-01..03 — all incorporated. One process incident recorded (round-4 corrupted
+aggregated delivery payload).
