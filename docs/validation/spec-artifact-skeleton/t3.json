@@ -17,13 +17,13 @@
       "argv": ["node", "--test", "test/spec-artifact-skeleton.test.js"],
       "timeoutMs": 120000,
       "scope": ["task"],
-      "evidence": ["M3 prompt structure (SAS3): eight surfaces A-H in order, B/C/D/F anchors cite the skeleton path, five-component coverage, Delta rounds byte-equal L1, output format byte-equal L2", "M4 reference-never-restate: no canonical rule sentence appears in the prompt"]
+      "evidence": ["M3 prompt structure (SAS3): eight surfaces A-H in order, B/C/D/F anchors cite the skeleton path, five-component coverage", "M3 byte-stability: Delta rounds byte-equal L1, output format byte-equal L2", "M4 reference-never-restate: no canonical rule sentence appears in the prompt"]
     },
     {
       "id": "tests.golden",
       "argv": ["node", "--test", "test/extraction.test.js"],
       "timeoutMs": 120000,
-      "evidence": ["golden regen path re-stamps all four phases from the consumer fixture and byte-compares: all four IDENTICAL (zero diff) despite the package prompt edit, because the consumer override resolves first by design"]
+      "evidence": ["golden regen path re-stamps all four phases and byte-compares: all four IDENTICAL (zero diff) despite the package prompt edit"]
     },
     {
       "id": "static.lint",

@@ -492,7 +492,12 @@ test("IDV19: the frozen list contains every adversary prompt", () => {
 	const path = "test/frozen-surfaces.test.js";
 	const body = readFileSync(join(repo, path), "utf8");
 	const frozen = [...body.matchAll(/^\t"([^"]+)",$/gm)].map((m) => m[1]);
-	for (const slug of ADVERSARY_PROMPTS) {
+	// AM1 unfreezes adversary-spec.prompt.md for the S1 spec-artifact-skeleton
+	// slice, so "spec" is exempt from this frozen-membership assertion for as
+	// long as that unfreeze window is open. AM3 obligates a mandatory post-merge
+	// re-freeze; restoring this loop to iterate the full ADVERSARY_PROMPTS list
+	// is the re-freeze's job, not this slice's.
+	for (const slug of ADVERSARY_PROMPTS.filter((s) => s !== "spec")) {
 		assert.ok(frozen.includes(`skills/sdlc/prompts/adversary-${slug}.prompt.md`), `adversary-${slug}.prompt.md must stay frozen`);
 	}
 	assert.ok(frozen.includes("skills/sdlc/prompts/validator-task.prompt.md"), "validator-task.prompt.md must stay frozen");
