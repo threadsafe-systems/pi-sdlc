@@ -170,3 +170,77 @@ test("M2: Premise durability, Dialogue discipline, configuration callout follow 
 		cursor = idx;
 	}
 });
+
+// ---- M3/M4: adversary-spec.prompt.md skeleton awareness (C3) ------------
+
+const prompt = readFileSync(join(repo, "skills/sdlc/prompts/adversary-spec.prompt.md"), "utf8");
+
+const LETTERS = ["A", "B", "C", "D", "E", "F", "G", "H"];
+
+function surfaceLine(letter) {
+	const m = prompt.match(new RegExp(`^${letter}\\. `, "m"));
+	assert.ok(m, `adversary-spec.prompt.md: surface ${letter}. missing`);
+	return prompt.slice(m.index, prompt.indexOf("\n", m.index));
+}
+
+test("M3: exactly eight attack surfaces A-H in order, no letter beyond H", () => {
+	const heads = [...prompt.matchAll(/^([A-Z])\. /gm)].map((m) => m[1]);
+	assert.deepEqual(heads, LETTERS, "adversary-spec.prompt.md: attack surfaces must be exactly A-H in order");
+});
+
+test("M3: the B/C/D/F anchors cite the skeleton path inside their surface lines", () => {
+	for (const letter of ["B", "C", "D", "F"]) {
+		assert.ok(surfaceLine(letter).includes("references/spec-artifact-skeleton.md"), `adversary-spec.prompt.md: surface ${letter} anchor must cite references/spec-artifact-skeleton.md`);
+	}
+});
+
+test("M3: the four anchors together name all five skeleton components", () => {
+	const coverage = {
+		Vocabulary: surfaceLine("D"),
+		Contracts: surfaceLine("C"),
+		"Scenario kind labels": surfaceLine("B"),
+		"Non-functional requirements": surfaceLine("F"),
+		"Scenario form": surfaceLine("B"),
+	};
+	for (const [component, line] of Object.entries(coverage)) {
+		assert.ok(line.includes(component), `adversary-spec.prompt.md: component ${JSON.stringify(component)} not named in its anchor line`);
+	}
+});
+
+const L1 = `## Delta rounds
+
+Round 1 reviews the whole spec. **Every round after the first is a delta review.** The caller gives you the prior rounds' findings and their dispositions, and your review is scoped to the delta since the previous round. Tag every finding \`NEW\`, or \`REOPENED(<prior-id>)\` when you re-raise an already-dispositioned finding by its id. A reopen is legal only when you cite evidence that did not exist, or was not available, when that finding was dispositioned; otherwise do not re-raise it. Confirming a prior fix is one line, not a re-litigation.`;
+
+const L2 = `## Output format (STRICT: markdown only, findings only, no preamble, no conclusion)
+
+### <short title>
+
+- severity: high | medium | low
+- confidence: high | medium (drop anything lower; do not speculate)
+- origin: NEW | REOPENED(<prior-id>)
+- location: <spec section, or doc/file:line>
+- defect: <one or two sentences: the concrete problem>
+- evidence: <what you verified: quoted spec text, file:line in the repo, or framework file:line at the pinned version>
+- impact: <why it matters: what freezes wrong, what test cannot gate, what claim is false>
+- fix: <one sentence: the minimal spec change>
+
+Rank most-severe first. For each attack surface A to H where you found nothing, emit one line: \`CLEAR: <letter> — <one-line reason>\`. Prefer a few high-confidence, evidence-backed findings over a long speculative list. Every finding must be concrete enough that the spec author could act on it without asking you anything.`;
+
+test("M3: Delta rounds section byte-identical to pinned block L1", () => {
+	const start = prompt.indexOf("## Delta rounds");
+	const end = prompt.indexOf("## Output format");
+	assert.ok(start !== -1 && end !== -1 && start < end, "adversary-spec.prompt.md: Delta rounds / Output format headings missing or misordered");
+	assert.equal(prompt.slice(start, end).replace(/\s+$/, ""), L1, "adversary-spec.prompt.md: Delta rounds section drifted from pinned block L1");
+});
+
+test("M3: output-format section byte-identical to pinned block L2", () => {
+	const start = prompt.indexOf("## Output format");
+	assert.ok(start !== -1, "adversary-spec.prompt.md: Output format heading missing");
+	assert.equal(prompt.slice(start).replace(/\n+$/, ""), L2, "adversary-spec.prompt.md: output-format section drifted from pinned block L2");
+});
+
+test("M4: none of the four canonical rule sentences appears in the prompt", () => {
+	for (const sentence of CANONICAL) {
+		assert.ok(!prompt.includes(sentence), `adversary-spec.prompt.md: canonical rule sentence restated (reference-never-restate): ${JSON.stringify(sentence.slice(0, 60))}...`);
+	}
+});

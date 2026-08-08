@@ -21,11 +21,11 @@ If you assert the spec misquotes or misuses the underlying framework or a depend
 ## Attack surfaces (verify each; also hunt for defects not listed)
 
 A. Frozen shapes vs the plan's locked decisions, field by field: any missing field that cannot be backfilled later? Any field that over-commits and will be regretted?
-B. Verification scenarios: does each falsifiable scenario actually gate the outcome it claims? Is there an outcome or non-functional requirement with no scenario, or a scenario that asserts nothing?
-C. Contracts and interfaces: is every interface buildable as written, with exact signatures, types, and error semantics? Name any under-specification an implementer would have to guess at.
-D. Contradictions: with the plan, with locked decisions, or internal to the spec.
+B. Verification scenarios: does each falsifiable scenario actually gate the outcome it claims? Is there an outcome or non-functional requirement with no scenario, or a scenario that asserts nothing? Check every scenario against `references/spec-artifact-skeleton.md`: exactly one kind label per the Scenario kind labels component, and the three-part Scenario form (Given/When–Then/Falsify).
+C. Contracts and interfaces: is every interface buildable as written, with exact signatures, types, and error semantics? Name any under-specification an implementer would have to guess at. Check every interface the spec introduces or modifies for a Contracts block per `references/spec-artifact-skeleton.md`; flag any empty or missing cell.
+D. Contradictions: with the plan, with locked decisions, or internal to the spec. Check term precision against the spec's Vocabulary table per `references/spec-artifact-skeleton.md`.
 E. Framework reality: does the spec's design compose correctly with how the framework actually behaves (concurrency, ordering, lifecycle, persistence, error paths)?
-F. Non-functional requirements: are performance, durability, security, and compatibility requirements stated and each tied to a scenario?
+F. Non-functional requirements: are performance, durability, security, and compatibility requirements stated and each tied to a scenario? Check every non-functional requirement against the Non-functional requirements component of `references/spec-artifact-skeleton.md` for its response measure and scenario binding.
 G. Honesty sweep: any sentence that claims more than the mechanism it builds.
 H. Carry landing: every `CARRY-TO-SPEC` minted at the plan gate must have landed in this spec, at the landing site its record names. Flag any carry that has not landed, or that landed somewhere other than the site its record names.
 
