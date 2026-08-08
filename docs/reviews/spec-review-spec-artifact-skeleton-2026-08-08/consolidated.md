@@ -90,7 +90,45 @@ All 9 incorporated, 0 dismissed. Eight distinct fixes (SPEC-R2-01/07 share the r
 
 9 incorporated / 0 dismissed. SPEC-R2-01/07 is the second arithmetic slip in this panel's history (SPEC-R1-11 was the first), both author-introduced and reviewer-caught; recorded for honesty. SPEC-R2-05 is the round's best catch: a byte-stability precondition with no matching mechanical protection — exactly the reference-never-trust gap the skeleton exists to prevent.
 
+## Round 3 (wave 3) — delta review of rev 3
+
+Target: rev 3 at `c58ad7a`. Scope: verification of the nine round-2 dispositions plus `NEW`/`REOPENED` findings on the rev-3 delta.
+
+### Verification of round-2 fixes
+
+- gemini: 8 of 9 confirmed; **SPEC-R2-06 REOPENED** (rev 3 fixed SAS1's prose but not M1's normative definition — see SPEC-R3-01).
+- luna: 9 of 9 confirmed — including SPEC-R2-06, citing `:127`. **Panel disagreement, resolved by the orchestrator:** line 127 was read directly; M1's definition carried no section-locality or exact-set assertions, so gemini's reopen is correct and luna's confirmation was a misread. Recorded for honesty — confirmations are spot-checked, not trusted.
+
+### Findings
+
+| id | reviewer | sev/conf | origin | location | defect (one line) | disposition |
+|---|---|---|---|---|---|---|
+| SPEC-R3-01 | gemini | med/high | REOPENED(SPEC-R2-06) | C7 (M1) vs SAS1 | SAS1 claims M1 checks section-locality and exact section set, but M1's definition still omits both — SAS1's falsification claim dishonest | **incorporated** |
+| SPEC-R3-02 | gemini | med/high | NEW | C1 vs C7 (M1) | C1 mandates binding-rule sentences in four component blocks, but no marker or scenario verifies their presence | **incorporated** |
+| SPEC-R3-03 | gemini | med/high | NEW | C7 (M2) vs SAS2 | SAS2 claims M2 checks §4 placement/paragraph order; M2 is defined as a loose file-presence check | **incorporated** |
+| SPEC-R3-04 | gemini | low/high | NEW | C6 vs C7 (M7) | C6's mandated AM1/AM3/re-freeze comment is unfalsifiable — M7/SAS7 never check it | **incorporated** |
+| SPEC-R3-05 | gemini | low/high | NEW | C7 (M6) vs SAS6 | SAS6 claims M6 falsifies reordering, but M6 defines membership only — reordering passes | **incorporated** |
+| SPEC-R3-06 | luna | med/high | REOPENED(SPEC-R2-05) | C7/M3, SAS3 | "a literal expected block the test embeds" pins neither bytes nor source — the test could embed an altered Delta-rounds/output-format block and still pass; assumption 5 requires self-contained expectations | **incorporated** |
+
+CLEAR (gemini): A, C, D, E, F, H. CLEAR (luna): A, C, D, E, F, G, H.
+
+### Adjudication (orchestrator, rev 4)
+
+All 6 incorporated, 0 dismissed. Six distinct fixes. Recurring defect class named for the record: rounds 2–3 kept finding **scenario prose claiming more than the marker definitions it cites** (R2-06 → R3-01, R3-03, R3-04, R3-05). Normative force lives in the M-definitions; scenario text is description. Rev 4 re-grounded every scenario claim in its marker definition.
+
+1. **M1 definition completed** (01): exact section set (no extras) and every marker/placeholder only between its owning header and the next. SAS1's claims are now true.
+2. **Binding-rule sentences pinned and gated** (02): C1 items 1–4 now fix each block's binding-rule sentence as C2's exact canonical sentence 1–4 (single source of truth); M1 asserts all four present in the skeleton, each inside its owning section (Vocabulary→1, Contracts→2, kind labels→3, NFR→4).
+3. **M2 precise and durable** (03): literal anchor assertions — §4's first paragraph begins `Produce the Spec doc:`; the rules+pointer paragraph sits between it and `**Premise durability.**`; the three existing anchor paragraphs (`**Premise durability.**`, `**Dialogue discipline.**`, `> **Under your configuration:**`) follow in order. No moving base — pure literal anchors, durable after merge. SAS2's falsify extended to placement and paragraph integrity.
+4. **Comment gated** (04): M7 asserts the comment's presence naming AM1 and AM3 and the re-freeze obligation; SAS7 extended.
+5. **Order gated** (05): M6 asserts the `FROZEN` array equals pinned literal list **L3** exactly, in L3's order — membership, count, and order in one equality. SAS6's reordering claim is now backed.
+6. **Literal blocks pinned** (06): M3's two "test embeds" expectations replaced by blocks **L1** (Delta rounds) and **L2** (output format) quoted verbatim under C7; orchestrator verified both byte-exact against `adversary-spec.prompt.md` before commit. L3 pinned the same way against `test/frozen-surfaces.test.js` minus the unfrozen entry. A tampered embed can no longer pass its own contract — which is exactly the round mechanics that produced this review, now mechanically frozen with pinned bytes.
+
+### Dismissal posture
+
+6 incorporated / 0 dismissed. SPEC-R3-06 is the round's deepest catch: an underspecification hiding inside an already-accepted fix shape ("the test embeds"), exposed only when assumption 5 was applied to it. Both reopen were lawful — each cited rev-3 text that did not exist when the original finding was dispositioned.
+
 ### Round map
 
 - Round 1: 13 findings (5 high / 8 medium) — 13 incorporated, 0 dismissed. Spec rev 1 → rev 2.
 - Round 2: 9 findings (3 high / 6 medium; 1 reopened, 8 new) — 9 incorporated, 0 dismissed; all 13 round-1 fixes verified by both reviewers. Spec rev 2 → rev 3.
+- Round 3: 6 findings (4 medium / 2 low; 2 reopened, 4 new) — 6 incorporated, 0 dismissed; one panel disagreement (R2-06) resolved by direct line read. Spec rev 3 → rev 4.
