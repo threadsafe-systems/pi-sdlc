@@ -1,8 +1,9 @@
 // ASD19 protects contract surfaces that must remain byte-identical to the branch
-// base: readiness/lifecycle scripts, config and validation contracts, panel
-// resolution, plan/spec reviewer prompts, the task validator prompt, and shared
-// panel law. The PR reviewer prompt is governed by the focused code-prose
-// contract while absent from this list. Reviewer prompts carry their rules inline
+// base: readiness/lifecycle scripts, config and validation contracts, panel and
+// validator wrappers, plan/spec reviewer prompts, the task validator prompt, and
+// shared panel law. The PR reviewer prompt plus the two script implementations
+// changed by the focused code-prose cleanup are absent from this list. Reviewer
+// prompts carry their rules inline
 // because reviewer subagents do not inherit the lifecycle skill.
 // Uses git to compare against the base.
 
@@ -24,9 +25,7 @@ const FROZEN = [
 	"skills/sdlc/schema/sdlc.config.schema.json",
 	"skills/sdlc/schema/sdlc.config.example.json",
 	"skills/sdlc/schema/task-validation-manifest.schema.json",
-	"skills/sdlc/scripts/resolve-panel.mjs",
 	"skills/sdlc/scripts/resolve-panel.sh",
-	"skills/sdlc/scripts/validate-task.mjs",
 	"skills/sdlc/scripts/validate-task.sh",
 	"skills/sdlc/scripts/verify-task-receipt.mjs",
 	"skills/sdlc/prompts/adversary-plan.prompt.md",

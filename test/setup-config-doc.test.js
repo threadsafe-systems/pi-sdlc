@@ -81,19 +81,10 @@ test("ASD11: every dial remains reachable non-interactively by flag", () => {
 	}
 });
 
-// ---- ASD20: config-doc write call site (+ telemetry preservation) ---------
+// ---- ASD20: config-doc write call site ------------------------------------
 
 test("ASD20: setup-sdlc.mjs carries the config-doc write call site", () => {
 	assert.match(setupSource, /from "\.\/config-doc\.mjs"/, "setup must import the config-doc module");
 	assert.match(setupSource, /writeConfigDoc\(root/, "setup must call the config-doc write at the config write call site");
 	assert.match(setupSource, /id: "config-doc"/, "setup must report the config-doc asset");
-});
-
-test("ASD20: optional telemetry and config-doc call sites coexist", () => {
-	assert.match(setupSource, /writeConfigDoc\(root/, "the config-doc call site is always present");
-	if (setupSource.includes("record-run-event")) {
-		assert.match(setupSource, /writeConfigDoc\(root/, "telemetry does not displace the config-doc call site");
-	} else {
-		assert.ok(true, "this fixture has no telemetry call site");
-	}
 });

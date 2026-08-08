@@ -23,3 +23,16 @@ Reviewers:
 | WC-R1-06 | low | NEW | The code-prose checkpoint blurred who dispatches/runs the validator in `subagent` versus `self` mode. | **incorporated** — the canonical law now assigns parent dispatch and implementer self-run explicitly, with contract coverage. |
 
 No finding was dismissed. Round 2 receives only this fix-wave delta.
+
+## Round 2
+
+Delta: `e4a5676..5a877da`
+
+Usable reviewers: `deepseek/deepseek-v4-pro:xhigh`, `moonshotai/kimi-k3:xhigh`, `google/gemini-3.1-pro-preview:xhigh`. The GLM reviewer was interrupted after 12 minutes without a verdict; the three-model configured floor remained met.
+
+| ID | Severity | Origin | Finding | Disposition |
+|---|---|---|---|---|
+| WC-R2-01 | high | NEW | The cleanup changed `resolve-panel.mjs` and `validate-task.mjs` while both remained in ASD19's frozen set, making committed HEAD fail the freeze gate. | **incorporated** — build amendment A3 bounds their temporary reopening, keeps the wrappers frozen, and extends tracked re-freeze issue #222 to restore both implementations after merge. |
+| WC-R2-02 | low | NEW | The renamed optional-telemetry coexistence test could only repeat an existing assertion or pass vacuously, so its name overclaimed what its body proved. | **incorporated** — deleted the redundant conditional test; the preceding ASD20 test retains the real config-doc call-site contract. |
+
+No finding was dismissed. Round 3 receives only this fix-wave delta.

@@ -179,3 +179,10 @@ These are programme-level carries, not Build deficiencies and not `CARRY-TO-IMPL
 - Class: **(c), normal fix wave**.
 - Disposition: **incorporated**. The reader-now header retains the package-owned `machine-checked` signature while replacing the historical finding citation with present live-GitHub semantics. No inventory schema or target changes.
 - Scope and checks unchanged.
+
+### A3 — bounded reopening for frozen script comments
+
+- Trigger: PR-review round 2 found that completing the bounded process-history cleanup changed reader-facing headers in `resolve-panel.mjs` and `validate-task.mjs` while both implementations remained in ASD19's frozen list.
+- Class: **(c), normal fix wave**.
+- Disposition: **incorporated**. The two implementations leave the feature branch's frozen set while their unchanged shell wrappers remain protected. Mandatory post-merge follow-up #222 restores both implementations alongside the reviewer prompt; the full freeze guard then becomes the standing contract again.
+- Scope unchanged: only comments changed in those implementations; no runtime behavior or interface changed.
