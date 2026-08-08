@@ -1,0 +1,116 @@
+{
+  "schemaVersion": 1,
+  "taskId": "t4",
+  "manifest": "/home/neil/code/threadsafe/pi-sdlc.worktrees/feat-spec-artifact-skeleton/docs/validation/spec-artifact-skeleton/t4.json",
+  "repoRoot": "/home/neil/code/threadsafe/pi-sdlc.worktrees/feat-spec-artifact-skeleton",
+  "verdict": "PASS",
+  "exitCode": 0,
+  "errors": [],
+  "manifestErrors": [],
+  "commands": [
+    {
+      "id": "tests.full",
+      "argv": [
+        "npm",
+        "test"
+      ],
+      "evidence": [
+        "whole-corpus regression net is green with the unfreeze window open (ASD19 guards the remaining 16 frozen surfaces)"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 7415,
+      "stdoutTail": "[...truncated; showing bounded tail...]\n✔ LT8: validate-task emits task.validated on FAIL (49.856698ms)\n✔ LT8: validate-task emits task.validated on an ERROR fixture whose manifest parses (34.197051ms)\n✔ LT8: an unparseable-manifest ERROR skips emission with the standard warning (27.799699ms)\n✔ LT9: unwritable run store degrades to a warning; primary output unaffected (131.253086ms)\n✔ nested --repo-root run stores are git-ignored too (gitignore anchoring) (2.663209ms)\n✔ LT10: check-lifecycle.mjs and .sh are untouched by FS5 side-effect emission (0.928302ms)\n✔ lookup-node: returns nodeId/number/title on success (6.013813ms)\n✔ lookup-node: not found -> ok:false (0.675396ms)\n✔ lookup-node: gh failure -> structured ok:false, never throws (1.140709ms)\n✔ create-epic: creates, looks up node, boards, sets Todo explicitly — returns {number,nodeId,itemId,url} (4.025318ms)\n✔ create-task: with --parent wires addSubIssue before boarding (0.499626ms)\n✔ create-epic: gh issue create failure short-circuits before any board mutation (0.422583ms)\n✔ create-epic: partial failure after issue creation preserves created {number,url} and names the failed step (2.111349ms)\n✔ create-epic: failure at the explicit Todo-set step also preserves created identity (3.484713ms)\n✔ add-blocked-by: wires the dependency edge (0.587017ms)\n✔ frontier: open + unassigned + unblocked (or no blockers) children only (1.410401ms)\n✔ frontier: refuses an incomplete subIssues page rather than silently truncating (0.5009ms)\n✔ frontier: refuses an incomplete blockedBy page — an 11th+ open blocker must not be silently missed (0.339925ms)\n✔ claim: unclaimed issue gets assigned (0.327369ms)\n✔ claim: already-assigned issue is not re-claimed (best-effort, not atomic) (1.154909ms)\n✔ find-items: filters by number (3.057424ms)\n✔ find-items: filters by status (0.369339ms)\n✔ find-items: filters by title-contains (case-insensitive) (0.28071ms)\n✔ find-items: --since joins updatedAt via a batched graphql query (0.591814ms)\n✔ find-items: refuses a truncated result rather than silently under-reporting (0.428201ms)\n✔ find-items: filters out items from a foreign repo on a multi-repo org board (0.442412ms)\n✔ set-status: by item id directly (1.146516ms)\n✔ set-status: by issue number resolves the item id first (0.475324ms)\n✔ set-status: unknown status rejected before any gh call (2.453843ms)\n✔ set-status: neither --item nor --from-status is a usage-shaped failure (0.329105ms)\n✔ set-status: bulk --from-status moves every matching item (0.393438ms)\n✔ set-status: bulk --from-status reports partial progress on a mid-batch failure (0.37584ms)\n✔ board-add: adds by issue number, builds the URL from tracker.repo (0.274446ms)\n✔ main: dispatches find-items end to end (1.081104ms)\n✔ main: --repo-root resolves the named repo even from an unrelated cwd (2.075033ms)\n✔ main: unknown subcommand exits 2 via fail() (real subprocess — fail() calls process.exit) (91.414676ms)\n✔ main: create-epic missing --body exits 2 before any gh call (52.880664ms)\n✔ main: create-task missing --parent exits 2 before any gh call (56.409076ms)\n✔ main: --number rejects a non-integer value with a usage error, not a NaN graphql variable (60.898104ms)\n✔ main: --parent 0 is rejected by needInt's positive floor, not silently treated as absent (52.546858ms)\n✔ create-task: a bad --parent is looked up BEFORE the issue is created — no live orphan on a typo'd parent (0.984932ms)\n✔ find-items: repo-less (draft) board items are excluded, not passed through (0.376191ms)\n✔ find-items: an unparsable --since is a usage-shaped failure, not a silent empty result (0.330921ms)\n✔ find-items: an unknown --status is a usage-shaped failure, not a silent empty result (0.282124ms)\n✔ set-status: --item and --from-status together is rejected before any gh call, not silently resolved by --item winning (0.369637ms)\n✔ main: --format rejects an unknown value (70.810273ms)\n✔ main: --gh-cmd points the real spawn path at a fake executable (88.276198ms)\n✔ main: --repo overrides lookup-node's target repo instead of the configured tracker.repo (2.652689ms)\n✔ main: --repo malformed value is a usage error before any gh call (24.475987ms)\n✔ main: --owner/--project override find-items' target board instead of the configured tracker.board (2.779896ms)\n✔ main: config-derived resolution is unchanged when no override flags are given (defaults preserved) (1.433035ms)\n✔ board-add: --repo/--owner/--project override the target board and URL repo (0.661096ms)\n✔ PV1: a valid JavaScript manifest runs only declared checks and passes (157.09971ms)\n✔ PV2: only declared argv run; an undeclared tool command never executes (177.264476ms)\n✔ PV3: schema and inspectManifest reject the mutation matrix before any command runs (70.802261ms)\n✔ PV4: command outcomes are complete and deterministic; runner continues after failures (53.686449ms)\n✔ PV4: a timeout is reported as FAIL with timedOut (1048.150923ms)\n✔ PV5: category applicability is exact; injected n/a shapes are rejected (57.323271ms)\n✔ PV6: scenario mapping gates the verdict (67.833049ms)\n✔ PV7: standards and banned patterns are commands, not judgement (99.396848ms)\n✔ PV8: evidence is bounded and secrets are redacted (83.036613ms)\n✔ PV8 unit: boundStream and redaction name-matching are precise (205.515572ms)\n✔ PV9: JSON/text/exit agree and JSON mode is order-independent (416.018009ms)\n✔ PV9: --report writes the exact JSON bytes atomically (114.857907ms)\n✔ PV9: --report outside the repo root is refused and clobbers nothing (102.760143ms)\n✔ PV10: generic validator law and generated agent are portable (0.557085ms)\n✔ PV11: receipt hash verification detects mutation of any stored file (6.855109ms)\n✔ PV11: a FAIL runner-report cannot ride under runnerVerdict PASS (0.979386ms)\n✔ parseArgs: recognises JSON anywhere and rejects bad flags (0.443314ms)\n✔ PV13: renderText is a faithful projection of the report (58.508982ms)\n✔ TST2: separate full and task checks satisfy Rule A and Rule B (0.138365ms)\n✔ TST1: a scope:[full] check satisfies Rule A (scenarios n/a) (0.086531ms)\n✔ TST3: a single scope:[full,task] check satisfies both rules with no duplicate (0.075228ms)\n✔ TST4: Rule A negative -- tests required with no full-tagged check (0.387643ms)\n✔ TST5: Rule B negative -- scenario cites a tests check but none task-tagged (0.54271ms)\n✔ TST6: tests:n/a is exempt from Rule A and Rule B (0.109907ms)\n✔ TST7: zero owned scenarios -- exempt from Rule B, still subject to Rule A (0.179939ms)\n✔ TST8: a static-only scenario does not trigger Rule B (0.112749ms)\n✔ TST9: an untagged check named tests.full does NOT satisfy Rule A (0.102537ms)\n✔ TST10: scope shape errors are reported at /checks/<i>/scope (0.168034ms)\n✔ TST11: golden multi-error ordering (scope-shape + Rule A + dangling check) (0.086946ms)\n✔ TST12: schema accepts optional scope and rejects malformed shapes (12.867919ms)\n✔ Rule B iterates owned scenarios only -- an unowned evidence key draws no Rule B error (0.130786ms)\n✔ scope enum error is emitted once per check, not per bad entry (0.114703ms)\n✔ Implement owns the complete reader-now authoring law (1.84119ms)\n✔ Implement permits executable directives without exempting their prose (0.243742ms)\n✔ Implement blocks validation or closure until the exact task attestation (0.886923ms)\n✔ Tasks projects the code-prose pass into every task Definition of Done (0.192358ms)\n✔ Every normal PR reviewer enforces the same reader-now obligations (0.170581ms)\n✔ Code-prose findings use impact severity and are not dismissed as style (0.156077ms)\n✔ The package law does not depend on an external comment-writing skill (0.161492ms)\nℹ tests 555\nℹ suites 0\nℹ pass 555\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 7229.042413\n",
+      "stderrTail": ""
+    },
+    {
+      "id": "tests.task",
+      "argv": [
+        "node",
+        "--test",
+        "test/spec-artifact-skeleton.test.js"
+      ],
+      "evidence": [
+        "M6 (SAS6): FROZEN array equals C7's pinned list L3 exactly, in L3's order, spec prompt absent",
+        "M7 (SAS7): IDV19 reconciliation is minimal and complete, single filter exempting spec, sibling loops unfiltered, AM1/AM3 comment"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 65,
+      "stdoutTail": "✔ M1: skeleton H1 is exact (0.527882ms)\n✔ M1: section set is exactly the five components, in fixed order, no extras (0.350464ms)\n✔ M1: Vocabulary markers are section-local (0.181309ms)\n✔ M1: Contracts markers are section-local (0.124118ms)\n✔ M1: kind-label markers are section-local (0.086215ms)\n✔ M1: NFR markers are section-local (0.07777ms)\n✔ M1: scenario-form markers are section-local (0.078237ms)\n✔ M1: the four canonical rule sentences sit in their owning sections (0.07983ms)\n✔ M5: inventory row matches C4's nine fields exactly (0.274529ms)\n✔ M2: §4's first paragraph still begins 'Produce the Spec doc:' (0.111822ms)\n✔ M2: the numbered binding rules sit between §4's first paragraph and Premise durability (0.126236ms)\n✔ M2: the numbered rules open their own lines (0.056249ms)\n✔ M2: Premise durability, Dialogue discipline, configuration callout follow in order (0.051919ms)\n✔ M3: exactly eight attack surfaces A-H in order, no letter beyond H (0.093006ms)\n✔ M3: the B/C/D/F anchors cite the skeleton path inside their surface lines (0.118548ms)\n✔ M3: the four anchors together name all five skeleton components (0.107866ms)\n✔ M3: Delta rounds section byte-identical to pinned block L1 (0.086952ms)\n✔ M3: output-format section byte-identical to pinned block L2 (0.053716ms)\n✔ M4: none of the four canonical rule sentences appears in the prompt (0.060508ms)\n✔ M6: the FROZEN array equals C7's pinned list L3 exactly (0.14353ms)\n✔ M7: the IDV19 reconciliation is minimal and complete (0.182392ms)\nℹ tests 21\nℹ suites 0\nℹ pass 21\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 43.848701\n",
+      "stderrTail": ""
+    },
+    {
+      "id": "static.lint",
+      "argv": [
+        "npx",
+        "biome",
+        "check",
+        "test/spec-artifact-skeleton.test.js",
+        "test/frozen-surfaces.test.js",
+        "test/iteration-disposition.test.js"
+      ],
+      "evidence": [
+        "the task's lintable surfaces are biome-clean"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 176,
+      "stdoutTail": "Checked 3 files in 14ms. No fixes applied.\n",
+      "stderrTail": ""
+    }
+  ],
+  "categories": [
+    {
+      "category": "tests",
+      "status": "PASS",
+      "checkIds": [
+        "tests.full",
+        "tests.task"
+      ]
+    },
+    {
+      "category": "static",
+      "status": "PASS",
+      "checkIds": [
+        "static.lint"
+      ]
+    },
+    {
+      "category": "scenarios",
+      "status": "PASS"
+    },
+    {
+      "category": "standards",
+      "status": "N/A",
+      "reason": "no governing standard beyond the declared checks applies to a frozen-list membership change plus test-file reconciliation"
+    },
+    {
+      "category": "bannedPatterns",
+      "status": "N/A",
+      "reason": "no task-diff pattern prohibition beyond lint applies to this task"
+    }
+  ],
+  "scenarios": [
+    {
+      "scenarioId": "SAS6",
+      "status": "PASS",
+      "checkIds": [
+        "tests.task"
+      ]
+    },
+    {
+      "scenarioId": "SAS7",
+      "status": "PASS",
+      "checkIds": [
+        "tests.task"
+      ]
+    }
+  ]
+}

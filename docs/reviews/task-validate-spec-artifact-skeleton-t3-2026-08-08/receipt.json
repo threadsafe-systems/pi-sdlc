@@ -1,0 +1,12 @@
+{
+	"schemaVersion": 1,
+	"taskId": "t3",
+	"model": "maas-qwen/deepseek-v4-flash-0731",
+	"createdAt": "2026-08-08T19:46:45Z",
+	"manifestPath": "docs/validation/spec-artifact-skeleton/t3.json",
+	"manifestSha256": "1a0b5fd2bc8d57bb05c61418a78176e7ea028b78d3591bd033879c8770b56f20",
+	"runnerReportSha256": "1123097c29396c122e4e5107dc16496db6684bc8ac908fc83f6e0e0890e5d563",
+	"generatedAgentSha256": "ec3895ff8b685dc90b6ce2db27aa82b37d1abeea1612749d9b1377c42d69cbdd",
+	"runnerVerdict": "PASS",
+	"validatorVerdict": "PASS"
+}

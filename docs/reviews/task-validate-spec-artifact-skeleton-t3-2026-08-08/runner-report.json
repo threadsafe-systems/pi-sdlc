@@ -1,0 +1,127 @@
+{
+  "schemaVersion": 1,
+  "taskId": "t3",
+  "manifest": "/home/neil/code/threadsafe/pi-sdlc.worktrees/feat-spec-artifact-skeleton/docs/validation/spec-artifact-skeleton/t3.json",
+  "repoRoot": "/home/neil/code/threadsafe/pi-sdlc.worktrees/feat-spec-artifact-skeleton",
+  "verdict": "PASS",
+  "exitCode": 0,
+  "errors": [],
+  "manifestErrors": [],
+  "commands": [
+    {
+      "id": "tests.full",
+      "argv": [
+        "npm",
+        "test"
+      ],
+      "evidence": [
+        "whole-corpus regression net is green"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 7423,
+      "stdoutTail": "[...truncated; showing bounded tail...]\n✔ LT8: validate-task emits task.validated on FAIL (131.247369ms)\n✔ LT8: validate-task emits task.validated on an ERROR fixture whose manifest parses (39.956719ms)\n✔ LT8: an unparseable-manifest ERROR skips emission with the standard warning (28.835695ms)\n✔ LT9: unwritable run store degrades to a warning; primary output unaffected (113.78185ms)\n✔ nested --repo-root run stores are git-ignored too (gitignore anchoring) (2.184501ms)\n✔ LT10: check-lifecycle.mjs and .sh are untouched by FS5 side-effect emission (0.526384ms)\n✔ lookup-node: returns nodeId/number/title on success (3.765941ms)\n✔ lookup-node: not found -> ok:false (0.392587ms)\n✔ lookup-node: gh failure -> structured ok:false, never throws (0.828915ms)\n✔ create-epic: creates, looks up node, boards, sets Todo explicitly — returns {number,nodeId,itemId,url} (0.907274ms)\n✔ create-task: with --parent wires addSubIssue before boarding (0.52574ms)\n✔ create-epic: gh issue create failure short-circuits before any board mutation (0.508413ms)\n✔ create-epic: partial failure after issue creation preserves created {number,url} and names the failed step (0.592116ms)\n✔ create-epic: failure at the explicit Todo-set step also preserves created identity (0.479432ms)\n✔ add-blocked-by: wires the dependency edge (1.061673ms)\n✔ frontier: open + unassigned + unblocked (or no blockers) children only (0.894078ms)\n✔ frontier: refuses an incomplete subIssues page rather than silently truncating (0.465533ms)\n✔ frontier: refuses an incomplete blockedBy page — an 11th+ open blocker must not be silently missed (0.344421ms)\n✔ claim: unclaimed issue gets assigned (0.465042ms)\n✔ claim: already-assigned issue is not re-claimed (best-effort, not atomic) (0.339816ms)\n✔ find-items: filters by number (0.41615ms)\n✔ find-items: filters by status (0.288647ms)\n✔ find-items: filters by title-contains (case-insensitive) (0.288297ms)\n✔ find-items: --since joins updatedAt via a batched graphql query (0.440624ms)\n✔ find-items: refuses a truncated result rather than silently under-reporting (0.242775ms)\n✔ find-items: filters out items from a foreign repo on a multi-repo org board (0.303258ms)\n✔ set-status: by item id directly (0.443546ms)\n✔ set-status: by issue number resolves the item id first (0.439028ms)\n✔ set-status: unknown status rejected before any gh call (1.172559ms)\n✔ set-status: neither --item nor --from-status is a usage-shaped failure (0.364022ms)\n✔ set-status: bulk --from-status moves every matching item (0.440119ms)\n✔ set-status: bulk --from-status reports partial progress on a mid-batch failure (0.448062ms)\n✔ board-add: adds by issue number, builds the URL from tracker.repo (0.283172ms)\n✔ main: dispatches find-items end to end (1.259794ms)\n✔ main: --repo-root resolves the named repo even from an unrelated cwd (0.489515ms)\n✔ main: unknown subcommand exits 2 via fail() (real subprocess — fail() calls process.exit) (56.222822ms)\n✔ main: create-epic missing --body exits 2 before any gh call (67.29406ms)\n✔ main: create-task missing --parent exits 2 before any gh call (78.528266ms)\n✔ main: --number rejects a non-integer value with a usage error, not a NaN graphql variable (52.04264ms)\n✔ main: --parent 0 is rejected by needInt's positive floor, not silently treated as absent (49.399378ms)\n✔ create-task: a bad --parent is looked up BEFORE the issue is created — no live orphan on a typo'd parent (1.469646ms)\n✔ find-items: repo-less (draft) board items are excluded, not passed through (2.166963ms)\n✔ find-items: an unparsable --since is a usage-shaped failure, not a silent empty result (3.912964ms)\n✔ find-items: an unknown --status is a usage-shaped failure, not a silent empty result (0.629384ms)\n✔ set-status: --item and --from-status together is rejected before any gh call, not silently resolved by --item winning (0.828363ms)\n✔ main: --format rejects an unknown value (82.476515ms)\n✔ main: --gh-cmd points the real spawn path at a fake executable (131.676927ms)\n✔ main: --repo overrides lookup-node's target repo instead of the configured tracker.repo (0.582513ms)\n✔ main: --repo malformed value is a usage error before any gh call (53.511223ms)\n✔ main: --owner/--project override find-items' target board instead of the configured tracker.board (0.985149ms)\n✔ main: config-derived resolution is unchanged when no override flags are given (defaults preserved) (5.828719ms)\n✔ board-add: --repo/--owner/--project override the target board and URL repo (2.000453ms)\n✔ PV1: a valid JavaScript manifest runs only declared checks and passes (133.246435ms)\n✔ PV2: only declared argv run; an undeclared tool command never executes (284.020115ms)\n✔ PV3: schema and inspectManifest reject the mutation matrix before any command runs (98.627125ms)\n✔ PV4: command outcomes are complete and deterministic; runner continues after failures (44.244496ms)\n✔ PV4: a timeout is reported as FAIL with timedOut (1053.905598ms)\n✔ PV5: category applicability is exact; injected n/a shapes are rejected (60.653795ms)\n✔ PV6: scenario mapping gates the verdict (66.939895ms)\n✔ PV7: standards and banned patterns are commands, not judgement (76.63508ms)\n✔ PV8: evidence is bounded and secrets are redacted (72.756121ms)\n✔ PV8 unit: boundStream and redaction name-matching are precise (208.828637ms)\n✔ PV9: JSON/text/exit agree and JSON mode is order-independent (446.654203ms)\n✔ PV9: --report writes the exact JSON bytes atomically (115.562444ms)\n✔ PV9: --report outside the repo root is refused and clobbers nothing (95.868895ms)\n✔ PV10: generic validator law and generated agent are portable (0.627213ms)\n✔ PV11: receipt hash verification detects mutation of any stored file (2.81643ms)\n✔ PV11: a FAIL runner-report cannot ride under runnerVerdict PASS (0.872809ms)\n✔ parseArgs: recognises JSON anywhere and rejects bad flags (0.416976ms)\n✔ PV13: renderText is a faithful projection of the report (65.497926ms)\n✔ TST2: separate full and task checks satisfy Rule A and Rule B (0.152122ms)\n✔ TST1: a scope:[full] check satisfies Rule A (scenarios n/a) (0.079044ms)\n✔ TST3: a single scope:[full,task] check satisfies both rules with no duplicate (0.0634ms)\n✔ TST4: Rule A negative -- tests required with no full-tagged check (0.372496ms)\n✔ TST5: Rule B negative -- scenario cites a tests check but none task-tagged (0.367196ms)\n✔ TST6: tests:n/a is exempt from Rule A and Rule B (0.083357ms)\n✔ TST7: zero owned scenarios -- exempt from Rule B, still subject to Rule A (0.114684ms)\n✔ TST8: a static-only scenario does not trigger Rule B (0.181541ms)\n✔ TST9: an untagged check named tests.full does NOT satisfy Rule A (0.123072ms)\n✔ TST10: scope shape errors are reported at /checks/<i>/scope (0.20451ms)\n✔ TST11: golden multi-error ordering (scope-shape + Rule A + dangling check) (0.12772ms)\n✔ TST12: schema accepts optional scope and rejects malformed shapes (12.246142ms)\n✔ Rule B iterates owned scenarios only -- an unowned evidence key draws no Rule B error (0.142303ms)\n✔ scope enum error is emitted once per check, not per bad entry (0.088598ms)\n✔ Implement owns the complete reader-now authoring law (1.590861ms)\n✔ Implement permits executable directives without exempting their prose (0.232503ms)\n✔ Implement blocks validation or closure until the exact task attestation (0.406266ms)\n✔ Tasks projects the code-prose pass into every task Definition of Done (0.160787ms)\n✔ Every normal PR reviewer enforces the same reader-now obligations (0.17144ms)\n✔ Code-prose findings use impact severity and are not dismissed as style (0.260058ms)\n✔ The package law does not depend on an external comment-writing skill (0.155733ms)\nℹ tests 555\nℹ suites 0\nℹ pass 555\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 7318.187394\n",
+      "stderrTail": ""
+    },
+    {
+      "id": "tests.task",
+      "argv": [
+        "node",
+        "--test",
+        "test/spec-artifact-skeleton.test.js"
+      ],
+      "evidence": [
+        "M3 prompt structure (SAS3): eight surfaces A-H in order, B/C/D/F anchors cite the skeleton path, five-component coverage",
+        "M3 byte-stability: Delta rounds byte-equal L1, output format byte-equal L2",
+        "M4 reference-never-restate: no canonical rule sentence appears in the prompt"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 66,
+      "stdoutTail": "✔ M1: skeleton H1 is exact (0.547145ms)\n✔ M1: section set is exactly the five components, in fixed order, no extras (0.414112ms)\n✔ M1: Vocabulary markers are section-local (0.197075ms)\n✔ M1: Contracts markers are section-local (0.121304ms)\n✔ M1: kind-label markers are section-local (0.085701ms)\n✔ M1: NFR markers are section-local (0.082532ms)\n✔ M1: scenario-form markers are section-local (0.081804ms)\n✔ M1: the four canonical rule sentences sit in their owning sections (0.845861ms)\n✔ M5: inventory row matches C4's nine fields exactly (0.374979ms)\n✔ M2: §4's first paragraph still begins 'Produce the Spec doc:' (0.143043ms)\n✔ M2: the numbered binding rules sit between §4's first paragraph and Premise durability (0.216237ms)\n✔ M2: the numbered rules open their own lines (0.083851ms)\n✔ M2: Premise durability, Dialogue discipline, configuration callout follow in order (0.065ms)\n✔ M3: exactly eight attack surfaces A-H in order, no letter beyond H (0.124996ms)\n✔ M3: the B/C/D/F anchors cite the skeleton path inside their surface lines (0.116501ms)\n✔ M3: the four anchors together name all five skeleton components (0.122328ms)\n✔ M3: Delta rounds section byte-identical to pinned block L1 (0.094801ms)\n✔ M3: output-format section byte-identical to pinned block L2 (0.065428ms)\n✔ M4: none of the four canonical rule sentences appears in the prompt (0.076127ms)\n✔ M6: the FROZEN array equals C7's pinned list L3 exactly (0.235158ms)\n✔ M7: the IDV19 reconciliation is minimal and complete (0.222967ms)\nℹ tests 21\nℹ suites 0\nℹ pass 21\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 46.257376\n",
+      "stderrTail": ""
+    },
+    {
+      "id": "tests.golden",
+      "argv": [
+        "node",
+        "--test",
+        "test/extraction.test.js"
+      ],
+      "evidence": [
+        "golden regen path re-stamps all four phases and byte-compares: all four IDENTICAL (zero diff) despite the package prompt edit"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 873,
+      "stdoutTail": "unknown format \"uri\" ignored in schema at path \"#/properties/tracker/properties/board/properties/url\"\nunknown format \"uri\" ignored in schema at path \"#/properties/tracker/properties/board/properties/url\"\n✔ S2: no loom-domain content in the generic surface (3.372842ms)\n✔ S3: JSON schemas validate their examples (27.059394ms)\n✔ S3b: ensure-panel-agent rejects malformed config (exit 2) (253.435465ms)\n✔ S3c: resolve-panel rejects malformed merged panels (exit 2) (108.625488ms)\n✔ S4: stamped name+tools+body byte-identical to golden; description == FS4 (124.354164ms)\n✔ S5: agent lands in the CONSUMER's .pi/agents (not the skill dir) (38.718008ms)\n✔ S6: resolve-panel --emit-tasks deep-equals golden under isolated env (137.729144ms)\n✔ S7: resolution terminal cases (86.822616ms)\nℹ tests 8\nℹ suites 0\nℹ pass 8\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 844.743213\n",
+      "stderrTail": ""
+    },
+    {
+      "id": "static.lint",
+      "argv": [
+        "npx",
+        "biome",
+        "check",
+        "test/spec-artifact-skeleton.test.js"
+      ],
+      "evidence": [
+        "the task's lintable surfaces are biome-clean (prompt markdown is not a biome target)"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 190,
+      "stdoutTail": "Checked 1 file in 8ms. No fixes applied.\n",
+      "stderrTail": ""
+    }
+  ],
+  "categories": [
+    {
+      "category": "tests",
+      "status": "PASS",
+      "checkIds": [
+        "tests.full",
+        "tests.task",
+        "tests.golden"
+      ]
+    },
+    {
+      "category": "static",
+      "status": "PASS",
+      "checkIds": [
+        "static.lint"
+      ]
+    },
+    {
+      "category": "scenarios",
+      "status": "PASS"
+    },
+    {
+      "category": "standards",
+      "status": "N/A",
+      "reason": "no governing standard beyond the declared checks applies to an additive prompt anchor plus contract-test assertions"
+    },
+    {
+      "category": "bannedPatterns",
+      "status": "N/A",
+      "reason": "no task-diff pattern prohibition beyond lint applies to this task"
+    }
+  ],
+  "scenarios": [
+    {
+      "scenarioId": "SAS3",
+      "status": "PASS",
+      "checkIds": [
+        "tests.task"
+      ]
+    }
+  ]
+}
