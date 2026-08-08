@@ -603,7 +603,7 @@
     {
       "id": "retro.script.render-retro",
       "source": "skills/sdlc-retro/scripts/render-retro.mjs",
-      "assertion": "render-retro.mjs \u2014 the sdlc-retro dashboard renderer (spec \u00a78, lt-t6).",
+      "assertion": "render-retro.mjs \u2014 the sdlc-retro dashboard renderer (spec \u00a78).",
       "targetKind": "command",
       "ownership": "package",
       "required": true,

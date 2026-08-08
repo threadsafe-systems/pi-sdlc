@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// render-retro.mjs — the sdlc-retro dashboard renderer (spec §8, lt-t6).
+// render-retro.mjs — the sdlc-retro dashboard renderer (spec §8).
 // Turns one run.json into a single self-contained, offline, deterministic
 // HTML dashboard: seven anchored sections, pinned per-section data bindings,
 // soft-data flagging with attribution, coverage notices for absent inputs.

@@ -30,7 +30,3 @@
    consolidated adjudication (incorporated/dismissed counts) with each fix-wave
    commit, and emit the `panel.consolidated` telemetry event per round — not
    once at the end.
-
-# Writing comments
-
-You must refer to the global writting-comments skill during the implementation phase

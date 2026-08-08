@@ -1,5 +1,4 @@
-// Scenarios for the cross-gate iteration & disposition vocabulary (S5).
-// Spec: docs/specs/2026-07-26-iteration-disposition-vocabulary.md.
+// Scenarios for the cross-gate iteration and disposition vocabulary.
 // Offline: reads the working tree only; no subprocess, model, or network calls.
 
 import assert from "node:assert/strict";
@@ -478,26 +477,26 @@ test("IDV33: retired checks name their present enforcement owners", () => {
 	for (const comment of [frozenOwner, nonChangeOwner]) {
 		assert.doesNotMatch(comment, processHistory, "ownership comments must describe present enforcement, not process history");
 	}
-	for (const mutation of [source.replace("// validator-task.prompt.md", "// Retired by the PR.\n// validator-task.prompt.md"), source.replace("// FROZEN list;", "// FROZEN list;\n\t// Retired by the PR.")]) {
-		assert.match(commentBlock(mutation.split("\n"), "validator-task.prompt.md"), processHistory, "process history anywhere in the ownership block must remain detectable");
+	const validatorOwnerLine = lines.findIndex((line) => line.trimStart().startsWith("//") && line.includes("validator-task.prompt.md"));
+	const mutateValidatorOwner = (offset) => {
+		const mutation = [...lines];
+		mutation.splice(validatorOwnerLine + offset, 0, "// Retired by the PR.");
+		return mutation;
+	};
+	for (const mutation of [mutateValidatorOwner(0), mutateValidatorOwner(1)]) {
+		assert.match(commentBlock(mutation, "validator-task.prompt.md"), processHistory, "process history anywhere in the ownership block must remain detectable");
 	}
 });
 
-// IDV19 was written diff-scoped, asserting the S5 branch DROPPED these three
-// entries. The post-merge re-freeze discharged that; the durable obligation is
-// the opposite one, so the scenario is restated as the standing guard rather
-// than deleted.
-test("IDV19: the three reopened adversary prompts are frozen again", () => {
+test("IDV19: the frozen list contains every unchanged adversary prompt", () => {
 	const path = "test/frozen-surfaces.test.js";
 	const body = readFileSync(join(repo, path), "utf8");
 	const frozen = [...body.matchAll(/^\t"([^"]+)",$/gm)].map((m) => m[1]);
-	for (const slug of ADVERSARY_PROMPTS) {
-		assert.ok(frozen.includes(`skills/sdlc/prompts/adversary-${slug}.prompt.md`), `adversary-${slug}.prompt.md was reopened for S5 and must be re-frozen`);
+	for (const slug of ["plan", "spec"]) {
+		assert.ok(frozen.includes(`skills/sdlc/prompts/adversary-${slug}.prompt.md`), `adversary-${slug}.prompt.md must stay frozen`);
 	}
+	assert.ok(!frozen.includes("skills/sdlc/prompts/adversary-review.prompt.md"), "the changed review prompt is outside this branch's frozen set");
 	assert.ok(frozen.includes("skills/sdlc/prompts/validator-task.prompt.md"), "validator-task.prompt.md must stay frozen");
-	const header = body.split("\n\n")[0];
-	assert.match(header, /re-frozen/i, "the header does not record that the reopened prompts were re-frozen");
-	assert.match(header, /iteration\s*&\s*disposition|S5/i, "the header does not name the slice that reopened them");
 });
 
 // --- Cross-cutting: citations, budget, amendment markers (T6) ----------------

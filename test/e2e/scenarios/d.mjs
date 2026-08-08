@@ -1,7 +1,5 @@
-// Scenario D — review.tasks self vs subagent: the per-task validator dispatch
-// delta through the installed resolve-panel. Under subagent, task_validate
-// resolves a validator panel; under self, resolve-panel refuses (matches PR #92
-// M1: "task validation is 'self' … only 'subagent' resolves").
+// Scenario D exercises the per-task validator dispatch through the installed
+// resolver. Subagent mode resolves a task_validate panel; self mode refuses.
 
 import { assertText } from "../harness.mjs";
 import { adopt, consumerPath, installedCmd, setCredentialedProviders, toolResults } from "./common.mjs";

@@ -1,8 +1,7 @@
-// ASD11 (DoD 9) + ASD20 (DoD 13, landing-order conditional): the agent-led setup
-// template names each concept it must explain; the setup-sdlc.mjs TTY fallback
-// asks <= 3 interactive prompts (two decisions + confirmation); every dial stays
-// reachable non-interactively by flag; and the config-doc write call site is
-// present in setup (with any already-landed telemetry call sites preserved).
+// ASD11 (DoD 9) + ASD20 (DoD 13): the agent-led setup template names each
+// concept it must explain; the setup-sdlc.mjs TTY fallback asks no more than
+// three interactive prompts; every dial stays reachable by flag; and the
+// config-doc import, write call, and reported asset remain present.
 
 import assert from "node:assert/strict";
 import { existsSync, mkdtempSync, readFileSync } from "node:fs";
@@ -81,22 +80,10 @@ test("ASD11: every dial remains reachable non-interactively by flag", () => {
 	}
 });
 
-// ---- ASD20: config-doc write call site (+ telemetry preservation) ---------
+// ---- ASD20: config-doc write call site ------------------------------------
 
 test("ASD20: setup-sdlc.mjs carries the config-doc write call site", () => {
 	assert.match(setupSource, /from "\.\/config-doc\.mjs"/, "setup must import the config-doc module");
 	assert.match(setupSource, /writeConfigDoc\(root/, "setup must call the config-doc write at the config write call site");
 	assert.match(setupSource, /id: "config-doc"/, "setup must report the config-doc asset");
-});
-
-test("ASD20 (landing-order conditional): any already-landed telemetry call sites are preserved", () => {
-	// This stream owns nothing in telemetry.mjs. If the telemetry stream (lt-t2)
-	// has already landed its record-run-event call sites in setup-sdlc.mjs, they
-	// must coexist with the config-doc write call site. Until it lands, there are
-	// none to preserve — the config-doc site is asserted above unconditionally.
-	if (setupSource.includes("record-run-event")) {
-		assert.match(setupSource, /writeConfigDoc\(root/, "both call sites must coexist after a merge");
-	} else {
-		assert.ok(true, "telemetry call sites not yet landed in this branch");
-	}
 });

@@ -1,0 +1,123 @@
+{
+  "schemaVersion": 1,
+  "taskId": "wc-t2",
+  "manifest": "/home/neil/code/threadsafe/pi-sdlc.worktrees/feat-writing-comments-discipline/docs/validation/writing-comments-discipline/wc-t2.json",
+  "repoRoot": "/home/neil/code/threadsafe/pi-sdlc.worktrees/feat-writing-comments-discipline",
+  "verdict": "PASS",
+  "exitCode": 0,
+  "errors": [],
+  "manifestErrors": [],
+  "commands": [
+    {
+      "id": "tests.full",
+      "argv": [
+        "npm",
+        "test"
+      ],
+      "evidence": [
+        "whole-corpus regression net completes within the approved timeout"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 7764,
+      "stdoutTail": "[...truncated; showing bounded tail...]\n✔ LT8: validate-task emits task.validated on PASS with and without --report (384.066969ms)\n✔ LT8: validate-task emits task.validated on FAIL (79.545452ms)\n✔ LT8: validate-task emits task.validated on an ERROR fixture whose manifest parses (35.50649ms)\n✔ LT8: an unparseable-manifest ERROR skips emission with the standard warning (52.256628ms)\n✔ LT9: unwritable run store degrades to a warning; primary output unaffected (227.897023ms)\n✔ nested --repo-root run stores are git-ignored too (gitignore anchoring) (4.307081ms)\n✔ LT10: check-lifecycle.mjs and .sh are untouched by FS5 side-effect emission (1.261993ms)\n✔ lookup-node: returns nodeId/number/title on success (5.740125ms)\n✔ lookup-node: not found -> ok:false (0.983653ms)\n✔ lookup-node: gh failure -> structured ok:false, never throws (0.908682ms)\n✔ create-epic: creates, looks up node, boards, sets Todo explicitly — returns {number,nodeId,itemId,url} (2.185659ms)\n✔ create-task: with --parent wires addSubIssue before boarding (1.356097ms)\n✔ create-epic: gh issue create failure short-circuits before any board mutation (0.951284ms)\n✔ create-epic: partial failure after issue creation preserves created {number,url} and names the failed step (0.950236ms)\n✔ create-epic: failure at the explicit Todo-set step also preserves created identity (0.87675ms)\n✔ add-blocked-by: wires the dependency edge (1.245712ms)\n✔ frontier: open + unassigned + unblocked (or no blockers) children only (1.894165ms)\n✔ frontier: refuses an incomplete subIssues page rather than silently truncating (0.860106ms)\n✔ frontier: refuses an incomplete blockedBy page — an 11th+ open blocker must not be silently missed (0.828801ms)\n✔ claim: unclaimed issue gets assigned (0.895167ms)\n✔ claim: already-assigned issue is not re-claimed (best-effort, not atomic) (0.805853ms)\n✔ find-items: filters by number (1.107828ms)\n✔ find-items: filters by status (0.858985ms)\n✔ find-items: filters by title-contains (case-insensitive) (0.850989ms)\n✔ find-items: --since joins updatedAt via a batched graphql query (1.02779ms)\n✔ find-items: refuses a truncated result rather than silently under-reporting (0.576293ms)\n✔ find-items: filters out items from a foreign repo on a multi-repo org board (0.830209ms)\n✔ set-status: by item id directly (1.127752ms)\n✔ set-status: by issue number resolves the item id first (0.902318ms)\n✔ set-status: unknown status rejected before any gh call (0.801052ms)\n✔ set-status: neither --item nor --from-status is a usage-shaped failure (0.873643ms)\n✔ set-status: bulk --from-status moves every matching item (0.903156ms)\n✔ set-status: bulk --from-status reports partial progress on a mid-batch failure (0.955407ms)\n✔ board-add: adds by issue number, builds the URL from tracker.repo (0.824038ms)\n✔ main: dispatches find-items end to end (2.859884ms)\n✔ main: --repo-root resolves the named repo even from an unrelated cwd (1.127537ms)\n✔ main: unknown subcommand exits 2 via fail() (real subprocess — fail() calls process.exit) (55.343208ms)\n✔ main: create-epic missing --body exits 2 before any gh call (33.374721ms)\n✔ main: create-task missing --parent exits 2 before any gh call (52.288376ms)\n✔ main: --number rejects a non-integer value with a usage error, not a NaN graphql variable (111.743351ms)\n✔ main: --parent 0 is rejected by needInt's positive floor, not silently treated as absent (48.059575ms)\n✔ create-task: a bad --parent is looked up BEFORE the issue is created — no live orphan on a typo'd parent (0.92588ms)\n✔ find-items: repo-less (draft) board items are excluded, not passed through (1.64039ms)\n✔ find-items: an unparsable --since is a usage-shaped failure, not a silent empty result (0.91814ms)\n✔ find-items: an unknown --status is a usage-shaped failure, not a silent empty result (0.783647ms)\n✔ set-status: --item and --from-status together is rejected before any gh call, not silently resolved by --item winning (0.685457ms)\n✔ main: --format rejects an unknown value (50.090256ms)\n✔ main: --gh-cmd points the real spawn path at a fake executable (80.472672ms)\n✔ main: --repo overrides lookup-node's target repo instead of the configured tracker.repo (1.316453ms)\n✔ main: --repo malformed value is a usage error before any gh call (32.959642ms)\n✔ main: --owner/--project override find-items' target board instead of the configured tracker.board (0.637197ms)\n✔ main: config-derived resolution is unchanged when no override flags are given (defaults preserved) (0.459965ms)\n✔ board-add: --repo/--owner/--project override the target board and URL repo (0.597462ms)\n✔ PV1: a valid JavaScript manifest runs only declared checks and passes (101.67222ms)\n✔ PV2: only declared argv run; an undeclared tool command never executes (225.835387ms)\n✔ PV3: schema and inspectManifest reject the mutation matrix before any command runs (72.497726ms)\n✔ PV4: command outcomes are complete and deterministic; runner continues after failures (62.454203ms)\n✔ PV4: a timeout is reported as FAIL with timedOut (1079.019769ms)\n✔ PV5: category applicability is exact; injected n/a shapes are rejected (178.920015ms)\n✔ PV6: scenario mapping gates the verdict (170.646273ms)\n✔ PV7: standards and banned patterns are commands, not judgement (228.219902ms)\n✔ PV8: evidence is bounded and secrets are redacted (174.9712ms)\n✔ PV8 unit: boundStream and redaction name-matching are precise (375.327298ms)\n✔ PV9: JSON/text/exit agree and JSON mode is order-independent (988.4627ms)\n✔ PV9: --report writes the exact JSON bytes atomically (261.22778ms)\n✔ PV9: --report outside the repo root is refused and clobbers nothing (237.451797ms)\n✔ PV10: generic validator law and generated agent are portable (0.939555ms)\n✔ PV11: receipt hash verification detects mutation of any stored file (7.67737ms)\n✔ PV11: a FAIL runner-report cannot ride under runnerVerdict PASS (2.019948ms)\n✔ parseArgs: recognises JSON anywhere and rejects bad flags (1.079262ms)\n✔ PV13: renderText is a faithful projection of the report (184.968838ms)\n✔ TST2: separate full and task checks satisfy Rule A and Rule B (0.617427ms)\n✔ TST1: a scope:[full] check satisfies Rule A (scenarios n/a) (0.285039ms)\n✔ TST3: a single scope:[full,task] check satisfies both rules with no duplicate (0.230282ms)\n✔ TST4: Rule A negative -- tests required with no full-tagged check (1.587536ms)\n✔ TST5: Rule B negative -- scenario cites a tests check but none task-tagged (1.517423ms)\n✔ TST6: tests:n/a is exempt from Rule A and Rule B (0.440249ms)\n✔ TST7: zero owned scenarios -- exempt from Rule B, still subject to Rule A (0.491069ms)\n✔ TST8: a static-only scenario does not trigger Rule B (0.291698ms)\n✔ TST9: an untagged check named tests.full does NOT satisfy Rule A (0.242404ms)\n✔ TST10: scope shape errors are reported at /checks/<i>/scope (0.580432ms)\n✔ TST11: golden multi-error ordering (scope-shape + Rule A + dangling check) (0.277559ms)\n✔ TST12: schema accepts optional scope and rejects malformed shapes (45.518022ms)\n✔ Rule B iterates owned scenarios only -- an unowned evidence key draws no Rule B error (0.576262ms)\n✔ scope enum error is emitted once per check, not per bad entry (0.278927ms)\n✔ Implement owns the complete reader-now authoring law (1.170844ms)\n✔ Implement permits executable directives without exempting their prose (0.932299ms)\n✔ Implement blocks validation or closure until the exact task attestation (0.376261ms)\n✔ Tasks projects the code-prose pass into every task Definition of Done (0.212343ms)\n✔ Every normal PR reviewer enforces the same reader-now obligations (0.24933ms)\n✔ Code-prose findings use impact severity and are not dismissed as style (0.202207ms)\nℹ tests 534\nℹ suites 0\nℹ pass 534\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 7563.603704\n",
+      "stderrTail": ""
+    },
+    {
+      "id": "tests.task",
+      "argv": [
+        "node",
+        "--test",
+        "test/writing-comments-discipline.test.js",
+        "test/extraction.test.js",
+        "test/iteration-disposition.test.js"
+      ],
+      "evidence": [
+        "normal-reviewer attack surface, stamped projection, author-reviewer parity, frozen-list reconciliation, and impact-based severity"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 1929,
+      "stdoutTail": "unknown format \"uri\" ignored in schema at path \"#/properties/tracker/properties/board/properties/url\"\nunknown format \"uri\" ignored in schema at path \"#/properties/tracker/properties/board/properties/url\"\n✔ S2: no loom-domain content in the generic surface (9.686585ms)\n✔ S3: JSON schemas validate their examples (51.439633ms)\n✔ S3b: ensure-panel-agent rejects malformed config (exit 2) (489.616194ms)\n✔ S3c: resolve-panel rejects malformed merged panels (exit 2) (301.903766ms)\n✔ S4: stamped name+tools+body byte-identical to golden; description == FS4 (334.096795ms)\n✔ S5: agent lands in the CONSUMER's .pi/agents (not the skill dir) (75.963827ms)\n✔ S6: resolve-panel --emit-tasks deep-equals golden under isolated env (327.19363ms)\n✔ S7: resolution terminal cases (159.329418ms)\n✔ IDV1: system-reference.md contains exactly one 'Iteration & disposition' section (1.716067ms)\n✔ IDV2: the glossary defines every term group, the alias, and the prefix mapping (1.460254ms)\n✔ IDV2 (non-vacuous): a glossary stripped of the alias fails its own check (0.642523ms)\n✔ IDV3: system-reference.md keeps the standing §1–§14 heading contract (1.918197ms)\n✔ IDV25: the glossary section is at most 60 lines (0.307849ms)\n✔ IDV5: phase-pr-review.md §5 contains every row of the C2 table (0.975042ms)\n✔ IDV6: phase-pr-review.md §1 carries the floors-govern-full-rounds clause (0.446041ms)\n✔ IDV7: the round cap names round 4 and lists exactly four bounded options (0.544246ms)\n✔ IDV8: at pr_review, moving on requires a ratified dismissal and never permits merging past a survivor (2.237508ms)\n✔ IDV13: phase-pr-review.md states the backlog checkpoint (1.009872ms)\n✔ IDV30: the existing 'Only … escalate' sentence is itself amended, not left standing (1.07641ms)\n✔ IDV11: every conditional outbound carry statement sits inside an 'under your configuration' callout (1.40674ms)\n✔ IDV11: CARRY-TO-BACKLOG is stated unconditionally, never wrapped in a callout (0.513415ms)\n✔ IDV9: the three amendment classes appear at their C4 homes (1.460562ms)\n✔ IDV10: §6 of those three carries a class-(a) pointer and defines no forward amendment (0.637249ms)\n✔ IDV26: all four outbound carry statements exist at their C3 homes (0.518403ms)\n✔ IDV12: the four inbound carry checkpoints appear in their named reference and section (1.720722ms)\n✔ IDV29: phase-implement.md §5 states the review.tasks: off fallback (0.554308ms)\n✔ IDV14: phase-tasks.md §4 specifies the spec-gap log with its exact columns and enums (0.687791ms)\n✔ IDV14: templates/sdlc-tasks.md remains a thin current-tree router (0.846174ms)\n✔ IDV27: assumption-recorded routes to the existing Assumptions appendix (0.608591ms)\n✔ IDV15: every adversary prompt carries the delta-round law and its C6 carry clause (2.079947ms)\n✔ IDV28: every adversary prompt's STRICT output format declares an origin field (0.591677ms)\n✔ IDV33: retired checks name their present enforcement owners (1.447082ms)\n✔ IDV19: the frozen list contains every unchanged adversary prompt (0.382255ms)\n✔ IDV4: every phase reference the vocabulary binds cites the glossary by name (1.405101ms)\n✔ IDV17: this scenario corpus makes no subprocess, model, or network call (3.347849ms)\n✔ IDV32: every amendment record in the Spec is named by an in-place marker in the Plan (0.90383ms)\n✔ IDV31: the finding-class alias sits at the binds-forward paragraph (0.153526ms)\n✔ IDV24: config-doc check reports current for .pi/sdlc/CONFIG.md (2.671239ms)\n✔ Implement owns the complete reader-now authoring law (3.097466ms)\n✔ Implement permits executable directives without exempting their prose (5.31302ms)\n✔ Implement blocks validation or closure until the exact task attestation (1.085124ms)\n✔ Tasks projects the code-prose pass into every task Definition of Done (0.52509ms)\n✔ Every normal PR reviewer enforces the same reader-now obligations (0.596789ms)\n✔ Code-prose findings use impact severity and are not dismissed as style (0.469481ms)\nℹ tests 44\nℹ suites 0\nℹ pass 44\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 1869.241315\n",
+      "stderrTail": ""
+    },
+    {
+      "id": "static.lint",
+      "argv": [
+        "npx",
+        "biome",
+        "check",
+        "test/writing-comments-discipline.test.js",
+        "test/iteration-disposition.test.js",
+        "test/frozen-surfaces.test.js"
+      ],
+      "evidence": [
+        "focused, iteration-disposition, and frozen-surface tests are Biome-clean"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 475,
+      "stdoutTail": "Checked 3 files in 31ms. No fixes applied.\n",
+      "stderrTail": ""
+    },
+    {
+      "id": "standards.frozen",
+      "argv": [
+        "node",
+        "--test",
+        "test/frozen-surfaces.test.js"
+      ],
+      "evidence": [
+        "only the deliberately changed PR prompt is reopened"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 183,
+      "stdoutTail": "✔ ASD19: frozen surfaces are byte-identical to the branch base (22.352089ms)\n✔ ASD19: FS8/FS9 check ids remain present in their frozen scripts (5.775324ms)\nℹ tests 2\nℹ suites 0\nℹ pass 2\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 124.039829\n",
+      "stderrTail": ""
+    }
+  ],
+  "categories": [
+    {
+      "category": "tests",
+      "status": "PASS",
+      "checkIds": [
+        "tests.full",
+        "tests.task"
+      ]
+    },
+    {
+      "category": "static",
+      "status": "PASS",
+      "checkIds": [
+        "static.lint"
+      ]
+    },
+    {
+      "category": "scenarios",
+      "status": "N/A",
+      "reason": "the approved reversible Plan has no Specification scenario ledger"
+    },
+    {
+      "category": "standards",
+      "status": "PASS",
+      "checkIds": [
+        "standards.frozen"
+      ]
+    },
+    {
+      "category": "bannedPatterns",
+      "status": "N/A",
+      "reason": "a generic process-provenance scanner is explicitly outside the approved scope"
+    }
+  ],
+  "scenarios": []
+}

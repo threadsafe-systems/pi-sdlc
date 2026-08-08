@@ -1,4 +1,4 @@
-// FS13 emitter tests (lt-t1): the record-run-event CLI, run-identity
+// FS13 emitter tests: the record-run-event CLI, run-identity
 // resolution, the shared event validator, and the run-store .gitignore entry.
 // Scenarios LT1-LT5 (emitter) and LT26 (.gitignore). Offline/deterministic
 // (NF1): only local git, no network, no model calls.
@@ -329,9 +329,9 @@ test("vocabulary: every known event has a payload descriptor", () => {
 });
 
 // ---------------------------------------------------------------------------
-// Telemetry emitter DX (2026-07-23): unknown-event bail carries a suggestion,
-// invalid-payload bail carries the expected template, and --list/--describe
-// are informational-only (stdout, exit 0, never touch the run store).
+// Unknown-event bail carries a suggestion, invalid-payload bail carries the
+// expected template, and --list/--describe are informational-only: stdout,
+// exit 0, and no run-store mutation.
 // ---------------------------------------------------------------------------
 
 test("DX: unknown-event bail suggests the nearest known event and lists all", () => {
@@ -451,7 +451,7 @@ test("DX: --list/--describe never mutate an existing run store mid-run", () => {
 	}
 });
 
-test("DX-fix: malformed --payload JSON still carries the expected template (PR panel finding)", () => {
+test("DX: malformed --payload JSON carries the expected template", () => {
 	const root = tmp();
 	try {
 		const r = run(["gate.approved", "--repo-root", root, "--slug", "s", "--payload", "{bad"]);
@@ -463,7 +463,7 @@ test("DX-fix: malformed --payload JSON still carries the expected template (PR p
 	}
 });
 
-test("DX-fix: a missing --payload value carries the expected template when the event is already known (PR panel finding)", () => {
+test("DX: a known event with a missing --payload value carries the expected template", () => {
 	const root = tmp();
 	try {
 		const r = run(["gate.approved", "--repo-root", root, "--slug", "s", "--payload"]);
@@ -475,14 +475,14 @@ test("DX-fix: a missing --payload value carries the expected template when the e
 	}
 });
 
-test("DX-fix: a missing --payload value with no prior event token degrades without a template (documented limitation)", () => {
+test("DX: a missing --payload value without an event token omits the template", () => {
 	const r = run(["--payload"]);
 	assert.equal(r.code, 2);
 	assert.ok(r.stderr.includes("--payload requires a value"), r.stderr);
 	assert.ok(!r.stderr.includes("expected:"), `unexpected template with no known event: ${r.stderr}`);
 });
 
-test("DX-fix: renderEventTemplate never crashes on inherited-property lookups (PR panel finding)", () => {
+test("DX: renderEventTemplate returns null for inherited-property lookups", () => {
 	for (const poisoned of ["__proto__", "constructor", "toString", "hasOwnProperty"]) {
 		assert.equal(renderEventTemplate(poisoned), null, `renderEventTemplate('${poisoned}') must return null, not throw`);
 		assert.equal(suggestEvent(poisoned), null, `suggestEvent('${poisoned}') should find nothing close`);

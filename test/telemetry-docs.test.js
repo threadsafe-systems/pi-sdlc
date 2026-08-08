@@ -1,4 +1,4 @@
-// Docs, FS11 inventory, and structural coverage tests (lt-t7). Scenarios
+// Docs, FS11 inventory, and structural coverage tests. Scenarios
 // LT24-LT25: the sdlc SKILL.md hook-token contract, sdlc-retro SKILL.md's
 // skill-relative collect/render invocations, FS11 inventory correctness, and
 // the structural omission-coverage test the FS11 checker itself cannot

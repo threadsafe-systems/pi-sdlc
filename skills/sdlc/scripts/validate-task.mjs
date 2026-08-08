@@ -5,7 +5,7 @@
 // redacts evidence, and reports PASS/FAIL/ERROR. No network, model, or
 // credential-file access. No runtime dependencies.
 //
-// --slug is additive (FS13 lt-t2): after the report is computed (regardless
+// --slug is additive (FS13): after the report is computed (regardless
 // of --report), emits task.validated to the resolved run's manifest
 // (fail-soft; never alters stdout bytes or the exit code, NF3).
 

@@ -58,6 +58,12 @@ gate; the panel still judges whether a `"full"`-tagged check is genuinely the
 broad suite. Full contract: `references/phase-implement.md` (PV1 manifest) and
 `docs/specs/2026-07-12-sdlc-portable-validator.md` §11.
 
+**Code-prose DoD.** Every task's Definition of Done includes the code-prose pass
+owned by `references/phase-implement.md` §4 and the exact task handoff
+`Code-prose pass: complete`. Build places that obligation before the task's
+validator/closure seam; it does not make the deterministic validator a prose
+judge or add a check command to the PV1 manifest.
+
 **Dialogue discipline.** Build expects **zero blocking questions**
 (shared contract: `references/system-reference.md`,
 "Presenting questions to the human"). A genuinely blocking question here almost always means the Spec's

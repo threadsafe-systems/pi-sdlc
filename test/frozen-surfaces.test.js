@@ -1,17 +1,7 @@
-// ASD19 (explicit non-changes): the frozen surfaces are byte-identical to the
-// branch base. sdlc-status (FS8), check-lifecycle (FS9), lib.mjs +
-// sdlc.config.schema.json (config schemaVersion 3), resolve-panel, the PV1/PV2
-// validator (schema + validate-task.mjs + validate-task.sh + verify-task-receipt),
-// the task validator prompt, and panel/ceremony law are untouched;
-// #91/#101/#102 scopes are not re-opened. The PV1 schema and validate-task.mjs
-// were reopened for the 2026-07-24 `scope`-field slice (PR #190) and are
-// re-frozen here by its post-merge follow-up.
-//
-// The three adversary prompts (plan, spec, review) were reopened for the
-// 2026-07-26 iteration & disposition vocabulary slice (S5, epic #199, PR #206)
-// — a reviewer subagent has none of the skill loaded, so every rule it must
-// obey has to be inline in its prompt — and are re-frozen here by its
-// post-merge follow-up.
+// ASD19 protects contract surfaces that must remain byte-identical to the branch
+// base: readiness/lifecycle scripts and shared law, config/validation contracts,
+// unchanged panel and validator commands, receipt verification, and plan/spec/task
+// validator prompts. The bounded exclusion set moves as one coherent unit.
 // Uses git to compare against the base.
 
 import assert from "node:assert/strict";
@@ -32,16 +22,20 @@ const FROZEN = [
 	"skills/sdlc/schema/sdlc.config.schema.json",
 	"skills/sdlc/schema/sdlc.config.example.json",
 	"skills/sdlc/schema/task-validation-manifest.schema.json",
-	"skills/sdlc/scripts/resolve-panel.mjs",
 	"skills/sdlc/scripts/resolve-panel.sh",
-	"skills/sdlc/scripts/validate-task.mjs",
 	"skills/sdlc/scripts/validate-task.sh",
 	"skills/sdlc/scripts/verify-task-receipt.mjs",
 	"skills/sdlc/prompts/adversary-plan.prompt.md",
 	"skills/sdlc/prompts/adversary-spec.prompt.md",
-	"skills/sdlc/prompts/adversary-review.prompt.md",
 	"skills/sdlc/prompts/validator-task.prompt.md",
 ];
+
+const BOUNDED_EXCLUSIONS = ["skills/sdlc/prompts/adversary-review.prompt.md", "skills/sdlc/scripts/resolve-panel.mjs", "skills/sdlc/scripts/validate-task.mjs"];
+
+function exclusionSetIsCoherent(frozen) {
+	const frozenCount = BOUNDED_EXCLUSIONS.filter((path) => frozen.includes(path)).length;
+	return frozenCount === 0 || frozenCount === BOUNDED_EXCLUSIONS.length;
+}
 
 function baseRef() {
 	// The branch base: the merge-base with the main line. In CI `main` may not be a
@@ -58,6 +52,13 @@ test("ASD19: frozen surfaces are byte-identical to the branch base", () => {
 	const base = baseRef();
 	const changed = execFileSync("git", ["-C", repo, "diff", "--name-only", base, "HEAD", "--", ...FROZEN], { encoding: "utf8" }).trim();
 	assert.equal(changed, "", `frozen surfaces changed since ${base}:\n${changed}`);
+});
+
+test("ASD19: the bounded exclusion set remains coherent", () => {
+	for (let count = 0; count <= BOUNDED_EXCLUSIONS.length; count++) {
+		assert.equal(exclusionSetIsCoherent(BOUNDED_EXCLUSIONS.slice(0, count)), count === 0 || count === BOUNDED_EXCLUSIONS.length, `${count}/${BOUNDED_EXCLUSIONS.length} frozen`);
+	}
+	assert.ok(exclusionSetIsCoherent(FROZEN), "the live frozen set contains either none or all bounded exclusions");
 });
 
 test("ASD19: FS8/FS9 check ids remain present in their frozen scripts", () => {

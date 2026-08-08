@@ -170,8 +170,7 @@ try {
 		closeSync(fd);
 	}
 } catch (err) {
-	// An I/O failure is exit 2 for the dedicated emitter (FS5 callers wrap this
-	// path in their own fail-soft handling, lt-t2).
+	// The dedicated emitter exits 2; FS5 callers wrap this path with fail-soft handling.
 	bail(`I/O failure writing the run store: ${err.message}`);
 }
 

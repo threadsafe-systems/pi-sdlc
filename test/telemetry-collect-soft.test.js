@@ -1,4 +1,4 @@
-// sdlc-retro collector soft-data / raw-snapshot / replay tests (lt-t5): the
+// sdlc-retro collector soft-data / raw-snapshot / replay tests: the
 // LLM seam, NF4 redaction + n-gram containment + 500-char cap, raw/
 // snapshotting, and --from-raw exclusive replay. Scenarios LT17-LT19,
 // LT28-LT29. Offline/deterministic (NF1): --llm-cmd is always a local fixture
