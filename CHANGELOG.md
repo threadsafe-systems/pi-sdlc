@@ -1,3 +1,9 @@
+## [3.2.0](https://github.com/threadsafe-systems/pi-sdlc/compare/v3.1.1...v3.2.0) (2026-08-08)
+
+### Features
+
+* **docs:** enforce reader-now code-prose discipline ([#223](https://github.com/threadsafe-systems/pi-sdlc/issues/223)) ([a82570e](https://github.com/threadsafe-systems/pi-sdlc/commit/a82570e0d0be841837a1994d6d8fca78fe9247a5))
+
 ## [3.1.1](https://github.com/threadsafe-systems/pi-sdlc/compare/v3.1.0...v3.1.1) (2026-08-07)
 
 ### Bug Fixes
