@@ -488,14 +488,13 @@ test("IDV33: retired checks name their present enforcement owners", () => {
 	}
 });
 
-test("IDV19: the frozen list contains every unchanged adversary prompt", () => {
+test("IDV19: the frozen list contains every adversary prompt", () => {
 	const path = "test/frozen-surfaces.test.js";
 	const body = readFileSync(join(repo, path), "utf8");
 	const frozen = [...body.matchAll(/^\t"([^"]+)",$/gm)].map((m) => m[1]);
-	for (const slug of ["plan", "spec"]) {
+	for (const slug of ADVERSARY_PROMPTS) {
 		assert.ok(frozen.includes(`skills/sdlc/prompts/adversary-${slug}.prompt.md`), `adversary-${slug}.prompt.md must stay frozen`);
 	}
-	assert.ok(!frozen.includes("skills/sdlc/prompts/adversary-review.prompt.md"), "the changed review prompt is outside this branch's frozen set");
 	assert.ok(frozen.includes("skills/sdlc/prompts/validator-task.prompt.md"), "validator-task.prompt.md must stay frozen");
 });
 
