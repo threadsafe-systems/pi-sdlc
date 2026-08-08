@@ -1,8 +1,7 @@
-// ASD11 (DoD 9) + ASD20 (DoD 13, landing-order conditional): the agent-led setup
-// template names each concept it must explain; the setup-sdlc.mjs TTY fallback
-// asks <= 3 interactive prompts (two decisions + confirmation); every dial stays
-// reachable non-interactively by flag; and the config-doc write call site is
-// present in setup (with any already-landed telemetry call sites preserved).
+// ASD11 (DoD 9) + ASD20 (DoD 13): the agent-led setup template names each
+// concept it must explain; the setup-sdlc.mjs TTY fallback asks no more than
+// three interactive prompts; every dial stays reachable by flag; and the
+// config-doc import, write call, and reported asset remain present.
 
 import assert from "node:assert/strict";
 import { existsSync, mkdtempSync, readFileSync } from "node:fs";

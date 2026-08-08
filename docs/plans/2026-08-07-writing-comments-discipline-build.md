@@ -184,5 +184,5 @@ These are programme-level carries, not Build deficiencies and not `CARRY-TO-IMPL
 
 - Trigger: PR-review round 2 found that completing the bounded process-history cleanup changed reader-facing headers in `resolve-panel.mjs` and `validate-task.mjs` while both implementations remained in ASD19's frozen list.
 - Class: **(c), normal fix wave**.
-- Disposition: **incorporated**. The two implementations leave the feature branch's frozen set while their unchanged shell wrappers remain protected. Mandatory post-merge follow-up #222 restores both implementations alongside the reviewer prompt; the full freeze guard then becomes the standing contract again.
+- Disposition: **incorporated**. The two implementations leave the feature branch's frozen set while their unchanged shell wrappers remain protected. One coherent-set assertion prevents any of the three bounded exclusions from entering `FROZEN` independently. Mandatory post-merge follow-up #222 restores both implementations alongside the reviewer prompt; the full freeze guard then becomes the standing contract again.
 - Scope unchanged: only comments changed in those implementations; no runtime behavior or interface changed.

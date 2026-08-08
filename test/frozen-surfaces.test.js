@@ -1,10 +1,8 @@
 // ASD19 protects contract surfaces that must remain byte-identical to the branch
-// base: readiness/lifecycle scripts, config and validation contracts, panel and
-// validator wrappers, plan/spec reviewer prompts, the task validator prompt, and
-// shared panel law. The PR reviewer prompt plus the two script implementations
-// changed by the focused code-prose cleanup are absent from this list. Reviewer
-// prompts carry their rules inline
-// because reviewer subagents do not inherit the lifecycle skill.
+// base: readiness/lifecycle scripts, config and validation contracts, unchanged
+// panel and validator surfaces, and shared panel law. The bounded exclusion set
+// is asserted as one coherent unit below. Reviewer prompts carry their rules
+// inline because reviewer subagents do not inherit the lifecycle skill.
 // Uses git to compare against the base.
 
 import assert from "node:assert/strict";
@@ -33,6 +31,8 @@ const FROZEN = [
 	"skills/sdlc/prompts/validator-task.prompt.md",
 ];
 
+const BOUNDED_EXCLUSIONS = ["skills/sdlc/prompts/adversary-review.prompt.md", "skills/sdlc/scripts/resolve-panel.mjs", "skills/sdlc/scripts/validate-task.mjs"];
+
 function baseRef() {
 	// The branch base: the merge-base with the main line. In CI `main` may not be a
 	// local branch (only origin/main is fetched), so try both refs.
@@ -48,6 +48,10 @@ test("ASD19: frozen surfaces are byte-identical to the branch base", () => {
 	const base = baseRef();
 	const changed = execFileSync("git", ["-C", repo, "diff", "--name-only", base, "HEAD", "--", ...FROZEN], { encoding: "utf8" }).trim();
 	assert.equal(changed, "", `frozen surfaces changed since ${base}:\n${changed}`);
+});
+
+test("ASD19: the bounded exclusion set remains coherent", () => {
+	for (const path of BOUNDED_EXCLUSIONS) assert.ok(!FROZEN.includes(path), `${path} cannot enter FROZEN independently`);
 });
 
 test("ASD19: FS8/FS9 check ids remain present in their frozen scripts", () => {

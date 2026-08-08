@@ -36,3 +36,19 @@ Usable reviewers: `deepseek/deepseek-v4-pro:xhigh`, `moonshotai/kimi-k3:xhigh`, 
 | WC-R2-02 | low | NEW | The renamed optional-telemetry coexistence test could only repeat an existing assertion or pass vacuously, so its name overclaimed what its body proved. | **incorporated** — deleted the redundant conditional test; the preceding ASD20 test retains the real config-doc call-site contract. |
 
 No finding was dismissed. Round 3 receives only this fix-wave delta.
+
+## Round 3
+
+Delta: `5a877da..491b35e`
+
+Reviewers: `deepseek/deepseek-v4-pro:xhigh`, `moonshotai/kimi-k3:xhigh`, `google/gemini-3.1-pro-preview:xhigh`.
+
+All three reviewers confirmed WC-R2-01 and WC-R2-02 resolved. No high or medium finding was reported.
+
+| ID | Severity | Origin | Finding | Disposition |
+|---|---|---|---|---|
+| WC-R3-01 | low | NEW | The frozen-surfaces header narrated the cleanup event and absent files instead of the current guard boundary. | **incorporated** — rewrote it as the present protected/exclusion-set contract. |
+| WC-R3-02 | low | NEW | The coherent re-freeze tripwire covered only the reviewer prompt, allowing either script implementation to be restored independently without forcing a coordinated guard update. | **incorporated** — added one exact three-surface exclusion set and a standing coherence assertion; amendment A3 records the mechanism. |
+| WC-R3-03 | low | NEW | The setup-config-doc file header still claimed telemetry-preservation coverage after deletion of the vacuous coexistence test. | **incorporated** — the header now names only the active setup/config-doc contracts. |
+
+No finding was dismissed. Round 4 receives only this fix-wave delta.
