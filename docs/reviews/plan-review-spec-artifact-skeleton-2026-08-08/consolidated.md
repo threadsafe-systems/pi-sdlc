@@ -1,4 +1,4 @@
-# Plan panel — consolidated adjudication (rounds 1–3)
+# Plan panel — consolidated adjudication (rounds 1–4)
 
 - Run: `spec-artifact-skeleton` (map #192, slice S1)
 - Track: irreversible
@@ -80,8 +80,24 @@ Split verdict: **luna PASSed clean** (all five fixes confirmed, CLEAR on every s
 
 Round 3: 2 incorporated, 0 dismissed — the third consecutive all-incorporate wave, flagged per posture. Context for the owner: luna returned a clean PASS, and gemini's two findings are text-hygiene fixes (a hedge clause, an ownership statement), not design objections; both were verified cheap and real. The plan is converging — round 4 is the cap and exists only to verify the rev-4 delta.
 
+## Findings — round 4 (capped convergence round)
+
+No findings. Both reviewers verified all three rev-4 items and scanned the delta for regressions:
+
+- **luna — PASS.** PLAN-R3-01 confirmed fixed (strict fixture boundary at `:44`, isolation routing at `:98`); PLAN-R3-02 confirmed fixed (orchestrator ownership aligned across In-scope 5, DoD 9, Context at `:34/:67/:71`); rev-4 header/amendment text consistent. Re-ran `npm test`: 534 passing. No regressions.
+- **gemini — PASS.** Same three items verified fixed with the same line citations; no regression findings. Two sub-threshold prose observations (non-findings): a stylistic note on the double-negative phrasing of the fixture boundary, and a remark that the Amendments section is now long — both below the reportable bar, both recorded here for transparency; neither alters the plan.
+
+### Adjudication — round 4
+
+Nothing to adjudicate: 0 findings, 0 incorporated, 0 dismissed. The panel converged at the capped round; the plan is final at rev 4.
+
+### Dismissal posture — final
+
+Four rounds, 14 findings total (7 high / 7 medium), 14 incorporated, 0 dismissed. Three consecutive all-incorporate waves were flagged per posture; the mitigating record is that finding severity and count shrank monotonically (7 → 5 → 2 → 0), every incorporated fix was verified by both reviewers in the following round, and the final round was a clean dual PASS. No finding was ever a design objection to S1's ratified purpose — all were executability/consistency defects in the plan text.
+
 ## Round map
 
 - round 1 ↔ this `consolidated.md` ↔ `panel.dispatched`/`panel.consolidated` (wave 1) ↔ harvest `plan_review-round1-2026-08-08`.
 - round 2 ↔ this `consolidated.md` ↔ `panel.dispatched`/`panel.consolidated` (wave 2) ↔ harvest `plan_review-round2-2026-08-08`.
 - round 3 ↔ this `consolidated.md` ↔ `panel.dispatched`/`panel.consolidated` (wave 3) ↔ harvest `plan_review-round3-2026-08-08`.
+- round 4 ↔ this `consolidated.md` ↔ `panel.dispatched`/`panel.consolidated` (wave 4) ↔ harvest `plan_review-round4-2026-08-08` (reviewer session logs were not flushed to disk for this round; the harvest `meta.json` carries the full outputs).
