@@ -1,7 +1,7 @@
 # Plan: S3 brainstorm gate-presentation contract (map #192)
 
-Status: rev 4, plan panel round 3 all-incorporated (R3-A1..A2; R2-D1..D3
-re-verified, sketch now verbatim — see docs/reviews/plan-review-gate-presentation-contract-2026-08-09/).
+Status: rev 5, plan panel round 4 all-incorporated (R4: synonym-prefix
+removal; see docs/reviews/plan-review-gate-presentation-contract-2026-08-09/).
 Run slug `gate-presentation-contract`,
 track irreversible. Map #192 slate row S3; bundles R1-G1, G2, G3, G4, G5, G7,
 G8 with R1-G5's shape amended at this gate (see provenance `rejected:` lines).
@@ -35,9 +35,11 @@ flowchart LR
 This run is map-sourced (Map #192 slate row), so this block is the index;
 every entry links the single home of the full grammar, the resolution
 comment [S3 gate record][s3-gate-record] (home list: one appetite line,
-nine decision lines, three rejected lines — R3-A1: entries are pure
-descriptive gists; the line-kind prefixes live only at home). The sketch
-above embeds verbatim as a gate artifact in both modes.
+nine decision lines, three rejected lines — R3-A1/R4: entries carry no
+line-kind prefix and no uniform classification of any kind; kind names may
+appear only as the subject matter of the decision being gisted, as they do
+in the sketch; entry classification lives only at home). The sketch above
+embeds verbatim as a gate artifact in both modes.
 
 - [one lifecycle slice (brainstorm→PR), S1-comparable scale, track irreversible; human gate + panel gates per config][s3-gate-record]
 - [gate presentation = exactly two artifacts (sketch + decisions list); R1-G5 prose skeleton dissolved; G1-G4, G7 survive as dialogue moves][s3-gate-record]
@@ -49,9 +51,9 @@ above embeds verbatim as a gate artifact in both modes.
 - [map mode — the sketch still embeds; only the list becomes the index; full grammar once in the resolution comment (thread variant)][s3-gate-record]
 - [assumptions cross in the plan's own Assumptions section, not recap material][s3-gate-record]
 - [enforcement = S1 pattern only — contract tests on rule prose; substance rides the human gate; no parser, no dial, no panel][s3-gate-record]
-- [refused alternative — a verbatim prose recap block: framing is throwaway; supersedes R1-G5's slate wording][s3-gate-record]
-- [refused alternative — a gate-time mechanical grammar parser: the human gate suffices for a framing phase][s3-gate-record]
-- [refused alternative — discarding rejected alternatives below the ADR bar: owner amendment; rejections are first-class crystallisation][s3-gate-record]
+- [the plan carries no verbatim prose recap block — framing is throwaway; provenance is sketch + decisions only; supersedes R1-G5's slate wording][s3-gate-record]
+- [no gate-time mechanical grammar parser over the recap — the human gate suffices for a framing phase][s3-gate-record]
+- [rejected alternatives never get discarded below the ADR bar — owner amendment; rejections crystallise as first-class][s3-gate-record]
 
 [s3-gate-record]: https://github.com/threadsafe-systems/pi-sdlc/issues/192#issuecomment-5230679564
 

@@ -124,12 +124,14 @@ DoD 1 names them.
 ## Round 3 (convergence check over rev 3 at 844e559) — 2 findings, 2 incorporated, 0 dismissed
 
 ### R3-A1 (medium, NEW, gemini) — index entries carried line-kind prefixes
+
 ACCEPTED. `appetite:`/`rejected:` prefixes on index gists re-materialised
 the grammar in the index (one-place-law breach introduced by the R2-D1
 fix itself). Rev 4: entries are pure descriptive gists; the intro line
 carries only home-list counts.
 
 ### R3-A2 (high, REOPEN R2-D1, luna) — plan sketch diverged from the canonical comment sketch
+
 ACCEPTED. The resolution comment was posted with amended (thread-variant)
 sketch nodes, but the plan's embedded copy kept the older nodes — exactly
 the "embeds verbatim" rule the contract prescribes, caught on the
@@ -143,3 +145,29 @@ string — the live comment held only the text "@/tmp/s3-resolution.md".
 Repaired via PATCH --input; round-trip verified (3 996 bytes; sketch + 13
 canonical lines). Recorded in round3.md with the lesson: fetch-back-verify
 posted artifacts before handing their URL to the panel.
+
+---
+
+## Round 4 (convergence check over rev 4 at f755141) — 1 finding, 1 incorporated, 2 sub-claims dismissed
+
+Roster note: gemini-3.1-pro-preview failed pre-verdict (billing 429,
+credits depleted) and substitute claude-fable-5 also failed pre-verdict
+(account rate-limit 429); gpt-5.6-sol:xhigh took the slot. Floor of 2
+satisfied by luna + sol. Both infra failures recorded, neither counted
+against the floor.
+
+### R4-A1 (medium; luna NEW + sol REOPEN R3-A1, independently converged) — synonym prefixes classify entries
+ACCEPTED. Rev-4 entries 11-13 all began `refused alternative — ...`,
+classifying those entries as the `rejected:` lines under a synonym — the
+R3-A1 breach surviving relabelled. Rev 5: entries begin with their subject;
+the intro carries the sharpened boundary rule (no line-kind prefix, no
+uniform classification; kind names allowed only as subject matter, as in
+the sketch; classification lives only at home).
+
+### Dismissed sub-claims (luna only)
+(a) the line-45 grammar-decision entry naming the three kinds, and
+(b) the intro's home-list counts — DISMISSED as subject matter, not
+classification: the grammar decision's gist must name its subject, and the
+ratified design embeds the sketch — whose DECS node names all three kinds —
+verbatim in both modes. The one-place law protects the entry list, not the
+vocabulary. Sol's independent review flagged neither.
