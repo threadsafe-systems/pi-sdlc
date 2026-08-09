@@ -1,6 +1,6 @@
 # Spec: S4 spike exit rule (map #192)
 
-Status: rev 3. Run slug `spike-exit-rule`, track irreversible. Plan:
+Status: rev 4. Run slug `spike-exit-rule`, track irreversible. Plan:
 `docs/plans/2026-08-09-spike-exit-rule.md` rev 4 at `e16f3db`. Spec author:
 `openai-codex/gpt-5.6-sol`.
 
@@ -31,7 +31,7 @@ Binding rule: every coined term used two or more times in the body appears in th
 
 - Signature/shape: one literal `### Spike exit loop` block inside
   `skills/sdlc/references/phase-brainstorm.md` §8, extending from that heading to
-  the next heading of level 3 or shallower (`###` or `##`), or the end of §8.
+  the next heading of level 2 or 3 (`##` or `###`), or the end of §8.
   Deeper subheadings remain inside the block. It applies an ordered
   four-route guide to each load-bearing uncertainty: (1) existing evidence
   sufficient to settle it → read now; (2) answering is delivery-grade → Plan
@@ -310,7 +310,8 @@ runtime ≥1 second, or command exceeding its named budget.
 ### SER13 — guidance stays guidance · inspection
 
 Given: the committed PR-review consolidated record, which names the immutable
-reviewed head SHA and records the exact changed-file inventory, plus the final
+reviewed head SHA, exact changed-file inventory, panel-output-availability time,
+adjudication start/finish times, and incremental model-call count, plus the final
 §8 prose at that SHA.
 When–Then: in the existing configured PR-panel wave, with an incremental budget
 of zero extra reviewers/model calls, at most one checklist row per reviewer, and
@@ -320,23 +321,26 @@ qualitative predicates imply no hidden numerical threshold, that #147 is named
 only as future read-tier mechanisation, and that no config, script, schema,
 telemetry, mandatory storage hierarchy, or reuse mandate was introduced; the
 consolidated record preserves the verdict and inventory after merge.
-Falsify: the record lacks the SHA/inventory/verdict, the prose needs
-implementation knowledge to apply, an unstated fifth route is needed, #147 is
-implemented or omitted, the diff adds prohibited machinery/mandate, the
-inspection launches any reviewer beyond the configured PR panel, or
-adjudication exceeds 5 minutes after outputs are available.
+Falsify: the record lacks the SHA, inventory, verdict, output-availability time,
+adjudication start/finish times, or model-call count; the prose needs
+implementation knowledge to apply; an unstated fifth route is needed; #147 is
+implemented or omitted; the diff adds prohibited machinery/mandate; the
+inspection launches any reviewer beyond the configured PR panel; or the retained
+timestamps show adjudication exceeding 5 minutes after outputs are available.
 
 ### SER14 — ephemeral-evidence lifecycle follow-up is durable · carried
 
 Carried to: pr_review.
-Given: the committed PR-review consolidated record and the Plan's parked
+Given: the committed PR-review consolidated record, which records host-action
+start/finish times and incremental model-call count, and the Plan's parked
 question about temporary spike evidence that becomes noise after implementation.
 When–Then: before the PR gate passes, within a host-action budget of 5 minutes
 and zero model calls, a durable tracker issue exists and is linked from the
 consolidated review; it asks whether to promote retained material or delete it
 and repair every temporary Plan/Spec pointer before merge. S4 itself does not
-implement that policy; the retained issue URL and review record keep the
-scenario falsifiable after merge.
-Falsify: the committed review record has no durable issue id/link, the follow-up
-loses either promotion or delete-and-repair outcome, the host-action budget is
-exceeded, an extra model call is made, or S4 grows retention tooling.
+implement that policy; the retained issue URL, timestamps, call count, and
+review record keep the scenario falsifiable after merge.
+Falsify: the committed review record lacks the durable issue id/link,
+host-action start/finish times, or model-call count; the follow-up loses either
+promotion or delete-and-repair outcome; retained timestamps exceed 5 minutes;
+the call count is non-zero; or S4 grows retention tooling.

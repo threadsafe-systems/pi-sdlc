@@ -2,13 +2,13 @@
 
 - Date: 2026-08-09
 - Track: irreversible
-- Spec revisions reviewed: rev 1 at `ecd5c47`; rev 2 at `b8ad46c`
+- Spec revisions reviewed: rev 1 at `ecd5c47`; rev 2 at `b8ad46c`; rev 3 at `59e3712`
 - Orchestrator/spec author: `openai-codex/gpt-5.6-sol`
-- Logical review waves: 1–2
+- Logical review waves: 1–3
 - Requested reviewers: `maas-qwen/deepseek-v4-flash-0732:high`, `openai-codex/gpt-5.6-terra:high`
 - Successful reviewers: `maas-qwen/deepseek-v4-flash-0731:high`, `openai-codex/gpt-5.6-terra:high`
 - Panel floor: 2 distinct successful models
-- Result through wave 2: 13 findings; 13 incorporated, 0 dismissed; no surviving high or medium
+- Result through wave 3: 15 findings; 15 incorporated, 0 dismissed; no surviving high or medium
 
 ## Dispatch and harvest inventory
 
@@ -17,6 +17,7 @@
 | 1 | owner-requested `deepseek-v4-flash-0732:high` + `gpt-5.6-terra:high` | 0732 returned non-transient `model_not_found`; Terra returned verdict | 1 | `panel.dispatched` wave 1 |
 | 1 | adjacent available `deepseek-v4-flash-0731:high` replacing 0732 | verdict returned | 2 | `panel.dispatched` wave 1 |
 | 2 | `deepseek-v4-flash-0731:high` + `gpt-5.6-terra:high` | both verdicts returned | 3 | `panel.dispatched` wave 2 |
+| 3 | `deepseek-v4-flash-0731:high` + `gpt-5.6-terra:high` | both verdicts returned | 4 | `panel.dispatched` wave 3 |
 
 Harvest destinations are `.pi/sdlc/runs/spike-exit-rule/panels/spec_review-round<label>-2026-08-09/`. DeepSeek 0732 was genuinely attempted as requested; the configured runtime does not expose that model id.
 
@@ -45,9 +46,18 @@ Harvest destinations are `.pi/sdlc/runs/spike-exit-rule/panels/spec_review-round
 
 All nine wave-1 fixes were confirmed.
 
+### Wave 3 delta adjudication
+
+| id | origin | severity | defect class | Raised by | Disposition | Adjudication |
+|---|---|---|---|---|---|---|
+| SPEC-R3-01 | NEW | medium | premise durability | Terra | incorporated | SER13/14 now require the committed review record to retain output-availability/action start/finish timestamps and incremental model-call counts, making time/cost falsifiers replayable after merge. |
+| SPEC-R3-02 | NEW | low | boundary terminology | DeepSeek | incorporated | C1 now says exactly “level 2 or 3,” matching its `##`/`###` parenthetical and C5's `^#{2,3}[ ]` regex. |
+
+Every wave-2 fix was confirmed.
+
 ## Stop condition
 
-Every finding through wave 2 was incorporated into Spec rev 3. None contradicted
-an owner-ratified decision and none was dismissed. A delta convergence round is
-required because SPEC-R2-01 and SPEC-R2-02 change mechanical ownership and the
-literal block boundary.
+Every finding through wave 3 was incorporated into Spec rev 4. None contradicted
+an owner-ratified decision and none was dismissed. Wave 4 is the final permitted
+convergence round; a surviving high or medium triggers round-cap diagnosis
+rather than a fifth dispatch.
