@@ -1,0 +1,11 @@
+{
+  "verdict": "PASS",
+  "reason": "runner exit 0 agrees with report verdict PASS (all 4 declared checks PASS, categories tests/static/scenarios PASS, standards/bannedPatterns Build-approved N/A, scenario GPC2 PASS); independent GPC2 spot-check confirmed every enumerated prose element in phase-plan.md §4",
+  "checksRun": [
+    "bash skills/sdlc/scripts/validate-task.sh --manifest docs/validation/gate-presentation-contract/t4.json --report docs/reviews/task-validate-gate-presentation-contract-t4-2026-08-09/runner-report.json (exit 0, verdict PASS; tests.task PASS, tests.full PASS 577/577, static.refs PASS, static.lint PASS)",
+    "read GPC2 wording in docs/specs/2026-08-09-gate-presentation-contract.md",
+    "read skills/sdlc/references/phase-plan.md §4 prose: enumeration extended, rule placed between opening paragraph and Dialogue discipline, plain/map/standalone branches named, no-contradiction clause with declared deviation, enforcement by reference to frozen adversary plan prompt attack surface D",
+    "git diff base...HEAD: phase-plan.md shows exactly the enumeration extension plus the inserted storage paragraph; skills/sdlc/prompts/adversary-plan.prompt.md untouched; attack surface D (Locked decisions) confirmed present in the frozen prompt",
+    "read test/gate-presentation-contract.test.js GPC2 tests: four tests assert anchor phrases and positional ordering, not rule substance"
+  ]
+}

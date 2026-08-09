@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "taskId": "t4",
+  "model": "maas-qwen/qwen3.8-max",
+  "createdAt": "2026-08-09T13:05:01Z",
+  "manifestPath": "docs/validation/gate-presentation-contract/t4.json",
+  "manifestSha256": "b4746758e9d42bfbbac8714eda6988b0c3858c71ceb527754ab6437e7699226d",
+  "runnerReportSha256": "cb80d64686a786e164795fd95253817316c76de2530f3abf215d6a9db2d275e7",
+  "generatedAgentSha256": "979025830b6277eb006c893dc0376b81bf65b9a03bb67b39d0c1dee294f9a1f8",
+  "runnerVerdict": "PASS",
+  "validatorVerdict": "PASS"
+}
