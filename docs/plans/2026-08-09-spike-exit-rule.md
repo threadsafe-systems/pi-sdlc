@@ -1,8 +1,8 @@
 # Plan: S4 spike exit rule (map #192)
 
-Status: rev 4, incorporating all plan-panel round-1 through round-3
-findings. Run slug `spike-exit-rule`, track irreversible. Map #192 slate row
-S4; carries R1-G6 with the original throwaway/timebox proposal amended by the
+Status: rev 4, plan panel round 4 clean after incorporating all 11 findings.
+Run slug `spike-exit-rule`, track irreversible. Map #192 slate row S4; carries
+R1-G6 with the original throwaway/timebox proposal amended by the
 owner-ratified Brainstorm design.
 
 ## Brainstorm provenance

@@ -2,12 +2,12 @@
 
 - Date: 2026-08-09
 - Track: irreversible
-- Plan revisions reviewed: rev 1 at `fa6ef9e`; rev 2 at `ed05281`; rev 3 at `067ec3b`
+- Plan revisions reviewed: rev 1 at `fa6ef9e`; rev 2 at `ed05281`; rev 3 at `067ec3b`; rev 4 at `f5558ae`
 - Orchestrator: `openai-codex/gpt-5.6-sol`
-- Logical review waves: 1–3
+- Logical review waves: 1–4
 - Panel floor: 2 distinct successful models
 - Successful reviewers: `openai-codex/gpt-5.6-luna:xhigh`, `zai/glm-5.2:xhigh`
-- Result through wave 3: 11 consolidated findings; 11 incorporated, 0 dismissed; no surviving high or medium
+- Final result: 11 consolidated findings; 11 incorporated, 0 dismissed; no surviving high or medium
 
 ## Dispatch and harvest inventory
 
@@ -19,6 +19,7 @@
 | 1 | `zai/glm-5.2:xhigh` replacing Fable | verdict returned | 4 | `panel.dispatched` wave 1 |
 | 2 | `openai-codex/gpt-5.6-luna:xhigh` + `zai/glm-5.2:xhigh` | both verdicts returned | 5 | `panel.dispatched` wave 2 |
 | 3 | `openai-codex/gpt-5.6-luna:xhigh` + `zai/glm-5.2:xhigh` | both verdicts returned | 6 | `panel.dispatched` wave 3 |
+| 4 | `openai-codex/gpt-5.6-luna:xhigh` + `zai/glm-5.2:xhigh` | both verdicts returned; clean | 7 | `panel.dispatched` wave 4 |
 
 Harvest destinations are `.pi/sdlc/runs/spike-exit-rule/panels/plan_review-round<label>-2026-08-09/`; every `meta.json` records its logical wave. Labels 2–4 differ from wave 1 because replacement dispatches require non-overwriting destinations.
 
@@ -55,10 +56,16 @@ Every round-1 fix was confirmed. No finding was reopened.
 
 PLAN-R2-01 and PLAN-R2-02 were confirmed. GLM found no new defect.
 
+### Wave 4 delta adjudication
+
+Both reviewers confirmed PLAN-R3-01. No NEW or REOPENED finding was returned.
+GLM recorded two residual observations — precedence remains intentionally
+prose-only and route predicates remain qualitative — both consequences of the
+owner-ratified no-parser/no-threshold decisions, not defects or surviving
+findings.
+
 ## Stop condition
 
-All high and medium findings through wave 3 were incorporated into Plan rev 4.
-No finding was dismissed, no owner-ratified decision was contradicted, and no
-high or medium survives adjudication. Wave 4 is the final permitted convergence
-round; any surviving high or medium triggers round-cap diagnosis rather than a
-fifth dispatch.
+The final permitted wave is clean. All 11 findings were incorporated, none was
+dismissed, no owner-ratified decision was contradicted, and no high or medium
+survives adjudication. The plan panel therefore meets its stop condition.
