@@ -6,7 +6,6 @@
 // calls. Later tasks append their section's assertions to this one file.
 
 import assert from "node:assert/strict";
-import { execSync } from "node:child_process";
 import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -207,26 +206,9 @@ test("GPC2 no-contradiction clause with declared deviation, enforcement by refer
 	assert.match(planSec4f, /the prompt itself stays untouched/);
 });
 
-// ---- GPC10/GPC11/GPC12: C8 cross-cutting bounds -------------------------------
+// ---- GPC10: C8 cross-cutting bounds ----------------------------------------
 
 const testSource = readFileSync(join(here, "gate-presentation-contract.test.js"), "utf8");
-
-function git(...args) {
-	return execSync(`git ${args.join(" ")}`, { cwd: repo, encoding: "utf8" }).trim();
-}
-
-// CI has no local 'main' branch; fall back to origin/main (S1 precedent).
-function baseRef() {
-	for (const ref of ["main", "origin/main"]) {
-		try {
-			git("rev-parse", "--verify", ref);
-			return ref;
-		} catch {
-			// try next
-		}
-	}
-	assert.fail("neither main nor origin/main resolves");
-}
 
 test("GPC10 test file imports only node built-ins (no parser)", () => {
 	const imports = [...testSource.matchAll(/^import .*$/gm)].map((m) => m[0]);
@@ -247,22 +229,8 @@ test("GPC10 no >=80-character verbatim substring of any governed doc in the test
 	}
 });
 
-test("GPC11 schema, package manifests and repo config byte-identical to merge-base", () => {
-	const base = baseRef();
-	const mb = git("merge-base", base, "HEAD");
-	const paths = ["schema/sdlc.config.schema.json", "skills/sdlc/schema/sdlc.config.schema.json", "package.json", "package-lock.json", ".pi/sdlc/sdlc.config.json"];
-	const diff = git("diff", "--name-only", mb, "HEAD", "--", ...paths);
-	assert.equal(diff, "", `manifest drift vs merge-base: ${diff}`);
-});
-
-test("GPC11 no new files under skills/sdlc/scripts/ on this branch", () => {
-	const base = baseRef();
-	const added = git("diff", "--diff-filter=A", "--name-only", `${base}...HEAD`, "--", "skills/sdlc/scripts/");
-	assert.equal(added, "", `new scripts added: ${added}`);
-});
-
-test("GPC11 consumer fixtures untouched by this branch", () => {
-	const base = baseRef();
-	const diff = git("diff", "--name-only", `${base}...HEAD`, "--", "test/fixtures/consumer/");
-	assert.equal(diff, "", `consumer fixture drift: ${diff}`);
-});
+// The three window-scoped GPC11 branch-relative tests (manifest/scripts/
+// fixture drift vs merge-base) were deleted post-merge per the PR #240 body
+// obligation: diff-scoped premises expire at merge (S1-AM4 pattern; #208).
+// GPC11's C8 bound stays enforced by the current-tree GPC10 tests above and
+// by the PR-gate scope inspection (GPC15).

@@ -27,7 +27,6 @@ const directReadPattern = new RegExp(`${gitStart}${argvTail}["'](?:${contentRead
 const EXEMPTIONS = new Map([
 	["test/disposition-ledger.test.js", "Historical fixture uses a full pinned commit first; its moving-main lookup is a guarded compatibility fallback when that commit is unavailable."],
 	["test/frozen-surfaces.test.js", "Standing diff guard: its contract is to compare the protected list with the branch base."],
-	["test/gate-presentation-contract.test.js", "GPC11's Given mandates manifest and fixture comparison against the merge-base; a branch-scoped diff guard in the same class as frozen-surfaces."],
 ]);
 
 function sourceFiles(dir) {
