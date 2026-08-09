@@ -1,9 +1,9 @@
 # Spec: Gate presentation contract (S3)
 
-Status: rev 2 — spec panel round 1 all-incorporated (CANON-01..19, see
+Status: rev 3 — spec panel round 2 all-incorporated (SPEC-R2-01..10, see
 docs/reviews/spec-review-gate-presentation-contract-2026-08-09/).
 Run: gate-presentation-contract · track: irreversible · map: #192
-Plan: docs/plans/2026-08-09-gate-presentation-contract.md (rev 5, `5f105fa`)
+Plan: docs/plans/2026-08-09-gate-presentation-contract.md (rev 5, `1dd6211`)
 Origin: map #192 resolution comment (issuecomment-5230679564) + design-amendment
 comment (issuecomment-5230580141). This run's upstream brainstorm is the live map
 record, so the plan carries the amendment as an index with link + gists — the
@@ -55,7 +55,11 @@ contract this spec verifies is the very grammar that decision list uses.
   provenance block (the gate sketch when one exists, then the decisions list —
   store in plain mode, index in map mode); standalone Plans (`sdlc:plan`, no
   committed upstream) record the live-formed intent in the same position with
-  an explicit `no upstream gate` declaration.
+  an explicit `no upstream gate` declaration. The rule also states that a plan
+  must not contradict a named decision or resurrect a `rejected:` line without
+  a declared deviation; enforcement rides the plan panel's existing attack
+  surface D (locked decisions) in `prompts/adversary-plan.prompt.md` — by
+  reference, never restated, and the prompt stays untouched.
 - Preconditions: a Plan is being authored — either from a Brainstorm outcome or
   standalone, with live-formed intent and the explicit `no upstream gate`
   declaration.
@@ -146,7 +150,7 @@ contract this spec verifies is the very grammar that decision list uses.
   governed doc; no new config dial; no new tooling, dependency, or script.
 - Error semantics: a restating test or a new dial is refused at review (this
   spec's panel and the PR panel), not at runtime.
-- Gated by: GPC10, GPC11, GPC12
+- Gated by: GPC10, GPC11, GPC12, GPC15
 
 ### C9 Map-mode provenance split (§9)
 
@@ -193,7 +197,7 @@ contract this spec verifies is the very grammar that decision list uses.
 | F4 | Make research trigger-based with declared skips, in §1 | C5, GPC7 |
 | F5 | Give constraint capture one prompt and no binding force at Brainstorm, in §1 | C6, GPC8 |
 | F6 | Name the dialogue moves G1–G3 in §1 | C10, GPC16 |
-| F7 | Enforce with contract tests only — no gate-time parser, no new dial, no new tooling | C8, GPC10, GPC11, GPC12 |
+| F7 | Enforce with contract tests only — no gate-time parser, no new dial, no new tooling | C8, GPC10, GPC11, GPC12, GPC15 |
 
 ## Non-functional requirements
 
@@ -215,9 +219,10 @@ Given: `skills/sdlc/references/phase-brainstorm.md` at HEAD.
 When–Then: it contains exactly one §8 block titled **The gate presentation**;
 inside it, exactly one fenced example shows a sketch and all three
 decision-line kinds, with the literal grammar `- appetite: <scale/time/effort>`
-present.
-Falsify: a second block, a missing kind in the example, or a grammar line
-altered.
+present; §8 states the gate presentation is exactly two artifacts (sketch +
+decisions list) and names no third contractual artifact or recap block.
+Falsify: a second block, a missing kind in the example, a grammar line
+altered, or §8 requiring a third artifact or a prose recap block.
 
 ### GPC2 — §4 storage rule: plain default, map index, standalone declaration · mechanical
 
@@ -228,8 +233,13 @@ discipline.** states that plans entered from Brainstorm open with the
 provenance block (sketch when one exists, then decisions list — store in plain
 mode, index in map mode), that plain is the default, and that standalone plans
 record live-formed intent with an explicit `no upstream gate` declaration.
+When–Then (continued): the §4 rule also states that a plan must not
+contradict a named decision or resurrect a `rejected:` line without a declared
+deviation, routing enforcement to the plan panel's attack surface D by
+reference.
 Falsify: the enumeration unchanged, plain described as anything but the
-default, or the standalone branch reachable without the declaration.
+default, the standalone branch reachable without the declaration, or the
+no-contradiction/no-resurrection statement missing from §4.
 
 ### GPC3 — §9 one home, no duplication · mechanical
 
@@ -310,27 +320,32 @@ test file.
 Given: the branch at the verification point and its merge-base with main.
 When–Then: `sdlc.config.schema.json` (wherever the schema lives at HEAD),
 `package.json`, and `package-lock.json` are byte-identical to merge-base; the
-branch adds no file under `skills/sdlc/scripts/` other than none; no governed
-doc introduces a configuration knob.
+branch adds no file under `skills/sdlc/scripts/`; no governed doc introduces
+a configuration knob.
 Falsify: any diff in those manifests, a new script, or a doc introducing a
 configuration knob.
 
 ### GPC12 — corpus green, anchors preserved · mechanical
 
 Given: the branch at the verification point.
-When–Then: `npm test` passes in full — including the pre-existing anchor tests
+When–Then: `node --test test/gate-presentation-contract.test.js` runs offline
+and completes in under 1 second; `npm test` passes in full within the plan's
+30-second external budget — including the pre-existing anchor tests
 (skill-kernel phase-brainstorm anchors, iteration-disposition suite,
 diff-scoped-premises guard) — `node skills/sdlc/scripts/check-references.mjs`
 exits 0, and `npx biome check` is clean on the touched-file set.
-Falsify: any red test, a broken cross-reference, or a lint finding on a touched
-file.
+Falsify: any red test, a contract-test run reaching the network or exceeding
+one second, a corpus run exceeding the budget, a broken cross-reference, or a
+lint finding on a touched file.
 
 ### GPC13 — sketch guidance reads as framing · inspection
 
 Given: the §8 sketch guidance prose in phase-brainstorm.md after the §8 rebuild
 lands.
-When–Then: at the Build phase's first task-close validation, the validator (or
-owner) judges whether the guidance captures entities, boundaries, data flows,
+When–Then: at the first per-task task-close validation during Implement (Build
+has no gate of its own; its output is validated per-task downstream), the
+validator (or owner) judges whether the guidance captures entities, boundaries,
+data flows,
 and actors as framing — explicitly throw-away and not contractual — matching
 the ratified whiteboard framing.
 Falsify: guidance that makes the sketch a deliverable, a contract surface, or
@@ -338,7 +353,7 @@ something to preserve beyond the plan embed.
 
 ### GPC14 — dogfood conformity of this run against home · inspection
 
-Given: this run's plan (rev 5, `5f105fa`), the map #192 index entries, and the
+Given: this run's plan (rev 5, `1dd6211`), the map #192 index entries, and the
 canonical home body (issuecomment-5230679564).
 When–Then: at the PR gate, the panel compares the plan's embedded sketch and
 its index against the home body — the sketch byte-for-byte, the full grammar
@@ -351,13 +366,16 @@ link.
 
 Carried to: pr_review.
 Given: the branch's full diff at PR time.
-When–Then: the PR panel verifies every edit falls inside the surfaces C1–C6
-and C9–C10 declare (phase-brainstorm.md §1/§8/§9, phase-plan.md §4, the one
-new test file) and that no governed doc outside that set changed, no frozen
-surface changed, and no parser or runtime grammar machinery was added
-anywhere.
-Falsify: an out-of-scope edit, a silent frozen-surface change, or any new
-parsing machinery.
+When–Then: the PR panel verifies every phase-doc edit falls inside the
+surfaces C1–C6, C8, and C9–C10 declare (phase-brainstorm.md §1/§8/§9,
+phase-plan.md §4, the one new test file) and that no governed doc outside
+that set changed, no frozen surface changed, no parser or runtime grammar
+machinery was added anywhere, and `git diff main...HEAD --
+test/fixtures/consumer/` is empty. Lifecycle artifacts — this spec, the build
+plan, the review records under docs/reviews/, and task receipts — are expected
+in the diff and exempt from the surface check.
+Falsify: an out-of-scope phase-doc or governed-doc edit, a silent
+frozen-surface change, any new parsing machinery, or a consumer-fixture diff.
 
 ### GPC16 — §1 dialogue moves named · mechanical
 
@@ -388,4 +406,4 @@ ticket artifact.
 
 ## Amendments
 
-None at rev 2.
+None at rev 3.
