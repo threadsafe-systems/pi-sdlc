@@ -1,3 +1,9 @@
+## [3.4.0](https://github.com/threadsafe-systems/pi-sdlc/compare/v3.3.1...v3.4.0) (2026-08-09)
+
+### Features
+
+* **gate-presentation:** S3 gate presentation contract — two artifacts, three line kinds (map [#192](https://github.com/threadsafe-systems/pi-sdlc/issues/192)) ([#240](https://github.com/threadsafe-systems/pi-sdlc/issues/240)) ([2bd390e](https://github.com/threadsafe-systems/pi-sdlc/commit/2bd390e9236e0e0b7c6ccf66290ebc686c0ad22c)), closes [#234](https://github.com/threadsafe-systems/pi-sdlc/issues/234) [235-#239](https://github.com/threadsafe-systems/235-/issues/239)
+
 ## [3.3.1](https://github.com/threadsafe-systems/pi-sdlc/compare/v3.3.0...v3.3.1) (2026-08-09)
 
 ### Bug Fixes
