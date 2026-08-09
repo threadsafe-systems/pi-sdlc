@@ -6,7 +6,7 @@
 // calls. Later tasks append their section's assertions to this one file.
 
 import assert from "node:assert/strict";
-import { readFileSync } from "node:fs";
+import { readFileSync, readdirSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { test } from "node:test";
@@ -100,6 +100,109 @@ test("GPC17 sec8 names the amendment loop and the transition", () => {
 	assert.match(sec8f, /the amended list lands/);
 	assert.match(sec8f, /The next transition is \*\*Plan\*\*/);
 	assert.match(sec8f, /the Plan carries the provenance/);
+});
+
+function blockOf(source, heading) {
+	const lines = source.split("\n");
+	const from = lines.indexOf(heading);
+	assert.ok(from >= 0, `${heading} must exist`);
+	const rest = lines.slice(from + 1);
+	const span = rest.findIndex((line) => /^#{2,3} /.test(line));
+	return rest.slice(0, span === -1 ? rest.length : span).join("\n");
+}
+
+const spike = blockOf(sec8, "### Spike exit loop");
+const spikef = flat(spike);
+
+// ---- Spike routing and exit loop ---------------------------------------------
+
+test("SER1 preserves one spike block and the exact phase/router sets", () => {
+	assert.equal(sec8.match(/^### Spike exit loop$/gm)?.length, 1);
+	const phaseRefs = readdirSync(join(repo, "skills", "sdlc", "references"))
+		.filter((name) => name.startsWith("phase-") && name.endsWith(".md"))
+		.sort();
+	assert.deepEqual(phaseRefs, ["phase-brainstorm.md", "phase-implement.md", "phase-plan.md", "phase-pr-review.md", "phase-spec.md", "phase-tasks.md"]);
+	const routers = readdirSync(join(repo, "templates"))
+		.filter((name) => name.startsWith("sdlc-") && name.endsWith(".md"))
+		.sort();
+	assert.deepEqual(routers, ["sdlc-brainstorm.md", "sdlc-implement.md", "sdlc-plan.md", "sdlc-pr-review.md", "sdlc-spec.md", "sdlc-tasks.md"]);
+});
+
+test("SER2 orders four unique first-match routes and keeps the read tier future-only", () => {
+	const anchors = ["Read now", "Plan and front-load", "Use human judgment", "Propose a spike"];
+	const routes = anchors.map((anchor) => spike.indexOf(anchor));
+	assert.ok(
+		routes.every((index) => index >= 0),
+		"all route anchors exist",
+	);
+	for (const anchor of anchors) assert.equal(spike.split(anchor).length - 1, 1, `${anchor} appears once`);
+	assert.deepEqual(
+		routes,
+		[...routes].sort((a, b) => a - b),
+		"route anchors stay ordered",
+	);
+	assert.match(spikef, /first matching route/);
+	assert.match(spikef, /Issue #147/);
+	assert.match(spikef, /future mechanisation/);
+	assert.match(spikef, /does not implement/);
+});
+
+test("SER3 keeps route boundaries exhaustive", () => {
+	assert.match(spikef, /available but insufficient/);
+	assert.match(spikef, /detailed requirements, delivery acceptance, or production behaviour/);
+	assert.match(spikef, /no empirical evidence can settle/);
+	assert.match(spikef, /remaining empirical uncertainty/);
+	assert.match(spikef, /Incomplete goals or exit criteria stay in Brainstorm/);
+});
+
+test("SER4 requires the pre-spike human checkpoint", () => {
+	assert.match(spikef, /human checkpoint/);
+	assert.match(spikef, /one or more goals/);
+	assert.match(spikef, /uncertainty each goal addresses/);
+	assert.match(spikef, /exit criteria/);
+	assert.match(spikef, /Before work starts/);
+});
+
+test("SER5 keeps spikes exploratory without a numeric threshold", () => {
+	assert.match(spikef, /no mandatory numerical time or cost threshold/);
+	assert.match(spikef, /deliverable in disguise/);
+	assert.match(spikef, /route to Plan/);
+});
+
+test("SER6 blocks continuation and direction until a fresh checkpoint", () => {
+	assert.match(spikef, /fresh human checkpoint/);
+	assert.match(spikef, /amended goals and exit criteria/);
+	assert.match(spikef, /before continuing, redirecting, selecting a direction, or transitioning to Plan/);
+	assert.match(spikef, /current exit criteria are adequately met/);
+});
+
+test("SER7 keeps direction separate and preserves lifecycle transitions", () => {
+	assert.match(spikef, /Direction is exactly \*\*stop\*\*, \*\*revise\*\*, or \*\*proceed\*\*/);
+	assert.match(spikef, /stop closes the proposed change without delivery/);
+	assert.match(spikef, /revise returns to Brainstorm/);
+	assert.match(spikef, /ordinary Brainstorm completion and for \*\*proceed\*\*/);
+	assert.match(sec8f, /The next transition is \*\*Plan\*\*/);
+});
+
+test("SER8 keeps artifact treatment independent and provisional", () => {
+	for (const anchor of ["discard", "retain as reference", "provisional foundation", "provisional candidate deliverable"]) assert.match(spikef, new RegExp(anchor));
+	assert.match(spikef, /independently from direction/);
+	assert.match(spikef, /Reuse is never mandatory/);
+	assert.match(spikef, /downstream lifecycle contracts/);
+});
+
+test("SER9 requires a destination for provisional treatments", () => {
+	assert.match(spikef, /names the future or proceeding effort/);
+	assert.match(spikef, /reduces to reference or discard/);
+});
+
+test("SER10 keeps every decision self-contained and retained evidence linked", () => {
+	for (const anchor of ["document", "issue comment", "prototype branch", "artifact directory"]) assert.match(spikef, new RegExp(anchor));
+	assert.match(spikef, /Every spike records an existing `decision:` line/);
+	assert.match(spikef, /Discard requires no link/);
+	assert.match(spikef, /meaningful if linked material is later removed/);
+	assert.match(spikef, /qualitative corpus/);
+	assert.match(spikef, /no new FS13 event/);
 });
 
 // ---- GPC16: §1 dialogue moves named ------------------------------------------

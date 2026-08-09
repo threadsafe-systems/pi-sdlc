@@ -158,9 +158,61 @@ The gate is amended by talking: the human speaks, the agent updates the list,
 and the amended list lands. No third contractual artifact and no prose recap
 belongs at this gate — the framing dies with the whiteboard.
 
-The next transition is **Plan**, and the Plan carries the provenance: the
-sketch embeds verbatim, and the decisions list crosses as the store (plain
-mode) or the index (map mode) per the Plan phase's storage rule.
+### Spike exit loop
+
+When a load-bearing uncertainty would make the gate premature, use this ordered
+guide and stop at the first matching route:
+
+1. **Read now.** Use existing evidence only when it is sufficient to settle the
+   uncertainty; evidence that is available but insufficient does not select this
+   route. Issue #147 is the future mechanisation of this read tier. This guidance
+   does not implement its feasibility linter.
+2. **Plan and front-load.** When answering requires detailed requirements,
+   delivery acceptance, or production behaviour, the work is delivery-grade:
+   route to Plan and make the risk explicit there.
+3. **Use human judgment.** When no empirical evidence can settle the question,
+   ask the human to decide rather than disguising preference as investigation.
+4. **Propose a spike.** Use a spike for the remaining empirical uncertainty.
+   Incomplete goals or exit criteria stay in Brainstorm; they do not create a
+   fifth route or authorize exploratory work.
+
+A spike is an information-buying Brainstorm activity. Before work starts, a
+human checkpoint approves one or more goals, the uncertainty each goal
+addresses, and exit criteria. There is no mandatory numerical time or cost
+threshold. Exit criteria that require detailed solution requirements or
+delivery acceptance reveal a deliverable in disguise and route to Plan.
+
+If the criteria are inadequately met, or the work reveals a new uncertainty, a
+fresh human checkpoint must approve amended goals and exit criteria before
+continuing, redirecting, selecting a direction, or transitioning to Plan. Exit
+interpretation starts only after the current exit criteria are adequately met.
+
+Interpret the exit on two independent axes:
+
+- Direction is exactly **stop**, **revise**, or **proceed**: stop closes the
+  proposed change without delivery; revise returns to Brainstorm; proceed may
+  advance only through the normal Brainstorm gate.
+- Artifact treatment is selected independently from direction: **discard**,
+  **retain as reference**, **provisional foundation**, or **provisional
+  candidate deliverable**. For either provisional treatment, the decision names
+  the future or proceeding effort it serves; without that destination, the
+  treatment reduces to reference or discard. Reuse is never mandatory, and a
+  foundation or candidate remains provisional until downstream lifecycle
+  contracts pass.
+
+Every spike records an existing `decision:` line that summarizes the learning,
+direction, and artifact treatment and remains meaningful if linked material is
+later removed. Discard requires no link. Retained spike evidence may be a
+document, issue comment, prototype branch, or artifact directory; link it from
+the same line. No mandatory storage hierarchy or fourth decision-line kind is
+introduced. This starts as a qualitative corpus of decision lines and links; it
+adds no new FS13 event vocabulary.
+
+The next transition is **Plan** for ordinary Brainstorm completion and for
+**proceed** after a spike. In both cases, the normal gate controls progression
+and the Plan carries the provenance: the sketch embeds verbatim, and the
+decisions list crosses as the store (plain mode) or the index (map mode) per the
+Plan phase's storage rule.
 
 ## 9. Advanced-mode pointers — map mode (wayfinder-lite)
 
