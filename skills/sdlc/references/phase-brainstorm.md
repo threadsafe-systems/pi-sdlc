@@ -200,17 +200,19 @@ Interpret the exit on two independent axes:
   foundation or candidate remains provisional until downstream lifecycle
   contracts pass.
 
-Retained spike evidence may be a document, issue comment, prototype branch, or
-artifact directory. Link it from an existing `decision:` line that summarizes
-the learning, direction, and artifact treatment and remains meaningful if the
-link is later removed. No mandatory storage hierarchy or fourth decision-line
-kind is introduced. This starts as a qualitative corpus of decision lines and
-links; it adds no new FS13 event vocabulary.
+Every spike records an existing `decision:` line that summarizes the learning,
+direction, and artifact treatment and remains meaningful if linked material is
+later removed. Discard requires no link. Retained spike evidence may be a
+document, issue comment, prototype branch, or artifact directory; link it from
+the same line. No mandatory storage hierarchy or fourth decision-line kind is
+introduced. This starts as a qualitative corpus of decision lines and links; it
+adds no new FS13 event vocabulary.
 
-For **proceed**, the normal gate still controls progression. The next transition
-is **Plan**, and the Plan carries the provenance: the sketch embeds verbatim,
-and the decisions list crosses as the store (plain mode) or the index (map mode)
-per the Plan phase's storage rule.
+The next transition is **Plan** for ordinary Brainstorm completion and for
+**proceed** after a spike. In both cases, the normal gate controls progression
+and the Plan carries the provenance: the sketch embeds verbatim, and the
+decisions list crosses as the store (plain mode) or the index (map mode) per the
+Plan phase's storage rule.
 
 ## 9. Advanced-mode pointers — map mode (wayfinder-lite)
 

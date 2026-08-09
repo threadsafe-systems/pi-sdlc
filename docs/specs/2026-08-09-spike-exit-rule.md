@@ -13,7 +13,7 @@ record a PR-gate destination.
 | Term | Definition | Binds to |
 |---|---|---|
 | load-bearing uncertainty | An unresolved question whose answer can change the proposed design, delivery approach, or decision to proceed | `phase-brainstorm.md` §8 |
-| delivery-grade | Requiring detailed solution requirements, delivery acceptance, or production behaviour and therefore belonging in Plan rather than a spike | `phase-brainstorm.md` §8 |
+| delivery-grade | Requiring detailed requirements, delivery acceptance, or production behaviour and therefore belonging in Plan rather than a spike | `phase-brainstorm.md` §8 |
 | human checkpoint | A stop where the human approves spike goals, addressed uncertainty, and exit criteria before work starts or continues | `phase-brainstorm.md` §8 |
 | spike | An information-buying Brainstorm activity that begins only after a human approves its goals, addressed uncertainty, and exit criteria | `phase-brainstorm.md` §8 |
 | exit criteria | Evidence conditions agreed before a spike that decide whether its uncertainty has been answered sufficiently | `phase-brainstorm.md` §8 |

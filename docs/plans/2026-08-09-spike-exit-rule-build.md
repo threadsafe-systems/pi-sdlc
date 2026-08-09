@@ -109,7 +109,7 @@ No inbound `CARRY-TO-BUILD` was minted at the Spec gate.
 
 | Carry | Destination | Landing site | Status |
 |---|---|---|---|
-| SER14 ephemeral-evidence follow-up | `pr_review` | committed PR consolidated record: issue URL, host-action timestamps, incremental model-call count | issue #245 created; PR landing pending |
+| SER14 ephemeral-evidence follow-up | `pr_review` | `docs/reviews/pr-review-spike-exit-rule-2026-08-09/consolidated.md`: issue URL, host-action timestamps, incremental model-call count | landed — issue #245 and required evidence recorded |
 
 ## Assumptions
 

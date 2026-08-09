@@ -128,12 +128,14 @@ test("SER1 preserves one spike block and the exact phase/router sets", () => {
 	assert.deepEqual(routers, ["sdlc-brainstorm.md", "sdlc-implement.md", "sdlc-plan.md", "sdlc-pr-review.md", "sdlc-spec.md", "sdlc-tasks.md"]);
 });
 
-test("SER2 orders the four first-match routes and keeps the read tier future-only", () => {
-	const routes = ["Read now", "Plan and front-load", "Use human judgment", "Propose a spike"].map((anchor) => spike.indexOf(anchor));
+test("SER2 orders four unique first-match routes and keeps the read tier future-only", () => {
+	const anchors = ["Read now", "Plan and front-load", "Use human judgment", "Propose a spike"];
+	const routes = anchors.map((anchor) => spike.indexOf(anchor));
 	assert.ok(
 		routes.every((index) => index >= 0),
 		"all route anchors exist",
 	);
+	for (const anchor of anchors) assert.equal(spike.split(anchor).length - 1, 1, `${anchor} appears once`);
 	assert.deepEqual(
 		routes,
 		[...routes].sort((a, b) => a - b),
@@ -178,6 +180,7 @@ test("SER7 keeps direction separate and preserves lifecycle transitions", () => 
 	assert.match(spikef, /Direction is exactly \*\*stop\*\*, \*\*revise\*\*, or \*\*proceed\*\*/);
 	assert.match(spikef, /stop closes the proposed change without delivery/);
 	assert.match(spikef, /revise returns to Brainstorm/);
+	assert.match(spikef, /ordinary Brainstorm completion and for \*\*proceed\*\*/);
 	assert.match(sec8f, /The next transition is \*\*Plan\*\*/);
 });
 
@@ -193,10 +196,11 @@ test("SER9 requires a destination for provisional treatments", () => {
 	assert.match(spikef, /reduces to reference or discard/);
 });
 
-test("SER10 keeps retained evidence linked and its decision self-contained", () => {
+test("SER10 keeps every decision self-contained and retained evidence linked", () => {
 	for (const anchor of ["document", "issue comment", "prototype branch", "artifact directory"]) assert.match(spikef, new RegExp(anchor));
-	assert.match(spikef, /existing `decision:` line/);
-	assert.match(spikef, /meaningful if the link is later removed/);
+	assert.match(spikef, /Every spike records an existing `decision:` line/);
+	assert.match(spikef, /Discard requires no link/);
+	assert.match(spikef, /meaningful if linked material is later removed/);
 	assert.match(spikef, /qualitative corpus/);
 	assert.match(spikef, /no new FS13 event/);
 });
