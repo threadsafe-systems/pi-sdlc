@@ -1,3 +1,9 @@
+## [3.3.0](https://github.com/threadsafe-systems/pi-sdlc/compare/v3.2.0...v3.3.0) (2026-08-09)
+
+### Features
+
+* **skeleton:** S1 spec artifact skeleton — fill-in skeleton + binding rules ([#231](https://github.com/threadsafe-systems/pi-sdlc/issues/231)) ([6566d27](https://github.com/threadsafe-systems/pi-sdlc/commit/6566d27a4d0edf5c123593e2405b9350e0f49633)), closes [#192](https://github.com/threadsafe-systems/pi-sdlc/issues/192) [#225](https://github.com/threadsafe-systems/pi-sdlc/issues/225) [226-#230](https://github.com/threadsafe-systems/226-/issues/230)
+
 ## [3.2.0](https://github.com/threadsafe-systems/pi-sdlc/compare/v3.1.1...v3.2.0) (2026-08-08)
 
 ### Features
