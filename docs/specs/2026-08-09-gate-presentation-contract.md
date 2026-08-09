@@ -1,6 +1,6 @@
 # Spec: Gate presentation contract (S3)
 
-Status: rev 3 — spec panel round 2 all-incorporated (SPEC-R2-01..10, see
+Status: rev 4 — spec panel round 3 all-incorporated (SPEC-R3-01..03, see
 docs/reviews/spec-review-gate-presentation-contract-2026-08-09/).
 Run: gate-presentation-contract · track: irreversible · map: #192
 Plan: docs/plans/2026-08-09-gate-presentation-contract.md (rev 5, `1dd6211`)
@@ -232,11 +232,10 @@ provenance block; a rule between the first paragraph and **Dialogue
 discipline.** states that plans entered from Brainstorm open with the
 provenance block (sketch when one exists, then decisions list — store in plain
 mode, index in map mode), that plain is the default, and that standalone plans
-record live-formed intent with an explicit `no upstream gate` declaration.
-When–Then (continued): the §4 rule also states that a plan must not
-contradict a named decision or resurrect a `rejected:` line without a declared
-deviation, routing enforcement to the plan panel's attack surface D by
-reference.
+record live-formed intent with an explicit `no upstream gate` declaration;
+the same §4 rule also states that a plan must not contradict a named decision
+or resurrect a `rejected:` line without a declared deviation, routing
+enforcement to the plan panel's attack surface D by reference.
 Falsify: the enumeration unchanged, plain described as anything but the
 default, the standalone branch reachable without the declaration, or the
 no-contradiction/no-resurrection statement missing from §4.
@@ -342,12 +341,12 @@ lint finding on a touched file.
 
 Given: the §8 sketch guidance prose in phase-brainstorm.md after the §8 rebuild
 lands.
-When–Then: at the first per-task task-close validation during Implement (Build
-has no gate of its own; its output is validated per-task downstream), the
-validator (or owner) judges whether the guidance captures entities, boundaries,
-data flows,
-and actors as framing — explicitly throw-away and not contractual — matching
-the ratified whiteboard framing.
+When–Then: at the PR gate, the PR panel judges whether the guidance captures
+entities, boundaries, data flows, and actors as framing — explicitly
+throw-away and not contractual — matching the ratified whiteboard framing. The
+inspection lives at the PR gate because phase-implement.md §5 defines the
+per-task validator as a checklist executor, not a judge, with judgement review
+happening later at the PR panel.
 Falsify: guidance that makes the sketch a deliverable, a contract surface, or
 something to preserve beyond the plan embed.
 
@@ -371,9 +370,10 @@ surfaces C1–C6, C8, and C9–C10 declare (phase-brainstorm.md §1/§8/§9,
 phase-plan.md §4, the one new test file) and that no governed doc outside
 that set changed, no frozen surface changed, no parser or runtime grammar
 machinery was added anywhere, and `git diff main...HEAD --
-test/fixtures/consumer/` is empty. Lifecycle artifacts — this spec, the build
-plan, the review records under docs/reviews/, and task receipts — are expected
-in the diff and exempt from the surface check.
+test/fixtures/consumer/` is empty. Lifecycle artifacts — this spec, the plan
+doc (docs/plans/2026-08-09-gate-presentation-contract.md), the build plan,
+the review records under docs/reviews/, and task receipts — are expected in
+the diff and exempt from the surface check.
 Falsify: an out-of-scope phase-doc or governed-doc edit, a silent
 frozen-surface change, any new parsing machinery, or a consumer-fixture diff.
 
