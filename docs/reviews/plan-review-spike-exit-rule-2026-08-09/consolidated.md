@@ -2,12 +2,12 @@
 
 - Date: 2026-08-09
 - Track: irreversible
-- Plan revisions reviewed: rev 1 at `fa6ef9e`; rev 2 at `ed05281`
+- Plan revisions reviewed: rev 1 at `fa6ef9e`; rev 2 at `ed05281`; rev 3 at `067ec3b`
 - Orchestrator: `openai-codex/gpt-5.6-sol`
-- Logical review waves: 1–2
+- Logical review waves: 1–3
 - Panel floor: 2 distinct successful models
 - Successful reviewers: `openai-codex/gpt-5.6-luna:xhigh`, `zai/glm-5.2:xhigh`
-- Result through wave 2: 10 consolidated findings; 10 incorporated, 0 dismissed; no surviving high or medium
+- Result through wave 3: 11 consolidated findings; 11 incorporated, 0 dismissed; no surviving high or medium
 
 ## Dispatch and harvest inventory
 
@@ -18,6 +18,7 @@
 | 1 | `anthropic/claude-fable-5:xhigh` retry | second transient 429 before verdict; retry exhausted | 3 | `panel.dispatched` wave 1 |
 | 1 | `zai/glm-5.2:xhigh` replacing Fable | verdict returned | 4 | `panel.dispatched` wave 1 |
 | 2 | `openai-codex/gpt-5.6-luna:xhigh` + `zai/glm-5.2:xhigh` | both verdicts returned | 5 | `panel.dispatched` wave 2 |
+| 3 | `openai-codex/gpt-5.6-luna:xhigh` + `zai/glm-5.2:xhigh` | both verdicts returned | 6 | `panel.dispatched` wave 3 |
 
 Harvest destinations are `.pi/sdlc/runs/spike-exit-rule/panels/plan_review-round<label>-2026-08-09/`; every `meta.json` records its logical wave. Labels 2–4 differ from wave 1 because replacement dispatches require non-overwriting destinations.
 
@@ -46,9 +47,18 @@ the same contract-ownership defect already raised at high severity by Luna.
 
 Every round-1 fix was confirmed. No finding was reopened.
 
+### Wave 3 delta adjudication
+
+| id | origin | severity | defect class | Raised by | Disposition | Adjudication |
+|---|---|---|---|---|---|---|
+| PLAN-R3-01 | NEW | high | precedence conflict | Luna | incorporated | Delivery-grade requirements/acceptance/production needs now route to Plan before the non-empirical judgment fallback, so judgment cannot bypass front-loaded delivery risk. |
+
+PLAN-R2-01 and PLAN-R2-02 were confirmed. GLM found no new defect.
+
 ## Stop condition
 
-All high and medium findings through wave 2 were incorporated into Plan rev 3.
+All high and medium findings through wave 3 were incorporated into Plan rev 4.
 No finding was dismissed, no owner-ratified decision was contradicted, and no
-high or medium survives adjudication. A focused delta convergence round is
-required because PLAN-R2-01 changes the core route precedence.
+high or medium survives adjudication. Wave 4 is the final permitted convergence
+round; any surviving high or medium triggers round-cap diagnosis rather than a
+fifth dispatch.

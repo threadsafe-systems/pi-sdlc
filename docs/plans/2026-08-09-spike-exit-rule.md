@@ -1,8 +1,8 @@
 # Plan: S4 spike exit rule (map #192)
 
-Status: rev 3, incorporating all plan-panel round-1 and round-2 findings.
-Run slug `spike-exit-rule`, track irreversible. Map #192 slate row S4; carries
-R1-G6 with the original throwaway/timebox proposal amended by the
+Status: rev 4, incorporating all plan-panel round-1 through round-3
+findings. Run slug `spike-exit-rule`, track irreversible. Map #192 slate row
+S4; carries R1-G6 with the original throwaway/timebox proposal amended by the
 owner-ratified Brainstorm design.
 
 ## Brainstorm provenance
@@ -87,11 +87,12 @@ lifecycle phase or bypassing downstream contracts.
    dialogue move, not an exit.
 2. The four-way guide applies to each load-bearing uncertainty in this order:
    first, if existing repo/config/docs/web evidence can settle it, **read** that
-   evidence now; otherwise, if no empirical evidence could settle it, use
-   **human judgment**; otherwise, if answering it requires detailed requirements,
+   evidence now; otherwise, if answering it requires detailed requirements,
    delivery acceptance, or production behaviour, **Plan and front-load** it;
+   otherwise, if no empirical evidence could settle it, use **human judgment**;
    otherwise propose a **spike**, which starts only after goals and exit criteria
-   are human-approved. Available-but-insufficient evidence never selects read,
+   are human-approved. Delivery-grade uncertainty therefore cannot escape to the
+   judgment fallback. Available-but-insufficient evidence never selects read,
    and a candidate spike with incomplete criteria remains in Brainstorm rather
    than becoming an ad hoc fifth route. This is ordered, exhaustive prose
    guidance, not a third gate artifact, parser, or numeric threshold.
