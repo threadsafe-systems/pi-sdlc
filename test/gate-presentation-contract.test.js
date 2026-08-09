@@ -104,7 +104,7 @@ test("GPC17 sec8 names the amendment loop and the transition", () => {
 
 function blockOf(source, heading) {
 	const lines = source.split("\n");
-	const from = lines.findIndex((line) => line === heading);
+	const from = lines.indexOf(heading);
 	assert.ok(from >= 0, `${heading} must exist`);
 	const rest = lines.slice(from + 1);
 	const span = rest.findIndex((line) => /^#{2,3} /.test(line));
@@ -130,8 +130,15 @@ test("SER1 preserves one spike block and the exact phase/router sets", () => {
 
 test("SER2 orders the four first-match routes and keeps the read tier future-only", () => {
 	const routes = ["Read now", "Plan and front-load", "Use human judgment", "Propose a spike"].map((anchor) => spike.indexOf(anchor));
-	assert.ok(routes.every((index) => index >= 0), "all route anchors exist");
-	assert.deepEqual(routes, [...routes].sort((a, b) => a - b), "route anchors stay ordered");
+	assert.ok(
+		routes.every((index) => index >= 0),
+		"all route anchors exist",
+	);
+	assert.deepEqual(
+		routes,
+		[...routes].sort((a, b) => a - b),
+		"route anchors stay ordered",
+	);
 	assert.match(spikef, /first matching route/);
 	assert.match(spikef, /Issue #147/);
 	assert.match(spikef, /future mechanisation/);
