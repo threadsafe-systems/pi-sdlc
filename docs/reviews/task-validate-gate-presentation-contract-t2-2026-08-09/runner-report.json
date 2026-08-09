@@ -1,0 +1,140 @@
+{
+  "schemaVersion": 1,
+  "taskId": "t2",
+  "manifest": "/home/neil/code/threadsafe/pi-sdlc.worktrees/feat-gate-presentation-contract/docs/validation/gate-presentation-contract/t2.json",
+  "repoRoot": "/home/neil/code/threadsafe/pi-sdlc.worktrees/feat-gate-presentation-contract",
+  "verdict": "PASS",
+  "exitCode": 0,
+  "errors": [],
+  "manifestErrors": [],
+  "commands": [
+    {
+      "id": "tests.full",
+      "argv": [
+        "npm",
+        "test"
+      ],
+      "evidence": [
+        "whole-corpus regression net is green after the §1 moves edit"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 5187,
+      "stdoutTail": "[...truncated; showing bounded tail...]\n✔ LT8: validate-task emits task.validated on FAIL (42.527564ms)\n✔ LT8: validate-task emits task.validated on an ERROR fixture whose manifest parses (22.442476ms)\n✔ LT8: an unparseable-manifest ERROR skips emission with the standard warning (23.631972ms)\n✔ LT9: unwritable run store degrades to a warning; primary output unaffected (107.700319ms)\n✔ nested --repo-root run stores are git-ignored too (gitignore anchoring) (3.426202ms)\n✔ LT10: check-lifecycle.mjs and .sh are untouched by FS5 side-effect emission (3.827121ms)\n✔ lookup-node: returns nodeId/number/title on success (2.268555ms)\n✔ lookup-node: not found -> ok:false (0.370231ms)\n✔ lookup-node: gh failure -> structured ok:false, never throws (0.266144ms)\n✔ create-epic: creates, looks up node, boards, sets Todo explicitly — returns {number,nodeId,itemId,url} (0.855991ms)\n✔ create-task: with --parent wires addSubIssue before boarding (0.546838ms)\n✔ create-epic: gh issue create failure short-circuits before any board mutation (0.382506ms)\n✔ create-epic: partial failure after issue creation preserves created {number,url} and names the failed step (0.356744ms)\n✔ create-epic: failure at the explicit Todo-set step also preserves created identity (0.313235ms)\n✔ add-blocked-by: wires the dependency edge (0.509665ms)\n✔ frontier: open + unassigned + unblocked (or no blockers) children only (0.68944ms)\n✔ frontier: refuses an incomplete subIssues page rather than silently truncating (0.276575ms)\n✔ frontier: refuses an incomplete blockedBy page — an 11th+ open blocker must not be silently missed (0.317132ms)\n✔ claim: unclaimed issue gets assigned (0.288533ms)\n✔ claim: already-assigned issue is not re-claimed (best-effort, not atomic) (0.248282ms)\n✔ find-items: filters by number (0.357154ms)\n✔ find-items: filters by status (0.33704ms)\n✔ find-items: filters by title-contains (case-insensitive) (0.247975ms)\n✔ find-items: --since joins updatedAt via a batched graphql query (0.331007ms)\n✔ find-items: refuses a truncated result rather than silently under-reporting (0.240484ms)\n✔ find-items: filters out items from a foreign repo on a multi-repo org board (0.214866ms)\n✔ set-status: by item id directly (0.383885ms)\n✔ set-status: by issue number resolves the item id first (0.287558ms)\n✔ set-status: unknown status rejected before any gh call (0.196273ms)\n✔ set-status: neither --item nor --from-status is a usage-shaped failure (0.251616ms)\n✔ set-status: bulk --from-status moves every matching item (0.318088ms)\n✔ set-status: bulk --from-status reports partial progress on a mid-batch failure (0.329211ms)\n✔ board-add: adds by issue number, builds the URL from tracker.repo (0.245411ms)\n✔ main: dispatches find-items end to end (1.026194ms)\n✔ main: --repo-root resolves the named repo even from an unrelated cwd (0.405768ms)\n✔ main: unknown subcommand exits 2 via fail() (real subprocess — fail() calls process.exit) (34.931803ms)\n✔ main: create-epic missing --body exits 2 before any gh call (30.877979ms)\n✔ main: create-task missing --parent exits 2 before any gh call (25.913347ms)\n✔ main: --number rejects a non-integer value with a usage error, not a NaN graphql variable (36.139528ms)\n✔ main: --parent 0 is rejected by needInt's positive floor, not silently treated as absent (24.620168ms)\n✔ create-task: a bad --parent is looked up BEFORE the issue is created — no live orphan on a typo'd parent (0.384483ms)\n✔ find-items: repo-less (draft) board items are excluded, not passed through (0.305773ms)\n✔ find-items: an unparsable --since is a usage-shaped failure, not a silent empty result (0.22101ms)\n✔ find-items: an unknown --status is a usage-shaped failure, not a silent empty result (0.203616ms)\n✔ set-status: --item and --from-status together is rejected before any gh call, not silently resolved by --item winning (0.205256ms)\n✔ main: --format rejects an unknown value (42.786423ms)\n✔ main: --gh-cmd points the real spawn path at a fake executable (109.367789ms)\n✔ main: --repo overrides lookup-node's target repo instead of the configured tracker.repo (0.505398ms)\n✔ main: --repo malformed value is a usage error before any gh call (31.766731ms)\n✔ main: --owner/--project override find-items' target board instead of the configured tracker.board (0.988879ms)\n✔ main: config-derived resolution is unchanged when no override flags are given (defaults preserved) (0.619901ms)\n✔ board-add: --repo/--owner/--project override the target board and URL repo (0.676833ms)\n✔ PV1: a valid JavaScript manifest runs only declared checks and passes (77.728979ms)\n✔ PV2: only declared argv run; an undeclared tool command never executes (130.99958ms)\n✔ PV3: schema and inspectManifest reject the mutation matrix before any command runs (61.145797ms)\n✔ PV4: command outcomes are complete and deterministic; runner continues after failures (48.584997ms)\n✔ PV4: a timeout is reported as FAIL with timedOut (1069.317768ms)\n✔ PV5: category applicability is exact; injected n/a shapes are rejected (65.964927ms)\n✔ PV6: scenario mapping gates the verdict (71.022352ms)\n✔ PV7: standards and banned patterns are commands, not judgement (82.265998ms)\n✔ PV8: evidence is bounded and secrets are redacted (68.058794ms)\n✔ PV8 unit: boundStream and redaction name-matching are precise (228.260857ms)\n✔ PV9: JSON/text/exit agree and JSON mode is order-independent (452.60997ms)\n✔ PV9: --report writes the exact JSON bytes atomically (119.857142ms)\n✔ PV9: --report outside the repo root is refused and clobbers nothing (111.439443ms)\n✔ PV10: generic validator law and generated agent are portable (0.343732ms)\n✔ PV11: receipt hash verification detects mutation of any stored file (4.958198ms)\n✔ PV11: a FAIL runner-report cannot ride under runnerVerdict PASS (0.530574ms)\n✔ parseArgs: recognises JSON anywhere and rejects bad flags (0.439152ms)\n✔ PV13: renderText is a faithful projection of the report (87.66555ms)\n✔ TST2: separate full and task checks satisfy Rule A and Rule B (0.153684ms)\n✔ TST1: a scope:[full] check satisfies Rule A (scenarios n/a) (0.08965ms)\n✔ TST3: a single scope:[full,task] check satisfies both rules with no duplicate (0.075554ms)\n✔ TST4: Rule A negative -- tests required with no full-tagged check (0.371473ms)\n✔ TST5: Rule B negative -- scenario cites a tests check but none task-tagged (0.337239ms)\n✔ TST6: tests:n/a is exempt from Rule A and Rule B (0.086678ms)\n✔ TST7: zero owned scenarios -- exempt from Rule B, still subject to Rule A (0.1502ms)\n✔ TST8: a static-only scenario does not trigger Rule B (0.071451ms)\n✔ TST9: an untagged check named tests.full does NOT satisfy Rule A (0.066614ms)\n✔ TST10: scope shape errors are reported at /checks/<i>/scope (0.153303ms)\n✔ TST11: golden multi-error ordering (scope-shape + Rule A + dangling check) (0.080393ms)\n✔ TST12: schema accepts optional scope and rejects malformed shapes (12.243249ms)\n✔ Rule B iterates owned scenarios only -- an unowned evidence key draws no Rule B error (0.154698ms)\n✔ scope enum error is emitted once per check, not per bad entry (0.097384ms)\n✔ Implement owns the complete reader-now authoring law (2.631977ms)\n✔ Implement permits executable directives without exempting their prose (0.397946ms)\n✔ Implement blocks validation or closure until the exact task attestation (0.596002ms)\n✔ Tasks projects the code-prose pass into every task Definition of Done (0.288955ms)\n✔ Every normal PR reviewer enforces the same reader-now obligations (0.304603ms)\n✔ Code-prose findings use impact severity and are not dismissed as style (0.253339ms)\n✔ The package law does not depend on an external comment-writing skill (0.29295ms)\nℹ tests 569\nℹ suites 0\nℹ pass 569\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 5099.381028\n",
+      "stderrTail": ""
+    },
+    {
+      "id": "tests.task",
+      "argv": [
+        "node",
+        "--test",
+        "test/gate-presentation-contract.test.js"
+      ],
+      "evidence": [
+        "GPC16 §1 moves: G1 naming no mechanism, G2 alternative-or-declare, G3 appetite before converging, G4/G7 bullet routing",
+        "GPC7 G4 triggers: exactly three named triggers, no research ceremony outside triggers, both fired and skipped-with-declaration branches, proportionality kept",
+        "GPC8 G7 prompt: one prompt not a battery, none identified a complete answer, bind-only-when-binding and no-binding-by-Brainstorm rules"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 76,
+      "stdoutTail": "✔ GPC1 sec8 heading stays pinned and the block is titled The gate presentation (0.60913ms)\n✔ GPC1 sec8 pins exactly two artifacts and no third (0.077543ms)\n✔ GPC1 sec8 example carries the sketch fence and all three line kinds (0.084782ms)\n✔ GPC5 appetite is exactly one and first; entries are one physical line (0.066276ms)\n✔ GPC5 decision lines carry a one-line why; rejected lines are unconditional (0.06693ms)\n✔ GPC6 ADR bar is named by reference, never restated (0.160643ms)\n✔ GPC6 qualifying decisions take the literal ASCII suffix (0.06415ms)\n✔ GPC17 sec8 names the sketch trigger and the absence declaration (0.060164ms)\n✔ GPC17 sec8 names the amendment loop and the transition (0.098205ms)\n✔ GPC16 sec1 names G1, G2, G3 alongside the G4 and G7 moves (0.123468ms)\n✔ GPC7 tools bullet names exactly the three triggers (0.083769ms)\n✔ GPC7 both branches: fired-and-researched, fired-but-skipped-with-declaration (0.081564ms)\n✔ GPC8 one prompt, none identified is a complete answer (0.066913ms)\n✔ GPC8 named constraints bind only when they actually bind (0.06037ms)\nℹ tests 14\nℹ suites 0\nℹ pass 14\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 44.648048\n",
+      "stderrTail": ""
+    },
+    {
+      "id": "static.refs",
+      "argv": [
+        "node",
+        "skills/sdlc/scripts/check-references.mjs"
+      ],
+      "evidence": [
+        "FS11 inverse completeness: phase-brainstorm.md still resolves with its inventory row after the §1 edit"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 35,
+      "stdoutTail": "[...truncated; showing bounded tail...]\ncheck: prompt.validator pass — package source assertion and target are present\ncheck: prompt.spec pass — package source assertion and target are present\ncheck: prompt.review pass — package source assertion and target are present\ncheck: script.status pass — package source assertion and target are present\ncheck: script.panel-resolver pass — package source assertion and target are present\ncheck: script.panel-agent pass — package source assertion and target are present\ncheck: script.validator pass — package source assertion and target are present\ncheck: script.receipt-verifier pass — package source assertion and target are present\ncheck: schema.task-validation pass — package source assertion and target are present\ncheck: consumer.workflow unverified-consumer — consumer-owned target is not package-certified: .pi/sdlc/workflow.md\ncheck: external.gh external — external facility: github.com/issues-projects\ncheck: reference.system pass — package source assertion and target are present\ncheck: reference.phase-brainstorm pass — package source assertion and target are present\ncheck: reference.phase-plan pass — package source assertion and target are present\ncheck: reference.phase-spec pass — package source assertion and target are present\ncheck: reference.spec-artifact-skeleton pass — package source assertion and target are present\ncheck: reference.phase-tasks pass — package source assertion and target are present\ncheck: reference.phase-implement pass — package source assertion and target are present\ncheck: reference.phase-pr-review pass — package source assertion and target are present\ncheck: entrypoint.brainstorm pass — package source assertion and target are present\ncheck: entrypoint.plan pass — package source assertion and target are present\ncheck: entrypoint.spec pass — package source assertion and target are present\ncheck: entrypoint.tasks pass — package source assertion and target are present\ncheck: entrypoint.implement pass — package source assertion and target are present\ncheck: entrypoint.pr-review pass — package source assertion and target are present\ncheck: script.config-doc pass — package source assertion and target are present\ncheck: config-doc.impl pass — package source assertion and target are present\ncheck: script.lifecycle-checker-wrapper pass — package source assertion and target are present\ncheck: script.setup-wrapper pass — package source assertion and target are present\ncheck: schema.config pass — package source assertion and target are present\ncheck: schema.config-example pass — package source assertion and target are present\ncheck: delegated.adversarial-review external — external facility: skill:adversarial-review\ncheck: optional-enhancement.visual-docs external — external facility: skill:sdlc-visual-docs\ncheck: script.record-run-event pass — package source assertion and target are present\ncheck: script.record-run-event-wrapper pass — package source assertion and target are present\ncheck: script.harvest-panel pass — package source assertion and target are present\ncheck: script.harvest-panel-wrapper pass — package source assertion and target are present\ncheck: retro.script.collect-run pass — package source assertion and target are present\ncheck: retro.script.collect-run-wrapper pass — package source assertion and target are present\ncheck: retro.script.render-retro pass — package source assertion and target are present\ncheck: retro.script.render-retro-wrapper pass — package source assertion and target are present\ncheck: retro.schema.event pass — package source assertion and target are present\ncheck: retro.schema.run pass — package source assertion and target are present\ncheck: retro.schema.llm-protocol pass — package source assertion and target are present\ncheck: retro.skill.source pass — package source assertion and target are present\ncheck: retro.skill.store-layout pass — package source assertion and target are present\ncheck: retro.skill.retro-output pass — package source assertion and target are present\ncheck: retro.skill.collect-invocation pass — package source assertion and target are present\ncheck: retro.skill.render-invocation pass — package source assertion and target are present\ncheck: retro.skill.event-schema-pointer pass — package source assertion and target are present\ncheck: retro.skill.llm-schema-pointer pass — package source assertion and target are present\ncheck: telemetry.adr-0028 pass — package source assertion and target are present\ncheck: sdlc.skill.telemetry-section pass — package source assertion and target are present\ncheck: sdlc.skill.retro-pointer pass — package source assertion and target are present\ncheck: sdlc.skill.record-run-event-pointer pass — package source assertion and target are present\ncheck: sdlc.skill.harvest-panel-pointer pass — package source assertion and target are present\ncheck: script.check-completion-wrapper pass — package source assertion and target are present\ncheck: script.check-completion pass — package source assertion and target are present\ncheck: consumer.config-doc-companion unverified-consumer — consumer-owned target is not package-certified: .pi/sdlc/CONFIG.md\ncheck: delegated.dispatch-subagents external — external facility: skill:dispatch-subagents\ncheck: delegated.gh-pr-review-comments external — external facility: skill:gh-pr-review-comments\ncheck: runtime-tool.git external — external facility: tool:git\ncheck: runtime-tool.node external — external facility: tool:node\ncheck: consumer.hooks unverified-consumer — consumer-owned target is not package-certified: .pi/sdlc/sdlc.config.json\ncheck: consumer.tracker unverified-consumer — consumer-owned target is not package-certified: .pi/sdlc/sdlc.config.json\ncheck: discovery.skills/sdlc/references/phase-brainstorm.md pass — discovered public artifact has an inventory row\ncheck: discovery.skills/sdlc/references/phase-implement.md pass — discovered public artifact has an inventory row\ncheck: discovery.skills/sdlc/references/phase-plan.md pass — discovered public artifact has an inventory row\ncheck: discovery.skills/sdlc/references/phase-pr-review.md pass — discovered public artifact has an inventory row\ncheck: discovery.skills/sdlc/references/phase-spec.md pass — discovered public artifact has an inventory row\ncheck: discovery.skills/sdlc/references/phase-tasks.md pass — discovered public artifact has an inventory row\ncheck: discovery.skills/sdlc/references/spec-artifact-skeleton.md pass — discovered public artifact has an inventory row\ncheck: discovery.skills/sdlc/references/system-reference.md pass — discovered public artifact has an inventory row\ncheck: discovery.templates/sdlc-brainstorm.md pass — discovered public artifact has an inventory row\ncheck: discovery.templates/sdlc-implement.md pass — discovered public artifact has an inventory row\ncheck: discovery.templates/sdlc-plan.md pass — discovered public artifact has an inventory row\ncheck: discovery.templates/sdlc-pr-review.md pass — discovered public artifact has an inventory row\ncheck: discovery.templates/sdlc-spec.md pass — discovered public artifact has an inventory row\ncheck: discovery.templates/sdlc-tasks.md pass — discovered public artifact has an inventory row\ncheck: discovery.templates/setup-sdlc.md pass — discovered public artifact has an inventory row\ncheck: discovery.skills/sdlc/scripts/check-completion.sh pass — discovered public artifact has an inventory row\ncheck: discovery.skills/sdlc/scripts/check-lifecycle.sh pass — discovered public artifact has an inventory row\ncheck: discovery.skills/sdlc/scripts/check-references.sh pass — discovered public artifact has an inventory row\ncheck: discovery.skills/sdlc/scripts/config-doc.sh pass — discovered public artifact has an inventory row\ncheck: discovery.skills/sdlc/scripts/ensure-panel-agent.sh pass — discovered public artifact has an inventory row\ncheck: discovery.skills/sdlc/scripts/harvest-panel.sh pass — discovered public artifact has an inventory row\ncheck: discovery.skills/sdlc/scripts/record-run-event.sh pass — discovered public artifact has an inventory row\ncheck: discovery.skills/sdlc/scripts/resolve-panel.sh pass — discovered public artifact has an inventory row\ncheck: discovery.skills/sdlc/scripts/sdlc-status.sh pass — discovered public artifact has an inventory row\ncheck: discovery.skills/sdlc/scripts/setup-sdlc.sh pass — discovered public artifact has an inventory row\ncheck: discovery.skills/sdlc/scripts/tracker-ops.sh pass — discovered public artifact has an inventory row\ncheck: discovery.skills/sdlc/scripts/validate-task.sh pass — discovered public artifact has an inventory row\ncheck: discovery.skills/sdlc/prompts/adversary-plan.prompt.md pass — discovered public artifact has an inventory row\ncheck: discovery.skills/sdlc/prompts/adversary-review.prompt.md pass — discovered public artifact has an inventory row\ncheck: discovery.skills/sdlc/prompts/adversary-spec.prompt.md pass — discovered public artifact has an inventory row\ncheck: discovery.skills/sdlc/prompts/validator-task.prompt.md pass — discovered public artifact has an inventory row\ncheck: discovery.skills/sdlc/schema/sdlc.config.example.json pass — discovered public artifact has an inventory row\ncheck: discovery.skills/sdlc/schema/sdlc.config.schema.json pass — discovered public artifact has an inventory row\ncheck: discovery.skills/sdlc/schema/task-validation-manifest.schema.json pass — discovered public artifact has an inventory row\n",
+      "stderrTail": ""
+    },
+    {
+      "id": "static.lint",
+      "argv": [
+        "npx",
+        "biome",
+        "check",
+        "test/gate-presentation-contract.test.js"
+      ],
+      "evidence": [
+        "the task's lintable surface (the contract test file) is biome-clean (markdown is not a biome target)"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 176,
+      "stdoutTail": "Checked 1 file in 6ms. No fixes applied.\n",
+      "stderrTail": ""
+    }
+  ],
+  "categories": [
+    {
+      "category": "tests",
+      "status": "PASS",
+      "checkIds": [
+        "tests.full",
+        "tests.task"
+      ]
+    },
+    {
+      "category": "static",
+      "status": "PASS",
+      "checkIds": [
+        "static.refs",
+        "static.lint"
+      ]
+    },
+    {
+      "category": "scenarios",
+      "status": "PASS"
+    },
+    {
+      "category": "standards",
+      "status": "N/A",
+      "reason": "no governing standard beyond the declared checks applies to a phase-reference section edit plus contract tests"
+    },
+    {
+      "category": "bannedPatterns",
+      "status": "N/A",
+      "reason": "no task-diff pattern prohibition beyond lint applies to this task"
+    }
+  ],
+  "scenarios": [
+    {
+      "scenarioId": "GPC16",
+      "status": "PASS",
+      "checkIds": [
+        "tests.task"
+      ]
+    },
+    {
+      "scenarioId": "GPC7",
+      "status": "PASS",
+      "checkIds": [
+        "tests.task"
+      ]
+    },
+    {
+      "scenarioId": "GPC8",
+      "status": "PASS",
+      "checkIds": [
+        "tests.task"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,12 @@
+{
+	"schemaVersion": 1,
+	"taskId": "t2",
+	"model": "maas-qwen/glm-5.2",
+	"createdAt": "2026-08-09T12:50:10Z",
+	"manifestPath": "docs/validation/gate-presentation-contract/t2.json",
+	"manifestSha256": "d2be79e4e4a9b3fc3d57c65f0caefcda6a9e64409d0d8a45442298f73b9e52c7",
+	"runnerReportSha256": "e23e6d9541edddd6427a601acf940aa21c580ed0fe673297beccab1077fe69b0",
+	"generatedAgentSha256": "979025830b6277eb006c893dc0376b81bf65b9a03bb67b39d0c1dee294f9a1f8",
+	"runnerVerdict": "PASS",
+	"validatorVerdict": "PASS"
+}
