@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "taskId": "t1",
+  "model": "deepseek/deepseek-v4-flash",
+  "createdAt": "2026-08-09T20:45:00Z",
+  "manifestPath": "docs/validation/spike-exit-rule/t1.json",
+  "manifestSha256": "c2814bb08e5bb201ec871ab2cbaea706e152a2bc95d58730e222461e9fd5ac19",
+  "runnerReportSha256": "30e2b93aaaa407f81377e0d0045e920803969b8d17d32d82493c4663375b5107",
+  "generatedAgentSha256": "979025830b6277eb006c893dc0376b81bf65b9a03bb67b39d0c1dee294f9a1f8",
+  "runnerVerdict": "PASS",
+  "validatorVerdict": "PASS"
+}
