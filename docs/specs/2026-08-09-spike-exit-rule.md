@@ -1,6 +1,6 @@
 # Spec: S4 spike exit rule (map #192)
 
-Status: rev 4. Run slug `spike-exit-rule`, track irreversible. Plan:
+Status: rev 5. Run slug `spike-exit-rule`, track irreversible. Plan:
 `docs/plans/2026-08-09-spike-exit-rule.md` rev 4 at `e16f3db`. Spec author:
 `openai-codex/gpt-5.6-sol`.
 
@@ -325,8 +325,9 @@ Falsify: the record lacks the SHA, inventory, verdict, output-availability time,
 adjudication start/finish times, or model-call count; the prose needs
 implementation knowledge to apply; an unstated fifth route is needed; #147 is
 implemented or omitted; the diff adds prohibited machinery/mandate; the
-inspection launches any reviewer beyond the configured PR panel; or the retained
-timestamps show adjudication exceeding 5 minutes after outputs are available.
+inspection launches any reviewer beyond the configured PR panel; the retained
+model-call count is non-zero; or the timestamps show adjudication exceeding 5
+minutes after outputs are available.
 
 ### SER14 — ephemeral-evidence lifecycle follow-up is durable · carried
 

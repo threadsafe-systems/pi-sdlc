@@ -2,13 +2,13 @@
 
 - Date: 2026-08-09
 - Track: irreversible
-- Spec revisions reviewed: rev 1 at `ecd5c47`; rev 2 at `b8ad46c`; rev 3 at `59e3712`
+- Spec revisions reviewed: rev 1 at `ecd5c47`; rev 2 at `b8ad46c`; rev 3 at `59e3712`; rev 4 at `0105661`
 - Orchestrator/spec author: `openai-codex/gpt-5.6-sol`
-- Logical review waves: 1–3
+- Logical review waves: 1–4
 - Requested reviewers: `maas-qwen/deepseek-v4-flash-0732:high`, `openai-codex/gpt-5.6-terra:high`
 - Successful reviewers: `maas-qwen/deepseek-v4-flash-0731:high`, `openai-codex/gpt-5.6-terra:high`
 - Panel floor: 2 distinct successful models
-- Result through wave 3: 15 findings; 15 incorporated, 0 dismissed; no surviving high or medium
+- Final result: 16 findings; 16 incorporated, 0 dismissed; no surviving high or medium
 
 ## Dispatch and harvest inventory
 
@@ -18,6 +18,7 @@
 | 1 | adjacent available `deepseek-v4-flash-0731:high` replacing 0732 | verdict returned | 2 | `panel.dispatched` wave 1 |
 | 2 | `deepseek-v4-flash-0731:high` + `gpt-5.6-terra:high` | both verdicts returned | 3 | `panel.dispatched` wave 2 |
 | 3 | `deepseek-v4-flash-0731:high` + `gpt-5.6-terra:high` | both verdicts returned | 4 | `panel.dispatched` wave 3 |
+| 4 | `deepseek-v4-flash-0731:high` + `gpt-5.6-terra:high` | both verdicts returned; no high/medium | 5 | `panel.dispatched` wave 4 |
 
 Harvest destinations are `.pi/sdlc/runs/spike-exit-rule/panels/spec_review-round<label>-2026-08-09/`. DeepSeek 0732 was genuinely attempted as requested; the configured runtime does not expose that model id.
 
@@ -55,9 +56,18 @@ All nine wave-1 fixes were confirmed.
 
 Every wave-2 fix was confirmed.
 
+### Wave 4 delta adjudication
+
+| id | origin | severity | defect class | Raised by | Disposition | Adjudication |
+|---|---|---|---|---|---|---|
+| SPEC-R4-01 | NEW | low | falsifier asymmetry | DeepSeek | incorporated | SER13 now falsifies a non-zero retained incremental model-call count, matching its zero-call budget and SER14's durable value check. |
+
+Both wave-3 fixes were confirmed. Terra returned no finding.
+
 ## Stop condition
 
-Every finding through wave 3 was incorporated into Spec rev 4. None contradicted
-an owner-ratified decision and none was dismissed. Wave 4 is the final permitted
-convergence round; a surviving high or medium triggers round-cap diagnosis
-rather than a fifth dispatch.
+The final permitted wave returned no high or medium. Its single low finding was
+incorporated into Spec rev 5 without a fifth dispatch. Across four waves all 16
+findings were incorporated, none was dismissed, no owner-ratified decision was
+contradicted, and no high or medium survives. The spec panel meets its stop
+condition.
