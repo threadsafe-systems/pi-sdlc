@@ -176,4 +176,13 @@ flowchart LR
 publishToTracker=2 — this five-task breakdown publishes as one epic + five
 native sub-issues on board 5, wired T1→T5 with blocked-by edges. The tracker
 is a projection of this committed document; this document is the source of
-truth. Projection recorded after publication (commit below).
+truth.
+
+Projection (published 2026-08-09, board 5):
+
+- Epic #234 — Epic: S3 gate presentation contract (map #192)
+- #235 T1 — §8 gate presentation block (C1, C3, C4)
+- #236 T2 — §1 dialogue moves (C5, C6, C10), blocked by #235
+- #237 T3 — §9 map-mode provenance split (C9), blocked by #236
+- #238 T4 — phase-plan.md §4 storage rule (C2), blocked by #237
+- #239 T5 — C8 cross-cutting assertions + DoD sweep, blocked by #238
