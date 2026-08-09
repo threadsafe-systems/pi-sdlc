@@ -1,0 +1,11 @@
+{
+  "verdict": "PASS",
+  "reason": "Runner exit 0 / verdict PASS; all 5 declared checks green; GPC10 anchor-only & node-builtin imports confirmed, GPC11 merge-base surfaces byte-identical / no new scripts / consumer fixtures untouched (independently re-verified via git), GPC12 full corpus (582 pass) + check-references exit 0 + biome clean on both touched test files; DSP7 exemption for gate-presentation-contract.test.js is the only diff to diff-scoped-premises.test.js (spec-mandated merge-base reason).",
+  "checksRun": [
+    "tests.task PASS (node --test test/gate-presentation-contract.test.js, 27 pass)",
+    "tests.full PASS (npm test, 582 pass)",
+    "static.refs PASS (check-references.mjs exit 0)",
+    "static.lifecycle PASS (check-lifecycle --track irreversible --slug gate-presentation-contract)",
+    "static.lint PASS (biome check on both touched test files)"
+  ]
+}
