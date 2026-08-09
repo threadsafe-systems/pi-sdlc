@@ -1,0 +1,150 @@
+{
+  "schemaVersion": 1,
+  "taskId": "t2",
+  "manifest": "/home/neil/code/threadsafe/pi-sdlc.worktrees/feat-spike-exit-rule/docs/validation/spike-exit-rule/t2.json",
+  "repoRoot": "/home/neil/code/threadsafe/pi-sdlc.worktrees/feat-spike-exit-rule",
+  "verdict": "PASS",
+  "exitCode": 0,
+  "errors": [],
+  "manifestErrors": [],
+  "commands": [
+    {
+      "id": "tests.full",
+      "argv": [
+        "npm",
+        "test"
+      ],
+      "evidence": [
+        "whole-corpus regression net is green"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 8101,
+      "stdoutTail": "[...truncated; showing bounded tail...]\n✔ LT8: validate-task emits task.validated on FAIL (77.461404ms)\n✔ LT8: validate-task emits task.validated on an ERROR fixture whose manifest parses (46.15522ms)\n✔ LT8: an unparseable-manifest ERROR skips emission with the standard warning (32.363913ms)\n✔ LT9: unwritable run store degrades to a warning; primary output unaffected (195.704255ms)\n✔ nested --repo-root run stores are git-ignored too (gitignore anchoring) (5.933312ms)\n✔ LT10: check-lifecycle.mjs and .sh are untouched by FS5 side-effect emission (1.447971ms)\n✔ lookup-node: returns nodeId/number/title on success (5.501011ms)\n✔ lookup-node: not found -> ok:false (1.021335ms)\n✔ lookup-node: gh failure -> structured ok:false, never throws (1.14793ms)\n✔ create-epic: creates, looks up node, boards, sets Todo explicitly — returns {number,nodeId,itemId,url} (3.075103ms)\n✔ create-task: with --parent wires addSubIssue before boarding (1.451601ms)\n✔ create-epic: gh issue create failure short-circuits before any board mutation (1.219337ms)\n✔ create-epic: partial failure after issue creation preserves created {number,url} and names the failed step (1.095169ms)\n✔ create-epic: failure at the explicit Todo-set step also preserves created identity (1.025905ms)\n✔ add-blocked-by: wires the dependency edge (4.02949ms)\n✔ frontier: open + unassigned + unblocked (or no blockers) children only (1.550542ms)\n✔ frontier: refuses an incomplete subIssues page rather than silently truncating (0.820604ms)\n✔ frontier: refuses an incomplete blockedBy page — an 11th+ open blocker must not be silently missed (0.782585ms)\n✔ claim: unclaimed issue gets assigned (0.826903ms)\n✔ claim: already-assigned issue is not re-claimed (best-effort, not atomic) (0.875459ms)\n✔ find-items: filters by number (1.101348ms)\n✔ find-items: filters by status (0.815397ms)\n✔ find-items: filters by title-contains (case-insensitive) (0.842769ms)\n✔ find-items: --since joins updatedAt via a batched graphql query (1.041733ms)\n✔ find-items: refuses a truncated result rather than silently under-reporting (0.686385ms)\n✔ find-items: filters out items from a foreign repo on a multi-repo org board (0.852462ms)\n✔ set-status: by item id directly (1.269393ms)\n✔ set-status: by issue number resolves the item id first (0.975357ms)\n✔ set-status: unknown status rejected before any gh call (0.860234ms)\n✔ set-status: neither --item nor --from-status is a usage-shaped failure (0.903407ms)\n✔ set-status: bulk --from-status moves every matching item (0.964283ms)\n✔ set-status: bulk --from-status reports partial progress on a mid-batch failure (1.075231ms)\n✔ board-add: adds by issue number, builds the URL from tracker.repo (0.875784ms)\n✔ main: dispatches find-items end to end (2.938952ms)\n✔ main: --repo-root resolves the named repo even from an unrelated cwd (1.315396ms)\n✔ main: unknown subcommand exits 2 via fail() (real subprocess — fail() calls process.exit) (54.764753ms)\n✔ main: create-epic missing --body exits 2 before any gh call (116.527493ms)\n✔ main: create-task missing --parent exits 2 before any gh call (70.048443ms)\n✔ main: --number rejects a non-integer value with a usage error, not a NaN graphql variable (45.835063ms)\n✔ main: --parent 0 is rejected by needInt's positive floor, not silently treated as absent (38.35851ms)\n✔ create-task: a bad --parent is looked up BEFORE the issue is created — no live orphan on a typo'd parent (0.548245ms)\n✔ find-items: repo-less (draft) board items are excluded, not passed through (0.429804ms)\n✔ find-items: an unparsable --since is a usage-shaped failure, not a silent empty result (0.326699ms)\n✔ find-items: an unknown --status is a usage-shaped failure, not a silent empty result (0.271333ms)\n✔ set-status: --item and --from-status together is rejected before any gh call, not silently resolved by --item winning (0.262564ms)\n✔ main: --format rejects an unknown value (47.985914ms)\n✔ main: --gh-cmd points the real spawn path at a fake executable (80.012064ms)\n✔ main: --repo overrides lookup-node's target repo instead of the configured tracker.repo (1.410523ms)\n✔ main: --repo malformed value is a usage error before any gh call (50.973698ms)\n✔ main: --owner/--project override find-items' target board instead of the configured tracker.board (0.646304ms)\n✔ main: config-derived resolution is unchanged when no override flags are given (defaults preserved) (0.480791ms)\n✔ board-add: --repo/--owner/--project override the target board and URL repo (0.516833ms)\n✔ PV1: a valid JavaScript manifest runs only declared checks and passes (228.825464ms)\n✔ PV2: only declared argv run; an undeclared tool command never executes (228.952494ms)\n✔ PV3: schema and inspectManifest reject the mutation matrix before any command runs (86.108391ms)\n✔ PV4: command outcomes are complete and deterministic; runner continues after failures (79.813137ms)\n✔ PV4: a timeout is reported as FAIL with timedOut (1105.090303ms)\n✔ PV5: category applicability is exact; injected n/a shapes are rejected (180.763459ms)\n✔ PV6: scenario mapping gates the verdict (149.251729ms)\n✔ PV7: standards and banned patterns are commands, not judgement (234.61947ms)\n✔ PV8: evidence is bounded and secrets are redacted (171.285978ms)\n✔ PV8 unit: boundStream and redaction name-matching are precise (405.116852ms)\n✔ PV9: JSON/text/exit agree and JSON mode is order-independent (1009.884094ms)\n✔ PV9: --report writes the exact JSON bytes atomically (264.037785ms)\n✔ PV9: --report outside the repo root is refused and clobbers nothing (264.866938ms)\n✔ PV10: generic validator law and generated agent are portable (1.025132ms)\n✔ PV11: receipt hash verification detects mutation of any stored file (6.689259ms)\n✔ PV11: a FAIL runner-report cannot ride under runnerVerdict PASS (1.045857ms)\n✔ parseArgs: recognises JSON anywhere and rejects bad flags (0.762895ms)\n✔ PV13: renderText is a faithful projection of the report (167.324198ms)\n✔ TST2: separate full and task checks satisfy Rule A and Rule B (0.598146ms)\n✔ TST1: a scope:[full] check satisfies Rule A (scenarios n/a) (0.296467ms)\n✔ TST3: a single scope:[full,task] check satisfies both rules with no duplicate (0.270904ms)\n✔ TST4: Rule A negative -- tests required with no full-tagged check (1.793585ms)\n✔ TST5: Rule B negative -- scenario cites a tests check but none task-tagged (1.584641ms)\n✔ TST6: tests:n/a is exempt from Rule A and Rule B (0.405506ms)\n✔ TST7: zero owned scenarios -- exempt from Rule B, still subject to Rule A (0.4535ms)\n✔ TST8: a static-only scenario does not trigger Rule B (0.270237ms)\n✔ TST9: an untagged check named tests.full does NOT satisfy Rule A (0.246704ms)\n✔ TST10: scope shape errors are reported at /checks/<i>/scope (0.572826ms)\n✔ TST11: golden multi-error ordering (scope-shape + Rule A + dangling check) (0.281712ms)\n✔ TST12: schema accepts optional scope and rejects malformed shapes (45.018303ms)\n✔ Rule B iterates owned scenarios only -- an unowned evidence key draws no Rule B error (0.587258ms)\n✔ scope enum error is emitted once per check, not per bad entry (0.314545ms)\n✔ Implement owns the complete reader-now authoring law (1.944435ms)\n✔ Implement permits executable directives without exempting their prose (0.269765ms)\n✔ Implement blocks validation or closure until the exact task attestation (0.579937ms)\n✔ Tasks projects the code-prose pass into every task Definition of Done (0.217982ms)\n✔ Every normal PR reviewer enforces the same reader-now obligations (0.225994ms)\n✔ Code-prose findings use impact severity and are not dismissed as style (0.196727ms)\n✔ The package law does not depend on an external comment-writing skill (0.219661ms)\nℹ tests 589\nℹ suites 0\nℹ pass 589\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 7901.07115\n",
+      "stderrTail": ""
+    },
+    {
+      "id": "tests.task",
+      "argv": [
+        "node",
+        "--test",
+        "test/gate-presentation-contract.test.js"
+      ],
+      "evidence": [
+        "the focused spike-exit and gate-presentation corpus passes within its offline budget"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 415,
+      "stdoutTail": "✔ GPC1 sec8 heading stays pinned and the block is titled The gate presentation (1.561847ms)\n✔ GPC1 sec8 pins exactly two artifacts and no third (0.20356ms)\n✔ GPC1 sec8 example carries the sketch fence and all three line kinds (0.308491ms)\n✔ GPC5 appetite is exactly one and first; entries are one physical line (0.167753ms)\n✔ GPC5 decision lines carry a one-line why; rejected lines are unconditional (0.157031ms)\n✔ GPC6 ADR bar is named by reference, never restated (0.439676ms)\n✔ GPC6 qualifying decisions take the literal ASCII suffix (0.209099ms)\n✔ GPC17 sec8 names the sketch trigger and the absence declaration (0.151919ms)\n✔ GPC17 sec8 names the amendment loop and the transition (0.195783ms)\n✔ SER1 preserves one spike block and the exact phase/router sets (1.67478ms)\n✔ SER2 orders the four first-match routes and keeps the read tier future-only (0.342953ms)\n✔ SER3 keeps route boundaries exhaustive (0.154598ms)\n✔ SER4 requires the pre-spike human checkpoint (0.115578ms)\n✔ SER5 keeps spikes exploratory without a numeric threshold (0.085476ms)\n✔ SER6 blocks continuation and direction until a fresh checkpoint (0.100681ms)\n✔ SER7 keeps direction separate and preserves lifecycle transitions (0.095608ms)\n✔ SER8 keeps artifact treatment independent and provisional (0.186435ms)\n✔ SER9 requires a destination for provisional treatments (0.091718ms)\n✔ SER10 keeps retained evidence linked and its decision self-contained (0.181912ms)\n✔ GPC16 sec1 names G1, G2, G3 alongside the G4 and G7 moves (0.16391ms)\n✔ GPC7 tools bullet names exactly the three triggers (0.116344ms)\n✔ GPC7 both branches: fired-and-researched, fired-but-skipped-with-declaration (0.093208ms)\n✔ GPC8 one prompt, none identified is a complete answer (0.096659ms)\n✔ GPC8 named constraints bind only when they actually bind (0.075014ms)\n✔ GPC18 sketch embeds verbatim in the plan in both modes (0.130076ms)\n✔ GPC3 one gist line + named link per ticket; full list in exactly one home (0.092846ms)\n✔ GPC3 resolution comment is the home; boundary rule stated (0.096247ms)\n✔ GPC4 thread variant is conditional and shares one home (0.084397ms)\n✔ GPC2 sec4 enumeration names the Brainstorm provenance block (0.065903ms)\n✔ GPC2 storage rule sits between the opening paragraph and Dialogue discipline (0.090118ms)\n✔ GPC2 both storage branches and the standalone branch are named (0.160586ms)\n✔ GPC2 no-contradiction clause with declared deviation, enforcement by reference (0.083569ms)\n✔ GPC10 test file imports only node built-ins (no parser) (0.263121ms)\n✔ GPC10 no >=80-character verbatim substring of any governed doc in the test file (264.176818ms)\nℹ tests 34\nℹ suites 0\nℹ pass 34\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 360.65677\n",
+      "stderrTail": ""
+    },
+    {
+      "id": "static.lint",
+      "argv": [
+        "npx",
+        "biome",
+        "check",
+        "test/gate-presentation-contract.test.js"
+      ],
+      "evidence": [
+        "the JavaScript contract-test surface is biome-clean"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 311,
+      "stdoutTail": "Checked 1 file in 23ms. No fixes applied.\n",
+      "stderrTail": ""
+    },
+    {
+      "id": "static.references",
+      "argv": [
+        "node",
+        "skills/sdlc/scripts/check-references.mjs"
+      ],
+      "evidence": [
+        "public reference inventory and links remain valid"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 79,
+      "stdoutTail": "[...truncated; showing bounded tail...]\ncheck: prompt.validator pass — package source assertion and target are present\ncheck: prompt.spec pass — package source assertion and target are present\ncheck: prompt.review pass — package source assertion and target are present\ncheck: script.status pass — package source assertion and target are present\ncheck: script.panel-resolver pass — package source assertion and target are present\ncheck: script.panel-agent pass — package source assertion and target are present\ncheck: script.validator pass — package source assertion and target are present\ncheck: script.receipt-verifier pass — package source assertion and target are present\ncheck: schema.task-validation pass — package source assertion and target are present\ncheck: consumer.workflow unverified-consumer — consumer-owned target is not package-certified: .pi/sdlc/workflow.md\ncheck: external.gh external — external facility: github.com/issues-projects\ncheck: reference.system pass — package source assertion and target are present\ncheck: reference.phase-brainstorm pass — package source assertion and target are present\ncheck: reference.phase-plan pass — package source assertion and target are present\ncheck: reference.phase-spec pass — package source assertion and target are present\ncheck: reference.spec-artifact-skeleton pass — package source assertion and target are present\ncheck: reference.phase-tasks pass — package source assertion and target are present\ncheck: reference.phase-implement pass — package source assertion and target are present\ncheck: reference.phase-pr-review pass — package source assertion and target are present\ncheck: entrypoint.brainstorm pass — package source assertion and target are present\ncheck: entrypoint.plan pass — package source assertion and target are present\ncheck: entrypoint.spec pass — package source assertion and target are present\ncheck: entrypoint.tasks pass — package source assertion and target are present\ncheck: entrypoint.implement pass — package source assertion and target are present\ncheck: entrypoint.pr-review pass — package source assertion and target are present\ncheck: script.config-doc pass — package source assertion and target are present\ncheck: config-doc.impl pass — package source assertion and target are present\ncheck: script.lifecycle-checker-wrapper pass — package source assertion and target are present\ncheck: script.setup-wrapper pass — package source assertion and target are present\ncheck: schema.config pass — package source assertion and target are present\ncheck: schema.config-example pass — package source assertion and target are present\ncheck: delegated.adversarial-review external — external facility: skill:adversarial-review\ncheck: optional-enhancement.visual-docs external — external facility: skill:sdlc-visual-docs\ncheck: script.record-run-event pass — package source assertion and target are present\ncheck: script.record-run-event-wrapper pass — package source assertion and target are present\ncheck: script.harvest-panel pass — package source assertion and target are present\ncheck: script.harvest-panel-wrapper pass — package source assertion and target are present\ncheck: retro.script.collect-run pass — package source assertion and target are present\ncheck: retro.script.collect-run-wrapper pass — package source assertion and target are present\ncheck: retro.script.render-retro pass — package source assertion and target are present\ncheck: retro.script.render-retro-wrapper pass — package source assertion and target are present\ncheck: retro.schema.event pass — package source assertion and target are present\ncheck: retro.schema.run pass — package source assertion and target are present\ncheck: retro.schema.llm-protocol pass — package source assertion and target are present\ncheck: retro.skill.source pass — package source assertion and target are present\ncheck: retro.skill.store-layout pass — package source assertion and target are present\ncheck: retro.skill.retro-output pass — package source assertion and target are present\ncheck: retro.skill.collect-invocation pass — package source assertion and target are present\ncheck: retro.skill.render-invocation pass — package source assertion and target are present\ncheck: retro.skill.event-schema-pointer pass — package source assertion and target are present\ncheck: retro.skill.llm-schema-pointer pass — package source assertion and target are present\ncheck: telemetry.adr-0028 pass — package source assertion and target are present\ncheck: sdlc.skill.telemetry-section pass — package source assertion and target are present\ncheck: sdlc.skill.retro-pointer pass — package source assertion and target are present\ncheck: sdlc.skill.record-run-event-pointer pass — package source assertion and target are present\ncheck: sdlc.skill.harvest-panel-pointer pass — package source assertion and target are present\ncheck: script.check-completion-wrapper pass — package source assertion and target are present\ncheck: script.check-completion pass — package source assertion and target are present\ncheck: consumer.config-doc-companion unverified-consumer — consumer-owned target is not package-certified: .pi/sdlc/CONFIG.md\ncheck: delegated.dispatch-subagents external — external facility: skill:dispatch-subagents\ncheck: delegated.gh-pr-review-comments external — external facility: skill:gh-pr-review-comments\ncheck: runtime-tool.git external — external facility: tool:git\ncheck: runtime-tool.node external — external facility: tool:node\ncheck: consumer.hooks unverified-consumer — consumer-owned target is not package-certified: .pi/sdlc/sdlc.config.json\ncheck: consumer.tracker unverified-consumer — consumer-owned target is not package-certified: .pi/sdlc/sdlc.config.json\ncheck: discovery.skills/sdlc/references/phase-brainstorm.md pass — discovered public artifact has an inventory row\ncheck: discovery.skills/sdlc/references/phase-implement.md pass — discovered public artifact has an inventory row\ncheck: discovery.skills/sdlc/references/phase-plan.md pass — discovered public artifact has an inventory row\ncheck: discovery.skills/sdlc/references/phase-pr-review.md pass — discovered public artifact has an inventory row\ncheck: discovery.skills/sdlc/references/phase-spec.md pass — discovered public artifact has an inventory row\ncheck: discovery.skills/sdlc/references/phase-tasks.md pass — discovered public artifact has an inventory row\ncheck: discovery.skills/sdlc/references/spec-artifact-skeleton.md pass — discovered public artifact has an inventory row\ncheck: discovery.skills/sdlc/references/system-reference.md pass — discovered public artifact has an inventory row\ncheck: discovery.templates/sdlc-brainstorm.md pass — discovered public artifact has an inventory row\ncheck: discovery.templates/sdlc-implement.md pass — discovered public artifact has an inventory row\ncheck: discovery.templates/sdlc-plan.md pass — discovered public artifact has an inventory row\ncheck: discovery.templates/sdlc-pr-review.md pass — discovered public artifact has an inventory row\ncheck: discovery.templates/sdlc-spec.md pass — discovered public artifact has an inventory row\ncheck: discovery.templates/sdlc-tasks.md pass — discovered public artifact has an inventory row\ncheck: discovery.templates/setup-sdlc.md pass — discovered public artifact has an inventory row\ncheck: discovery.skills/sdlc/scripts/check-completion.sh pass — discovered public artifact has an inventory row\ncheck: discovery.skills/sdlc/scripts/check-lifecycle.sh pass — discovered public artifact has an inventory row\ncheck: discovery.skills/sdlc/scripts/check-references.sh pass — discovered public artifact has an inventory row\ncheck: discovery.skills/sdlc/scripts/config-doc.sh pass — discovered public artifact has an inventory row\ncheck: discovery.skills/sdlc/scripts/ensure-panel-agent.sh pass — discovered public artifact has an inventory row\ncheck: discovery.skills/sdlc/scripts/harvest-panel.sh pass — discovered public artifact has an inventory row\ncheck: discovery.skills/sdlc/scripts/record-run-event.sh pass — discovered public artifact has an inventory row\ncheck: discovery.skills/sdlc/scripts/resolve-panel.sh pass — discovered public artifact has an inventory row\ncheck: discovery.skills/sdlc/scripts/sdlc-status.sh pass — discovered public artifact has an inventory row\ncheck: discovery.skills/sdlc/scripts/setup-sdlc.sh pass — discovered public artifact has an inventory row\ncheck: discovery.skills/sdlc/scripts/tracker-ops.sh pass — discovered public artifact has an inventory row\ncheck: discovery.skills/sdlc/scripts/validate-task.sh pass — discovered public artifact has an inventory row\ncheck: discovery.skills/sdlc/prompts/adversary-plan.prompt.md pass — discovered public artifact has an inventory row\ncheck: discovery.skills/sdlc/prompts/adversary-review.prompt.md pass — discovered public artifact has an inventory row\ncheck: discovery.skills/sdlc/prompts/adversary-spec.prompt.md pass — discovered public artifact has an inventory row\ncheck: discovery.skills/sdlc/prompts/validator-task.prompt.md pass — discovered public artifact has an inventory row\ncheck: discovery.skills/sdlc/schema/sdlc.config.example.json pass — discovered public artifact has an inventory row\ncheck: discovery.skills/sdlc/schema/sdlc.config.schema.json pass — discovered public artifact has an inventory row\ncheck: discovery.skills/sdlc/schema/task-validation-manifest.schema.json pass — discovered public artifact has an inventory row\n",
+      "stderrTail": ""
+    },
+    {
+      "id": "static.lifecycle",
+      "argv": [
+        "bash",
+        "skills/sdlc/scripts/check-lifecycle.sh",
+        "--track",
+        "irreversible",
+        "--slug",
+        "spike-exit-rule"
+      ],
+      "evidence": [
+        "the irreversible Plan, Spec, and Build artifact contract passes"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "durationMs": 82,
+      "stdoutTail": "root: /home/neil/code/threadsafe/pi-sdlc.worktrees/feat-spike-exit-rule\nmode: flags\nstate: pass\nexit-code: 0\ntrack: irreversible\nslug: spike-exit-rule\nreason: -\nexempt: false\ncheck: cli.arguments pass — arguments are valid\ncheck: root.resolve pass — consumer root resolved\ncheck: git.repository pass — resolved root is a git worktree\ncheck: config.valid pass — committed configuration is valid\ncheck: declaration.source pass — declaration source read\ncheck: declaration.parse pass — one declaration structure parsed\ncheck: declaration.track pass — track: irreversible\ncheck: declaration.slug pass — slug: spike-exit-rule\ncheck: declaration.reason pass — reason not applicable for lifecycle track\ncheck: artifact.plan pass — plan document(s): 2026-08-09-spike-exit-rule.md\ncheck: artifact.spec pass — spec document(s): 2026-08-09-spike-exit-rule.md\ncheck: artifact.build pass — build document(s): 2026-08-09-spike-exit-rule-build.md\n",
+      "stderrTail": ""
+    }
+  ],
+  "categories": [
+    {
+      "category": "tests",
+      "status": "PASS",
+      "checkIds": [
+        "tests.full",
+        "tests.task"
+      ]
+    },
+    {
+      "category": "static",
+      "status": "PASS",
+      "checkIds": [
+        "static.lint",
+        "static.references",
+        "static.lifecycle"
+      ]
+    },
+    {
+      "category": "scenarios",
+      "status": "PASS"
+    },
+    {
+      "category": "standards",
+      "status": "N/A",
+      "reason": "no governing standard beyond the declared lifecycle, reference, lint, and test checks applies to the integration sweep"
+    },
+    {
+      "category": "bannedPatterns",
+      "status": "N/A",
+      "reason": "the no-new-machinery prohibitions remain assigned to the PR-panel inspection scenario SER13"
+    }
+  ],
+  "scenarios": [
+    {
+      "scenarioId": "SER12",
+      "status": "PASS",
+      "checkIds": [
+        "tests.full",
+        "tests.task",
+        "static.lint",
+        "static.references",
+        "static.lifecycle"
+      ]
+    }
+  ]
+}
