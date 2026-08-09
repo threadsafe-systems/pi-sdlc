@@ -157,6 +157,7 @@ satisfied by luna + sol. Both infra failures recorded, neither counted
 against the floor.
 
 ### R4-A1 (medium; luna NEW + sol REOPEN R3-A1, independently converged) — synonym prefixes classify entries
+
 ACCEPTED. Rev-4 entries 11-13 all began `refused alternative — ...`,
 classifying those entries as the `rejected:` lines under a synonym — the
 R3-A1 breach surviving relabelled. Rev 5: entries begin with their subject;
@@ -165,9 +166,25 @@ uniform classification; kind names allowed only as subject matter, as in
 the sketch; classification lives only at home).
 
 ### Dismissed sub-claims (luna only)
+
 (a) the line-45 grammar-decision entry naming the three kinds, and
 (b) the intro's home-list counts — DISMISSED as subject matter, not
 classification: the grammar decision's gist must name its subject, and the
 ratified design embeds the sketch — whose DECS node names all three kinds —
 verbatim in both modes. The one-place law protects the entry list, not the
 vocabulary. Sol's independent review flagged neither.
+
+---
+
+## Round 5 (convergence check, rev 5, 2026-08-09)
+
+Delta `f755141..5f105fa` (three index entries reworded + one intro sentence
+sharpened). Both reviewers (luna, sol) return **CLEAR, 0 findings**, each with
+an explicit re-verification of R4-N1's fix and of the dismissed adjacent
+questions. **Panel converged: two consecutive waves with zero new findings
+after full incorporation. No round 6.**
+
+Cumulative ledger across five rounds: 17 findings, 17 incorporated, 0
+dismissed standing (three early cosmetic observations were withdrawn/deferred
+by their own authors, not adjudicated). Zero findings survived a subsequent
+round from round 3 onward.
