@@ -6,6 +6,7 @@
 // calls. Later tasks append their section's assertions to this one file.
 
 import assert from "node:assert/strict";
+import { execSync } from "node:child_process";
 import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -204,4 +205,64 @@ test("GPC2 no-contradiction clause with declared deviation, enforcement by refer
 	assert.match(planSec4f, /must not contradict a named decision or resurrect a `rejected:` line without a declared deviation/);
 	assert.match(planSec4f, /routes by reference to the frozen adversary plan prompt's attack surface D/);
 	assert.match(planSec4f, /the prompt itself stays untouched/);
+});
+
+// ---- GPC10/GPC11/GPC12: C8 cross-cutting bounds -------------------------------
+
+const testSource = readFileSync(join(here, "gate-presentation-contract.test.js"), "utf8");
+
+function git(...args) {
+	return execSync(`git ${args.join(" ")}`, { cwd: repo, encoding: "utf8" }).trim();
+}
+
+// CI has no local 'main' branch; fall back to origin/main (S1 precedent).
+function baseRef() {
+	for (const ref of ["main", "origin/main"]) {
+		try {
+			git("rev-parse", "--verify", ref);
+			return ref;
+		} catch {
+			// try next
+		}
+	}
+	assert.fail("neither main nor origin/main resolves");
+}
+
+test("GPC10 test file imports only node built-ins (no parser)", () => {
+	const imports = [...testSource.matchAll(/^import .*$/gm)].map((m) => m[0]);
+	assert.ok(imports.length >= 1, "sanity: imports exist");
+	for (const line of imports) {
+		assert.match(line, /from "node:/, `non-builtin import: ${line}`);
+	}
+});
+
+test("GPC10 no >=80-character verbatim substring of any governed doc in the test file", () => {
+	const governed = [readFileSync(join(repo, "skills", "sdlc", "references", "phase-brainstorm.md"), "utf8"), readFileSync(join(repo, "skills", "sdlc", "references", "phase-plan.md"), "utf8"), readFileSync(join(repo, "skills", "sdlc", "references", "system-reference.md"), "utf8")];
+	// Windows are taken on the raw source, so regex bodies count too.
+	for (let i = 0; i + 80 <= testSource.length; i++) {
+		const window = testSource.slice(i, i + 80);
+		for (const doc of governed) {
+			assert.ok(!doc.includes(window), `restated governed text at test offset ${i}: ${window.slice(0, 40)}...`);
+		}
+	}
+});
+
+test("GPC11 schema, package manifests and repo config byte-identical to merge-base", () => {
+	const base = baseRef();
+	const mb = git("merge-base", base, "HEAD");
+	const paths = ["schema/sdlc.config.schema.json", "skills/sdlc/schema/sdlc.config.schema.json", "package.json", "package-lock.json", ".pi/sdlc/sdlc.config.json"];
+	const diff = git("diff", "--name-only", mb, "HEAD", "--", ...paths);
+	assert.equal(diff, "", `manifest drift vs merge-base: ${diff}`);
+});
+
+test("GPC11 no new files under skills/sdlc/scripts/ on this branch", () => {
+	const base = baseRef();
+	const added = git("diff", "--diff-filter=A", "--name-only", `${base}...HEAD`, "--", "skills/sdlc/scripts/");
+	assert.equal(added, "", `new scripts added: ${added}`);
+});
+
+test("GPC11 consumer fixtures untouched by this branch", () => {
+	const base = baseRef();
+	const diff = git("diff", "--name-only", `${base}...HEAD`, "--", "test/fixtures/consumer/");
+	assert.equal(diff, "", `consumer fixture drift: ${diff}`);
 });
