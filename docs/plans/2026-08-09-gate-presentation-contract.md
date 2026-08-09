@@ -1,7 +1,7 @@
 # Plan: S3 brainstorm gate-presentation contract (map #192)
 
-Status: rev 2, plan panel round 1 all-incorporated (R1-01..11, see
-docs/reviews/plan-review-gate-presentation-contract-2026-08-09/).
+Status: rev 3, plan panel round 2 all-incorporated (R2-D1..D3; R1-01..11
+re-verified CLEAR, see docs/reviews/plan-review-gate-presentation-contract-2026-08-09/).
 Run slug `gate-presentation-contract`,
 track irreversible. Map #192 slate row S3; bundles R1-G1, G2, G3, G4, G5, G7,
 G8 with R1-G5's shape amended at this gate (see provenance `rejected:` lines).
@@ -9,9 +9,10 @@ G8 with R1-G5's shape amended at this gate (see provenance `rejected:` lines).
 ## Brainstorm provenance
 
 Ratified at the brainstorm gate 2026-08-09 (approver `human:neilwashere`),
-plain mode — this block is the store. Design re-assessed Matt Pocock's
-wayfinder + domain-modeling discipline: the whiteboard is framing and
-throwaway; only the crystallised residue persists.
+map mode — this block is the index; the full grammar lives exactly once in
+the resolution comment linked below (R2-D1). Design re-assessed Matt
+Pocock's wayfinder + domain-modeling discipline: the whiteboard is framing
+and throwaway; only the crystallised residue persists.
 
 ### The sketch
 
@@ -29,21 +30,28 @@ flowchart LR
     DECS -.->|appetite: line| E158["#158 estimator\nfuture handoff evidence"]
 ```
 
-### The decisions list
+### The decisions list (index — map mode)
 
-- appetite: one lifecycle slice (brainstorm→PR), S1-comparable scale, track irreversible; human-gated brainstorm, panel-gated plan/spec per config
-- decision: the gate presentation is exactly two artifacts — the whiteboard sketch and the decisions list; R1-G5's eight-item prose skeleton is dissolved; G1/G2/G3/G4/G7 survive as dialogue moves (shape the conversation, produce no artifact)
-- decision: sketch trigger = the design introduces a new flow or ≥3 interacting components; absence is declared at the gate; the sketch is a gate artifact and embeds verbatim in the plan in both modes
-- decision: decisions-list grammar = three line kinds — appetite (exactly one, always first, binds ceremony not shape), decision, rejected; one-line entries; optional `(-> ADR 00NN)` suffix (ASCII, canonical)
-- decision: rejections always crystallise — a refused alternative is an explicit not-do decision recorded with its trade-off rationale
-- decision: the three-criteria ADR bar (hard-to-reverse + surprising + real trade-off) stays an additional deep record; the rejected line is the always-record
-- decision: plain mode — the plan is the store: sketch + decisions list embedded verbatim in the plan's provenance
-- decision: map mode — the sketch still embeds verbatim in the plan (a gate artifact, belonging to no ticket); only the decisions list becomes the index — named links with one-line gists (Decisions-so-far shape); the full grammar (the three line kinds) lives in exactly one place, the ticket resolution comment; wayfinder's one-place law survives
-- decision: assumptions cross in the plan's own Assumptions section, not recap material
-- decision: enforcement = S1 pattern only — contract tests assert rule prose in phase-brainstorm.md §8 and phase-plan.md; substance rides the human gate (review.brainstorm=human); no gate-time list parser, no new dial (#159), no new panel
-- rejected: a verbatim prose recap block restated in the plan — framing is throwaway; provenance = sketch + decisions only; supersedes R1-G5's slate wording ("the recap ingredients restated verbatim in the plan")
-- rejected: a gate-time mechanical grammar parser over the recap — it polices framing at the one phase whose point is cheap human-judged discovery; the human gate suffices
-- rejected: discarding rejected alternatives unless they clear the ADR bar — owner amendment; rejections are first-class crystallisation
+This run is map-sourced (Map #192 slate row), so this block is the index;
+every entry links the single home of the full grammar, the resolution
+comment [S3 gate record][s3-gate-record]. The sketch above embeds verbatim
+as a gate artifact in both modes.
+
+- [appetite: one lifecycle slice (brainstorm→PR), S1-comparable scale, track irreversible; human gate + panel gates per config][s3-gate-record]
+- [gate presentation = exactly two artifacts (sketch + decisions list); R1-G5 prose skeleton dissolved; G1/G2/G3/G4/G7 survive as dialogue moves][s3-gate-record]
+- [sketch trigger = new flow or ≥3 interacting components; absence declared at the gate; embeds verbatim in the plan in both modes][s3-gate-record]
+- [grammar = three line kinds (appetite exactly-one-first, decision, rejected); one-line entries; ASCII (-> ADR 00NN) suffix][s3-gate-record]
+- [rejections always crystallise — a refused alternative is an explicit not-do decision with trade-off rationale][s3-gate-record]
+- [ADR bar = system-reference.md's Governance paragraph, preserved by reference; qualifying decisions take the suffix][s3-gate-record]
+- [plain mode — the plan is the store: sketch + decisions list embedded verbatim][s3-gate-record]
+- [map mode — the sketch still embeds; only the list becomes the index; full grammar once in the resolution comment (thread variant)][s3-gate-record]
+- [assumptions cross in the plan's own Assumptions section, not recap material][s3-gate-record]
+- [enforcement = S1 pattern only — contract tests on rule prose; substance rides the human gate; no parser, no dial, no panel][s3-gate-record]
+- [rejected: verbatim prose recap block — framing is throwaway; supersedes R1-G5's slate wording][s3-gate-record]
+- [rejected: gate-time mechanical grammar parser — the human gate suffices for a framing phase][s3-gate-record]
+- [rejected: discarding rejected alternatives below the ADR bar — owner amendment; rejections are first-class crystallisation][s3-gate-record]
+
+[s3-gate-record]: https://github.com/threadsafe-systems/pi-sdlc/issues/192#issuecomment-5230679564
 
 ## Problem statement
 
@@ -72,9 +80,8 @@ alternative.
    sketch trigger + absence declaration, the amendment loop (human speaks,
    agent updates, amended list lands), the transition (the plan carries
    the provenance), and the three-criteria ADR bar preserved **by reference**
-   to system-reference.md's Governance paragraph (hard to reverse + surprising
-   - real trade-off — never restated in §8) as an additional deep record for
-   both modes.
+   to system-reference.md's Governance paragraph (never restated in §8,
+   including this plan — R2-D2) as an additional deep record for both modes.
 2. `skills/sdlc/references/phase-brainstorm.md` §1: the named dialogue moves
    — problem/outcome opening that names no mechanism (G1),
    alternative-or-declare (G2), appetite elicited before converging (G3),
@@ -91,8 +98,12 @@ alternative.
 3. `skills/sdlc/references/phase-brainstorm.md` §9: the map-mode provenance
    split — the sketch embeds verbatim in the plan in both modes (a gate
    artifact, belonging to no ticket); only the decisions list becomes the
-   index (named links, gist lines); the ticket resolution comment is the
-   single home of the full grammar (the three line kinds).
+   index (named links, gist lines); the resolution comment is the single
+   home of the full grammar (the three line kinds) — a decision ticket's
+   resolution comment or, thread variant (R2-D1), a comment in the map
+   thread when decisions are ratified there rather than in separate tickets
+   (entries sharing a comment share one home; this run's own gate record is
+   such a comment).
 4. `skills/sdlc/references/phase-plan.md` §4: the provenance rule, doc-side
    only. The first paragraph's section enumeration gains the Brainstorm
    provenance block. Plans **entered from Brainstorm** open with the
@@ -109,7 +120,10 @@ alternative.
    exactly-one-first; one-line entries; the ASCII `(-> ADR 00NN)` suffix;
    sketch trigger + absence declaration; the store/index split and the
    sketch-in-both-modes rule; the standalone exception; the ADR-bar
-   reference; the no-parser prohibition. Literal anchor definitions land in
+   reference; the G4 trigger rules (research-or-declare required only when a
+   named trigger fires; a fired-but-skipped trigger must be declared) and
+   the G7 rules (constraints named or "none identified"; they bind the
+   design only when they actually bind); the no-parser prohibition. Literal anchor definitions land in
    the Spec phase (separateSpec=true).
 
 ## Out of scope
@@ -127,7 +141,8 @@ alternative.
 
 ## Definition of done
 
-1. §8 rebuilt and §1 moves present; contract tests assert the anchors.
+1. §8 rebuilt and §1 moves present — incl. the G4 trigger/skip and the G7
+   none/binding semantics (R2-D3); contract tests assert the anchors.
 2. phase-plan.md §4: first-paragraph enumeration extended with the
    provenance block, and the rule placed between the first paragraph and
    **Dialogue discipline.**; contract tests assert both.

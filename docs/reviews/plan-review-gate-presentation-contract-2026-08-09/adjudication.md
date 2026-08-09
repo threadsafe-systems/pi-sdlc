@@ -88,3 +88,33 @@ Transcription drift between the map comment (Unicode →) and the reviewer task
 (ASCII ->). Fix: ASCII `(-> ADR 00NN)` pinned as canonical in rev 2's grammar
 line; map #192 comment amended to match. Prose arrows elsewhere are
 non-normative and untouched.
+
+---
+
+## Round 2 (delta over rev 2 at 1d1af2c) — 3 findings, 3 incorporated, 0 dismissed
+
+### R2-D1 (high, NEW, gemini) — dogfood mode contradiction + missing thread variant
+
+ACCEPTED. The run is map-sourced (Map #192 slate row), so rev 1's plain-mode
+declaration was wrong; the round-2 dispatch prompt inherited the error and
+asserted the opposite, which luna deferred to — gemini flagged it anyway.
+Fix has three parts, all in rev 3: a resolution comment on #192
+(issuecomment-5230679564) becomes the single home of the full grammar
+(verbatim sketch + 13-line list); the dogfood block becomes the map-mode
+index it prescribes; In-scope 3 gains the thread-variant clause (the
+resolution comment may be a comment in the map thread rather than a separate
+decision ticket).
+
+### R2-D2 (medium, REOPEN R1-07, gemini) — ADR bar restated twice
+
+ACCEPTED. Rev 2 restated the criteria at the decisions-list line (with a
+`-`/`+` typo) and again parenthetically in In-scope 1, both against the
+R1-07 adjudication. Both removed in rev 3; only the reference to
+system-reference.md's Governance paragraph remains, in the plan and in the
+resolution comment's canonical line.
+
+### R2-D3 (medium, NEW, luna) — G4/G7 semantics missing from test directions
+
+ACCEPTED. In-scope 5 gains two semantic directions (G4 trigger/skip
+declaration; G7 `none identified` and binds-only-when-actually-binding);
+DoD 1 names them.
