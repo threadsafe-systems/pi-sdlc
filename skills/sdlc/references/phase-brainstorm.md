@@ -100,8 +100,49 @@ the gate: phase-specific first, then `*`. A failed `after` hook **warns**
 ## 8. Completion evidence and next transition
 
 Completion evidence is the human-approved design (plain mode) or a
-decision-ready map destination (map mode). The next transition is **Plan**,
-using the agreed design as its objective.
+decision-ready map destination (map mode). Both land at the gate as **The gate
+presentation** — exactly two artifacts, and nothing else:
+
+1. **The sketch** — a mermaid picture of the design: entities, boundaries,
+   flows, actors. It is required when the design adds a new flow or three or
+   more interacting components; otherwise its absence is declared at the gate,
+   never silent. The sketch is framing, not contractual — it captures how the
+   change is thought about, and it is throw-away once the gate passes.
+2. **The decisions list** — one line per crystallized decision, in exactly
+   three line kinds:
+
+````text
+```mermaid
+flowchart LR
+    A[domain entity] --> B[boundary]
+```
+
+- appetite: <scale/time/effort>
+- decision: <what was ratified> — <one-line why>
+- rejected: <alternative refused> — <trade-off reason>
+````
+
+Rules for the list: exactly one `appetite:` line and it is the first decision
+line — it binds ceremony (scale, time, effort), not shape. Every entry of all
+three kinds is one physical line. `decision:` lines carry the ratified
+decision with a one-line why. `rejected:` lines are unconditional — a refused
+alternative is an explicit decision not to do something, and its trade-off
+reason is always recorded; no ADR-criteria gate applies to crystallizing a
+rejection.
+
+A decision or rejection meeting the Governance bar in
+`references/system-reference.md` additionally earns an ADR as a deep record in
+either mode; qualifying decisions take the suffix — the literal ASCII
+`(-> ADR 00NN)` appended to their line. The bar itself lives in that
+paragraph; this block never restates it.
+
+The gate is amended by talking: the human speaks, the agent updates the list,
+and the amended list lands. No third contractual artifact and no prose recap
+belongs at this gate — the framing dies with the whiteboard.
+
+The next transition is **Plan**, and the Plan carries the provenance: the
+sketch embeds verbatim, and the decisions list crosses as the store (plain
+mode) or the index (map mode) per the Plan phase's storage rule.
 
 ## 9. Advanced-mode pointers — map mode (wayfinder-lite)
 
