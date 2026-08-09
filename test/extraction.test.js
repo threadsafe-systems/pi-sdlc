@@ -144,6 +144,16 @@ test("S4: stamped name+tools+body byte-identical to golden; description == FS4",
 	}
 });
 
+test("S4b: stamped agents are whitespace-clean (no trailing space on empty extensions)", () => {
+	for (const phase of PHASES) {
+		const dir = mkdtempSync(join(tmpdir(), "sdlc-s4b-"));
+		run("ensure-panel-agent.mjs", [phase, "--config", consumer, "--dir", dir, "--force"]);
+		const raw = readFileSync(join(dir, `${agentName("loom", phase)}.md`), "utf8");
+		assert.ok(!/[ \t]$/m.test(raw), `${phase} stamped agent carries trailing whitespace`);
+		rmSync(dir, { recursive: true, force: true });
+	}
+});
+
 test("S5: agent lands in the CONSUMER's .pi/agents (not the skill dir)", () => {
 	const cdir = mkConsumer();
 	const r = run("ensure-panel-agent.mjs", ["pr_review", "--config", cdir, "--force"]);
