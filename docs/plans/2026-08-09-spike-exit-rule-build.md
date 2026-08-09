@@ -142,6 +142,29 @@ The 1-second host action is within SER14's 5-minute budget. The issue body keeps
 both required outcomes: promote retained material, or delete it and repair every
 temporary Plan/Spec pointer.
 
+## PR review handoff
+
+The PR orchestrator completes this table in the committed consolidated review;
+T2 has prepared every field and the durable SER14 values rather than estimating
+review-time evidence early.
+
+| Scenario | Required field | PR-review source |
+|---|---|---|
+| SER13 | immutable reviewed head SHA | `git rev-parse HEAD` immediately before panel dispatch |
+| SER13 | exact changed-file inventory | `git diff --name-only <base>...<reviewed-head>` at that SHA |
+| SER13 | reviewer verdicts and consolidated verdict | harvested configured PR-panel outputs and adjudication |
+| SER13 | panel-output availability time | latest terminal timestamp across the configured panel wave |
+| SER13 | adjudication start and finish times | orchestrator timestamps around consolidation |
+| SER13 | incremental model-call count | `0` beyond the configured PR panel; no extra SER13 reviewer |
+| SER14 | durable issue | [#245](https://github.com/threadsafe-systems/pi-sdlc/issues/245) |
+| SER14 | host-action start and finish times | `2026-08-09T19:45:57Z` / `2026-08-09T19:45:58Z` |
+| SER14 | incremental model-call count | `0` for issue creation |
+
+The PR gate does not pass until its consolidated record carries every row above,
+links #245, and lands the carry ledger entry. The inspection allows at most one
+checklist row per configured reviewer and five minutes of adjudication after all
+panel outputs are available.
+
 ## Tracker
 
 `shape.publishToTracker=2`, so this two-task breakdown publishes as one epic plus
