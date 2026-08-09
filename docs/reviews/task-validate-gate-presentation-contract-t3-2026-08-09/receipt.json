@@ -1,0 +1,12 @@
+{
+	"schemaVersion": 1,
+	"taskId": "t3",
+	"model": "maas-qwen/qwen3.7-plus",
+	"createdAt": "2026-08-09T12:53:17Z",
+	"manifestPath": "docs/validation/gate-presentation-contract/t3.json",
+	"manifestSha256": "1e968d805eaf0306b72e50f0f7aa7568a1375c5a723727467f8c0e0e7c4f54e6",
+	"runnerReportSha256": "6db51c9c180b5e598757bef2e7ef0401da8bfa07bb177784c3cdec8457640689",
+	"generatedAgentSha256": "979025830b6277eb006c893dc0376b81bf65b9a03bb67b39d0c1dee294f9a1f8",
+	"runnerVerdict": "PASS",
+	"validatorVerdict": "PASS"
+}
