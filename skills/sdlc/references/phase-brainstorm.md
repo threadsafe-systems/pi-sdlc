@@ -220,5 +220,19 @@ destination as its objective. If breadth-first mapping surfaces no fog at all �
 the whole effort fits in one session — skip the map and use plain brainstorm
 dialogue instead.
 
+**Provenance at the gate.** When a map-sourced run reaches the Brainstorm
+gate, the gate presentation crosses into the Plan under a split. **The
+sketch embeds verbatim in the plan in both modes** — it is a gate artifact,
+belonging to no ticket. Only **the decisions list becomes the index**: one
+gist line + named link per ticket, and the full list kept verbatim in
+exactly one home — never duplicated into the plan. The home is the
+**resolution comment** carrying the full three-kind grammar: the decision
+ticket's resolution comment, or — thread variant, only when the decisions
+were ratified as thread comments on the map issue — a comment in the map
+thread; entries sharing that comment share one home. Boundary rule for the
+index lines: no line-kind prefix and no uniform classification of any kind;
+kind names may appear as subject matter of the decision being gisted, and
+entry classification lives only at the home.
+
 Map-mode mechanics (labels, sub-issue/blocking mutations, board discipline) are
 owned once by `assets/tracker-ops.md`.

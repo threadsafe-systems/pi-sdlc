@@ -145,3 +145,32 @@ test("GPC8 named constraints bind only when they actually bind", () => {
 	assert.match(sec1f, /become decision lines only when they actually bind/);
 	assert.match(sec1f, /Brainstorm never binds a constraint itself/);
 });
+
+// ---- GPC18/GPC3/GPC4: §9 map-mode provenance split ----------------------------
+
+const sec9 = sectionOf(brainstorm, 9);
+const sec9f = flat(sec9);
+
+test("GPC18 sketch embeds verbatim in the plan in both modes", () => {
+	assert.match(sec9f, /The sketch embeds verbatim in the plan in both modes/);
+	assert.match(sec9f, /a gate artifact, belonging to no ticket/);
+});
+
+test("GPC3 one gist line + named link per ticket; full list in exactly one home", () => {
+	assert.match(sec9f, /Only \*\*the decisions list becomes the index\*\*/);
+	assert.match(sec9f, /one gist line \+ named link per ticket/);
+	assert.match(sec9f, /exactly one home/);
+	assert.match(sec9f, /never duplicated into the plan/);
+});
+
+test("GPC3 resolution comment is the home; boundary rule stated", () => {
+	assert.match(sec9f, /The home is the \*\*resolution comment\*\*/);
+	assert.match(sec9f, /no line-kind prefix and no uniform classification of any kind/);
+	assert.match(sec9f, /kind names may appear as subject matter of the decision being gisted/);
+	assert.match(sec9f, /entry classification lives only at the home/);
+});
+
+test("GPC4 thread variant is conditional and shares one home", () => {
+	assert.match(sec9f, /only when the decisions were ratified as thread comments on the map issue/);
+	assert.match(sec9f, /entries sharing that comment share one home/);
+});
