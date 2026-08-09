@@ -102,11 +102,38 @@ skills/sdlc/references/phase-brainstorm.md
 test/gate-presentation-contract.test.js
 ```
 
+## Wave 2 convergence
+
+- Delta: `763706b6871e3508f5066e52b208d6ae3a4da1d5..aaac61c4b915fc2c07e296c8598f1274304cd33d`
+- Final reviewed head: `aaac61c4b915fc2c07e296c8598f1274304cd33d`
+- Reviewers: `openai-codex/gpt-5.6-luna:xhigh`,
+  `deepseek/deepseek-v4-pro:xhigh`, `zai/glm-5.2:xhigh`
+- Outputs available: `2026-08-09T21:10:10Z`
+- Adjudication: `2026-08-09T21:10:46Z`–`2026-08-09T21:11:18Z`
+- Incremental reviewers/model calls beyond the configured wave: `0`
+
+All three reviewers verified PR-R1-01 through PR-R1-05 as **RESOLVED** from the
+committed files. All three found no new defect. SER13 remained clean and SER14
+remained landed. No high, medium, or low finding survives.
+
+The exact final-head inventory is the 45-entry reviewed-head block above plus
+these six round-1 review artifacts introduced by the fix wave:
+
+```text
+docs/reviews/pr-review-spike-exit-rule-2026-08-09/consolidated.md
+docs/reviews/pr-review-spike-exit-rule-2026-08-09/prompt.md
+docs/reviews/pr-review-spike-exit-rule-2026-08-09/round1-deepseek-v4-pro.md
+docs/reviews/pr-review-spike-exit-rule-2026-08-09/round1-infra.md
+docs/reviews/pr-review-spike-exit-rule-2026-08-09/round1-openai-codex-gpt-5.6-luna.md
+docs/reviews/pr-review-spike-exit-rule-2026-08-09/round1-zai-glm-5.2.md
+```
+
 ## Artifact inventory
 
 | Logical wave | Harvest labels | Consolidated record | Events |
 |---:|---|---|---|
-| 1 | `pr_review-round1` through `pr_review-round4` | this file | four `panel.dispatched`; `panel.consolidated` recorded after adjudication |
+| 1 | `pr_review-round1` through `pr_review-round4` | this file | four `panel.dispatched`; one `panel.consolidated` |
+| 2 | `pr_review-round5` | this file | one `panel.dispatched`; `panel.consolidated` recorded after adjudication |
 
-A delta convergence wave is required because PR-R1-02 and PR-R1-03 change
-normative phase guidance and PR-R1-04 strengthens mechanical enforcement.
+Panel clean: two logical waves, five consolidated findings, all incorporated,
+zero dismissed, and zero surviving findings.
