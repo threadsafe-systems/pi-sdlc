@@ -1,7 +1,6 @@
 # Spec: S4 spike exit rule (map #192)
 
-Status: rev 2, incorporating every spec-panel round-1 finding. Run slug
-`spike-exit-rule`, track irreversible. Plan:
+Status: rev 3. Run slug `spike-exit-rule`, track irreversible. Plan:
 `docs/plans/2026-08-09-spike-exit-rule.md` rev 4 at `e16f3db`. Spec author:
 `openai-codex/gpt-5.6-sol`.
 
@@ -32,7 +31,8 @@ Binding rule: every coined term used two or more times in the body appears in th
 
 - Signature/shape: one literal `### Spike exit loop` block inside
   `skills/sdlc/references/phase-brainstorm.md` §8, extending from that heading to
-  the next level-three-or-higher heading or the end of §8. It applies an ordered
+  the next heading of level 3 or shallower (`###` or `##`), or the end of §8.
+  Deeper subheadings remain inside the block. It applies an ordered
   four-route guide to each load-bearing uncertainty: (1) existing evidence
   sufficient to settle it → read now; (2) answering is delivery-grade → Plan
   and front-load; (3) no empirical evidence can settle it → human judgment;
@@ -117,8 +117,10 @@ Binding rule: every coined term used two or more times in the body appears in th
 
 - Signature/shape: append S4 assertions to
   `test/gate-presentation-contract.test.js`. A short structural helper extracts
-  the literal `### Spike exit loop` block only. Existing GPC assertions own the
-  gate-presentation block; `SER` assertions own only that extracted spike block.
+  the literal `### Spike exit loop` block through the next heading matching
+  `^#{2,3}[ ]`, while retaining deeper subheadings. Existing GPC assertions own
+  the gate-presentation block; `SER` assertions own only that extracted spike
+  block.
   The same file adds current-tree exact-set assertions for the six
   `references/phase-*.md` files and six `templates/sdlc-*.md` routers.
 - Preconditions: C1–C4 prose exists in phase-brainstorm.md §8.
@@ -195,9 +197,10 @@ When–Then: normalized prose contains one anchor for each route and their first
 occurrences are strictly ordered: read existing sufficient evidence, Plan and
 front-load delivery-grade work, human judgment for empirically undecidable
 questions, then propose a spike for the remainder; the prose names first-match
-precedence.
+precedence, and the read route names #147 as future mechanisation outside S4.
 Falsify: a missing/duplicate route, Plan after judgment, spike before a prior
-route, or no first-match rule.
+route, no first-match rule, or removal/implementation of the #147 future-work
+anchor.
 
 ### SER3 — route boundaries are exhaustive · mechanical
 
@@ -310,16 +313,18 @@ Given: the committed PR-review consolidated record, which names the immutable
 reviewed head SHA and records the exact changed-file inventory, plus the final
 §8 prose at that SHA.
 When–Then: in the existing configured PR-panel wave, with an incremental budget
-of zero extra reviewers/model calls and at most one checklist row per reviewer,
-the panel judges that the ordered rule is understandable without a parser, that
+of zero extra reviewers/model calls, at most one checklist row per reviewer, and
+at most 5 minutes of adjudication after panel outputs are available, the panel
+judges that the ordered rule is understandable without a parser, that
 qualitative predicates imply no hidden numerical threshold, that #147 is named
 only as future read-tier mechanisation, and that no config, script, schema,
 telemetry, mandatory storage hierarchy, or reuse mandate was introduced; the
 consolidated record preserves the verdict and inventory after merge.
 Falsify: the record lacks the SHA/inventory/verdict, the prose needs
 implementation knowledge to apply, an unstated fifth route is needed, #147 is
-implemented or omitted, the diff adds prohibited machinery/mandate, or the
-inspection launches any reviewer beyond the configured PR panel.
+implemented or omitted, the diff adds prohibited machinery/mandate, the
+inspection launches any reviewer beyond the configured PR panel, or
+adjudication exceeds 5 minutes after outputs are available.
 
 ### SER14 — ephemeral-evidence lifecycle follow-up is durable · carried
 

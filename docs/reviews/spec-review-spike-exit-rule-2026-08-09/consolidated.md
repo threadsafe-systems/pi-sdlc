@@ -2,13 +2,13 @@
 
 - Date: 2026-08-09
 - Track: irreversible
-- Spec revision reviewed: rev 1 at `ecd5c47`
+- Spec revisions reviewed: rev 1 at `ecd5c47`; rev 2 at `b8ad46c`
 - Orchestrator/spec author: `openai-codex/gpt-5.6-sol`
-- Logical review wave: 1
+- Logical review waves: 1–2
 - Requested reviewers: `maas-qwen/deepseek-v4-flash-0732:high`, `openai-codex/gpt-5.6-terra:high`
 - Successful reviewers: `maas-qwen/deepseek-v4-flash-0731:high`, `openai-codex/gpt-5.6-terra:high`
 - Panel floor: 2 distinct successful models
-- Result: 9 findings; 9 incorporated, 0 dismissed; no surviving high or medium
+- Result through wave 2: 13 findings; 13 incorporated, 0 dismissed; no surviving high or medium
 
 ## Dispatch and harvest inventory
 
@@ -16,6 +16,7 @@
 |---|---|---|---:|---|
 | 1 | owner-requested `deepseek-v4-flash-0732:high` + `gpt-5.6-terra:high` | 0732 returned non-transient `model_not_found`; Terra returned verdict | 1 | `panel.dispatched` wave 1 |
 | 1 | adjacent available `deepseek-v4-flash-0731:high` replacing 0732 | verdict returned | 2 | `panel.dispatched` wave 1 |
+| 2 | `deepseek-v4-flash-0731:high` + `gpt-5.6-terra:high` | both verdicts returned | 3 | `panel.dispatched` wave 2 |
 
 Harvest destinations are `.pi/sdlc/runs/spike-exit-rule/panels/spec_review-round<label>-2026-08-09/`. DeepSeek 0732 was genuinely attempted as requested; the configured runtime does not expose that model id.
 
@@ -33,9 +34,20 @@ Harvest destinations are `.pi/sdlc/runs/spike-exit-rule/panels/spec_review-round
 | SPEC-R1-08 | NEW | low | vocabulary omission | Terra | incorporated | Vocabulary now defines and binds `delivery-grade` and `human checkpoint`. |
 | SPEC-R1-09 | NEW | low | falsifier ambiguity | DeepSeek | incorporated | SER3 now falsifies empirically answerable non-delivery-grade questions routed to judgment instead of spike. |
 
+### Wave 2 delta adjudication
+
+| id | origin | severity | defect class | Raised by | Disposition | Adjudication |
+|---|---|---|---|---|---|---|
+| SPEC-R2-01 | NEW | medium | mechanical coverage | DeepSeek | incorporated | SER2 now mechanically asserts the #147 future-work anchor in the extracted spike block and falsifies omission or implementation. |
+| SPEC-R2-02 | NEW | medium | boundary ambiguity | DeepSeek | incorporated | C1/C5 now define the block through the next heading of level 3 or shallower using `^#{2,3}[ ]`; deeper subheadings remain inside. |
+| SPEC-R2-03 | REOPENED(SPEC-R1-04) | medium | proportionality | Terra | incorporated | SER13 adds a 5-minute adjudication budget after outputs are available and falsifies an overrun. |
+| SPEC-R2-04 | NEW | low | artifact narration | Terra | incorporated | The Spec status is contract-only (`rev 3`); panel history remains solely in this review artifact. |
+
+All nine wave-1 fixes were confirmed.
+
 ## Stop condition
 
-Every round-1 finding was incorporated into Spec rev 2. None contradicted an
-owner-ratified decision and none was dismissed. A delta convergence round is
-required because SPEC-R1-01, SPEC-R1-02, and SPEC-R1-04 materially strengthen
-exit semantics and verification contracts.
+Every finding through wave 2 was incorporated into Spec rev 3. None contradicted
+an owner-ratified decision and none was dismissed. A delta convergence round is
+required because SPEC-R2-01 and SPEC-R2-02 change mechanical ownership and the
+literal block boundary.
