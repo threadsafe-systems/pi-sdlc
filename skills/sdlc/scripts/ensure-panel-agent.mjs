@@ -82,7 +82,9 @@ const description = agentDescription(cfg.labelPrefix, phase);
 const rawBody = readFileSync(promptPath, "utf8").replace(/\n+$/, "");
 const body = rawBody.split("REVIEWER_TAG").join(REVIEWER_TAG_REPLACEMENT);
 
-const content = `${["---", `name: ${name}`, `description: ${description}`, `tools: ${tools}`, `extensions: ${extensions}`, "---", "", body].join("\n")}\n`;
+// The empty extensions default would otherwise leave a trailing space on the
+// front-matter line, and stamped agents must stay whitespace-clean.
+const content = `${["---", `name: ${name}`, `description: ${description}`, `tools: ${tools}`, `extensions: ${extensions}`.trimEnd(), "---", "", body].join("\n")}\n`;
 
 const agentsDir = dir ? (isAbsolute(dir) ? dir : resolve(dir)) : resolveConsumerPath(root, cfg.paths.agents, "paths.agents").resolved;
 const out = join(agentsDir, `${name}.md`);
