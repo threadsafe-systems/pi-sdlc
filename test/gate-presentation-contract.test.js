@@ -174,3 +174,34 @@ test("GPC4 thread variant is conditional and shares one home", () => {
 	assert.match(sec9f, /only when the decisions were ratified as thread comments on the map issue/);
 	assert.match(sec9f, /entries sharing that comment share one home/);
 });
+
+// ---- GPC2: phase-plan.md §4 storage rule ---------------------------------------
+
+const planDoc = readFileSync(join(repo, "skills", "sdlc", "references", "phase-plan.md"), "utf8");
+const planSec4 = sectionOf(planDoc, 4);
+const planSec4f = flat(planSec4);
+
+test("GPC2 sec4 enumeration names the Brainstorm provenance block", () => {
+	assert.match(planSec4, /Brainstorm provenance block/);
+});
+
+test("GPC2 storage rule sits between the opening paragraph and Dialogue discipline", () => {
+	const openIdx = planSec4.indexOf("Produce the Plan doc");
+	const ruleIdx = planSec4.indexOf("**Brainstorm provenance storage.**");
+	const dialogueIdx = planSec4.indexOf("**Dialogue discipline.**");
+	assert.ok(openIdx >= 0, "opening paragraph present");
+	assert.ok(ruleIdx > openIdx, "rule after the opening paragraph");
+	assert.ok(dialogueIdx > ruleIdx, "rule before Dialogue discipline");
+});
+
+test("GPC2 both storage branches and the standalone branch are named", () => {
+	assert.match(planSec4f, /in plain mode store both verbatim/);
+	assert.match(planSec4f, /in map mode store the sketch verbatim and index the decisions list/);
+	assert.match(planSec4f, /no upstream gate/);
+});
+
+test("GPC2 no-contradiction clause with declared deviation, enforcement by reference", () => {
+	assert.match(planSec4f, /must not contradict a named decision or resurrect a `rejected:` line without a declared deviation/);
+	assert.match(planSec4f, /routes by reference to the frozen adversary plan prompt's attack surface D/);
+	assert.match(planSec4f, /the prompt itself stays untouched/);
+});
