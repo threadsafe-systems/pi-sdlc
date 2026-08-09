@@ -30,6 +30,7 @@ function sectionOf(source, n) {
 }
 
 const sec8 = sectionOf(brainstorm, 8);
+const sec1 = sectionOf(brainstorm, 1);
 // Prose is hard-wrapped; match anchors against whitespace-normalized text.
 const flat = (s) => s.replace(/\s+/g, " ");
 const sec8f = flat(sec8);
@@ -99,4 +100,48 @@ test("GPC17 sec8 names the amendment loop and the transition", () => {
 	assert.match(sec8f, /the amended list lands/);
 	assert.match(sec8f, /The next transition is \*\*Plan\*\*/);
 	assert.match(sec8f, /the Plan carries the provenance/);
+});
+
+// ---- GPC16: §1 dialogue moves named ------------------------------------------
+
+const sec1f = flat(sec1);
+
+test("GPC16 sec1 names G1, G2, G3 alongside the G4 and G7 moves", () => {
+	assert.match(sec1f, /G1 open on problem and outcome, naming no mechanism/);
+	assert.match(sec1f, /G2 alternative-or-declare/);
+	assert.match(sec1f, /G3 appetite before converging/);
+	assert.match(sec1f, /elicit scale, time, and effort before the design converges/);
+	assert.match(sec1f, /Moves G4 and G7 are the two labelled bullets below/);
+});
+
+// ---- GPC7: G4 triggers in §1 with declared skips --------------------------------
+
+test("GPC7 tools bullet names exactly the three triggers", () => {
+	assert.match(sec1f, /\*\*external dependency\*\*/);
+	assert.match(sec1f, /\*\*prior-art claim\*\*/);
+	assert.match(sec1f, /\*\*cross-repo pattern invoked\*\*/);
+	assert.match(sec1f, /exactly three triggers/);
+	assert.match(sec1f, /outside those triggers there is no research ceremony/);
+});
+
+test("GPC7 both branches: fired-and-researched, fired-but-skipped-with-declaration", () => {
+	// Fired branch: research is required when a trigger fires.
+	assert.match(sec1f, /Research is required only when one of exactly three triggers fires/);
+	// Skipped branch: a fired-but-skipped trigger must be declared.
+	assert.match(sec1f, /A fired-but-skipped trigger must be declared in the same gate presentation/);
+	// The proportionality sentence stays.
+	assert.match(sec1f, /proportional, not mandatory ceremony/);
+});
+
+// ---- GPC8: G7 one prompt in §1, none identified, no binding -----------------------
+
+test("GPC8 one prompt, none identified is a complete answer", () => {
+	assert.match(sec1f, /move G7 — constraints prompt/);
+	assert.match(sec1f, /One prompt, not a battery/);
+	assert.match(sec1f, /`none identified` — a complete answer, not a failure state/);
+});
+
+test("GPC8 named constraints bind only when they actually bind", () => {
+	assert.match(sec1f, /become decision lines only when they actually bind/);
+	assert.match(sec1f, /Brainstorm never binds a constraint itself/);
 });
