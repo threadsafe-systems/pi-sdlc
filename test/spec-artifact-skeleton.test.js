@@ -251,59 +251,6 @@ test("M4: none of the four canonical rule sentences appears in the prompt", () =
 	}
 });
 
-// L3 — spec C7's pinned expected post-unfreeze FROZEN array, exact order.
-const L3 = [
-	"skills/sdlc/scripts/sdlc-status.mjs",
-	"skills/sdlc/scripts/sdlc-status.sh",
-	"skills/sdlc/scripts/check-lifecycle.mjs",
-	"skills/sdlc/scripts/check-lifecycle.sh",
-	"skills/sdlc/scripts/lib.mjs",
-	"skills/sdlc/schema/sdlc.config.schema.json",
-	"skills/sdlc/schema/sdlc.config.example.json",
-	"skills/sdlc/schema/task-validation-manifest.schema.json",
-	"skills/sdlc/scripts/resolve-panel.mjs",
-	"skills/sdlc/scripts/resolve-panel.sh",
-	"skills/sdlc/scripts/validate-task.mjs",
-	"skills/sdlc/scripts/validate-task.sh",
-	"skills/sdlc/scripts/verify-task-receipt.mjs",
-	"skills/sdlc/prompts/adversary-plan.prompt.md",
-	"skills/sdlc/prompts/adversary-review.prompt.md",
-	"skills/sdlc/prompts/validator-task.prompt.md",
-];
-
-test("M6: the FROZEN array equals C7's pinned list L3 exactly", () => {
-	// C5's membership contract: exactly L3's 16 entries, in L3's order —
-	// adversary-spec.prompt.md absent, every other frozen path present and
-	// unreordered. Removing or reordering any further entry must fail this.
-	// Window-scoped (AM4): this test pins the unfrozen window's shape; the
-	// AM3 re-freeze deletes it when the FROZEN entry is restored.
-	const body = readFileSync(join(repo, "test/frozen-surfaces.test.js"), "utf8");
-	const frozen = [...body.matchAll(/^\t"([^"]+)",$/gm)].map((m) => m[1]);
-	assert.deepEqual(frozen, L3, "FROZEN array drifted from C7's pinned list L3");
-	assert.ok(!frozen.includes("skills/sdlc/prompts/adversary-spec.prompt.md"), "adversary-spec.prompt.md must be unfrozen for the S1 slice");
-});
-
-test("M7: the IDV19 reconciliation is minimal and complete", () => {
-	// C6's minimality: the IDV19 loop is the only filtered use of
-	// ADVERSARY_PROMPTS, the constant is intact, the sibling loops are
-	// unfiltered, the validator-task assertion remains, and the comment
-	// names AM1, AM3 and the re-freeze obligation.
-	// Window-scoped (AM4): this test pins the unfrozen window's shape; the
-	// AM3 re-freeze deletes it when IDV19's unfiltered loop is restored.
-	const body = readFileSync(join(repo, "test/iteration-disposition.test.js"), "utf8");
-	assert.ok(body.includes('const ADVERSARY_PROMPTS = ["plan", "spec", "review"];'), "ADVERSARY_PROMPTS must stay the literal three-slug constant");
-	const filtered = [...body.matchAll(/ADVERSARY_PROMPTS\.filter/g)];
-	assert.equal(filtered.length, 1, "exactly one filtered use of ADVERSARY_PROMPTS may exist (IDV19's)");
-	assert.ok(body.includes('ADVERSARY_PROMPTS.filter((s) => s !== "spec")'), "the single filter must exempt exactly the spec prompt");
-	const unfiltered = [...body.matchAll(/for \(const slug of ADVERSARY_PROMPTS\)/g)];
-	assert.equal(unfiltered.length, 2, "the two sibling loops must iterate ADVERSARY_PROMPTS unfiltered");
-	const idv19 = body.slice(body.indexOf('test("IDV19:'));
-	assert.ok(idv19.includes('assert.ok(frozen.includes("skills/sdlc/prompts/validator-task.prompt.md")'), "IDV19's validator-task.prompt.md assertion must remain");
-	assert.match(idv19, /AM1/, "IDV19's comment must name AM1");
-	assert.match(idv19, /AM3/, "IDV19's comment must name AM3");
-	assert.match(idv19, /re-freeze/, "IDV19's comment must name the re-freeze obligation");
-});
-
 test("M8: the skeleton rejects keyword-parser machinery by name", () => {
 	// SAS11's pair: no Cucumber/Behat/Gherkin vocabulary anywhere in the
 	// skeleton, and the scenario-form section carries the positive rejection
