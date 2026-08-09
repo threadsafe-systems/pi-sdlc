@@ -1,6 +1,8 @@
 # Plan: S3 brainstorm gate-presentation contract (map #192)
 
-Status: rev 1, awaiting plan panel. Run slug `gate-presentation-contract`,
+Status: rev 2, plan panel round 1 all-incorporated (R1-01..11, see
+docs/reviews/plan-review-gate-presentation-contract-2026-08-09/).
+Run slug `gate-presentation-contract`,
 track irreversible. Map #192 slate row S3; bundles R1-G1, G2, G3, G4, G5, G7,
 G8 with R1-G5's shape amended at this gate (see provenance `rejected:` lines).
 
@@ -32,11 +34,11 @@ flowchart LR
 - appetite: one lifecycle slice (brainstorm→PR), S1-comparable scale, track irreversible; human-gated brainstorm, panel-gated plan/spec per config
 - decision: the gate presentation is exactly two artifacts — the whiteboard sketch and the decisions list; R1-G5's eight-item prose skeleton is dissolved; G1/G2/G3/G4/G7 survive as dialogue moves (shape the conversation, produce no artifact)
 - decision: sketch trigger = the design introduces a new flow or ≥3 interacting components; absence is declared at the gate; the sketch is a gate artifact and embeds verbatim in the plan in both modes
-- decision: decisions-list grammar = three line kinds — appetite (exactly one, always first, binds ceremony not shape), decision, rejected; one-line entries; optional (→ ADR 00NN) suffix
+- decision: decisions-list grammar = three line kinds — appetite (exactly one, always first, binds ceremony not shape), decision, rejected; one-line entries; optional `(-> ADR 00NN)` suffix (ASCII, canonical)
 - decision: rejections always crystallise — a refused alternative is an explicit not-do decision recorded with its trade-off rationale
 - decision: the three-criteria ADR bar (hard-to-reverse + surprising + real trade-off) stays an additional deep record; the rejected line is the always-record
 - decision: plain mode — the plan is the store: sketch + decisions list embedded verbatim in the plan's provenance
-- decision: map mode — the plan is the index: named links with one-line gists (Decisions-so-far shape); the full grammar lives in exactly one place, the ticket resolution comment; wayfinder's one-place law survives
+- decision: map mode — the sketch still embeds verbatim in the plan (a gate artifact, belonging to no ticket); only the decisions list becomes the index — named links with one-line gists (Decisions-so-far shape); the full grammar (the three line kinds) lives in exactly one place, the ticket resolution comment; wayfinder's one-place law survives
 - decision: assumptions cross in the plan's own Assumptions section, not recap material
 - decision: enforcement = S1 pattern only — contract tests assert rule prose in phase-brainstorm.md §8 and phase-plan.md; substance rides the human gate (review.brainstorm=human); no gate-time list parser, no new dial (#159), no new panel
 - rejected: a verbatim prose recap block restated in the plan — framing is throwaway; provenance = sketch + decisions only; supersedes R1-G5's slate wording ("the recap ingredients restated verbatim in the plan")
@@ -68,25 +70,52 @@ alternative.
 1. `skills/sdlc/references/phase-brainstorm.md` §8 rebuilt as **The gate
    presentation**: the two-artifact requirement, the three-kind grammar, the
    sketch trigger + absence declaration, the amendment loop (human speaks,
-   agent updates, amended list lands), and the transition (the plan carries
-   the provenance).
+   agent updates, amended list lands), the transition (the plan carries
+   the provenance), and the three-criteria ADR bar preserved **by reference**
+   to system-reference.md's Governance paragraph (hard to reverse + surprising
+   - real trade-off — never restated in §8) as an additional deep record for
+   both modes.
 2. `skills/sdlc/references/phase-brainstorm.md` §1: the named dialogue moves
    — problem/outcome opening that names no mechanism (G1),
    alternative-or-declare (G2), appetite elicited before converging (G3),
-   research-or-declare with named triggers (G4, folded into the existing
-   tools bullet), one constraints prompt, named never bound (G7).
+   research-or-declare (G4), and one constraints prompt (G7). G4 folds into
+   the existing tools bullet keeping its proportionality: the
+   proportional/not-mandatory-ceremony sentence stays; named triggers
+   (external dependency, prior-art claim, cross-repo pattern invoked) make
+   research-or-declare required only when a trigger fires; outside triggers
+   there is no research ceremony, and a fired-but-skipped trigger must be
+   declared. G7 is one prompt asking the human to name the constraints that
+   shape the design, or declare "none identified"; named constraints inform
+   the design and become decision lines only when they actually bind —
+   Brainstorm never binds a constraint itself.
 3. `skills/sdlc/references/phase-brainstorm.md` §9: the map-mode provenance
-   split — the plan is the index (named links, gist lines); the ticket
-   resolution comment is the single home of the full grammar.
-4. `skills/sdlc/references/phase-plan.md` §4: the provenance rule — every
-   Plan doc opens with the Brainstorm provenance block (the gate sketch when
-   one exists, then the decisions list: store in plain mode, index in map
-   mode); a plan contradicting a named decision must declare the deviation;
-   the plan panel's scope check includes resurrected `rejected:` lines.
-5. `test/gate-presentation-contract.test.js`: contract tests asserting the
-   rule prose anchors above (offline string assertions, S1 pattern).
+   split — the sketch embeds verbatim in the plan in both modes (a gate
+   artifact, belonging to no ticket); only the decisions list becomes the
+   index (named links, gist lines); the ticket resolution comment is the
+   single home of the full grammar (the three line kinds).
+4. `skills/sdlc/references/phase-plan.md` §4: the provenance rule, doc-side
+   only. The first paragraph's section enumeration gains the Brainstorm
+   provenance block. Plans **entered from Brainstorm** open with the
+   provenance block (the gate sketch when one exists, then the decisions
+   list: store in plain mode, index in map mode); **standalone Plans**
+   (`sdlc:plan`, no committed upstream) record the live-formed intent in the
+   same position with an explicit "no upstream gate" declaration. A plan must
+   not contradict a named decision or resurrect a `rejected:` line without a
+   declared deviation; enforcement rides the plan panel's existing attack
+   surface D (locked decisions) in `prompts/adversary-plan.prompt.md` — by
+   reference, never restated, and the prompt stays untouched (it is frozen).
+5. `test/gate-presentation-contract.test.js`: contract tests (offline string
+   assertions, S1 pattern) covering the semantic directions: appetite
+   exactly-one-first; one-line entries; the ASCII `(-> ADR 00NN)` suffix;
+   sketch trigger + absence declaration; the store/index split and the
+   sketch-in-both-modes rule; the standalone exception; the ADR-bar
+   reference; the no-parser prohibition. Literal anchor definitions land in
+   the Spec phase (separateSpec=true).
 
 ## Out of scope
+
+- Editing `prompts/adversary-plan.prompt.md` (frozen; enforcement routes to
+   its existing attack surface D by reference — no unfreeze dance in S3).
 
 - S2 (plan skeleton template embedding the provenance placeholder) — it
   consumes this seam; S3 defines the rule, S2 builds the skeleton.
@@ -99,18 +128,24 @@ alternative.
 ## Definition of done
 
 1. §8 rebuilt and §1 moves present; contract tests assert the anchors.
-2. phase-plan.md §4 carries the provenance rule; contract tests assert
-   placement between the first paragraph and **Dialogue discipline.**
-3. Contract test file runs offline, < 1 second.
+2. phase-plan.md §4: first-paragraph enumeration extended with the
+   provenance block, and the rule placed between the first paragraph and
+   **Dialogue discipline.**; contract tests assert both.
+3. Contract test file runs offline, < 1 second:
+   `node --test test/gate-presentation-contract.test.js`.
 4. Full corpus `npm test` green, external budget 30 seconds.
-5. biome clean on touched files.
-6. `check-references` exit 0 — no new FS11 surface (rules live in existing
-   references; no inventory row needed).
-7. `check-lifecycle --track irreversible --slug gate-presentation-contract`
-   exit 0 once build doc exists.
-8. Frozen surfaces byte-identical (ASD19); `test/fixtures/consumer/`
-   untouched; the two skill-kernel §9 anchors ("Working the map", "native
-   GitHub sub-issues of the map") intact.
+5. `npx biome check` clean on the touched-file set (the two phase references
+   - the new test file).
+6. `node skills/sdlc/scripts/check-references.mjs` exit 0 — no new FS11
+   surface (rules live in existing references; no inventory row needed).
+7. `bash skills/sdlc/scripts/check-lifecycle.sh --track irreversible --slug
+   gate-presentation-contract` exit 0 once Spec AND Build artifacts are
+   committed; mid-run artifact.spec/artifact.build failures are expected
+   (S1 precedent).
+8. Frozen surfaces byte-identical (ASD19 via full corpus);
+   `git diff main...HEAD -- test/fixtures/consumer/` empty; the two
+   skill-kernel §9 anchors ("Working the map", "native GitHub sub-issues of
+   the map") intact via full corpus.
 
 ## Assumptions
 
