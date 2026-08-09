@@ -1,3 +1,9 @@
+## [3.5.0](https://github.com/threadsafe-systems/pi-sdlc/compare/v3.4.0...v3.5.0) (2026-08-09)
+
+### Features
+
+* **brainstorm:** add bounded spike exit rule ([#246](https://github.com/threadsafe-systems/pi-sdlc/issues/246)) ([f1c1da7](https://github.com/threadsafe-systems/pi-sdlc/commit/f1c1da77cb8692bfb2d2495e0e6604ee4af7e4a4))
+
 ## [3.4.0](https://github.com/threadsafe-systems/pi-sdlc/compare/v3.3.1...v3.4.0) (2026-08-09)
 
 ### Features
