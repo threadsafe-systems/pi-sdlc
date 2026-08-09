@@ -109,7 +109,7 @@ No inbound `CARRY-TO-BUILD` was minted at the Spec gate.
 
 | Carry | Destination | Landing site | Status |
 |---|---|---|---|
-| SER14 ephemeral-evidence follow-up | `pr_review` | committed PR consolidated record: issue URL, host-action timestamps, incremental model-call count | issue prepared by T2; PR landing pending |
+| SER14 ephemeral-evidence follow-up | `pr_review` | committed PR consolidated record: issue URL, host-action timestamps, incremental model-call count | issue #245 created; PR landing pending |
 
 ## Assumptions
 
@@ -129,10 +129,28 @@ No inbound `CARRY-TO-BUILD` was minted at the Spec gate.
 6. SER14's issue creation is a deterministic host action requiring no model call;
    its timing and call-count evidence is copied into the PR consolidated record.
 
+## SER14 host-action evidence
+
+| Field | Value |
+|---|---|
+| Issue | [#245 — Grill: ephemeral spike evidence lifecycle](https://github.com/threadsafe-systems/pi-sdlc/issues/245) |
+| Started | `2026-08-09T19:45:57Z` |
+| Finished | `2026-08-09T19:45:58Z` |
+| Incremental model calls | `0` |
+
+The 1-second host action is within SER14's 5-minute budget. The issue body keeps
+both required outcomes: promote retained material, or delete it and repair every
+temporary Plan/Spec pointer.
+
 ## Tracker
 
 `shape.publishToTracker=2`, so this two-task breakdown publishes as one epic plus
 two native sub-issues on board 5. T2 is blocked by T1. The tracker is a
 projection of this committed document; this document remains authoritative.
 
-Projection: pending publication.
+Projection (published 2026-08-09, board 5):
+
+- Epic [#242](https://github.com/threadsafe-systems/pi-sdlc/issues/242) — S4 spike exit rule (map #192)
+- [#243](https://github.com/threadsafe-systems/pi-sdlc/issues/243) — T1 spike exit loop and contract tests
+- [#244](https://github.com/threadsafe-systems/pi-sdlc/issues/244) — T2 integration sweep and PR carry preparation, blocked by #243
+- Follow-up [#245](https://github.com/threadsafe-systems/pi-sdlc/issues/245) — ephemeral spike evidence lifecycle (separate from epic tasks)
