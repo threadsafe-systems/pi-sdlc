@@ -1,0 +1,12 @@
+{
+	"schemaVersion": 1,
+	"taskId": "t2",
+	"model": "maas-qwen/qwen3.7-plus",
+	"createdAt": "2026-08-08T19:29:20Z",
+	"manifestPath": "docs/validation/spec-artifact-skeleton/t2.json",
+	"manifestSha256": "c411814aaf60ebbe1e14153649b2b1640e056b3c26e150a8bdc428e03aec872e",
+	"runnerReportSha256": "3541a53d24793c6370828938aaae2a4816570a2f51a0c867d64658a514eff07e",
+	"generatedAgentSha256": "979025830b6277eb006c893dc0376b81bf65b9a03bb67b39d0c1dee294f9a1f8",
+	"runnerVerdict": "PASS",
+	"validatorVerdict": "PASS"
+}

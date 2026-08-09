@@ -1,0 +1,12 @@
+{
+	"schemaVersion": 1,
+	"taskId": "t4",
+	"model": "maas-qwen/glm-5.2",
+	"createdAt": "2026-08-08T19:46:45Z",
+	"manifestPath": "docs/validation/spec-artifact-skeleton/t4.json",
+	"manifestSha256": "04b9366a9b0086c5127cb91120b2672f1aa0be04b3bd45df97945b84eb4bc1f8",
+	"runnerReportSha256": "e476aebb5c9e9bbb8b00df5ec86c7d1312dcf27148594083e4c5d8427c0ebd84",
+	"generatedAgentSha256": "979025830b6277eb006c893dc0376b81bf65b9a03bb67b39d0c1dee294f9a1f8",
+	"runnerVerdict": "PASS",
+	"validatorVerdict": "PASS"
+}

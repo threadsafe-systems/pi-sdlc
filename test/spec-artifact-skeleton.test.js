@@ -1,0 +1,315 @@
+// Contract tests for the S1 spec artifact skeleton. Offline string
+// assertions over the markdown/test surfaces; no subprocess, model, or
+// network calls. Marker sets M1-M8 mirror spec C7.
+
+import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
+import { test } from "node:test";
+
+const here = dirname(fileURLToPath(import.meta.url));
+const repo = dirname(here);
+
+const skeleton = readFileSync(join(repo, "skills/sdlc/references/spec-artifact-skeleton.md"), "utf8");
+
+// The four canonical rule sentences fixed by spec C2. The skeleton carries
+// each inside its owning section; the prompt must never carry them (M4).
+const CANONICAL = [
+	"every coined term used two or more times in the body appears in the Vocabulary table, and every term in the table appears in the body",
+	"every interface this change introduces or modifies has a Contracts block (interfaces mentioned only as unchanged context do not, and must not be silently re-described)",
+	"every scenario carries exactly one kind label and the mechanical/total ratio is readable off the spec",
+	"every NFR has a response measure and a binding scenario id, or the literal marker `unbound — accepted at gate` with a reason",
+];
+
+const SECTIONS = ["Vocabulary", "Contracts", "Scenario kind labels", "Non-functional requirements", "Scenario form"];
+
+function splitSections(source) {
+	const headers = [...source.matchAll(/^## (.+)$/gm)];
+	const preamble = source.slice(0, headers.length ? headers[0].index : source.length);
+	const sections = {};
+	for (let i = 0; i < headers.length; i++) {
+		const start = headers[i].index + headers[i][0].length;
+		const end = i + 1 < headers.length ? headers[i + 1].index : source.length;
+		sections[headers[i][1]] = source.slice(start, end);
+	}
+	return { preamble, sections, order: headers.map((m) => m[1]) };
+}
+
+const { preamble, sections, order } = splitSections(skeleton);
+
+function inSectionOnly(marker, owner) {
+	assert.ok(sections[owner].includes(marker), `spec-artifact-skeleton.md: marker ${JSON.stringify(marker)} missing from section "## ${owner}"`);
+	const others = [preamble, ...SECTIONS.filter((s) => s !== owner).map((s) => sections[s] ?? "")].join("\n");
+	assert.ok(!others.includes(marker), `spec-artifact-skeleton.md: marker ${JSON.stringify(marker)} appears outside its owning section "## ${owner}"`);
+}
+
+test("M1: skeleton H1 is exact", () => {
+	assert.ok(skeleton.startsWith("# Spec artifact skeleton\n"), "spec-artifact-skeleton.md: H1 must be exactly '# Spec artifact skeleton'");
+});
+
+test("M1: section set is exactly the five components, in fixed order, no extras", () => {
+	assert.deepEqual(order, SECTIONS, "spec-artifact-skeleton.md: the complete '## ' section set must be exactly the five components in the fixed order");
+});
+
+test("M1: Vocabulary markers are section-local", () => {
+	inSectionOnly("| Term | Definition | Binds to |", "Vocabulary");
+	inSectionOnly("| <term> | <one-sentence definition> | <identifier or file> |", "Vocabulary");
+	inSectionOnly("<term>", "Vocabulary");
+	inSectionOnly("<one-sentence definition>", "Vocabulary");
+	inSectionOnly("<identifier or file>", "Vocabulary");
+});
+
+test("M1: Contracts markers are section-local", () => {
+	inSectionOnly("### <interface name>", "Contracts");
+	inSectionOnly("<interface name>", "Contracts");
+	for (const bullet of ["- Signature/shape:", "- Preconditions:", "- Postconditions:", "- Invariants:", "- Error semantics:", "- Gated by:"]) {
+		inSectionOnly(bullet, "Contracts");
+	}
+});
+
+test("M1: kind-label markers are section-local", () => {
+	for (const label of ["`mechanical`", "`inspection`", "`carried`"]) {
+		inSectionOnly(label, "Scenario kind labels");
+	}
+});
+
+test("M1: NFR markers are section-local", () => {
+	inSectionOnly("| Characteristic (ISO 25010) | Stimulus/condition | Response measure | Binding |", "Non-functional requirements");
+	inSectionOnly("| <characteristic> | <stimulus or condition> | <measurable response> | <scenario id, or `unbound — accepted at gate` with a reason> |", "Non-functional requirements");
+	inSectionOnly("unbound — accepted at gate", "Non-functional requirements");
+});
+
+test("M1: scenario-form markers are section-local", () => {
+	for (const part of ["`Given:`", "`When–Then:`", "`Falsify:`"]) {
+		inSectionOnly(part, "Scenario form");
+	}
+	inSectionOnly("`Given: none`", "Scenario form");
+});
+
+test("M1: the four canonical rule sentences sit in their owning sections", () => {
+	const owners = ["Vocabulary", "Contracts", "Scenario kind labels", "Non-functional requirements"];
+	CANONICAL.forEach((sentence, i) => {
+		inSectionOnly(sentence, owners[i]);
+	});
+});
+
+test("M5: inventory row matches C4's nine fields exactly", () => {
+	const inventory = JSON.parse(readFileSync(join(repo, "skills/sdlc/assets/normative-references.json"), "utf8"));
+	assert.equal(inventory.sources.length, 81, "normative-references.json: expected exactly 81 source rows");
+	const row = inventory.sources.find((r) => r.id === "reference.spec-artifact-skeleton");
+	assert.ok(row, "normative-references.json: row reference.spec-artifact-skeleton missing");
+	assert.deepEqual(row, {
+		id: "reference.spec-artifact-skeleton",
+		source: "skills/sdlc/references/spec-artifact-skeleton.md",
+		assertion: "# Spec artifact skeleton",
+		targetKind: "file",
+		ownership: "package",
+		required: true,
+		resolution: "package",
+		target: "skills/sdlc/references/spec-artifact-skeleton.md",
+		class: "package-public",
+	});
+	assert.ok(!("verification" in row), "normative-references.json: row reference.spec-artifact-skeleton must not carry the optional verification key");
+});
+
+// ---- M2: phase-spec.md §4 binding rules (C2) -----------------------------
+
+const phaseSpec = readFileSync(join(repo, "skills/sdlc/references/phase-spec.md"), "utf8");
+
+function section4(source) {
+	const head = source.match(/^## 4\. /m);
+	assert.ok(head, "phase-spec.md: heading '## 4.' not found");
+	const rest = source.slice(source.indexOf("\n", head.index) + 1);
+	const next = rest.match(/^## /m);
+	return next ? rest.slice(0, next.index) : rest;
+}
+
+const s4 = section4(phaseSpec);
+
+test("M2: §4's first paragraph still begins 'Produce the Spec doc:'", () => {
+	assert.ok(s4.trimStart().startsWith("Produce the Spec doc:"), "phase-spec.md §4: first paragraph must still begin 'Produce the Spec doc:'");
+});
+
+test("M2: the inserted block sits immediately after §4's first paragraph (adjacency, C2/SAS2)", () => {
+	// C2/SAS2's "paragraph" reads as the contiguous inserted region — C2
+	// renders the rules as a numbered list, so one literal markdown paragraph
+	// is impossible. Enforced shape: §4's blank-line-separated blocks are,
+	// contiguously and in order — first paragraph, rules lead-in, the four
+	// numbered rule lines, defect sentence + pointer, Premise durability.
+	// Any paragraph inserted between consecutive pairs fails this.
+	const blocks = s4
+		.split(/\n\s*\n/)
+		.map((b) => b.trim())
+		.filter(Boolean);
+	const firstIdx = blocks.findIndex((b) => b.startsWith("Produce the Spec doc:"));
+	assert.ok(firstIdx !== -1, "phase-spec.md §4: first paragraph block not found");
+	const lead = blocks[firstIdx + 1];
+	assert.ok(lead?.startsWith("Author the Spec against the fixed skeleton"), "phase-spec.md §4: the rules lead-in must be the block immediately after the first paragraph");
+	const list = blocks[firstIdx + 2];
+	assert.equal(list, CANONICAL.map((sentence, i) => `${i + 1}. ${sentence}`).join("\n"), "phase-spec.md §4: the block after the lead-in must be exactly the four numbered rule lines");
+	const closing = blocks[firstIdx + 3];
+	assert.ok(closing?.startsWith("The gate refuses"), "phase-spec.md §4: the defect sentence block must immediately follow the numbered rules");
+	assert.ok(closing.includes("anything missing is a spec defect"), "phase-spec.md §4: literal 'anything missing is a spec defect' missing");
+	assert.ok(closing.includes("references/spec-artifact-skeleton.md"), "phase-spec.md §4: skeleton pointer 'references/spec-artifact-skeleton.md' missing");
+	const premise = blocks[firstIdx + 4];
+	assert.ok(premise?.startsWith("**Premise durability.**"), "phase-spec.md §4: Premise durability must immediately follow the inserted block");
+});
+
+test("M2: the numbered rules open their own lines", () => {
+	const lines = s4.split("\n");
+	for (let i = 0; i < CANONICAL.length; i++) {
+		const wanted = `${i + 1}. ${CANONICAL[i]}`;
+		assert.ok(lines.includes(wanted), `phase-spec.md §4: rule ${i + 1} must open its own line verbatim`);
+	}
+});
+
+test("M2: Premise durability, Dialogue discipline, configuration callout follow in order", () => {
+	const anchors = ["**Premise durability.**", "**Dialogue discipline.**", "> **Under your configuration:**"];
+	let cursor = 0;
+	for (const anchor of anchors) {
+		const idx = s4.indexOf(anchor);
+		assert.ok(idx !== -1, `phase-spec.md §4: anchor missing: ${anchor}`);
+		assert.ok(idx > cursor, `phase-spec.md §4: anchor out of order: ${anchor}`);
+		// Each anchor still opens its paragraph: preceded by a blank line.
+		assert.ok(idx >= 2 && s4.slice(idx - 2, idx) === "\n\n", `phase-spec.md §4: anchor must still begin its paragraph: ${anchor}`);
+		cursor = idx;
+	}
+});
+
+// ---- M3/M4: adversary-spec.prompt.md skeleton awareness (C3) ------------
+
+const prompt = readFileSync(join(repo, "skills/sdlc/prompts/adversary-spec.prompt.md"), "utf8");
+
+const LETTERS = ["A", "B", "C", "D", "E", "F", "G", "H"];
+
+function surfaceLine(letter) {
+	const m = prompt.match(new RegExp(`^${letter}\\. `, "m"));
+	assert.ok(m, `adversary-spec.prompt.md: surface ${letter}. missing`);
+	return prompt.slice(m.index, prompt.indexOf("\n", m.index));
+}
+
+test("M3: exactly eight attack surfaces A-H in order, no letter beyond H", () => {
+	const heads = [...prompt.matchAll(/^([A-Z])\. /gm)].map((m) => m[1]);
+	assert.deepEqual(heads, LETTERS, "adversary-spec.prompt.md: attack surfaces must be exactly A-H in order");
+});
+
+test("M3: the B/C/D/F anchors cite the skeleton path inside their surface lines", () => {
+	for (const letter of ["B", "C", "D", "F"]) {
+		assert.ok(surfaceLine(letter).includes("references/spec-artifact-skeleton.md"), `adversary-spec.prompt.md: surface ${letter} anchor must cite references/spec-artifact-skeleton.md`);
+	}
+});
+
+test("M3: the four anchors together name all five skeleton components", () => {
+	const coverage = {
+		Vocabulary: surfaceLine("D"),
+		Contracts: surfaceLine("C"),
+		"Scenario kind labels": surfaceLine("B"),
+		"Non-functional requirements": surfaceLine("F"),
+		"Scenario form": surfaceLine("B"),
+	};
+	for (const [component, line] of Object.entries(coverage)) {
+		assert.ok(line.includes(component), `adversary-spec.prompt.md: component ${JSON.stringify(component)} not named in its anchor line`);
+	}
+});
+
+const L1 = `## Delta rounds
+
+Round 1 reviews the whole spec. **Every round after the first is a delta review.** The caller gives you the prior rounds' findings and their dispositions, and your review is scoped to the delta since the previous round. Tag every finding \`NEW\`, or \`REOPENED(<prior-id>)\` when you re-raise an already-dispositioned finding by its id. A reopen is legal only when you cite evidence that did not exist, or was not available, when that finding was dispositioned; otherwise do not re-raise it. Confirming a prior fix is one line, not a re-litigation.`;
+
+const L2 = `## Output format (STRICT: markdown only, findings only, no preamble, no conclusion)
+
+### <short title>
+
+- severity: high | medium | low
+- confidence: high | medium (drop anything lower; do not speculate)
+- origin: NEW | REOPENED(<prior-id>)
+- location: <spec section, or doc/file:line>
+- defect: <one or two sentences: the concrete problem>
+- evidence: <what you verified: quoted spec text, file:line in the repo, or framework file:line at the pinned version>
+- impact: <why it matters: what freezes wrong, what test cannot gate, what claim is false>
+- fix: <one sentence: the minimal spec change>
+
+Rank most-severe first. For each attack surface A to H where you found nothing, emit one line: \`CLEAR: <letter> — <one-line reason>\`. Prefer a few high-confidence, evidence-backed findings over a long speculative list. Every finding must be concrete enough that the spec author could act on it without asking you anything.`;
+
+test("M3: Delta rounds section byte-identical to pinned block L1", () => {
+	const start = prompt.indexOf("## Delta rounds");
+	const end = prompt.indexOf("## Output format");
+	assert.ok(start !== -1 && end !== -1 && start < end, "adversary-spec.prompt.md: Delta rounds / Output format headings missing or misordered");
+	assert.equal(prompt.slice(start, end).replace(/\s+$/, ""), L1, "adversary-spec.prompt.md: Delta rounds section drifted from pinned block L1");
+});
+
+test("M3: output-format section byte-identical to pinned block L2", () => {
+	const start = prompt.indexOf("## Output format");
+	assert.ok(start !== -1, "adversary-spec.prompt.md: Output format heading missing");
+	assert.equal(prompt.slice(start).replace(/\n+$/, ""), L2, "adversary-spec.prompt.md: output-format section drifted from pinned block L2");
+});
+
+test("M4: none of the four canonical rule sentences appears in the prompt", () => {
+	for (const sentence of CANONICAL) {
+		assert.ok(!prompt.includes(sentence), `adversary-spec.prompt.md: canonical rule sentence restated (reference-never-restate): ${JSON.stringify(sentence.slice(0, 60))}...`);
+	}
+});
+
+// L3 — spec C7's pinned expected post-unfreeze FROZEN array, exact order.
+const L3 = [
+	"skills/sdlc/scripts/sdlc-status.mjs",
+	"skills/sdlc/scripts/sdlc-status.sh",
+	"skills/sdlc/scripts/check-lifecycle.mjs",
+	"skills/sdlc/scripts/check-lifecycle.sh",
+	"skills/sdlc/scripts/lib.mjs",
+	"skills/sdlc/schema/sdlc.config.schema.json",
+	"skills/sdlc/schema/sdlc.config.example.json",
+	"skills/sdlc/schema/task-validation-manifest.schema.json",
+	"skills/sdlc/scripts/resolve-panel.mjs",
+	"skills/sdlc/scripts/resolve-panel.sh",
+	"skills/sdlc/scripts/validate-task.mjs",
+	"skills/sdlc/scripts/validate-task.sh",
+	"skills/sdlc/scripts/verify-task-receipt.mjs",
+	"skills/sdlc/prompts/adversary-plan.prompt.md",
+	"skills/sdlc/prompts/adversary-review.prompt.md",
+	"skills/sdlc/prompts/validator-task.prompt.md",
+];
+
+test("M6: the FROZEN array equals C7's pinned list L3 exactly", () => {
+	// C5's membership contract: exactly L3's 16 entries, in L3's order —
+	// adversary-spec.prompt.md absent, every other frozen path present and
+	// unreordered. Removing or reordering any further entry must fail this.
+	// Window-scoped (AM4): this test pins the unfrozen window's shape; the
+	// AM3 re-freeze deletes it when the FROZEN entry is restored.
+	const body = readFileSync(join(repo, "test/frozen-surfaces.test.js"), "utf8");
+	const frozen = [...body.matchAll(/^\t"([^"]+)",$/gm)].map((m) => m[1]);
+	assert.deepEqual(frozen, L3, "FROZEN array drifted from C7's pinned list L3");
+	assert.ok(!frozen.includes("skills/sdlc/prompts/adversary-spec.prompt.md"), "adversary-spec.prompt.md must be unfrozen for the S1 slice");
+});
+
+test("M7: the IDV19 reconciliation is minimal and complete", () => {
+	// C6's minimality: the IDV19 loop is the only filtered use of
+	// ADVERSARY_PROMPTS, the constant is intact, the sibling loops are
+	// unfiltered, the validator-task assertion remains, and the comment
+	// names AM1, AM3 and the re-freeze obligation.
+	// Window-scoped (AM4): this test pins the unfrozen window's shape; the
+	// AM3 re-freeze deletes it when IDV19's unfiltered loop is restored.
+	const body = readFileSync(join(repo, "test/iteration-disposition.test.js"), "utf8");
+	assert.ok(body.includes('const ADVERSARY_PROMPTS = ["plan", "spec", "review"];'), "ADVERSARY_PROMPTS must stay the literal three-slug constant");
+	const filtered = [...body.matchAll(/ADVERSARY_PROMPTS\.filter/g)];
+	assert.equal(filtered.length, 1, "exactly one filtered use of ADVERSARY_PROMPTS may exist (IDV19's)");
+	assert.ok(body.includes('ADVERSARY_PROMPTS.filter((s) => s !== "spec")'), "the single filter must exempt exactly the spec prompt");
+	const unfiltered = [...body.matchAll(/for \(const slug of ADVERSARY_PROMPTS\)/g)];
+	assert.equal(unfiltered.length, 2, "the two sibling loops must iterate ADVERSARY_PROMPTS unfiltered");
+	const idv19 = body.slice(body.indexOf('test("IDV19:'));
+	assert.ok(idv19.includes('assert.ok(frozen.includes("skills/sdlc/prompts/validator-task.prompt.md")'), "IDV19's validator-task.prompt.md assertion must remain");
+	assert.match(idv19, /AM1/, "IDV19's comment must name AM1");
+	assert.match(idv19, /AM3/, "IDV19's comment must name AM3");
+	assert.match(idv19, /re-freeze/, "IDV19's comment must name the re-freeze obligation");
+});
+
+test("M8: the skeleton rejects keyword-parser machinery by name", () => {
+	// SAS11's pair: no Cucumber/Behat/Gherkin vocabulary anywhere in the
+	// skeleton, and the scenario-form section carries the positive rejection
+	// sentence. The skeleton is framework-neutral fill-in structure only.
+	for (const banned of ["Cucumber", "Behat", "Gherkin"]) {
+		assert.ok(!skeleton.includes(banned), `spec-artifact-skeleton.md must not mention ${banned}`);
+	}
+	assert.ok(sections["Scenario form"].includes("No keyword parser, no step definitions."), "Scenario form section must carry the literal rejection sentence");
+});

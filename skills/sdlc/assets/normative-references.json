@@ -348,6 +348,17 @@
       "class": "package-public"
     },
     {
+      "id": "reference.spec-artifact-skeleton",
+      "source": "skills/sdlc/references/spec-artifact-skeleton.md",
+      "assertion": "# Spec artifact skeleton",
+      "targetKind": "file",
+      "ownership": "package",
+      "required": true,
+      "resolution": "package",
+      "target": "skills/sdlc/references/spec-artifact-skeleton.md",
+      "class": "package-public"
+    },
+    {
       "id": "reference.phase-tasks",
       "source": "skills/sdlc/references/phase-tasks.md",
       "assertion": "# Phase reference: Build / Tasks",
