@@ -1,7 +1,7 @@
 # Plan: S3 brainstorm gate-presentation contract (map #192)
 
-Status: rev 3, plan panel round 2 all-incorporated (R2-D1..D3; R1-01..11
-re-verified CLEAR, see docs/reviews/plan-review-gate-presentation-contract-2026-08-09/).
+Status: rev 4, plan panel round 3 all-incorporated (R3-A1..A2; R2-D1..D3
+re-verified, sketch now verbatim — see docs/reviews/plan-review-gate-presentation-contract-2026-08-09/).
 Run slug `gate-presentation-contract`,
 track irreversible. Map #192 slate row S3; bundles R1-G1, G2, G3, G4, G5, G7,
 G8 with R1-G5's shape amended at this gate (see provenance `rejected:` lines).
@@ -22,8 +22,8 @@ flowchart LR
     GP --> SK["the sketch\nmermaid; conditional;\nabsence declared"]
     GP --> DECS["the decisions list\nappetite: / decision: / rejected:\none-line entries"]
     DECS -->|plain mode| STORE["plan provenance = STORE\nsketch + list embedded verbatim"]
-    DECS -->|map mode| INDEX["plan provenance = INDEX\nname-wrapped ticket links,\nDecisions-so-far shape"]
-    INDEX --> TICKET["ticket resolution comment\nsingle home of the full grammar"]
+    DECS -->|map mode| INDEX["plan provenance = INDEX\nnamed links + one-line gists\n(Decisions-so-far shape)"]
+    INDEX --> TICKET["resolution comment\nsingle home of the full grammar\n(a decision ticket, or — thread variant —\na comment in the map thread)"]
     DECS -.->|three-criteria bar| ADR["ADR\ndeep record"]
     STORE --> PP["Plan panel\ncontradicts-a-named-decision check"]
     INDEX --> PP
@@ -34,22 +34,24 @@ flowchart LR
 
 This run is map-sourced (Map #192 slate row), so this block is the index;
 every entry links the single home of the full grammar, the resolution
-comment [S3 gate record][s3-gate-record]. The sketch above embeds verbatim
-as a gate artifact in both modes.
+comment [S3 gate record][s3-gate-record] (home list: one appetite line,
+nine decision lines, three rejected lines — R3-A1: entries are pure
+descriptive gists; the line-kind prefixes live only at home). The sketch
+above embeds verbatim as a gate artifact in both modes.
 
-- [appetite: one lifecycle slice (brainstorm→PR), S1-comparable scale, track irreversible; human gate + panel gates per config][s3-gate-record]
-- [gate presentation = exactly two artifacts (sketch + decisions list); R1-G5 prose skeleton dissolved; G1/G2/G3/G4/G7 survive as dialogue moves][s3-gate-record]
+- [one lifecycle slice (brainstorm→PR), S1-comparable scale, track irreversible; human gate + panel gates per config][s3-gate-record]
+- [gate presentation = exactly two artifacts (sketch + decisions list); R1-G5 prose skeleton dissolved; G1-G4, G7 survive as dialogue moves][s3-gate-record]
 - [sketch trigger = new flow or ≥3 interacting components; absence declared at the gate; embeds verbatim in the plan in both modes][s3-gate-record]
-- [grammar = three line kinds (appetite exactly-one-first, decision, rejected); one-line entries; ASCII (-> ADR 00NN) suffix][s3-gate-record]
+- [three line kinds (appetite exactly-one-first, decision, rejected); one-line entries; ASCII (-> ADR 00NN) suffix][s3-gate-record]
 - [rejections always crystallise — a refused alternative is an explicit not-do decision with trade-off rationale][s3-gate-record]
 - [ADR bar = system-reference.md's Governance paragraph, preserved by reference; qualifying decisions take the suffix][s3-gate-record]
 - [plain mode — the plan is the store: sketch + decisions list embedded verbatim][s3-gate-record]
 - [map mode — the sketch still embeds; only the list becomes the index; full grammar once in the resolution comment (thread variant)][s3-gate-record]
 - [assumptions cross in the plan's own Assumptions section, not recap material][s3-gate-record]
 - [enforcement = S1 pattern only — contract tests on rule prose; substance rides the human gate; no parser, no dial, no panel][s3-gate-record]
-- [rejected: verbatim prose recap block — framing is throwaway; supersedes R1-G5's slate wording][s3-gate-record]
-- [rejected: gate-time mechanical grammar parser — the human gate suffices for a framing phase][s3-gate-record]
-- [rejected: discarding rejected alternatives below the ADR bar — owner amendment; rejections are first-class crystallisation][s3-gate-record]
+- [refused alternative — a verbatim prose recap block: framing is throwaway; supersedes R1-G5's slate wording][s3-gate-record]
+- [refused alternative — a gate-time mechanical grammar parser: the human gate suffices for a framing phase][s3-gate-record]
+- [refused alternative — discarding rejected alternatives below the ADR bar: owner amendment; rejections are first-class crystallisation][s3-gate-record]
 
 [s3-gate-record]: https://github.com/threadsafe-systems/pi-sdlc/issues/192#issuecomment-5230679564
 

@@ -118,3 +118,28 @@ resolution comment's canonical line.
 ACCEPTED. In-scope 5 gains two semantic directions (G4 trigger/skip
 declaration; G7 `none identified` and binds-only-when-actually-binding);
 DoD 1 names them.
+
+---
+
+## Round 3 (convergence check over rev 3 at 844e559) — 2 findings, 2 incorporated, 0 dismissed
+
+### R3-A1 (medium, NEW, gemini) — index entries carried line-kind prefixes
+ACCEPTED. `appetite:`/`rejected:` prefixes on index gists re-materialised
+the grammar in the index (one-place-law breach introduced by the R2-D1
+fix itself). Rev 4: entries are pure descriptive gists; the intro line
+carries only home-list counts.
+
+### R3-A2 (high, REOPEN R2-D1, luna) — plan sketch diverged from the canonical comment sketch
+ACCEPTED. The resolution comment was posted with amended (thread-variant)
+sketch nodes, but the plan's embedded copy kept the older nodes — exactly
+the "embeds verbatim" rule the contract prescribes, caught on the
+contract's own dogfood via hash comparison. Rev 4: plan mermaid block
+replaced byte-for-byte; extracted fences now hash identically
+(bab0b82b7323) plan vs live comment.
+
+Orchestrator defect O-1 (not a panel finding): the resolution comment was
+originally posted via `gh api -f body=@file`, which gh treats as a literal
+string — the live comment held only the text "@/tmp/s3-resolution.md".
+Repaired via PATCH --input; round-trip verified (3 996 bytes; sketch + 13
+canonical lines). Recorded in round3.md with the lesson: fetch-back-verify
+posted artifacts before handing their URL to the panel.
