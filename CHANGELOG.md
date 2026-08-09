@@ -1,3 +1,9 @@
+## [3.3.1](https://github.com/threadsafe-systems/pi-sdlc/compare/v3.3.0...v3.3.1) (2026-08-09)
+
+### Bug Fixes
+
+* **panel-agent:** trim the empty extensions line when stamping agents ([#233](https://github.com/threadsafe-systems/pi-sdlc/issues/233)) ([7a6629f](https://github.com/threadsafe-systems/pi-sdlc/commit/7a6629f70193b3a7bcad7c5d183337a551015c62))
+
 ## [3.3.0](https://github.com/threadsafe-systems/pi-sdlc/compare/v3.2.0...v3.3.0) (2026-08-09)
 
 ### Features
