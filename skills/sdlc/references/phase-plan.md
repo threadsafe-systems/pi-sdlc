@@ -34,8 +34,20 @@ phase-specific; array order within a list. A failed or skipped `before` hook
 ## 4. Required activity and artifact/output shape
 
 Produce the Plan doc: **objectives, rationale, scope in/out, definition of done,
-and context for the next agent**. Its home routes to the configured
-`paths.plans`.
+context for the next agent, and the Brainstorm provenance block**. Its home
+routes to the configured `paths.plans`.
+
+**Brainstorm provenance storage.** A Plan entered from a Brainstorm gate opens
+with the provenance block: the sketch and the decisions list, stored per §8's
+mode rule — in plain mode store both verbatim; in map mode store the sketch
+verbatim and index the decisions list (one gist line per ticket, linking to the
+ticket resolution comment where the full list lives in one place), with index
+entries carrying no line-kind prefix and no uniform classification. A Plan
+entered with no upstream gate declares that explicitly ("no upstream gate") in
+the block's place. A plan must not contradict a named decision or resurrect a
+`rejected:` line without a declared deviation in the plan itself. Adjudication
+of whether a plan violates this rule routes by reference to the frozen
+adversary plan prompt's attack surface D — the prompt itself stays untouched.
 
 **Dialogue discipline.** Ask per the shared contract
 (`references/system-reference.md`, "Presenting questions to the human") with

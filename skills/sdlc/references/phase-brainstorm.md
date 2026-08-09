@@ -25,17 +25,35 @@ its own.
 
 Concrete behaviour, not just tone:
 
+The dialogue runs on named moves — greppable, not scripted: **G1 open on
+problem and outcome, naming no mechanism** (the opening asks what is broken
+or wanted, never how to build it); **G2 alternative-or-declare** (for each
+design choice, name a live alternative or declare there is none); **G3
+appetite before converging** (elicit scale, time, and effort before the
+design converges — the same appetite that later opens the decisions list at
+the gate). Moves G4 and G7 are the two labelled bullets below.
+
 - **Raise a contradiction, or say there isn't one.** Before the gate, name at
   least one contradiction, unstated assumption, or gap in the design if one
   exists. If the design is genuinely clean, state that explicitly ("no
   contradiction found") rather than saying nothing — silence is not evidence of
   soundness.
-- **Use the tools available**, not just the conversation, when they would
-  actually sharpen the thinking: web research for prior art or external
-  grounding, and codebase exploration when the idea touches an existing pattern
-  the human might be unaware of or wrongly assuming is novel. This is
+- **Use the tools available** (move G4 — research-or-declare), not just the
+  conversation, when they would actually sharpen the thinking: web research
+  for prior art or external grounding, and codebase exploration when the idea
+  touches an existing pattern the human might be unaware of or wrongly
+  assuming is novel. Research is required only when one of exactly three
+  triggers fires: an **external dependency** the design leans on, a
+  **prior-art claim** it rests on, or a **cross-repo pattern invoked** by the
+  idea; outside those triggers there is no research ceremony. This is
   proportional, not mandatory ceremony — a brief brainstorm does not need a
-  research pass just to be brief.
+  research pass just to be brief. A fired-but-skipped trigger must be
+  declared in the same gate presentation — skipping is visible, never silent.
+- **Ask about constraints once** (move G7 — constraints prompt). One prompt,
+  not a battery: ask the human to name the constraints that shape the design,
+  or declare `none identified` — a complete answer, not a failure state.
+  Named constraints inform the design and become decision lines only when
+  they actually bind; Brainstorm never binds a constraint itself.
 - **Present open questions per the shared contract**
   (`references/system-reference.md`, "Presenting questions to the human") —
   never a wall of unstructured prose. Brainstorm's delta: a recommendation
@@ -100,8 +118,49 @@ the gate: phase-specific first, then `*`. A failed `after` hook **warns**
 ## 8. Completion evidence and next transition
 
 Completion evidence is the human-approved design (plain mode) or a
-decision-ready map destination (map mode). The next transition is **Plan**,
-using the agreed design as its objective.
+decision-ready map destination (map mode). Both land at the gate as **The gate
+presentation** — exactly two artifacts, and nothing else:
+
+1. **The sketch** — a mermaid picture of the design: entities, boundaries,
+   flows, actors. It is required when the design adds a new flow or three or
+   more interacting components; otherwise its absence is declared at the gate,
+   never silent. The sketch is framing, not contractual — it captures how the
+   change is thought about, and it is throw-away once the gate passes.
+2. **The decisions list** — one line per crystallized decision, in exactly
+   three line kinds:
+
+````text
+```mermaid
+flowchart LR
+    A[domain entity] --> B[boundary]
+```
+
+- appetite: <scale/time/effort>
+- decision: <what was ratified> — <one-line why>
+- rejected: <alternative refused> — <trade-off reason>
+````
+
+Rules for the list: exactly one `appetite:` line and it is the first decision
+line — it binds ceremony (scale, time, effort), not shape. Every entry of all
+three kinds is one physical line. `decision:` lines carry the ratified
+decision with a one-line why. `rejected:` lines are unconditional — a refused
+alternative is an explicit decision not to do something, and its trade-off
+reason is always recorded; no ADR-criteria gate applies to crystallizing a
+rejection.
+
+A decision or rejection meeting the Governance bar in
+`references/system-reference.md` additionally earns an ADR as a deep record in
+either mode; qualifying decisions take the suffix — the literal ASCII
+`(-> ADR 00NN)` appended to their line. The bar itself lives in that
+paragraph; this block never restates it.
+
+The gate is amended by talking: the human speaks, the agent updates the list,
+and the amended list lands. No third contractual artifact and no prose recap
+belongs at this gate — the framing dies with the whiteboard.
+
+The next transition is **Plan**, and the Plan carries the provenance: the
+sketch embeds verbatim, and the decisions list crosses as the store (plain
+mode) or the index (map mode) per the Plan phase's storage rule.
 
 ## 9. Advanced-mode pointers — map mode (wayfinder-lite)
 
@@ -160,6 +219,20 @@ patch has graduated. At that point proceed to Plan normally, using the
 destination as its objective. If breadth-first mapping surfaces no fog at all —
 the whole effort fits in one session — skip the map and use plain brainstorm
 dialogue instead.
+
+**Provenance at the gate.** When a map-sourced run reaches the Brainstorm
+gate, the gate presentation crosses into the Plan under a split. **The
+sketch embeds verbatim in the plan in both modes** — it is a gate artifact,
+belonging to no ticket. Only **the decisions list becomes the index**: one
+gist line + named link per ticket, and the full list kept verbatim in
+exactly one home — never duplicated into the plan. The home is the
+**resolution comment** carrying the full three-kind grammar: the decision
+ticket's resolution comment, or — thread variant, only when the decisions
+were ratified as thread comments on the map issue — a comment in the map
+thread; entries sharing that comment share one home. Boundary rule for the
+index lines: no line-kind prefix and no uniform classification of any kind;
+kind names may appear as subject matter of the decision being gisted, and
+entry classification lives only at the home.
 
 Map-mode mechanics (labels, sub-issue/blocking mutations, board discipline) are
 owned once by `assets/tracker-ops.md`.

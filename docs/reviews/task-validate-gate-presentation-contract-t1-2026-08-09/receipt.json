@@ -1,0 +1,12 @@
+{
+	"schemaVersion": 1,
+	"taskId": "t1",
+	"model": "maas-qwen/deepseek-v4-flash-0731",
+	"createdAt": "2026-08-09T12:44:55Z",
+	"manifestPath": "docs/validation/gate-presentation-contract/t1.json",
+	"manifestSha256": "cc7d74115c631872791ac8a58b58845dcf7d82592a9e194c35b874729b5fbb1a",
+	"runnerReportSha256": "50a3c8de60e60c6fd78ae8900e9336ee0655b0060a9f4f4646b7bca22c5c05ff",
+	"generatedAgentSha256": "979025830b6277eb006c893dc0376b81bf65b9a03bb67b39d0c1dee294f9a1f8",
+	"runnerVerdict": "PASS",
+	"validatorVerdict": "PASS"
+}
