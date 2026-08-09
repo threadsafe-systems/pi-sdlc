@@ -2,12 +2,12 @@
 
 - Date: 2026-08-09
 - Track: irreversible
-- Plan revision reviewed: rev 1 at `fa6ef9e`
+- Plan revisions reviewed: rev 1 at `fa6ef9e`; rev 2 at `ed05281`
 - Orchestrator: `openai-codex/gpt-5.6-sol`
-- Logical review wave: 1
+- Logical review waves: 1–2
 - Panel floor: 2 distinct successful models
 - Successful reviewers: `openai-codex/gpt-5.6-luna:xhigh`, `zai/glm-5.2:xhigh`
-- Result: 8 consolidated findings; 8 incorporated, 0 dismissed; no surviving high or medium
+- Result through wave 2: 10 consolidated findings; 10 incorporated, 0 dismissed; no surviving high or medium
 
 ## Dispatch and harvest inventory
 
@@ -17,8 +17,9 @@
 | 1 | `openai-codex/gpt-5.6-luna:xhigh` replacing Gemini | verdict returned | 2 | `panel.dispatched` wave 1 |
 | 1 | `anthropic/claude-fable-5:xhigh` retry | second transient 429 before verdict; retry exhausted | 3 | `panel.dispatched` wave 1 |
 | 1 | `zai/glm-5.2:xhigh` replacing Fable | verdict returned | 4 | `panel.dispatched` wave 1 |
+| 2 | `openai-codex/gpt-5.6-luna:xhigh` + `zai/glm-5.2:xhigh` | both verdicts returned | 5 | `panel.dispatched` wave 2 |
 
-Harvest destinations are `.pi/sdlc/runs/spike-exit-rule/panels/plan_review-round<label>-2026-08-09/`; every label records `wave: 1` in `meta.json`.
+Harvest destinations are `.pi/sdlc/runs/spike-exit-rule/panels/plan_review-round<label>-2026-08-09/`; every `meta.json` records its logical wave. Labels 2–4 differ from wave 1 because replacement dispatches require non-overwriting destinations.
 
 ## Adjudication
 
@@ -36,9 +37,18 @@ Harvest destinations are `.pi/sdlc/runs/spike-exit-rule/panels/plan_review-round
 GLM's separate-file low finding was consolidated into PLAN-R1-01 because it is
 the same contract-ownership defect already raised at high severity by Luna.
 
+### Wave 2 delta adjudication
+
+| id | origin | severity | defect class | Raised by | Disposition | Adjudication |
+|---|---|---|---|---|---|---|
+| PLAN-R2-01 | NEW | high | routing ambiguity | Luna | incorporated | The guide is now ordered and exhaustive: sufficient existing evidence → read; empirically undecidable → judgment; delivery-grade evidence → Plan/front-load; remaining empirical uncertainty → propose spike after checkpoint. Incomplete criteria remain in Brainstorm rather than creating a fifth route. |
+| PLAN-R2-02 | NEW | low | gate overclaim | GLM | incorporated | The Biome command now names only the JavaScript file it actually checks; Markdown coverage is attributed to the focused contract corpus instead of Biome. |
+
+Every round-1 fix was confirmed. No finding was reopened.
+
 ## Stop condition
 
-All high and medium findings were incorporated into Plan rev 2. No finding was
-dismissed, no owner-ratified decision was contradicted, and no high or medium
-survives adjudication. A delta convergence round is required because the fix
-wave materially changes routing predicates and outcome semantics.
+All high and medium findings through wave 2 were incorporated into Plan rev 3.
+No finding was dismissed, no owner-ratified decision was contradicted, and no
+high or medium survives adjudication. A focused delta convergence round is
+required because PLAN-R2-01 changes the core route precedence.

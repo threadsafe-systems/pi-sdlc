@@ -1,9 +1,9 @@
 # Plan: S4 spike exit rule (map #192)
 
-Status: rev 2, incorporating all plan-panel round-1 findings. Run slug
-`spike-exit-rule`, track irreversible. Map #192 slate row S4; carries R1-G6
-with the original throwaway/timebox proposal amended by the owner-ratified
-Brainstorm design.
+Status: rev 3, incorporating all plan-panel round-1 and round-2 findings.
+Run slug `spike-exit-rule`, track irreversible. Map #192 slate row S4; carries
+R1-G6 with the original throwaway/timebox proposal amended by the
+owner-ratified Brainstorm design.
 
 ## Brainstorm provenance
 
@@ -85,14 +85,16 @@ lifecycle phase or bypassing downstream contracts.
    the three line kinds, the amendment loop, and Plan provenance. §8 owns the
    rule because it changes Brainstorm completion/transition; §1's G4 remains a
    dialogue move, not an exit.
-2. The four-way guide applies to each load-bearing uncertainty using explicit
-   predicates: evidence already present in repo/config/docs/web routes to
-   **read**; exploratory activity with declared exit criteria that can reduce
-   uncertainty before delivery specification routes to **spike**; criteria that
-   require detailed requirements, delivery acceptance, or production behaviour
-   route to **Plan and front-load**; questions no empirical evidence can settle
-   route to **human judgment**. This is deterministic prose guidance, not a
-   third gate artifact, parser, or numeric threshold.
+2. The four-way guide applies to each load-bearing uncertainty in this order:
+   first, if existing repo/config/docs/web evidence can settle it, **read** that
+   evidence now; otherwise, if no empirical evidence could settle it, use
+   **human judgment**; otherwise, if answering it requires detailed requirements,
+   delivery acceptance, or production behaviour, **Plan and front-load** it;
+   otherwise propose a **spike**, which starts only after goals and exit criteria
+   are human-approved. Available-but-insufficient evidence never selects read,
+   and a candidate spike with incomplete criteria remains in Brainstorm rather
+   than becoming an ad hoc fifth route. This is ordered, exhaustive prose
+   guidance, not a third gate artifact, parser, or numeric threshold.
 3. The pre-spike human checkpoint: explicit goal or goals, the uncertainty each
    addresses, and exit criteria. No numeric time/cost threshold. Exit criteria
    that need detailed requirements or delivery acceptance criteria trigger the
@@ -160,7 +162,9 @@ lifecycle phase or bypassing downstream contracts.
 5. `node --test test/gate-presentation-contract.test.js` passes offline within a
    1-second external budget.
 6. `npm test` passes within a 30-second external budget.
-7. `npx biome check skills/sdlc/references/phase-brainstorm.md test/gate-presentation-contract.test.js docs/plans/2026-08-09-spike-exit-rule.md` passes within a 5-second external budget.
+7. `npx biome check test/gate-presentation-contract.test.js` passes within a
+   5-second external budget. Biome checks only the JavaScript target; the
+   Markdown contract is governed by items 5 and 9.
 8. `node skills/sdlc/scripts/check-references.mjs` exits 0 within a 5-second
    external budget; no FS11 inventory row is added because this changes an
    existing public reference.
