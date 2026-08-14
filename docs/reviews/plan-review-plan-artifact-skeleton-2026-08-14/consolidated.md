@@ -31,7 +31,21 @@ Tally, round 1: 3 high / 7 medium; **10 incorporated, 0 dismissed**.
 - glm CLEAR A (DoD falsifiability) and CLEAR F (track) accepted; luna independently CLEARed F.
 - glm CLEAR PROPORTIONALITY conflicts with luna PLAN-R1-10; adjudicated **in favour of the finding** — the repository's own precedent budgets every gate check individually, and an unbudgeted check is exactly what the workflow's proportionality law flags.
 
+## Round 2 — delta review of `581c201..47a6832` (rev 2)
+
+- Round 2 commit under review: `47a6832` (rev 2); reviewers: `openai-codex/gpt-5.6-luna:xhigh` (`round2-gpt-5.6-luna.md`), `zai/glm-5.2:xhigh` (`round2-zai-glm-5.2.md`). No infra events.
+- All ten round-1 fixes confirmed by both reviewers (one line each in their outputs).
+- 4 raw findings deduped to 3 (luna's single high and glm's NEW-1 are the same defect, established independently; glm supplied byte-level verification).
+
+| ID | Sev | Source | Finding (gist) | Verified evidence | Disposition |
+| --- | --- | --- | --- | --- | --- |
+| PLAN-R2-01 | high | luna-F1 + glm-NEW-1 | Round-1 golden-regeneration class rests on a false premise: the extraction suite stamps from the consumer fixture config and FS5 resolves consumer-override-first; the fixture ships its own plan prompt, so the package-prompt change cannot move the golden | `ensure-panel-agent.mjs:70-75`; `test/extraction.test.js:21,133-142`; `test/fixtures/consumer/.pi/sdlc/prompts/adversary-plan.prompt.md` exists; S1's merge commit touched no goldens | **incorporated** — the change class is replaced by an explicit goldens-unchanged-by-design declaration; package-prompt content coverage is the contract-test anchors (S1 precedent). Fix-shape adjudication: luna's alternative (a second, package-default golden pipeline) **rejected** as redundant CI machinery over the same content the anchor tests already pin |
+| PLAN-R2-02 | medium | glm-NEW-2 | The shipped gate-presentation spec's C2 shape restates the superseded clause ("…and the prompt stays untouched") with an empty Amendments trail, so post-merge the settled-decision record contradicts the repo silently | `docs/specs/2026-08-09-gate-presentation-contract.md` C2 signature/shape; its Amendments section reads "None at rev 3." | **incorporated** — a one-line C2-supersession Amendments entry in that spec joins the named change classes |
+| PLAN-R2-03 | low | glm-NEW-3 | The replacement GPC2 pin can trip GPC10's ≥80-character verbatim-substring bound over governed docs | `test/gate-presentation-contract.test.js:324-330` | **incorporated** — Scope item 3 bounds the replacement pin under 80 characters |
+
+Tally, round 2: 1 high / 1 medium / 1 low; **3 incorporated, 0 dismissed** (one fix-shape alternative rejected within PLAN-R2-01's adjudication). Round-2 CLEARs: luna B/D/F/PROPORTIONALITY; glm B/C/F/PROPORTIONALITY — no conflicts.
+
 ## Escalations carried to the plan gate
 
-1. **PLAN-R1-03** — supersession of the shipped gate-presentation clause "the prompt itself stays untouched" (`phase-plan.md` §4, pinned by GPC2): the slice narrows it to "changed only under the FS19 deliberate-change precedent, limited to skeleton-awareness anchors". Requires explicit owner ratification.
+1. **PLAN-R1-03 (+ PLAN-R2-02)** — supersession of the shipped gate-presentation clause "the prompt itself stays untouched" (`phase-plan.md` §4, pinned by GPC2; restated by the gate-presentation spec's C2 shape): the slice narrows it to "changed only under the FS19 deliberate-change precedent, limited to skeleton-awareness anchors", updates the GPC2 pin (under GPC10's bound), and records a one-line Amendments entry in the shipped spec. Requires explicit owner ratification.
 2. **PLAN-R1-05** — #146 tracker end-state concretised as **close as superseded** (durable comment records the absorbed sweep rows and the two deliberately-unadopted mandates). Requires explicit owner ratification of the disposition wording.
