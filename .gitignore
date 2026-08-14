@@ -8,6 +8,17 @@ node_modules/
 # review scratch diffs
 *.diff
 
+# Per-PR scratch. The PR phase writes the body here and check-lifecycle reads
+# it, so the file's content belongs to whichever PR is open right now; tracking
+# it puts a stale declaration block (wrong track, wrong slug, a spent BREAKING
+# CHANGE footer) on main between PRs.
+#
+# Anchored to the repository root: a panel snapshots the PR body it reviewed
+# into docs/reviews/<dir>/pr-body.md, and those snapshots are committed
+# evidence. An unanchored pattern matches them too, and `git add <dir>` skips
+# ignored files silently, so the snapshot would vanish without an error.
+/pr-body.md
+
 # FS13 lifecycle-telemetry run store (git-ignored; raw material stays local).
 # **/ anchoring is deliberate: --repo-root can point at a nested fixture dir
 # (e.g. test/fixtures/consumer) that shares this repo's .git, so a run store
