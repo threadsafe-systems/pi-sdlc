@@ -45,7 +45,23 @@ Tally, round 1: 3 high / 7 medium; **10 incorporated, 0 dismissed**.
 
 Tally, round 2: 1 high / 1 medium / 1 low; **3 incorporated, 0 dismissed** (one fix-shape alternative rejected within PLAN-R2-01's adjudication). Round-2 CLEARs: luna B/D/F/PROPORTIONALITY; glm B/C/F/PROPORTIONALITY — no conflicts.
 
+## Round 3 — delta review of `47a6832..e07922d` (rev 3)
+
+- Round 3 commit under review: `e07922d` (rev 3); reviewers: `openai-codex/gpt-5.6-luna:xhigh` (`round3-gpt-5.6-luna.md`), `zai/glm-5.2:xhigh` (`round3-zai-glm-5.2.md`). No infra events.
+- glm: **PASS** with one low finding, after independently re-verifying every round-2 disposition end-to-end (consumer-override stamping walk, spec-doc pin absence, GPC10 window). luna: all thirteen priors confirmed, one medium finding.
+
+| ID | Sev | Source | Finding (gist) | Verified evidence | Disposition |
+| --- | --- | --- | --- | --- | --- |
+| PLAN-R3-01 | medium | luna | The C2 Amendments entry was specified as "one line" without the amendment-record fields the spec-amendment law requires (trigger, class, disposition, author; in-place marker when the full record lives elsewhere), and without saying it replaces `None at rev 3.` | `phase-spec.md:106-112`; `system-reference.md:464-470`; target section `2026-08-09-gate-presentation-contract.md:407-409` | **incorporated** — the entry is now a full one-line amendment record replacing the `None at rev 3.` line, with an in-place marker naming this Plan/spawned spec as the full record. Luna's alternative (backward Spec gate) rejected as disproportionate: the supersession itself is owner-ratified at this plan's gate |
+| PLAN-R3-02 | low | glm | Assumption 4's permitted-change-class enumeration went stale as rounds 1–2 added classes (GPC2 pin, M5 amendment, spec Amendments record) | plan Assumption 4 vs Scope items 3/7, DoD 7 | **incorporated** — enumeration extended to match Scope |
+
+Tally, round 3: 1 medium / 1 low; **2 incorporated, 0 dismissed**. Round-3 CLEARs: luna B/C/D/F/PROPORTIONALITY; glm A/B/D/E/F/PROPORTIONALITY — no conflicts.
+
+**Convergence adjudication (round-3 rule):** severities falling monotonically (3H/7M → 1H/1M/1L → 1M/1L), zero reopens across all rounds, glm PASS — the panel has converged. Adjudicated to proceed to the owner gate at rev 4 rather than dispatch a fourth round over two sentence-level record-keeping fixes; the gate inspects those fixes directly.
+
+Cumulative: **15 findings, 15 incorporated, 0 dismissed** across 3 rounds (2 fix-shape alternatives rejected within adjudications, recorded in PLAN-R2-01 and PLAN-R3-01).
+
 ## Escalations carried to the plan gate
 
-1. **PLAN-R1-03 (+ PLAN-R2-02)** — supersession of the shipped gate-presentation clause "the prompt itself stays untouched" (`phase-plan.md` §4, pinned by GPC2; restated by the gate-presentation spec's C2 shape): the slice narrows it to "changed only under the FS19 deliberate-change precedent, limited to skeleton-awareness anchors", updates the GPC2 pin (under GPC10's bound), and records a one-line Amendments entry in the shipped spec. Requires explicit owner ratification.
+1. **PLAN-R1-03 (+ PLAN-R2-02, PLAN-R3-01)** — supersession of the shipped gate-presentation clause "the prompt itself stays untouched" (`phase-plan.md` §4, pinned by GPC2; restated by the gate-presentation spec's C2 shape): the slice narrows it to "changed only under the FS19 deliberate-change precedent, limited to skeleton-awareness anchors", updates the GPC2 pin (under GPC10's bound), and records a one-line Amendments entry in the shipped spec. Requires explicit owner ratification.
 2. **PLAN-R1-05** — #146 tracker end-state concretised as **close as superseded** (durable comment records the absorbed sweep rows and the two deliberately-unadopted mandates). Requires explicit owner ratification of the disposition wording.
