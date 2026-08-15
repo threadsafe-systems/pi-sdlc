@@ -188,6 +188,10 @@ premise durability, not gaps.
 8. The gate-presentation spec's amendment record (C8 edit 3) is a docs-file
    prose edit pinned by no test; it rides T2 and is verified at the PR gate
    (PAS10), matching spec assumption 6.
+9. (T1, Implement) Local full-corpus runs export the canonical macOS temp
+   path (`TMPDIR=/private/var/...`): the default `/var` symlink alias defeats
+   fixture root-containment checks (29 spurious failures); with the canonical
+   path the corpus is 604/604 green, matching CI and the recorded receipts.
 
 ## Tracker
 
