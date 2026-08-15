@@ -327,6 +327,13 @@ test("M7: the IDV19 reconciliation is minimal", () => {
 	assert.match(idv19, /re-freeze restores the unfiltered loop/, "iteration-disposition.test.js: the exemption comment must state the restoration obligation");
 });
 
+test("M8: the skeleton mandates no tooling", () => {
+	for (const denied of ["Cucumber", "Behat", "Gherkin", "linter", "CI check"]) {
+		assert.ok(!skeleton.includes(denied), `plan-artifact-skeleton.md: denied substring present: ${denied}`);
+	}
+	assert.ok(skeleton.includes("The skeleton is authoring guidance, not mechanical prevention."), "plan-artifact-skeleton.md: the guidance sentence must be present");
+});
+
 test("M5: the inventory row matches all nine fields exactly, no verification key, 82 rows", () => {
 	const inventory = JSON.parse(readFileSync(join(repo, "skills/sdlc/assets/normative-references.json"), "utf8"));
 	assert.equal(inventory.sources.length, 82, "normative-references.json: expected exactly 82 source rows");
