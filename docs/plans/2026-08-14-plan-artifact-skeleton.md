@@ -1,6 +1,6 @@
 # Plan: Plan artifact skeleton (S2)
 
-Status: rev 4 — plan-panel rounds 1–3 incorporated (15/15, 0 dismissed; glm round 3: PASS; adjudication in `docs/reviews/plan-review-plan-artifact-skeleton-2026-08-14/consolidated.md`); owner approval pending. Two escalations for the owner at the gate: the GPC clause supersession (including its spec-doc Amendments record) and the #146 disposition (see Amendments A1–A3).
+Status: rev 4 — plan-panel rounds 1–3 incorporated (15/15, 0 dismissed; glm round 3: PASS; adjudication in `docs/reviews/plan-review-plan-artifact-skeleton-2026-08-14/consolidated.md`); owner-approved 2026-08-14 (human:neil), both gate escalations ratified: the GPC clause supersession (including its spec-doc Amendments record) and the #146 close-as-superseded disposition (see Amendments A1–A3).
 
 Track: irreversible — freezes the plan artifact shape (a public authoring surface adopted repos and later slices bind to)
 

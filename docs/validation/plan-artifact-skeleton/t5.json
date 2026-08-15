@@ -15,7 +15,7 @@
         "npm",
         "test"
       ],
-      "timeoutMs": 300000,
+      "timeoutMs": 30000,
       "scope": [
         "full"
       ],
@@ -30,7 +30,7 @@
         "--test",
         "test/plan-artifact-skeleton.test.js"
       ],
-      "timeoutMs": 120000,
+      "timeoutMs": 1000,
       "scope": [
         "task"
       ],
@@ -45,7 +45,7 @@
         "--test",
         "test/frozen-surfaces.test.js"
       ],
-      "timeoutMs": 120000,
+      "timeoutMs": 1000,
       "scope": [
         "task"
       ],
@@ -59,7 +59,7 @@
         "node",
         "skills/sdlc/scripts/check-references.mjs"
       ],
-      "timeoutMs": 60000,
+      "timeoutMs": 5000,
       "evidence": [
         "inventory inverse-complete (PAS11)"
       ]
@@ -74,7 +74,7 @@
         "--slug",
         "plan-artifact-skeleton"
       ],
-      "timeoutMs": 60000,
+      "timeoutMs": 5000,
       "evidence": [
         "plan, spec, and build documents resolve for this run's declaration (PAS11)"
       ]
@@ -88,7 +88,7 @@
         "test/plan-artifact-skeleton.test.js",
         "skills/sdlc/assets/normative-references.json"
       ],
-      "timeoutMs": 120000,
+      "timeoutMs": 5000,
       "evidence": [
         "touched lintable surfaces are biome-clean (PAS11)"
       ]

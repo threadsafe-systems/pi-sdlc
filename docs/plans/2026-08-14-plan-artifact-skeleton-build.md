@@ -141,6 +141,15 @@ Every task's Definition of Done includes the code-prose pass owned by
   disposition — the standalone frozen-surfaces run added above as PAS9's
   `"task"`-tagged evidence; author — orchestrator. Approval renewed by this
   committed record.
+- **Amendment (class b, 2026-08-15):** trigger — PR panel finding PR-R1-02
+  (manifest `timeoutMs` kill-switches sat far above the governed per-check
+  budgets, so the machinery did not enforce the bound it marked PASS);
+  disposition — every check's `timeoutMs` across t1–t5 set to its committed
+  budget (full corpus 30 s; each single-file test 1 s; reference, lifecycle,
+  and lint checks 5 s each). The five committed receipts attest the
+  pre-amendment runs; their runner reports show measured durations inside
+  these budgets. Author — orchestrator. Approval renewed by this committed
+  record.
 
 ## Scenario → task ownership
 

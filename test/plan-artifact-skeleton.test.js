@@ -226,6 +226,15 @@ test("M3: exactly six attack-surface markers A. through F., in order", () => {
 	assert.deepEqual(letters, ["A", "B", "C", "D", "E", "F"], "adversary-plan.prompt.md: the attack-surface letter set must be exactly A-F in order");
 });
 
+/** The sentence carrying the skeleton citation: from the terminator before the citation to the segment end. */
+function anchorSentence(segment) {
+	const cite = segment.indexOf(SKELETON_PATH);
+	if (cite === -1) return null;
+	const head = segment.slice(0, cite);
+	const start = Math.max(head.lastIndexOf(". "), head.lastIndexOf("? "), head.lastIndexOf("! "));
+	return segment.slice(start === -1 ? 0 : start + 2);
+}
+
 test("M3: exactly one anchor inside each of A-E with the pinned coverage map; F untouched", () => {
 	const segments = surfaceSegments(prompt);
 	for (const [letter, names] of Object.entries(COVERAGE)) {
@@ -233,8 +242,9 @@ test("M3: exactly one anchor inside each of A-E with the pinned coverage map; F 
 		assert.ok(segment, `adversary-plan.prompt.md: attack surface ${letter} not found`);
 		const anchors = segment.split(SKELETON_PATH).length - 1;
 		assert.equal(anchors, 1, `adversary-plan.prompt.md: surface ${letter} must cite the skeleton path exactly once`);
+		const sentence = anchorSentence(segment);
 		for (const name of names) {
-			assert.ok(segment.includes(name), `adversary-plan.prompt.md: surface ${letter} must name ${JSON.stringify(name)}`);
+			assert.ok(sentence.includes(name), `adversary-plan.prompt.md: surface ${letter}'s anchor sentence must name ${JSON.stringify(name)}`);
 		}
 	}
 	assert.ok(!segments.F.includes(SKELETON_PATH), "adversary-plan.prompt.md: surface F carries no anchor");

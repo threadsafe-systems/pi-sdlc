@@ -488,7 +488,7 @@ test("IDV33: retired checks name their present enforcement owners", () => {
 	}
 });
 
-test("IDV19: the frozen list contains every adversary prompt", () => {
+test("IDV19: the frozen list contains every adversary prompt (plan exempt in this unfreeze window)", () => {
 	const path = "test/frozen-surfaces.test.js";
 	const body = readFileSync(join(repo, path), "utf8");
 	const frozen = [...body.matchAll(/^\t"([^"]+)",$/gm)].map((m) => m[1]);

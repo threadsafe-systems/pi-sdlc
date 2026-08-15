@@ -3,49 +3,93 @@
   "taskId": "t2",
   "buildPlan": "docs/plans/2026-08-14-plan-artifact-skeleton-build.md",
   "repoRoot": ".",
-  "ownedScenarios": ["PAS2", "PAS3"],
+  "ownedScenarios": [
+    "PAS2",
+    "PAS3"
+  ],
   "checks": [
     {
       "id": "tests.full",
-      "argv": ["npm", "test"],
-      "timeoutMs": 300000,
-      "scope": ["full"],
-      "evidence": ["whole-corpus regression net is green"]
+      "argv": [
+        "npm",
+        "test"
+      ],
+      "timeoutMs": 30000,
+      "scope": [
+        "full"
+      ],
+      "evidence": [
+        "whole-corpus regression net is green"
+      ]
     },
     {
       "id": "tests.task",
-      "argv": ["node", "--test", "test/plan-artifact-skeleton.test.js"],
-      "timeoutMs": 120000,
-      "scope": ["task"],
-      "evidence": ["M2 (PAS2): rules paragraph adjacency, numbered 1.-5. lines, defect sentence, pointer, following-paragraph order", "M2 clause assertions (PAS3): surviving clause present, superseded clause absent, routing-by-reference intact"]
+      "argv": [
+        "node",
+        "--test",
+        "test/plan-artifact-skeleton.test.js"
+      ],
+      "timeoutMs": 1000,
+      "scope": [
+        "task"
+      ],
+      "evidence": [
+        "M2 (PAS2): rules paragraph adjacency, numbered 1.-5. lines, defect sentence, pointer, following-paragraph order",
+        "M2 clause assertions (PAS3): surviving clause present, superseded clause absent, routing-by-reference intact"
+      ]
     },
     {
       "id": "tests.gpc",
-      "argv": ["node", "--test", "test/gate-presentation-contract.test.js"],
-      "timeoutMs": 120000,
-      "evidence": ["GPC suite green with the 62-character replacement pin under GPC10's 80-character bound (PAS3)"]
+      "argv": [
+        "node",
+        "--test",
+        "test/gate-presentation-contract.test.js"
+      ],
+      "timeoutMs": 1000,
+      "evidence": [
+        "GPC suite green with the 62-character replacement pin under GPC10's 80-character bound (PAS3)"
+      ]
     },
     {
       "id": "static.lint",
-      "argv": ["npx", "biome", "check", "test/plan-artifact-skeleton.test.js", "test/gate-presentation-contract.test.js"],
-      "timeoutMs": 120000,
-      "evidence": ["the task's lintable surfaces are biome-clean (markdown is not a biome target)"]
+      "argv": [
+        "npx",
+        "biome",
+        "check",
+        "test/plan-artifact-skeleton.test.js",
+        "test/gate-presentation-contract.test.js"
+      ],
+      "timeoutMs": 5000,
+      "evidence": [
+        "the task's lintable surfaces are biome-clean (markdown is not a biome target)"
+      ]
     }
   ],
   "categories": {
     "tests": {
       "applicability": "required",
-      "checkIds": ["tests.full", "tests.task", "tests.gpc"]
+      "checkIds": [
+        "tests.full",
+        "tests.task",
+        "tests.gpc"
+      ]
     },
     "static": {
       "applicability": "required",
-      "checkIds": ["static.lint"]
+      "checkIds": [
+        "static.lint"
+      ]
     },
     "scenarios": {
       "applicability": "required",
       "evidence": {
-        "PAS2": ["tests.task"],
-        "PAS3": ["tests.task", "tests.gpc"]
+        "PAS2": [
+          "tests.task"
+        ],
+        "PAS3": [
+          "tests.task",
+          "tests.gpc"
+        ]
       }
     },
     "standards": {

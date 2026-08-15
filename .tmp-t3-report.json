@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "taskId": "t3",
+  "manifest": "/Users/neil/code/pi-sdlc.worktrees/feat-plan-artifact-skeleton/docs/validation/plan-artifact-skeleton/t3.json",
+  "repoRoot": "/Users/neil/code/pi-sdlc.worktrees/feat-plan-artifact-skeleton",
+  "verdict": "ERROR",
+  "exitCode": 2,
+  "errors": [],
+  "manifestErrors": [
+    "/checks/1/evidence/1: evidence labels must be single-line strings (max 160)"
+  ],
+  "commands": [],
+  "categories": [],
+  "scenarios": []
+}

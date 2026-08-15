@@ -1,6 +1,6 @@
 # Specification: Plan artifact skeleton (S2)
 
-Status: rev 3 — spec-panel rounds 1–2 incorporated (SPEC-R1-01..07 + SPEC-R2-01..02, 9 total, all incorporated, 0 dismissed; both reviewers confirmed every prior fix in round 2; adjudication in `docs/reviews/spec-review-plan-artifact-skeleton-2026-08-14/consolidated.md`); owner approval pending
+Status: rev 3 — spec-panel rounds 1–2 incorporated (SPEC-R1-01..07 + SPEC-R2-01..02, 9 total, all incorporated, 0 dismissed; both reviewers confirmed every prior fix in round 2; adjudication in `docs/reviews/spec-review-plan-artifact-skeleton-2026-08-14/consolidated.md`); owner-approved 2026-08-14 (human:neil)
 Track: irreversible (freezes the plan artifact shape — a public authoring surface adopted repos and later slices bind to)
 Run slug: `plan-artifact-skeleton`
 Map: #192 (design-phase craft), slice S2

@@ -14,7 +14,7 @@
         "npm",
         "test"
       ],
-      "timeoutMs": 300000,
+      "timeoutMs": 30000,
       "scope": [
         "full"
       ],
@@ -29,7 +29,7 @@
         "--test",
         "test/plan-artifact-skeleton.test.js"
       ],
-      "timeoutMs": 120000,
+      "timeoutMs": 1000,
       "scope": [
         "task"
       ],
@@ -45,7 +45,7 @@
         "--test",
         "test/iteration-disposition.test.js"
       ],
-      "timeoutMs": 120000,
+      "timeoutMs": 1000,
       "evidence": [
         "the reconciled IDV19 and untouched siblings (incl. IDV33) stay green (PAS8)"
       ]
@@ -60,7 +60,7 @@
         "test/frozen-surfaces.test.js",
         "test/iteration-disposition.test.js"
       ],
-      "timeoutMs": 120000,
+      "timeoutMs": 5000,
       "evidence": [
         "the task's lintable surfaces are biome-clean"
       ]
