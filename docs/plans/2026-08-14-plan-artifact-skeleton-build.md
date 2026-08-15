@@ -129,11 +129,18 @@ Every task's Definition of Done includes the code-prose pass owned by
   check-lifecycle at this run's declaration, biome over touched surfaces.
 - **Scenarios owned:** PAS9, PAS11, PAS12.
 - **Checks:** `node --test test/plan-artifact-skeleton.test.js`
-  (`scope: ["task"]`, offline, <1s); `npm test` (`scope: ["full"]`, offline,
+  (`scope: ["task"]`, offline, <1s); `node --test test/frozen-surfaces.test.js`
+  (`scope: ["task"]`, offline, <1s — the standing ASD19 guard run standalone as
+  PAS9's task-scoped evidence); `npm test` (`scope: ["full"]`, offline,
   30s external timeout); `node skills/sdlc/scripts/check-references.mjs`
   (≤5s); `bash skills/sdlc/scripts/check-lifecycle.sh --track irreversible
   --slug plan-artifact-skeleton` (≤5s); `npx biome check` over touched
   surfaces (≤5s).
+- **Amendment (class b, 2026-08-14):** trigger — the PV1 runner rejected the
+  first T5 manifest (Rule B: PAS9 cited only a `"full"`-tagged tests check);
+  disposition — the standalone frozen-surfaces run added above as PAS9's
+  `"task"`-tagged evidence; author — orchestrator. Approval renewed by this
+  committed record.
 
 ## Scenario → task ownership
 
