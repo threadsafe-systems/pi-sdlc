@@ -406,4 +406,4 @@ ticket artifact.
 
 ## Amendments
 
-None at rev 3.
+- AM1 (2026-08-14): C2's closing clause "the prompt stays untouched" is superseded — trigger: the plan-artifact-skeleton slice adds skeleton-awareness anchors to the plan-review prompt; class: declared supersession of a settled decision, owner-ratified at that slice's Plan gate; disposition: the clause in `phase-plan.md` §4 narrows to "the prompt changes only under the deliberate-change discipline: a recorded unfreeze with a mandatory re-freeze, and only with skeleton-awareness anchors", adjudication still routing by reference to attack surface D; author: orchestrator (`anthropic/claude-fable-5`); full record: `docs/plans/2026-08-14-plan-artifact-skeleton.md` and `docs/specs/2026-08-14-plan-artifact-skeleton.md` (C8).

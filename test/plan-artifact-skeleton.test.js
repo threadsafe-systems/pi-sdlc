@@ -120,6 +120,73 @@ test("M1: each canonical rule sentence sits inside its owning section", () => {
 	for (let i = 0; i < CANONICAL.length; i++) inSectionOnly(CANONICAL[i], owners[i]);
 });
 
+// ---- M2: phase-plan.md §4 binding rules and the surviving clause ---------
+
+const phasePlan = readFileSync(join(repo, "skills/sdlc/references/phase-plan.md"), "utf8");
+
+function section4(source) {
+	const head = source.match(/^## 4\. /m);
+	assert.ok(head, "phase-plan.md: heading '## 4.' not found");
+	const rest = source.slice(source.indexOf("\n", head.index) + 1);
+	const next = rest.match(/^## /m);
+	return next ? rest.slice(0, next.index) : rest;
+}
+
+const s4 = section4(phasePlan);
+const s4flat = s4.replace(/\s+/g, " ");
+
+test("M2: §4's first paragraph still begins 'Produce the Plan doc:'", () => {
+	assert.ok(s4.trimStart().startsWith("Produce the Plan doc:"), "phase-plan.md §4: first paragraph must still begin 'Produce the Plan doc:'");
+});
+
+test("M2: the inserted block sits immediately after §4's first paragraph", () => {
+	// The contiguous inserted region, enforced as blank-line-separated blocks
+	// in order: first paragraph, rules lead-in, the five numbered rule lines,
+	// defect sentence + pointer, Brainstorm provenance storage. Any paragraph
+	// inserted between consecutive pairs fails this.
+	const blocks = s4
+		.split(/\n\s*\n/)
+		.map((b) => b.trim())
+		.filter(Boolean);
+	const firstIdx = blocks.findIndex((b) => b.startsWith("Produce the Plan doc:"));
+	assert.ok(firstIdx !== -1, "phase-plan.md §4: first paragraph block not found");
+	const lead = blocks[firstIdx + 1];
+	assert.ok(lead?.startsWith("Author the Plan against the fixed skeleton"), "phase-plan.md §4: the rules lead-in must be the block immediately after the first paragraph");
+	const list = blocks[firstIdx + 2];
+	assert.equal(list, CANONICAL.map((sentence, i) => `${i + 1}. ${sentence}`).join("\n"), "phase-plan.md §4: the block after the lead-in must be exactly the five numbered rule lines");
+	const closing = blocks[firstIdx + 3];
+	assert.ok(closing?.startsWith("The gate refuses"), "phase-plan.md §4: the defect sentence block must immediately follow the numbered rules");
+	assert.ok(closing.includes("anything missing is a plan defect"), "phase-plan.md §4: literal 'anything missing is a plan defect' missing");
+	assert.ok(closing.includes("references/plan-artifact-skeleton.md"), "phase-plan.md §4: skeleton pointer 'references/plan-artifact-skeleton.md' missing");
+	const provenance = blocks[firstIdx + 4];
+	assert.ok(provenance?.startsWith("**Brainstorm provenance storage.**"), "phase-plan.md §4: Brainstorm provenance storage must immediately follow the inserted block");
+});
+
+test("M2: the numbered rules open their own lines", () => {
+	const lines = s4.split("\n");
+	for (let i = 0; i < CANONICAL.length; i++) {
+		const wanted = `${i + 1}. ${CANONICAL[i]}`;
+		assert.ok(lines.includes(wanted), `phase-plan.md §4: rule ${i + 1} must open its own line verbatim`);
+	}
+});
+
+test("M2: provenance storage, Dialogue discipline, configuration callout follow in order", () => {
+	const anchors = ["**Brainstorm provenance storage.**", "**Dialogue discipline.**", "> **Under your configuration:**"];
+	let cursor = 0;
+	for (const anchor of anchors) {
+		const idx = s4.indexOf(anchor);
+		assert.ok(idx !== -1, `phase-plan.md §4: anchor missing: ${anchor}`);
+		assert.ok(idx > cursor, `phase-plan.md §4: anchor out of order: ${anchor}`);
+		cursor = idx;
+	}
+});
+
+test("M2: the provenance paragraph carries the surviving clause, not the superseded one", () => {
+	assert.match(s4flat, /the prompt changes only under the deliberate-change discipline: a recorded unfreeze with a mandatory re-freeze, and only with skeleton-awareness anchors/, "phase-plan.md §4: surviving-rule clause missing from the provenance paragraph");
+	assert.ok(!s4flat.includes("the prompt itself stays untouched"), "phase-plan.md §4: the superseded clause must be gone");
+	assert.match(s4flat, /routes by reference to the frozen adversary plan prompt's attack surface D/, "phase-plan.md §4: adjudication routing by reference to attack surface D must survive");
+});
+
 test("M5: the inventory row matches all nine fields exactly, no verification key, 82 rows", () => {
 	const inventory = JSON.parse(readFileSync(join(repo, "skills/sdlc/assets/normative-references.json"), "utf8"));
 	assert.equal(inventory.sources.length, 82, "normative-references.json: expected exactly 82 source rows");
