@@ -187,6 +187,103 @@ test("M2: the provenance paragraph carries the surviving clause, not the superse
 	assert.match(s4flat, /routes by reference to the frozen adversary plan prompt's attack surface D/, "phase-plan.md §4: adjudication routing by reference to attack surface D must survive");
 });
 
+// ---- M3/M4: the plan-review prompt's structure and anchors ----------------
+
+const prompt = readFileSync(join(repo, "skills/sdlc/prompts/adversary-plan.prompt.md"), "utf8");
+
+// The per-letter coverage map: each attack surface names exactly these
+// skeleton sections in its anchor sentence.
+const COVERAGE = {
+	A: ["Definition of done", "Carried to"],
+	B: ["Problem statement", "Outcome proof"],
+	C: ["Objectives and scope", "Non-goals", "Context for the next agent"],
+	D: ["Brainstorm provenance", "Alternatives considered"],
+	E: ["Non-functional requirements & repo-doc sweep", "Pre-mortem"],
+};
+
+const SKELETON_PATH = "references/plan-artifact-skeleton.md";
+
+/** The attack-surface segments: letter marker to the next letter or the carry-landing paragraph. */
+function surfaceSegments(source) {
+	const lines = source.split("\n");
+	const segments = {};
+	let current = null;
+	for (const line of lines) {
+		const m = line.match(/^([A-Z])\. /);
+		if (m) {
+			current = m[1];
+			segments[current] = line;
+			continue;
+		}
+		if (current && line.startsWith("**Carry landing")) current = null;
+		else if (current) segments[current] += `\n${line}`;
+	}
+	return segments;
+}
+
+test("M3: exactly six attack-surface markers A. through F., in order", () => {
+	const letters = [...prompt.matchAll(/^([A-Z])\. /gm)].map((m) => m[1]);
+	assert.deepEqual(letters, ["A", "B", "C", "D", "E", "F"], "adversary-plan.prompt.md: the attack-surface letter set must be exactly A-F in order");
+});
+
+test("M3: exactly one anchor inside each of A-E with the pinned coverage map; F untouched", () => {
+	const segments = surfaceSegments(prompt);
+	for (const [letter, names] of Object.entries(COVERAGE)) {
+		const segment = segments[letter];
+		assert.ok(segment, `adversary-plan.prompt.md: attack surface ${letter} not found`);
+		const anchors = segment.split(SKELETON_PATH).length - 1;
+		assert.equal(anchors, 1, `adversary-plan.prompt.md: surface ${letter} must cite the skeleton path exactly once`);
+		for (const name of names) {
+			assert.ok(segment.includes(name), `adversary-plan.prompt.md: surface ${letter} must name ${JSON.stringify(name)}`);
+		}
+	}
+	assert.ok(!segments.F.includes(SKELETON_PATH), "adversary-plan.prompt.md: surface F carries no anchor");
+});
+
+test("M3: the carry-landing decision paragraph is present", () => {
+	assert.ok(prompt.includes("**Carry landing: none applies here, by decision.**"), "adversary-plan.prompt.md: the carry-landing decision paragraph must remain");
+});
+
+// The byte-pinned sections: any edit inside them is a contract break. The
+// expectations are embedded here so a tampered copy cannot pass its own pin.
+const L1_DELTA_ROUNDS = `## Delta rounds
+
+Round 1 reviews the whole plan. **Every round after the first is a delta review.** The caller gives you the prior rounds' findings and their dispositions, and your review is scoped to the delta since the previous round. Tag every finding \`NEW\`, or \`REOPENED(<prior-id>)\` when you re-raise an already-dispositioned finding by its id. A reopen is legal only when you cite evidence that did not exist, or was not available, when that finding was dispositioned; otherwise do not re-raise it. Confirming a prior fix is one line, not a re-litigation.`;
+
+const L2_OUTPUT_FORMAT = `## Output format (STRICT: markdown only, findings only, no preamble, no conclusion)
+
+### <short title>
+
+- severity: high | medium | low
+- confidence: high | medium (drop anything lower; do not speculate)
+- origin: NEW | REOPENED(<prior-id>)
+- location: <plan section or line>
+- defect: <one or two sentences: the concrete problem>
+- evidence: <what you verified: quoted plan text, or file:line in the repo>
+- impact: <why it matters: what freezes wrong, what cannot be verified, what will bite>
+- fix: <one sentence: the minimal plan change>
+
+Rank most-severe first. For each attack surface A to F where you found nothing, emit one line: \`CLEAR: <letter> — <one-line reason>\`. Prefer a few high-confidence, evidence-backed findings over a long speculative list. Every finding must be concrete enough to act on without asking you anything.`;
+
+test("M3: the Delta rounds section is byte-identical to its pinned block", () => {
+	const start = prompt.indexOf("## Delta rounds");
+	const end = prompt.indexOf("## Output format");
+	assert.ok(start !== -1 && end > start, "adversary-plan.prompt.md: Delta rounds and Output format headings must both exist, in order");
+	assert.equal(prompt.slice(start, end).replace(/\n+$/, ""), L1_DELTA_ROUNDS, "adversary-plan.prompt.md: the Delta rounds section must match its pinned block byte-for-byte");
+});
+
+test("M3: the output-format section is byte-identical to its pinned block", () => {
+	const start = prompt.indexOf("## Output format");
+	assert.ok(start !== -1, "adversary-plan.prompt.md: Output format heading must exist");
+	assert.equal(prompt.slice(start).replace(/\n+$/, ""), L2_OUTPUT_FORMAT, "adversary-plan.prompt.md: the output-format section must match its pinned block byte-for-byte");
+});
+
+test("M4: no canonical rule sentence appears in the prompt", () => {
+	for (const sentence of CANONICAL) {
+		assert.ok(!prompt.includes(sentence), `adversary-plan.prompt.md: canonical rule sentence must not be restated: ${sentence.slice(0, 60)}...`);
+	}
+});
+
 // ---- M6/M7: the unfreeze window (deleted by the post-merge re-freeze) -----
 
 // The expected FROZEN membership while the plan prompt is deliberately
