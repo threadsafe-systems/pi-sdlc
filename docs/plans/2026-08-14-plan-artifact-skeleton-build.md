@@ -195,4 +195,6 @@ premise durability, not gaps.
 one epic plus five sub-issues on board 5, per `assets/tracker-ops.md`, serial
 blocked-by chain (each task blocked by its predecessor).
 
-Published 2026-08-14: pending — ids recorded here after publish.
+Published 2026-08-14: epic **#248**; tasks **#249** (T1), **#250** (T2),
+**#251** (T3), **#252** (T4), **#253** (T5); serial blocked-by chain
+250←249, 251←250, 252←251, 253←252 (each task blocked by its predecessor).
