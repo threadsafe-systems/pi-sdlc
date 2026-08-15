@@ -1,0 +1,12 @@
+{
+ "schemaVersion": 1,
+ "taskId": "t2",
+ "model": "anthropic/claude-haiku-4-5",
+ "createdAt": "2026-08-15T08:36:21Z",
+ "manifestPath": "docs/validation/plan-artifact-skeleton/t2.json",
+ "manifestSha256": "8a19ab3f7a9d9777d642556b4179afb7a8e81b7821144e16469a651853fdf6e5",
+ "runnerReportSha256": "5d48e98d91c8d642c5a3645092490c1f92b1f312240dceec488c0622d434b882",
+ "generatedAgentSha256": "979025830b6277eb006c893dc0376b81bf65b9a03bb67b39d0c1dee294f9a1f8",
+ "runnerVerdict": "PASS",
+ "validatorVerdict": "PASS"
+}
