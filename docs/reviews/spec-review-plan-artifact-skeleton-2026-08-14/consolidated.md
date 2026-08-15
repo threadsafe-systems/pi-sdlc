@@ -29,6 +29,23 @@ Tally, round 1: 5 medium / 2 low; **7 incorporated, 0 dismissed**.
 - luna: A (L3 byte-checked), D (canonical sentences match the plan), E, G. glm: D, E (with its full grounding walk), F, PROPORTIONALITY.
 - glm's PROPORTIONALITY CLEAR conflicts with luna's SPEC-R1-04 (inspection budgets): adjudicated **in favour of the finding** — glm's CLEAR covered command-running scenarios, luna's finding targets the inspection scenarios, which indeed carried no bound at rev 1.
 
+## Round 2 — delta review of `2b521ff..9b40119` (rev 2)
+
+- Round 2 commit under review: `9b40119` (rev 2); reviewers: `openai-codex/gpt-5.6-luna:xhigh` (`round2-gpt-5.6-luna.md`), `zai/glm-5.2:xhigh` (`round2-zai-glm-5.2.md`). No infra events.
+- All seven round-1 fixes confirmed by both reviewers; glm re-verified the delta byte-level (L1/L2/L3 re-diffed, GPC2 ordering survival, the 62-char pin's GPC10 safety, denial-set self-collision check — "CI/CD" does not contain "CI check" — IDV19/IDV33 placements, golden's zero REVIEWER_TAG derivation, the `None at rev 3.` target line).
+- 3 raw findings deduped to 2 (both reviewers caught the stale pin count independently).
+
+| ID | Sev | Source | Finding (gist) | Verified evidence | Disposition |
+| --- | --- | --- | --- | --- | --- |
+| SPEC-R2-01 | medium | luna + glm | PAS3 still asserted the revoked 66-character pin count; the re-worded pin measures 62 — an internal contract/scenario contradiction | `wc -c` on the pin literal = 62; 66 was the rev-1 FS19-worded variant's length | **incorporated** — PAS3 now says 62-character |
+| SPEC-R2-02 | medium | luna | The gate-inspections NFR row's stimulus covers spec + PR gates but bound only PAS10 (the PR-diff half), leaving the spec-gate half outside the verification contract | NFR row vs PAS13 (spec gate) / PAS14 (PR gate) | **incorporated** — row re-bound to PAS10, PAS13, PAS14 |
+
+Tally, round 2: 2 medium; **2 incorporated, 0 dismissed**. Round-2 CLEARs: luna A/C/E/G/PROPORTIONALITY; glm A/B/C/E/F/G/PROPORTIONALITY — no conflicts.
+
+**Convergence adjudication:** severities falling (5M/2L → 2M), zero reopens, every prior fix independently confirmed, and both round-2 findings are one-word/one-cell corrections. The panel has converged; adjudicated to proceed to the owner gate at rev 3 rather than dispatch a third round over two count/binding fixes the gate inspects directly.
+
+Cumulative: **9 findings, 9 incorporated, 0 dismissed** across 2 rounds (one fix-shape alternative — a second golden pipeline — was rejected back at the plan panel; none arose here).
+
 ## Escalations
 
-None new this round. The two standing plan-gate ratifications (GPC supersession, #146 close-as-superseded) are already owner-approved; SPEC-R1-02's re-wording stays within the ratified supersession's semantics (recorded above).
+None new. The two standing plan-gate ratifications (GPC supersession, #146 close-as-superseded) are already owner-approved; SPEC-R1-02's re-wording stays within the ratified supersession's semantics (recorded above).

@@ -1,6 +1,6 @@
 # Specification: Plan artifact skeleton (S2)
 
-Status: rev 2 — spec-panel round 1 incorporated (SPEC-R1-01..07, 5 medium / 2 low, all incorporated, 0 dismissed; adjudication in `docs/reviews/spec-review-plan-artifact-skeleton-2026-08-14/consolidated.md`); round 2 + owner approval pending
+Status: rev 3 — spec-panel rounds 1–2 incorporated (SPEC-R1-01..07 + SPEC-R2-01..02, 9 total, all incorporated, 0 dismissed; both reviewers confirmed every prior fix in round 2; adjudication in `docs/reviews/spec-review-plan-artifact-skeleton-2026-08-14/consolidated.md`); owner approval pending
 Track: irreversible (freezes the plan artifact shape — a public authoring surface adopted repos and later slices bind to)
 Run slug: `plan-artifact-skeleton`
 Map: #192 (design-phase craft), slice S2
@@ -233,7 +233,7 @@ skills/sdlc/prompts/validator-task.prompt.md
 | Compatibility | Any frozen surface diffed against the branch base; the PR diff read hunk by hunk | Byte-identical for all 16 remaining frozen entries; the diff contains only the permitted change classes (`templates/sdlc-plan.md`, `test/fixtures/golden/`, `test/fixtures/consumer/`, `package.json`, lockfile all untouched) | PAS9, PAS10 |
 | Maintainability | A reviewer or future slice reads the plan-review prompt | The prompt references the skeleton, never restates the five canonical rule sentences | PAS5 |
 | Portability | A consumer adopts the skeleton in any language/toolchain | No runtime assertion machinery, Gherkin-family tooling, linter/CI-check mandate, or new dependency anywhere in the slice — the skeleton's wording mechanically clean (PAS12), the whole-slice boundary held at the diff (PAS10: `package.json` + lockfile untouched, hunks within permitted classes) | PAS10, PAS12 |
-| Performance efficiency (gate inspections) | The spec/PR gate panels inspect this slice's artifacts | Inspections ride the already-dispatched gate panels — no separate dispatch, run, or machinery; the inspected set is bounded to this slice's permitted-class diff and the named artifacts, and a diff exceeding the permitted classes fails PAS10 rather than expanding the review | PAS10 |
+| Performance efficiency (gate inspections) | The spec/PR gate panels inspect this slice's artifacts | Inspections ride the already-dispatched gate panels — no separate dispatch, run, or machinery; the inspected set is bounded to this slice's permitted-class diff and the named artifacts, and a diff exceeding the permitted classes fails PAS10 rather than expanding the review | PAS10, PAS13, PAS14 |
 | Maintainability (future slices) | S6 reuses the `references/<skeleton>.md` pattern | Future-slice quality — this slice's evidence is that the pattern held for its first reuse (S2 itself) with no spec-only or plan-only leakage in the generic shape, inspected at the spec gate | unbound — accepted at gate — reason: fully verifiable only when S6 lands; S2 is itself the first reuse evidence |
 
 ## Verification scenarios
@@ -255,7 +255,7 @@ Falsify: deleting any rule sentence or the pointer, dropping or reordering the n
 ### PAS3 — the supersession clause swap lands and the GPC suite stays green `(mechanical)`
 
 Given: branch HEAD with C8 edits 1–2 landed.
-When–Then: M2's clause assertions pass (`the prompt itself stays untouched` absent from §4; the surviving-rule clause present) and `node --test test/gate-presentation-contract.test.js` passes — GPC2 matches the 66-character replacement pin, GPC10's 80-character bound holds over the whole test source, and every other GPC pin passes unmodified.
+When–Then: M2's clause assertions pass (`the prompt itself stays untouched` absent from §4; the surviving-rule clause present) and `node --test test/gate-presentation-contract.test.js` passes — GPC2 matches the 62-character replacement pin, GPC10's 80-character bound holds over the whole test source, and every other GPC pin passes unmodified.
 Falsify: a lingering superseded clause, a missing surviving-rule clause, a replacement pin ≥ 80 characters (GPC10 fails mechanically), or any other GPC assertion changing fails this scenario.
 
 ### PAS4 — the prompt's structure is protected, anchors placed inside A–E `(mechanical)`
