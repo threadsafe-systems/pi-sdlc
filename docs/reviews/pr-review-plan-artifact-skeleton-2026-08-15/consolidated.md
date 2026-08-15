@@ -72,7 +72,18 @@ dismissal, and the third is a proven test-strength gap.
 
 ## Round 3 (harvest label 4)
 
-Delta review over `482bd95`..the wave-2 head — the commit carrying this
-round-2 adjudication; the exact sha is in the dispatch task and harvest
-label 4's meta. Full panel again (round 2 carried
-two mediums). The round-3 section is appended when its verdicts land.
+Delta review over `482bd95..f4ababf` (the round-2 fix wave and this record's
+round-2 sections); full panel (sol, luna, deepseek) since round 2 carried two
+mediums. PR-R2-02 and PR-R2-03's round-2 correction confirmed RESOLVED by all
+three; PR-R2-01 confirmed for `.`-terminated drift and re-reopened for the
+residual class. Round-3 findings, deduped 6 raw → 2 (both raised by all
+three reviewers independently):
+
+| id | sev | raised by | finding | disposition |
+| --- | --- | --- | --- | --- |
+| PR-R3-01 | M | all three, REOPENED(PR-R2-01) | The round-2 forward bound matched only `.` — an anchor sentence ending `?` or `!`, or left unterminated, still let coverage names drift into a trailing sentence (each variant proven by mutation) | **Incorporated** — the forward bound now matches `[.?!]` symmetrically with the backward bound, and an unterminated anchor sentence fails outright (`anchorSentence` returns null and M3 asserts termination). Replay battery: all three rounds' six drift mutations caught, the trailing-question control and the unmutated prompt pass |
+| PR-R3-02 | L | all three | The round-3 placeholder section this file carried re-introduced both PR-R2-03 patterns: an out-of-repo range pointer and future-narrating append prose | **Incorporated** — this section now records the completed round with its exact range; the convention henceforth: a round's section is written only once its verdicts are adjudicated, so this file never carries placeholders for unfinished rounds |
+
+Root cause noted for PR-R3-02: the record was written at dispatch time.
+Dispatch-time state belongs to telemetry (`panel.dispatched`) and the harvest
+meta, not this file.
