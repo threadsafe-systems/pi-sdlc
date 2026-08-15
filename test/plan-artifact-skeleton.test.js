@@ -23,18 +23,7 @@ const CANONICAL = [
 	"every pre-mortem row carries trigger, consequence, mitigation, owner, and destination; only small reversible work may instead declare the block's zero state, with a one-line reason",
 ];
 
-const SECTIONS = [
-	"Brainstorm provenance",
-	"Problem statement",
-	"Non-goals",
-	"Alternatives considered",
-	"Objectives and scope",
-	"Outcome proof",
-	"Non-functional requirements & repo-doc sweep",
-	"Pre-mortem",
-	"Definition of done",
-	"Context for the next agent",
-];
+const SECTIONS = ["Brainstorm provenance", "Problem statement", "Non-goals", "Alternatives considered", "Objectives and scope", "Outcome proof", "Non-functional requirements & repo-doc sweep", "Pre-mortem", "Definition of done", "Context for the next agent"];
 
 function splitSections(source) {
 	const headers = [...source.matchAll(/^## (.+)$/gm)];
