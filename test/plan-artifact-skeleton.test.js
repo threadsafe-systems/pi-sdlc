@@ -226,13 +226,16 @@ test("M3: exactly six attack-surface markers A. through F., in order", () => {
 	assert.deepEqual(letters, ["A", "B", "C", "D", "E", "F"], "adversary-plan.prompt.md: the attack-surface letter set must be exactly A-F in order");
 });
 
-/** The sentence carrying the skeleton citation: from the terminator before the citation to the segment end. */
+/** The sentence carrying the skeleton citation: terminator-bounded on both sides. */
 function anchorSentence(segment) {
 	const cite = segment.indexOf(SKELETON_PATH);
 	if (cite === -1) return null;
 	const head = segment.slice(0, cite);
 	const start = Math.max(head.lastIndexOf(". "), head.lastIndexOf("? "), head.lastIndexOf("! "));
-	return segment.slice(start === -1 ? 0 : start + 2);
+	const tail = segment.slice(cite + SKELETON_PATH.length);
+	const close = tail.search(/\.(\s|$)/);
+	const stop = close === -1 ? segment.length : cite + SKELETON_PATH.length + close + 1;
+	return segment.slice(start === -1 ? 0 : start + 2, stop);
 }
 
 test("M3: exactly one anchor inside each of A-E with the pinned coverage map; F untouched", () => {

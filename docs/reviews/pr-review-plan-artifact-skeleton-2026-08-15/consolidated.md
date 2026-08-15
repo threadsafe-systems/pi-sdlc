@@ -49,7 +49,30 @@ traceability, PAS14 obligations) returned CLEAR with executed mechanics
   ratified C6 mandates them. Owner decides; recommended disposition: dismiss
   (reason above). Not absorbed, not silently dismissed.
 
-## Round 2
+## Round 2 (harvest label 3)
 
-Delta review over `2f8be30..d81be3e` with this dispositions table; full panel
-(three reviewers) since wave 1 carried three mediums. Verdicts pending.
+Delta review over `2f8be30..482bd95` (the fix wave `d81be3e` plus the
+review-artifacts commit `482bd95`) with the round-1 dispositions table; full
+panel (sol, luna, deepseek) since wave 1 carried three mediums.
+
+Prior fixes: PR-R1-01, PR-R1-02, and PR-R1-06 confirmed RESOLVED by every
+reviewer; PR-R1-04/05/07 respected without reopen (PR-R1-05's owner verdict
+still pending as E1). Round-2 findings, deduped 5 raw → 3:
+
+| id | sev | raised by | finding | disposition |
+| --- | --- | --- | --- | --- |
+| PR-R2-01 | M | sol REOPENED(PR-R1-03) + deepseek | `anchorSentence` sliced from the pre-citation terminator to the segment end, so a coverage name drifted into a trailing sentence still passed (both reviewers proved it by mutation — a legal reopen: the evidence arises from the round-1 helper itself) | **Incorporated** — the helper now terminates at the first sentence terminator after the citation; both reviewers' forward-drift mutations plus sol's round-1 in-sentence mutation replayed and all are caught, the unmutated prompt passes |
+| PR-R2-02 | M | sol + luna (deepseek L) | `.tmp-t3-report.json` — a stale scratch runner report with an ERROR verdict no committed manifest state produces — was swept into `d81be3e` by a `git add -A`, landing outside PAS10's permitted classes and contradicting the committed t3 PASS receipt | **Incorporated** — `git rm`'d in this wave; fix-wave commits now stage explicit paths, never `-A` |
+| PR-R2-03 | L | sol + deepseek | This record stated round 2's range as `2f8be30..d81be3e` (excluding the commit it ships in) and carried future-narrating "Verdicts pending" prose | **Incorporated** — range corrected above; the pending line replaced by this adjudication |
+
+Round-2 incorporation is 3/3 — flagged per the dismissal-posture rule, with
+the mitigating note that two of the three are mechanical hygiene defects
+(committed scratch file, wrong recorded range) admitting no reasonable
+dismissal, and the third is a proven test-strength gap.
+
+## Round 3 (harvest label 4)
+
+Delta review over `482bd95`..the wave-2 head — the commit carrying this
+round-2 adjudication; the exact sha is in the dispatch task and harvest
+label 4's meta. Full panel again (round 2 carried
+two mediums). The round-3 section is appended when its verdicts land.
