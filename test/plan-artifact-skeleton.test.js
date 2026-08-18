@@ -226,29 +226,25 @@ test("M3: exactly six attack-surface markers A. through F., in order", () => {
 	assert.deepEqual(letters, ["A", "B", "C", "D", "E", "F"], "adversary-plan.prompt.md: the attack-surface letter set must be exactly A-F in order");
 });
 
-/** The sentence carrying the skeleton citation: terminator-bounded on both sides, null when unterminated. */
-function anchorSentence(segment) {
-	const cite = segment.indexOf(SKELETON_PATH);
-	if (cite === -1) return null;
-	const head = segment.slice(0, cite);
-	const start = Math.max(head.lastIndexOf(". "), head.lastIndexOf("? "), head.lastIndexOf("! "));
-	const tail = segment.slice(cite + SKELETON_PATH.length);
-	const close = tail.search(/[.?!](\s|$)/);
-	if (close === -1) return null;
-	return segment.slice(start === -1 ? 0 : start + 2, cite + SKELETON_PATH.length + close + 1);
-}
+// The anchor sentences, byte-pinned like this file's other literal blocks:
+// any edit to an anchor is a deliberate pin update, never silent drift.
+const ANCHORS = {
+	A: "Check the plan's `Definition of done` block and the `Carried to` field of its `Outcome proof` rows against their definitions in `references/plan-artifact-skeleton.md`.",
+	B: "Verify the `Problem statement` and `Outcome proof` blocks against their definitions in `references/plan-artifact-skeleton.md`; flag any empty or evasive cell.",
+	C: "Verify `Objectives and scope` (boundary labels, parked destinations), `Non-goals`, and `Context for the next agent` against their definitions in `references/plan-artifact-skeleton.md`.",
+	D: "Verify the `Brainstorm provenance` and `Alternatives considered` blocks against their definitions in `references/plan-artifact-skeleton.md`.",
+	E: "Verify the `Non-functional requirements & repo-doc sweep` and `Pre-mortem` blocks against their definitions in `references/plan-artifact-skeleton.md`.",
+};
 
-test("M3: exactly one anchor inside each of A-E with the pinned coverage map; F untouched", () => {
+test("M3: each of A-E carries its pinned anchor sentence and the only citation in its segment; F untouched", () => {
 	const segments = surfaceSegments(prompt);
-	for (const [letter, names] of Object.entries(COVERAGE)) {
+	for (const [letter, anchor] of Object.entries(ANCHORS)) {
 		const segment = segments[letter];
 		assert.ok(segment, `adversary-plan.prompt.md: attack surface ${letter} not found`);
-		const anchors = segment.split(SKELETON_PATH).length - 1;
-		assert.equal(anchors, 1, `adversary-plan.prompt.md: surface ${letter} must cite the skeleton path exactly once`);
-		const sentence = anchorSentence(segment);
-		assert.ok(sentence, `adversary-plan.prompt.md: surface ${letter}'s anchor sentence must end with a sentence terminator`);
-		for (const name of names) {
-			assert.ok(sentence.includes(name), `adversary-plan.prompt.md: surface ${letter}'s anchor sentence must name ${JSON.stringify(name)}`);
+		assert.ok(segment.includes(anchor), `adversary-plan.prompt.md: surface ${letter} must carry its pinned anchor sentence verbatim`);
+		assert.equal(segment.split(SKELETON_PATH).length - 1, 1, `adversary-plan.prompt.md: surface ${letter} must cite the skeleton path exactly once (the pinned sentence's own citation)`);
+		for (const name of COVERAGE[letter]) {
+			assert.ok(anchor.includes(name), `pinned anchor ${letter} must name ${JSON.stringify(name)} (the pin and the coverage map moved apart)`);
 		}
 	}
 	assert.ok(!segments.F.includes(SKELETON_PATH), "adversary-plan.prompt.md: surface F carries no anchor");

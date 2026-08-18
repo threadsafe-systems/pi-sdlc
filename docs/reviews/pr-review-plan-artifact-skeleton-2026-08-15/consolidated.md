@@ -31,7 +31,7 @@ Resolved panel (floor 3, author excluded): `openai-codex/gpt-5.6-sol:xhigh`,
 | PR-R1-02 | M | sol | Manifest `timeoutMs` kill-switches (300 s / 120 s / 60 s) sat far above the governed budgets (30 s / 1 s / 5 s), so PAS11's bound was not enforced by the machinery that marks it PASS | **Incorporated** — every check across t1–t5 tightened to its committed budget; class-b build amendment recorded; the five receipts attest the pre-amendment runs and their runner reports show measured durations inside budget; runner re-run PASS under the tightened budgets (corpus 3.5 s, single files ≤ 77 ms, checks ≤ 228 ms) |
 | PR-R1-03 | M | sol | M3 searched the whole attack-surface segment for coverage names, so anchor-sentence drift passed (sol verified by mutation) | **Incorporated** — M3 now scopes name assertions to the anchor sentence (the sentence carrying the skeleton citation); sol's exact mutation replayed post-fix and is caught |
 | PR-R1-04 | L | sol | `validator.md` in each receipt bundle names the validator's scratch report path, not the committed `runner-report.json` | **Recorded, no fix** — validator.md files are verbatim copies of validator output; rewriting them would falsify the record. Convention, stated here durably: at bundle assembly the scratch report is relocated to `runner-report.json` adjacent to `validator.md` in the same bundle |
-| PR-R1-05 | L | sol | The IDV19 exemption comment and the M6/M7 section marker narrate lifecycle provenance (AM ids, "on this branch", future deletion) rather than a current invariant | **Escalated to owner** — contradicts ratified spec C6, which mandates exactly that comment, its AM1/AM3 citation, and its placement (M7 pins it mechanically). Recommendation: dismiss — the citation is the spec's chosen discoverability mechanism for the unfreeze window, temporariness *is* the code's current invariant, and the re-freeze deletes both comments |
+| PR-R1-05 | L | sol | The IDV19 exemption comment and the M6/M7 section marker narrate lifecycle provenance (AM ids, "on this branch", future deletion) rather than a current invariant | **Dismissed — human-ratified 2026-08-15 (human:neil)**, binding forward: ratified spec C6 mandates exactly that comment, its AM1/AM3 citation, and its placement (M7 pins it mechanically); the citation is the spec's chosen discoverability mechanism for the unfreeze window, temporariness is the code's current invariant, and the re-freeze deletes both comments |
 | PR-R1-06 | L | luna | IDV19's test name claimed "contains every adversary prompt" while the body exempts `plan` | **Incorporated** — name window-qualified ("plan exempt in this unfreeze window"); the original name's restoration folded into the PR body's re-freeze component 2; M7 unaffected (anchors on the `test("IDV19:` prefix) |
 | PR-R1-07 | L | luna | `frozen-surfaces.test.js` header prose still says the suite protects plan/spec/task-validator prompts | **Dismissed** — a header edit would add a hunk outside PAS10's permitted change class for that file (the single FROZEN-entry removal) to fix a transient prose nit; the array itself is the authoritative membership statement, the window is documented at the governing sites (IDV19's exemption comment, M6/M7, spec AM1/AM3), and the re-freeze restores full coverage |
 
@@ -45,9 +45,9 @@ traceability, PAS14 obligations) returned CLEAR with executed mechanics
 
 ## Escalations for the owner
 
-- **E1 (PR-R1-05):** panel asks to strip the AM1/AM3 provenance comments;
-  ratified C6 mandates them. Owner decides; recommended disposition: dismiss
-  (reason above). Not absorbed, not silently dismissed.
+- **E1 (PR-R1-05):** resolved — dismissed, human-ratified 2026-08-15
+  (human:neil); the ratified dismissal binds forward per the adjudication
+  contract.
 
 ## Round 2 (harvest label 3)
 
@@ -93,8 +93,8 @@ Round-4 findings, deduped 4 raw → 3:
 
 | id | sev | raised by | finding | disposition |
 | --- | --- | --- | --- | --- |
-| PR-R4-01 | M | all three, REOPENED(PR-R3-01) | An anchor sentence stripped of its terminator while a later terminated sentence follows folds that later text into the extracted slice, so drifted names still pass (mutation-proven at `0092099`) | **Proposed: resolved by restructure** — owner adjudication under the round cap; see the diagnosis below |
-| PR-R4-02 | M | deepseek | The backward bound matches only space-suffixed terminators (`". "`), so a `.\n` line-wrap boundary hides backward drift (mutation-proven) | **Proposed: resolved by restructure** — same adjudication |
+| PR-R4-01 | M | all three, REOPENED(PR-R3-01) | An anchor sentence stripped of its terminator while a later terminated sentence follows folds that later text into the extracted slice, so drifted names still pass (mutation-proven at `0092099`) | **Resolved by restructure** — human-ratified 2026-08-15 (human:neil, cap option b); the parser is deleted, so the defect class has no code to live in. Verification appendix below |
+| PR-R4-02 | M | deepseek | The backward bound matches only space-suffixed terminators (`". "`), so a `.\n` line-wrap boundary hides backward drift (mutation-proven) | **Resolved by restructure** — same ratification |
 | PR-R4-03 | L | luna | The round-3 root-cause paragraph narrated dispatch-time process in the durable record | **Incorporated** — paragraph removed in this wave |
 
 ## Cap diagnosis (round cap reached; no round 5 dispatched)
@@ -125,6 +125,19 @@ raised in rounds 1–4, is a byte-level pin break. The trade-off is the
 standard one for this repo's pins: a deliberate anchor change must update
 the pinned literal, which is exactly the attention the deliberate-change
 discipline wants.
+
+**Restructure verification (ratified plan, executed).** `anchorSentence`
+is deleted; the five anchor sentences are byte-pinned constants and M3
+asserts each appears verbatim in its surface's segment, that the skeleton
+path occurs exactly once per segment, and that each pin names its coverage
+sections. Deterministic battery at the restructure commit: all seven drift
+mutations raised across rounds 1–4 (in-sentence wording, `.`/`?`/`!`
+forward drift, unterminated same-sentence, unterminated trailing-paragraph
+fold, `.\n` backward line-wrap) are caught; a benign trailing sentence
+passes; a smuggled second citation is caught; the unmutated prompt passes
+29/29 with the full corpus green. A single-reviewer sub-floor confirmation
+dispatch (exempt from the round cap per the floor rule) verifies the
+restructure delta.
 
 **Artifact-inventory self-audit** (round ↔ record ↔ events ↔ harvest):
 round 1 ↔ §Round 1 ↔ `panel.dispatched` ×2 (original + recovery)/
