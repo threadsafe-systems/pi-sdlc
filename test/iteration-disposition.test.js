@@ -488,11 +488,14 @@ test("IDV33: retired checks name their present enforcement owners", () => {
 	}
 });
 
-test("IDV19: the frozen list contains every adversary prompt", () => {
+test("IDV19: the frozen list contains every adversary prompt (plan exempt in this unfreeze window)", () => {
 	const path = "test/frozen-surfaces.test.js";
 	const body = readFileSync(join(repo, path), "utf8");
 	const frozen = [...body.matchAll(/^\t"([^"]+)",$/gm)].map((m) => m[1]);
-	for (const slug of ADVERSARY_PROMPTS) {
+	// Deliberate unfreeze window (spec AM1/AM3, docs/specs/2026-08-14-plan-artifact-skeleton.md):
+	// the plan prompt is mutable on this branch; the mandatory post-merge
+	// re-freeze restores the unfiltered loop and deletes this filter.
+	for (const slug of ADVERSARY_PROMPTS.filter((s) => s !== "plan")) {
 		assert.ok(frozen.includes(`skills/sdlc/prompts/adversary-${slug}.prompt.md`), `adversary-${slug}.prompt.md must stay frozen`);
 	}
 	assert.ok(frozen.includes("skills/sdlc/prompts/validator-task.prompt.md"), "validator-task.prompt.md must stay frozen");

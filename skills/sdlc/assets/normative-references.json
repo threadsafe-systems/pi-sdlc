@@ -348,6 +348,17 @@
       "class": "package-public"
     },
     {
+      "id": "reference.plan-artifact-skeleton",
+      "source": "skills/sdlc/references/plan-artifact-skeleton.md",
+      "assertion": "# Plan artifact skeleton",
+      "targetKind": "file",
+      "ownership": "package",
+      "required": true,
+      "resolution": "package",
+      "target": "skills/sdlc/references/plan-artifact-skeleton.md",
+      "class": "package-public"
+    },
+    {
       "id": "reference.spec-artifact-skeleton",
       "source": "skills/sdlc/references/spec-artifact-skeleton.md",
       "assertion": "# Spec artifact skeleton",

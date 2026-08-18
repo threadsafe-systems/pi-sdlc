@@ -37,6 +37,18 @@ Produce the Plan doc: **objectives, rationale, scope in/out, definition of done,
 context for the next agent, and the Brainstorm provenance block**. Its home
 routes to the configured `paths.plans`.
 
+Author the Plan against the fixed skeleton: fill in every block, delete none
+of the markers. The binding rules:
+
+1. the problem statement names an actor, observable baseline evidence, and a consequence, and contains no implementation prescription
+2. every in-scope item carries exactly one boundary label (`objective` | `constraint` | `solution decision`) and every parked item names its destination
+3. every objective has an outcome-proof row — a metric with baseline, target/window, and an evidence owner, or a cited proxy/no-measurement rationale — and the row names its Spec or retro landing site
+4. every NFR/repo-doc sweep row carries applicability with its reason, target, binding phase, and verification, or `n/a` with a technical reason
+5. every pre-mortem row carries trigger, consequence, mitigation, owner, and destination; only small reversible work may instead declare the block's zero state, with a one-line reason
+
+The gate refuses a Plan with gaps — anything missing is a plan defect. The
+skeleton `references/plan-artifact-skeleton.md` pins the complete shape.
+
 **Brainstorm provenance storage.** A Plan entered from a Brainstorm gate opens
 with the provenance block: the sketch and the decisions list, stored per §8's
 mode rule — in plain mode store both verbatim; in map mode store the sketch
@@ -47,7 +59,9 @@ entered with no upstream gate declares that explicitly ("no upstream gate") in
 the block's place. A plan must not contradict a named decision or resurrect a
 `rejected:` line without a declared deviation in the plan itself. Adjudication
 of whether a plan violates this rule routes by reference to the frozen
-adversary plan prompt's attack surface D — the prompt itself stays untouched.
+adversary plan prompt's attack surface D — the prompt changes only under the
+deliberate-change discipline: a recorded unfreeze with a mandatory re-freeze,
+and only with skeleton-awareness anchors.
 
 **Dialogue discipline.** Ask per the shared contract
 (`references/system-reference.md`, "Presenting questions to the human") with

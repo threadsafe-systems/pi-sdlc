@@ -306,7 +306,7 @@ test("GPC2 both storage branches and the standalone branch are named", () => {
 test("GPC2 no-contradiction clause with declared deviation, enforcement by reference", () => {
 	assert.match(planSec4f, /must not contradict a named decision or resurrect a `rejected:` line without a declared deviation/);
 	assert.match(planSec4f, /routes by reference to the frozen adversary plan prompt's attack surface D/);
-	assert.match(planSec4f, /the prompt itself stays untouched/);
+	assert.match(planSec4f, /the prompt changes only under the deliberate-change discipline/);
 });
 
 // ---- GPC10: C8 cross-cutting bounds ----------------------------------------

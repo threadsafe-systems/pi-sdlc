@@ -96,7 +96,7 @@ test("M1: the four canonical rule sentences sit in their owning sections", () =>
 
 test("M5: inventory row matches C4's nine fields exactly", () => {
 	const inventory = JSON.parse(readFileSync(join(repo, "skills/sdlc/assets/normative-references.json"), "utf8"));
-	assert.equal(inventory.sources.length, 81, "normative-references.json: expected exactly 81 source rows");
+	assert.equal(inventory.sources.length, 82, "normative-references.json: expected exactly 82 source rows");
 	const row = inventory.sources.find((r) => r.id === "reference.spec-artifact-skeleton");
 	assert.ok(row, "normative-references.json: row reference.spec-artifact-skeleton missing");
 	assert.deepEqual(row, {
