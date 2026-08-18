@@ -1,3 +1,9 @@
+## [3.6.0](https://github.com/threadsafe-systems/pi-sdlc/compare/v3.5.0...v3.6.0) (2026-08-18)
+
+### Features
+
+* **skill:** plan artifact skeleton (S2, map [#192](https://github.com/threadsafe-systems/pi-sdlc/issues/192)) ([#261](https://github.com/threadsafe-systems/pi-sdlc/issues/261)) ([b3a6a91](https://github.com/threadsafe-systems/pi-sdlc/commit/b3a6a91d7e2ae1cec5f5e9cf18adca82f430815b)), closes [#248](https://github.com/threadsafe-systems/pi-sdlc/issues/248) [249-#253](https://github.com/threadsafe-systems/249-/issues/253) [#249](https://github.com/threadsafe-systems/pi-sdlc/issues/249)
+
 ## [3.5.0](https://github.com/threadsafe-systems/pi-sdlc/compare/v3.4.0...v3.5.0) (2026-08-09)
 
 ### Features
