@@ -67,6 +67,11 @@ installed skill path:
 node <skill-dir>/scripts/check-lifecycle.mjs --body pr-body.md --repo-root .
 ```
 
+Run the repository's own lint/format gate beside it before opening:
+programmatically (re)generated files must satisfy the repo formatter, not
+merely semantic checks, or CI diverges from a locally green tree at exactly
+the files an orchestrator regenerates.
+
 `track: none` is an exemption declaration, not a third lifecycle track; it
 requires a reason and its honesty remains PR-panel prose law. CI enforcement is
 conditional on the repository configuring the shipped workflow or snippet.
@@ -196,7 +201,11 @@ hand-copy a prompt per model.
    **logical wave number** regardless (a replacement's `panel.dispatched`
    carries its original wave's round; see `references/system-reference.md`,
    "Lifecycle telemetry"); only the harvest label advances, and the
-   label↔wave mapping is recorded in the wave's `consolidated.md`.
+   label↔wave mapping is recorded in the wave's `consolidated.md`. The same
+   event map carries the revision signals: emit `artifact.revised` when a
+   design-artifact amendment wave commits, and `pr.fix_wave` when a PR
+   fix-wave commit lands — these are the rework measures the retro distills,
+   and nothing else records them.
 
 3. **Consolidate**: collapse duplicates into one issue, keep cross-model agreement
    as signal, preserve genuine disagreement. Consolidation also **mints each

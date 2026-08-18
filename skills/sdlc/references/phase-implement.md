@@ -139,7 +139,10 @@ Under `subagent` or `self`, every task carries a committed **PV1 validation mani
 task. It names, as exact argv arrays, the task's checks across five categories —
 `tests`, `static`, `scenarios`, `standards`, `bannedPatterns` — each `required`
 or `n/a` with a Build-approved reason, plus the mapping from each owned
-Specification scenario to the required checks that evidence it.
+Specification scenario to the required checks that evidence it. Evidence
+labels are single-line strings of at most 160 characters; the schema enforces
+the cap at runner time, so a longer label surfaces as a dispatch-time `ERROR`,
+not a commit-time failure.
 
 Each check may carry an optional **`scope`** array (`("full" | "task")[]`,
 non-empty, unique) declaring its role, enforced by two `inspectManifest`
@@ -168,7 +171,9 @@ contract's 2026-07-24 amendment (`docs/specs/2026-07-12-sdlc-portable-validator.
 The **deterministic runner** (`scripts/validate-task.sh` → `validate-task.mjs`,
 surface PV2) — not the model — validates the manifest, executes only its declared
 argv with no shell, evaluates categories and scenarios, bounds and redacts command
-evidence, and returns `PASS` (exit 0), `FAIL` (exit 1), or `ERROR` (exit 2).
+evidence, writes its report only inside the repository root (an outside path,
+`/tmp` included, is refused as `ERROR`), and returns `PASS` (exit 0), `FAIL`
+(exit 1), or `ERROR` (exit 2).
 Build, not the validator, owns which commands run and which categories are `n/a`;
 the validator cannot invent a command, weaken a check, or decide applicability.
 Under `subagent`, the validator subagent (`prompts/validator-task.prompt.md`) runs
@@ -250,4 +255,3 @@ surface directly, give it the same shape every time:
   needing human attention. A second consecutive infra failure on the same
   dispatch, or any model-authored verdict, surfaces to the human as normal —
   never silently retried away.
-
