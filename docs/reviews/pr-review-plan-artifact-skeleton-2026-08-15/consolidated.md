@@ -136,8 +136,11 @@ forward drift, unterminated same-sentence, unterminated trailing-paragraph
 fold, `.\n` backward line-wrap) are caught; a benign trailing sentence
 passes; a smuggled second citation is caught; the unmutated prompt passes
 29/29 with the full corpus green. A single-reviewer sub-floor confirmation
-dispatch (exempt from the round cap per the floor rule) verifies the
-restructure delta.
+dispatch (exempt from the round cap per the floor rule) verified the
+restructure delta: CONFIRMED — pins byte-identical to the shipped prompt,
+no parser logic remains, all mutation classes fail, no new hole found
+(`round-confirm-deepseek-v4-pro.md`). The panel carries no surviving high
+or medium finding.
 
 **Artifact-inventory self-audit** (round ↔ record ↔ events ↔ harvest):
 round 1 ↔ §Round 1 ↔ `panel.dispatched` ×2 (original + recovery)/
