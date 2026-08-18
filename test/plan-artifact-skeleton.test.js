@@ -294,49 +294,6 @@ test("M4: no canonical rule sentence appears in the prompt", () => {
 	}
 });
 
-// ---- M6/M7: the unfreeze window (deleted by the post-merge re-freeze) -----
-
-// The expected FROZEN membership while the plan prompt is deliberately
-// unfrozen: the standing list minus that one entry, order preserved.
-const FROZEN_WINDOW = [
-	"skills/sdlc/scripts/sdlc-status.mjs",
-	"skills/sdlc/scripts/sdlc-status.sh",
-	"skills/sdlc/scripts/check-lifecycle.mjs",
-	"skills/sdlc/scripts/check-lifecycle.sh",
-	"skills/sdlc/scripts/lib.mjs",
-	"skills/sdlc/schema/sdlc.config.schema.json",
-	"skills/sdlc/schema/sdlc.config.example.json",
-	"skills/sdlc/schema/task-validation-manifest.schema.json",
-	"skills/sdlc/scripts/resolve-panel.mjs",
-	"skills/sdlc/scripts/resolve-panel.sh",
-	"skills/sdlc/scripts/validate-task.mjs",
-	"skills/sdlc/scripts/validate-task.sh",
-	"skills/sdlc/scripts/verify-task-receipt.mjs",
-	"skills/sdlc/prompts/adversary-spec.prompt.md",
-	"skills/sdlc/prompts/adversary-review.prompt.md",
-	"skills/sdlc/prompts/validator-task.prompt.md",
-];
-
-test("M6: the FROZEN array is exactly the 16-entry window list, in order", () => {
-	const body = readFileSync(join(repo, "test/frozen-surfaces.test.js"), "utf8");
-	const frozen = [...body.matchAll(/^\t"([^"]+)",$/gm)].map((m) => m[1]);
-	assert.deepEqual(frozen, FROZEN_WINDOW, "frozen-surfaces.test.js: FROZEN must equal the pinned window list exactly (16 entries, order preserved, plan prompt absent)");
-});
-
-test("M7: the IDV19 reconciliation is minimal", () => {
-	const body = readFileSync(join(repo, "test/iteration-disposition.test.js"), "utf8");
-	assert.ok(body.includes('const ADVERSARY_PROMPTS = ["plan", "spec", "review"];'), "iteration-disposition.test.js: the ADVERSARY_PROMPTS constant must stay the full literal");
-	const filtered = [...body.matchAll(/ADVERSARY_PROMPTS\.filter\(/g)];
-	assert.equal(filtered.length, 1, "iteration-disposition.test.js: exactly one filtered use of ADVERSARY_PROMPTS (the IDV19 loop)");
-	assert.ok(body.includes('ADVERSARY_PROMPTS.filter((s) => s !== "plan")'), "iteration-disposition.test.js: the IDV19 filter must exempt exactly the plan slug");
-	const unfiltered = [...body.matchAll(/for \(const slug of ADVERSARY_PROMPTS\) \{/g)];
-	assert.equal(unfiltered.length, 2, "iteration-disposition.test.js: the two sibling loops must iterate ADVERSARY_PROMPTS unfiltered");
-	assert.ok(body.includes('frozen.includes("skills/sdlc/prompts/validator-task.prompt.md")'), "iteration-disposition.test.js: IDV19's validator-task assertion must remain");
-	const idv19 = body.slice(body.indexOf('test("IDV19:'));
-	assert.match(idv19, /spec AM1\/AM3/, "iteration-disposition.test.js: the exemption comment must cite the unfreeze and re-freeze record");
-	assert.match(idv19, /re-freeze restores the unfiltered loop/, "iteration-disposition.test.js: the exemption comment must state the restoration obligation");
-});
-
 test("M8: the skeleton mandates no tooling", () => {
 	for (const denied of ["Cucumber", "Behat", "Gherkin", "linter", "CI check"]) {
 		assert.ok(!skeleton.includes(denied), `plan-artifact-skeleton.md: denied substring present: ${denied}`);
