@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>sdlc-retro: S2 plan artifact skeleton</title>
+<style>
+body { font-family: system-ui, sans-serif; margin: 0; padding: 2rem; background: #0b0e14; color: #d6dbe5; line-height: 1.5; }
+h1 { margin-top: 0; }
+section { margin-bottom: 2.5rem; padding: 1.25rem; background: #131722; border-radius: 8px; }
+.strip { display: flex; flex-wrap: wrap; gap: 1.5rem; }
+.metric { display: flex; flex-direction: column; gap: 0.25rem; }
+.metric .label { font-size: 0.8rem; color: #8892a6; text-transform: uppercase; letter-spacing: 0.05em; }
+.metric .value { font-size: 1.5rem; font-weight: 600; }
+.phase-row, .rollup-row, .panel-model-row, .panel-finding-row, .steering-mark, .rework-row, .coverage-row { display: flex; gap: 1rem; padding: 0.4rem 0; border-bottom: 1px solid #232838; }
+[data-soft="true"] { background: rgba(255, 196, 0, 0.08); }
+.soft-attribution { font-size: 0.75rem; color: #ffc400; }
+.coverage-notice { color: #8892a6; font-style: italic; }
+.panel-round { margin-bottom: 1.5rem; }
+</style>
+</head>
+<body>
+<h1>S2 plan artifact skeleton <small>(irreversible)</small></h1>
+<nav><a href="#exec-strip">Summary</a> · <a href="#phase-swimlane">Phases</a> · <a href="#cost-breakdown">Cost</a> · <a href="#panel-deepdive">Panels</a> · <a href="#steering-map">Steering</a> · <a href="#rework-panel">Rework</a> · <a href="#coverage">Coverage</a></nav>
+<section id="exec-strip">
+<h2>Executive strip</h2>
+<div class="strip">
+<div class="metric" data-metric="tokens"><span class="label">Tokens</span><span class="value">91935432</span></div>
+<div class="metric" data-metric="cost"><span class="label">Cost</span><span class="value">$208.1304</span></div>
+<div class="metric" data-metric="wallMs"><span class="label">Wall time</span><span class="value">85.11h</span></div>
+<div class="metric" data-metric="agentMs"><span class="label">Agent time</span><span class="value">1.56h</span></div>
+<div class="metric" data-metric="humanWaitMs"><span class="label">Human wait (proxy)</span><span class="value">1.23h</span></div>
+</div>
+</section>
+<section id="phase-swimlane">
+<h2>Phase swimlane</h2>
+<div class="phase-row" data-phase="plan"><span class="phase-name">plan</span><span class="phase-start">2026-08-14T20:54:45.270Z</span><span class="phase-end">2026-08-15T06:22:11.004Z</span><span class="phase-derived">(derived end)</span></div>
+<div class="phase-row" data-phase="spec"><span class="phase-name">spec</span><span class="phase-start">2026-08-15T06:22:11.004Z</span><span class="phase-end">2026-08-15T08:18:09.796Z</span><span class="phase-derived">(derived end)</span></div>
+<div class="phase-row" data-phase="build"><span class="phase-name">build</span><span class="phase-start">2026-08-15T08:18:09.796Z</span><span class="phase-end">2026-08-15T08:22:57.295Z</span></div>
+<div class="phase-row" data-phase="implement"><span class="phase-name">implement</span><span class="phase-start">2026-08-15T08:22:57.330Z</span><span class="phase-end">2026-08-15T11:19:07.800Z</span></div>
+<div class="phase-row" data-phase="pr"><span class="phase-name">pr</span><span class="phase-start">2026-08-15T11:19:07.837Z</span><span class="phase-end">2026-08-18T10:01:17.103Z</span></div>
+</section>
+<section id="cost-breakdown">
+<h2>Cost breakdown</h2>
+<h3>By model</h3>
+<div class="rollup-row" data-model="claude-fable-5"><span class="rollup-key">claude-fable-5</span><span class="rollup-tokens">91935432</span><span class="rollup-cost">$208.1304</span></div>
+<h3>By phase</h3>
+<div class="rollup-row" data-phase="plan"><span class="rollup-key">plan</span><span class="rollup-tokens">10144544</span><span class="rollup-cost">$30.5833</span></div>
+<div class="rollup-row" data-phase="spec"><span class="rollup-key">spec</span><span class="rollup-tokens">10503961</span><span class="rollup-cost">$29.6522</span></div>
+<div class="rollup-row" data-phase="build"><span class="rollup-key">build</span><span class="rollup-tokens">3335357</span><span class="rollup-cost">$4.5414</span></div>
+<div class="rollup-row" data-phase="implement"><span class="rollup-key">implement</span><span class="rollup-tokens">35576436</span><span class="rollup-cost">$58.9645</span></div>
+<div class="rollup-row" data-phase="pr"><span class="rollup-key">pr</span><span class="rollup-tokens">22567995</span><span class="rollup-cost">$67.5982</span></div>
+</section>
+<section id="panel-deepdive">
+<h2>Panel deep-dive</h2>
+<div class="panel-wave" data-panel-phase="plan_review" data-wave="1">
+<h3>plan_review wave 1</h3>
+<div class="panel-round" data-round="1">
+<h4>round 1</h4>
+<p class="coverage-notice">no per-model metrics for this round</p>
+</div>
+<p class="coverage-notice">no precision figures for this wave</p>
+</div>
+<div class="panel-wave" data-panel-phase="plan_review" data-wave="2">
+<h3>plan_review wave 2</h3>
+<div class="panel-round" data-round="2">
+<h4>round 2</h4>
+<p class="coverage-notice">no per-model metrics for this round</p>
+</div>
+<p class="coverage-notice">no precision figures for this wave</p>
+</div>
+<div class="panel-wave" data-panel-phase="plan_review" data-wave="3">
+<h3>plan_review wave 3</h3>
+<div class="panel-round" data-round="3">
+<h4>round 3</h4>
+<p class="coverage-notice">no per-model metrics for this round</p>
+</div>
+<p class="coverage-notice">no precision figures for this wave</p>
+</div>
+<div class="panel-wave" data-panel-phase="pr_review" data-wave="1">
+<h3>pr_review wave 1</h3>
+<div class="panel-round" data-round="1">
+<h4>round 1</h4>
+<p class="coverage-notice">no per-model metrics for this round</p>
+</div>
+<p class="coverage-notice">no precision figures for this wave</p>
+</div>
+<div class="panel-wave" data-panel-phase="pr_review" data-wave="2">
+<h3>pr_review wave 2</h3>
+<div class="panel-round" data-round="2">
+<h4>round 2</h4>
+<p class="coverage-notice">no per-model metrics for this round</p>
+</div>
+<p class="coverage-notice">no precision figures for this wave</p>
+</div>
+<div class="panel-wave" data-panel-phase="pr_review" data-wave="3">
+<h3>pr_review wave 3</h3>
+<div class="panel-round" data-round="3">
+<h4>round 3</h4>
+<p class="coverage-notice">no per-model metrics for this round</p>
+</div>
+<p class="coverage-notice">no precision figures for this wave</p>
+</div>
+<div class="panel-wave" data-panel-phase="pr_review" data-wave="4">
+<h3>pr_review wave 4</h3>
+<div class="panel-round" data-round="4">
+<h4>round 4</h4>
+<p class="coverage-notice">no per-model metrics for this round</p>
+</div>
+<p class="coverage-notice">no precision figures for this wave</p>
+</div>
+<div class="panel-wave" data-panel-phase="pr_review" data-wave="5">
+<h3>pr_review wave 5</h3>
+<div class="panel-round" data-round="5">
+<h4>round 5</h4>
+<p class="coverage-notice">no per-model metrics for this round</p>
+</div>
+<p class="coverage-notice">no precision figures for this wave</p>
+</div>
+<div class="panel-wave" data-panel-phase="pr_review" data-wave="6">
+<h3>pr_review wave 6</h3>
+<div class="panel-round" data-round="6">
+<h4>round 6</h4>
+<p class="coverage-notice">no per-model metrics for this round</p>
+</div>
+<p class="coverage-notice">no precision figures for this wave</p>
+</div>
+<div class="panel-wave" data-panel-phase="spec_review" data-wave="1">
+<h3>spec_review wave 1</h3>
+<div class="panel-round" data-round="1">
+<h4>round 1</h4>
+<p class="coverage-notice">no per-model metrics for this round</p>
+</div>
+<p class="coverage-notice">no precision figures for this wave</p>
+</div>
+<div class="panel-wave" data-panel-phase="spec_review" data-wave="2">
+<h3>spec_review wave 2</h3>
+<div class="panel-round" data-round="2">
+<h4>round 2</h4>
+<p class="coverage-notice">no per-model metrics for this round</p>
+</div>
+<p class="coverage-notice">no precision figures for this wave</p>
+</div>
+</section>
+<section id="steering-map"><h2>Steering map</h2><p class="coverage-notice">no steering data (soft data absent or no user turns correlated)</p></section>
+<section id="rework-panel">
+<h2>Rework</h2>
+<div class="rework-row"><span>Artifact revisions</span><span>0</span></div>
+<div class="rework-row"><span>Phase backward moves</span><span>0</span></div>
+<div class="rework-row"><span>PR fix waves</span><span>0</span></div>
+</section>
+<section id="coverage">
+<h2>Coverage</h2>
+<div class="coverage-row" data-marker="soft.absent"><span class="coverage-marker">soft.absent</span></div>
+</section>
+</body>
+</html>

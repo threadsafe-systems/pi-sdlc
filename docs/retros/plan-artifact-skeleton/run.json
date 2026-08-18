@@ -1,0 +1,206 @@
+{
+  "schemaVersion": 1,
+  "slug": "plan-artifact-skeleton",
+  "coverage": [
+    {
+      "marker": "soft.absent"
+    }
+  ],
+  "sizeProxies": {
+    "scenarios": 11,
+    "tasks": 5,
+    "sessions": 1,
+    "phases": [
+      "plan",
+      "spec",
+      "build",
+      "implement",
+      "pr"
+    ],
+    "diff": {
+      "files": 0,
+      "insertions": 0,
+      "deletions": 0
+    }
+  },
+  "hard": {
+    "window": {
+      "start": "2026-08-14T20:54:45.237Z",
+      "end": "2026-08-18T10:01:17.103Z"
+    },
+    "phases": [
+      {
+        "phase": "plan",
+        "start": "2026-08-14T20:54:45.270Z",
+        "end": "2026-08-15T06:22:11.004Z",
+        "exitExplicit": false
+      },
+      {
+        "phase": "spec",
+        "start": "2026-08-15T06:22:11.004Z",
+        "end": "2026-08-15T08:18:09.796Z",
+        "exitExplicit": false
+      },
+      {
+        "phase": "build",
+        "start": "2026-08-15T08:18:09.796Z",
+        "end": "2026-08-15T08:22:57.295Z",
+        "exitExplicit": true
+      },
+      {
+        "phase": "implement",
+        "start": "2026-08-15T08:22:57.330Z",
+        "end": "2026-08-15T11:19:07.800Z",
+        "exitExplicit": true
+      },
+      {
+        "phase": "pr",
+        "start": "2026-08-15T11:19:07.837Z",
+        "end": "2026-08-18T10:01:17.103Z",
+        "exitExplicit": true
+      }
+    ],
+    "sessions": [
+      {
+        "file": "2026-08-14T20-54-08-691Z_01a0020d-b833-75d0-97d8-3e3c037ba94e.jsonl",
+        "start": "2026-08-14T20:36:22.974Z",
+        "end": "2026-08-18T10:08:59.725Z",
+        "models": [
+          "claude-fable-5"
+        ]
+      }
+    ],
+    "panels": [
+      {
+        "panelPhase": "plan_review",
+        "round": 1,
+        "wave": 1,
+        "dir": ".pi/sdlc/runs/plan-artifact-skeleton/panels/plan_review-round1-2026-08-14",
+        "models": []
+      },
+      {
+        "panelPhase": "plan_review",
+        "round": 2,
+        "wave": 2,
+        "dir": ".pi/sdlc/runs/plan-artifact-skeleton/panels/plan_review-round2-2026-08-14",
+        "models": []
+      },
+      {
+        "panelPhase": "plan_review",
+        "round": 3,
+        "wave": 3,
+        "dir": ".pi/sdlc/runs/plan-artifact-skeleton/panels/plan_review-round3-2026-08-14",
+        "models": []
+      },
+      {
+        "panelPhase": "pr_review",
+        "round": 1,
+        "wave": 1,
+        "dir": ".pi/sdlc/runs/plan-artifact-skeleton/panels/pr_review-round1-2026-08-15",
+        "models": []
+      },
+      {
+        "panelPhase": "pr_review",
+        "round": 2,
+        "wave": 2,
+        "dir": ".pi/sdlc/runs/plan-artifact-skeleton/panels/pr_review-round2-2026-08-15",
+        "models": []
+      },
+      {
+        "panelPhase": "pr_review",
+        "round": 3,
+        "wave": 3,
+        "dir": ".pi/sdlc/runs/plan-artifact-skeleton/panels/pr_review-round3-2026-08-15",
+        "models": []
+      },
+      {
+        "panelPhase": "pr_review",
+        "round": 4,
+        "wave": 4,
+        "dir": ".pi/sdlc/runs/plan-artifact-skeleton/panels/pr_review-round4-2026-08-15",
+        "models": []
+      },
+      {
+        "panelPhase": "pr_review",
+        "round": 5,
+        "wave": 5,
+        "dir": ".pi/sdlc/runs/plan-artifact-skeleton/panels/pr_review-round5-2026-08-15",
+        "models": []
+      },
+      {
+        "panelPhase": "pr_review",
+        "round": 6,
+        "wave": 6,
+        "dir": ".pi/sdlc/runs/plan-artifact-skeleton/panels/pr_review-round6-2026-08-18",
+        "models": []
+      },
+      {
+        "panelPhase": "spec_review",
+        "round": 1,
+        "wave": 1,
+        "dir": ".pi/sdlc/runs/plan-artifact-skeleton/panels/spec_review-round1-2026-08-15",
+        "models": []
+      },
+      {
+        "panelPhase": "spec_review",
+        "round": 2,
+        "wave": 2,
+        "dir": ".pi/sdlc/runs/plan-artifact-skeleton/panels/spec_review-round2-2026-08-15",
+        "models": []
+      }
+    ],
+    "models": [
+      "claude-fable-5"
+    ],
+    "rollups": {
+      "byModel": [
+        {
+          "model": "claude-fable-5",
+          "tokens": 91935432,
+          "cost": 208.1303710000002
+        }
+      ],
+      "byPhase": [
+        {
+          "phase": "plan",
+          "tokens": 10144544,
+          "cost": 30.583267000000003
+        },
+        {
+          "phase": "spec",
+          "tokens": 10503961,
+          "cost": 29.6521925
+        },
+        {
+          "phase": "build",
+          "tokens": 3335357,
+          "cost": 4.541414499999999
+        },
+        {
+          "phase": "implement",
+          "tokens": 35576436,
+          "cost": 58.96446549999997
+        },
+        {
+          "phase": "pr",
+          "tokens": 22567995,
+          "cost": 67.5981945
+        }
+      ]
+    },
+    "rework": {
+      "artifactRevised": 0,
+      "phaseBackward": 0,
+      "fixWave": 0
+    },
+    "totals": {
+      "tokens": 91935432,
+      "cost": 208.1303710000002,
+      "wallMs": 306391866,
+      "agentMs": 5622435,
+      "humanWaitMs": 4436110
+    }
+  },
+  "title": "S2 plan artifact skeleton",
+  "track": "irreversible"
+}
