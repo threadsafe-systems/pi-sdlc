@@ -163,6 +163,15 @@ hand-copy a prompt per model.
    still going. Keep polling until every original child and every replacement is
    accounted for.
 
+   **Time budget.** Every reviewer dispatch passes an explicit `timeoutMs`; the
+   `subagent` tool's 30-minute default is never inherited by silence. The floor
+   for a PR panel is **45 minutes**, and a review of **≥30 changed files or
+   ≥2,000 changed lines starts at 90**. Treat those figures as a floor open to
+   revision rather than a derived model — they are calibrated from a single
+   observation, a 70-file, ~5,200-line PR panel whose reviewers all died at the
+   30-minute default and completed at 90 minutes. A design panel reads one
+   artifact rather than a diff and takes the same 45-minute floor.
+
    **Reviewer dispatch recovery.** The resolved `prefer` list is an ordered
    candidate pool, not merely documentation. A reviewer that returns a model
    verdict (findings, `PASS`, or `REVISE`) has completed its assignment and is
@@ -170,12 +179,30 @@ hand-copy a prompt per model.
    including crash, OOM, overload/billing exhaustion, timeout, transport/tool
    failure, or empty output — is an infra failure: retry that model once when the
    failure may be transient, then replace it with the next untried, credentialed
-   model in that phase's configured `prefer` list. Do not count a failed model
+   model in that phase's configured `prefer` list. Two causes have a better first
+   move than replacement, below. Do not count a failed model
    against the configured panel floor. Continue through the ordered candidate
    pool until the panel floor is met or the pool is exhausted. Only then apply
    `review.onShortfall`: `fail` stops and asks the human; `proceed` records the
    shortfall and continues. Never substitute an unconfigured model or treat an
    infra failure as a reviewer verdict.
+
+   **A timeout is deterministic, not transient.** A reviewer that ran out of
+   budget on a large diff will run out again at the same budget, and a
+   replacement model inherits the same diff — so the transient-failure remedy
+   above fixes neither. When a reviewer times out, retry the **same** model once
+   at double the budget before considering replacement; when a whole wave times
+   out, raise the budget for the whole wave. The retry belongs to the original
+   logical wave and carries that wave's number in its `panel.dispatched` payload
+   (only the harvest label advances). Replace a model only once it has timed out
+   again at the raised budget.
+
+   **Prefer a provider-route twin.** For a provider-side failure — 429, 5xx,
+   transport — the first replacement to try is the same model on a different
+   provider route where the phase's pool declares one, which preserves the
+   panel's model diversity instead of spending a pool slot on a weaker model;
+   such a twin never appears in the resolved panel, because `resolve-panel`
+   folds it onto its direct model identity and skips it.
 
    **Delta dispatch.** The first round reviews the whole artifact; **every round
    after the first is a delta review**. Carry the prior rounds' findings *and
