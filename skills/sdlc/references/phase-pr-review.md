@@ -85,12 +85,14 @@ hand-copy a prompt per model.
 1. **Resolve the panel** for the phase (live, deduped, author-excluded):
 
    ```bash
-   scripts/resolve-panel.sh <plan_review|spec_review|pr_review|task_validate> --author <provider/model>
+   scripts/resolve-panel.sh <plan_review|spec_review|pr_review|task_validate> --author <provider/model> [--track <irreversible|reversible>]
    ```
 
    It reads the merged config's `panels` block, keeps models with credentials, and
    applies the configured phase floor and author-exclusion rule under the config's
-   shortfall posture. Add `--pong` for a live smoke test (costs a call per
+   shortfall posture. `--track` is mandatory whenever the config declares per-track
+   panel overrides: without it the resolver exits before selecting any model, so a
+   command that omits it fails on exactly the configurations that need it most. Add `--pong` for a live smoke test (costs a call per
    candidate; off by default). When `resolve-panel` prints a `proceed`-mode
    shortfall advisory, carry it into that phase's consolidated writeup and, at PR
    phase, into the PR itself as a comment or adjudication note. Do not commit a
@@ -110,24 +112,45 @@ hand-copy a prompt per model.
 
      ```bash
      scripts/ensure-panel-agent.sh pr_review   # writes .pi/agents/<prefix>-pr-review.md
-     scripts/resolve-panel.sh pr_review --author <provider/model> --emit-tasks <prefix>-pr-review
+     scripts/resolve-panel.sh pr_review --author <provider/model> --track <track> --emit-tasks <prefix>-pr-review
      ```
 
-     `--emit-tasks` prints a ready-to-paste `subagent` `tasks: [...]` array. Replace
-     its task value with the exact review task: name the artifact paths, commit,
-     governing documents, grounding rule, and required findings-only output. Dispatch
-     the populated array with `async: true` (`subagent({ tasks: [...], async: true })`),
-     not as a blocking call: a blocking multi-model dispatch only returns control after
-     every reviewer finishes, so a reviewer that crashes in the first second still sits
-     unactioned until the slowest sibling completes minutes later. Async dispatch
-     returns immediately with one run id/`asyncDir` covering every child in the panel.
-     Per-model attribution comes back on each task's `result.model` once you read it.
+     `--emit-tasks` prints a `tasks: [...]` array in an older orchestration shape
+     that the current `subagent` tool rejects. Treat it as a content source, not a
+     payload: take its per-model entries, replace each task value with the exact
+     review task (artifact paths, commit, governing documents, grounding rule,
+     required findings-only output), and dispatch them as one async workflow.
+
+     ```js
+     subagent({
+       async: true,
+       timeoutMs: 2700000,            // the wave budget; never left to the default
+       workflowScript: `
+         const TASK = "...the exact review task...";
+         return await runs.all([
+           { key: "sol",  agent: "<prefix>-pr-review", model: "openai-codex/gpt-5.6-sol:xhigh",
+             task: TASK, output: "<reviews dir>/sol.md" },
+           { key: "luna", agent: "<prefix>-pr-review", model: "openai-codex/gpt-5.6-luna:xhigh",
+             task: TASK, output: "<reviews dir>/luna.md" }
+         ]);
+       `
+     })
+     ```
+
+     Dispatch async, never blocking: a blocking multi-model dispatch returns control
+     only after every reviewer finishes, so a reviewer that crashes in the first
+     second sits unactioned until the slowest sibling completes minutes later. Async
+     returns immediately with one run id/`asyncDir` covering every child. Give each
+     entry an `output` path so verdicts reach disk even when the summary is
+     truncated. Per-model attribution comes back on each child's resolved model.
      `ensure-panel-agent.sh` copies the prompt body verbatim and writes to the
      consumer repo's `.pi/agents` where the session resolves project agents (NOT a
      `cd`-ed cwd). Consult the project's governing documents (for example
      `AGENTS.md`) for any local sub-agent gotchas.
    - detached (headless/cron/CI, no live tool): `dispatch-subagents`'s `dispatch.sh`
-     stamps one prompt file across `--model` flags.
+     stamps one prompt file across `--model` flags. It exposes no timeout option, so
+     bound it externally: wrap each child at the same budget the in-harness path
+     would pass, and treat a kill as a timeout for recovery purposes.
 
    Give each reviewer the exact inputs: the artifact under review, the upstream
    artifacts it must be consistent with, the repo path and commit, the PR body's
@@ -145,37 +168,87 @@ hand-copy a prompt per model.
    worktree, dispatch the project `researcher-readonly` agent (no `write` tool,
    returns the brief inline) so children never block on a forbidden write. For
    such research fan-outs — not panel dispatch, which follows the per-child
-   polling rule below — prefer `wait({ all: true })` over status-polling, and
+   polling rule below — prefer `bg_wait({ all: true })` over status-polling, and
    read a child's transcript before treating a "detached" status label as lost
    output.
 
    **React per-child, not per-batch.** Once dispatched async, poll
-   `subagent({ action: "status", id: <asyncId> })` (not a bare `wait` with no
+   `subagent({ action: "status", id: <asyncId> })` (not a bare `bg_wait` with no
    timeout, which only unblocks once every child in that run finishes) at a
-   short interval; a `wait({ id: <asyncId>, timeoutMs: 20000 })` call doubles as
+   short interval; a `bg_wait({ id: <asyncId>, timeoutMs: 20000 })` call doubles as
    that interval's sleep, since a timeout returns control without stopping the
    run. Diff each poll's per-child
    status against the last one: the moment any child shows an infra failure (see
    below) rather than a verdict, act on it immediately — do not wait for the other
    panelists still running. A replacement dispatch for that model is a brand-new,
    separate async `subagent` single-agent call, not folded back into the original
-   `tasks:` array, so it runs alongside whichever siblings from the first batch are
-   still going. Keep polling until every original child and every replacement is
+   workflow's `runs.all` array, so it runs alongside whichever siblings from the
+   first batch are still going. Keep polling until every original child and every replacement is
    accounted for.
+
+   **Time budget.** Every reviewer dispatch passes an explicit `timeoutMs`; the
+   `subagent` tool's 30-minute default is never inherited by silence. The floor
+   for a PR panel is **45 minutes**, and a review of **≥30 changed files or
+   ≥2,000 changed lines starts at 90**. A design panel reads one artifact rather
+   than a diff and takes the same 45-minute floor.
+
+   These are working figures, not a derived model. A single observation supports
+   the 90: a 55-file panel in which two of three reviewers exhausted the 30-minute
+   default and both completed on a 90-minute retry. The third reviewer in that
+   panel failed on credentials, which says nothing about budget. The 45-minute
+   floor and the ≥30-file/≥2,000-line trigger are interpolation between that one
+   point and no trigger at all; no run has yet tested either. Revise them as
+   evidence arrives rather than citing them as measured.
 
    **Reviewer dispatch recovery.** The resolved `prefer` list is an ordered
    candidate pool, not merely documentation. A reviewer that returns a model
    verdict (findings, `PASS`, or `REVISE`) has completed its assignment and is
    never silently replaced. A reviewer that fails before producing a verdict —
-   including crash, OOM, overload/billing exhaustion, timeout, transport/tool
+   including crash, OOM, overload/billing exhaustion, transport/tool
    failure, or empty output — is an infra failure: retry that model once when the
    failure may be transient, then replace it with the next untried, credentialed
-   model in that phase's configured `prefer` list. Do not count a failed model
+   model in that phase's configured `prefer` list. Two causes are excluded from
+   that same-budget retry and take the remedies below instead: a timeout takes the
+   budget rule, and a provider-side failure takes the route twin. Do not count a failed model
    against the configured panel floor. Continue through the ordered candidate
    pool until the panel floor is met or the pool is exhausted. Only then apply
    `review.onShortfall`: `fail` stops and asks the human; `proceed` records the
    shortfall and continues. Never substitute an unconfigured model or treat an
    infra failure as a reviewer verdict.
+
+   **A timeout is usually deterministic, not transient.** A reviewer that ran out
+   of budget on a large diff will run out again at the same budget, and a
+   replacement model inherits the same diff — so the transient-failure remedy
+   above fixes neither. When a reviewer times out, retry the **same** model once
+   at double the budget before considering replacement; when a whole wave times
+   out, double the budget for the whole wave, once. The retry belongs to the
+   original logical wave and carries that wave's number in its `panel.dispatched`
+   payload (only the harvest label advances). Replace a model only once it has
+   timed out again at the raised budget.
+
+   One timeout is not deterministic. A child that produced **no output at all**
+   may have stalled in the provider rather than exhausted its budget on the diff,
+   and doubling the budget on a stalled route only buys a longer stall. Treat a
+   zero-output timeout as a provider-side failure and try the route twin below
+   before spending a raised budget on the same route.
+
+   **Bound the whole gate, not just each attempt.** Doubling per model and then
+   walking the pool has no aggregate ceiling, and `prefer` pools have no maximum
+   length, so a large diff against a long pool can burn hours of model time before
+   shortfall handling is reached at all. Cap total panel time at **four times the
+   wave's opening budget**. On reaching the cap, stop dispatching, harvest the
+   verdicts that exist, and apply `review.onShortfall` as though the pool were
+   exhausted.
+
+   **Prefer a provider-route twin.** For a provider-side failure — 429, 5xx,
+   transport — the first replacement to try is the same model on a different
+   provider route where the phase's pool declares one, which preserves the
+   panel's model diversity instead of spending a pool slot on a weaker model;
+   `resolve-panel` folds such a twin onto its direct model identity, so it is
+   skipped whenever the direct entry was itself selected. It is not dead weight in
+   the pool: where the direct route lacks credentials, the twin is selected as an
+   ordinary panelist in its own right, so a resolved panel may legitimately
+   contain one.
 
    **Delta dispatch.** The first round reviews the whole artifact; **every round
    after the first is a delta review**. Carry the prior rounds' findings *and
