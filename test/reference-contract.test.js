@@ -29,7 +29,9 @@ test("NR7: skill dispatch instructions are concrete and CI claims are bounded", 
 	const prReview = read("skills/sdlc/references/phase-pr-review.md");
 	assert.doesNotMatch(skill, /FILL_IN_TASK_BLOCK/);
 	assert.doesNotMatch(prReview, /FILL_IN_TASK_BLOCK/);
-	assert.match(prReview, /Replace\s+its task value with the exact review task/);
+	assert.match(prReview, /replace each task value with the exact\s+review task/);
+	assert.match(prReview, /runs\.all\(\[/);
+	assert.match(prReview, /timeoutMs/);
 	assert.match(prReview, /configured the shipped workflow|documented snippet/);
 	assert.doesNotMatch(skill, /CI checks the declared track's artifacts are committed\./);
 });

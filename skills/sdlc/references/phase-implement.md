@@ -234,10 +234,12 @@ surface directly, give it the same shape every time:
 - **Scope, stated as a stop-condition.** Name exactly the task's check
   commands and Definition-of-Done items as the boundary of its work, and say
   plainly not to explore or fix adjacent things past that boundary.
-- **A `toolBudget`/`turnBudget` by default.** Attach a bounded budget (the
-  `subagent` tool's own `toolBudget: { soft, hard }` / `turnBudget: {
+- **A `toolBudget`/`turnBudget`/`timeoutMs` by default.** Attach a bounded budget
+  (the `subagent` tool's own `toolBudget: { soft, hard }` / `turnBudget: {
   maxTurns, graceTurns }` parameters) so a worker drifting past scope is
-  nudged, then finalized, without a human having to notice and intervene.
+  nudged, then finalized, without a human having to notice and intervene. Pass
+  `timeoutMs` explicitly for the same reason: left unset it takes the tool's
+  30-minute default, which is a wall-clock cap nobody chose.
 - **A canonical "finalize now" resume message** for a worker caught
   exploring past scope: "You were exploring past this task's stated scope.
   Stop investigating and finalize your current change against the stated
@@ -249,9 +251,11 @@ surface directly, give it the same shape every time:
   contract's triage tiers. One channel to the human, never one per worker.
 - **Infra failure gets one automatic retry; no verdict does.** If a
   dispatched worker's run ends in an **infra-class failure** — a process
-  crash, an out-of-memory kill, overload or billing exhaustion, a provider
-  timeout, a transport/tool error, or empty output — that is infrastructure
+  crash, an out-of-memory kill, overload or billing exhaustion, a transport/tool
+  error, or empty output — that is infrastructure
   noise, not a REVISE/FAIL verdict from the model. Retry that exact dispatch once, automatically, before treating it as
-  needing human attention. A second consecutive infra failure on the same
+  needing human attention. A **timeout** is the exception: an identical retry
+  buys an identical exhaustion, so retry it once at double the budget instead of
+  unchanged. A second consecutive infra failure on the same
   dispatch, or any model-authored verdict, surfaces to the human as normal —
   never silently retried away.
