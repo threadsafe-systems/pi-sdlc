@@ -43,16 +43,16 @@
     "reversible": { "review": { "design": "human" } }
   },
   "panels": {
-    "$comment": "Panel roster for pi-sdlc itself, redesigned 2026-07-21 grounded in vals.ai SWE-bench-Verified and LM Council's HLE/GPQA-Diamond/FrontierMath/Terminal-Bench aggregates (see docs/briefs/2026-07-21-retro-informed-orchestration-and-ceremony-candidates.md and docs/briefs/2026-07-21-panel-roster-redesign.md for full rationale + citations). Preference reconciled against live credentials by resolve-panel; model ids drift, re-check with `pi --list-models`. Entries may carry pi's ':<thinking>' suffix (off/minimal/low/medium/high/xhigh/max). panelSize is the per-phase distinct-model floor (model-identity axis, verified exact-identity not vendor-wide in resolve-panel.mjs's modelIdentity()). plan_review/spec_review run rarely per effort and gate irreversible design tradeoffs, so cost is a rounding error against a bad architecture call: bumped to xhigh and re-led with the models that top HLE/GPQA-Diamond/FrontierMath (Fable 5, Gemini 3.1 Pro Preview), not just SWE-bench. pr_review is explicitly the highly-technical/high-reasoning gate (owner direction, 2026-07-21): bumped to xhigh throughout; kimi-k3 stays in the roster (genuinely top-tier on SWE-bench-Verified, 93.4%) but demoted to last preference after this repo's own retro evidence of two hard 1,200,000ms timeouts in a single Case PR-review run (docs/briefs/2026-07-21-retro-informed-orchestration-and-ceremony-candidates.md); gemini-3.1-pro-preview is likewise demoted, not dropped; its position is retained, but the API-credit/429 reason recorded for that demotion is superseded — the entry named a provider prefix (`google/`) that no credentialled provider answers to, so it could not resolve at all, and the same model under `google-vertex/` answered a live probe on 2026-09-03. Re-rank it only on fresh evidence. task_validate drops gpt-5.6-terra (owner-reported operational trouble; it also ranks well down the SWE-bench-Verified table, consistent with that report) and leads with haiku-4-5, matching what Case's config already does. authorDefault moves off claude-opus-4-8 to the claude-fable line (95.0% SWE-bench-Verified + FrontierMath Tier-4 leader vs opus-4-8's 88.6%/56.1%) as the best available single all-rounder until per-phase author preferences ship (see C1, same brief). Qwen (current Bedrock-hosted Qwen3-235B/Qwen3-Coder-480B) was evaluated and NOT added: it sits clearly behind every roster model on SWE-bench-Verified and WebDev Arena, and the newer, more competitive Qwen 3.6/3.7 line isn't available through any configured provider yet — worth re-checking once it is. Generation sweep 2026-09-03, every id checked against `pi --list-models` and answered by a live probe: fable-5 to fable-5-1, opus-4-8 to opus-5, glm-5.2 to glm-5.3, and the Bedrock opus route from the `global.` to the `eu.` inference profile. No entry changed position; only ids moved. pr_review pairs direct anthropic/claude-opus-5 with amazon-bedrock/eu.anthropic.claude-opus-5 immediately behind it, and that pair is deliberate rather than a duplicate: modelIdentity() folds the Bedrock alias onto anthropic/claude-opus-5, so the Bedrock entry contributes no distinct-model slot and is skipped at resolution whenever the direct entry is chosen. It earns its place at dispatch instead — phase-pr-review.md §5 names a provider-route twin as the first replacement to try when a reviewer dies of a provider-side failure, and this pair is the pool's only same-model, different-route option. Deleting it as a duplicate removes that option.",
+    "$comment": "Panel roster for this repo. resolve-panel reconciles this preference order against live credentials, applies the per-phase floor, and excludes the authoring model. Entries may carry pi's ':<thinking>' suffix (off/minimal/low/medium/high/xhigh/max). panelSize is a distinct-model floor measured on model identity rather than vendor: modelIdentity() folds a Bedrock alias onto its direct vendor/model, so two routes to one model count once toward the floor. Order is strongest-reasoning-first; later entries are fallbacks reached only when an earlier one lacks credentials or fails at dispatch. plan_review and spec_review gate design decisions that are expensive to reverse, so they run at xhigh. A pair such as anthropic/claude-opus-5 followed immediately by amazon-bedrock/eu.anthropic.claude-opus-5 is a provider-route twin, not a duplicate: the Bedrock entry contributes no distinct-model slot and is skipped whenever the direct entry is selected, but it is the pool's only same-model different-route option and is what dispatch recovery reaches for when the direct route fails provider-side. Where the direct route has no credentials the twin is selected on its own merits as an ordinary panelist. Deleting either half as a duplicate removes that option. anthropic/claude-fable-5-1 has no twin available: Bedrock publishes fable-5-1 inference profiles, but this account's role is not permitted to invoke them. Model ids drift, so re-check with `pi --list-models` — and note that catalogue presence alone proves neither that the caller may invoke a model nor that it can be dispatched as a subagent child, which are the two properties this roster actually depends on.",
     "authorDefault": "anthropic/claude-fable-5-1:high",
     "phases": {
       "plan_review": {
         "panelSize": 2,
-        "prefer": ["anthropic/claude-fable-5-1:xhigh", "google-vertex/gemini-3.1-pro-preview:xhigh", "openai-codex/gpt-5.6-luna:xhigh", "zai/glm-5.3:xhigh", "deepseek/deepseek-v4-pro:xhigh", "anthropic/claude-opus-5:xhigh"]
+        "prefer": ["anthropic/claude-fable-5-1:xhigh", "google-vertex/gemini-3.1-pro-preview:xhigh", "openai-codex/gpt-5.6-luna:xhigh", "zai/glm-5.3:xhigh", "zai/glm-5.3-flash:xhigh", "anthropic/claude-opus-5:xhigh"]
       },
       "spec_review": {
         "panelSize": 2,
-        "prefer": ["anthropic/claude-fable-5-1:xhigh", "google-vertex/gemini-3.1-pro-preview:xhigh", "openai-codex/gpt-5.6-luna:xhigh", "zai/glm-5.3:xhigh", "deepseek/deepseek-v4-pro:xhigh", "anthropic/claude-opus-5:xhigh"]
+        "prefer": ["anthropic/claude-fable-5-1:xhigh", "google-vertex/gemini-3.1-pro-preview:xhigh", "openai-codex/gpt-5.6-luna:xhigh", "zai/glm-5.3:xhigh", "zai/glm-5.3-flash:xhigh", "anthropic/claude-opus-5:xhigh"]
       },
       "pr_review": {
         "panelSize": 3,
@@ -62,15 +62,15 @@
           "openai-codex/gpt-5.6-luna:xhigh",
           "anthropic/claude-opus-5:xhigh",
           "amazon-bedrock/eu.anthropic.claude-opus-5:xhigh",
-          "deepseek/deepseek-v4-pro:xhigh",
           "zai/glm-5.3:xhigh",
+          "zai/glm-5.3-flash:xhigh",
           "google-vertex/gemini-3.1-pro-preview:xhigh",
           "moonshotai/kimi-k3:xhigh"
         ]
       },
       "task_validate": {
         "panelSize": 1,
-        "prefer": ["anthropic/claude-haiku-4-5", "deepseek/deepseek-v4-flash", "zai/glm-5.3:low"]
+        "prefer": ["anthropic/claude-haiku-4-5-20251001", "amazon-bedrock/eu.anthropic.claude-haiku-4-5-20251001-v1:0", "zai/glm-5.3-flash", "zai/glm-5.3:low"]
       }
     }
   }
