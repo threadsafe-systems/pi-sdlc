@@ -121,16 +121,19 @@ standing in for scenario coverage.
 | --- | --- | --- | --- |
 | No Spec exists — reversible track, `shape.separateSpec` not exercised — so no scenario ids back either task's checks | minor | assumption-recorded | Assumptions appendix, A1 |
 | The 45/90-minute budget figures rest on one observation, and no scenario pins them | minor | assumption-recorded | Assumptions appendix, A2 |
-| No mechanical check can falsify T2; §5 doctrine is judged by reading only | minor | CARRY-TO-IMPLEMENT | The PR panel's review of the §5 diff |
+| No mechanical check can falsify T2; §5 doctrine is judged by reading only | minor | CARRY-TO-IMPLEMENT — discharged | Round 1 of the PR panel read the §5 diff and returned findings against it |
 
 ## Assumptions
 
 - **A1 — no scenario ids.** The reversible track carries no Spec, so tasks own
   no scenarios and the validator's Rule B does not apply. Each task still
   carries a `"full"`-tagged check under Rule A.
-- **A2 — the budget figures are a floor, not a derivation.** 45 and 90 minutes
-  come from a single data point. T2 writes them as a revisable floor and says
-  so in the text, rather than implying a calibrated model.
+- **A2 — the budget figures are a floor, not a derivation.** Only the 90 has an
+  observation behind it: a 55-file panel where two of three reviewers exhausted
+  the 30-minute default and both completed on a 90-minute retry, the third
+  having failed on credentials. The 45-minute floor and the ≥30-file/≥2,000-line
+  trigger are interpolation and remain untested. T2 states this in the text
+  rather than implying a calibrated model.
 - **A3 — decomposition granularity.** Two tasks, split by file. A single task
   was rejected because it would put an unfalsifiable doctrine change behind a
   data change's mechanical check.
@@ -138,29 +141,36 @@ standing in for scenario coverage.
   is generated from the manifest, so editing the manifest makes it stale and
   `config-doc.sh check` reports `stale`. Regenerated with `config-doc.sh write`;
   never hand-edited. The build plan originally named only the manifest.
-- **A6 — the local `npm test` baseline is not zero, and this is not new.**
-  `main` fails 29 of 616 tests on macOS while CI is green. All 29 share one
-  cause: `mktemp -d` returns a `/var/folders/…` path that is a symlink to
-  `/private/var/folders/…`, `git rev-parse --show-toplevel` resolves the
-  symlink, and the containment check compares the two literally and reports
-  `git.repository :: resolved root escapes its git top-level` (exit 2). CI runs
-  Linux, where the two paths agree. This change's failure set is identical to
-  the `main` baseline, so the DoD is stated as "no new failures" rather than
-  "passes". Filed separately; fixing it is out of scope here.
+- **A6 — the suite is green; macOS needs a canonical `TMPDIR`.** `npm test` is
+  616/616 on this branch and on `main`. The 29 failures seen with the default
+  macOS `TMPDIR` share one cause: `mktemp -d` returns a `/var/folders/…` path
+  that is a symlink to `/private/var/folders/…`, `git rev-parse --show-toplevel`
+  resolves the symlink, and the containment check compares the two literally and
+  reports `git.repository :: resolved root escapes its git top-level` (exit 2).
+  Exporting `TMPDIR=$(cd "$TMPDIR" && pwd -P)/` removes all 29. Linux CI is
+  unaffected because the two paths agree there. The DoD therefore states
+  "616/616 green", not "no new failures" — an earlier revision of this appendix
+  claimed a non-zero baseline, which was a local path artefact mistaken for a
+  property of the repository.
 - **A4 — near-threshold publish call, deviating from `shape.publishToTracker`.**
   The committed threshold is 2 and this build has 2 tasks, so the contract's
-  default is to mint an epic plus two `build-task` sub-issues. Not done here:
-  #268 and #270 already exist, are labelled, and sit on the shared board, and
-  they partition this work as cleanly as the two tasks do. Minting an epic and
-  two more issues over a ~30-line, two-file change would produce four tracker
-  objects for one PR. The build-plan doc remains canonical either way. This is
-  a stated derivation call, visible for the PR panel to challenge — flag it if
-  the projection is wanted.
+  default is to mint an epic plus two `build-task` sub-issues. Not done here,
+  on the argument that minting an epic and two more issues over a two-file
+  change would produce four tracker objects for one PR, and that #268 and #270
+  already partition this work as cleanly as the two tasks do.
+
+  The original form of this assumption also claimed those two issues were
+  labelled and on the shared board. They are not: both carry no labels and
+  neither appears on the project board, so the half of the argument that rested
+  on an existing projection does not hold. The remaining proportionality
+  argument stands on its own. Escalated to the owner rather than settled here.
 
 ## Tracker
 
-No new tracker objects. #268 and #270 serve as the projection per A4; the PR
-closes both. #141 receives a comment recording the PONG falsification of its
+No new tracker objects. #268 and #270 stand in for the projection per A4; the PR
+closes both. Neither carries labels nor appears on the project board, so this is
+a deviation from `shape.publishToTracker` rather than a projection that already
+existed — see A4, escalated to the owner. #141 receives a comment recording the PONG falsification of its
 gemini-credits premise, per the Plan's Definition of done — a comment on an
 existing ticket, not a new object.
 </content>
