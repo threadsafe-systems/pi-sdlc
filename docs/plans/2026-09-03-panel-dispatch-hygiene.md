@@ -184,21 +184,33 @@ Evidence gathered during the dialogue, and what it overturned:
 ## Definition of done
 
 - Every model id in `.pi/sdlc/sdlc.config.json`'s four `prefer` pools and
-  `authorDefault` appears in `pi --list-models` output, checked mechanically.
+  `authorDefault` appears in `pi --list-models` output, checked mechanically,
+  **and** answers a probe dispatched as a subagent child. Catalogue presence on
+  its own proves neither that the caller may invoke the model nor that it can be
+  dispatched as a child, and both have been observed to fail independently of
+  the listing.
 - `pr_review`'s pool contains `anthropic/claude-opus-5` immediately followed by
   `amazon-bedrock/eu.anthropic.claude-opus-5`.
 - `plan_review` and `spec_review` carry `anthropic/claude-opus-5` in the slot
   previously holding `claude-opus-4-8`.
-- No pool contains a `google/` prefixed id.
+- No pool contains a `google/` prefixed id, and no pool contains a `deepseek/`
+  id: `zai/glm-5.3-flash` takes those positions.
+- `task_validate` leads with the dated `anthropic/claude-haiku-4-5-20251001`.
+  The undated alias resolves to that dated id at dispatch and then fails the
+  launch identity check, so the alias is unusable as a configured entry.
 - `authorDefault` and every `claude-fable-5` pool entry read
   `anthropic/claude-fable-5-1`.
 - No pool contains `zai/glm-5.2`; every Zai entry reads `zai/glm-5.3`,
   preserving its existing thinking suffix and pool position.
 - No configured entry has a live newer generation of the same model family,
   checked against `pi --list-models`.
-- Pool ordering is unchanged: the diff moves no entry's position within any
-  `prefer` array.
-- The config `$comment` states, for each corrected entry, what was wrong.
+- No entry is re-ranked relative to another. `pr_review` gains one candidate and
+  `task_validate` gains a route twin, which shift the entries after them one
+  index each; index stability is not claimed, relative order is.
+- The config `$comment` carries only durable roster facts — what the order
+  means, what a route twin is and why deleting either half loses an option, and
+  what a listing does not prove. No dates, ticket references, benchmark figures
+  or probe records, all of which go stale without the file changing.
 - `phase-pr-review.md` §5 states an explicit dispatch time budget with a named
   floor and a size trigger.
 - §5's recovery ladder distinguishes a deterministic timeout from a transient
@@ -213,13 +225,13 @@ Evidence gathered during the dialogue, and what it overturned:
   once the change is committed — the readiness gate's `adoption.manifest-clean`
   check fails by design while the manifest has uncommitted edits, so this is a
   post-commit check.
-- `npm test` introduces **no new failures** against the `main` baseline, the two
-  failure sets being identical, with `test/frozen-surfaces.test.js` green and no
-  file from its `FROZEN` list in the diff. The baseline is not zero on macOS:
-  29 pre-existing failures share one cause unrelated to this change, recorded in
-  the build plan's Assumptions appendix and filed as its own issue.
-- CI is green on the PR, which is the authoritative signal the local macOS
-  baseline cannot give.
+- `npm test` is **616/616 green**, with `test/frozen-surfaces.test.js` green and
+  no file from its `FROZEN` list in the diff. On macOS the suite requires a
+  canonical `TMPDIR`: the default `/var/folders/…` path is a symlink to
+  `/private/var/folders/…`, and 29 tests fail on the resulting containment
+  check. That is a local path artefact, not a baseline of real failures.
+- CI is green on the PR, including `commit-lint`, which validates the PR title
+  as a conventional commit header rather than only the branch's commits.
 - #141 carries a comment recording the PONG falsification of the
   gemini-credits theory.
 - #270 and #268 are closed by the PR.
