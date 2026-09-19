@@ -191,9 +191,13 @@ Evidence gathered during the dialogue, and what it overturned:
   Catalogue presence proves neither that the caller may invoke the model nor
   that it can be dispatched as a subagent child, and both have been observed to
   fail independently of the listing — so every id this change adds or alters
-  also carries a committed child-dispatch probe receipt under
-  `docs/validation/`, naming the id, the date and the dispatch path used. Ids
-  this change leaves untouched are not claimed to have been probed.
+  carries a committed child-dispatch probe receipt under `docs/validation/`,
+  recording the id, the date, the dispatch path and the **outcome per id**. An
+  outcome may be `inconclusive`: a rate limit or a harness fault is a property of
+  the account or the probe, not of the model, and is recorded as neither a pass
+  nor a failure. The receipt is evidence of what was attempted and what it
+  established, not a blanket claim that every id is dispatchable. Ids this change
+  leaves untouched are not claimed to have been probed.
 - `pr_review`'s pool contains `anthropic/claude-opus-5` immediately followed by
   `amazon-bedrock/eu.anthropic.claude-opus-5`.
 - `plan_review` and `spec_review` carry `anthropic/claude-opus-5` in the slot
