@@ -1,6 +1,16 @@
-# Panel dispatch hygiene: pool rot and reviewer time budgets
+# Panel roster hygiene: stale and undispatchable model ids
 
-Track: **reversible** · Slug: `panel-dispatch-hygiene` · Closes #268, #270
+Track: **reversible** · Slug: `panel-dispatch-hygiene` · Closes #270
+
+**Scope split.** This Plan originally carried both #270 (roster rot) and #268
+(reviewer time budgets). The reviewer-budget half — `phase-pr-review.md` §5 and
+the implement-side timeout doctrine — moved to its own track after two review
+rounds put 13 of 18 findings in that newly authored doctrine and one in the
+roster half. Doctrine prose is not falsifiable by a test, so shipping it beside
+a mechanically verifiable config change let the weaker evidence set the bar for
+both — the failure this Plan's own Build predicted for the two tasks and then
+ignored one level up. #268 stays open and continues on its own branch, carrying
+both rounds' findings as its starting backlog.
 
 ## Brainstorm provenance
 
@@ -13,6 +23,8 @@ Decisions ratified in the dialogue, verbatim:
   The pool lists direct `anthropic/claude-opus-5`, with
   `amazon-bedrock/eu.anthropic.claude-opus-5` behind it as a declared
   provider-route twin.
+  **Revised at the scope split:** only the config pairing is in scope here. The
+  one-sentence §5 rule ships with #268.
   **Revised after D4:** the config pairing stands, but §5 records the rule in
   **one sentence** rather than a full recovery rung. A bespoke route-twin rung
   is a one-off, opus-only version of the successor pattern's per-seat fallback
@@ -31,6 +43,7 @@ Decisions ratified in the dialogue, verbatim:
   durable under any shape; bespoke fallback prose is not, so it is minimised.
 - **D3 — the reviewer time budget is concrete.** A named floor, a size trigger,
   and a wave rule, rather than prose telling the reader to scale with size.
+  **Moved at the scope split:** D3 is #268's decision and is not built here.
 
 Assumptions carried from the gate, stated and unobjected:
 
@@ -57,17 +70,14 @@ Evidence gathered during the dialogue, and what it overturned:
 
 - Actor/situation: a session dispatching an sdlc review panel — design or PR —
   in this repository.
-- Baseline evidence: PR #261's PR panel (70 files, +5,148/−12) lost both
-  surviving reviewers to the `subagent` tool's 30-minute default timeout and
-  returned zero verdicts; a recovery wave at 90 minutes completed. Separately,
-  all three review pools in `.pi/sdlc/sdlc.config.json` list
+- Baseline evidence: all three review pools in `.pi/sdlc/sdlc.config.json` list
   `google/gemini-3.1-pro-preview`, a provider id absent from
   `pi --list-models`, and `pr_review` lists
   `amazon-bedrock/global.anthropic.claude-opus-4-8`, whose inference region and
   model generation have both moved.
-- Consequence: each stale entry and each unstated budget costs a dispatch, a
-  diagnosis and a replacement wave, every time a panel resolves — and the S2
-  retro misdiagnosed both causes, so the wrong fix was nearly shipped.
+- Consequence: each stale entry costs a dispatch, a diagnosis and a replacement
+  wave every time a panel resolves — and the S2 retro misdiagnosed the cause, so
+  the wrong fix was nearly shipped.
 
 ## Non-goals
 
@@ -104,10 +114,6 @@ Evidence gathered during the dialogue, and what it overturned:
 
 ## Objectives and scope
 
-- [objective] A panel dispatch never silently inherits the `subagent` tool's
-  30-minute default timeout.
-- [objective] A whole-wave timeout has a sanctioned response that is not
-  "replace the model".
 - [objective] Every model id in the repo's configured pools resolves against
   `pi --list-models`.
 - [objective] A provider-route twin is a declared, findable recovery step
@@ -125,8 +131,6 @@ Evidence gathered during the dialogue, and what it overturned:
 - [solution decision] Generation sweep, each keeping its existing pool
   position: `claude-fable-5` → `claude-fable-5-1` (including `authorDefault`),
   `claude-opus-4-8` → `claude-opus-5`, `zai/glm-5.2` → `zai/glm-5.3`.
-- [solution decision] Budget floor is 45 minutes for a PR panel; at ≥30 changed
-  files or ≥2,000 changed lines the dispatch starts at 90 minutes.
 - [solution decision] The gemini entry is corrected to
   `google-vertex/gemini-3.1-pro-preview` at its existing pool position.
 - parked: a `sonnet-5` route twin for non-opus slots — destination: a tracker
@@ -146,8 +150,7 @@ Evidence gathered during the dialogue, and what it overturned:
 
 | Goal | Question | Metric | Baseline | Target/window | Evidence owner | Carried to |
 | --- | --- | --- | --- | --- | --- | --- |
-| No dispatch inherits the default timeout | Does §5 make an explicit `timeoutMs` mandatory at dispatch? | Inspection: §5 states an explicit budget is passed every dispatch, with a named floor | §5 states no budget at all; the 30-minute default applies silently | Present at merge | Author (PR panel confirms) | This PR's panel |
-| A timeout wave is recoverable without swapping models | Does §5 sanction a raised-budget retry of the same models? | Inspection: the recovery ladder separates deterministic timeout from transient failure | Timeout is classed transient; raised-budget retry is unsanctioned | Present at merge | Author (PR panel confirms) | This PR's panel |
+| Reference prose matches the shipped roster | Does any phase reference name a model this change removed? | Inspection: no reference prose names a `deepseek/` id or the undated haiku alias | `phase-implement.md` names both as the task-validator preference | Present at merge | Author | DoD check below |
 | Pools contain only resolvable ids | Do all configured ids appear in `pi --list-models`? | Count of configured ids absent from the live list | 3 pools carry `google/gemini-3.1-pro-preview`; `pr_review` carries a stale Bedrock route+generation | 0 absent, verified at implement | Author | DoD check below |
 | Roster names current generations | Is any entry superseded by a live newer generation of the same family? | Count of entries with a live newer sibling | 5 entries superseded (fable-5, opus-4-8 ×2, glm-5.2, gemini prefix) | 0 superseded, verified at implement | Author | DoD check below |
 | Nothing built here is thrown away next round | Does the slice avoid pre-empting the successor pattern? | Inspection: no seat table, no per-seat fallback column, route-twin content is one sentence | D1 as first drafted specified a full bespoke recovery rung | Present at merge | Author (PR panel confirms) | Successor-pattern brainstorm |
@@ -172,23 +175,25 @@ Evidence gathered during the dialogue, and what it overturned:
 
 | Risk | Trigger | Consequence | Mitigation | Owner | Destination |
 | --- | --- | --- | --- | --- | --- |
-| The 45/90-minute numbers are wrong | They are calibrated from a single data point (PR #261) | Panels either time out anyway or idle expensively | Write them into §5 as a stated floor open to revision, not a derived law; record the single-point calibration in §5 itself | Author | Implement |
 | The route-twin rule is never followed | It lives in prose; nothing enforces it | Sessions keep swapping to a different model on provider outages | Accept for this slice; the mechanised version is parked to #141 and to the successor pattern | Author | #141 |
 | This slice is obsoleted weeks after merging | The successor reviewer pattern replaces the pool/fallback surface entirely | Wasted authoring effort; contradictory guidance in §5 | Slice deliberately scoped to the durable core (ids, time budgets); bespoke fallback prose held to one sentence per D1-revised | Author | Successor-pattern brainstorm |
 | The generation sweep changes panel behaviour invisibly | Five ids move at once with no efficacy measurement to detect a regression | A weaker panel goes unnoticed because nothing measures seat quality | Same families and pool positions throughout; seat efficacy measurement is parked to the successor pattern, which is where it belongs | Author | Successor-pattern brainstorm |
 | The roster rots again within weeks | Model ids drift faster than the config is read | The next panel run repeats this whole diagnosis | Attach the PONG falsification to #141 so the mechanical check is prioritised on real evidence | Author | #141 |
 | `anthropic/claude-opus-5` displaces a better reviewer | opus-5 replaces opus-4-8 in plan/spec pools as a forced consequence of D1 | Panel quality shifts without benchmark evidence | Same vendor and family, one generation newer; position in the pool is unchanged | Author | Implement |
-| Editing §5 collides with the S2 retro sweep | #272 recently rewrote neighbouring parts of §5 | Merge conflict or contradictory guidance | Edit against current `main`; the recovery paragraph was untouched by #272 (verified by diff) | Author | Implement |
+| A roster change silently falsifies prose elsewhere | Model ids are quoted in phase references as well as configured in the manifest | A reader follows a reference to an id the roster no longer carries | Sweep every reference for quoted ids as part of the change, not after it; DoD carries the check | Author | Implement |
+| `anthropic/claude-fable-5-1` stays pool lead while undispatchable as a child on this machine | Subagent children do not load the anthropic-auth extension and fall back to a CLI that gates the model (#275) | Every panel resolving this pool pays one wasted dispatch until #275 lands | Accepted as a residual risk, not fixed by demotion: the model is invocable and the defect is one machine's child runtime, so downgrading shared config would encode a local fault | Author | #275 |
 | The PR panel itself times out reviewing this | The diff is small, so the risk is low | Delay only | Dispatch this PR's own panel with the explicit budget the change introduces | Author | PR |
 
 ## Definition of done
 
 - Every model id in `.pi/sdlc/sdlc.config.json`'s four `prefer` pools and
-  `authorDefault` appears in `pi --list-models` output, checked mechanically,
-  **and** answers a probe dispatched as a subagent child. Catalogue presence on
-  its own proves neither that the caller may invoke the model nor that it can be
-  dispatched as a child, and both have been observed to fail independently of
-  the listing.
+  `authorDefault` appears in `pi --list-models` output, checked mechanically.
+  Catalogue presence proves neither that the caller may invoke the model nor
+  that it can be dispatched as a subagent child, and both have been observed to
+  fail independently of the listing — so every id this change adds or alters
+  also carries a committed child-dispatch probe receipt under
+  `docs/validation/`, naming the id, the date and the dispatch path used. Ids
+  this change leaves untouched are not claimed to have been probed.
 - `pr_review`'s pool contains `anthropic/claude-opus-5` immediately followed by
   `amazon-bedrock/eu.anthropic.claude-opus-5`.
 - `plan_review` and `spec_review` carry `anthropic/claude-opus-5` in the slot
@@ -211,14 +216,16 @@ Evidence gathered during the dialogue, and what it overturned:
   means, what a route twin is and why deleting either half loses an option, and
   what a listing does not prove. No dates, ticket references, benchmark figures
   or probe records, all of which go stale without the file changing.
-- `phase-pr-review.md` §5 states an explicit dispatch time budget with a named
-  floor and a size trigger.
-- §5's recovery ladder distinguishes a deterministic timeout from a transient
-  failure, and sanctions one raised-budget retry of the same models before any
-  replacement.
-- §5 names the provider-route twin as the first replacement for a
-  provider-side failure, in **one sentence** — no bespoke recovery rung, no
-  seat table, no per-seat fallback column.
+- The `$comment`'s identity-fold claim is scoped to the pairs that actually
+  fold. `modelIdentity()` folds a Bedrock alias onto its direct vendor/model
+  only when the id after the vendor segment is identical; a versioned
+  inference-profile suffix such as `-v1:0` does not fold, so `task_validate`'s
+  haiku pair counts as two distinct identities against the floor while the opus
+  pair counts as one.
+- No phase reference quotes a model id the roster no longer carries.
+  `phase-implement.md`'s task-validator paragraph names the shipped
+  `task_validate` order, not `deepseek/deepseek-v4-flash` or the undated
+  `anthropic/claude-haiku-4-5`.
 - `.pi/sdlc/CONFIG.md`, the generated companion, is regenerated from the edited
   manifest and `config-doc.sh check` reports `current`.
 - `bash skills/sdlc/scripts/sdlc-status.sh --repo-root . --format json` exits 0
@@ -234,7 +241,7 @@ Evidence gathered during the dialogue, and what it overturned:
   as a conventional commit header rather than only the branch's commits.
 - #141 carries a comment recording the PONG falsification of the
   gemini-credits theory.
-- #270 and #268 are closed by the PR.
+- #270 is closed by the PR. #268 remains open and continues on its own branch.
 
 ## Context for the next agent
 
