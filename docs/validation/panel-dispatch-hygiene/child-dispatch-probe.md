@@ -30,7 +30,7 @@ word PONG`, no tools. Dispatch path, not `pi --print`.
 | --- | --- |
 | `amazon-bedrock/eu.anthropic.claude-opus-5` | dispatched |
 | `amazon-bedrock/eu.anthropic.claude-haiku-4-5-20251001-v1:0` | dispatched |
-| `google-vertex/gemini-3.1-pro-preview` | dispatched |
+| `google-vertex/gemini-3.1-pro-preview` | dispatched; did not obey the task |
 | `zai/glm-5.3` | dispatched |
 | `zai/glm-5.3-flash` | dispatched |
 | `anthropic/claude-fable-5-1` | inconclusive — account rate limit |
@@ -47,6 +47,13 @@ way.
 `anthropic/claude-fable-5-1` is separately known to fail child launch on this
 machine for the reason in #275. This probe neither confirms nor refutes that; it
 never reached the launch.
+
+Four of the five returned exactly `PONG`.
+`google-vertex/gemini-3.1-pro-preview` launched and returned, which is what this
+receipt measures, but answered about an unrelated pull request instead of the
+given task — it responded to ambient context rather than its own instruction.
+Dispatchability is established; instruction-following under a one-line task is
+not, and a reviewer seat depends on the second.
 
 ## Two false-negative classes this probe produced
 
