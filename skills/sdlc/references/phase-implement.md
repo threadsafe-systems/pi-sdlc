@@ -198,10 +198,12 @@ generated-agent copy and model under `subagent`) under
 `docs/reviews/task-validate-<feature>-<task-id>-<date>/`, verifiable with
 `scripts/verify-task-receipt.mjs`. Judgement review happens later at the PR panel.
 
-> **Under your configuration:** the task-validator model preference is
-> `deepseek/deepseek-v4-flash`, then `anthropic/claude-haiku-4-5` — a `:low` (or
-> `:off`) thinking suffix fits this checklist-executor role. The effective roster
-> resolves from the committed `panels` block via `resolve-panel task_validate`.
+> **Under your configuration:** resolve the task-validator model from the
+> committed `panels` block with `resolve-panel task_validate --track <track>`;
+> this repo's per-track `overrides` make `--track` mandatory, and the resolver
+> exits without it. A `:low` (or `:off`) thinking suffix fits this
+> checklist-executor role. The resolver is the only current source for the
+> order — ids quoted in prose drift from the manifest on the next roster edit.
 
 ## 6. Refusal and backward-transition behaviour
 
