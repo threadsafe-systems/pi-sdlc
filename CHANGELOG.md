@@ -1,3 +1,9 @@
+## [3.6.2](https://github.com/threadsafe-systems/pi-sdlc/compare/v3.6.1...v3.6.2) (2026-09-20)
+
+### Bug Fixes
+
+* **validation:** delete a probe receipt that records a broken probe as dead models ([#276](https://github.com/threadsafe-systems/pi-sdlc/issues/276)) ([4f66f9c](https://github.com/threadsafe-systems/pi-sdlc/commit/4f66f9cfd1e69299ca17388c448ea80f434f2042))
+
 ## [3.6.1](https://github.com/threadsafe-systems/pi-sdlc/compare/v3.6.0...v3.6.1) (2026-09-20)
 
 ### Bug Fixes
