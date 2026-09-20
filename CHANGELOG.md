@@ -1,3 +1,9 @@
+## [3.6.1](https://github.com/threadsafe-systems/pi-sdlc/compare/v3.6.0...v3.6.1) (2026-09-20)
+
+### Bug Fixes
+
+* **panels:** correct roster ids and the reference prose that quoted them ([#274](https://github.com/threadsafe-systems/pi-sdlc/issues/274)) ([bafeb83](https://github.com/threadsafe-systems/pi-sdlc/commit/bafeb83ca35faba2d7a26976028ff412f7a661c9)), closes [#268](https://github.com/threadsafe-systems/pi-sdlc/issues/268) [#270](https://github.com/threadsafe-systems/pi-sdlc/issues/270)
+
 ## [3.6.0](https://github.com/threadsafe-systems/pi-sdlc/compare/v3.5.0...v3.6.0) (2026-08-18)
 
 ### Features
