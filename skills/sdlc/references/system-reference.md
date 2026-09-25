@@ -48,14 +48,14 @@ ADR 0016) proves all of this mechanically with four states (`ready`,
 branch table and its exit codes; this reference does not restate the FS8 check
 ids or exits.
 
-**Advisory mode** is the escape hatch when a repo has not opted in but the user
-still wants sdlc guidance for one session, with the user's explicit in-session
-consent. In advisory mode: never use any `announce` string and never claim the
-session runs "under law"; prefix every phase marker with `advisory:`; follow the
-phase sequence as guidance only; and MUST NOT create or mutate tracker objects,
-MUST NOT claim any gate as passed, and MUST NOT stamp panel agents. An `error`
-state is never silently downgraded to advisory mode — advisory is not a bypass.
-To opt in, run `/setup-sdlc` (see §8).
+Adoption is an operator decision, never an agent's. Both skills load only on an
+explicit operator request. When the kernel's startup gate reports `not-adopted`,
+or an `error` whose failing check is `root.resolve` (no manifest or git
+repository encloses the working directory), the agent sets the lifecycle aside
+without announcing, asking, or mentioning adoption, and continues the task. Every
+other `error`, and `not-ready`, stops. The standalone `/sdlc-*` commands keep
+their own unadopted sampling path, since only the operator invokes them. An
+operator adopts with `/setup-sdlc` (see §8).
 
 ## 4. Tracks, phases, transitions, gates, refusal
 

@@ -40,17 +40,20 @@ Create `.pi/sdlc/` in your repo:
 - `prompts/<name>.prompt.md` (optional) — override a phase reviewer prompt when
   your project needs a specific grounding the generic prompt does not carry.
 
-Without adoption the skill does not run as project law. `sdlc-status` is the
+Both skills are **operator-triggered**: an agent loads them only when you ask
+(`/skill:sdlc`, `/skill:sdlc-retro`, a `/sdlc-*` command, or a direct request),
+never on its own because a change is starting. Without adoption the skill does
+not run as project law. `sdlc-status` is the
 mechanical four-state gate: exit 0 `ready`, 1 `not-adopted`, 2 `error`, 3
 `not-ready`. Adoption means the **current git `HEAD`** contains
 `.pi/sdlc/sdlc.config.json` — a file merely on disk is not adoption — and
 readiness (exit 0) additionally requires that manifest clean and valid with a
-merged `panels` roster. Invoking the skill in a repo whose
-`HEAD` has no manifest prompts you to adopt it with `/setup-sdlc`, or to
-continue in a clearly-labelled session-only advisory mode. The fastest way to
-opt in is the `/setup-sdlc` scaffolder, which interviews you (identity,
-optional tracker, optional worktree and notification hooks) and writes the
-manifest — then commit `.pi/sdlc/` to actually adopt.
+merged `panels` roster. In a repo whose `HEAD` has no manifest, or a working
+directory outside any git repository, the agent sets the lifecycle aside
+silently and carries on with the task: it never asks whether to adopt. Adoption
+is your decision, and the fastest way to make it is the `/setup-sdlc`
+scaffolder, which interviews you (identity, optional tracker, optional worktree
+and notification hooks) and writes the manifest — then commit `.pi/sdlc/` to actually adopt.
 
 ### Migrating callers of the old two-state status
 

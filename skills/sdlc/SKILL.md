@@ -1,6 +1,6 @@
 ---
 name: sdlc
-description: The enforced software development lifecycle. Use at the start of any feature or change. Sequences brainstorm, plan, spec, build, implement, and PR review, enforces the per-phase gates, and routes each phase to its reference. This is the project law, not a suggestion.
+description: Operator-triggered only. Load this skill only when the operator explicitly asks to run the sdlc (/skill:sdlc, a /sdlc-* command, or a direct request); never load it on your own because a change is starting. The enforced software development lifecycle for repositories that have adopted it. It sequences brainstorm, plan, spec, build, implement, and PR review, enforces the per-phase gates, and routes each phase to its reference.
 ---
 
 # sdlc
@@ -9,7 +9,8 @@ The one predictable way a change enters the codebase. This file is the **kernel
 and router**: the small interface every lifecycle session must learn. Detailed
 per-phase mechanics live in `references/phase-*.md`, loaded when that phase
 begins; the whole public system map is `references/system-reference.md`. All
-paths are skill-relative.
+paths are skill-relative. The operator starts the sdlc, never an agent: load this
+skill only on an explicit request (`/skill:sdlc`, a `/sdlc-*` command, or a direct ask).
 
 ## Readiness gate and announcement (run first)
 
@@ -21,7 +22,7 @@ clean and valid, its merged `panels` roster present and valid, any
 `.pi/sdlc/workflow.md` readable. `sdlc-status` (FS8, ADR 0016) proves this
 mechanically with four states.
 
-At the start of every session, run the mechanical gate and branch on its exit
+When the skill is invoked, run the mechanical gate and branch on its exit
 code (prefer `--format json` when parsing):
 
 1. In pi, run `scripts/sdlc-status.sh [--repo-root DIR] [--format text|json]`
@@ -32,25 +33,26 @@ code (prefer `--format json` when parsing):
    enumerate each configured hook (phase, timing, kind) and each top-level rule of
    `.pi/sdlc/workflow.md` if present, then run the startup freshness check below.
    Proceed under full law.
-3. **Exit 1 (`not-adopted`)**: do NOT announce. State the repo has not adopted the
-   sdlc and offer `/setup-sdlc` to opt in, or advisory mode for this session only
-   with the user's explicit in-session consent.
-4. **Exit 2 (`error`)**: do NOT announce. Surface the report's diagnostics and
-   stop. An error is never silently downgraded to advisory mode — advisory is not
-   a bypass.
+3. **Exit 1 (`not-adopted`)**: do NOT announce and do NOT ask. Say nothing about
+   the sdlc or its adoption (no offer, no question, no pause); set the lifecycle
+   aside and continue the task outside it. Adoption is the operator's decision.
+4. **Exit 2 (`error`)**: do NOT announce. When the failing check is
+   `root.resolve` (no manifest or git repository encloses the working directory),
+   handle it exactly as exit 1. Otherwise surface the report's diagnostics and
+   stop; an error is never a reason to continue outside the lifecycle.
 5. **Exit 3 (`not-ready`)**: do NOT announce. State the repo is adopted but
    incomplete, list the report's remediations, and stop. When
    `config.schema-current` is failing, the sanctioned actions are to pin the older
    skill release, or re-run `setup-sdlc` (`--force` to replace) —
    there is no pre-adoption config fold-forward.
    Never hand-edit `schemaVersion` or the config shape.
-   Do not offer advisory mode as a bypass.
+   Do not continue outside the lifecycle as a bypass.
 
 Before `sdlc-status` exits 0 the agent MUST NOT enter any lifecycle phase, MUST
 NOT fire configured hooks, MUST NOT stamp panel agents, MUST NOT create or mutate
 tracker objects, and MUST NOT claim any gate as passed. This startup table is
 agent-executed prose law (ADR 0011): the script proves repository state; it does
-not claim to enforce agent behaviour. Advisory-mode behaviour is documented in
+not claim to enforce agent behaviour. Adoption semantics are documented in
 `references/system-reference.md`, "Adoption & readiness".
 
 ## The iron law (two tracks)
