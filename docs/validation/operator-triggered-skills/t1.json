@@ -1,0 +1,57 @@
+{
+  "schemaVersion": 1,
+  "taskId": "t1",
+  "buildPlan": "docs/plans/2026-09-24-operator-triggered-skills-build.md",
+  "repoRoot": ".",
+  "ownedScenarios": [],
+  "checks": [
+    {
+      "id": "tests.full",
+      "argv": ["npm", "test"],
+      "timeoutMs": 180000,
+      "scope": ["full"],
+      "evidence": ["whole unit corpus, including docs, disposition-ledger and skill-kernel contracts, passes"]
+    },
+    {
+      "id": "tests.task",
+      "argv": ["node", "--test", "test/operator-triggered-skills.test.js"],
+      "timeoutMs": 10000,
+      "scope": ["task"],
+      "evidence": ["operator-only descriptions, silent not-adopted branch, non-git as exit 1, no advisory mode"]
+    },
+    {
+      "id": "static.lint",
+      "argv": ["npx", "biome", "check", "."],
+      "timeoutMs": 30000,
+      "evidence": ["repository is Biome-clean"]
+    },
+    {
+      "id": "static.references",
+      "argv": ["node", "skills/sdlc/scripts/check-references.mjs"],
+      "timeoutMs": 10000,
+      "evidence": ["normative-reference inventory still covers every public artifact"]
+    }
+  ],
+  "categories": {
+    "tests": {
+      "applicability": "required",
+      "checkIds": ["tests.full", "tests.task"]
+    },
+    "static": {
+      "applicability": "required",
+      "checkIds": ["static.lint", "static.references"]
+    },
+    "scenarios": {
+      "applicability": "n/a",
+      "reason": "the approved reversible Plan has no Specification scenario ledger"
+    },
+    "standards": {
+      "applicability": "n/a",
+      "reason": "the focused contract test is the package-owned standard for this prose contract"
+    },
+    "bannedPatterns": {
+      "applicability": "n/a",
+      "reason": "the focused test already rejects the retired advisory and adoption-offer wording"
+    }
+  }
+}

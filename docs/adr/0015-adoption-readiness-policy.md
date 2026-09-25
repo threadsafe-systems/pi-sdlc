@@ -1,6 +1,7 @@
 # ADR 0015: adoption is the committed HEAD manifest; readiness is four-state
 
-- Amended by: [ADR 0023](0023-status-surface-fs8-v2.md)
+- Amended by: [ADR 0023](0023-status-surface-fs8-v2.md),
+  [ADR 0030](0030-operator-triggered-skills.md) (the agent's exit-1 branch)
 
 - Context: ADR 0010 defined opt-in as "the presence of a committed manifest",
   but the gate mechanically tested only filesystem presence, so untracked,

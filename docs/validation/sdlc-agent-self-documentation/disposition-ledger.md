@@ -34,13 +34,13 @@ anchor check.
 | S02 | Ready criteria; four mechanical states | retained | skills/sdlc/SKILL.md | proves this mechanically with four states |
 | S03 | Run the gate; branch on exit code | retained | skills/sdlc/SKILL.md | branch on its exit |
 | S04 | Exit 0 ready: announce + enumerate hooks/workflow | retained | skills/sdlc/SKILL.md | announce with the config's `announce` string |
-| S05 | Exit 1 not-adopted: no announce; offer setup/advisory | retained | skills/sdlc/SKILL.md | State the repo has not adopted the |
-| S06 | Exit 2 error: stop; never downgrade to advisory | retained | skills/sdlc/SKILL.md | An error is never silently downgraded to advisory mode |
+| S05 | Exit 1 not-adopted: no announce, no question, no mention of adoption; continue the task | retained | skills/sdlc/SKILL.md | do NOT announce and do NOT ask |
+| S06 | Exit 2 error: no git repository behaves as exit 1; otherwise stop, never a bypass | retained | skills/sdlc/SKILL.md | an error is never a reason to continue outside the |
 | S07 | Exit 3 not-ready: remediate; schema-current; no fold-forward | retained | skills/sdlc/SKILL.md | pre-adoption config fold-forward |
 | S08 | Before ready, MUST NOT enter phase/fire hooks/mutate tracker | retained | skills/sdlc/SKILL.md | MUST NOT create or mutate tracker objects |
 | S09 | Startup table is agent-executed prose law (ADR 0011) | retained | skills/sdlc/SKILL.md | agent-executed prose law (ADR 0011) |
-| S10 | Advisory mode is a one-session escape hatch | moved | skills/sdlc/references/system-reference.md | escape hatch when a repo has not opted in |
-| S11 | Advisory-mode behavioural rules | moved | skills/sdlc/references/system-reference.md | never claim the session runs |
+| S10 | Advisory mode is a one-session escape hatch | replaced | — | advisory mode is removed; not-adopted is silent (ADR 0030) |
+| S11 | Advisory-mode behavioural rules | replaced | — | advisory mode is removed, so its rules have no subject (ADR 0030) |
 | S12 | Iron law: backward always allowed, no sunk-cost | retained | skills/sdlc/SKILL.md | sunk cost of an earlier gate never justifies shipping a |
 | S13 | Irreversible definition | retained | skills/sdlc/SKILL.md | freezes a shape other code, data, or |
 | S14 | Irreversible track requires plan+spec panels | retained | skills/sdlc/SKILL.md | plan panel AND spec panel |

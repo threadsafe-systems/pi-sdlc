@@ -1,6 +1,6 @@
 ---
 name: sdlc-retro
-description: Post-mortem pipeline for the sdlc's lifecycle telemetry (FS13) — collect the run store into a distilled run.json, then render it as a single self-contained HTML dashboard. Use after a feature's implement/PR phases to see phase timing, cost, panel precision, human-wait, and rework for that run.
+description: Operator-triggered only. Load this skill only when the operator explicitly asks for an sdlc retro (/skill:sdlc-retro or a direct request); never load it on your own. Post-mortem pipeline for the sdlc's lifecycle telemetry (FS13) — collects the run store into a distilled run.json, then renders it as a single self-contained HTML dashboard of phase timing, cost, panel precision, human-wait, and rework for that run.
 ---
 
 # sdlc-retro

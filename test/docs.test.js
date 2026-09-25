@@ -95,11 +95,12 @@ test("FS9 and FS10 ADRs freeze the new surfaces", () => {
 
 const STARTUP_FRAGMENTS = {
 	"exit 0 (ready) branch": /\*\*Exit 0 \(`ready`\)\*\*:/,
-	"exit 1 (not-adopted) branch": /\*\*Exit 1 \(`not-adopted`\)\*\*: do NOT announce/,
+	"exit 1 (not-adopted) branch": /\*\*Exit 1 \(`not-adopted`\)\*\*: do NOT announce and do NOT ask/,
 	"exit 2 (error) branch": /\*\*Exit 2 \(`error`\)\*\*: do NOT announce/,
 	"exit 3 (not-ready) branch": /\*\*Exit 3 \(`not-ready`\)\*\*: do NOT announce/,
-	"error is never advisory": /never .*downgraded to advisory/,
-	"not-ready is not bypassed": /Do not\s+offer advisory mode as a bypass/,
+	"no-repository error is handled as not-adopted": /`root\.resolve` or\s+`git\.repository`[\s\S]*?handle it exactly as exit 1/,
+	"error is never a bypass": /an error is never a reason to continue outside the\s+lifecycle/,
+	"not-ready is not bypassed": /Do not\s+continue outside the lifecycle as a bypass/,
 	"prohibition: enter a phase": /MUST\s+NOT\s+enter\s+any\s+lifecycle\s+phase/,
 	"prohibition: fire hooks": /MUST\s+NOT\s+fire\s+configured\s+hooks/,
 	"prohibition: stamp agents": /MUST\s+NOT\s+stamp\s+panel\s+agents/,
@@ -108,7 +109,7 @@ const STARTUP_FRAGMENTS = {
 };
 
 test("AR10: all four startup branches and every prohibition are present and mutation-detectable", () => {
-	// scope to the startup block: the advisory section repeats some prohibitions
+	// scope to the startup block: other sections repeat some prohibitions
 	const start = skillMd.indexOf("## Readiness gate and announcement");
 	const end = skillMd.indexOf("## The iron law");
 	assert.ok(start >= 0 && end > start, "startup section must exist before the iron-law section");
