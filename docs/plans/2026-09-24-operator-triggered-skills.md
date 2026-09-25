@@ -89,8 +89,8 @@ Evidence gathered during the dialogue:
 - [solution decision] Rewrite the `SKILL.md` exit-1 (`not-adopted`) branch:
   do not announce, do not ask, do not mention adoption; set the sdlc aside and
   continue the task.
-- [solution decision] Exit 2 whose failing check is `root.resolve` or
-  `git.repository` is handled exactly as exit 1 (see "Amendments").
+- [solution decision] Exit 2 whose failing check is `root.resolve` is handled
+  exactly as exit 1 (see "Amendments").
 - [solution decision] Delete advisory mode from `SKILL.md` and
   `references/system-reference.md` §3, keeping the "exit 2 and exit 3 stop"
   rules without the advisory wording.
@@ -144,7 +144,7 @@ in use.
   adoption, and tells the agent to continue the task outside the lifecycle.
 - No text in `SKILL.md` or `references/system-reference.md` matches
   `/advisory mode/i`.
-- An exit 2 caused by `root.resolve` or `git.repository` is handled as exit 1;
+- An exit 2 caused by `root.resolve` is handled as exit 1;
   every other exit 2, and exit 3, still stops; all five pre-exit-0 prohibitions
   remain.
 - ADR 0030 exists with Context/Decision/Consequences; ADR 0010 and 0015 name it.
@@ -166,6 +166,8 @@ in use.
   it), not exit 1. The brainstorm premise that exit 2 only occurs in adopted
   repositories was false, so an agent in any non-git directory would still
   stop. Class **(b)**: the objective is unchanged and no frozen shape is
-  touched; the kernel's exit-2 branch now handles those two checks exactly as
-  exit 1. Disposition: amended in place. Author: the implementing agent
+  touched; the kernel's exit-2 branch now handles a `root.resolve` failure
+  exactly as exit 1. `git.repository` is not carved out: it also fails when
+  `git` cannot run or an explicit root is wrong, so an adopted repository can
+  produce it (PR panel round 1). Disposition: amended in place. Author: the implementing agent
   (anthropic/claude-opus-5-5).

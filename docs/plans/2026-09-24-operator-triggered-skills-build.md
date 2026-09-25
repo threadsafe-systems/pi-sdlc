@@ -58,8 +58,13 @@ T1 (policy prose + tests)  ── independent
     operator-only loading and carry neither the ambient phrase nor
     `disable-model-invocation`; the exit-1 branch forbids asking and mentioning
     adoption and names no `/setup-sdlc`; `SKILL.md` and `system-reference.md`
-    contain no `/advisory mode/i`. Each assertion is mutation-checked against a
-    reverted fixture string, as `docs.test.js` AR10 does.
+    contain no `/advisory mode/i`; the README states operator-only loading and
+    the silent unadopted path; ADR 0030 exists and is indexed from ADR 0010 and
+    0015. Each negative assertion is checked against a fixture that satisfies
+    every other assertion and carries only the forbidden text. `sdlc-status`
+    runs in a temp non-git directory (expects `root.resolve` error) and in this
+    repository with `git` off `PATH` (expects `root.resolve` pass and
+    `git.repository` error), pinning the exit-2 carve-out to real behaviour.
   - `npx biome check .` (static, offline, <10s).
   - `node skills/sdlc/scripts/check-references.mjs` (static, offline, <5s).
 - **DoD:** every Plan Definition-of-done bullet; `npm run test:e2e` green run
@@ -89,20 +94,25 @@ coverage.
   by hand before the PR, and the `e2e` workflow runs it on the PR.
 - **A3 — below the tracker threshold.** One task against a committed
   `shape.publishToTracker` of 2, so no epic or sub-issues are minted.
-- **A5 — surfaces discovered at Implement.** Three files outside T1's list
-  pinned the old text and had to move with it:
-  `docs/validation/sdlc-agent-self-documentation/disposition-ledger.md` (S05 and
-  S06 re-anchored; S10 and S11 advisory rows marked `replaced`), and
-  `skills/sdlc/SKILL.md`'s 220-line ceiling in `test/skill-kernel.test.js`,
-  met by tightening the new prose rather than raising the ceiling.
+- **A5 — surfaces discovered at Implement.** Two surfaces outside T1's list
+  moved with the change. The disposition ledger
+  `docs/validation/sdlc-agent-self-documentation/disposition-ledger.md` quoted
+  the old exit-1 and exit-2 text: S05 is now `replaced`, S06 is re-anchored,
+  and the S10 and S11 advisory rows are `replaced`. `test/skill-kernel.test.js`
+  caps `SKILL.md` at 220 lines; the new prose was tightened to fit rather than
+  raising the cap.
 - **A6 — a YAML hazard in the description.** The first rewrite of the `sdlc`
   description contained `it: sequences`; pi parses frontmatter as YAML, so
   the unquoted `: ` made pi drop the skill and every e2e L2 scenario locked at
   the discovery gate. Fixed in the text, and the focused test now rejects `: `
   in an unquoted description.
-- **A7 — exit-2 amendment.** The Plan's in-place amendment (non-git
-  directories handled as exit 1) lands in T1: kernel exit-2 branch,
-  system-reference §3, README, ADR 0030, and a focused-test case.
+- **A7 — exit-2 amendment.** The Plan's in-place amendment lands in T1:
+  kernel exit-2 branch, system-reference §3, README, ADR 0030 and ADR 0015's
+  amendment note, and focused tests. Only `root.resolve` is carved out;
+  `git.repository` still stops, because it also fails when `git` cannot run or
+  an explicit root is wrong, which an adopted repository can produce. The
+  templates pass `--repo-root .`, so `root.resolve` never fails there and their
+  stop-on-exit-2 rule still matches the kernel.
 - **A4 — release type.** `feat:`; no config shape changes, so the ADR 0021
   release guard does not apply.
 

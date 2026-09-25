@@ -49,11 +49,13 @@ branch table and its exit codes; this reference does not restate the FS8 check
 ids or exits.
 
 Adoption is an operator decision, never an agent's. Both skills load only on an
-explicit operator request. In a repository that has not adopted the sdlc — or a
-directory that is not a git repository at all — the agent sets the lifecycle
-aside without announcing, asking, or mentioning adoption, and continues the task.
-There is no partial or session-only lifecycle. An operator adopts with
-`/setup-sdlc` (see §8).
+explicit operator request. When the kernel's startup gate reports `not-adopted`,
+or an `error` whose failing check is `root.resolve` (no manifest or git
+repository encloses the working directory), the agent sets the lifecycle aside
+without announcing, asking, or mentioning adoption, and continues the task. Every
+other `error`, and `not-ready`, stops. The standalone `/sdlc-*` commands keep
+their own unadopted sampling path, since only the operator invokes them. An
+operator adopts with `/setup-sdlc` (see §8).
 
 ## 4. Tracks, phases, transitions, gates, refusal
 

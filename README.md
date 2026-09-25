@@ -48,12 +48,12 @@ mechanical four-state gate: exit 0 `ready`, 1 `not-adopted`, 2 `error`, 3
 `not-ready`. Adoption means the **current git `HEAD`** contains
 `.pi/sdlc/sdlc.config.json` — a file merely on disk is not adoption — and
 readiness (exit 0) additionally requires that manifest clean and valid with a
-merged `panels` roster. In a repo whose `HEAD` has no manifest, or a directory
-that is not a git repository, the agent sets the lifecycle aside silently and
-carries on with the task: it never asks whether to adopt. Adoption is your
-decision, and the fastest way to make it is the `/setup-sdlc` scaffolder, which interviews you (identity,
-optional tracker, optional worktree and notification hooks) and writes the
-manifest — then commit `.pi/sdlc/` to actually adopt.
+merged `panels` roster. In a repo whose `HEAD` has no manifest, or a working
+directory outside any git repository, the agent sets the lifecycle aside
+silently and carries on with the task: it never asks whether to adopt. Adoption
+is your decision, and the fastest way to make it is the `/setup-sdlc`
+scaffolder, which interviews you (identity, optional tracker, optional worktree
+and notification hooks) and writes the manifest — then commit `.pi/sdlc/` to actually adopt.
 
 ### Migrating callers of the old two-state status
 

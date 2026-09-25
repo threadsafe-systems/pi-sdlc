@@ -37,10 +37,9 @@ code (prefer `--format json` when parsing):
    the sdlc or its adoption (no offer, no question, no pause); set the lifecycle
    aside and continue the task outside it. Adoption is the operator's decision.
 4. **Exit 2 (`error`)**: do NOT announce. When the failing check is
-   `root.resolve` or `git.repository`, there is no git repository that could have
-   adopted the sdlc: handle it exactly as exit 1. Otherwise surface the report's
-   diagnostics and stop; an error is never a reason to continue outside the
-   lifecycle.
+   `root.resolve` (no manifest or git repository encloses the working directory),
+   handle it exactly as exit 1. Otherwise surface the report's diagnostics and
+   stop; an error is never a reason to continue outside the lifecycle.
 5. **Exit 3 (`not-ready`)**: do NOT announce. State the repo is adopted but
    incomplete, list the report's remediations, and stop. When
    `config.schema-current` is failing, the sanctioned actions are to pin the older
