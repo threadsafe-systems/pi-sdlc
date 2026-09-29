@@ -27,7 +27,7 @@ code (prefer `--format json` when parsing):
 
 1. In pi, run `scripts/sdlc-status.sh [--repo-root DIR] [--format text|json]`
    relative to this loaded skill (headless: `node <skill-dir>/scripts/sdlc-status.mjs`),
-   with cwd inside the consumer repo or pass `--repo-root`.
+   from the task's working directory, without `--repo-root`.
 2. **Exit 0 (`ready`)**: emit the `run.started` telemetry event (FS13, see the
    telemetry directive below), announce with the config's `announce` string, then
    enumerate each configured hook (phase, timing, kind) and each top-level rule of
@@ -39,7 +39,7 @@ code (prefer `--format json` when parsing):
 4. **Exit 2 (`error`)**: do NOT announce. When the failing check is
    `root.resolve` (no manifest or git repository encloses the working directory),
    handle it exactly as exit 1. Otherwise surface the report's diagnostics and
-   stop; an error is never a reason to continue outside the lifecycle.
+   stop; any other error is never a reason to continue outside the lifecycle.
 5. **Exit 3 (`not-ready`)**: do NOT announce. State the repo is adopted but
    incomplete, list the report's remediations, and stop. When
    `config.schema-current` is failing, the sanctioned actions are to pin the older

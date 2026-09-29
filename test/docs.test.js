@@ -99,7 +99,7 @@ const STARTUP_FRAGMENTS = {
 	"exit 2 (error) branch": /\*\*Exit 2 \(`error`\)\*\*: do NOT announce/,
 	"exit 3 (not-ready) branch": /\*\*Exit 3 \(`not-ready`\)\*\*: do NOT announce/,
 	"no-repository error is handled as not-adopted": /failing check is\s+`root\.resolve`[\s\S]*?handle it exactly as exit 1/,
-	"error is never a bypass": /an error is never a reason to continue outside the\s+lifecycle/,
+	"error is never a bypass": /any other error is never a reason to continue outside the\s+lifecycle/,
 	"not-ready is not bypassed": /Do not\s+continue outside the lifecycle as a bypass/,
 	"prohibition: enter a phase": /MUST\s+NOT\s+enter\s+any\s+lifecycle\s+phase/,
 	"prohibition: fire hooks": /MUST\s+NOT\s+fire\s+configured\s+hooks/,

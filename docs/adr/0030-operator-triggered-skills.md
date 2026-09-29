@@ -26,7 +26,9 @@
   only when no explicit root was passed and neither a manifest nor a git
   repository encloses the working directory. `git.repository` also fails when
   `git` cannot run or an explicit root is wrong, so an adopted repository can
-  produce it; it still stops. Advisory mode is removed. Other exit-2 causes and
+  produce it; it still stops. The kernel runs `sdlc-status` from the working
+  directory without `--repo-root`, because an explicit root always passes
+  `root.resolve`. Advisory mode is removed. Other exit-2 causes and
   exit 3 still stop, and the pre-exit-0 prohibitions are unchanged.
   `sdlc-status` states, exits, and check ids do not change. The standalone
   `/sdlc-*` commands keep their unadopted sampling path, since only the
@@ -37,6 +39,10 @@
   `/skill:sdlc` in an unadopted repository gets no acknowledgement that the
   lifecycle did not start; the agent simply does the task. Operator triggering
   rests on description wording, which a model can ignore; the cost of that
-  failure in an unadopted repository is one silent status check. Outside the
+  failure in an unadopted repository is one silent status check.
+  `root.resolve` looks for the manifest on disk before asking `git`, so an
+  adopted repository whose working tree has lost the manifest, on a host where
+  `git` cannot run, is also set aside silently; CI's `check-lifecycle` still
+  gates its PRs. Outside the
   standalone commands, there is no sanctioned way to follow the lifecycle as
   non-binding guidance in an unadopted repository.

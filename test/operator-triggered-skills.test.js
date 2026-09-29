@@ -73,7 +73,7 @@ test("the not-adopted branch neither asks nor mentions adoption, and continues t
 
 test("only a root.resolve error is handled as not-adopted; git.repository errors still stop", () => {
 	assertContract("exit-2 branch", between(skillMd, "**Exit 2 (`error`)**", "**Exit 3 (`not-ready`)**"), {
-		required: [/failing check is\s+`root\.resolve`/, /handle it exactly as exit 1/, /Otherwise surface the report's diagnostics and\s+stop/],
+		required: [/failing check is\s+`root\.resolve`/, /handle it exactly as exit 1/, /Otherwise surface the report's diagnostics and\s+stop/, /any other error is never a reason to continue outside the lifecycle/],
 		forbidden: ["`git.repository`"],
 	});
 });
@@ -95,7 +95,16 @@ test("sdlc-status fails root.resolve in a working directory outside any git repo
 	}
 });
 
-test("sdlc-status in an adopted repository with git unavailable fails git.repository, not root.resolve", () => {
+// An explicit --repo-root always passes root.resolve, so the carve-out only
+// applies when the gate runs from the working directory without one.
+test("the startup gate runs sdlc-status from the working directory without --repo-root", () => {
+	assertContract("startup step 1", between(skillMd, "1. In pi, run", "2. **Exit 0 (`ready`)**"), {
+		required: [/from the task's working directory, without `--repo-root`/],
+		forbidden: ["or pass `--repo-root`"],
+	});
+});
+
+test("sdlc-status with the manifest on disk and git unavailable fails git.repository, not root.resolve", () => {
 	const emptyPath = mkdtempSync(join(tmpdir(), "sdlc-nopath-"));
 	try {
 		const { exit, check } = runStatus(repo, { PATH: emptyPath, HOME: emptyPath });

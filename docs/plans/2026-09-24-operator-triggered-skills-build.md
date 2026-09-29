@@ -111,8 +111,11 @@ coverage.
   amendment note, and focused tests. Only `root.resolve` is carved out;
   `git.repository` still stops, because it also fails when `git` cannot run or
   an explicit root is wrong, which an adopted repository can produce. The
-  templates pass `--repo-root .`, so `root.resolve` never fails there and their
-  stop-on-exit-2 rule still matches the kernel.
+  kernel runs `sdlc-status` without `--repo-root`; the templates pass
+  `--repo-root .`, so `root.resolve` never fails there and their stop-on-exit-2
+  rule still holds. The remaining two-fault case (manifest missing from the
+  working tree and `git` unrunnable) is recorded in the Plan amendment and ADR
+  0030.
 - **A4 — release type.** `feat:`; no config shape changes, so the ADR 0021
   release guard does not apply.
 

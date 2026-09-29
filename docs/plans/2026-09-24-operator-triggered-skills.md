@@ -169,5 +169,13 @@ in use.
   touched; the kernel's exit-2 branch now handles a `root.resolve` failure
   exactly as exit 1. `git.repository` is not carved out: it also fails when
   `git` cannot run or an explicit root is wrong, so an adopted repository can
-  produce it (PR panel round 1). Disposition: amended in place. Author: the implementing agent
+  produce it. The kernel runs `sdlc-status` from the working directory without
+  `--repo-root`, since an explicit root always passes `root.resolve`. One risk
+  remains: `root.resolve` looks for the manifest on disk before asking `git`,
+  so a repository whose `HEAD` carries the manifest but whose working tree has
+  lost it, on a host where `git` cannot run, also fails `root.resolve` and is
+  set aside silently. Both faults must occur together, and CI's
+  `check-lifecycle` still gates that repository's PRs. Closing it needs a
+  change to the frozen `sdlc-status` and is out of scope. Disposition: amended
+  in place. Author: the implementing agent
   (anthropic/claude-opus-5-5).
