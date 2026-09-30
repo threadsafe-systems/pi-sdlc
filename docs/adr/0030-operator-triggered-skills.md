@@ -3,8 +3,8 @@
 - Status: accepted
 - Date: 2026-09-25
 - Amends: ADR 0010 (the exit-1 offer), ADR 0015 (the exit-1 branch, and a
-  root outside any git repository is `not-adopted`), ADR 0023 (the same
-  classification in the FS8 surface)
+  root outside any git repository is `not-adopted`), ADR 0016 and ADR 0023
+  (the same classification in the FS8 surface)
 
 - Context: pi-sdlc is usually installed globally, so its skills are listed in
   every session. The `sdlc` description told agents to load it "at the start of
@@ -28,13 +28,21 @@
   exit 3 still stops, and the pre-exit-0 prohibitions are unchanged.
   `sdlc-status` reports a root outside any git repository as `not-adopted`
   (`root.resolve` pass, `git.repository` fail, exit 1), but only when the
-  filesystem proves it: the root is an existing directory, `$GIT_DIR` is unset,
-  and neither the root nor any ancestor, on its given or symlink-resolved path,
-  holds a `.git` entry or is itself a git directory. The proof never runs git,
-  so a repository git cannot use still reports `error`. This holds however the
-  root is given (working directory, `--repo-root`, or `$SDLC_ROOT`).
+  filesystem proves it for both the root and the working directory: each is an
+  existing directory, none of `$GIT_DIR`, `$GIT_WORK_TREE` or `$GIT_COMMON_DIR`
+  is set, and neither they nor any ancestor, on its given or symlink-resolved
+  path, holds a `.git` entry or looks like a git directory. The working
+  directory is proved too because an on-disk manifest above a repository,
+  `core.worktree`, or a mistaken explicit root can point the root away from the
+  repository the caller is in. The proof never runs git, so a repository git
+  cannot use still reports `error`. This holds however the root is given
+  (working directory, `--repo-root`, or `$SDLC_ROOT`).
   `sdlc-status` exit codes, state names, check ids, and output shape do not
-  change; a manifest on disk outside git is still not adoption. The standalone
+  change; a manifest on disk outside git is still not adoption. The FS8 schema
+  version stays 2: `fail` is already a valid status for every check, and no
+  field changes. What changes is a classification ADR 0016 fixed — the FS8
+  spec made `git.repository` error-only and `adoption.manifest-head:fail` the
+  sole not-adopted trigger — so this ADR amends ADR 0016 as well. The standalone
   `/sdlc-*` commands keep their unadopted sampling path, since only the
   operator invokes them.
 - Consequences: adoption is purely an operator action. Adopted repositories no

@@ -137,8 +137,10 @@ anchor discipline as above.
 
 ## Intentionally replaced
 
-None. Every pre-change (`d528b97` baseline) normative statement and red flag is
-retained in the kernel/router or moved to exactly one reference. New additions in
+Three rows: S05, S10 and S11, replaced by ADR 0030 when the not-adopted offer
+and advisory mode were removed. Every other pre-change (`d528b97` baseline)
+normative statement and red flag is retained in the kernel/router or moved to
+exactly one reference. New additions in
 the restructured `SKILL.md` (e.g. the startup freshness check and its
 `CONFIG.md`-prose-vs-JSON red flag) are net-new to this stream and are not ledger
 rows, which map pre-change statements only. Content that landed on `main` after

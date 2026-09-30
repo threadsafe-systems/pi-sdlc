@@ -48,7 +48,7 @@ test("ASD19: frozen surfaces are byte-identical to the branch base", () => {
 	assert.equal(changed, "", `frozen surfaces changed since ${base}:\n${changed}`);
 });
 
-test("ASD19: FS8/FS9 check ids remain present in their frozen scripts", () => {
+test("ASD19: FS8/FS9 check ids remain present in their scripts", () => {
 	const status = execFileSync("git", ["-C", repo, "show", "HEAD:skills/sdlc/scripts/sdlc-status.mjs"], { encoding: "utf8" });
 	for (const id of ["adoption.manifest-head", "config.valid", "workflow.readable"]) assert.ok(status.includes(id), `FS8 id missing: ${id}`);
 });

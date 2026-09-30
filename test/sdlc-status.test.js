@@ -9,7 +9,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { test } from "node:test";
 
-import { baseEnv, gitFixture, readyFixture, runStatus, VALID_CONFIG } from "./fs8-helpers.js";
+import { baseEnv, git, gitFixture, readyFixture, runStatus, VALID_CONFIG } from "./fs8-helpers.js";
 
 const CANONICAL_IDS = ["cli.arguments", "root.resolve", "git.repository", "adoption.manifest-head", "adoption.manifest-clean", "config.valid", "config.schema-current", "config.panels", "workflow.readable"];
 const OLDER_REMEDY = "config schemaVersion 1 predates this skill (requires 3) — re-run setup-sdlc to write a fresh v3 config (--force to replace an existing one), or pin pi-sdlc to the release that wrote it; there is no pre-adoption fold-forward path";
@@ -260,7 +260,7 @@ test("a directory outside any git repository is not-adopted however the root is 
 		const noGit = mk("sdlc-nopath-");
 		assertNotAdoptedOutsideGit(runStatus(["--format", "json"], { cwd: dir }), "cwd");
 		assertNotAdoptedOutsideGit(runStatus(["--repo-root", ".", "--format", "json"], { cwd: dir }), "--repo-root .");
-		assertNotAdoptedOutsideGit(runStatus(["--repo-root", dir, "--format", "json"]), "--repo-root absolute");
+		assertNotAdoptedOutsideGit(runStatus(["--repo-root", dir, "--format", "json"], { cwd: tmpdir() }), "--repo-root absolute");
 		assertNotAdoptedOutsideGit(runStatus(["--format", "json"], { cwd: tmpdir(), env: baseEnv({ SDLC_ROOT: dir }) }), "$SDLC_ROOT");
 		assertNotAdoptedOutsideGit(runStatus(["--format", "json"], { cwd: dir, env: baseEnv({ PATH: noGit }) }), "git not on PATH");
 		assert.equal(reportOf(runStatus(["--format", "json"], { cwd: dir })).root, dir);
@@ -305,6 +305,46 @@ test("a repository git cannot use is an error, not not-adopted", () => {
 		symlinkSync(join(repo, "sub"), join(links, "sub"));
 		assertStatusError(runStatus(["--repo-root", join(links, "sub"), "--format", "json"], { env: baseEnv({ PATH: noGit }) }), "symlink into a repository, git not on PATH");
 		for (const dir of [adopted, repo]) rmSync(dir, { recursive: true, force: true });
+	});
+});
+
+test("a root outside git that points away from the caller's repository is an error", () => {
+	withTempDirs((mk) => {
+		const outside = mk("sdlc-outside-");
+		const repo = readyFixture();
+		rmSync(join(repo, ".pi", "sdlc", "sdlc.config.json"));
+		try {
+			assertStatusError(runStatus(["--repo-root", outside, "--format", "json"], { cwd: repo }), "explicit non-git root from inside a repository");
+			assertStatusError(runStatus(["--format", "json"], { cwd: repo, env: baseEnv({ SDLC_ROOT: outside }) }), "$SDLC_ROOT outside git from inside a repository");
+			assertStatusError(runStatus(["--format", "json"], { cwd: repo, env: baseEnv({ GIT_WORK_TREE: outside }) }), "$GIT_WORK_TREE outside the repository");
+			git(repo, ["config", "core.worktree", outside]);
+			assertStatusError(runStatus(["--format", "json"], { cwd: repo }), "core.worktree outside the repository");
+		} finally {
+			rmSync(repo, { recursive: true, force: true });
+		}
+
+		for (const name of ["GIT_WORK_TREE", "GIT_COMMON_DIR"]) {
+			assertStatusError(runStatus(["--format", "json"], { cwd: outside, env: baseEnv({ [name]: outside }) }), `$${name} set`);
+		}
+
+		const outer = mk("sdlc-outer-");
+		mkdirSync(join(outer, ".pi", "sdlc"), { recursive: true });
+		writeFileSync(join(outer, ".pi", "sdlc", "sdlc.config.json"), JSON.stringify(VALID_CONFIG));
+		const nested = join(outer, "proj");
+		mkdirSync(join(nested, ".pi", "sdlc"), { recursive: true });
+		writeFileSync(join(nested, ".pi", "sdlc", "sdlc.config.json"), JSON.stringify(VALID_CONFIG));
+		git(nested, ["init", "-q"]);
+		git(nested, ["add", "-A"]);
+		git(nested, ["commit", "-q", "-m", "adopt"]);
+		rmSync(join(nested, ".pi", "sdlc", "sdlc.config.json"));
+		assertStatusError(runStatus(["--format", "json"], { cwd: nested }), "manifest outside git above an adopted repository");
+
+		const common = mk("sdlc-common-");
+		execFileSync("git", ["init", "-q", "--bare", common]);
+		const linked = mk("sdlc-linked-gitdir-");
+		writeFileSync(join(linked, "HEAD"), "ref: refs/heads/main\n");
+		writeFileSync(join(linked, "commondir"), `${common}\n`);
+		assertStatusError(runStatus(["--repo-root", linked, "--format", "json"], { cwd: tmpdir() }), "gitdir with a commondir file");
 	});
 });
 

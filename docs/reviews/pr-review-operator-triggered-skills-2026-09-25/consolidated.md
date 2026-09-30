@@ -67,3 +67,25 @@ confirmed PR-R2-01..05 as landed; luna returned no findings.
 
 No finding was dismissed. Round 4 reviews the whole change set, since the
 `sdlc-status` change reshapes the PR.
+
+## Round 4
+
+Full review: `origin/main...5f8662d`
+
+Reviewers (harvest label `pr_review-round4`): the same three models. Fable
+confirmed PR-R3-01..07 as landed.
+
+| ID | Severity | Origin | Class | Finding | Raised by | Disposition |
+|---|---|---|---|---|---|---|
+| PR-R4-01 | high | NEW | fail-open safety gap | `$GIT_WORK_TREE` or `core.worktree` pointing outside the repository moves the resolved root there; the proof checked only the root, so an adopted repository whose manifest was deleted reported `not-adopted`. Reproduced. | luna | **incorporated** — the proof must hold for the working directory as well as the root, and `$GIT_WORK_TREE` or `$GIT_COMMON_DIR` set makes absence unprovable; each case is pinned by a test. |
+| PR-R4-02 | medium | NEW | fail-open safety gap | An on-disk manifest in a non-git ancestor wins the FS3 walk over a nested adopted repository whose own manifest was deleted; the proof then held for that ancestor and the report was `not-adopted`. Reproduced. | fable, sol | **incorporated** — same fix: the working directory sits inside the repository, so the result is `error`. Pinned by a test. |
+| PR-R4-03 | medium | NEW | fail-open safety gap | A gitdir holding `HEAD` and a `commondir` file (a linked worktree's gitdir) did not look like a git directory, so it was proven absent. Reproduced. | sol | **incorporated** — a HEAD beside `objects/`, `refs/` or `commondir` counts as a git directory. Pinned by a test. |
+| PR-R4-04 | medium | NEW | stale caller guidance | README's caller-migration section still said non-git roots exit 2, and `test/docs.test.js` pinned that wording. | fable, sol, luna | **incorporated** — the section and its test fragments now state exit 1 for a root outside git and exit 2 for a repository git cannot use. |
+| PR-R4-05 | medium | NEW | unrecorded contract change | ADR 0016 and the FS8 spec fix `git.repository` as error-only with `adoption.manifest-head:fail` the sole not-adopted trigger; ADR 0030 neither amended them nor said why no schema bump. | fable | **incorporated** — ADR 0016 and the spec carry "Amended by ADR 0030" notes; ADR 0030 states why the schema version stays 2; the aggregate comment cites the amendment. |
+| PR-R4-06 | low | NEW | inaccurate audit record | The ledger's "Intentionally replaced" section said none were replaced while S05, S10 and S11 are `replaced`. | sol | **incorporated** — the section names the three rows. |
+| PR-R4-07 | low | NEW | inaccurate audit record | The Build's decomposition rationale still said "One task" and "Every edit is prose". | sol | **incorporated** — it describes T1 and T2. |
+| PR-R4-08 | low | REOPENED(PR-R2-05) | process provenance | The Plan's second amendment cited panel finding ids as its trigger. | fable, sol | **incorporated** — the trigger states the behavioural reason only. |
+| PR-R4-09 | low | NEW | inaccurate audit record | An ASD19 test name still called `sdlc-status.mjs` a frozen script. | fable | **incorporated** — renamed. |
+
+No finding was dismissed. Round 5 is a delta review of the fixes.
+

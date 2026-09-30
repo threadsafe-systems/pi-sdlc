@@ -180,16 +180,19 @@ in use.
   Superseded by the next amendment. Author: the implementing agent
   (anthropic/claude-opus-5-5).
 - **2026-09-25 — `sdlc-status` proves the absence of a repository.** Trigger:
-  PR panel findings PR-R2-01, PR-R3-01 and PR-R3-02 showed that no reading of exit 2 in the
-  kernel is safe. `root.resolve` and `git.repository` both fail for a missing
+  no reading of exit 2 in the kernel is safe. `root.resolve` and `git.repository` both fail for a missing
   repository and for a repository git cannot use (git missing, dubious
   ownership, a pruned worktree), and forbidding `--repo-root` stranded
   monorepo-subdirectory consumers. Class **(a)**: it changes the classification
   in the frozen `sdlc-status` surface, so the Plan gate re-runs. Change:
   `sdlc-status` reports `root.resolve:pass`, `git.repository:fail`, state
-  `not-adopted`, exit 1 when it proves no git repository encloses the root: no
-  `.git` entry in the root or any ancestor (logical and physical path), no
-  `GIT_DIR`, and the root is an existing directory. Anything short of that
+  `not-adopted`, exit 1 when it proves no git repository encloses the root or
+  the working directory: both are existing directories, neither they nor any
+  ancestor (logical and physical path) holds a `.git` entry or looks like a
+  git directory, and no `GIT_DIR`, `GIT_WORK_TREE` or `GIT_COMMON_DIR` is set.
+  The working directory is proved too because an on-disk manifest above a
+  repository, `core.worktree`, or a mistaken explicit root can point the root
+  away from the repository the caller is in. Anything short of that
   proof keeps today's `error`. The kernel drops its exit-2 exception and
   restores `--repo-root`. Exit codes, state names, check ids, and the output
   shape do not change; a manifest on disk outside git still never counts as

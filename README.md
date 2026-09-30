@@ -65,9 +65,10 @@ exits:
   exit 3 until the merged config is committed, clean, and carries `panels`.
 - Exit 3 is new (adopted but incomplete or dirty); shell callers must branch
   on 0/1/2/3 explicitly.
-- Non-git roots move to exit 2: they historically exited 1 without a manifest
-  and 0 with a valid one. Non-git consumers must adopt inside a git
-  repository.
+- Non-git roots exit 1 (`not-adopted`, with `git.repository` failing) when
+  neither the root nor the working directory is inside any git repository;
+  historically they exited 0 with a valid manifest. A repository git cannot
+  use exits 2. Non-git consumers must adopt inside a git repository.
 - The legacy text summary keys (`opted-in:`, `prefix:`, `labelPrefix:`,
   `hooks:`, `workflow:`, `models:`) are removed; parse the FS8 `check:` lines
   or preferably `--format json`.

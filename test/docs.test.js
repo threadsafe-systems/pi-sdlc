@@ -133,8 +133,9 @@ test("AR10: docs never equate manifest presence with readiness or claim mechanic
 
 const MIGRATION_FRAGMENTS = {
 	"former exit 0 may become exit 3": /may now\s+exit 3/,
-	"non-git roots move to exit 2": /non-git .*exit 2/i,
-	"non-git historic exit 1 and 0": /exited\s+1\s+without\s+a\s+manifest\s+and\s+0\s+with/,
+	"non-git roots exit 1": /Non-git roots exit 1 \(`not-adopted`/,
+	"non-git historic exit 0": /historically they exited\s+0\s+with\s+a\s+valid\s+manifest/,
+	"unusable repository exits 2": /A repository git cannot\s+use exits 2/,
 	"exit 3 is new": /exit 3 is new/i,
 	"explicit 0\\/1\\/2\\/3 branching": /branch\s+on\s+0\/1\/2\/3\s+explicitly/,
 	"legacy keys removed": /`opted-in:`.*removed|legacy text .*keys .*removed|legacy .*summary keys/,

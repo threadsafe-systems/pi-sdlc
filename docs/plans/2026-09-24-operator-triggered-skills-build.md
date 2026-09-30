@@ -9,10 +9,10 @@ Every task's Definition of Done includes the code-prose pass owned by
 
 ## Decomposition rationale
 
-One task. Every edit is prose in service of one policy, and the kernel, the
-system reference, the README, the ADRs and the tests that pin them must change
-together: splitting them would leave an intermediate commit where the docs test
-asserts wording that no longer exists. The Plan's pre-mortem destinations
+Two tasks. T1 is prose in service of one policy: the kernel, the system
+reference, the README, the ADRs and the tests that pin them must change
+together, since splitting them would leave an intermediate commit where the
+docs test asserts wording that no longer exists. The Plan's pre-mortem destinations
 ("Build task 1/2/3") land in T1, except the no-repository proof risk, which
 lands in T2.
 
@@ -88,9 +88,11 @@ T2 (sdlc-status proves no repository) ── independent; T1's kernel wording re
     non-git cases and the AR8 root-fallback fixture.
 - **Does:**
   - Reports `root.resolve:pass`, `git.repository:fail`, `not-adopted`, exit 1
-    when the root is an existing directory, `$GIT_DIR` is unset, and no `.git`
-    entry or git directory exists at the root or any ancestor on its given or
-    symlink-resolved path. The proof runs no git.
+    when the root and the working directory are both existing directories
+    with no `.git` entry or git directory (a HEAD beside `objects/`, `refs/`
+    or a `commondir` file) at themselves or any ancestor on their given or
+    symlink-resolved paths, and none of `$GIT_DIR`, `$GIT_WORK_TREE` or
+    `$GIT_COMMON_DIR` is set. The proof runs no git.
   - Leaves every other root or git failure as `error`, exit 2.
   - Changes no exit code, state name, check id, or output field.
 - **Scenarios owned:** none — reversible track, no Spec.
@@ -103,8 +105,13 @@ T2 (sdlc-status proves no repository) ── independent; T1's kernel wording re
     outside git; exit 2 for an adopted repository whose manifest was deleted
     with `git` off `PATH` or under dubious ownership, an explicit root with
     `git` off `PATH`, a broken `.git` file, a bare repository, `$GIT_DIR` set,
-    a symlink into a repository, and a missing explicit root; AR8's root
-    fallback still reports the working directory.
+    a symlink into a repository, and a missing explicit root; exit 2 when
+    the root points away from the caller's repository (an explicit or
+    `$SDLC_ROOT` root, `$GIT_WORK_TREE`, `core.worktree`, or an on-disk
+    manifest above an adopted repository whose own manifest was deleted),
+    for a gitdir with a `commondir` file, and with `$GIT_WORK_TREE` or
+    `$GIT_COMMON_DIR` set; AR8's root fallback still reports the working
+    directory.
   - `npx biome check .` (static, offline, <10s).
   - `node skills/sdlc/scripts/check-references.mjs` (static, offline, <5s).
 - **DoD:** the Plan's `sdlc-status` Definition-of-done bullet;

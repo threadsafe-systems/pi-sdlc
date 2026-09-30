@@ -94,8 +94,11 @@ test("the README states operator-only loading and the silent unadopted path", ()
 	});
 });
 
-test("ADR 0030 records the decision and ADRs 0010 and 0015 point to it", () => {
+test("ADR 0030 records the decision and the ADRs it amends point to it", () => {
 	assert.ok(existsSync(join(repo, "docs/adr/0030-operator-triggered-skills.md")));
 	assertContract("ADR 0010", read("docs/adr/0010-opt-in-semantics.md"), { required: [/removed by ADR 0030/] });
 	assertContract("ADR 0015", read("docs/adr/0015-adoption-readiness-policy.md"), { required: [/\[ADR 0030\]\(0030-operator-triggered-skills\.md\)/] });
+	for (const adr of ["0016-status-surface-fs8.md", "0023-status-surface-fs8-v2.md"]) {
+		assertContract(`ADR ${adr.slice(0, 4)}`, read(`docs/adr/${adr}`), { required: [/Amended by:[\s\S]*\[ADR 0030\]\(0030-operator-triggered-skills\.md\)/] });
+	}
 });
