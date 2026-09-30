@@ -2,10 +2,10 @@
   "schemaVersion": 1,
   "taskId": "t2",
   "model": "anthropic/claude-haiku-4-5-20251001",
-  "createdAt": "2026-09-30T15:21:15Z",
+  "createdAt": "2026-09-30T15:39:16Z",
   "manifestPath": "docs/validation/operator-triggered-skills/t2.json",
   "manifestSha256": "94db5af46dd5128a3542cbc38e225630f530b31825ffabd80ef708fde52ed270",
-  "runnerReportSha256": "bb6919f041f267f446a8bf89f11004cc12b1ebecc91b2b7ba7056d788808926e",
+  "runnerReportSha256": "ae623f0e3769ddf299ecfbb4b58a27564a8ae7d08225c9391f6cbdb3b2d93b86",
   "generatedAgentSha256": "979025830b6277eb006c893dc0376b81bf65b9a03bb67b39d0c1dee294f9a1f8",
   "runnerVerdict": "PASS",
   "validatorVerdict": "PASS"
