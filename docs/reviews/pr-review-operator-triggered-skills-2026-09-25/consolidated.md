@@ -33,8 +33,9 @@ No finding was dismissed. Round 2 receives only this fix-wave delta.
 
 Delta: `658879c..f2d2860`
 
-Reviewers (harvest label `pr_review-round2`): the same three models. All
-confirmed every round-1 fix. Round-2 reviewer output cites round-1 findings by
+Reviewers (harvest label `pr_review-round2`): the same three models. Fable
+confirmed each round-1 fix line by line; the table records two round-1
+findings reopened (PR-R2-01, PR-R2-04). Round-2 reviewer output cites round-1 findings by
 the ids `OT-R1-nn`, which map one-to-one to `PR-R1-nn` above.
 
 | ID | Severity | Origin | Class | Finding | Raised by | Disposition |
@@ -46,3 +47,23 @@ the ids `OT-R1-nn`, which map one-to-one to `PR-R1-nn` above.
 | PR-R2-05 | low | NEW | process provenance in governing doc | The Plan amendment cited "PR panel round 1". | sol | **incorporated** — removed; the behavioural reason stands on its own. |
 
 No finding was dismissed. Round 3 receives only this fix-wave delta.
+
+## Round 3
+
+Delta: `f2d2860..c8c5a60`
+
+Reviewers (harvest label `pr_review-round3`): the same three models. Fable
+confirmed PR-R2-01..05 as landed; luna returned no findings.
+
+| ID | Severity | Origin | Class | Finding | Raised by | Disposition |
+|---|---|---|---|---|---|---|
+| PR-R3-01 | medium | NEW | fail-open safety gap | Forbidding `--repo-root` in the kernel strands a monorepo-subdirectory consumer: from the git top-level, `sdlc-status` finds no manifest and reports `not-adopted`, which the kernel handles silently. Reproduced. | fable | **escalated** — the owner chose to fix `sdlc-status` in this PR (Plan rev 4, class (a)). Incorporated in `96f755c`: the kernel accepts `--repo-root` again. |
+| PR-R3-02 | medium | NEW | fail-open safety gap | The recorded two-fault risk understates its trigger: `root.resolve` fails for any `git rev-parse` failure, including dubious ownership, not only a missing `git`; ADR 0030's Decision contradicts its Consequences. Reproduced. Sol raised the ADR contradiction as REOPENED(PR-R2-01). | fable, sol | **escalated** — same owner decision. Incorporated in `96f755c`: `sdlc-status` reports `not-adopted` only on a filesystem proof that no repository encloses the root; dubious ownership, a missing `git`, a broken `.git` file, a bare repository and `$GIT_DIR` stay `error`, each pinned by a test. The kernel's exit-2 exception and the recorded risk are gone; ADR 0030 is rewritten. |
+| PR-R3-03 | low | NEW | overstated mitigation | ADR 0030 and the Plan say CI's `check-lifecycle` still gates adopted repositories' PRs, but that workflow is opt-in. | fable | **incorporated** — both now say "where a repository installs it". |
+| PR-R3-04 | low | NEW | unconstrained invocation | `$SDLC_ROOT` is an explicit root the kernel did not neutralise, so a non-git directory would still stop. | fable | **incorporated** — the proof applies to any root; a test covers `$SDLC_ROOT`, `--repo-root .` and an absolute `--repo-root`. |
+| PR-R3-05 | low | NEW | self-contradicting law | Step 1's synopsis offered `[--repo-root DIR]` in the sentence that forbade it. | fable | **incorporated** — the prohibition is gone; step 1 accepts `--repo-root`, pinned by the focused test. |
+| PR-R3-06 | low | REOPENED(PR-R2-04) | inaccurate audit record | Build A5 said S06 "is re-anchored" after S06 became `replaced`. | fable, sol | **incorporated** — every exit 2 stops again, so S06 is `retained` on its re-anchored phrase and A5 is accurate. |
+| PR-R3-07 | low | NEW | inaccurate audit record | The round-2 header said all reviewers confirmed every round-1 fix, while its table records two reopened findings. | fable | **incorporated** — the header now names who confirmed what. |
+
+No finding was dismissed. Round 4 reviews the whole change set, since the
+`sdlc-status` change reshapes the PR.
