@@ -80,7 +80,8 @@ T2 (sdlc-status proves no repository) ── independent; T1's kernel wording re
 
 - **Surfaces:**
   - `skills/sdlc/scripts/sdlc-status.mjs` — a filesystem proof that no git
-    repository encloses the root; `root.resolve` and `git.repository` use it;
+    repository encloses the root or the working directory; `root.resolve` and
+    `git.repository` use it;
     the aggregate maps `git.repository:fail` to `not-adopted`.
   - `test/frozen-surfaces.test.js` — `sdlc-status.mjs` leaves the ASD19 list
     for this PR (A8).

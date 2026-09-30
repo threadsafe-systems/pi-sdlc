@@ -5,8 +5,9 @@
 // network, no mutation.
 //
 // Usage: sdlc-status.mjs [--config DIR | --repo-root DIR] [--format text|json]
-// Exit: 0 ready; 1 not-adopted (HEAD has no manifest blob, or no git
-// repository encloses the root); 2 error (CLI/root/git/config failure);
+// Exit: 0 ready; 1 not-adopted (HEAD has no manifest blob, or the filesystem
+// proves no git repository encloses the root or the working directory);
+// 2 error (CLI/root/git/config failure);
 // 3 not-ready (adopted but dirty/incomplete).
 
 import { spawnSync } from "node:child_process";
@@ -202,7 +203,7 @@ function buildReport(argv, cwd) {
 		if (rootOutside && provablyOutsideGit(cwd)) {
 			set("git.repository", "fail", "no git repository encloses the resolved root", "adopt the sdlc inside a git repository");
 		} else if (rootOutside) {
-			set("git.repository", "error", "the resolved root is outside git but the working directory is inside a git repository", "run from the consumer repository, or pass --repo-root pointing into it");
+			set("git.repository", "error", "the resolved root is outside git but the working directory cannot be proven outside a git repository", "run from the consumer repository or pass --repo-root pointing into it; outside git, run from the root itself");
 		} else if (top.code !== 0 || !top.stdout) {
 			set("git.repository", "error", "resolved root is not within a git worktree", "adopt the sdlc inside a git repository");
 		} else {

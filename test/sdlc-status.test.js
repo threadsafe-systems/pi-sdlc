@@ -316,7 +316,7 @@ test("a root outside git that points away from the caller's repository is an err
 		try {
 			const pointedAway = runStatus(["--repo-root", outside, "--format", "json"], { cwd: repo });
 			assertStatusError(pointedAway, "explicit non-git root from inside a repository");
-			assert.match(reportOf(pointedAway).checks.find((c) => c.id === "git.repository").message, /working directory is inside a git repository/);
+			assert.match(check(reportOf(pointedAway), "git.repository").message, /working directory cannot be proven outside a git repository/);
 			assertStatusError(runStatus(["--format", "json"], { cwd: repo, env: baseEnv({ SDLC_ROOT: outside }) }), "$SDLC_ROOT outside git from inside a repository");
 			assertStatusError(runStatus(["--format", "json"], { cwd: repo, env: baseEnv({ GIT_WORK_TREE: outside }) }), "$GIT_WORK_TREE outside the repository");
 			git(repo, ["config", "core.worktree", outside]);

@@ -2,8 +2,8 @@
 
 - Amended by: [ADR 0023](0023-status-surface-fs8-v2.md),
   [ADR 0030](0030-operator-triggered-skills.md) (the agent's exit-1 branch is
-  silent, and when no git repository provably encloses the root or the
-  working directory, the result is `not-adopted`, not `error`)
+  silent, and when the filesystem proves no git repository encloses the root
+  or the working directory, the result is `not-adopted`, not `error`)
 
 - Context: ADR 0010 defined opt-in as "the presence of a committed manifest",
   but the gate mechanically tested only filesystem presence, so untracked,

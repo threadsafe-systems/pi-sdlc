@@ -101,11 +101,30 @@ PR-R5-02). Luna returned no findings.
 
 | ID | Severity | Origin | Class | Finding | Raised by | Disposition |
 |---|---|---|---|---|---|---|
-| PR-R5-01 | medium | NEW | hollow test | Four root-proof cases ran from the repository checkout, so the new working-directory proof failed first and they no longer tested the root proof; removing the symlink-resolved walk went undetected. | fable | **incorporated** — those cases run from a temp directory; removing the root proof now fails 7 tests and removing the symlink-resolved walk fails 3. The is-directory guard stays explicit; a file root already fails through `ENOTDIR`, and the "root is a file" case pins that outcome. |
+| PR-R5-01 | medium | NEW | hollow test | Four root-proof cases ran from the repository checkout, so the new working-directory proof failed first and they no longer tested the root proof; removing the symlink-resolved walk went undetected. | fable | **incorporated** — those cases run from a temp directory; removing the root proof now fails 3 tests and removing the symlink-resolved walk fails 1 (corrected under PR-R6-04). The is-directory guard stays explicit; a file root already fails through `ENOTDIR`, and the "root is a file" case pins that outcome. |
 | PR-R5-02 | medium | REOPENED(PR-R4-05) | stale contract summary | The spec, ADR 0016 and the Plan's pre-mortem and Definition of done described the new classification as root-only, omitting the working-directory and environment conditions. The spec note also missed §1.2 and AR4. | sol, fable | **incorporated** — the spec, ADR 0015, 0016 and 0023 notes, system-reference §3 and the Plan state both directories; the spec note lists §1.2 and AR4. |
 | PR-R5-03 | low | NEW | unactionable diagnostic | A provably non-git root reached from inside a repository reported the same message as an unusable repository. | fable | **incorporated** — `git.repository` now says the working directory is inside a git repository and suggests `--repo-root` into it; the test asserts the message. |
 | PR-R5-04 | low | NEW | misleading test name | The round-4 regression test also covered git environment overrides and a `commondir` gitdir. | sol, fable | **incorporated** — split into two tests named for what each asserts. |
 | PR-R5-05 | low | NEW | duplicated code | The `root.resolve` fallback proved the working directory twice, since `attemptedRoot` is always the working directory. | fable | **incorporated** — the redundant call is gone. |
+
+No finding was dismissed.
+
+## Round 6
+
+Delta: `18d6cc4..71fca38`
+
+Reviewers (harvest label `pr_review-round6`): the same three models. Fable
+confirmed PR-R5-01..05; sol marked PR-R5-02 and PR-R5-03 partial (PR-R6-02,
+PR-R6-03). Luna returned no findings. No finding concerns a fail-open path.
+
+| ID | Severity | Origin | Class | Finding | Raised by | Disposition |
+|---|---|---|---|---|---|---|
+| PR-R6-01 | medium | NEW | inverted contract wording | The ADR 0015, 0016 and 0023 notes said "when no git repository provably encloses", which reads as absence of proof rather than proof of absence. | fable | **incorporated** — the notes say "when the filesystem proves no git repository encloses", matching the spec. |
+| PR-R6-02 | medium | REOPENED(PR-R5-02) | stale contract summary | The Plan's Definition of done omitted the `GIT_DIR`, `GIT_WORK_TREE` and `GIT_COMMON_DIR` condition. | sol | **incorporated** — the Definition of done states the proof, the environment condition, and that any failed proof exits 2. |
+| PR-R6-03 | low | REOPENED(PR-R5-03) | overstated diagnostic | The new `git.repository` message said the working directory "is inside a git repository" when the proof had only failed (a broken `.git` file, a dangling symlink). | fable, sol | **incorporated** — the message says the working directory "cannot be proven outside a git repository", and the remediation adds running from the root itself. |
+| PR-R6-04 | low | NEW | inaccurate audit record | The PR-R5-01 disposition gave mutation counts of 7 and 3; they counted failure lines, not tests. | fable, sol | **incorporated** — corrected to 3 tests and 1 test, remeasured from the failing-tests summary. |
+| PR-R6-05 | low | NEW | stale contract summary | The `sdlc-status.mjs` header and the Build's Surfaces bullet described exit 1 for the root only. | fable | **incorporated** — both name the root and the working directory. |
+| PR-R6-06 | low | NEW | duplicated code | The message assertion re-implemented the test file's `check()` helper. | fable | **incorporated** — it uses `check()`. |
 
 No finding was dismissed.
 

@@ -148,10 +148,11 @@ in use.
   adoption, and tells the agent to continue the task outside the lifecycle.
 - No text in `SKILL.md` or `references/system-reference.md` matches
   `/advisory mode/i`.
-- `sdlc-status` exits 1 when no git repository encloses the root or the
-  working directory, with or without an explicit root, and exits 2 whenever a
-  `.git` exists that git cannot use or the root points away from the caller's
-  repository;
+- `sdlc-status` exits 1 when the filesystem proves no git repository encloses
+  the root or the working directory (with or without an explicit root, and
+  with none of `GIT_DIR`, `GIT_WORK_TREE` or `GIT_COMMON_DIR` set), and exits 2
+  whenever that proof fails, including a `.git` git cannot use and a root that
+  points away from the caller's repository;
   every exit 2 and exit 3 stops; all five pre-exit-0 prohibitions remain.
 - ADR 0030 exists with Context/Decision/Consequences; ADR 0010 and 0015 name it.
 - `npm test`, `npm run lint`, and `npm run test:e2e` pass.
