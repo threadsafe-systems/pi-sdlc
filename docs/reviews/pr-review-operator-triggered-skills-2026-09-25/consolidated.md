@@ -120,11 +120,26 @@ PR-R6-03). Luna returned no findings. No finding concerns a fail-open path.
 | ID | Severity | Origin | Class | Finding | Raised by | Disposition |
 |---|---|---|---|---|---|---|
 | PR-R6-01 | medium | NEW | inverted contract wording | The ADR 0015, 0016 and 0023 notes said "when no git repository provably encloses", which reads as absence of proof rather than proof of absence. | fable | **incorporated** — the notes say "when the filesystem proves no git repository encloses", matching the spec. |
-| PR-R6-02 | medium | REOPENED(PR-R5-02) | stale contract summary | The Plan's Definition of done omitted the `GIT_DIR`, `GIT_WORK_TREE` and `GIT_COMMON_DIR` condition. | sol | **incorporated** — the Definition of done states the proof, the environment condition, and that any failed proof exits 2. |
+| PR-R6-02 | medium | REOPENED(PR-R5-02) | stale contract summary | The Plan's Definition of done omitted the `GIT_DIR`, `GIT_WORK_TREE` and `GIT_COMMON_DIR` condition. | sol | **incorporated** — the Definition of done states the proof and the environment condition (its exit-2 clause corrected under PR-R7-01). |
 | PR-R6-03 | low | REOPENED(PR-R5-03) | overstated diagnostic | The new `git.repository` message said the working directory "is inside a git repository" when the proof had only failed (a broken `.git` file, a dangling symlink). | fable, sol | **incorporated** — the message says the working directory "cannot be proven outside a git repository", and the remediation adds running from the root itself. |
 | PR-R6-04 | low | NEW | inaccurate audit record | The PR-R5-01 disposition gave mutation counts of 7 and 3; they counted failure lines, not tests. | fable, sol | **incorporated** — corrected to 3 tests and 1 test, remeasured from the failing-tests summary. |
 | PR-R6-05 | low | NEW | stale contract summary | The `sdlc-status.mjs` header and the Build's Surfaces bullet described exit 1 for the root only. | fable | **incorporated** — both name the root and the working directory. |
 | PR-R6-06 | low | NEW | duplicated code | The message assertion re-implemented the test file's `check()` helper. | fable | **incorporated** — it uses `check()`. |
+
+No finding was dismissed.
+
+## Round 7
+
+Delta: `4be31af..0f2a239`
+
+Reviewers (harvest label `pr_review-round7`): the same three models. Fable and
+sol confirmed PR-R6-01..06 (sol marked PR-R6-02 partial, see PR-R7-01); fable
+reproduced the mutation counts recorded under PR-R6-04. No finding concerns
+code behaviour.
+
+| ID | Severity | Origin | Class | Finding | Raised by | Disposition |
+|---|---|---|---|---|---|---|
+| PR-R7-01 | medium | NEW | stale contract summary | The Plan's Definition of done said `sdlc-status` exits 2 "whenever that proof fails", but the proof fails in every ordinary repository, which exits 0, 1 or 3; exit 2 needs git to find no usable worktree at the root as well. | fable, sol, luna | **incorporated** — the clause is limited to a root where git finds no usable worktree. |
 
 No finding was dismissed.
 
