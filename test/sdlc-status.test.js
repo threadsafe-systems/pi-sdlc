@@ -219,7 +219,7 @@ test("argument, root, and git errors retain exit 2", () => {
 		assert.equal(textCheckStatus(result.stdout, "cli.arguments"), "error");
 	}
 	const missing = join(realpathSync(tmpdir()), "sdlc-missing-root-does-not-exist");
-	const result = runStatus(["--repo-root", missing]);
+	const result = runStatus(["--repo-root", missing], { cwd: tmpdir() });
 	assert.equal(result.code, 2, result.stdout + result.stderr);
 	assert.equal(textCheckStatus(result.stdout, "git.repository"), "error");
 });
@@ -283,7 +283,7 @@ test("a repository git cannot use is an error, not not-adopted", () => {
 		rmSync(join(adopted, ".pi", "sdlc", "sdlc.config.json"));
 		assertStatusError(runStatus(["--format", "json"], { cwd: adopted, env: baseEnv({ PATH: noGit }) }), "manifest deleted, git not on PATH");
 		assertStatusError(runStatus(["--format", "json"], { cwd: adopted, env: baseEnv({ GIT_TEST_ASSUME_DIFFERENT_OWNER: "1" }) }), "manifest deleted, dubious ownership");
-		assertStatusError(runStatus(["--repo-root", adopted, "--format", "json"], { env: baseEnv({ PATH: noGit }) }), "explicit root, git not on PATH");
+		assertStatusError(runStatus(["--repo-root", adopted, "--format", "json"], { cwd: tmpdir(), env: baseEnv({ PATH: noGit }) }), "explicit root, git not on PATH");
 
 		const pruned = mk("sdlc-pruned-");
 		writeFileSync(join(pruned, ".git"), "gitdir: /nonexistent/worktrees/gone\n");
@@ -295,7 +295,7 @@ test("a repository git cannot use is an error, not not-adopted", () => {
 
 		const fileRoot = join(mk("sdlc-file-root-"), "not-a-directory");
 		writeFileSync(fileRoot, "");
-		assertStatusError(runStatus(["--repo-root", fileRoot, "--format", "json"]), "root is a file");
+		assertStatusError(runStatus(["--repo-root", fileRoot, "--format", "json"], { cwd: tmpdir() }), "root is a file");
 
 		const redirected = mk("sdlc-gitdir-");
 		assertStatusError(runStatus(["--format", "json"], { cwd: redirected, env: baseEnv({ GIT_DIR: join(redirected, "missing") }) }), "$GIT_DIR set");
@@ -303,7 +303,7 @@ test("a repository git cannot use is an error, not not-adopted", () => {
 		const repo = readyFixture({ "sub/keep": "" });
 		const links = mk("sdlc-link-");
 		symlinkSync(join(repo, "sub"), join(links, "sub"));
-		assertStatusError(runStatus(["--repo-root", join(links, "sub"), "--format", "json"], { env: baseEnv({ PATH: noGit }) }), "symlink into a repository, git not on PATH");
+		assertStatusError(runStatus(["--repo-root", join(links, "sub"), "--format", "json"], { cwd: tmpdir(), env: baseEnv({ PATH: noGit }) }), "symlink into a repository, git not on PATH");
 		for (const dir of [adopted, repo]) rmSync(dir, { recursive: true, force: true });
 	});
 });
@@ -314,17 +314,15 @@ test("a root outside git that points away from the caller's repository is an err
 		const repo = readyFixture();
 		rmSync(join(repo, ".pi", "sdlc", "sdlc.config.json"));
 		try {
-			assertStatusError(runStatus(["--repo-root", outside, "--format", "json"], { cwd: repo }), "explicit non-git root from inside a repository");
+			const pointedAway = runStatus(["--repo-root", outside, "--format", "json"], { cwd: repo });
+			assertStatusError(pointedAway, "explicit non-git root from inside a repository");
+			assert.match(reportOf(pointedAway).checks.find((c) => c.id === "git.repository").message, /working directory is inside a git repository/);
 			assertStatusError(runStatus(["--format", "json"], { cwd: repo, env: baseEnv({ SDLC_ROOT: outside }) }), "$SDLC_ROOT outside git from inside a repository");
 			assertStatusError(runStatus(["--format", "json"], { cwd: repo, env: baseEnv({ GIT_WORK_TREE: outside }) }), "$GIT_WORK_TREE outside the repository");
 			git(repo, ["config", "core.worktree", outside]);
 			assertStatusError(runStatus(["--format", "json"], { cwd: repo }), "core.worktree outside the repository");
 		} finally {
 			rmSync(repo, { recursive: true, force: true });
-		}
-
-		for (const name of ["GIT_WORK_TREE", "GIT_COMMON_DIR"]) {
-			assertStatusError(runStatus(["--format", "json"], { cwd: outside, env: baseEnv({ [name]: outside }) }), `$${name} set`);
 		}
 
 		const outer = mk("sdlc-outer-");
@@ -338,6 +336,15 @@ test("a root outside git that points away from the caller's repository is an err
 		git(nested, ["commit", "-q", "-m", "adopt"]);
 		rmSync(join(nested, ".pi", "sdlc", "sdlc.config.json"));
 		assertStatusError(runStatus(["--format", "json"], { cwd: nested }), "manifest outside git above an adopted repository");
+	});
+});
+
+test("git environment overrides and a linked worktree's gitdir make absence unprovable", () => {
+	withTempDirs((mk) => {
+		const outside = mk("sdlc-outside-");
+		for (const name of ["GIT_WORK_TREE", "GIT_COMMON_DIR"]) {
+			assertStatusError(runStatus(["--format", "json"], { cwd: outside, env: baseEnv({ [name]: outside }) }), `$${name} set`);
+		}
 
 		const common = mk("sdlc-common-");
 		execFileSync("git", ["init", "-q", "--bare", common]);

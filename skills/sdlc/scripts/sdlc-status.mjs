@@ -182,7 +182,7 @@ function buildReport(argv, cwd) {
 		if (rootInspection.ok) {
 			root = rootInspection.root;
 			set("root.resolve", "pass", "consumer root resolved");
-		} else if (provablyOutsideGit(rootInspection.attemptedRoot) && provablyOutsideGit(cwd)) {
+		} else if (provablyOutsideGit(rootInspection.attemptedRoot)) {
 			root = rootInspection.attemptedRoot;
 			set("root.resolve", "pass", "no manifest or git repository encloses the working directory; using it as the root");
 		} else {
@@ -198,8 +198,11 @@ function buildReport(argv, cwd) {
 		// The working directory must be provably outside git too: an on-disk
 		// manifest above a repository, core.worktree, or a mistaken explicit root
 		// can each point the root away from the repository the caller is in.
-		if ((top.code !== 0 || !top.stdout) && provablyOutsideGit(root) && provablyOutsideGit(cwd)) {
+		const rootOutside = (top.code !== 0 || !top.stdout) && provablyOutsideGit(root);
+		if (rootOutside && provablyOutsideGit(cwd)) {
 			set("git.repository", "fail", "no git repository encloses the resolved root", "adopt the sdlc inside a git repository");
+		} else if (rootOutside) {
+			set("git.repository", "error", "the resolved root is outside git but the working directory is inside a git repository", "run from the consumer repository, or pass --repo-root pointing into it");
 		} else if (top.code !== 0 || !top.stdout) {
 			set("git.repository", "error", "resolved root is not within a git worktree", "adopt the sdlc inside a git repository");
 		} else {

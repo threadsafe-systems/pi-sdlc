@@ -7,9 +7,10 @@
 - Track: **irreversible**
 - Author vendor: openai
 - Human gate: Specification approved by Neil Chambers on 2026-07-12.
-- Amended by: ADR 0030 — a root that no git repository encloses is
-  `git.repository:fail`, state `not-adopted`, exit 1 (§2.2, §2.3 item 4,
-  §2.8).
+- Amended by: ADR 0030 — when the filesystem proves no git repository
+  encloses the root or the working directory, the result is
+  `git.repository:fail`, state `not-adopted`, exit 1 (§1.2, §2.2, §2.3 item 4,
+  §2.8, AR4).
 - Frozen surfaces:
   - supersedes ADR 0010's `sdlc-status` 0/1/2 contract;
   - introduces FS8, the `sdlc-status` v1 output/exit surface;

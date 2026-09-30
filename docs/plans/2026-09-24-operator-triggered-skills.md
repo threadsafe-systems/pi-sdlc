@@ -91,7 +91,8 @@ Evidence gathered during the dialogue:
   do not announce, do not ask, do not mention adoption; set the sdlc aside and
   continue the task.
 - [solution decision] `sdlc-status` reports `not-adopted` (exit 1) when
-  inspection proves no git repository encloses the root, so the kernel's exit-2
+  inspection proves no git repository encloses the root or the working
+  directory, so the kernel's exit-2
   branch needs no exception and every exit 2 stops (see "Amendments").
 - [solution decision] Delete advisory mode from `SKILL.md` and
   `references/system-reference.md` §3, keeping the "exit 2 and exit 3 stop"
@@ -136,7 +137,7 @@ in use.
 |---|---|---|---|---|---|
 | Agents still load `sdlc` ambiently | a model treats "starting a change" as a reason to load a listed skill despite the description | the kernel runs in sessions the operator did not trigger | the description leads with the operator-only rule; the exit-1 branch is silent anyway, so the worst case in an unadopted repo is one status command | PR author | Build task 1 |
 | Adopted repos lose enforcement unnoticed | an operator expects the law to apply without invoking it | a change lands outside the lifecycle | release note and README say how to invoke; CI `check-lifecycle`, where installed, still gates PRs in adopted repos | PR author | Build task 2 |
-| The no-repository proof is wrong | a repository `sdlc-status` cannot see (git missing, dubious ownership, pruned worktree, `GIT_DIR` redirect) is classified as absent | an adopted repository is silently set aside | the proof needs no `.git` entry in the root or any ancestor (logical and physical path), no `GIT_DIR`, and an existing root directory; anything short of it stays `error`; tests pin each reviewer-reproduced case | PR author | Build task 2 |
+| The no-repository proof is wrong | a repository `sdlc-status` cannot see (git missing, dubious ownership, pruned worktree, `GIT_DIR` redirect) is classified as absent | an adopted repository is silently set aside | the proof needs the root and the working directory to be existing directories with no `.git` entry or git directory at themselves or any ancestor (logical and physical path), and no `GIT_DIR`, `GIT_WORK_TREE` or `GIT_COMMON_DIR`; anything short of it stays `error`; tests pin each reviewer-reproduced case | PR author | Build task 2 |
 | A stale advisory reference survives | advisory wording in a file the sweep missed | agents still see an advisory option | test asserts no "advisory mode" text in `SKILL.md` and `system-reference.md` | PR author | Build task 3 |
 
 ## Definition of done
@@ -147,8 +148,10 @@ in use.
   adoption, and tells the agent to continue the task outside the lifecycle.
 - No text in `SKILL.md` or `references/system-reference.md` matches
   `/advisory mode/i`.
-- `sdlc-status` exits 1 for a root no git repository encloses, with or without
-  an explicit root, and exits 2 whenever a `.git` exists that git cannot use;
+- `sdlc-status` exits 1 when no git repository encloses the root or the
+  working directory, with or without an explicit root, and exits 2 whenever a
+  `.git` exists that git cannot use or the root points away from the caller's
+  repository;
   every exit 2 and exit 3 stops; all five pre-exit-0 prohibitions remain.
 - ADR 0030 exists with Context/Decision/Consequences; ADR 0010 and 0015 name it.
 - `npm test`, `npm run lint`, and `npm run test:e2e` pass.

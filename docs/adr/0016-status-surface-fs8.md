@@ -1,8 +1,9 @@
 # ADR 0016: FS8 — the frozen sdlc-status machine surface (schema version 1)
 
 - Amended by: [ADR 0023](0023-status-surface-fs8-v2.md);
-  [ADR 0030](0030-operator-triggered-skills.md) (a root that no git repository
-  encloses is `git.repository:fail`, state `not-adopted`, exit 1, not `error`)
+  [ADR 0030](0030-operator-triggered-skills.md) (when no git repository
+  provably encloses the root or the working directory, the result is
+  `git.repository:fail`, state `not-adopted`, exit 1, not `error`)
 
 - Context: readiness (ADR 0015) is consumed by agents, shell callers, and CI.
   Like FS1/FS2, its machine surface must be frozen so consumers can bind to it

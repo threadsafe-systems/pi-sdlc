@@ -89,3 +89,23 @@ confirmed PR-R3-01..07 as landed.
 
 No finding was dismissed. Round 5 is a delta review of the fixes.
 
+## Round 5
+
+Delta: `5f8662d..18d6cc4`
+
+Reviewers (harvest label `pr_review-round5`): the same three models. Fable
+confirmed PR-R4-01..09 and found no fail-open path after probing empty git
+variables, `GIT_CEILING_DIRECTORIES`, case-insensitive `.GIT`, dangling `.git`
+symlinks and symlinked working directories. Sol marked PR-R4-05 partial (see
+PR-R5-02). Luna returned no findings.
+
+| ID | Severity | Origin | Class | Finding | Raised by | Disposition |
+|---|---|---|---|---|---|---|
+| PR-R5-01 | medium | NEW | hollow test | Four root-proof cases ran from the repository checkout, so the new working-directory proof failed first and they no longer tested the root proof; removing the symlink-resolved walk went undetected. | fable | **incorporated** — those cases run from a temp directory; removing the root proof now fails 7 tests and removing the symlink-resolved walk fails 3. The is-directory guard stays explicit; a file root already fails through `ENOTDIR`, and the "root is a file" case pins that outcome. |
+| PR-R5-02 | medium | REOPENED(PR-R4-05) | stale contract summary | The spec, ADR 0016 and the Plan's pre-mortem and Definition of done described the new classification as root-only, omitting the working-directory and environment conditions. The spec note also missed §1.2 and AR4. | sol, fable | **incorporated** — the spec, ADR 0015, 0016 and 0023 notes, system-reference §3 and the Plan state both directories; the spec note lists §1.2 and AR4. |
+| PR-R5-03 | low | NEW | unactionable diagnostic | A provably non-git root reached from inside a repository reported the same message as an unusable repository. | fable | **incorporated** — `git.repository` now says the working directory is inside a git repository and suggests `--repo-root` into it; the test asserts the message. |
+| PR-R5-04 | low | NEW | misleading test name | The round-4 regression test also covered git environment overrides and a `commondir` gitdir. | sol, fable | **incorporated** — split into two tests named for what each asserts. |
+| PR-R5-05 | low | NEW | duplicated code | The `root.resolve` fallback proved the working directory twice, since `attemptedRoot` is always the working directory. | fable | **incorporated** — the redundant call is gone. |
+
+No finding was dismissed.
+

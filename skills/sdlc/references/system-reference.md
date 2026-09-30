@@ -50,7 +50,8 @@ ids or exits.
 
 Adoption is an operator decision, never an agent's. Both skills load only on an
 explicit operator request. When the kernel's startup gate reports `not-adopted`
-— which includes a root that no git repository encloses — the agent sets the
+— which includes a root and working directory that no git repository
+encloses — the agent sets the
 lifecycle aside without announcing, asking, or mentioning adoption, and
 continues the task. Every `error`, and `not-ready`, stops. The standalone `/sdlc-*` commands keep
 their own unadopted sampling path, since only the operator invokes them. An
