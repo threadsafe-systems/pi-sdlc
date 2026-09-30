@@ -13,7 +13,6 @@ const here = dirname(fileURLToPath(import.meta.url));
 const repo = dirname(here);
 
 const FROZEN = [
-	"skills/sdlc/scripts/sdlc-status.mjs",
 	"skills/sdlc/scripts/sdlc-status.sh",
 	"skills/sdlc/scripts/check-lifecycle.mjs",
 	"skills/sdlc/scripts/check-lifecycle.sh",

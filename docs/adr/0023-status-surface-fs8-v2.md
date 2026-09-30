@@ -3,6 +3,8 @@
 - Status: accepted
 - Date: 2026-07-16
 - Amends: ADR 0015 and ADR 0016
+- Amended by: [ADR 0030](0030-operator-triggered-skills.md) (a root that no git
+  repository encloses is `not-adopted`, not `error`)
 
 ## Context
 

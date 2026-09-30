@@ -13,12 +13,19 @@ One task. Every edit is prose in service of one policy, and the kernel, the
 system reference, the README, the ADRs and the tests that pin them must change
 together: splitting them would leave an intermediate commit where the docs test
 asserts wording that no longer exists. The Plan's pre-mortem destinations
-("Build task 1/2/3") all land in T1.
+("Build task 1/2/3") land in T1, except the no-repository proof risk, which
+lands in T2.
+
+T2 was added by the Plan's class (a) amendment. It changes the `sdlc-status`
+script and its readiness tests, a separate surface from T1's prose, and it
+ships with T1's kernel wording in one PR: without T2 the kernel's "every exit 2
+stops" would halt in every non-git directory.
 
 ## Dependency graph
 
 ```text
 T1 (policy prose + tests)  ── independent
+T2 (sdlc-status proves no repository) ── independent; T1's kernel wording relies on it at merge
 ```
 
 ## Tasks
@@ -61,14 +68,47 @@ T1 (policy prose + tests)  ── independent
     contain no `/advisory mode/i`; the README states operator-only loading and
     the silent unadopted path; ADR 0030 exists and is indexed from ADR 0010 and
     0015. Each negative assertion is checked against a fixture that satisfies
-    every other assertion and carries only the forbidden text. `sdlc-status`
-    runs in a temp non-git directory (expects `root.resolve` error) and in this
-    repository with `git` off `PATH` (expects `root.resolve` pass and
-    `git.repository` error), pinning the exit-2 carve-out to real behaviour.
+    every other assertion and carries only the forbidden text. The exit-2
+    branch names no failing check as not-adopted, and step 1 accepts
+    `--repo-root`.
   - `npx biome check .` (static, offline, <10s).
   - `node skills/sdlc/scripts/check-references.mjs` (static, offline, <5s).
 - **DoD:** every Plan Definition-of-done bullet; `npm run test:e2e` green run
   by hand (see A2); `Code-prose pass: complete`.
+
+### T2 — `sdlc-status` reports a root outside any git repository as not-adopted
+
+- **Surfaces:**
+  - `skills/sdlc/scripts/sdlc-status.mjs` — a filesystem proof that no git
+    repository encloses the root; `root.resolve` and `git.repository` use it;
+    the aggregate maps `git.repository:fail` to `not-adopted`.
+  - `test/frozen-surfaces.test.js` — `sdlc-status.mjs` leaves the ASD19 list
+    for this PR (A8).
+  - `test/sdlc-status.test.js`, `test/readiness-output.test.js` — the
+    non-git cases and the AR8 root-fallback fixture.
+- **Does:**
+  - Reports `root.resolve:pass`, `git.repository:fail`, `not-adopted`, exit 1
+    when the root is an existing directory, `$GIT_DIR` is unset, and no `.git`
+    entry or git directory exists at the root or any ancestor on its given or
+    symlink-resolved path. The proof runs no git.
+  - Leaves every other root or git failure as `error`, exit 2.
+  - Changes no exit code, state name, check id, or output field.
+- **Scenarios owned:** none — reversible track, no Spec.
+- **Checks:**
+  - `npm test` (`scope: ["full"]`, offline, ~60s).
+  - `node --test test/sdlc-status.test.js test/readiness-output.test.js`
+    (`scope: ["task"]`, offline, ~15s). Asserts exit 1 outside git from the
+    working directory, `--repo-root .`, an absolute `--repo-root`,
+    `$SDLC_ROOT`, and with `git` off `PATH`; exit 1 with a manifest on disk
+    outside git; exit 2 for an adopted repository whose manifest was deleted
+    with `git` off `PATH` or under dubious ownership, an explicit root with
+    `git` off `PATH`, a broken `.git` file, a bare repository, `$GIT_DIR` set,
+    a symlink into a repository, and a missing explicit root; AR8's root
+    fallback still reports the working directory.
+  - `npx biome check .` (static, offline, <10s).
+  - `node skills/sdlc/scripts/check-references.mjs` (static, offline, <5s).
+- **DoD:** the Plan's `sdlc-status` Definition-of-done bullet;
+  `Code-prose pass: complete`.
 
 ## Scenario → task ownership
 
@@ -82,6 +122,7 @@ coverage.
 | --- | --- | --- | --- |
 | No Spec exists — reversible track — so no scenario ids back T1's checks | minor | assumption-recorded | Assumptions appendix, A1 |
 | The e2e suite cannot run under the deterministic runner | minor | assumption-recorded | Assumptions appendix, A2 |
+| `sdlc-status.mjs` is an ASD19 frozen surface | minor | assumption-recorded | Assumptions appendix, A8 |
 
 ## Assumptions
 
@@ -92,8 +133,8 @@ coverage.
   passes argv with no shell, so `env -i PATH="$PATH" …` cannot be expressed as
   a check. T1 runs `env -i PATH="$PATH" HOME="$HOME" node test/e2e/run.mjs`
   by hand before the PR, and the `e2e` workflow runs it on the PR.
-- **A3 — below the tracker threshold.** One task against a committed
-  `shape.publishToTracker` of 2, so no epic or sub-issues are minted.
+- **A3 — tracker.** T1 alone was below the committed `shape.publishToTracker`
+  of 2; adding T2 reached it, so the breakdown is published (see Tracker).
 - **A5 — surfaces discovered at Implement.** Two surfaces outside T1's list
   moved with the change. The disposition ledger
   `docs/validation/sdlc-agent-self-documentation/disposition-ledger.md` quoted
@@ -106,19 +147,19 @@ coverage.
   the unquoted `: ` made pi drop the skill and every e2e L2 scenario locked at
   the discovery gate. Fixed in the text, and the focused test now rejects `: `
   in an unquoted description.
-- **A7 — exit-2 amendment.** The Plan's in-place amendment lands in T1:
-  kernel exit-2 branch, system-reference §3, README, ADR 0030 and ADR 0015's
-  amendment note, and focused tests. Only `root.resolve` is carved out;
-  `git.repository` still stops, because it also fails when `git` cannot run or
-  an explicit root is wrong, which an adopted repository can produce. The
-  kernel runs `sdlc-status` without `--repo-root`; the templates pass
-  `--repo-root .`, so `root.resolve` never fails there and their stop-on-exit-2
-  rule still holds. The remaining two-fault case (manifest missing from the
-  working tree and `git` unrunnable) is recorded in the Plan amendment and ADR
-  0030.
+- **A7 — non-git directories.** The Plan's first amendment carved
+  `root.resolve` out of the kernel's exit-2 stop. Its second, class (a),
+  amendment replaces that: T2 makes `sdlc-status` report a root outside any
+  git repository as `not-adopted`, and T1's kernel stops on every exit 2 and
+  accepts `--repo-root` again.
+- **A8 — unfreezing `sdlc-status.mjs`.** T2 removes it from the ASD19 list in
+  this PR; a follow-up re-freezes it after merge. `lib.mjs` and
+  `sdlc-status.sh` stay frozen.
 - **A4 — release type.** `feat:`; no config shape changes, so the ADR 0021
-  release guard does not apply.
+  release guard does not apply. The release note states that `sdlc-status`
+  exits 1, not 2, for a root outside any git repository.
 
 ## Tracker
 
-No tracker objects (A3).
+Epic #278; T1 #279 and T2 #280 are its sub-issues, with no blocking edges.
+The epic closes after the post-merge re-freeze of `sdlc-status.mjs` (A8).

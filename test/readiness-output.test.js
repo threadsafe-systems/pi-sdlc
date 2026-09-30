@@ -192,7 +192,7 @@ test("AR8: --format json anywhere in argv forces the envelope for argument error
 });
 
 test("AR8: JSON envelope root falls back to absolute cwd on root-resolution failure", () => {
-	const dir = gitFixture({ files: {}, init: false });
+	const dir = gitFixture({ files: { ".git": "gitdir: /nonexistent/worktrees/gone\n" }, init: false });
 	try {
 		const r = runStatus(["--format", "json"], { cwd: dir });
 		assert.equal(r.code, 2, r.stdout + r.stderr);

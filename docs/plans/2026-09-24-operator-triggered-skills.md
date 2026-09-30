@@ -57,8 +57,9 @@ Evidence gathered during the dialogue:
   decision.
 - Hiding the skills with `disable-model-invocation` — it strands the `/sdlc-*`
   templates' skill-directory lookup and the operator does not need it.
-- Changing `sdlc-status` exits, states, or check ids — the four-state contract
-  is sound; only the agent's reaction to exit 1 changes.
+- Changing `sdlc-status` exit codes, state names, check ids, or output shape —
+  the four-state contract is sound. One classification changes: a root that no
+  git repository encloses is `not-adopted`, not `error` (see "Amendments").
 - Changing the standalone templates' `not-adopted` sampling path — those are
   operator-invoked commands, so running them in an unadopted repo is already an
   operator decision.
@@ -89,8 +90,9 @@ Evidence gathered during the dialogue:
 - [solution decision] Rewrite the `SKILL.md` exit-1 (`not-adopted`) branch:
   do not announce, do not ask, do not mention adoption; set the sdlc aside and
   continue the task.
-- [solution decision] Exit 2 whose failing check is `root.resolve` is handled
-  exactly as exit 1 (see "Amendments").
+- [solution decision] `sdlc-status` reports `not-adopted` (exit 1) when
+  inspection proves no git repository encloses the root, so the kernel's exit-2
+  branch needs no exception and every exit 2 stops (see "Amendments").
 - [solution decision] Delete advisory mode from `SKILL.md` and
   `references/system-reference.md` §3, keeping the "exit 2 and exit 3 stop"
   rules without the advisory wording.
@@ -123,17 +125,18 @@ in use.
 | README / AGENTS.md docs | applies — README describes the exit-1 opt-in prompt and advisory mode; no AGENTS.md exists | README adoption paragraph matches the new behaviour | Implement | `test/docs.test.js` OH12 and a new README assertion |
 | ADR record | applies — ADR 0010/0015 describe the exit-1 offer | ADR 0030 records the change; 0010 and 0015 point at it | Implement | `test/docs.test.js` ADR checks |
 | Observability | n/a — no telemetry event or run-store field changes | — | — | — |
-| Security and secret delivery | n/a — no credentials, scripts, or network paths change | — | — | — |
+| Security and secret delivery | n/a — no credentials or network paths change; the one script change is read-only filesystem inspection | — | — | — |
 | CI/CD | applies — the unit suite and e2e L2 scenario A assert the old text | `npm test`, `npm run lint`, and `npm run test:e2e` pass | PR | CI green |
 | Usability (ISO 25010) | applies — the change exists to remove an interruption | exit-1 branch contains no question to the human | Implement | docs test |
-| Compatibility (ISO 25010) | applies — adopted repositories stop getting ambient lifecycle enforcement | release note states the skills are operator-triggered | PR | semantic-release changelog entry |
+| Compatibility (ISO 25010) | applies — adopted repositories stop getting ambient lifecycle enforcement, and `sdlc-status` callers see roots outside any git repository move from exit 2 to exit 1 | release note states both | PR | semantic-release changelog entry |
 
 ## Pre-mortem
 
 | Risk | Trigger | Consequence | Mitigation | Owner | Destination |
 |---|---|---|---|---|---|
 | Agents still load `sdlc` ambiently | a model treats "starting a change" as a reason to load a listed skill despite the description | the kernel runs in sessions the operator did not trigger | the description leads with the operator-only rule; the exit-1 branch is silent anyway, so the worst case in an unadopted repo is one status command | PR author | Build task 1 |
-| Adopted repos lose enforcement unnoticed | an operator expects the law to apply without invoking it | a change lands outside the lifecycle | release note and README say how to invoke; CI `check-lifecycle` still gates PRs in adopted repos | PR author | Build task 2 |
+| Adopted repos lose enforcement unnoticed | an operator expects the law to apply without invoking it | a change lands outside the lifecycle | release note and README say how to invoke; CI `check-lifecycle`, where installed, still gates PRs in adopted repos | PR author | Build task 2 |
+| The no-repository proof is wrong | a repository `sdlc-status` cannot see (git missing, dubious ownership, pruned worktree, `GIT_DIR` redirect) is classified as absent | an adopted repository is silently set aside | the proof needs no `.git` entry in the root or any ancestor (logical and physical path), no `GIT_DIR`, and an existing root directory; anything short of it stays `error`; tests pin each reviewer-reproduced case | PR author | Build task 2 |
 | A stale advisory reference survives | advisory wording in a file the sweep missed | agents still see an advisory option | test asserts no "advisory mode" text in `SKILL.md` and `system-reference.md` | PR author | Build task 3 |
 
 ## Definition of done
@@ -144,9 +147,9 @@ in use.
   adoption, and tells the agent to continue the task outside the lifecycle.
 - No text in `SKILL.md` or `references/system-reference.md` matches
   `/advisory mode/i`.
-- An exit 2 caused by `root.resolve` is handled as exit 1;
-  every other exit 2, and exit 3, still stops; all five pre-exit-0 prohibitions
-  remain.
+- `sdlc-status` exits 1 for a root no git repository encloses, with or without
+  an explicit root, and exits 2 whenever a `.git` exists that git cannot use;
+  every exit 2 and exit 3 stops; all five pre-exit-0 prohibitions remain.
 - ADR 0030 exists with Context/Decision/Consequences; ADR 0010 and 0015 name it.
 - `npm test`, `npm run lint`, and `npm run test:e2e` pass.
 
@@ -155,6 +158,9 @@ in use.
 - The `review.design: advisory` config value is a different concept (a
   non-blocking design panel) and stays.
 - `templates/sdlc-*.md` keep their `not-adopted` sampling path unchanged.
+- `skills/sdlc/scripts/sdlc-status.mjs` leaves the ASD19 frozen set for this
+  change; a tracked follow-up re-freezes it after merge. `lib.mjs` and the
+  `.sh` wrapper stay frozen.
 - Release type: `feat:` (minor). No config shape changes, so the ADR 0021
   release guard does not apply.
 
@@ -170,12 +176,22 @@ in use.
   exactly as exit 1. `git.repository` is not carved out: it also fails when
   `git` cannot run or an explicit root is wrong, so an adopted repository can
   produce it. The kernel runs `sdlc-status` from the working directory without
-  `--repo-root`, since an explicit root always passes `root.resolve`. One risk
-  remains: `root.resolve` looks for the manifest on disk before asking `git`,
-  so a repository whose `HEAD` carries the manifest but whose working tree has
-  lost it, on a host where `git` cannot run, also fails `root.resolve` and is
-  set aside silently. Both faults must occur together, and CI's
-  `check-lifecycle` still gates that repository's PRs. Closing it needs a
-  change to the frozen `sdlc-status` and is out of scope. Disposition: amended
-  in place. Author: the implementing agent
+  `--repo-root`, since an explicit root always passes `root.resolve`.
+  Superseded by the next amendment. Author: the implementing agent
   (anthropic/claude-opus-5-5).
+- **2026-09-25 — `sdlc-status` proves the absence of a repository.** Trigger:
+  PR panel findings PR-R2-01, PR-R3-01 and PR-R3-02 showed that no reading of exit 2 in the
+  kernel is safe. `root.resolve` and `git.repository` both fail for a missing
+  repository and for a repository git cannot use (git missing, dubious
+  ownership, a pruned worktree), and forbidding `--repo-root` stranded
+  monorepo-subdirectory consumers. Class **(a)**: it changes the classification
+  in the frozen `sdlc-status` surface, so the Plan gate re-runs. Change:
+  `sdlc-status` reports `root.resolve:pass`, `git.repository:fail`, state
+  `not-adopted`, exit 1 when it proves no git repository encloses the root: no
+  `.git` entry in the root or any ancestor (logical and physical path), no
+  `GIT_DIR`, and the root is an existing directory. Anything short of that
+  proof keeps today's `error`. The kernel drops its exit-2 exception and
+  restores `--repo-root`. Exit codes, state names, check ids, and the output
+  shape do not change; a manifest on disk outside git still never counts as
+  adoption (ADR 0015). Disposition: owner chose this option after escalation.
+  Author: the implementing agent (anthropic/claude-opus-5-5).

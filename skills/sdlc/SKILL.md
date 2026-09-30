@@ -27,7 +27,7 @@ code (prefer `--format json` when parsing):
 
 1. In pi, run `scripts/sdlc-status.sh [--repo-root DIR] [--format text|json]`
    relative to this loaded skill (headless: `node <skill-dir>/scripts/sdlc-status.mjs`),
-   from the task's working directory, without `--repo-root`.
+   with cwd inside the consumer repo or pass `--repo-root`.
 2. **Exit 0 (`ready`)**: emit the `run.started` telemetry event (FS13, see the
    telemetry directive below), announce with the config's `announce` string, then
    enumerate each configured hook (phase, timing, kind) and each top-level rule of
@@ -36,10 +36,9 @@ code (prefer `--format json` when parsing):
 3. **Exit 1 (`not-adopted`)**: do NOT announce and do NOT ask. Say nothing about
    the sdlc or its adoption (no offer, no question, no pause); set the lifecycle
    aside and continue the task outside it. Adoption is the operator's decision.
-4. **Exit 2 (`error`)**: do NOT announce. When the failing check is
-   `root.resolve` (no manifest or git repository encloses the working directory),
-   handle it exactly as exit 1. Otherwise surface the report's diagnostics and
-   stop; any other error is never a reason to continue outside the lifecycle.
+   A directory outside any git repository reports exit 1 too.
+4. **Exit 2 (`error`)**: do NOT announce. Surface the report's diagnostics and
+   stop; an error is never a reason to continue outside the lifecycle.
 5. **Exit 3 (`not-ready`)**: do NOT announce. State the repo is adopted but
    incomplete, list the report's remediations, and stop. When
    `config.schema-current` is failing, the sanctioned actions are to pin the older

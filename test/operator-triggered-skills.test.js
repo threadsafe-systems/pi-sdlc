@@ -1,7 +1,5 @@
 import assert from "node:assert/strict";
-import { spawnSync } from "node:child_process";
-import { existsSync, mkdtempSync, readFileSync, rmSync } from "node:fs";
-import { tmpdir } from "node:os";
+import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import test from "node:test";
 import { fileURLToPath } from "node:url";
@@ -12,7 +10,6 @@ const skillMd = read("skills/sdlc/SKILL.md");
 const retroMd = read("skills/sdlc-retro/SKILL.md");
 const sysRef = read("skills/sdlc/references/system-reference.md");
 const readme = read("README.md");
-const statusScript = join(repo, "skills/sdlc/scripts/sdlc-status.mjs");
 
 function frontmatter(body) {
 	const m = body.match(/^---\n([\s\S]*?)\n---\n/);
@@ -71,49 +68,18 @@ test("the not-adopted branch neither asks nor mentions adoption, and continues t
 	});
 });
 
-test("only a root.resolve error is handled as not-adopted; git.repository errors still stop", () => {
+test("every exit 2 stops; no failing check is handled as not-adopted", () => {
 	assertContract("exit-2 branch", between(skillMd, "**Exit 2 (`error`)**", "**Exit 3 (`not-ready`)**"), {
-		required: [/failing check is\s+`root\.resolve`/, /handle it exactly as exit 1/, /Otherwise surface the report's diagnostics and\s+stop/, /any other error is never a reason to continue outside the lifecycle/],
-		forbidden: ["`git.repository`"],
+		required: [/Surface the report's diagnostics and\s+stop/, /an error is never a reason to continue outside the\s+lifecycle/],
+		forbidden: ["`root.resolve`", "`git.repository`", "exactly as exit 1"],
 	});
 });
 
-function runStatus(cwd, env) {
-	const r = spawnSync(process.execPath, [statusScript, "--format", "json"], { cwd, env, encoding: "utf8" });
-	const report = JSON.parse(r.stdout);
-	return { exit: r.status, check: (id) => report.checks.find((c) => c.id === id)?.status };
-}
-
-test("sdlc-status fails root.resolve in a working directory outside any git repository", () => {
-	const dir = mkdtempSync(join(tmpdir(), "sdlc-nogit-"));
-	try {
-		const { exit, check } = runStatus(dir, { PATH: process.env.PATH, HOME: dir });
-		assert.equal(exit, 2);
-		assert.equal(check("root.resolve"), "error");
-	} finally {
-		rmSync(dir, { recursive: true, force: true });
-	}
-});
-
-// An explicit --repo-root always passes root.resolve, so the carve-out only
-// applies when the gate runs from the working directory without one.
-test("the startup gate runs sdlc-status from the working directory without --repo-root", () => {
+test("the startup gate accepts an explicit consumer root", () => {
 	assertContract("startup step 1", between(skillMd, "1. In pi, run", "2. **Exit 0 (`ready`)**"), {
-		required: [/from the task's working directory, without `--repo-root`/],
-		forbidden: ["or pass `--repo-root`"],
+		required: [/with cwd inside the consumer repo or pass `--repo-root`/],
+		forbidden: ["without `--repo-root`"],
 	});
-});
-
-test("sdlc-status with the manifest on disk and git unavailable fails git.repository, not root.resolve", () => {
-	const emptyPath = mkdtempSync(join(tmpdir(), "sdlc-nopath-"));
-	try {
-		const { exit, check } = runStatus(repo, { PATH: emptyPath, HOME: emptyPath });
-		assert.equal(exit, 2);
-		assert.equal(check("root.resolve"), "pass");
-		assert.equal(check("git.repository"), "error");
-	} finally {
-		rmSync(emptyPath, { recursive: true, force: true });
-	}
 });
 
 test("advisory mode is gone from the kernel and the system reference", () => {

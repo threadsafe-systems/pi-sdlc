@@ -4,7 +4,7 @@
 
 import assert from "node:assert/strict";
 import { execFileSync } from "node:child_process";
-import { mkdtempSync, mkdirSync, realpathSync, rmSync, writeFileSync } from "node:fs";
+import { mkdtempSync, mkdirSync, realpathSync, rmSync, symlinkSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { test } from "node:test";
@@ -218,14 +218,94 @@ test("argument, root, and git errors retain exit 2", () => {
 		assert.equal(result.code, 2, `${args.join(" ")}: ${result.stdout}${result.stderr}`);
 		assert.equal(textCheckStatus(result.stdout, "cli.arguments"), "error");
 	}
-	const dir = realpathSync(mkdtempSync(join(tmpdir(), "sdlc-nongit-")));
+	const missing = join(realpathSync(tmpdir()), "sdlc-missing-root-does-not-exist");
+	const result = runStatus(["--repo-root", missing]);
+	assert.equal(result.code, 2, result.stdout + result.stderr);
+	assert.equal(textCheckStatus(result.stdout, "git.repository"), "error");
+});
+
+// A directory is not-adopted only when the filesystem proves no repository
+// encloses it; a repository that exists but that git cannot use stays an error.
+function withTempDirs(fn) {
+	const made = [];
+	const mk = (prefix) => {
+		const dir = realpathSync(mkdtempSync(join(tmpdir(), prefix)));
+		made.push(dir);
+		return dir;
+	};
 	try {
-		const result = runStatus(["--repo-root", dir]);
-		assert.equal(result.code, 2, result.stdout + result.stderr);
-		assert.equal(textCheckStatus(result.stdout, "git.repository"), "error");
+		fn(mk);
 	} finally {
-		rmSync(dir, { recursive: true, force: true });
+		for (const dir of made) rmSync(dir, { recursive: true, force: true });
 	}
+}
+
+function assertNotAdoptedOutsideGit(result, label) {
+	const report = reportOf(result);
+	assert.equal(result.code, 1, `${label}: ${result.stdout}${result.stderr}`);
+	assert.equal(report.state, "not-adopted", label);
+	assert.equal(check(report, "root.resolve").status, "pass", label);
+	assert.equal(check(report, "git.repository").status, "fail", label);
+	assert.equal(check(report, "adoption.manifest-head").status, "skip", label);
+}
+
+function assertStatusError(result, label) {
+	assert.equal(result.code, 2, `${label}: ${result.stdout}${result.stderr}`);
+	assert.equal(reportOf(result).state, "error", label);
+}
+
+test("a directory outside any git repository is not-adopted however the root is given", () => {
+	withTempDirs((mk) => {
+		const dir = mk("sdlc-nongit-");
+		const noGit = mk("sdlc-nopath-");
+		assertNotAdoptedOutsideGit(runStatus(["--format", "json"], { cwd: dir }), "cwd");
+		assertNotAdoptedOutsideGit(runStatus(["--repo-root", ".", "--format", "json"], { cwd: dir }), "--repo-root .");
+		assertNotAdoptedOutsideGit(runStatus(["--repo-root", dir, "--format", "json"]), "--repo-root absolute");
+		assertNotAdoptedOutsideGit(runStatus(["--format", "json"], { cwd: tmpdir(), env: baseEnv({ SDLC_ROOT: dir }) }), "$SDLC_ROOT");
+		assertNotAdoptedOutsideGit(runStatus(["--format", "json"], { cwd: dir, env: baseEnv({ PATH: noGit }) }), "git not on PATH");
+		assert.equal(reportOf(runStatus(["--format", "json"], { cwd: dir })).root, dir);
+	});
+});
+
+test("a manifest on disk outside any git repository is still not adoption", () => {
+	withTempDirs((mk) => {
+		const dir = mk("sdlc-nongit-manifest-");
+		mkdirSync(join(dir, ".pi", "sdlc"), { recursive: true });
+		writeFileSync(join(dir, ".pi", "sdlc", "sdlc.config.json"), JSON.stringify(VALID_CONFIG));
+		assertNotAdoptedOutsideGit(runStatus(["--format", "json"], { cwd: dir }), "manifest on disk");
+	});
+});
+
+test("a repository git cannot use is an error, not not-adopted", () => {
+	withTempDirs((mk) => {
+		const noGit = mk("sdlc-nopath-");
+		const adopted = readyFixture();
+		rmSync(join(adopted, ".pi", "sdlc", "sdlc.config.json"));
+		assertStatusError(runStatus(["--format", "json"], { cwd: adopted, env: baseEnv({ PATH: noGit }) }), "manifest deleted, git not on PATH");
+		assertStatusError(runStatus(["--format", "json"], { cwd: adopted, env: baseEnv({ GIT_TEST_ASSUME_DIFFERENT_OWNER: "1" }) }), "manifest deleted, dubious ownership");
+		assertStatusError(runStatus(["--repo-root", adopted, "--format", "json"], { env: baseEnv({ PATH: noGit }) }), "explicit root, git not on PATH");
+
+		const pruned = mk("sdlc-pruned-");
+		writeFileSync(join(pruned, ".git"), "gitdir: /nonexistent/worktrees/gone\n");
+		assertStatusError(runStatus(["--format", "json"], { cwd: pruned }), "broken .git file");
+
+		const bare = mk("sdlc-bare-");
+		execFileSync("git", ["init", "-q", "--bare", bare]);
+		assertStatusError(runStatus(["--format", "json"], { cwd: bare }), "bare repository");
+
+		const fileRoot = join(mk("sdlc-file-root-"), "not-a-directory");
+		writeFileSync(fileRoot, "");
+		assertStatusError(runStatus(["--repo-root", fileRoot, "--format", "json"]), "root is a file");
+
+		const redirected = mk("sdlc-gitdir-");
+		assertStatusError(runStatus(["--format", "json"], { cwd: redirected, env: baseEnv({ GIT_DIR: join(redirected, "missing") }) }), "$GIT_DIR set");
+
+		const repo = readyFixture({ "sub/keep": "" });
+		const links = mk("sdlc-link-");
+		symlinkSync(join(repo, "sub"), join(links, "sub"));
+		assertStatusError(runStatus(["--repo-root", join(links, "sub"), "--format", "json"], { env: baseEnv({ PATH: noGit }) }), "symlink into a repository, git not on PATH");
+		for (const dir of [adopted, repo]) rmSync(dir, { recursive: true, force: true });
+	});
 });
 
 test("workflow readability remains an independent readiness check", () => {
