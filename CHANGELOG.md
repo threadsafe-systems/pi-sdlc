@@ -1,3 +1,9 @@
+## [3.7.0](https://github.com/threadsafe-systems/pi-sdlc/compare/v3.6.2...v3.7.0) (2026-10-02)
+
+### Features
+
+* **sdlc:** make the sdlc skills operator-triggered and silence not-adopted ([#277](https://github.com/threadsafe-systems/pi-sdlc/issues/277)) ([320c162](https://github.com/threadsafe-systems/pi-sdlc/commit/320c162e103e3b7f97d51e9eb163032a9f0b3263)), closes [#280](https://github.com/threadsafe-systems/pi-sdlc/issues/280)
+
 ## [3.6.2](https://github.com/threadsafe-systems/pi-sdlc/compare/v3.6.1...v3.6.2) (2026-09-20)
 
 ### Bug Fixes
