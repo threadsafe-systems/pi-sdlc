@@ -282,7 +282,7 @@ test("a repository git cannot use is an error, not not-adopted", () => {
 		const adopted = readyFixture();
 		rmSync(join(adopted, ".pi", "sdlc", "sdlc.config.json"));
 		assertStatusError(runStatus(["--format", "json"], { cwd: adopted, env: baseEnv({ PATH: noGit }) }), "manifest deleted, git not on PATH");
-		assertStatusError(runStatus(["--format", "json"], { cwd: adopted, env: baseEnv({ GIT_TEST_ASSUME_DIFFERENT_OWNER: "1" }) }), "manifest deleted, dubious ownership");
+		assertStatusError(runStatus(["--format", "json"], { cwd: adopted, env: baseEnv({ GIT_TEST_ASSUME_DIFFERENT_OWNER: "1", GIT_CONFIG_NOSYSTEM: "1", GIT_CONFIG_GLOBAL: "/dev/null" }) }), "manifest deleted, dubious ownership");
 		assertStatusError(runStatus(["--repo-root", adopted, "--format", "json"], { cwd: tmpdir(), env: baseEnv({ PATH: noGit }) }), "explicit root, git not on PATH");
 
 		const pruned = mk("sdlc-pruned-");
