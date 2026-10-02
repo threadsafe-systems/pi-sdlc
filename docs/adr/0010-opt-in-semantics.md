@@ -3,7 +3,8 @@
 > Superseded by ADR 0015: the committed-manifest intent below is now
 > mechanically enforced against current `HEAD`, with four-state readiness
 > (0 ready / 1 not-adopted / 2 error / 3 not-ready). The exit codes described
-> here are historical.
+> here are historical. The exit-1 offer of `/setup-sdlc` or advisory mode is
+> removed by ADR 0030: not-adopted is now silent.
 
 - Context: the skill previously ran as project law in any repo, falling back to
   built-in defaults (`prefix`/`labelPrefix` = `sdlc`, standard doc paths) when

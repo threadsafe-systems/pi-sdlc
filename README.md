@@ -40,17 +40,20 @@ Create `.pi/sdlc/` in your repo:
 - `prompts/<name>.prompt.md` (optional) — override a phase reviewer prompt when
   your project needs a specific grounding the generic prompt does not carry.
 
-Without adoption the skill does not run as project law. `sdlc-status` is the
+Both skills are **operator-triggered**: an agent loads them only when you ask
+(`/skill:sdlc`, `/skill:sdlc-retro`, a `/sdlc-*` command, or a direct request),
+never on its own because a change is starting. Without adoption the skill does
+not run as project law. `sdlc-status` is the
 mechanical four-state gate: exit 0 `ready`, 1 `not-adopted`, 2 `error`, 3
 `not-ready`. Adoption means the **current git `HEAD`** contains
 `.pi/sdlc/sdlc.config.json` — a file merely on disk is not adoption — and
 readiness (exit 0) additionally requires that manifest clean and valid with a
-merged `panels` roster. Invoking the skill in a repo whose
-`HEAD` has no manifest prompts you to adopt it with `/setup-sdlc`, or to
-continue in a clearly-labelled session-only advisory mode. The fastest way to
-opt in is the `/setup-sdlc` scaffolder, which interviews you (identity,
-optional tracker, optional worktree and notification hooks) and writes the
-manifest — then commit `.pi/sdlc/` to actually adopt.
+merged `panels` roster. In a repo whose `HEAD` has no manifest, or a working
+directory outside any git repository, the agent sets the lifecycle aside
+silently and carries on with the task: it never asks whether to adopt. Adoption
+is your decision, and the fastest way to make it is the `/setup-sdlc`
+scaffolder, which interviews you (identity, optional tracker, optional worktree
+and notification hooks) and writes the manifest — then commit `.pi/sdlc/` to actually adopt.
 
 ### Migrating callers of the old two-state status
 
@@ -62,9 +65,10 @@ exits:
   exit 3 until the merged config is committed, clean, and carries `panels`.
 - Exit 3 is new (adopted but incomplete or dirty); shell callers must branch
   on 0/1/2/3 explicitly.
-- Non-git roots move to exit 2: they historically exited 1 without a manifest
-  and 0 with a valid one. Non-git consumers must adopt inside a git
-  repository.
+- Non-git roots exit 1 (`not-adopted`, with `git.repository` failing) when
+  neither the root nor the working directory is inside any git repository;
+  historically they exited 0 with a valid manifest. A repository git cannot
+  use exits 2. Non-git consumers must adopt inside a git repository.
 - The legacy text summary keys (`opted-in:`, `prefix:`, `labelPrefix:`,
   `hooks:`, `workflow:`, `models:`) are removed; parse the FS8 `check:` lines
   or preferably `--format json`.

@@ -5,12 +5,14 @@
 // network, no mutation.
 //
 // Usage: sdlc-status.mjs [--config DIR | --repo-root DIR] [--format text|json]
-// Exit: 0 ready; 1 not-adopted (HEAD has no manifest blob); 2 error
-// (CLI/root/git/config failure); 3 not-ready (adopted but dirty/incomplete).
+// Exit: 0 ready; 1 not-adopted (HEAD has no manifest blob, or the filesystem
+// proves no git repository encloses the root or the working directory);
+// 2 error (CLI/root/git/config failure);
+// 3 not-ready (adopted but dirty/incomplete).
 
 import { spawnSync } from "node:child_process";
-import { existsSync, readFileSync, realpathSync } from "node:fs";
-import { delimiter, isAbsolute, join, relative, resolve, sep } from "node:path";
+import { existsSync, lstatSync, readFileSync, realpathSync, statSync } from "node:fs";
+import { delimiter, dirname, isAbsolute, join, relative, resolve, sep } from "node:path";
 import { classifyConfigVersion, CONFIG_SCHEMA_VERSION, inspectConfig, inspectRoot, REMEDY_SCHEMA_NEWER, REMEDY_SCHEMA_OLDER } from "./lib.mjs";
 
 const CHECK_IDS = ["cli.arguments", "root.resolve", "git.repository", "adoption.manifest-head", "adoption.manifest-clean", "config.valid", "config.schema-current", "config.panels", "workflow.readable"];
@@ -51,6 +53,47 @@ function readFileChecked(p) {
 function git(cwd, args) {
 	const r = spawnSync("git", ["-C", cwd, ...args], { encoding: "utf8", stdio: ["ignore", "pipe", "pipe"] });
 	return { code: r.error ? -1 : (r.status ?? -1), stdout: (r.stdout ?? "").trim() };
+}
+
+// True only when the filesystem proves no git repository can enclose `dir`: it
+// is an existing directory, none of $GIT_DIR, $GIT_WORK_TREE or
+// $GIT_COMMON_DIR is set, and neither `dir` nor any ancestor — on the path as
+// given or its symlink-resolved form — holds a `.git` entry or looks like a git
+// directory (a HEAD beside objects/, refs/ or a commondir file, as in a bare
+// repository or a linked worktree's gitdir). It never runs git, so a
+// repository git cannot use (git missing, dubious ownership, a broken `.git`
+// file) still counts as present. Any unexpected filesystem error also counts
+// as present.
+function provablyOutsideGit(dir) {
+	if (process.env.GIT_DIR || process.env.GIT_WORK_TREE || process.env.GIT_COMMON_DIR) return false;
+	let physical;
+	try {
+		physical = realpathSync(dir);
+		if (!statSync(physical).isDirectory()) return false;
+	} catch {
+		return false;
+	}
+	const absent = (p) => {
+		try {
+			lstatSync(p);
+			return false;
+		} catch (e) {
+			if (e?.code === "ENOENT") return true;
+			throw e;
+		}
+	};
+	const looksLikeGitDir = (d) => !absent(join(d, "HEAD")) && ["objects", "refs", "commondir"].some((name) => !absent(join(d, name)));
+	try {
+		for (const start of new Set([resolve(dir), physical])) {
+			for (let d = start; ; d = dirname(d)) {
+				if (!absent(join(d, ".git")) || looksLikeGitDir(d)) return false;
+				if (dirname(d) === d) break;
+			}
+		}
+	} catch {
+		return false;
+	}
+	return true;
 }
 
 // --- argument parsing (spec §1.1) ---------------------------------------------
@@ -140,6 +183,9 @@ function buildReport(argv, cwd) {
 		if (rootInspection.ok) {
 			root = rootInspection.root;
 			set("root.resolve", "pass", "consumer root resolved");
+		} else if (provablyOutsideGit(rootInspection.attemptedRoot)) {
+			root = rootInspection.attemptedRoot;
+			set("root.resolve", "pass", "no manifest or git repository encloses the working directory; using it as the root");
 		} else {
 			root = rootInspection.attemptedRoot;
 			set("root.resolve", "error", rootInspection.message, "pass --config <dir> or --repo-root <dir>, or set $SDLC_ROOT");
@@ -150,7 +196,15 @@ function buildReport(argv, cwd) {
 	let prefix = "";
 	if (statusOf(results, "root.resolve") === "pass") {
 		const top = git(root, ["rev-parse", "--show-toplevel"]);
-		if (top.code !== 0 || !top.stdout) {
+		// The working directory must be provably outside git too: an on-disk
+		// manifest above a repository, core.worktree, or a mistaken explicit root
+		// can each point the root away from the repository the caller is in.
+		const rootOutside = (top.code !== 0 || !top.stdout) && provablyOutsideGit(root);
+		if (rootOutside && provablyOutsideGit(cwd)) {
+			set("git.repository", "fail", "no git repository encloses the resolved root", "adopt the sdlc inside a git repository");
+		} else if (rootOutside) {
+			set("git.repository", "error", "the resolved root is outside git but the working directory cannot be proven outside a git repository", "run from the consumer repository or pass --repo-root pointing into it; outside git, run from the root itself");
+		} else if (top.code !== 0 || !top.stdout) {
 			set("git.repository", "error", "resolved root is not within a git worktree", "adopt the sdlc inside a git repository");
 		} else {
 			let ok = true;
@@ -292,13 +346,13 @@ function buildReport(argv, cwd) {
 		return { id, status: "skip", message: reasonFor(PREREQ[id]) };
 	});
 
-	// aggregate (spec §2.8)
+	// aggregate (spec §2.8, amended by ADR 0030: a git.repository fail is not-adopted)
 	let state;
 	let exitCode;
 	if (checks.some((c) => c.status === "error")) {
 		state = "error";
 		exitCode = 2;
-	} else if (checks.find((c) => c.id === "adoption.manifest-head").status === "fail") {
+	} else if (["git.repository", "adoption.manifest-head"].some((id) => checks.find((c) => c.id === id).status === "fail")) {
 		state = "not-adopted";
 		exitCode = 1;
 	} else if (checks.some((c) => c.status === "fail")) {
